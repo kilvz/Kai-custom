@@ -1,0 +1,47 @@
+Atvērtā koda MI tērzēšanas lietotne, kas veido interaktīvus ekrānus, ne tikai tekstu. Kai 9000 ir bezmaksas ChatGPT alternatīva ar dvēseli, sirdspukstu, pastāvīgām atmiņām un pastiprinātu mācīšanos — MI asistents, kas attīstās ar katru sarunu.
+
+Atšķirībā no parastajiem tērzēšanas robotiem, Kai 9000 ģenerē interaktīvu saskarni — pogas, formas, tabulas, diagrammas un pilnekrāna lietotnes — tieši tērzēšanā. Lūdziet izveidot kalkulatoru, viktorīnu vai uzdevumu sarakstu, un tas attēlos reālu, funkcionējošu saskarni.
+
+🧠 Dvēsele un atmiņa — tērzēšanas robots, kas jūs pazīst
+Piešķiriet Kai 9000 personību, uzrakstot tā "dvēseli". Tas atceras svarīgo — jūsu preferences, iepriekšējās mācības un zināmās problēmas — un pastiprina šīs zināšanas laika gaitā. Jo vairāk tērzējat, jo gudrāks tas kļūst.
+
+💓 Sirdspuksts — vienmēr aktīvais personīgais aģents
+Kai 9000 neguļ. Sirdspuksta sistēma pārbauda pēc grafika — pārskata uzdevumus, e-pastus un tendences — pat kad jūs netērzējat. Kad kaut kas prasa uzmanību, Kai 9000 informē. Kad viss kārtībā, tas klusē.
+
+⚡ 24 pakalpojumi — viena lietotne, visi modeļi
+Pieslēdzieties ChatGPT, Gemini, Claude, DeepSeek, Llama, Mistral, Grok un vēl 17 sniedzējiem. Palaidiet lokālos modeļus ar Ollama vai LM Studio. Iebūvēts bezmaksas līmenis — API atslēga nav nepieciešama.
+
+Atbalstītie pakalpojumi
+• OpenAI (GPT-4o, GPT-4, o1, o3)
+• Google Gemini (ar failu pielikumiem)
+• Anthropic Claude
+• DeepSeek (R1 spriešana)
+• xAI Grok
+• Mistral, Groq, OpenRouter, NVIDIA
+• Together, Hugging Face, Cerebras
+• Deep Infra, Fireworks, Venice, MiniMax, Moonshot
+• Ollama / LM Studio / jebkura ar OpenAI saderīga API
+• Iebūvēts bezmaksas līmenis
+
+🛠️ 40+ rīku — vairāk nekā tērzēšana
+Iespējojiet jaudīgus rīkus, kas ļauj asistentam rīkoties:
+• Meklēšana tīmeklī — reāllaika atbildes no interneta
+• E-pasts — pārbaudīt, lasīt, atbildēt, rakstīt un meklēt
+• Termināļa komandas — izpildīt komandas jūsu ierīcē
+• Uzdevumu plānošana — atkārtoti uzdevumi ar cron
+• Kalendāra notikumi — veidot notikumus no tērzēšanas
+• Teksta pārvēršana runā — klausieties dabiskā balsī
+• Paziņojumi — automātiski push brīdinājumi
+• Atrašanās vieta un laiks — kontekstjutīgas atbildes
+• MCP serveri — pieslēgties ārējiem rīku serveriem
+
+🖥️ Interaktīvās saskarnes režīms
+Pārejiet pilnekrāna režīmā. Kai 9000 kļūst par vizuālu lietotņu veidotāju — bez markdown, bez ritināma teksta. Tikai pieskārieniem reaģējoši, funkcionāli ekrāni. Tas ir kā personīgs izstrādātājs jūsu kabatā.
+
+🔒 Privātums vispirms, atvērtais kods un bez reklāmām
+Visa tērzēšanas vēsture ir šifrēta un glabāta tikai jūsu ierīcē. Bez reklāmām, datu vākšanas vai izsekošanas. API pieprasījumi tiek nosūtīti tieši jūsu sniedzējam. Pilnībā atvērtais kods, pilnīga caurskatāmība.
+
+🌍 Darbojas visur
+Izmantojiet Kai 9000 savā Android tālrunī, planšetdatorā, Chromebook vai galddatorā. Jūsu asistents vienmēr pa rokai.
+
+Neatkarīgi no tā, vai rakstāt, programmējat, tulkojat vai mācāties — Kai 9000 ir bezmaksas, bez reklāmām, atvērtā koda ChatGPT alternatīva, kas pielāgojas jums.

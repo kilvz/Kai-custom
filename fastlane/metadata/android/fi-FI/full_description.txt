@@ -1,0 +1,47 @@
+Avoimen lähdekoodin AI-chat-sovellus, joka rakentaa interaktiivisia näyttöjä, ei pelkkää tekstiä. Kai 9000 on ilmainen ChatGPT-vaihtoehto sielulla, sykkeellä, pysyvällä muistilla ja vahvistetulla oppimisella — AI-avustaja, joka kehittyy jokaisella keskustelulla.
+
+Kai 9000 luo natiiveja interaktiivisia käyttöliittymiä — painikkeita, lomakkeita, taulukoita, kaavioita ja kokoruudun sovelluksia — suoraan chatissa. Pyydä laskinta, tietovisaa, hallintapaneelia tai tehtävälistaa ja saat oikean toimivan käyttöliittymän. Tämä on AI:ta tekstin tuolla puolen.
+
+🧠 Sielu ja Muisti — Chatbot, Joka Tuntee Sinut
+Anna Kai 9000:lle persoona kirjoittamalla sen "sielu". Se muistaa tärkeät asiat keskustelujen välillä — mieltymyksesi, opitut asiat ja tunnetut ongelmat — ja vahvistaa tietojaan ajan myötä. Hyödylliset muistot ylennetään pysyvään persoonaan. Mitä enemmän keskustelet, sitä älykkäämmäksi se tulee.
+
+💓 Syke — Aina Päällä Oleva Agenttisi
+Kai 9000 ei nuku. Sykejärjestelmä tarkistaa aikataulun mukaan — tehtävät, sähköpostit ja trendit — vaikka et keskustelisikaan. Aseta väli, aktiiviset tunnit ja malli. Kun jokin vaatii huomiotasi, Kai 9000 nostaa sen esiin. Kun kaikki on hyvin, se pysyy hiljaa.
+
+⚡ 24 Palvelua — Yksi Sovellus, Kai 9000kki Mallit
+Yhdistä ChatGPT, Gemini, Claude, DeepSeek, Llama, Mistral, Grok ja 17 muuhun. Paikallisia malleja Ollama tai LM Studio kautta. Useita tilejä, prioriteetit ja älykäs varaketju automaattisesti. Ilmaistaso — ei API-avainta.
+
+Tuetut Palvelut
+• OpenAI (GPT-4o, GPT-4, o1, o3)
+• Google Gemini (tiedostoliitteet)
+• Anthropic Claude
+• DeepSeek (R1-päättely)
+• xAI Grok
+• Mistral, Groq, OpenRouter, NVIDIA
+• Together, Hugging Face, Cerebras
+• Deep Infra, Fireworks, Venice, MiniMax, Moonshot
+• Ollama / LM Studio / OpenAI-yhteensopiva API
+• Sisäänrakennettu ilmaistaso
+
+🛠️ 40+ Työkalua — Chatin Tuolla Puolen
+Tehokkaita työkaluja, jotka antavat avustajan toimia, ei vain puhua:
+• Verkkohaku — reaaliaikaiset vastaukset internetistä
+• Sähköposti — tarkista, lue, vastaa, kirjoita ja hae
+• Shell-komennot — päätekomennot laitteellasi
+• Tehtävien Ajastus — toistuvat tehtävät cron-lausekkeilla
+• Kalenteritapahtumat — suoraan chatista
+• Tekstistä Puheeksi — luonnollinen ääni
+• Ilmoitukset — push-ilmoitukset
+• Sijainti ja Aika — kontekstitietoiset vastaukset
+• MCP Servers — ulkoiset työkalupalvelimet
+
+🖥️ Interaktiivinen UI-tila
+Kokoruutu. Kai 9000 muuttuu visuaaliseksi sovellusrakentajaksi — ei markdownia, ei vieritettävää tekstiä. Toimivia näyttöjä lennossa. Kuin sovelluskehittäjä taskussasi.
+
+🔒 Yksityisyys Edellä, Avoin Lähdekoodi, Mainokseton
+Salattu paikallinen historia. Ei mainoksia, ei tiedonkeruuta, ei seurantaa. API-kutsut suoraan palveluntarjoajalle — Kai 9000 ei ole koskaan välissä. Täysin avointa lähdekoodia, täysin läpinäkyvää.
+
+🌍 Toimii Kai 9000kkialla
+Android-puhelin, tabletti, Chromebook tai pöytätietokone. Avustajasi, aina ulottuvillasi.
+
+Kirjoitatpa, koodaat, tiivistät, käännät, ideoit tai opiskelet — Kai 9000 on ilmainen, mainokseton, avoimen lähdekoodin ChatGPT-vaihtoehto, joka mukautuu sinuun.

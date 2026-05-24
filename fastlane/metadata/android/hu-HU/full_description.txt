@@ -1,0 +1,47 @@
+Nyilt forraskodu AI chat alkalmazas, amely interaktiv keppernyoket epit, nem csak szoveget. Kai 9000 egy ingyenes ChatGPT alternativa lelekkel, szivveressel, tarto memoriaval es megerositett tanulassal — egy AI asszisztens, amely minden beszelgetessel fejlodik.
+
+A hagyomanyos chatbotoktol elteroen Kai 9000 nativ interaktiv feluletet general — gombokat, urlapokat, tablazatokat, diagramokat es teljes keppernyos alkalmazasokat — kozvetlenul a chatben. Kerd meg, hogy epitsen szamologepet, kvizt vagy feladatlistat, es valodi, mukodo feluletet renderel, amelyet megerinthetsz es hasznalhatsz. Ez az AI a szovegen tul.
+
+🧠 Lelek es memoria — Egy chatbot, amely ismer teged
+Adj Kai 9000-nak szemelyiseget a "lelke" megirasaval. Emlekszik arra, ami fontos a beszelgetesek kozott — a preferenciaidra, korabbi tanulsagokra es ismert problemakra — es megerositi ezt a tudast idovel. A hasznos emlekek beepulnek az allando szemelyisegebe. Minel tobbet beszelgetsz, annal okosabb lesz.
+
+💓 Szivveres — Mindig aktiv szemelyes ugynokod
+Kai 9000 nem alszik. Szivveres rendszere utemezetten ellenoriz — attekinti a fuggo feladatokat, emaileket es trendeket — meg akkor is, amikor nem beszelgetsz. Allitsd be az intervallumot, az aktiv orakat es a modellt. Amikor valami figyelmet igenyel, Kai 9000 felszinre hozza. Amikor minden rendben, csendben marad.
+
+⚡ 24 szolgaltatas — Egy alkalmazas, minden modell
+Csatlakozz a ChatGPT, Gemini, Claude, DeepSeek, Llama, Mistral, Grok es meg 17 tovabbi szolgaltatohoz. Futtass helyi modelleket Ollama vagy LM Studio segitsegevel privat, offline hasznalatra. Adj hozza tobb fiokot, rendezd at a prioritasokat, es hagyd, hogy az intelligens tartalek lanc automatikusan kezelje a kimaradasokat. A beepitett ingyenes szint azt jelenti, hogy azonnal elkezdhetsz csevegesni — nem kell API kulcs.
+
+Tamogatott szolgaltatasok
+• OpenAI (GPT-4o, GPT-4, o1, o3)
+• Google Gemini (fajlmellekletekkel)
+• Anthropic Claude
+• DeepSeek (R1 kovetkeztetes)
+• xAI Grok
+• Mistral, Groq, OpenRouter, NVIDIA
+• Together, Hugging Face, Cerebras
+• Deep Infra, Fireworks, Venice, MiniMax, Moonshot
+• Ollama / LM Studio / barmely OpenAI-kompatibilis API
+• Beepitett ingyenes szint
+
+🛠️ 40+ eszkoz — A chaten tul
+Engedelyezz hatekony eszkozoket, amelyekkel az asszisztens cselekedhet, nem csak beszelhet:
+• Webes kereses — valos ideju valaszok az internetrol
+• Email — ellenorzes, olvasas, valasz, iras es kereses
+• Shell parancsok — terminalparancsok vegrehajtasa az eszkozodon
+• Feladatutemeses — ismetlodo feladatok beallitasa cron kifejezsekkel
+• Naptaresemenyek — esemenyek letrehozasa kozvetlenul a chatbol
+• Szovegfelolvasas — valaszok meghallgatasa termeszetes hangon
+• Ertesitesek — kivaltott push riasztasok
+• Helymegallapitas es ido — kontextustudatos valaszok
+• MCP Servers — csatlakozas kulso eszkozszerverekhez
+
+🖥️ Interaktiv UI mod
+Valtas teljes kepernyore. Interaktiv modban Kai 9000 vizualis alkalmazasepitove valik — nincs markdown, nincs gorgetheto szoveg. Csak megerintheto, mukodo kepernyok, amelyek menet kozben generalodnak. Navigalj kizarolag gombokkal es beviteli mezokkel. Mint egy alkalmazasfejleszto a zsebedben.
+
+🔒 Adatvedelem az elso, nyilt forraskod es hirdetesmentes
+Minden csevegesi elozmeny titkositva es helyben tarolva az eszkozodon. Nincs hirdetes, nincs adatgyujtes, nincs nyomon kovetes. Az API hivasok kozvetlenul a valasztott szolgaltatohoz mennek — Kai 9000 soha nincs kozottuk. Futtass helyi modelleket teljesen offline, privat elmenyert. Teljesen nyilt forraskodu, teljesen atlatszto.
+
+🌍 Mindenhol mukodik
+Hasznald Kai 9000-t Android telefonodon, tablagepeden, Chromebookon vagy asztali gepen. Az asszisztensed, mindig kesznel.
+
+Legyen szo irasrol, kodolasrol, osszefoglalasrol, forditasrol, otletelesrol, munkafolyamatok automatizalasarol, emailek kezeleserol vagy tanulasrol — Kai 9000 az ingyenes, hirdetesmentes, nyilt forraskodu ChatGPT alternativa, amely hozzad alkalmazkodik.

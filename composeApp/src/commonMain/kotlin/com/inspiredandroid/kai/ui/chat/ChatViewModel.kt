@@ -1,0 +1,497 @@
+package com.inspiredandroid.kai.ui.chat
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.inspiredandroid.kai.data.Conversation
+import com.inspiredandroid.kai.data.DataRepository
+import com.inspiredandroid.kai.data.FreeMode
+import com.inspiredandroid.kai.data.Service
+import com.inspiredandroid.kai.data.ServiceEntry
+import com.inspiredandroid.kai.data.TaskScheduler
+import com.inspiredandroid.kai.data.UiSubmission
+import com.inspiredandroid.kai.getBackgroundDispatcher
+import com.inspiredandroid.kai.network.toUiError
+import com.inspiredandroid.kai.ui.markdown.KaiUiBlock
+import com.inspiredandroid.kai.ui.markdown.KaiUiError
+import com.inspiredandroid.kai.ui.markdown.parseMarkdown
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.extension
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.conversation_untitled
+import kai.composeapp.generated.resources.error_unsupported_file_type
+import kai.composeapp.generated.resources.litert_no_model_warning
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.seconds
+
+class ChatViewModel(
+    private val dataRepository: DataRepository,
+    private val taskScheduler: TaskScheduler,
+    private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
+) : ViewModel() {
+
+    private val actions = ChatActions(
+        ask = ::ask,
+        retry = ::retry,
+        toggleSpeechOutput = ::toggleSpeechOutput,
+        clearHistory = ::clearHistory,
+        setIsSpeaking = ::setIsSpeaking,
+        addFile = ::addFile,
+        removeFile = ::removeFile,
+        startNewChat = ::startNewChat,
+        regenerate = ::regenerate,
+        cancel = ::cancel,
+        selectService = ::selectService,
+        loadConversation = ::loadConversation,
+        deleteConversation = ::deleteConversation,
+        clearUnreadHeartbeat = ::clearUnreadHeartbeat,
+        clearSnackbar = ::clearSnackbar,
+        undoDeleteConversation = ::undoDeleteConversation,
+        submitUiCallback = ::submitUiCallback,
+        resubmit = ::resubmit,
+        enterInteractiveMode = ::enterInteractiveMode,
+        exitInteractiveMode = ::exitInteractiveMode,
+        goBackInteractiveMode = ::goBackInteractiveMode,
+        sendSmsDraft = ::sendSmsDraft,
+        discardSmsDraft = ::discardSmsDraft,
+    )
+    private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
+    private var currentJob: Job? = null
+    private var pendingConversationDeleteJob: Job? = null
+    private val _state = MutableStateFlow(
+        ChatUiState(
+            actions = actions,
+            showPrivacyInfo = dataRepository.isUsingSharedKey(),
+        ),
+    )
+
+    init {
+        updateAvailableServices()
+
+        // Keep restoreCurrentConversation off the main thread; see issue #197 (large persisted
+        // tool outputs caused ANRs when JSON-decoded synchronously during VM construction).
+        // ChatScreen gates the interactive-mode branch on !isRestoring to avoid a flash.
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.loadConversations()
+            dataRepository.restoreCurrentConversation()
+            presetInteractiveModeForCurrentConversation()
+            _state.update { it.copy(isRestoring = false) }
+        }
+
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.connectEnabledMcpServers()
+        }
+        viewModelScope.launch {
+            dataRepository.fallbackStatus.collect { status ->
+                _state.update { it.copy(fallbackStatus = status) }
+            }
+        }
+        taskScheduler.isLoadingCheck = { _state.value.isLoading }
+        taskScheduler.start()
+
+        viewModelScope.launch {
+            dataRepository.smsDrafts.collect { drafts ->
+                _state.update { it.copy(smsDrafts = drafts.toImmutableList()) }
+            }
+        }
+
+        viewModelScope.launch {
+            dataRepository.openHeartbeatRequested
+                .filter { it }
+                .collect {
+                    val heartbeatId = dataRepository.savedConversations.value
+                        .firstOrNull { it.type == Conversation.TYPE_HEARTBEAT }?.id
+                    if (heartbeatId != null) {
+                        loadConversation(heartbeatId)
+                        clearUnreadHeartbeat()
+                    }
+                    dataRepository.consumeOpenHeartbeatRequest()
+                }
+        }
+    }
+
+    val state = combine(
+        _state,
+        dataRepository.chatHistory,
+        dataRepository.savedConversations,
+        dataRepository.currentConversationId,
+        dataRepository.hasUnreadHeartbeat,
+    ) { state, history, conversations, conversationId, hasUnreadHeartbeat ->
+        val summaries = conversations
+            .sortedByDescending { it.updatedAt }
+            .map {
+                val isHeartbeat = it.type == Conversation.TYPE_HEARTBEAT
+                val isInteractive = it.type == Conversation.TYPE_INTERACTIVE
+                ConversationSummary(
+                    id = it.id,
+                    title = if (isHeartbeat) "" else it.title.ifEmpty { getString(Res.string.conversation_untitled) },
+                    updatedAt = it.updatedAt,
+                    isHeartbeat = isHeartbeat,
+                    isInteractive = isInteractive,
+                )
+            }
+        state.copy(
+            history = history.toImmutableList(),
+            supportedFileExtensions = dataRepository.supportedFileExtensions().toImmutableList(),
+            savedConversations = summaries.toImmutableList(),
+            currentConversationId = conversationId,
+            hasUnreadHeartbeat = hasUnreadHeartbeat,
+        )
+    }.distinctUntilChanged().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = _state.value,
+    )
+
+    private fun submitUiCallback(event: String, data: Map<String, String>) {
+        val message = if (data.isNotEmpty()) {
+            val formattedData = data.entries.joinToString(", ") { "${it.key}: ${it.value}" }
+            "Responded with: $formattedData"
+        } else {
+            "Pressed: $event"
+        }
+        val lastAssistant = dataRepository.chatHistory.value.lastRenderedAssistant()
+        val submission = lastAssistant?.let {
+            UiSubmission(sourceContent = it.content, values = data, pressedEvent = event)
+        }
+        askInternal(message, submission)
+    }
+
+    private fun ask(question: String?) {
+        askInternal(question, null)
+    }
+
+    private fun askInternal(question: String?, uiSubmission: UiSubmission?) {
+        // Prevent concurrent requests
+        if (_state.value.isLoading) return
+
+        // Capture files before launching coroutine to avoid race with files being cleared
+        val files = _state.value.files
+
+        currentJob = viewModelScope.launch(backgroundDispatcher) {
+            _state.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    files = persistentListOf(),
+                )
+            }
+            try {
+                dataRepository.ask(question, files, uiSubmission)
+
+                // Auto-retry in interactive mode if the response has no valid kai-ui
+                if (_state.value.isInteractiveMode) {
+                    retryIfNoValidKaiUi()
+                }
+
+                _state.update {
+                    it.copy(isLoading = false)
+                }
+            } catch (exception: Exception) {
+                // CancellationException must be re-thrown to properly propagate coroutine cancellation
+                if (exception is CancellationException) throw exception
+
+                _state.update {
+                    it.copy(
+                        error = exception.toUiError(),
+                        isLoading = false,
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun retryIfNoValidKaiUi(maxRetries: Int = 2) {
+        repeat(maxRetries) {
+            currentCoroutineContext().ensureActive()
+            val lastAssistant = dataRepository.chatHistory.value.lastRenderedAssistant() ?: return
+
+            val blocks = parseMarkdown(lastAssistant.content).blocks
+            val hasValidUi = blocks.any { it is KaiUiBlock }
+            if (hasValidUi) return
+
+            // Build error feedback for the AI
+            val errorBlock = blocks.filterIsInstance<KaiUiError>().firstOrNull()
+            val errorDetail = if (errorBlock != null) {
+                "JSON parse error in: ${errorBlock.rawJson.take(200)}"
+            } else {
+                "No kai-ui code fence found in your response."
+            }
+            val retryMessage = "[SYSTEM] Your previous response failed to render as interactive UI. $errorDetail " +
+                "Remember: respond with ONLY a single ```kai-ui code fence containing valid JSON. No text outside the fence."
+
+            dataRepository.ask(retryMessage, emptyList())
+        }
+    }
+
+    private fun clearHistory() {
+        dataRepository.clearHistory()
+        _state.update {
+            it.copy(error = null)
+        }
+    }
+
+    private fun setIsSpeaking(isSpeaking: Boolean, contentId: String) {
+        _state.update {
+            it.copy(
+                isSpeaking = isSpeaking,
+                isSpeakingContentId = if (isSpeaking) {
+                    contentId
+                } else {
+                    it.isSpeakingContentId
+                },
+            )
+        }
+    }
+
+    private fun addFile(file: PlatformFile) {
+        val ext = file.extension.lowercase()
+        val supported = dataRepository.supportedFileExtensions()
+        if (ext.isEmpty() || ext !in supported) {
+            _state.update {
+                it.copy(snackbarMessage = Res.string.error_unsupported_file_type)
+            }
+            return
+        }
+        _state.update {
+            it.copy(files = (it.files + file).toImmutableList())
+        }
+    }
+
+    private fun removeFile(file: PlatformFile) {
+        _state.update {
+            it.copy(files = it.files.filterNot { f -> f == file }.toImmutableList())
+        }
+    }
+
+    private fun clearSnackbar() {
+        _state.update {
+            it.copy(snackbarMessage = null)
+        }
+    }
+
+    private fun retry() {
+        ask(null)
+    }
+
+    private fun toggleSpeechOutput() {
+        _state.update {
+            it.copy(
+                isSpeechOutputEnabled = !it.isSpeechOutputEnabled,
+            )
+        }
+    }
+
+    private fun cancel() {
+        currentJob?.cancel()
+        currentJob = null
+        _state.update {
+            it.copy(isLoading = false)
+        }
+    }
+
+    private fun selectService(instanceId: String) {
+        val freeMode = FREE_MODE_INSTANCE_IDS[instanceId]
+        if (freeMode != null) {
+            dataRepository.setFreeMode(freeMode)
+            dataRepository.setFreeServicePrimary(true)
+            updateAvailableServices()
+            return
+        }
+
+        dataRepository.setFreeServicePrimary(false)
+        val instances = dataRepository.getConfiguredServiceInstances()
+        val currentIds = instances.map { it.instanceId }
+        if (instanceId !in currentIds) return
+        val reordered = listOf(instanceId) + currentIds.filter { it != instanceId }
+        dataRepository.reorderConfiguredServices(reordered)
+        updateAvailableServices()
+    }
+
+    private fun updateAvailableServices() {
+        val configuredEntries = dataRepository.getServiceEntries()
+        val currentFreeMode = dataRepository.getFreeMode()
+        val freeIsPrimary = dataRepository.isFreeServicePrimary() || configuredEntries.isEmpty()
+
+        val freeModes = (listOf(currentFreeMode) + FreeMode.entries.filter { it != currentFreeMode }).map { mode ->
+            ServiceEntry(
+                instanceId = mode.instanceId,
+                serviceId = Service.Free.id,
+                serviceName = freeModeNames.getValue(mode),
+                modelId = "",
+                icon = mode.icon,
+            )
+        }
+
+        val entries = if (freeIsPrimary) {
+            freeModes + configuredEntries
+        } else {
+            configuredEntries + freeModes
+        }.toImmutableList()
+
+        val primaryService = entries.firstOrNull()?.let { Service.fromId(it.serviceId) }
+        val warning = if (primaryService?.isOnDevice == true && dataRepository.getLocalDownloadedModels().isEmpty()) {
+            Res.string.litert_no_model_warning
+        } else {
+            null
+        }
+        _state.update { it.copy(availableServices = entries, warning = warning, showPrivacyInfo = dataRepository.isUsingSharedKey()) }
+    }
+
+    companion object {
+        private val FREE_MODE_INSTANCE_IDS = FreeMode.entries.associateBy { it.instanceId }
+    }
+
+    private fun regenerate() {
+        dataRepository.regenerate()
+        ask(null)
+    }
+
+    private fun loadConversation(id: String) {
+        currentJob?.cancel()
+        currentJob = null
+        val conversation = dataRepository.savedConversations.value.find { it.id == id }
+        val isInteractive = conversation?.type == Conversation.TYPE_INTERACTIVE
+        dataRepository.setInteractiveMode(isInteractive)
+        dataRepository.loadConversation(id)
+        _state.update {
+            it.copy(error = null, isInteractiveMode = isInteractive, isLoading = false)
+        }
+    }
+
+    private fun deleteConversation(id: String) {
+        commitPendingConversationDeletion()
+        _state.update { it.copy(pendingConversationDeletion = id) }
+        pendingConversationDeleteJob = viewModelScope.launch(backgroundDispatcher) {
+            delay(4.seconds)
+            dataRepository.deleteConversation(id)
+            _state.update { it.copy(pendingConversationDeletion = null) }
+        }
+    }
+
+    private fun undoDeleteConversation() {
+        pendingConversationDeleteJob?.cancel()
+        pendingConversationDeleteJob = null
+        _state.update { it.copy(pendingConversationDeletion = null) }
+    }
+
+    private fun commitPendingConversationDeletion() {
+        pendingConversationDeleteJob?.cancel()
+        pendingConversationDeleteJob = null
+        val pendingId = _state.value.pendingConversationDeletion ?: return
+        _state.update { it.copy(pendingConversationDeletion = null) }
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.deleteConversation(pendingId)
+        }
+    }
+
+    override fun onCleared() {
+        commitPendingConversationDeletion()
+        // The scheduler lives longer than this ViewModel (it's a singleton driving the
+        // Android foreground service). Reset the predicate so the daemon path keeps
+        // running without a stale reference to a dead state flow. The foreground-visible
+        // signal (`appInForeground`) is tracked separately via `ProcessLifecycleOwner`
+        // on Android — ViewModel lifecycle is too narrow (survives backgrounding).
+        taskScheduler.isLoadingCheck = { false }
+        super.onCleared()
+    }
+
+    private fun clearUnreadHeartbeat() {
+        dataRepository.clearUnreadHeartbeat()
+    }
+
+    private fun sendSmsDraft(draftId: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.sendSmsDraft(draftId)
+        }
+    }
+
+    private fun discardSmsDraft(draftId: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.discardSmsDraft(draftId)
+        }
+    }
+
+    private fun startNewChat() {
+        currentJob?.cancel()
+        currentJob = null
+        dataRepository.startNewChat()
+        dataRepository.setInteractiveMode(false)
+        _state.update {
+            it.copy(error = null, isInteractiveMode = false, isLoading = false)
+        }
+    }
+
+    private fun enterInteractiveMode() {
+        dataRepository.startNewChat()
+        dataRepository.setInteractiveMode(true)
+        _state.update {
+            it.copy(isInteractiveMode = true, error = null)
+        }
+    }
+
+    private fun exitInteractiveMode() {
+        currentJob?.cancel()
+        currentJob = null
+        dataRepository.startNewChat()
+        dataRepository.setInteractiveMode(false)
+        _state.update {
+            it.copy(isInteractiveMode = false, isLoading = false, error = null)
+        }
+    }
+
+    private fun resubmit(messageId: String, event: String, data: Map<String, String>) {
+        if (_state.value.isLoading) return
+        dataRepository.truncateFrom(messageId)
+        submitUiCallback(event, data)
+    }
+
+    private fun goBackInteractiveMode() {
+        val userCount = dataRepository.chatHistory.value.count { it.role == History.Role.USER }
+        if (userCount <= 1) {
+            // Go back to initial prompt — clear history but stay in interactive mode
+            dataRepository.clearHistory()
+        } else {
+            dataRepository.popLastExchange()
+        }
+    }
+
+    fun refreshSettings() {
+        updateAvailableServices()
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.restoreCurrentConversation()
+            presetInteractiveModeForCurrentConversation()
+        }
+    }
+
+    /**
+     * Resolves the interactive mode flag from the currently-loaded conversation, or — when
+     * there is no loaded conversation (new empty chat) — falls back to the persisted flag.
+     */
+    private fun presetInteractiveModeForCurrentConversation() {
+        val currentId = dataRepository.currentConversationId.value
+        val conversation = dataRepository.savedConversations.value.find { it.id == currentId }
+        val isInteractive = if (conversation != null) {
+            conversation.type == Conversation.TYPE_INTERACTIVE
+        } else {
+            dataRepository.isInteractiveModeActive()
+        }
+        dataRepository.setInteractiveMode(isInteractive)
+        _state.update { it.copy(isInteractiveMode = isInteractive) }
+    }
+}

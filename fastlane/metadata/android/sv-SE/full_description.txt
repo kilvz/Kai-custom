@@ -1,0 +1,47 @@
+AI-chattapp med oppen kallkod som bygger interaktiva skarmar, inte bara text. Kai 9000 ar ett gratis ChatGPT-alternativ med en sjal, ett hjartslag, bestande minnen och forstarkt larande — en AI-assistent som utvecklas med varje samtal du har.
+
+Till skillnad fran vanliga chatbotar genererar Kai 9000 nativt interaktivt granssnitt — knappar, formular, tabeller, diagram och helskarmsprogram — direkt i chatten. Be den bygga en kalkylator, ett quiz, en instrumentpanel eller en att gora-lista, sa renderar den ett riktigt fungerande granssnitt du kan trycka, svepa och interagera med. Det har ar AI bortom text.
+
+🧠 Sjal och Minne — En chattbot som kanner dig
+Ge Kai 9000 en personlighet genom att skriva dess "sjal." Den kommer ihag det som ar viktigt over samtal — dina preferenser, tidigare laroerfarenheter och kanda problem — och forstarker den kunskapen over tid. Minnen som visar sig vara anvanbara befordras till dess permanenta personlighet. Ju mer du chattar, desto smartare blir den.
+
+💓 Hjartslag — Din personliga agent, alltid aktiv
+Kai 9000 sover inte. Dess hjartslag-system kollar in regelbundet — granskar vantande uppgifter, mejl och trender — aven nar du inte chattar. Stall in intervallet, aktiva timmar och modell. Nar nagot kraver din uppmarksamhet pakallar Kai 9000 den. Nar allt ar lugnt haller den sig tyst.
+
+⚡ 24 tjanster — En app, varje modell
+Anslut till ChatGPT, Gemini, Claude, DeepSeek, Llama, Mistral, Grok och 17 fler leverantorer. Kor lokala modeller via Ollama eller LM Studio for privat offlineanvandning. Lagg till flera konton, ordna om prioriteringar och lat den smarta reservkedjan hantera avbrott automatiskt. En inbyggd gratisniva innebar att du kan borja chatta utan nagon installation — ingen API-nyckel behovs.
+
+Tjanster som stods
+• OpenAI (GPT-4o, GPT-4, o1, o3)
+• Google Gemini (med filbilagor)
+• Anthropic Claude
+• DeepSeek (R1 reasoning)
+• xAI Grok
+• Mistral, Groq, OpenRouter, NVIDIA
+• Together, Hugging Face, Cerebras
+• Deep Infra, Fireworks, Venice, MiniMax, Moonshot
+• Ollama / LM Studio / alla OpenAI-kompatibla API:er
+• Inbyggd gratisniva
+
+🛠️ 40+ verktyg — Mer an chatt
+Aktivera kraftfulla verktyg som later assistenten agera, inte bara prata:
+• Webbsokning — realtidssvar fran internet
+• E-post — kontrollera, lasa, svara, skriva och soka
+• Shell-kommandon — exekvera terminalkommandon pa din enhet
+• Uppgiftsschemalagning — stall in aterkommande uppgifter med cron-uttryck
+• Kalenderhardelser — skapa handelser direkt fran chatten
+• Text-till-tal — lyssna pa svar med naturlig rost
+• Notiser — utlosta push-notiser
+• Plats och tid — kontextmedvetna svar
+• MCP Servers — anslut till externa verktygservrar
+
+🖥️ Interaktivt UI-lage
+Ga till helskarmsvy. I interaktivt lage blir Kai 9000 en visuell appbyggare — ingen markdown, ingen rullande text. Bara tryckbara, funktionella skarmar som genereras i flygande fart. Navigera helt genom knappar och inmatningsfalt. Det ar som att ha en personlig apputvecklare i fickan.
+
+🔒 Integritet forst, oppen kallkod och reklamfritt
+All chatthistorik ar krypterad och lagrad lokalt pa din enhet. Inga annonser, ingen datainsamling, ingen sparning. API-anrop gar direkt till din valda leverantor — Kai 9000 star aldrig i vagen. Kor lokala modeller for en helt offline och privat upplevelse. Helt oppen kallkod, helt transparent.
+
+🌍 Fungerar overallt
+Anvand Kai 9000 pa din Android-telefon, surfplatta, Chromebook eller dator. Din assistent, alltid inom rackvidd.
+
+Oavsett om du skriver, kodar, sammanfattar, oversatter, brainstormar, automatiserar arbetsfloden, hanterar e-post eller studerar — Kai 9000 ar det gratis, reklamfria, ChatGPT-alternativet med oppen kallkod som anpassar sig efter dig.

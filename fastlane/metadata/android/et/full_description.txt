@@ -1,0 +1,47 @@
+Avatud lähtekoodiga AI-vestlusrakendus, mis loob interaktiivseid ekraane, mitte ainult teksti. Kai 9000 on tasuta ChatGPT alternatiiv hingega, südamelöögiga, püsivate mälestustega ja tugevdatud õppimisega — AI-assistent, mis areneb iga vestlusega.
+
+Erinevalt tavalistest juturobotest genereerib Kai 9000 natiivset interaktiivset kasutajaliidest — nuppe, vorme, tabeleid, diagramme ja täisekraanirakendusi — otse vestluses. Palu tal ehitada kalkulaator, viktoriin, töölaud või ülesannete nimekiri ja ta renderdab päris töötava liidese, mida saad puudutada, pühkida ja kasutada. See on AI, mis ulatub tekstist kaugemale.
+
+🧠 Hing ja Mälu — Juturobot, mis Tunneb Sind
+Anna Kai 9000-le isiksus, kirjutades tema „hinge". Ta mäletab vestluste vahel olulist — sinu eelistusi, varasemaid õppetunde ja teadaolevaid probleeme — ning tugevdab seda teadmist aja jooksul. Kasulikud mälestused edendatakse tema püsivaks isiksuseks. Mida rohkem vestled, seda targemaks ta muutub.
+
+💓 Südamelöök — Sinu Alati Aktiivne Isiklik Agent
+Kai 9000 ei maga. Tema südamelöögisüsteem kontrollib regulaarselt — vaadates üle pooleliolevad ülesanded, e-kirjad ja trendid — isegi kui sa ei vestle. Seadista intervall, aktiivsed tunnid ja mudel. Kui miski vajab sinu tähelepanu, annab Kai 9000 märku. Kui kõik on korras, jääb ta vaikseks.
+
+⚡ 24 Teenust — Üks Rakendus, Iga Mudel
+Ühendu ChatGPT, Gemini, Claude, DeepSeek, Llama, Mistral, Grok ja veel 17 pakkujaga. Käita kohalikke mudeleid Ollama või LM Studio kaudu privaatseks võrguühenduseta kasutamiseks. Lisa mitu kontot, järjesta prioriteete ümber ja lase nutikal varuahelal automaatselt katkestusi hallata. Sisseehitatud tasuta tase tähendab, et saad vestlemist alustada ilma seadistuseta — API-võtit pole vaja.
+
+Toetatud Teenused
+• OpenAI (GPT-4o, GPT-4, o1, o3)
+• Google Gemini (failide manustega)
+• Anthropic Claude
+• DeepSeek (R1 reasoning)
+• xAI Grok
+• Mistral, Groq, OpenRouter, NVIDIA
+• Together, Hugging Face, Cerebras
+• Deep Infra, Fireworks, Venice, MiniMax, Moonshot
+• Ollama / LM Studio / mis tahes OpenAI-ühilduv API
+• Sisseehitatud tasuta tase
+
+🛠️ 40+ Tööriista — Rohkem kui Vestlus
+Luba võimsad tööriistad, mis lasevad assistendil tegutseda, mitte ainult rääkida:
+• Veebiotsing — reaalajas vastused internetist
+• E-post — kontrolli, loe, vasta, koosta ja otsi
+• Shell-käsud — käivita terminali käske oma seadmes
+• Ülesannete Ajastamine — seadista korduvaid ülesandeid cron-avaldistega
+• Kalendrisündmused — loo sündmusi otse vestlusest
+• Tekst Kõneks — kuula vastuseid loomulikul häälel
+• Teavitused — tingimuspõhised push-teavitused
+• Asukoht ja Aeg — kontekstiteadlikud vastused
+• MCP Servers — ühendu väliste tööriistade serveritega
+
+🖥️ Interaktiivne UI Režiim
+Täisekraan. Interaktiivses režiimis muutub Kai 9000 visuaalseks rakenduste loojaks — ilma markdowni, ilma keritava tekstita. Ainult puudutatavad, funktsionaalsed ekraanid, mis genereeritakse kohapeal. Navigeeri täielikult nuppude ja sisestusväljadega. See on nagu isiklik rakenduste arendaja taskus.
+
+🔒 Privaatsus Ennekõike, Avatud Lähtekood ja Reklaamivaba
+Kogu vestlusajalugu on krüpteeritud ja salvestatud lokaalselt sinu seadmesse. Reklaame, andmekogumist ega jälgimist pole. API-kutsed lähevad otse sinu valitud pakkujale — Kai 9000 ei jää kunagi vahele. Käita kohalikke mudeleid täielikult võrguühenduseta privaatse kogemuse saamiseks. Täielikult avatud lähtekoodiga, täielikult läbipaistev.
+
+🌍 Töötab Kõikjal
+Kasuta Kai 9000'd oma Android-telefonis, tahvelarvutis, Chromebookis või lauaarvutis. Sinu assistent, alati käeulatuses.
+
+Olenemata sellest, kas kirjutad, programmeerid, kokkuvõtteid teed, tõlgid, ajurünnakuid korraldad, töövooge automatiseerid, e-kirju haldad või õpid — Kai 9000 on tasuta, reklaamivaba, avatud lähtekoodiga ChatGPT alternatiiv, mis kohandub sinuga.
