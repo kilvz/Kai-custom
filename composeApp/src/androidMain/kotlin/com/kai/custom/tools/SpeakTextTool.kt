@@ -10,8 +10,6 @@ import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.resolveSandboxAbsolute
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
@@ -89,18 +87,17 @@ object SpeakTextTool : Tool {
 
         val hostFile = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, outputFile)
         if (hostFile != null && hostFile.exists()) {
-            withContext(Dispatchers.Main) {
-                try {
-                    val mp = MediaPlayer().apply {
-                        setDataSource(hostFile.absolutePath)
-                        prepare()
-                        start()
-                        setOnCompletionListener { it.release() }
-                        setOnErrorListener { mp2, _, _ -> mp2.release(); true }
-                    }
-                } catch (_: Exception) {
-                    // playback failed — still return success for generation
+            try {
+                val mp = MediaPlayer()
+                mp.setDataSource(hostFile.absolutePath)
+                mp.prepareAsync()
+                mp.setOnPreparedListener { player ->
+                    player.start()
                 }
+                mp.setOnCompletionListener { it.release() }
+                mp.setOnErrorListener { mp2, _, _ -> mp2.release(); true }
+            } catch (_: Exception) {
+                // playback failed — still return success for generation
             }
         }
 
