@@ -223,17 +223,13 @@ fun QuestionInput(
             } else {
                 KeyboardActions() // No keyboard send action on mobile
             },
-            leadingIcon = if (filePickerLauncher != null) {
-                {
-                    CircleIconButton(
-                        icon = vectorResource(Res.drawable.ic_attach),
-                        onClick = { filePickerLauncher.launch() },
-                        modifier = Modifier.padding(start = 7.dp),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-            } else {
-                null
+            leadingIcon = {
+                CircleIconButton(
+                    icon = vectorResource(Res.drawable.ic_attach),
+                    onClick = { filePickerLauncher.launch() },
+                    modifier = Modifier.padding(start = 7.dp),
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
             },
             keyboardOptions = KeyboardOptions(
                 imeAction = if (currentPlatform is Platform.Mobile) ImeAction.Default else ImeAction.Send,

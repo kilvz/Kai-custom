@@ -16,6 +16,10 @@ composeCompiler {
 }
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     android {
         namespace = "com.kai.custom.shared"
         compileSdk =
