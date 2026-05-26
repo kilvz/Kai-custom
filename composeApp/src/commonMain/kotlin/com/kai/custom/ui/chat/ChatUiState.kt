@@ -36,6 +36,8 @@ private fun String.isTextMimeType(): Boolean = startsWith("text/") || this == "a
  * Splits attachments into the text that should be prepended to the user's message
  * (decoded text files with filename headers) and the remaining binary attachments
  * (images, PDFs) that become standalone content blocks in provider-specific formats.
+ * Non-image, non-PDF binary files (e.g. Excel, Word) get a text stub so the AI
+ * knows they exist and can use a tool to read them.
  */
 private data class AttachmentSplit(
     val textPrefix: String,
@@ -47,12 +49,20 @@ private fun List<Attachment>.splitForMessage(): AttachmentSplit {
     val prefix = StringBuilder()
     val binaries = mutableListOf<Attachment>()
     for (att in this) {
-        if (att.mimeType.isTextMimeType()) {
-            val decoded = Base64.decode(att.data).decodeToString()
-            if (att.fileName != null) prefix.append("--- ${att.fileName} ---\n")
-            prefix.append(decoded).append("\n\n")
-        } else {
-            binaries.add(att)
+        when {
+            att.mimeType.isTextMimeType() -> {
+                val decoded = Base64.decode(att.data).decodeToString()
+                if (att.fileName != null) prefix.append("--- ${att.fileName} ---\n")
+                prefix.append(decoded).append("\n\n")
+            }
+            att.mimeType.startsWith("image/") || att.mimeType == "application/pdf" -> {
+                binaries.add(att)
+            }
+            else -> {
+                // Non-image, non-PDF binary — add a text stub so the AI knows the file exists.
+                val name = att.fileName ?: "attached file"
+                prefix.append("[Attached file: $name (type: ${att.mimeType})]\n\n")
+            }
         }
     }
     return AttachmentSplit(prefix.toString(), binaries)
@@ -136,8 +146,8 @@ fun History.toGroqMessageDto(
 ): OpenAICompatibleChatRequestDto.Message = when (role) {
     History.Role.USER -> {
         val split = attachments.splitForMessage()
-        // Images become image_url parts; PDFs are dropped (OpenAI-compatible has no native PDF
-        // support, matching the prior behavior). Text files get merged into the text prefix.
+        // Images become image_url parts. Text files get merged into the text prefix.
+        // PDFs and other non-image binaries get a text stub from splitForMessage.
         val imageAttachments = split.binaries.filter { it.mimeType.startsWith("image/") }
         val fullText = "${split.textPrefix}$content"
         val messageContent: JsonElement = if (imageAttachments.isEmpty()) {

@@ -8,7 +8,7 @@ import com.kai.custom.shizuku.ShizukuManager
 object AdbTool : Tool {
     override val schema = ToolSchema(
         name = "run_adb",
-        description = "Run shell commands with ADB-level privileges on the Android device via Shizuku. Access system services outside the sandbox — pm, am, dumpsys, settings, wm, input, device_config, content, appops, cmd, and any other shell-level commands. Requires Shizuku installed and permission granted. If Shizuku is not running, it must be started first (one-time setup via 'adb shell sh /data/local/tmp/shizuku start' on a computer, or Wireless Debugging on Android 11+). Uses Shizuku UserService (persistent privileged process) — no per-command process spawn overhead.",
+        description = "Run shell commands with ADB-level privileges on the Android device via Shizuku. Access system services outside the sandbox — pm, am, dumpsys, settings, wm, input, device_config, content, appops, cmd, and any other shell-level commands. Requires Shizuku installed and permission granted. If Shizuku is not running, it must be started first via 'adb shell sh /data/local/tmp/shizuku start' on a computer, or Wireless Debugging on Android 11+.",
         parameters = mapOf(
             "command" to ParameterSchema(type = "string", description = "Shell command to execute with ADB privileges (e.g. 'pm list packages | grep kai', 'dumpsys battery', 'settings get global airplane_mode_on')", required = true),
             "timeout" to ParameterSchema(type = "integer", description = "Maximum execution time in seconds (default: 30, max: 60)", required = false),
