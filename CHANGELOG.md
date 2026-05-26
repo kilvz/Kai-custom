@@ -13,6 +13,7 @@
 - Clarified sandbox vs ADB distinction in shell tool descriptions
 - Added versionCode to generated Version.kt
 - Updated docs and improved error logging
+- Sponsor button in Settings pointing to original Kai author (SimonSchubert)
 
 ## v2.6.3 — 2026-05-24
 
