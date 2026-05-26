@@ -581,26 +581,14 @@ private fun SettingsTabSelector(
 
 @Composable
 private fun BottomInfo() {
+    val uriHandler = LocalUriHandler.current
+
     Text(
         text = stringResource(Res.string.settings_ai_mistakes_warning),
         style = MaterialTheme.typography.bodySmall,
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onBackground,
     )
-
-    val uriHandler = LocalUriHandler.current
-
-    Text(
-        text = stringResource(Res.string.settings_become_sponsor),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .clickable { uriHandler.openUri("https://github.com/sponsors/SimonSchubert") }
-            .handCursor()
-            .padding(vertical = 4.dp),
-    )
-
-    Spacer(Modifier.height(8.dp))
 
     Row(
         modifier = Modifier.padding(horizontal = 16.dp),

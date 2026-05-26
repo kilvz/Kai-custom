@@ -237,44 +237,47 @@ fun TerminalContent(
             }
         }
 
-        SelectionContainer(
-            modifier = Modifier.weight(1f),
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            state = listState,
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                state = listState,
-            ) {
-                if (outputLines.isEmpty()) {
-                    item {
-                        Text(
-                            text = stringResource(Res.string.terminal_help_text),
-                            style = monoStyle(13.sp, colors.dimText),
-                        )
-                    }
+            if (outputLines.isEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(Res.string.terminal_help_text),
+                        style = monoStyle(13.sp, colors.dimText),
+                    )
                 }
-                items(
-                    items = outputLines,
-                    contentType = { it::class },
-                ) { line ->
-                    when (line) {
-                        is TerminalLine.Command -> {
-                            Spacer(Modifier.height(4.dp))
+            }
+            items(
+                items = outputLines,
+                contentType = { it::class },
+            ) { line ->
+                when (line) {
+                    is TerminalLine.Command -> {
+                        Spacer(Modifier.height(4.dp))
+                        SelectionContainer {
                             Text(
                                 text = "$ ${line.text}",
                                 style = monoStyle(13.sp, colors.prompt),
                             )
                         }
+                    }
 
-                        is TerminalLine.Output -> {
+                    is TerminalLine.Output -> {
+                        SelectionContainer {
                             Text(
                                 text = parseAnsiToAnnotatedString(line.text, colors.text),
                                 style = monoStyle(13.sp),
                             )
                         }
+                    }
 
-                        is TerminalLine.Error -> {
+                    is TerminalLine.Error -> {
+                        SelectionContainer {
                             Text(
                                 text = parseAnsiToAnnotatedString(line.text, colors.error),
                                 style = monoStyle(13.sp),
@@ -282,15 +285,15 @@ fun TerminalContent(
                         }
                     }
                 }
-                if (isRunning) {
-                    item {
-                        Spacer(Modifier.height(4.dp))
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp,
-                            color = colors.prompt,
-                        )
-                    }
+            }
+            if (isRunning) {
+                item {
+                    Spacer(Modifier.height(4.dp))
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(14.dp),
+                        strokeWidth = 2.dp,
+                        color = colors.prompt,
+                    )
                 }
             }
         }
