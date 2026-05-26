@@ -168,6 +168,7 @@ import kai.composeapp.generated.resources.settings_ai_mistakes_warning
 import kai.composeapp.generated.resources.settings_api_key_label
 import kai.composeapp.generated.resources.settings_api_key_optional_label
 import kai.composeapp.generated.resources.settings_base_url_label
+import kai.composeapp.generated.resources.settings_become_sponsor
 import kai.composeapp.generated.resources.settings_business_partnerships
 import kai.composeapp.generated.resources.settings_business_partnerships_description
 import kai.composeapp.generated.resources.settings_contact_sponsorship
@@ -587,16 +588,26 @@ private fun BottomInfo() {
         color = MaterialTheme.colorScheme.onBackground,
     )
 
-    Spacer(Modifier.height(8.dp))
-
     val uriHandler = LocalUriHandler.current
+
+    Text(
+        text = stringResource(Res.string.settings_become_sponsor),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier
+            .clickable { uriHandler.openUri("https://github.com/sponsors/SimonSchubert") }
+            .handCursor()
+            .padding(vertical = 4.dp),
+    )
+
+    Spacer(Modifier.height(8.dp))
 
     Row(
         modifier = Modifier.padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            stringResource(Res.string.settings_version, "${Version.appVersion} (Kai ${Version.appVersionBase})"),
+            stringResource(Res.string.settings_version, "${Version.appVersion} (Kai-${Version.appVersionBase})"),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
