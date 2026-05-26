@@ -10,7 +10,7 @@
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
 
     <application
-        android:name="com.inspiredandroid.kai.KaiApplication"
+        android:name="com.kai.custom.KaiApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -23,7 +23,7 @@
         <activity
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
-            android:name="com.inspiredandroid.kai.MainActivity"
+            android:name="com.kai.custom.MainActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -41,12 +41,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
         <service
-            android:name="com.inspiredandroid.kai.DaemonService"
+            android:name="com.kai.custom.DaemonService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
         <service
-            android:name="com.inspiredandroid.kai.inference.ModelDownloadService"
+            android:name="com.kai.custom.inference.ModelDownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
         <uses-native-library android:name="libvndksupport.so" android:required="false"/>

@@ -141,7 +141,7 @@
 # ProGuard flags "descriptor class missing" and the reflective KClass handle
 # Koin holds would point at a renamed class. Also makes user-submitted
 # stack traces readable without a mapping file.
--keep class com.inspiredandroid.kai.** { *; }
+-keep class com.kai.custom.** { *; }
 
 # androidx.lifecycle / savedstate — required by compose-navigation and
 # Koin ViewModel support. Not covered by the Compose plugin defaults.

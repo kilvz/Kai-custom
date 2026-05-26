@@ -1,6 +1,7 @@
 [versions]
 agp = "9.2.1"
-appVersion = "2.6.3"
+appVersion = "1.0.0"
+appVersionBase = "2.6.3"
 android-versionCode = "106"
 android-compileSdk = "36"
 android-minSdk = "26"
@@ -33,6 +34,7 @@ bouncycastle = "1.84"
 reorderable = "3.1.0"
 litert-lm = "0.12.0"
 materialIcons = "1.7.3"
+shizuku = "13.1.5"
 
 [libraries]
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
@@ -89,6 +91,8 @@ bouncycastle-provider = { module = "org.bouncycastle:bcprov-jdk18on", version.re
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 litert-lm = { module = "com.google.ai.edge.litertlm:litertlm-android", version.ref = "litert-lm" }
 litert-lm-jvm = { module = "com.google.ai.edge.litertlm:litertlm-jvm", version.ref = "litert-lm" }
+shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
+shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
