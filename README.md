@@ -1,4 +1,4 @@
-# Kai 9000 — kilvz fork
+# Kai 9001 — kilvz fork
 
 > **Android-only fork.** Only the Android build target is tested and published here.  
 > Based on [Kai v2.6.3](https://github.com/SimonSchubert/Kai). Version: **1.0.0 (Kai-2.6.3)**
@@ -26,7 +26,7 @@ An **open-source AI assistant with persistent memory** — custom forked for And
 
 ## AI That Builds Screens, Not Just Text
 
-Kai 9000's Interactive UI lets the AI generate full interactive screens — quizzes, dashboards, recipes, brainstorms, and more. Navigate by tapping buttons instead of scrolling through chat.
+Kai 9001's Interactive UI lets the AI generate full interactive screens — quizzes, dashboards, recipes, brainstorms, and more. Navigate by tapping buttons instead of scrolling through chat.
 
 <img src="screenshots/interactive-survival.png" alt="Survival Game" height="300"> <img src="screenshots/interactive-recipe.png" alt="Recipe Card" height="300"> <img src="screenshots/interactive-ecopulse.png" alt="EcoPulse Brainstorm" height="300"> <img src="screenshots/interactive-memories.png" alt="Memories" height="300">
 

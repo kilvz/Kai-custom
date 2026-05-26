@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000కి స్వాగతం</string>
+    <string name="welcome_message">Kai 9001కి స్వాగతం</string>
     <string name="prompt_ask_question">ప్రశ్న అడగండి</string>
     <string name="error_invalid_api_key">చెల్లని API కీ. దయచేసి మీ సెట్టింగ్‌లను తనిఖీ చేయండి.</string>
     <string name="error_rate_limit_exceeded">రేట్ పరిమితి మించిపోయింది. దయచేసి తర్వాత మళ్ళీ ప్రయత్నించండి.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">మళ్ళీ రూపొందించు</string>
     <string name="error_empty_response">ప్రతిస్పందన అందలేదు. కొత్త చాట్ ప్రారంభించడం లేదా మీ సందేశాన్ని తగ్గించడం ప్రయత్నించండి.</string>
     <string name="settings_daemon_mode">డీమన్ మోడ్</string>
-    <string name="settings_daemon_mode_description">యాప్ ముందుభాగంలో లేనప్పటికీ షెడ్యూల్ చేసిన టాస్క్‌లు అమలు అయ్యేలా Kai 9000 ని నేపథ్యంలో రన్ అవుతూ ఉంచండి.</string>
+    <string name="settings_daemon_mode_description">యాప్ ముందుభాగంలో లేనప్పటికీ షెడ్యూల్ చేసిన టాస్క్‌లు అమలు అయ్యేలా Kai 9001 ని నేపథ్యంలో రన్ అవుతూ ఉంచండి.</string>
     <string name="settings_scheduled_tasks">షెడ్యూల్ చేసిన టాస్క్‌లు</string>
     <string name="settings_scheduled_tasks_description">భవిష్యత్ అమలు కోసం AI షెడ్యూల్ చేసిన టాస్క్‌లు. షెడ్యూల్ చేసిన టాస్క్‌లను సృష్టించడానికి AI ని గుర్తుచేయమని లేదా తర్వాత ఏదైనా అమలు చేయమని అడగండి.</string>
     <string name="settings_scheduled_tasks_cancel">టాస్క్ రద్దు చేయి</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">నేను పూర్తిగా పనిచేస్తున్నాను.</string>
     <string name="interactive_welcome_subtitle">మీరు ఏమి చేయాలనుకుంటున్నారో చెప్పండి.</string>
     <string name="interactive_back_content_description">వెనుకకు</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">ఇంటరాక్టివ్ మోడ్ నుండి నిష్క్రమించు</string>
     <string name="interactive_ui_parsing_failed">UI పార్సింగ్ విఫలమైంది, మళ్ళీ ప్రయత్నిస్తోంది…</string>
     <string name="settings_sponsors_monthly">నెలవారీ స్పాన్సర్లు</string>

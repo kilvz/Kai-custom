@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Maligayang pagdating sa Kai 9000</string>
+    <string name="welcome_message">Maligayang pagdating sa Kai 9001</string>
     <string name="prompt_ask_question">Magtanong</string>
     <string name="error_invalid_api_key">Hindi wastong API Key. Suriin ang iyong mga setting.</string>
     <string name="error_rate_limit_exceeded">Nalampasan na ang limitasyon ng request. Subukan muli mamaya.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Muling buuin</string>
     <string name="error_empty_response">Walang natanggap na sagot. Subukang magsimula ng bagong chat o paikliin ang iyong mensahe.</string>
     <string name="settings_daemon_mode">Daemon Mode</string>
-    <string name="settings_daemon_mode_description">Panatilihing tumatakbo ang Kai 9000 sa background para maisagawa ang mga naka-schedule na gawain kahit wala sa harapan ang app.</string>
+    <string name="settings_daemon_mode_description">Panatilihing tumatakbo ang Kai 9001 sa background para maisagawa ang mga naka-schedule na gawain kahit wala sa harapan ang app.</string>
     <string name="settings_scheduled_tasks">Mga Naka-schedule na Gawain</string>
     <string name="settings_scheduled_tasks_description">Mga gawain na naka-schedule ng AI para sa hinaharap na pagsasagawa. Hilingin sa AI na ipaalala sa iyo o magpatakbo ng isang bagay sa ibang pagkakataon upang lumikha ng mga naka-schedule na gawain.</string>
     <string name="settings_scheduled_tasks_cancel">Kanselahin ang gawain</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Ganap akong gumagana.</string>
     <string name="interactive_welcome_subtitle">Sabihin mo sa akin kung ano ang gusto mong gawin.</string>
     <string name="interactive_back_content_description">Bumalik</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Lumabas sa interactive mode</string>
     <string name="interactive_ui_parsing_failed">Nabigo ang pag-parse ng UI, sinusubukan muli…</string>
     <string name="settings_sponsors_monthly">Buwanang mga sponsor</string>

@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Kai 9000
+Name=Kai 9001
 Comment=AI assistant powered by Ollama, Gemini, ChatGPT and more
 Exec=kai-wrapper
 Icon=io.github.simonschubert.Kai

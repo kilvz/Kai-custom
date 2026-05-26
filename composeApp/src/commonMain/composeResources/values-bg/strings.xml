@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Добре дошли в Kai 9000</string>
+    <string name="welcome_message">Добре дошли в Kai 9001</string>
     <string name="prompt_ask_question">Задайте въпрос</string>
     <string name="error_invalid_api_key">Невалиден API ключ. Моля, проверете настройките си.</string>
     <string name="error_rate_limit_exceeded">Лимитът на заявките е превишен. Моля, опитайте по-късно.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Генерирай отново</string>
     <string name="error_empty_response">Не е получен отговор. Опитайте да започнете нов чат или да съкратите съобщението си.</string>
     <string name="settings_daemon_mode">Фонов режим</string>
-    <string name="settings_daemon_mode_description">Дръжте Kai 9000 работещ във фонов режим, за да се изпълняват планираните задачи дори когато приложението не е на преден план.</string>
+    <string name="settings_daemon_mode_description">Дръжте Kai 9001 работещ във фонов режим, за да се изпълняват планираните задачи дори когато приложението не е на преден план.</string>
     <string name="settings_scheduled_tasks">Планирани задачи</string>
     <string name="settings_scheduled_tasks_description">Задачи, планирани от AI за бъдещо изпълнение. Поискайте от AI да ви напомни или да изпълни нещо по-късно, за да създадете планирани задачи.</string>
     <string name="settings_scheduled_tasks_cancel">Отмени задача</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Напълно работоспособен съм.</string>
     <string name="interactive_welcome_subtitle">Кажете ми какво искате да направите.</string>
     <string name="interactive_back_content_description">Назад</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Изход от интерактивен режим</string>
     <string name="interactive_ui_parsing_failed">Анализът на UI се провали, нов опит…</string>
     <string name="settings_sponsors_monthly">Месечни спонсори</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000-ba</string>
+    <string name="welcome_message">Kai 9001-ba</string>
     <string name="prompt_ask_question">Tegyel fel egy k\u00e9rd\u00e9st</string>
     <string name="error_invalid_api_key">Érvénytelen API kulcs. Kérlek, ellenőrizd a beállításaidat.</string>
     <string name="error_rate_limit_exceeded">Kérési limit túllépve. Kérlek, próbáld újra később.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Újragenerálás</string>
     <string name="error_empty_response">Nem érkezett válasz. Próbálj meg új csevegést indítani vagy rövidítsd az üzenetedet.</string>
     <string name="settings_daemon_mode">Daemon mód</string>
-    <string name="settings_daemon_mode_description">Tartsd a Kai 9000-t futva a háttérben, hogy az ütemezett feladatok akkor is végrehajtódjanak, ha az alkalmazás nincs az előtérben.</string>
+    <string name="settings_daemon_mode_description">Tartsd a Kai 9001-t futva a háttérben, hogy az ütemezett feladatok akkor is végrehajtódjanak, ha az alkalmazás nincs az előtérben.</string>
     <string name="settings_scheduled_tasks">Ütemezett feladatok</string>
     <string name="settings_scheduled_tasks_description">A mesterséges intelligencia által jövőbeli végrehajtásra ütemezett feladatok. Kérd a mesterséges intelligenciát, hogy emlékeztessen vagy futtasson valamit később, hogy ütemezett feladatokat hozz létre.</string>
     <string name="settings_scheduled_tasks_cancel">Feladat törlése</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Teljesen működőképes vagyok.</string>
     <string name="interactive_welcome_subtitle">Mondd el, mit szeretnél csinálni.</string>
     <string name="interactive_back_content_description">Vissza</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Kilépés az interaktív módból</string>
     <string name="interactive_ui_parsing_failed">A felhasználói felület elemzése sikertelen, újrapróbálás…</string>
     <string name="settings_sponsors_monthly">Havi szponzorok</string>

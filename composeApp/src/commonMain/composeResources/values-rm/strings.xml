@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Bainvegni tar Kai 9000</string>
+    <string name="welcome_message">Bainvegni tar Kai 9001</string>
     <string name="prompt_ask_question">Fa ina dumonda</string>
     <string name="error_invalid_api_key">Clav API nunvalida. Controlai Voss parameters.</string>
     <string name="error_rate_limit_exceeded">Limit da dumondas surpassà. Empruvai pli tard.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Regenerar</string>
     <string name="error_empty_response">Nagina resposta retschavida. Empruvai da cumenzar in nov chat u da scursanir Voss messadi.</string>
     <string name="settings_daemon_mode">Modus daemon</string>
-    <string name="settings_daemon_mode_description">Laschar Kai 9000 ir en il fund per che incumbensas planisadas vegnan exequidas era sche l'app n'è betg en il prim plan.</string>
+    <string name="settings_daemon_mode_description">Laschar Kai 9001 ir en il fund per che incumbensas planisadas vegnan exequidas era sche l'app n'è betg en il prim plan.</string>
     <string name="settings_scheduled_tasks">Incumbensas planisadas</string>
     <string name="settings_scheduled_tasks_description">Incumbensas planisadas da l'AI per l'execuziun futura. Dumandai a l'AI da s'enregurdar u da lantschar insatge pli tard per crear incumbensas planisadas.</string>
     <string name="settings_scheduled_tasks_cancel">Annullar incumbensa</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Jau sun cumplettamain operativ.</string>
     <string name="interactive_welcome_subtitle">Di a mi tge che ti vuls far.</string>
     <string name="interactive_back_content_description">Enavos</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Bandunar il modus interactiv</string>
     <string name="interactive_ui_parsing_failed">L'analisa da l'UI n'è betg reussida, emprova danovamain…</string>
     <string name="settings_sponsors_monthly">Sponsurs mensils</string>

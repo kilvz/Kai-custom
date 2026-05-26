@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000에 오신 것을 환영합니다</string>
+    <string name="welcome_message">Kai 9001에 오신 것을 환영합니다</string>
     <string name="prompt_ask_question">질문하기</string>
     <string name="error_invalid_api_key">유효하지 않은 API 키입니다. 설정을 확인하세요.</string>
     <string name="error_rate_limit_exceeded">요청 한도를 초과했습니다. 나중에 다시 시도하세요.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">재생성</string>
     <string name="error_empty_response">응답이 수신되지 않았습니다. 새 채팅을 시작하거나 메시지를 짧게 해보세요.</string>
     <string name="settings_daemon_mode">데몬 모드</string>
-    <string name="settings_daemon_mode_description">앱이 포그라운드에 없을 때도 예약된 작업이 실행되도록 Kai 9000를 백그라운드에서 계속 실행합니다.</string>
+    <string name="settings_daemon_mode_description">앱이 포그라운드에 없을 때도 예약된 작업이 실행되도록 Kai 9001를 백그라운드에서 계속 실행합니다.</string>
     <string name="settings_scheduled_tasks">예약된 작업</string>
     <string name="settings_scheduled_tasks_description">AI가 미래 실행을 위해 예약한 작업입니다. 예약된 작업을 만들려면 AI에게 나중에 알려주거나 실행하도록 요청하세요.</string>
     <string name="settings_scheduled_tasks_cancel">작업 취소</string>
@@ -230,7 +230,7 @@
     <string name="interactive_welcome_title">완전히 작동 중입니다.</string>
     <string name="interactive_welcome_subtitle">무엇을 하고 싶은지 알려주세요.</string>
     <string name="interactive_back_content_description">뒤로</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">인터랙티브 모드 종료</string>
     <string name="interactive_ui_parsing_failed">UI 파싱 실패, 다시 시도 중…</string>
     <string name="settings_sponsors_monthly">월간 후원자</string>

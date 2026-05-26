@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Bienvenido a Kai 9000</string>
+    <string name="welcome_message">Bienvenido a Kai 9001</string>
     <string name="prompt_ask_question">Haz una pregunta</string>
     <string name="error_invalid_api_key">Clave API inválida. Por favor, revisa tu configuración.</string>
     <string name="error_rate_limit_exceeded">Límite de tasa excedido. Inténtalo de nuevo más tarde.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Regenerar</string>
     <string name="error_empty_response">No se recibió respuesta. Intenta iniciar un nuevo chat o acortar tu mensaje.</string>
     <string name="settings_daemon_mode">Modo Demonio</string>
-    <string name="settings_daemon_mode_description">Mantén Kai 9000 ejecutándose en segundo plano para que las tareas programadas se ejecuten incluso cuando la aplicación no esté en primer plano.</string>
+    <string name="settings_daemon_mode_description">Mantén Kai 9001 ejecutándose en segundo plano para que las tareas programadas se ejecuten incluso cuando la aplicación no esté en primer plano.</string>
     <string name="settings_scheduled_tasks">Tareas Programadas</string>
     <string name="settings_scheduled_tasks_description">Tareas programadas por la IA para ejecución futura. Pide a la IA que te recuerde o ejecute algo más tarde para crear tareas programadas.</string>
     <string name="settings_scheduled_tasks_cancel">Cancelar tarea</string>
@@ -230,7 +230,7 @@ Si algo necesita atención (memorias obsoletas, tareas vencidas, seguimientos de
     <string name="interactive_welcome_title">Estoy completamente operativo.</string>
     <string name="interactive_welcome_subtitle">Dime qué te gustaría hacer.</string>
     <string name="interactive_back_content_description">Atrás</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Salir del modo interactivo</string>
     <string name="interactive_ui_parsing_failed">Error al analizar la UI, reintentando…</string>
     <string name="settings_sponsors_monthly">Patrocinadores mensuales</string>

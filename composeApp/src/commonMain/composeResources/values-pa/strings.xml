@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000 ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ</string>
+    <string name="welcome_message">Kai 9001 ਵਿੱਚ ਜੀ ਆਇਆਂ ਨੂੰ</string>
     <string name="prompt_ask_question">ਸਵਾਲ ਪੁੱਛੋ</string>
     <string name="error_invalid_api_key">ਅਵੈਧ API ਕੁੰਜੀ। ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀਆਂ ਸੈਟਿੰਗਾਂ ਚੈੱਕ ਕਰੋ।</string>
     <string name="error_rate_limit_exceeded">ਦਰ ਸੀਮਾ ਪਾਰ ਹੋ ਗਈ। ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">ਦੁਬਾਰਾ ਤਿਆਰ ਕਰੋ</string>
     <string name="error_empty_response">ਕੋਈ ਜਵਾਬ ਨਹੀਂ ਮਿਲਿਆ। ਨਵੀਂ ਚੈਟ ਸ਼ੁਰੂ ਕਰਨ ਜਾਂ ਆਪਣਾ ਸੁਨੇਹਾ ਛੋਟਾ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
     <string name="settings_daemon_mode">ਡੈਮਨ ਮੋਡ</string>
-    <string name="settings_daemon_mode_description">Kai 9000 ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚਲਦਾ ਰੱਖੋ ਤਾਂ ਜੋ ਨਿਯਤ ਕਾਰਜ ਐਪ ਅੱਗੇ ਨਾ ਹੋਣ ਤੇ ਵੀ ਚੱਲਣ।</string>
+    <string name="settings_daemon_mode_description">Kai 9001 ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚਲਦਾ ਰੱਖੋ ਤਾਂ ਜੋ ਨਿਯਤ ਕਾਰਜ ਐਪ ਅੱਗੇ ਨਾ ਹੋਣ ਤੇ ਵੀ ਚੱਲਣ।</string>
     <string name="settings_scheduled_tasks">ਨਿਯਤ ਕਾਰਜ</string>
     <string name="settings_scheduled_tasks_description">AI ਦੁਆਰਾ ਭਵਿੱਖ ਵਿੱਚ ਚਲਾਉਣ ਲਈ ਨਿਯਤ ਕੀਤੇ ਕਾਰਜ। ਨਿਯਤ ਕਾਰਜ ਬਣਾਉਣ ਲਈ AI ਨੂੰ ਯਾਦ ਦਿਵਾਉਣ ਜਾਂ ਬਾਅਦ ਵਿੱਚ ਕੁਝ ਚਲਾਉਣ ਲਈ ਕਹੋ।</string>
     <string name="settings_scheduled_tasks_cancel">ਕਾਰਜ ਰੱਦ ਕਰੋ</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">ਮੈਂ ਪੂਰੀ ਤਰ੍ਹਾਂ ਕੰਮ ਕਰ ਰਿਹਾ ਹਾਂ।</string>
     <string name="interactive_welcome_subtitle">ਮੈਨੂੰ ਦੱਸੋ ਤੁਸੀਂ ਕੀ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ।</string>
     <string name="interactive_back_content_description">ਪਿੱਛੇ</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">ਇੰਟਰੈਕਟਿਵ ਮੋਡ ਤੋਂ ਬਾਹਰ ਨਿਕਲੋ</string>
     <string name="interactive_ui_parsing_failed">UI ਪਾਰਸਿੰਗ ਅਸਫਲ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…</string>
     <string name="settings_sponsors_monthly">ਮਹੀਨਾਵਾਰ ਸਪਾਂਸਰ</string>

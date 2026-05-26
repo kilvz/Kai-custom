@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Laipni lūdzam Kai 9000</string>
+    <string name="welcome_message">Laipni lūdzam Kai 9001</string>
     <string name="prompt_ask_question">Uzdodiet jautājumu</string>
     <string name="error_invalid_api_key">Nederīga API atslēga. Lūdzu, pārbaudiet iestatījumus.</string>
     <string name="error_rate_limit_exceeded">Pieprasījumu limits pārsniegts. Lūdzu, mēģiniet vēlāk.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Ģenerēt atkārtoti</string>
     <string name="error_empty_response">Netika saņemta atbilde. Mēģiniet sākt jaunu tērzēšanu vai saīsināt savu ziņojumu.</string>
     <string name="settings_daemon_mode">Daemon režīms</string>
-    <string name="settings_daemon_mode_description">Turiet Kai 9000 darbojamies fonā, lai ieplānotie uzdevumi tiktu izpildīti arī tad, kad lietotne nav priekšplānā.</string>
+    <string name="settings_daemon_mode_description">Turiet Kai 9001 darbojamies fonā, lai ieplānotie uzdevumi tiktu izpildīti arī tad, kad lietotne nav priekšplānā.</string>
     <string name="settings_scheduled_tasks">Ieplānotie uzdevumi</string>
     <string name="settings_scheduled_tasks_description">AI ieplānotie uzdevumi turpmākai izpildei. Lūdziet AI atgādināt jums vai palaist kaut ko vēlāk, lai izveidotu ieplānotos uzdevumus.</string>
     <string name="settings_scheduled_tasks_cancel">Atcelt uzdevumu</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Esmu pilnībā darbspējīgs.</string>
     <string name="interactive_welcome_subtitle">Pastāstiet man, ko vēlaties darīt.</string>
     <string name="interactive_back_content_description">Atpakaļ</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Iziet no interaktīvā režīma</string>
     <string name="interactive_ui_parsing_failed">UI analīze neizdevās, mēģinu vēlreiz…</string>
     <string name="settings_sponsors_monthly">Ikmēneša sponsori</string>
