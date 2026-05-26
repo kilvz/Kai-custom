@@ -10,7 +10,8 @@ abstract class ICommandService : Binder(), IInterface {
     companion object {
         const val DESCRIPTOR = "com.kai.custom.shizuku.ICommandService"
         const val TRANSACTION_executeCommand = 1
-        const val TRANSACTION_destroy = 16777114
+        /** Shizuku server sends this to kill the UserService process */
+        const val TRANSACTION_destroy = 16777115
     }
 
     override fun asBinder(): IBinder = this
@@ -32,7 +33,7 @@ abstract class ICommandService : Binder(), IInterface {
                 reply?.writeString(result)
                 return true
             }
-            TRANSACTION_destroy -> {
+            TRANSACTION_destroy, 16777114 -> {
                 data.enforceInterface(DESCRIPTOR)
                 destroy()
                 return true

@@ -15,7 +15,11 @@ import org.koin.java.KoinJavaComponent.inject
 
 private const val TOOL_DESCRIPTION = """Execute a shell command in an Alpine Linux sandbox and return stdout, stderr, exit code, and current working directory. The environment is a full Alpine Linux system running via proot.
 
+IMPORTANT — Android system commands (pm, am, dumpsys, settings, wm, input, device_config, content, appops, cmd, and anything under /system, /vendor, /apex) do NOT exist in this Alpine sandbox. It is NOT the Android shell. For ADB-level system commands, use the separate run_adb tool instead — that tool goes through Shizuku and can access all Android system services.
+
 Shell session is PERSISTENT across calls within THIS conversation: cwd, exported environment variables, and any in-shell state carry from one call to the next, just like a normal terminal. So "cd /tmp" in one call, then "pwd" in the next, returns "/tmp". You do NOT need to chain "cd dir && command" unless you want directory changes to be one-shot. Other conversations and the in-app Terminal tab each have their own isolated shells; the rootfs and /root are still shared on disk, so files persist across all of them.
+
+This sandbox is for: running Python/Node scripts, git operations, curl/wget HTTP requests, ssh to remote servers, file manipulation, apk package management, and general Linux command-line work.
 
 Pre-installed: bash, python3 (pip), nodejs, git, curl, wget, jq, plus remote-server tools — ssh, scp, sftp (openssh-client), lftp (FTP/FTPS), rsync. Use them directly, e.g. "ssh user@host 'remote command'", "sftp user@host", "lftp -c 'open ftp://...; put file'". Authentication state (~/.ssh keys, known_hosts) persists.
 

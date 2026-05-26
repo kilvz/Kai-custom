@@ -231,6 +231,8 @@ class VersionGeneratorPlugin : Plugin<Project> {
                     .get()
                     .asFile
             versionFile.parentFile?.mkdirs()
+            val versionCode = libs.versions.android.versionCode.get()
+
             versionFile.writeText(
                 """
                 package com.kai.custom
@@ -238,6 +240,7 @@ class VersionGeneratorPlugin : Plugin<Project> {
                 object Version {
                     const val appVersion = "$appVersion"
                     const val appVersionBase = "$appVersionBase"
+                    const val versionCode = $versionCode
                 }
                 """.trimIndent(),
             )

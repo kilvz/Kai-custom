@@ -79,7 +79,12 @@ class LinuxSandboxManager(
     private fun checkExistingInstallation() {
         val rootfs = File(sandboxDir, "rootfs")
         val proot = File(prootPath)
-        if (rootfs.isDirectory && proot.exists() && proot.canExecute()) {
+        val rootfsOk = rootfs.isDirectory
+        val prootExists = proot.exists()
+        val prootExec = proot.canExecute()
+        android.util.Log.d("LinuxSandbox",
+            "checkExistingInstallation: rootfs=$rootfs dir=$rootfsOk proot=$prootPath exists=$prootExists canExec=$prootExec")
+        if (rootfsOk && prootExists && prootExec) {
             _state.value = SandboxState.Ready
         }
     }
@@ -283,11 +288,47 @@ class LinuxSandboxManager(
         )
         currentJob = scope.launch {
             try {
+                val rootfsDir = File(sandboxDir, "rootfs")
                 val executor = createProotExecutor()
+
+                // Refresh the APK cache before installing. `apk add` without
+                // --no-cache relies on the cached index; if the rootfs was set up
+                // in a prior session the cache may be stale or absent. We also
+                // avoid --no-cache because proot's ptrace can block TLS syscalls
+                // on some Android versions, causing "Permission denied" when apk
+                // tries to fetch the index over HTTPS. The cached index from `apk
+                // update` below avoids the need for HTTPS at install time.
+                var updated = false
+                for (mirror in downloader.mirrors) {
+                    downloader.writeRepositories(rootfsDir, mirror)
+                    val result = executor.execute("apk update", timeoutSeconds = 60)
+                    if (result["success"] as? Boolean == true) {
+                        updated = true
+                        break
+                    }
+                }
+                if (!updated) {
+                    // HTTPS mirrors all failed — retry with HTTP on each
+                    for (mirror in downloader.mirrors) {
+                        val httpMirror = mirror.replace("https://", "http://")
+                        downloader.writeRepositories(rootfsDir, httpMirror)
+                        val result = executor.execute("apk update", timeoutSeconds = 60)
+                        if (result["success"] as? Boolean == true) {
+                            updated = true
+                            break
+                        }
+                    }
+                }
+                if (!updated) {
+                    android.util.Log.e("LinuxSandbox", "apk update failed on all Alpine mirrors (HTTPS and HTTP)")
+                    _state.value = SandboxState.Error("apk update failed — check device network connectivity")
+                    return@launch
+                }
+
                 for (pkg in packages) {
                     ensureActive()
                     _state.value = SandboxState.Installing("Installing $pkg...")
-                    val result = executor.execute("apk add --no-cache $pkg", timeoutSeconds = 120)
+                    val result = executor.execute("apk add $pkg", timeoutSeconds = 120)
                     ensureActive()
                     val success = result["success"] as? Boolean ?: false
                     if (!success) {

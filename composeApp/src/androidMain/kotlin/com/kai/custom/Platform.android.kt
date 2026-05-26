@@ -26,8 +26,6 @@ import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.notifications.NotificationReader
 import com.kai.custom.notifications.declaresNotificationListener
-import com.kai.custom.sandbox.LinuxSandboxManager
-import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
@@ -439,14 +437,11 @@ actual fun getAvailableTools(): List<Tool> {
         }
 
         if (appSettings.isSandboxEnabled()) {
-            val sandboxManager: LinuxSandboxManager by inject(LinuxSandboxManager::class.java)
-            if (sandboxManager.state.value is SandboxState.Ready) {
-                add(ShellCommandTool)
-                add(ProcessManagerTool)
-                add(SshConfigureHostTool)
-                add(SpeakTextTool)
-                add(OpenCodeTool)
-            }
+            add(ShellCommandTool)
+            add(ProcessManagerTool)
+            add(SshConfigureHostTool)
+            add(SpeakTextTool)
+            add(OpenCodeTool)
         }
 
         if (appSettings.isToolEnabled(AdbTool.schema.name)) {

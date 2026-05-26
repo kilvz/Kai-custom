@@ -1,6 +1,7 @@
 package com.kai.custom.shizuku
 
 import android.content.Context
+import android.util.Log
 import androidx.annotation.Keep
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -9,6 +10,8 @@ import java.io.InputStreamReader
 
 class CommandService : ICommandService {
 
+    private val tag = "CommandService"
+
     @Keep
     constructor() : super()
 
@@ -16,9 +19,8 @@ class CommandService : ICommandService {
     constructor(context: Context) : super()
 
     override fun executeCommand(command: String, timeoutMs: Long): String {
-        return try {
-            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
-
+        val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+        try {
             var stdout = ""
             var stderr = ""
             val stdoutThread = Thread { stdout = readStream(process.inputStream) }
@@ -41,7 +43,7 @@ class CommandService : ICommandService {
             stdoutThread.join(5000)
             stderrThread.join(5000)
 
-            if (timedOut) {
+            return if (timedOut) {
                 process.destroy()
                 Json.encodeToString(
                     CommandResultDto(
@@ -62,8 +64,9 @@ class CommandService : ICommandService {
                     )
                 )
             }
-        } catch (e: Exception) {
-            Json.encodeToString(
+        } catch (e: Throwable) {
+            process.destroy()
+            return Json.encodeToString(
                 CommandResultDto(
                     exitCode = -1,
                     timedOut = false,
@@ -74,6 +77,7 @@ class CommandService : ICommandService {
     }
 
     override fun destroy() {
+        Log.d(tag, "destroy() called — exiting process")
         System.exit(0)
     }
 

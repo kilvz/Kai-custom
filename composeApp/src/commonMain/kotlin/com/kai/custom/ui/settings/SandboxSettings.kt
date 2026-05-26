@@ -72,12 +72,10 @@ internal fun SandboxSettingsCard(
                     )
                 }
             }
-            if (sandboxState.sandboxReady) {
-                Switch(
-                    checked = sandboxState.isSandboxEnabled,
-                    onCheckedChange = onToggleSandbox,
-                )
-            }
+            Switch(
+                checked = sandboxState.isSandboxEnabled,
+                onCheckedChange = onToggleSandbox,
+            )
         }
 
         if (sandboxState.sandboxProgress != null) {
