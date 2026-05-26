@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Välkommen till Kai 9000</string>
+    <string name="welcome_message">Välkommen till Kai 9001</string>
     <string name="prompt_ask_question">Ställ en fråga</string>
     <string name="error_invalid_api_key">Ogiltig API-nyckel. Kontrollera dina inställningar.</string>
     <string name="error_rate_limit_exceeded">Hastighetsgränsen överskriden. Försök igen senare.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Generera om</string>
     <string name="error_empty_response">Inget svar mottaget. Prova att starta en ny chatt eller korta ner ditt meddelande.</string>
     <string name="settings_daemon_mode">Bakgrundsläge</string>
-    <string name="settings_daemon_mode_description">Håll Kai 9000 igång i bakgrunden så att schemalagda uppgifter körs även när appen inte är i förgrunden.</string>
+    <string name="settings_daemon_mode_description">Håll Kai 9001 igång i bakgrunden så att schemalagda uppgifter körs även när appen inte är i förgrunden.</string>
     <string name="settings_scheduled_tasks">Schemalagda uppgifter</string>
     <string name="settings_scheduled_tasks_description">Uppgifter som AI:n har schemalagt för framtida körning. Be AI:n att påminna dig eller köra något senare för att skapa schemalagda uppgifter.</string>
     <string name="settings_scheduled_tasks_cancel">Avbryt uppgift</string>
@@ -230,7 +230,7 @@ Om något behöver uppmärksamhet (föråldrade minnen, förfallna uppgifter, an
     <string name="interactive_welcome_title">Jag är fullt operativ.</string>
     <string name="interactive_welcome_subtitle">Berätta vad du vill göra.</string>
     <string name="interactive_back_content_description">Tillbaka</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Lämna interaktivt läge</string>
     <string name="interactive_ui_parsing_failed">UI-analys misslyckades, försöker igen…</string>
     <string name="settings_sponsors_monthly">Månatliga sponsorer</string>

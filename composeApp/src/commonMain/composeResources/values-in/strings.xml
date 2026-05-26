@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Selamat datang di Kai 9000</string>
+    <string name="welcome_message">Selamat datang di Kai 9001</string>
     <string name="prompt_ask_question">Ajukan pertanyaan</string>
     <string name="error_invalid_api_key">Kunci API tidak valid. Silakan periksa pengaturan Anda.</string>
     <string name="error_rate_limit_exceeded">Batas kecepatan tercapai. Coba lagi nanti.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Regenerasi</string>
     <string name="error_empty_response">Tidak ada respons yang diterima. Coba mulai obrolan baru atau persingkat pesan Anda.</string>
     <string name="settings_daemon_mode">Mode Daemon</string>
-    <string name="settings_daemon_mode_description">Biarkan Kai 9000 berjalan di latar belakang agar tugas terjadwal tetap dijalankan meskipun aplikasi tidak di latar depan.</string>
+    <string name="settings_daemon_mode_description">Biarkan Kai 9001 berjalan di latar belakang agar tugas terjadwal tetap dijalankan meskipun aplikasi tidak di latar depan.</string>
     <string name="settings_scheduled_tasks">Tugas Terjadwal</string>
     <string name="settings_scheduled_tasks_description">Tugas yang dijadwalkan oleh AI untuk dijalankan di masa depan. Minta AI untuk mengingatkan Anda atau menjalankan sesuatu nanti untuk membuat tugas terjadwal.</string>
     <string name="settings_scheduled_tasks_cancel">Batalkan tugas</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Saya sepenuhnya beroperasi.</string>
     <string name="interactive_welcome_subtitle">Beritahu saya apa yang ingin Anda lakukan.</string>
     <string name="interactive_back_content_description">Kembali</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Keluar dari mode interaktif</string>
     <string name="interactive_ui_parsing_failed">Penguraian UI gagal, mencoba lagi…</string>
     <string name="settings_sponsors_monthly">Sponsor Bulanan</string>

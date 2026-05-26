@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">مرحبًا بك في Kai 9000</string>
+    <string name="welcome_message">مرحبًا بك في Kai 9001</string>
     <string name="prompt_ask_question">اطرح سؤالًا</string>
     <string name="error_invalid_api_key">مفتاح API غير صالح. يرجى التحقق من إعداداتك.</string>
     <string name="error_rate_limit_exceeded">تم تجاوز حد المعدل. يرجى المحاولة لاحقًا.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">إعادة التوليد</string>
     <string name="error_empty_response">لم يتم تلقي أي رد. حاول بدء محادثة جديدة أو تقصير رسالتك.</string>
     <string name="settings_daemon_mode">وضع الخلفية</string>
-    <string name="settings_daemon_mode_description">أبقِ Kai 9000 يعمل في الخلفية حتى تُنفَّذ المهام المجدولة حتى عندما لا يكون التطبيق في المقدمة.</string>
+    <string name="settings_daemon_mode_description">أبقِ Kai 9001 يعمل في الخلفية حتى تُنفَّذ المهام المجدولة حتى عندما لا يكون التطبيق في المقدمة.</string>
     <string name="settings_scheduled_tasks">المهام المجدولة</string>
     <string name="settings_scheduled_tasks_description">مهام جدولها الذكاء الاصطناعي للتنفيذ المستقبلي. اطلب من الذكاء الاصطناعي تذكيرك أو تشغيل شيء لاحقاً لإنشاء مهام مجدولة.</string>
     <string name="settings_scheduled_tasks_cancel">إلغاء المهمة</string>
@@ -230,7 +230,7 @@
     <string name="interactive_welcome_title">أنا جاهز للعمل بالكامل.</string>
     <string name="interactive_welcome_subtitle">أخبرني بما تريد فعله.</string>
     <string name="interactive_back_content_description">رجوع</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">الخروج من الوضع التفاعلي</string>
     <string name="interactive_ui_parsing_failed">فشل تحليل واجهة المستخدم، جارٍ إعادة المحاولة…</string>
     <string name="settings_sponsors_monthly">الرعاة الشهريون</string>

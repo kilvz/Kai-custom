@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Chào mừng đến với Kai 9000</string>
+    <string name="welcome_message">Chào mừng đến với Kai 9001</string>
     <string name="prompt_ask_question">Đặt câu hỏi</string>
     <string name="error_invalid_api_key">Khóa API không hợp lệ. Vui lòng kiểm tra cài đặt của bạn.</string>
     <string name="error_rate_limit_exceeded">Đã vượt quá giới hạn tốc độ. Vui lòng thử lại sau.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Tạo lại</string>
     <string name="error_empty_response">Không nhận được phản hồi. Hãy thử bắt đầu cuộc trò chuyện mới hoặc rút ngắn tin nhắn của bạn.</string>
     <string name="settings_daemon_mode">Chế độ nền</string>
-    <string name="settings_daemon_mode_description">Giữ Kai 9000 chạy trong nền để các tác vụ đã lên lịch thực thi ngay cả khi ứng dụng không ở nền trước.</string>
+    <string name="settings_daemon_mode_description">Giữ Kai 9001 chạy trong nền để các tác vụ đã lên lịch thực thi ngay cả khi ứng dụng không ở nền trước.</string>
     <string name="settings_scheduled_tasks">Tác vụ đã lên lịch</string>
     <string name="settings_scheduled_tasks_description">Các tác vụ được AI lên lịch để thực hiện trong tương lai. Yêu cầu AI nhắc nhở bạn hoặc chạy một việc gì đó sau để tạo tác vụ đã lên lịch.</string>
     <string name="settings_scheduled_tasks_cancel">Hủy tác vụ</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Tôi hoàn toàn sẵn sàng hoạt động.</string>
     <string name="interactive_welcome_subtitle">Hãy cho tôi biết bạn muốn làm gì.</string>
     <string name="interactive_back_content_description">Quay lại</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Thoát chế độ tương tác</string>
     <string name="interactive_ui_parsing_failed">Phân tích UI thất bại, đang thử lại…</string>
     <string name="settings_sponsors_monthly">Nhà tài trợ hàng tháng</string>

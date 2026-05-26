@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Sveiki atvykę į Kai 9000</string>
+    <string name="welcome_message">Sveiki atvykę į Kai 9001</string>
     <string name="prompt_ask_question">Užduokite klausimą</string>
     <string name="error_invalid_api_key">Neteisingas API raktas. Patikrinkite nustatymus.</string>
     <string name="error_rate_limit_exceeded">Užklausų limitas viršytas. Bandykite vėliau.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Pergeneruoti</string>
     <string name="error_empty_response">Atsakymas negautas. Pabandykite pradėti naują pokalbį arba sutrumpinti savo žinutę.</string>
     <string name="settings_daemon_mode">Daemon režimas</string>
-    <string name="settings_daemon_mode_description">Leiskite Kai 9000 veikti fone, kad suplanuotos užduotys būtų vykdomos net kai programa nėra priekiniame plane.</string>
+    <string name="settings_daemon_mode_description">Leiskite Kai 9001 veikti fone, kad suplanuotos užduotys būtų vykdomos net kai programa nėra priekiniame plane.</string>
     <string name="settings_scheduled_tasks">Suplanuotos užduotys</string>
     <string name="settings_scheduled_tasks_description">AI suplanuotos užduotys būsimam vykdymui. Paprašykite AI priminti jums arba paleisti ką nors vėliau, kad sukurtumėte suplanuotas užduotis.</string>
     <string name="settings_scheduled_tasks_cancel">Atšaukti užduotį</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Esu visiškai veikiantis.</string>
     <string name="interactive_welcome_subtitle">Pasakykite, ką norėtumėte daryti.</string>
     <string name="interactive_back_content_description">Atgal</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Išeiti iš interaktyvaus režimo</string>
     <string name="interactive_ui_parsing_failed">UI analizė nepavyko, bandoma iš naujo…</string>
     <string name="settings_sponsors_monthly">Mėnesiniai rėmėjai</string>

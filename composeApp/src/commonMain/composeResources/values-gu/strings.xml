@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000 માં આપનું સ્વાગત છે</string>
+    <string name="welcome_message">Kai 9001 માં આપનું સ્વાગત છે</string>
     <string name="prompt_ask_question">પ્રશ્ન પૂછો</string>
     <string name="error_invalid_api_key">અમાન્ય API કી. કૃપા કરીને તમારી સેટિંગ્સ તપાસો.</string>
     <string name="error_rate_limit_exceeded">દર મર્યાદા વટાવી ગઈ. કૃપા કરીને પછી ફરી પ્રયાસ કરો.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">ફરીથી જનરેટ કરો</string>
     <string name="error_empty_response">કોઈ જવાબ મળ્યો નથી. નવી ચેટ શરૂ કરવાનો અથવા તમારો સંદેશ ટૂંકો કરવાનો પ્રયાસ કરો.</string>
     <string name="settings_daemon_mode">ડેમન મોડ</string>
-    <string name="settings_daemon_mode_description">Kai 9000 ને બેકગ્રાઉન્ડમાં ચાલુ રાખો જેથી શેડ્યૂલ કરેલ કાર્યો એપ ફોરગ્રાઉન્ડમાં ન હોય ત્યારે પણ ચાલે.</string>
+    <string name="settings_daemon_mode_description">Kai 9001 ને બેકગ્રાઉન્ડમાં ચાલુ રાખો જેથી શેડ્યૂલ કરેલ કાર્યો એપ ફોરગ્રાઉન્ડમાં ન હોય ત્યારે પણ ચાલે.</string>
     <string name="settings_scheduled_tasks">શેડ્યૂલ કરેલ કાર્યો</string>
     <string name="settings_scheduled_tasks_description">AI દ્વારા ભવિષ્યના અમલ માટે શેડ્યૂલ કરેલ કાર્યો. શેડ્યૂલ કરેલ કાર્યો બનાવવા માટે AI ને તમને યાદ અપાવવા અથવા પછીથી કંઈક ચલાવવા કહો.</string>
     <string name="settings_scheduled_tasks_cancel">કાર્ય રદ કરો</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">હું સંપૂર્ણ રીતે કાર્યરત છું.</string>
     <string name="interactive_welcome_subtitle">મને કહો તમે શું કરવા માગો છો.</string>
     <string name="interactive_back_content_description">પાછળ</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">ઇન્ટરેક્ટિવ મોડમાંથી બહાર નીકળો</string>
     <string name="interactive_ui_parsing_failed">UI પાર્સિંગ નિષ્ફળ, ફરીથી પ્રયાસ કરી રહ્યા છીએ…</string>
     <string name="settings_sponsors_monthly">માસિક પ્રાયોજકો</string>

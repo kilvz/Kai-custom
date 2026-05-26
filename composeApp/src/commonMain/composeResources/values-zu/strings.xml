@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Siyakwamukela ku-Kai 9000</string>
+    <string name="welcome_message">Siyakwamukela ku-Kai 9001</string>
     <string name="prompt_ask_question">Buza umbuzo</string>
     <string name="error_invalid_api_key">Ukhiye we-API ongavumelekile. Sicela uhlole izilungiselelo zakho.</string>
     <string name="error_rate_limit_exceeded">Umkhawulo wezicelo udluliwe. Sicela uzame futhi kamuva.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Phinda wenze</string>
     <string name="error_empty_response">Akukho mpendulo etholakele. Zama ukuqala ingxoxo entsha noma ufinyeze umyalezo wakho.</string>
     <string name="settings_daemon_mode">Imodi ye-Daemon</string>
-    <string name="settings_daemon_mode_description">Gcina i-Kai 9000 isebenza ngemuva ukuze imisebenzi ehleliwe isebenze ngisho noma i-app ingekho phambili.</string>
+    <string name="settings_daemon_mode_description">Gcina i-Kai 9001 isebenza ngemuva ukuze imisebenzi ehleliwe isebenze ngisho noma i-app ingekho phambili.</string>
     <string name="settings_scheduled_tasks">Imisebenzi Ehleliwe</string>
     <string name="settings_scheduled_tasks_description">Imisebenzi ehlelwe i-AI ukuze yenziwe esikhathini esizayo. Cela i-AI ukukhumbuza noma isebenzise into kamuva ukuze udale imisebenzi ehleliwe.</string>
     <string name="settings_scheduled_tasks_cancel">Khansela umsebenzi</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Ngisebenza ngokuphelele.</string>
     <string name="interactive_welcome_subtitle">Ngitshele ukuthi ufuna ukwenzani.</string>
     <string name="interactive_back_content_description">Emuva</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Phuma kumodi yokuxhumana</string>
     <string name="interactive_ui_parsing_failed">Ukuhlaziya kwe-UI kuhlulekile, kuzanywa futhi…</string>
     <string name="settings_sponsors_monthly">Abaxhasi Banyanga Zonke Izinyanga</string>

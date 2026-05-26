@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000-க்கு வரவேற்கிறோம்</string>
+    <string name="welcome_message">Kai 9001-க்கு வரவேற்கிறோம்</string>
     <string name="prompt_ask_question">கேள்வி கேளுங்கள்</string>
     <string name="error_invalid_api_key">தவறான API விசை. உங்கள் அமைப்புகளைச் சரிபார்க்கவும்.</string>
     <string name="error_rate_limit_exceeded">விகித வரம்பு மீறப்பட்டது. பின்னர் மீண்டும் முயற்சிக்கவும்.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">மீண்டும் உருவாக்கு</string>
     <string name="error_empty_response">பதில் எதுவும் பெறப்படவில்லை. புதிய அரட்டையைத் தொடங்கவும் அல்லது உங்கள் செய்தியைச் சுருக்கவும்.</string>
     <string name="settings_daemon_mode">டீமன் பயன்முறை</string>
-    <string name="settings_daemon_mode_description">ஆப் முன்புறத்தில் இல்லாதபோதும் திட்டமிட்ட பணிகள் செயல்படும் வகையில் Kai 9000 ஐ பின்னணியில் இயங்க வைக்கவும்.</string>
+    <string name="settings_daemon_mode_description">ஆப் முன்புறத்தில் இல்லாதபோதும் திட்டமிட்ட பணிகள் செயல்படும் வகையில் Kai 9001 ஐ பின்னணியில் இயங்க வைக்கவும்.</string>
     <string name="settings_scheduled_tasks">திட்டமிட்ட பணிகள்</string>
     <string name="settings_scheduled_tasks_description">எதிர்கால செயல்பாட்டிற்கு AI திட்டமிட்ட பணிகள். திட்டமிட்ட பணிகளை உருவாக்க AI-யிடம் நினைவூட்டச் சொல்லுங்கள் அல்லது பின்னர் ஏதாவது இயக்கச் சொல்லுங்கள்.</string>
     <string name="settings_scheduled_tasks_cancel">பணியை ரத்துசெய்</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">நான் முழுமையாக செயல்படுகிறேன்.</string>
     <string name="interactive_welcome_subtitle">நீங்கள் என்ன செய்ய விரும்புகிறீர்கள் என்று சொல்லுங்கள்.</string>
     <string name="interactive_back_content_description">பின்செல்</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">ஊடாடும் பயன்முறையிலிருந்து வெளியேறு</string>
     <string name="interactive_ui_parsing_failed">UI பகுப்பாய்வு தோல்வி, மீண்டும் முயற்சிக்கிறது…</string>
     <string name="settings_sponsors_monthly">மாதாந்திர நிதியுதவியாளர்கள்</string>

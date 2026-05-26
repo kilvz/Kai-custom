@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Ласкаво просимо до Kai 9000</string>
+    <string name="welcome_message">Ласкаво просимо до Kai 9001</string>
     <string name="prompt_ask_question">Задати питання</string>
     <string name="error_invalid_api_key">Недійсний ключ API. Будь ласка, перевірте налаштування.</string>
     <string name="error_rate_limit_exceeded">Перевищено ліміт запитів. Будь ласка, спробуйте пізніше.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Згенерувати заново</string>
     <string name="error_empty_response">Відповідь не отримано. Спробуйте розпочати новий чат або скоротити повідомлення.</string>
     <string name="settings_daemon_mode">Фоновий режим</string>
-    <string name="settings_daemon_mode_description">Тримати Kai 9000 запущеним у фоновому режимі, щоб заплановані завдання виконувались навіть коли додаток не на передньому плані.</string>
+    <string name="settings_daemon_mode_description">Тримати Kai 9001 запущеним у фоновому режимі, щоб заплановані завдання виконувались навіть коли додаток не на передньому плані.</string>
     <string name="settings_scheduled_tasks">Заплановані завдання</string>
     <string name="settings_scheduled_tasks_description">Завдання, заплановані ШІ для виконання в майбутньому. Попросіть ШІ нагадати вам або виконати щось пізніше, щоб створити заплановані завдання.</string>
     <string name="settings_scheduled_tasks_cancel">Скасувати завдання</string>
@@ -230,7 +230,7 @@
     <string name="interactive_welcome_title">Я повністю працездатний.</string>
     <string name="interactive_welcome_subtitle">Скажіть мені, що ви хочете зробити.</string>
     <string name="interactive_back_content_description">Назад</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Вийти з інтерактивного режиму</string>
     <string name="interactive_ui_parsing_failed">Не вдалося розібрати UI, повторна спроба…</string>
     <string name="settings_sponsors_monthly">Щомісячні спонсори</string>

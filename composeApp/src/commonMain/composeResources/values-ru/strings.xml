@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Добро пожаловать в Kai 9000</string>
+    <string name="welcome_message">Добро пожаловать в Kai 9001</string>
     <string name="prompt_ask_question">Задать вопрос</string>
     <string name="error_invalid_api_key">Недействительный ключ API. Пожалуйста, проверьте настройки.</string>
     <string name="error_rate_limit_exceeded">Превышен лимит запросов. Пожалуйста, попробуйте позже.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Сгенерировать заново</string>
     <string name="error_empty_response">Ответ не получен. Попробуйте начать новый чат или сократить сообщение.</string>
     <string name="settings_daemon_mode">Фоновый режим</string>
-    <string name="settings_daemon_mode_description">Оставлять Kai 9000 работающим в фоновом режиме, чтобы запланированные задачи выполнялись даже когда приложение не на переднем плане.</string>
+    <string name="settings_daemon_mode_description">Оставлять Kai 9001 работающим в фоновом режиме, чтобы запланированные задачи выполнялись даже когда приложение не на переднем плане.</string>
     <string name="settings_scheduled_tasks">Запланированные задачи</string>
     <string name="settings_scheduled_tasks_description">Задачи, запланированные ИИ для выполнения в будущем. Попросите ИИ напомнить вам или выполнить что-то позже, чтобы создать запланированные задачи.</string>
     <string name="settings_scheduled_tasks_cancel">Отменить задачу</string>
@@ -230,7 +230,7 @@
     <string name="interactive_welcome_title">Я полностью работоспособен.</string>
     <string name="interactive_welcome_subtitle">Скажите, что вы хотите сделать.</string>
     <string name="interactive_back_content_description">Назад</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Выйти из интерактивного режима</string>
     <string name="interactive_ui_parsing_failed">Не удалось разобрать UI, повторная попытка…</string>
     <string name="settings_sponsors_monthly">Ежемесячные спонсоры</string>

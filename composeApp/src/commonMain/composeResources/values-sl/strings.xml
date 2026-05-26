@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Dobrodošli v Kai 9000</string>
+    <string name="welcome_message">Dobrodošli v Kai 9001</string>
     <string name="prompt_ask_question">Zastavite vprašanje</string>
     <string name="error_invalid_api_key">Neveljaven API ključ. Preverite nastavitve.</string>
     <string name="error_rate_limit_exceeded">Omejitev zahtev je presežena. Poskusite znova pozneje.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Ponovno ustvari</string>
     <string name="error_empty_response">Ni bilo prejetega odgovora. Poskusite začeti nov pogovor ali skrajšati sporočilo.</string>
     <string name="settings_daemon_mode">Način demona</string>
-    <string name="settings_daemon_mode_description">Ohranite Kai 9000 v delovanju v ozadju, da se načrtovana opravila izvajajo tudi ko aplikacija ni v ospredju.</string>
+    <string name="settings_daemon_mode_description">Ohranite Kai 9001 v delovanju v ozadju, da se načrtovana opravila izvajajo tudi ko aplikacija ni v ospredju.</string>
     <string name="settings_scheduled_tasks">Načrtovana opravila</string>
     <string name="settings_scheduled_tasks_description">Opravila, ki jih je UI načrtoval za prihodnjo izvajanje. Prosite UI, da vas opomni ali nekaj požene pozneje, da ustvarite načrtovana opravila.</string>
     <string name="settings_scheduled_tasks_cancel">Prekliči opravilo</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Popolnoma sem operativen.</string>
     <string name="interactive_welcome_subtitle">Povejte mi, kaj želite storiti.</string>
     <string name="interactive_back_content_description">Nazaj</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Zapusti interaktivni način</string>
     <string name="interactive_ui_parsing_failed">Razčlenjevanje UI ni uspelo, poskušam znova…</string>
     <string name="settings_sponsors_monthly">Mesečni sponzorji</string>
