@@ -1,6 +1,9 @@
-# Kai 9000
+# Kai 9000 — kilvz fork
 
-<img src="https://img.shields.io/badge/Platform-Web-f7df1c?logo=javascript" alt="Web"> <img src="https://img.shields.io/badge/Platform-Android-34a853.svg?logo=android" alt="Android" /> <img src="https://img.shields.io/badge/Platform-iOS-lightgrey.svg?logo=apple" alt="iOS" /> <img src="https://img.shields.io/badge/Platform-Windows/macOS/Linux-e10707.svg?logo=openjdk" alt="Platform JVM" />
+> **Android-only fork.** Only the Android build target is tested and published here.  
+> Based on [Kai v2.6.3](https://github.com/SimonSchubert/Kai). Version: **1.0.0 (Kai-2.6.3)**
+
+<img src="https://img.shields.io/badge/Platform-Android-34a853.svg?logo=android" alt="Android" />
 <div align="center">
 
 <br>
@@ -8,46 +11,18 @@
 <br>
 <br>
 
-An **open-source AI assistant with persistent memory** that runs on **Android, iOS, Windows, Mac, Linux, and Web**.
-
-**[Website](https://kai9000.com)** - **[Documentation](https://kai9000.com/docs/)**
+An **open-source AI assistant with persistent memory** — custom forked for Android.
 </div>
 
 ## Installation
 
-[![App Store](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/app_store_badge.png)](https://apps.apple.com/us/app/kai-ai/id6758148023)
-[![Play Store](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/play_store_badge.png)](https://play.google.com/store/apps/details?id=com.inspiredandroid.kai)
-[![F-Droid](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/fdroid_badge.png)](https://f-droid.org/en/packages/com.inspiredandroid.kai/)
-[![Web](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/web_badge.png)](https://kai9000.com/app/)
-
-Homebrew (macOS):
-
-```
-brew install --cask simonschubert/tap/kai
-```
-
-AUR (Arch Linux):
-
-```
-yay -S kai-bin
-```
-
-Winget (Windows):
-
-```
-winget install SimonSchubert.Kai
-```
+> **Android only.** Download the APK from the latest release below.
 
 ### Direct Downloads
 
 | Platform | Format | Download |
 |----------|--------|----------|
-| Android | APK | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| macOS | DMG | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Windows | MSI | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Linux | DEB | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Linux | RPM | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Linux | AppImage | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
+| Android | APK | [GitHub Releases](https://github.com/kilvz/Kai/releases) |
 
 ## AI That Builds Screens, Not Just Text
 
@@ -60,7 +35,7 @@ Kai 9000's Interactive UI lets the AI generate full interactive screens — quiz
 - **Persistent memory** — Kai remembers important details across conversations and uses them automatically
 - **Customizable soul** — Define the AI's personality and behavior with an editable system prompt
 - **Multi-service fallback** — 24 LLM providers with automatic failover
-- **On-device inference** — Run AI models locally on Android using LiteRT, no internet needed
+- **On-device inference** — Run AI models locally using LiteRT, no internet needed
 - **Tool execution** — Web search, notifications, calendar events, shell commands, and more
 - **MCP server support** — Connect to remote tool servers via the Model Context Protocol
 - **Autonomous heartbeat** — Periodic self-checks that surface anything needing attention
@@ -84,14 +59,6 @@ Enable it in **Settings > Linux Sandbox**.
 <img src="screenshots/mobile-7.png" alt="Linux Sandbox" height="300">
 
 ## Screenshots
-
-### Desktop
-
-<img src="screenshots/desktop-1.png" alt="Desktop App" height="300">
-
-### Web
-
-<img src="screenshots/web-1.png" alt="Web App" height="300">
 
 ### Mobile
 
@@ -176,7 +143,7 @@ All popular servers are free and require no API key. MCP servers auto-reconnect 
 
 ## Integrations
 
-### Splinterlands Auto-Battle (Android & Desktop)
+### Splinterlands Auto-Battle (Android)
 
 Kai can automatically play [Splinterlands](https://splinterlands.com) Wild Ranked battles. Configure one or more LLM services in priority order, add your Hive account, and hit Start -- Kai will continuously find matches, pick teams using LLM-powered strategy, and submit them on-chain. Falls back to a simple greedy picker if all LLM services fail. Available in **Settings > Integrations**.
 
