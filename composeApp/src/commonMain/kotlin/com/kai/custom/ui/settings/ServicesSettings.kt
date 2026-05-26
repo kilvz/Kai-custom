@@ -99,6 +99,7 @@ import kai.composeapp.generated.resources.settings_api_key_label
 import kai.composeapp.generated.resources.settings_api_key_optional_label
 import kai.composeapp.generated.resources.settings_base_url_label
 import kai.composeapp.generated.resources.settings_free_fallback
+import kai.composeapp.generated.resources.settings_become_sponsor
 import kai.composeapp.generated.resources.settings_free_tier_description
 import kai.composeapp.generated.resources.settings_free_tier_title
 import kai.composeapp.generated.resources.settings_openai_compatible_or_other_service
@@ -233,6 +234,30 @@ internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions)
         isFreeFallbackEnabled = uiState.isFreeFallbackEnabled,
         onToggleFreeFallback = actions.onToggleFreeFallback,
     )
+
+    Spacer(Modifier.height(8.dp))
+    val uriHandler = LocalUriHandler.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { uriHandler.openUri("https://github.com/sponsors/SimonSchubert") }
+            .handCursor()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Favorite,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = stringResource(Res.string.settings_become_sponsor),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
 
     // Add service bottom sheet
     if (showAddServiceSheet) {
