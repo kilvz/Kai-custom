@@ -20,7 +20,7 @@
     -->
     <application>
         <service
-            android:name="com.inspiredandroid.kai.notifications.KaiNotificationListenerService"
+            android:name="com.kai.custom.notifications.KaiNotificationListenerService"
             android:exported="true"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
