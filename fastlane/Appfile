@@ -1,2 +1,0 @@
-package_name("com.inspiredandroid.kai")
-json_key_file("fastlane/play-store-key.json")

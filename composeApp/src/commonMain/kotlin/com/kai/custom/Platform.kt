@@ -56,17 +56,14 @@ expect fun getPlatformToolDefinitions(): List<ToolInfo>
 expect val isEmailSupported: Boolean
 
 /**
- * True only on the FOSS Android build. Gated on `READ_SMS` being declared in the
- * merged manifest — the Play Store flavor doesn't declare it, so this returns
- * false there, and the SMS feature is invisible in that build.
+ * True only on Android builds where `READ_SMS` is declared in the merged manifest.
+ * The `foss` flavor declares it; other platforms return false.
  */
 expect val isSmsSupported: Boolean
 
 /**
- * True only on the FOSS Android build. Gated on `KaiNotificationListenerService`
- * being declared in the merged manifest — the Play Store flavor doesn't declare
- * it, so this returns false there, and the notification-reading feature is
- * invisible in that build.
+ * True only on Android builds where `KaiNotificationListenerService` is declared
+ * in the merged manifest. The `foss` flavor declares it; other platforms return false.
  */
 expect val isNotificationsSupported: Boolean
 
@@ -88,6 +85,8 @@ expect suspend fun compressImageBytes(bytes: ByteArray, mimeType: String): ByteA
 expect fun openUrl(url: String): Boolean
 
 expect fun openTtsSettings()
+
+expect fun openBatteryOptimizationSettings()
 
 @androidx.compose.runtime.Composable
 expect fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit)

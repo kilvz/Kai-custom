@@ -61,6 +61,7 @@ import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SpeakTextTool
 import com.kai.custom.tools.SmsTools
 import com.kai.custom.tools.SshCommandTool
+import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshConnectTool
 import com.kai.custom.tools.SshDisconnectTool
 import com.kai.custom.tools.WebSearchTool
@@ -264,6 +265,7 @@ private fun createEncryptedPrefs(context: Context): android.content.SharedPrefer
         ),
     )
     add(SshCommandTool.toolInfo)
+    add(SshConfigureHostTool.toolInfo)
     add(SshConnectTool.toolInfo)
     add(SshDisconnectTool.toolInfo)
     // Phone tools — full device access
@@ -486,6 +488,9 @@ actual fun getAvailableTools(): List<Tool> {
         if (appSettings.isSshEnabled()) {
             if (appSettings.isToolEnabled(SshCommandTool.schema.name)) {
                 add(SshCommandTool)
+            }
+            if (appSettings.isToolEnabled(SshConfigureHostTool.schema.name)) {
+                add(SshConfigureHostTool)
             }
             if (appSettings.isToolEnabled(SshConnectTool.schema.name)) {
                 add(SshConnectTool)
@@ -1018,5 +1023,16 @@ actual fun openTtsSettings() {
         } catch (_: Exception) {
             // TTS settings activity not available
         }
+    }
+}
+
+actual fun openBatteryOptimizationSettings() {
+    val context: Context by inject(Context::class.java)
+    try {
+        val intent = Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        // Battery optimization settings not available
     }
 }

@@ -8,9 +8,8 @@ import com.kai.custom.data.NotificationStore
 import org.koin.java.KoinJavaComponent.inject
 
 // Whether the listener service is declared in the merged manifest. The `foss` flavor
-// declares it, `playStore` does not — so this is a compile-time property per flavor,
-// safe to cache for the process lifetime. Shared with Platform.android.kt's
-// `isNotificationsSupported`.
+// declares it, so this is a compile-time property, safe to cache for the process
+// lifetime. Shared with Platform.android.kt's `isNotificationsSupported`.
 internal fun Context.declaresNotificationListener(): Boolean = try {
     val info = packageManager.getPackageInfo(packageName, PackageManager.GET_SERVICES)
     info.services?.any { it.name == NOTIFICATION_LISTENER_FQN } == true

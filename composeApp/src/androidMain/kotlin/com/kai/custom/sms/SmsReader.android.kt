@@ -11,9 +11,8 @@ import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 
 // Whether READ_SMS is declared in the merged manifest. The `foss` flavor declares
-// it, `playStore` does not — so this is a compile-time property per flavor, safe
-// to cache for the process lifetime. Shared with Platform.android.kt's
-// `isSmsSupported`.
+// it, so this is a compile-time property, safe to cache for the process lifetime.
+// Shared with Platform.android.kt's `isSmsSupported`.
 internal fun Context.declaresReadSms(): Boolean = try {
     packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
         .requestedPermissions?.contains(Manifest.permission.READ_SMS) == true

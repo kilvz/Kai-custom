@@ -31,9 +31,6 @@ android {
 
     flavorDimensions += "distribution"
     productFlavors {
-        create("playStore") {
-            dimension = "distribution"
-        }
         create("foss") {
             dimension = "distribution"
             isDefault = true
@@ -98,5 +95,4 @@ dependencies {
     implementation(libs.tts.compose)
     implementation(libs.compose.components.uiToolingPreview)
     debugImplementation(libs.compose.ui.tooling)
-    "playStoreImplementation"(libs.play.review)
 }

@@ -1,20 +1,19 @@
 # Notifications
 
-**Last verified:** 2026-05-14 (per-app filtering delegated to system Notification Access "Apps" picker)
+**Last verified:** 2026-05-27 (per-app filtering delegated to system Notification Access "Apps" picker)
 
-> Reading notifications is **FOSS-only** and **Android-only**. The Play Store variant of Kai does not declare `BIND_NOTIFICATION_LISTENER_SERVICE` and the feature is invisible there — no settings, no tools, no code path. Play Store's notification-access policies restrict the listener to a narrow set of approved use cases (accessibility, smartwatches, replacement notification UIs), which Kai is not.
+> Reading notifications is **Android-only**. Kai declares `BIND_NOTIFICATION_LISTENER_SERVICE` in the `foss` flavor; iOS, desktop, and wasm return no-op stubs.
 
-Kai on the FOSS Android build can **read** notifications posted by other apps and surface them to the AI, mirroring the SMS feature: per-app opt-in, capped pending queue, heartbeat summary, plus on-demand `check_notifications` / `read_notification` / `search_notifications` tools.
+Kai can **read** notifications posted by other apps and surface them to the AI: per-app opt-in, capped pending queue, heartbeat summary, plus on-demand `check_notifications` / `read_notification` / `search_notifications` tools.
 
 There is no "send" counterpart in v1. Acting on a notification (replying via `RemoteInput`, dismissing) is out of scope for the first cut and would follow the SMS-send draft pattern when added.
 
 ## Availability
 
-- **FOSS Android build**: fully available.
-- **Play Store Android build**: feature is invisible — `BIND_NOTIFICATION_LISTENER_SERVICE` is not declared in the Play flavor's merged manifest, the runtime support check returns false, the settings section is hidden, and the notification tools are never registered.
+- **Android**: fully available.
 - **iOS / desktop / web**: unsupported. iOS does not allow third-party apps to read system notifications at all; desktop and web have no equivalent surface. No-op stubs.
 
-The FOSS gate is purely manifest-based: the `foss` product flavor contributes `androidApp/src/foss/AndroidManifest.xml` declaring the listener service with `BIND_NOTIFICATION_LISTENER_SERVICE`, while the `playStore` flavor does not. At runtime the app queries `PackageManager.getPackageInfo(…, GET_SERVICES)` (or checks the merged-manifest service registration) to decide whether to show the feature.
+The gate is manifest-based: `androidApp/src/foss/AndroidManifest.xml` declares the listener service with `BIND_NOTIFICATION_LISTENER_SERVICE`. At runtime the app queries `PackageManager.getPackageInfo(…, GET_SERVICES)` to decide whether to show the feature.
 
 ## Scope
 
@@ -106,7 +105,7 @@ No notifications-specific push notification. New notifications surface via the e
 
 ## Settings UI
 
-The Notifications section appears in **Settings → Agent** only when `isNotificationsSupported` is true (FOSS build). One card with:
+The Notifications section appears in **Settings → Agent** only when `isNotificationsSupported` is true. One card with:
 
 - **Read notifications** toggle — enabling deep-links to system notification-access settings; the toggle stays off until access is confirmed on return.
 - **"Open notification access"** button — shown when the toggle is on but access has not been granted (or was revoked).
@@ -120,7 +119,7 @@ There is **no poll interval slider** — the listener is push-driven.
 
 | File | Purpose |
 |---|---|
-| `androidApp/src/foss/AndroidManifest.xml` | Declares `BIND_NOTIFICATION_LISTENER_SERVICE` and registers `KaiNotificationListenerService` in the FOSS flavor only |
+| `androidApp/src/foss/AndroidManifest.xml` | Declares `BIND_NOTIFICATION_LISTENER_SERVICE` and registers `KaiNotificationListenerService` |
 | `composeApp/src/commonMain/.../data/NotificationModels.kt` | `NotificationRecord`, `NotificationSyncState` data classes |
 | `composeApp/src/commonMain/.../data/NotificationStore.kt` | Pending queue + broader store + retention sweeps |
 | `composeApp/src/commonMain/.../notifications/NotificationReader.kt` | Expect interface for `getById`, `search`, `currentRecords` |

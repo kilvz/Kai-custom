@@ -3,11 +3,11 @@ package com.kai.custom.notifications
 import com.kai.custom.data.NotificationRecord
 
 /**
- * Multiplatform notification reader. Only the Android FOSS build returns real data —
+ * Multiplatform notification reader. Only the Android build returns real data —
  * the feature is gated by the `KaiNotificationListenerService` being declared in the
- * merged manifest, which is only the case for the `foss` product flavor. iOS, desktop,
- * and wasm return no-op stubs (notification access is either restricted or doesn't
- * exist on those platforms).
+ * merged manifest (the `foss` flavor declares it). iOS, desktop, and wasm return
+ * no-op stubs (notification access is either restricted or doesn't exist on those
+ * platforms).
  *
  * Unlike [com.kai.custom.sms.SmsReader] which queries the system content
  * provider, this reads from the in-process [com.kai.custom.data.NotificationStore]

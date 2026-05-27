@@ -1,3 +1,0 @@
-Add support for local Gemma 4 via LiteRT
-Add PublicAI, Fireworks, DeepInfra, and OpenCode services
-Add missing localizations

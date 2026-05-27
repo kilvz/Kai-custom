@@ -37,7 +37,8 @@ class AndroidSshConnectionManager : SshConnectionManager {
                     setPassword(config.password)
                 }
                 setConfig("StrictHostKeyChecking", "no")
-                connect(10000)
+                setServerAliveInterval(15000)
+                connect(30000)
             }
             session = s
             _connectionState.value = SshConnectionState(connected = true)
@@ -60,6 +61,7 @@ class AndroidSshConnectionManager : SshConnectionManager {
         withContext(Dispatchers.IO) {
             val s = session
             if (s == null || !s.isConnected) {
+                _connectionState.value = SshConnectionState()
                 return@withContext Result.failure(Exception("SSH not connected"))
             }
             addTranscript(TerminalLine.Command(command))
