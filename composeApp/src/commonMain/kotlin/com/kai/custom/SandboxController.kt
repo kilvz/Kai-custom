@@ -2,6 +2,7 @@ package com.kai.custom
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.kai.custom.data.MemoryEntry
 import kotlinx.coroutines.flow.StateFlow
 
 data class SandboxStatus(
@@ -92,6 +93,18 @@ interface SandboxController {
     suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean
     suspend fun openFile(path: String): Result<Unit>
     suspend fun deleteEntry(path: String, recursive: Boolean): Boolean
+
+    /**
+     * Semantic search over memories using TF-IDF + cosine similarity inside the
+     * sandbox Python runtime. Returns null when the sandbox is not available,
+     * letting callers fall back to FTS5. Default implementation returns null so
+     * platforms without a sandbox always use the fallback.
+     */
+    suspend fun searchMemories(
+        memories: List<MemoryEntry>,
+        query: String,
+        limit: Int,
+    ): List<MemoryEntry>? = null
     suspend fun renameEntry(path: String, newName: String): Result<String>
 }
 

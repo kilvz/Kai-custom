@@ -270,6 +270,7 @@ actual fun getAvailableTools(): List<Tool> {
     val context: Context by inject(Context::class.java)
     val appSettings: AppSettings by inject(AppSettings::class.java)
     val memoryStore: MemoryStore by inject(MemoryStore::class.java)
+    val sandboxController: SandboxController by inject(SandboxController::class.java)
     val taskStore: TaskStore by inject(TaskStore::class.java)
     val calendarPermissionController: CalendarPermissionController by inject(CalendarPermissionController::class.java)
     val calendarRepository = CalendarRepository(context, calendarPermissionController)
@@ -277,7 +278,7 @@ actual fun getAvailableTools(): List<Tool> {
 
     return buildList {
         if (appSettings.isMemoryEnabled()) {
-            addAll(CommonTools.getMemoryTools(memoryStore))
+            addAll(CommonTools.getMemoryTools(memoryStore, sandboxController))
             addAll(listOf(HeartbeatTools.getPromoteLearningTool(memoryStore, appSettings)))
         }
         if (appSettings.isSchedulingEnabled()) {
