@@ -308,11 +308,13 @@ internal val StatusColorUnknown = Color(0xFF9E9E9E)
 fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel(),
     sandboxViewModel: SandboxViewModel = koinViewModel(),
+    sshViewModel: SshViewModel = koinViewModel(),
     onNavigateBack: () -> Unit,
     navigationTabBar: (@Composable () -> Unit)? = null,
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val sandboxState by sandboxViewModel.state.collectAsStateWithLifecycle()
+    val sshState by sshViewModel.state.collectAsStateWithLifecycle()
 
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
@@ -335,6 +337,8 @@ fun SettingsScreen(
         onCancelSandbox = sandboxViewModel::onCancelSandbox,
         onResetSandbox = sandboxViewModel::onResetSandbox,
         onInstallPackages = sandboxViewModel::onInstallPackages,
+        sshState = sshState,
+        sshViewModel = sshViewModel,
         onNavigateBack = onNavigateBack,
         navigationTabBar = navigationTabBar,
     )
@@ -351,6 +355,8 @@ fun SettingsScreenContent(
     onCancelSandbox: () -> Unit = {},
     onResetSandbox: () -> Unit = {},
     onInstallPackages: () -> Unit = {},
+    sshState: SshUiState = SshUiState(),
+    sshViewModel: SshViewModel? = null,
     onNavigateBack: () -> Unit = {},
     navigationTabBar: (@Composable () -> Unit)? = null,
 ) {
@@ -479,6 +485,24 @@ fun SettingsScreenContent(
                                     onShowAddMcpServerDialog = actions.onShowAddMcpServerDialog,
                                     onAddPopularMcpServer = actions.onAddPopularMcpServer,
                                 )
+                                Spacer(Modifier.height(24.dp))
+                                if (sshViewModel != null) {
+                                    SshSettingsCard(
+                                        sshState = sshState,
+                                        onHostChanged = sshViewModel::onHostChanged,
+                                        onPortChanged = sshViewModel::onPortChanged,
+                                        onUsernameChanged = sshViewModel::onUsernameChanged,
+                                        onAuthMethodChanged = sshViewModel::onAuthMethodChanged,
+                                        onPasswordChanged = sshViewModel::onPasswordChanged,
+                                        onPrivateKeyChanged = sshViewModel::onPrivateKeyChanged,
+                                        onConnect = sshViewModel::connect,
+                                        onDisconnect = sshViewModel::disconnect,
+                                        onClearTranscript = sshViewModel::clearTranscript,
+                                        onSelectProfile = sshViewModel::selectProfile,
+                                        onDeleteProfile = sshViewModel::deleteProfile,
+                                        onSaveProfile = sshViewModel::saveCurrentAsProfile,
+                                    )
+                                }
                             }
 
                             SettingsTab.Sandbox -> {

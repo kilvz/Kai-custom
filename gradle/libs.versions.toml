@@ -1,8 +1,8 @@
 [versions]
 agp = "9.2.1"
-appVersion = "1.5.0"
+appVersion = "1.6.0"
 appVersionBase = "2.6.3"
-android-versionCode = "110"
+android-versionCode = "111"
 android-compileSdk = "36"
 android-minSdk = "26"
 android-targetSdk = "36"
@@ -36,6 +36,7 @@ litert-lm = "0.12.0"
 tensorflowLite = "2.16.1"
 materialIcons = "1.7.3"
 shizuku = "13.1.5"
+jsch = "0.1.55"
 
 [libraries]
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
@@ -95,6 +96,7 @@ litert-lm-jvm = { module = "com.google.ai.edge.litertlm:litertlm-jvm", version.r
 tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
+jsch = { module = "com.jcraft:jsch", version.ref = "jsch" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

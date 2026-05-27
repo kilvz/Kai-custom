@@ -1,7 +1,7 @@
 # Kai 9001
 
 > **Android-only** fork of [Kai](https://github.com/SimonSchubert/Kai) — an open-source AI assistant with persistent memory.  
-> v1.5.0 · FOSS-only · No proprietary SDKs.
+> v1.6.0 · FOSS-only · No proprietary SDKs.
 
 <div align="center">
 <img src="site/img/logo_animation.gif" height="80">
@@ -57,6 +57,16 @@ Eight Android-specific tools, each individually toggleable in Settings:
 | Installed apps | `QUERY_ALL_PACKAGES` |
 
 Tools request permissions at runtime; the user is directed to Android Settings to grant them.
+
+### SSH Remote Execution
+
+Persistent SSH connection to one or more remote servers, configurable and usable by both the user and the AI:
+
+- **Multiple saved profiles** — save host, port, username, auth method (password or private key) per server; switch between them via dropdown in Settings
+- **AI-managed connections** — the AI can connect (`ssh_connect`), disconnect (`ssh_disconnect`), and execute commands (`ssh_execute_command`) on a remote server. The AI can save new profiles or reuse saved ones by name
+- **Interactive terminal** — SSH terminal button (terminal icon) in the chat top bar opens a live command log with manual input, just like the sandbox terminal
+- **Persistent session** — connection stays alive across commands so state (cwd, environment, exports) carries forward
+- **JSch-based** — pure Java SSH library, no native dependencies
 
 ### Linux Sandbox
 
@@ -175,6 +185,7 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 | **`speak_text` tool** | TTS via edge-tts in Linux sandbox, 27 language voices. Gated behind sandbox availability. |
 | **Shizuku integration** | `run_adb` tool executes shell commands with ADB-level privileges via Shizuku. `ShizukuManager` + `ShizukuProvider` declared in manifest. |
 | **`run_opencode` tool** | Delegate complex coding tasks to opencode's autonomous agent in sandbox. |
+| **SSH remote execution** | `ssh_connect` (save/use named profiles), `ssh_disconnect`, `ssh_execute_command` tools. Multi-profile storage. Interactive SSH terminal in chat with command input and live transcript. JSch-based, persistent sessions. |
 | **30+ Android permissions** | Location, contacts, phone state, camera, audio record, body sensors, activity recognition, bluetooth, external storage, WiFi state, query all packages, system alert window, install packages, read logs, biometric, vibrate. |
 | **GitHub Issue button** | Links to `https://github.com/kilvz/Kai-custom/issues/new?template=integration_request.yml` in Settings > Integrations. |
 | **Sponsor button** | Links to original author's GitHub Sponsors in FreeSettings card. Upstream shows full sponsor list with avatars. |
@@ -195,6 +206,7 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 | **App icon** | Purple overlapping circles | **Red** overlapping circles |
 | **Version scheme** | Tracks upstream (2.x.x) | Custom 1.x.x — major = breaking, minor = features, patch = bugs |
 | **GitHub issues** | Disabled | Enabled with integration request template |
+| **SSH integration** | None | JSch persistent SSH client: multi-profile management, interactive terminal in chat, AI tools (`ssh_connect`/`ssh_disconnect`/`ssh_execute_command`), profile save/reuse by AI |
 
 ### Features Present in Both (No Meaningful Changes)
 

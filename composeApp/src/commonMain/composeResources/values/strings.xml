@@ -356,6 +356,11 @@
     <string name="sandbox_packages_up_to_date">All packages up to date</string>
     <string name="sandbox_packages_upgrade_failed">Upgrade failed: %1$s</string>
     <string name="sandbox_content_description">Open Linux sandbox</string>
+    <string name="ssh_content_description">Open SSH terminal</string>
+    <string name="ssh_terminal_title">SSH Terminal</string>
+    <string name="ssh_terminal_help_text">Connected to SSH server. Type commands below.</string>
+    <string name="ssh_terminal_input_placeholder">enter command…</string>
+    <string name="ssh_terminal_not_connected">SSH not connected. Configure connection in Settings &gt; Tools.</string>
     <string name="sandbox_files_save_success">Saved</string>
     <string name="sandbox_files_save_failed">Save failed</string>
     <string name="sandbox_files_open_failed">Could not open externally</string>

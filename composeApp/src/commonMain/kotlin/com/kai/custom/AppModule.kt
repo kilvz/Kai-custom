@@ -42,6 +42,7 @@ import com.kai.custom.ui.sandbox.SandboxSessionViewModel
 import com.kai.custom.ui.settings.SandboxViewModel
 import com.kai.custom.ui.settings.SettingsViewModel
 import com.kai.custom.ui.settings.SplinterlandsViewModel
+import com.kai.custom.ui.settings.SshViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -151,8 +152,10 @@ val appModule = module {
     single<SandboxController> { createSandboxController() }
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
+    single<SshConnectionManager> { createSshConnectionManager() }
     viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
+    viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
     viewModel { SandboxPackagesViewModel(get<SandboxController>()) }
     viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }

@@ -1,10 +1,13 @@
 package com.kai.custom.data
 
+import com.kai.custom.SshProfile
 import com.kai.custom.defaultUiScale
 import com.kai.custom.data.getDefaultLanguage
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -343,6 +346,102 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_PREFERRED_LANGUAGE, lang)
     }
 
+    // SSH connection
+    fun isSshEnabled(): Boolean = settings.getBoolean(KEY_SSH_ENABLED, false)
+
+    fun setSshEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_SSH_ENABLED, enabled)
+    }
+
+    fun getSshHost(): String = settings.getString(KEY_SSH_HOST, "")
+
+    fun setSshHost(host: String) {
+        settings.putString(KEY_SSH_HOST, host)
+    }
+
+    fun getSshPort(): Int = settings.getInt(KEY_SSH_PORT, 22)
+
+    fun setSshPort(port: Int) {
+        settings.putInt(KEY_SSH_PORT, port)
+    }
+
+    fun getSshUsername(): String = settings.getString(KEY_SSH_USERNAME, "")
+
+    fun setSshUsername(username: String) {
+        settings.putString(KEY_SSH_USERNAME, username)
+    }
+
+    fun getSshAuthMethod(): com.kai.custom.SshAuthMethod {
+        val name = settings.getString(KEY_SSH_AUTH_METHOD, com.kai.custom.SshAuthMethod.PASSWORD.name)
+        return try { com.kai.custom.SshAuthMethod.valueOf(name) } catch (_: Exception) { com.kai.custom.SshAuthMethod.PASSWORD }
+    }
+
+    fun setSshAuthMethod(method: com.kai.custom.SshAuthMethod) {
+        settings.putString(KEY_SSH_AUTH_METHOD, method.name)
+    }
+
+    fun getSshPassword(): String = settings.getString(KEY_SSH_PASSWORD, "")
+
+    fun setSshPassword(password: String) {
+        settings.putString(KEY_SSH_PASSWORD, password)
+    }
+
+    fun getSshPrivateKey(): String = settings.getString(KEY_SSH_PRIVATE_KEY, "")
+
+    fun setSshPrivateKey(key: String) {
+        settings.putString(KEY_SSH_PRIVATE_KEY, key)
+    }
+
+    fun getSshProfiles(): List<SshProfile> {
+        val json = settings.getString(KEY_SSH_PROFILES, "")
+        if (json.isBlank()) return emptyList()
+        return try {
+            SharedJson.decodeFromString(ListSerializer(SshProfile.serializer()), json)
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveSshProfiles(profiles: List<SshProfile>) {
+        val json = SharedJson.encodeToString(ListSerializer(SshProfile.serializer()), profiles)
+        settings.putString(KEY_SSH_PROFILES, json)
+    }
+
+    fun saveSshProfile(profile: SshProfile) {
+        val profiles = getSshProfiles().toMutableList()
+        val index = profiles.indexOfFirst { it.name == profile.name }
+        if (index >= 0) {
+            profiles[index] = profile
+        } else {
+            profiles.add(profile)
+        }
+        saveSshProfiles(profiles)
+    }
+
+    fun deleteSshProfile(name: String) {
+        val profiles = getSshProfiles().toMutableList()
+        profiles.removeAll { it.name == name }
+        saveSshProfiles(profiles)
+        if (getActiveSshProfileName() == name) {
+            setActiveSshProfileName("")
+        }
+    }
+
+    fun getActiveSshProfileName(): String = settings.getString(KEY_SSH_ACTIVE_PROFILE, "")
+
+    fun setActiveSshProfileName(name: String) {
+        settings.putString(KEY_SSH_ACTIVE_PROFILE, name)
+        val profile = getSshProfiles().find { it.name == name }
+        if (profile != null) {
+            setSshHost(profile.host)
+            setSshPort(profile.port)
+            setSshUsername(profile.username)
+            setSshAuthMethod(profile.authMethod)
+            setSshPassword(profile.password)
+            setSshPrivateKey(profile.privateKey)
+        }
+    }
+
     // Wake word detection
     private val _wakeWordEnabledFlow = MutableStateFlow(settings.getBoolean(KEY_WAKE_WORD_ENABLED, false))
     val wakeWordEnabledFlow: StateFlow<Boolean> = _wakeWordEnabledFlow
@@ -653,6 +752,16 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_WAKE_WORD_MODE = "wake_word_mode"
         const val KEY_WAKE_WORD_TEMPLATE = "wake_word_template"
         const val KEY_PREFERRED_LANGUAGE = "preferred_language"
+
+        const val KEY_SSH_ENABLED = "ssh_enabled"
+        const val KEY_SSH_HOST = "ssh_host"
+        const val KEY_SSH_PORT = "ssh_port"
+        const val KEY_SSH_USERNAME = "ssh_username"
+        const val KEY_SSH_AUTH_METHOD = "ssh_auth_method"
+        const val KEY_SSH_PASSWORD = "ssh_password"
+        const val KEY_SSH_PRIVATE_KEY = "ssh_private_key"
+        const val KEY_SSH_PROFILES = "ssh_profiles"
+        const val KEY_SSH_ACTIVE_PROFILE = "ssh_active_profile"
 
         // Full memory guidance for remote models — references all memory tools.
         const val DEFAULT_MEMORY_INSTRUCTIONS =
