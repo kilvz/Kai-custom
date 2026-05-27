@@ -113,6 +113,8 @@ interface DataRepository {
     fun setWakeWordMode(mode: String)
     fun getWakeWordTemplate(): String
     fun setWakeWordTemplate(template: String)
+    fun getPreferredLanguage(): String
+    fun setPreferredLanguage(lang: String)
 
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean

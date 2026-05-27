@@ -5,7 +5,7 @@ import android.util.Log
 
 object WakeWordInterpreter {
     private const val TAG = "WakeWordInterpreter"
-    const val THRESHOLD = 0.8f
+    const val THRESHOLD = 0.3f
     var isLoaded = false
         private set
 

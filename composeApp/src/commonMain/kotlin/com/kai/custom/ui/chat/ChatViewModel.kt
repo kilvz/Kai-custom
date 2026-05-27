@@ -118,8 +118,14 @@ class ChatViewModel(
 
         // Observe wake word detection — trigger voice input when phrase is heard
         viewModelScope.launch {
+            var lastTriggerMs = 0L
             wakeWordController.wakeWordDetected.collect { phrase ->
-                if (!_state.value.isVoiceInputActive && !_state.value.isLoading) {
+                val now = System.currentTimeMillis()
+                if (now - lastTriggerMs > 3000
+                    && !_state.value.isVoiceInputActive
+                    && !_state.value.isLoading
+                ) {
+                    lastTriggerMs = now
                     doStartVoiceInput()
                 }
             }
@@ -131,7 +137,9 @@ class ChatViewModel(
                 .map { it.isLoading }
                 .distinctUntilChanged()
                 .collect { loading ->
-                    if (!loading && _state.value.wasVoiceInput && dataRepository.isWakeWordEnabled()) {
+                    if (!loading && !_state.value.isVoiceInputActive
+                        && _state.value.wasVoiceInput && dataRepository.isWakeWordEnabled()
+                    ) {
                         wakeWordController.startListening(
                             dataRepository.getWakeWordPhrase(),
                             WakeWordMode.valueOf(dataRepository.getWakeWordMode()),
@@ -365,10 +373,15 @@ class ChatViewModel(
                     _state.update { it.copy(wasVoiceInput = true) }
                     val speakToolEnabled = dataRepository.getToolDefinitions()
                         .any { it.id == "speak_text" && it.isEnabled }
-                    val voiceText = if (speakToolEnabled) {
-                        "[The user spoke this via voice input. Read your full response aloud using the speak_text tool if sandbox is available. If sandbox is not available, respond in text and the app will speak it for you.]\n${final.trim()}"
-                    } else final.trim()
-                    ask(voiceText)
+                    val preferredLang = dataRepository.getPreferredLanguage()
+                    val langOpt = com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLang }
+                    val voiceHint = if (speakToolEnabled) {
+                        val voice = langOpt?.edgeTtsVoice ?: "en-US-AndrewNeural"
+                        "[The user spoke this via voice input. The preferred language is ${langOpt?.displayName ?: "English"}. Read your full response aloud using the speak_text tool with voice=$voice. If sandbox is not available, respond in text and the app will speak it for you.]\n${final.trim()}"
+                    } else {
+                        final.trim()
+                    }
+                    ask(voiceHint)
                 }
             },
             onError = {

@@ -41,7 +41,16 @@ private val THINK_BLOCK_REGEX = Regex("<think>.*?</think>", RegexOption.DOT_MATC
 
 // Qwen3 emits <think>…</think> blocks as part of its chat template; strip them before
 // the user sees them. Safe for Gemma 4, which never emits these tags.
-fun stripThinkBlocks(s: String): String = THINK_BLOCK_REGEX.replace(s, "").trim()
+fun stripThinkBlocks(s: String): String {
+    // Qwen3-Thinking sometimes emits </think> without an opening <think> tag;
+    // treat everything up to and including </think> as thinking content.
+    val fixed = if (!s.contains("<think>") && s.contains("</think>")) {
+        s.substringAfter("</think>").trim()
+    } else {
+        s
+    }
+    return THINK_BLOCK_REGEX.replace(fixed, "").trim()
+}
 
 /**
  * Drops UTF-16 surrogate halves from the string. The litert-lm JNI layer passes

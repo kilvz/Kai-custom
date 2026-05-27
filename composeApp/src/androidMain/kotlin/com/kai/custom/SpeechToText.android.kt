@@ -33,6 +33,9 @@ class AndroidSpeechToText : SpeechToText {
             onError("Microphone permission not granted. Grant it in Settings > Apps > Kai > Permissions.")
             return
         }
+        // Release any previous recognizer that wasn't cleaned up
+        recognizer?.destroy()
+        recognizer = null
         isListening = true
         recognizer = SpeechRecognizer.createSpeechRecognizer(context)
         recognizer?.setRecognitionListener(object : RecognitionListener {
@@ -40,7 +43,11 @@ class AndroidSpeechToText : SpeechToText {
                 isListening = false
                 val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val text = matches?.firstOrNull()
-                if (text != null) onFinalResult(text)
+                if (text != null) {
+                    onFinalResult(text)
+                } else {
+                    onError("No speech recognized")
+                }
             }
 
             override fun onPartialResults(partialResults: Bundle) {

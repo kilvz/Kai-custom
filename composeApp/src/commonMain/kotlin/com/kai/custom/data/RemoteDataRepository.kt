@@ -1686,6 +1686,7 @@ class RemoteDataRepository(
             emailAccounts = emailAccounts,
             runtime = runtime,
             uiMode = uiMode,
+            preferredLanguage = appSettings.getPreferredLanguage(),
         ).ifEmpty { null }
     }
 
@@ -1779,6 +1780,12 @@ class RemoteDataRepository(
 
     override fun setWakeWordTemplate(template: String) {
         appSettings.setWakeWordTemplate(template)
+    }
+
+    override fun getPreferredLanguage(): String = appSettings.getPreferredLanguage()
+
+    override fun setPreferredLanguage(lang: String) {
+        appSettings.setPreferredLanguage(lang)
     }
 
     override fun getHeartbeatConfig(): HeartbeatConfig = heartbeatManager.getConfig()

@@ -33,9 +33,12 @@ class WakeWordService : Service() {
         private const val TAG = "WakeWordService"
         private const val CHANNEL_ID = "kai_wake_word_channel"
         private const val NOTIFICATION_ID = 9002
+        private const val ANTI_FLAP_MS = 2000L
         private val _wakeWordDetected = MutableSharedFlow<String>(extraBufferCapacity = 4)
         val wakeWordDetected: SharedFlow<String> = _wakeWordDetected.asSharedFlow()
         @Volatile var isRunning = false
+            private set
+        @Volatile var lastStoppedMs: Long = 0L
             private set
     }
 
@@ -47,10 +50,12 @@ class WakeWordService : Service() {
     private var lastDetectionMs: Long = 0L
     private val detectionCooldownMs: Long = 3000L
     private var serviceStartMs: Long = 0L
+    @Volatile private var audioRecord: AudioRecord? = null
 
     override fun onCreate() {
         super.onCreate()
-        Log.d(TAG, "onCreate")
+        Log.d(TAG, "onCreate — stack trace follows")
+        Log.d(TAG, Log.getStackTraceString(Exception("onCreate stack trace")))
         createNotificationChannel()
     }
 
@@ -62,6 +67,14 @@ class WakeWordService : Service() {
             WakeWordMatcher.deserializeTemplate(templateStr)
         } else null
         Log.d(TAG, "onStartCommand phrase=$currentPhrase mode=$currentMode hasTemplate=${currentTemplate != null}")
+
+        // Anti-flap: if we were destroyed less than ANTI_FLAP_MS ago, reject immediately
+        val sinceStop = System.currentTimeMillis() - lastStoppedMs
+        if (sinceStop < ANTI_FLAP_MS) {
+            Log.w(TAG, "anti-flap: stopped ${sinceStop}ms ago, rejecting restart")
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         val notification = buildNotification()
         try {
@@ -111,8 +124,16 @@ class WakeWordService : Service() {
     override fun onDestroy() {
         Log.d(TAG, "onDestroy")
         isRunning = false
+        lastStoppedMs = System.currentTimeMillis()
         detectJob?.cancel()
         scope.cancel()
+        // Release AudioRecord directly — scope.cancel() does NOT interrupt blocking read()
+        val rec = audioRecord
+        if (rec != null) {
+            audioRecord = null
+            try { rec.stop() } catch (_: Exception) {}
+            rec.release()
+        }
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
     }
@@ -127,22 +148,25 @@ class WakeWordService : Service() {
         val actualBufferSize = maxOf(bufferSize * 2, minBufferSize)
         Log.d(TAG, "bufferSize=$bufferSize minBufferSize=$minBufferSize actual=$actualBufferSize")
 
-        val audioRecord = AudioRecord(
+        val rec = AudioRecord(
             MediaRecorder.AudioSource.MIC,
             sampleRate,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT,
             actualBufferSize,
         )
+        audioRecord = rec
 
-        if (audioRecord.state != AudioRecord.STATE_INITIALIZED) {
-            Log.e(TAG, "AudioRecord not initialized, state=${audioRecord.state}")
+        if (rec.state != AudioRecord.STATE_INITIALIZED) {
+            Log.e(TAG, "AudioRecord not initialized, state=${rec.state}")
+            audioRecord = null
+            rec.release()
             return
         }
         Log.d(TAG, "AudioRecord initialized, starting recording")
 
-        audioRecord.startRecording()
-        Log.d(TAG, "recording state=${audioRecord.recordingState}")
+        rec.startRecording()
+        Log.d(TAG, "recording state=${rec.recordingState}")
 
         val buffer = ShortArray(bufferSize)
         val floatBuffer = FloatArray(bufferSize)
@@ -151,9 +175,12 @@ class WakeWordService : Service() {
         var framesProcessed = 0
         var readCount = 0
         var zeroCount = 0
+        // Adaptive energy baseline — tracks ambient noise level (rain, fan, etc.)
+        var energyBaseline = 2.0f
+        val baselineDecay = 0.99f
         try {
             while (currentCoroutineContext().isActive) {
-                val read = audioRecord.read(buffer, 0, bufferSize)
+                val read = rec.read(buffer, 0, bufferSize)
                 readCount++
                 if (read > 0) {
                     for (i in 0 until read) {
@@ -165,17 +192,20 @@ class WakeWordService : Service() {
                     for (i in 0 until read) {
                         energy += floatBuffer[i] * floatBuffer[i]
                     }
-                    val hasVoice = energy > 2.0f
+                    // Decaying baseline of ambient energy; adapts to rain, fan, road noise
+                    energyBaseline = baselineDecay * energyBaseline + (1f - baselineDecay) * energy
+                    // Only process if energy significantly exceeds ambient (2x baseline or >3.0 raw)
+                    val hasSignificantAudio = energy > maxOf(energyBaseline * 2f, 3.0f)
 
                     val features = mfccProcessor.compute(floatBuffer, read)
                     val score = detectWakeWord(features)
                     framesProcessed++
                     if (framesProcessed % 50 == 0) {
-                        Log.d(TAG, "processed $framesProcessed frames, last score=$score mode=$currentMode energy=$energy hasVoice=$hasVoice reads=$readCount zeros=$zeroCount")
+                        Log.d(TAG, "processed $framesProcessed frames, last score=$score mode=$currentMode energy=$energy hasSigAudio=$hasSignificantAudio reads=$readCount zeros=$zeroCount baseline=$energyBaseline")
                     }
                     val now = System.currentTimeMillis()
-                    // Skip detection during startup grace period (3s) and silent frames
-                    if (now - serviceStartMs < 3000 || !hasVoice) continue
+                    // Skip detection during startup grace period (3s) and silent/low frames
+                    if (now - serviceStartMs < 3000 || !hasSignificantAudio) continue
 
                     val threshold = if (currentMode == "PERSONAL") 0.8f else WakeWordInterpreter.THRESHOLD
                     if (score > threshold) {
@@ -201,8 +231,9 @@ class WakeWordService : Service() {
             Log.e(TAG, "listenLoop exception: $e")
         }
         Log.d(TAG, "listenLoop ending (processed=$framesProcessed reads=$readCount zeros=$zeroCount)")
-        try { audioRecord.stop() } catch (e: Exception) { Log.e(TAG, "stop error: $e") }
-        audioRecord.release()
+        audioRecord = null
+        try { rec.stop() } catch (_: Exception) { }
+        rec.release()
     }
 
     private fun detectWakeWord(features: Array<FloatArray>): Float {

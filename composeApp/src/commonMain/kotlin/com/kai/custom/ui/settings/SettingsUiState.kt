@@ -109,6 +109,7 @@ data class SettingsUiState(
     val wakeWordEnrolled: Boolean = false,
     val isEnrolling: Boolean = false,
     val wakeWordEnrollmentMessage: String = "",
+    val preferredLanguage: String = "en",
     val uiScale: Float = 1.0f,
     val showUiScale: Boolean = false,
     val mcpServers: ImmutableList<McpServerUiState> = persistentListOf(),

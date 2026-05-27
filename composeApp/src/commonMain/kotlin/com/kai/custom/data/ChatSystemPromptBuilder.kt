@@ -144,8 +144,20 @@ internal fun buildChatSystemPrompt(
     emailAccounts: List<EmailAccountSummary>,
     runtime: ChatPromptRuntimeContext,
     uiMode: ChatPromptUiMode,
+    preferredLanguage: String = "en",
 ): String = buildString {
     append(soul)
+
+    // Language instruction — tell the AI which language to respond in
+    if (preferredLanguage != "en") {
+        if (isNotEmpty()) append("\n\n")
+        val langName = com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLanguage }?.displayName ?: preferredLanguage
+        append("## Language\nRespond in $langName. All your responses must be in $langName.\n")
+        append("When using the speak_text tool, use the appropriate voice for $langName (e.g. ${com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLanguage }?.edgeTtsVoice ?: "en-US-AndrewNeural"}).")
+    } else {
+        if (isNotEmpty()) append("\n\n")
+        append("## Language\nRespond in English. When using the speak_text tool, use the voice en-US-AndrewNeural.")
+    }
 
     if (isNotEmpty()) append("\n\n")
     append(DEFAULT_HONESTY_RULE)

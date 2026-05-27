@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kai.custom.data.ThemeMode
+import com.kai.custom.data.languageOptions
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.KaiSlider
 import com.kai.custom.ui.handCursor
@@ -120,6 +121,12 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                         )
                     }
                     SettingsCard {
+                        LanguageSection(
+                            preferredLanguage = uiState.preferredLanguage,
+                            onChangePreferredLanguage = actions.onChangePreferredLanguage,
+                        )
+                    }
+                    SettingsCard {
                         TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
                     }
                 } // end second column staggered
@@ -176,7 +183,99 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     )
                 }
                 SettingsCard {
+                    LanguageSection(
+                        preferredLanguage = uiState.preferredLanguage,
+                        onChangePreferredLanguage = actions.onChangePreferredLanguage,
+                    )
+                }
+                SettingsCard {
                     TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LanguageSection(
+    preferredLanguage: String,
+    onChangePreferredLanguage: (String) -> Unit,
+) {
+    val opt = languageOptions.firstOrNull { it.code == preferredLanguage }
+    val selectedLabel = opt?.displayName ?: preferredLanguage
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Language",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = "Preferred language for AI responses and speech output",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+        )
+        Box(modifier = Modifier.fillMaxWidth()) {
+            KaiOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = selectedLabel,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = {
+                    Icon(
+                        modifier = Modifier.handCursor(),
+                        imageVector = vectorResource(Res.drawable.ic_arrow_drop_down),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                },
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .handCursor()
+                    .clickable { expanded = true },
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                languageOptions.forEach { opt ->
+                    val isSelected = opt.code == preferredLanguage
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = opt.displayName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
+                            )
+                        },
+                        onClick = {
+                            expanded = false
+                            onChangePreferredLanguage(opt.code)
+                        },
+                        modifier = Modifier
+                            .handCursor()
+                            .then(
+                                if (isSelected) {
+                                    Modifier
+                                        .padding(horizontal = 4.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            shape = RoundedCornerShape(12.dp),
+                                        )
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                    )
                 }
             }
         }
