@@ -27,3 +27,4 @@ fastlane/README.md
 *.tar.gz
 tools/speech_commands/
 *.tflite
+/playstore/
