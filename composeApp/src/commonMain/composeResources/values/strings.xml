@@ -56,6 +56,7 @@
     <string name="settings_tab_tools">Tools</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
     <string name="settings_tab_integrations">Integrations</string>
+    <string name="settings_tab_ssh">SSH</string>
     <string name="tools_count">%1$d Tools</string>
     <string name="waiting_thinking">Thinking…</string>
     <string name="waiting_working">Working…</string>

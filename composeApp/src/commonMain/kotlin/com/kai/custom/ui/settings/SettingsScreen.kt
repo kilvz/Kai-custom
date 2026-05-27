@@ -254,6 +254,7 @@ import kai.composeapp.generated.resources.settings_tab_integrations
 import kai.composeapp.generated.resources.settings_tab_sandbox
 import kai.composeapp.generated.resources.settings_tab_services
 import kai.composeapp.generated.resources.settings_tab_tools
+import kai.composeapp.generated.resources.settings_tab_ssh
 import kai.composeapp.generated.resources.settings_task_details_consecutive_failures
 import kai.composeapp.generated.resources.settings_task_details_created
 import kai.composeapp.generated.resources.settings_task_details_last_result
@@ -472,6 +473,27 @@ fun SettingsScreenContent(
                                 IntegrationsContent()
                             }
 
+                            SettingsTab.SSH -> {
+                                if (sshViewModel != null) {
+                                    SshSettingsCard(
+                                        sshState = sshState,
+                                        onHostChanged = sshViewModel::onHostChanged,
+                                        onPortChanged = sshViewModel::onPortChanged,
+                                        onUsernameChanged = sshViewModel::onUsernameChanged,
+                                        onAuthMethodChanged = sshViewModel::onAuthMethodChanged,
+                                        onPasswordChanged = sshViewModel::onPasswordChanged,
+                                        onPrivateKeyChanged = sshViewModel::onPrivateKeyChanged,
+                                        onPassphraseChanged = sshViewModel::onPassphraseChanged,
+                                        onConnect = sshViewModel::connect,
+                                        onDisconnect = sshViewModel::disconnect,
+                                        onClearTranscript = sshViewModel::clearTranscript,
+                                        onSelectProfile = sshViewModel::selectProfile,
+                                        onDeleteProfile = sshViewModel::deleteProfile,
+                                        onSaveProfile = sshViewModel::saveCurrentAsProfile,
+                                    )
+                                }
+                            }
+
                             SettingsTab.Tools -> {
                                 ToolsContent(
                                     tools = filteredUiState.tools,
@@ -485,24 +507,6 @@ fun SettingsScreenContent(
                                     onShowAddMcpServerDialog = actions.onShowAddMcpServerDialog,
                                     onAddPopularMcpServer = actions.onAddPopularMcpServer,
                                 )
-                                Spacer(Modifier.height(24.dp))
-                                if (sshViewModel != null) {
-                                    SshSettingsCard(
-                                        sshState = sshState,
-                                        onHostChanged = sshViewModel::onHostChanged,
-                                        onPortChanged = sshViewModel::onPortChanged,
-                                        onUsernameChanged = sshViewModel::onUsernameChanged,
-                                        onAuthMethodChanged = sshViewModel::onAuthMethodChanged,
-                                        onPasswordChanged = sshViewModel::onPasswordChanged,
-                                        onPrivateKeyChanged = sshViewModel::onPrivateKeyChanged,
-                                        onConnect = sshViewModel::connect,
-                                        onDisconnect = sshViewModel::disconnect,
-                                        onClearTranscript = sshViewModel::clearTranscript,
-                                        onSelectProfile = sshViewModel::selectProfile,
-                                        onDeleteProfile = sshViewModel::deleteProfile,
-                                        onSaveProfile = sshViewModel::saveCurrentAsProfile,
-                                    )
-                                }
                             }
 
                             SettingsTab.Sandbox -> {
@@ -594,6 +598,7 @@ private fun SettingsTabSelector(
                             SettingsTab.Tools -> stringResource(Res.string.settings_tab_tools)
                             SettingsTab.Sandbox -> stringResource(Res.string.settings_tab_sandbox)
                             SettingsTab.Integrations -> stringResource(Res.string.settings_tab_integrations)
+                            SettingsTab.SSH -> stringResource(Res.string.settings_tab_ssh)
                         },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         color = MaterialTheme.colorScheme.primary,

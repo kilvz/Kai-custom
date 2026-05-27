@@ -15,6 +15,7 @@ data class SshProfile(
     val authMethod: SshAuthMethod = SshAuthMethod.PASSWORD,
     val password: String = "",
     val privateKey: String = "",
+    val passphrase: String = "",
 )
 
 data class SshConfig(
@@ -24,6 +25,7 @@ data class SshConfig(
     val authMethod: SshAuthMethod = SshAuthMethod.PASSWORD,
     val password: String = "",
     val privateKey: String = "",
+    val passphrase: String = "",
 )
 
 data class SshConnectionState(

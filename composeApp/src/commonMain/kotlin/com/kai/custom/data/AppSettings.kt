@@ -392,6 +392,12 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_SSH_PRIVATE_KEY, key)
     }
 
+    fun getSshPassphrase(): String = settings.getString(KEY_SSH_PASSPHRASE, "")
+
+    fun setSshPassphrase(passphrase: String) {
+        settings.putString(KEY_SSH_PASSPHRASE, passphrase)
+    }
+
     fun getSshProfiles(): List<SshProfile> {
         val json = settings.getString(KEY_SSH_PROFILES, "")
         if (json.isBlank()) return emptyList()
@@ -439,6 +445,7 @@ class AppSettings(internal val settings: Settings) {
             setSshAuthMethod(profile.authMethod)
             setSshPassword(profile.password)
             setSshPrivateKey(profile.privateKey)
+            setSshPassphrase(profile.passphrase)
         }
     }
 
@@ -760,6 +767,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SSH_AUTH_METHOD = "ssh_auth_method"
         const val KEY_SSH_PASSWORD = "ssh_password"
         const val KEY_SSH_PRIVATE_KEY = "ssh_private_key"
+        const val KEY_SSH_PASSPHRASE = "ssh_passphrase"
         const val KEY_SSH_PROFILES = "ssh_profiles"
         const val KEY_SSH_ACTIVE_PROFILE = "ssh_active_profile"
 
