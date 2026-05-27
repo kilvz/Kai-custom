@@ -8,6 +8,7 @@ data class LanguageOption(
 
 val languageOptions: List<LanguageOption> = listOf(
     LanguageOption("en", "English", "en-US-AndrewNeural"),
+    LanguageOption("id", "Indonesian", "id-ID-ArdiNeural"),
     LanguageOption("es", "Spanish", "es-ES-AlvaroNeural"),
     LanguageOption("fr", "French", "fr-FR-DeniseNeural"),
     LanguageOption("de", "German", "de-DE-KatjaNeural"),
@@ -33,7 +34,6 @@ val languageOptions: List<LanguageOption> = listOf(
     LanguageOption("he", "Hebrew", "he-IL-AvriNeural"),
     LanguageOption("ro", "Romanian", "ro-RO-EmilNeural"),
     LanguageOption("hu", "Hungarian", "hu-HU-NoemiNeural"),
-    LanguageOption("id", "Indonesian", "id-ID-ArdiNeural"),
 )
 
 fun getDefaultLanguage(): String {
