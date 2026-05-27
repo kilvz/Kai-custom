@@ -2,9 +2,7 @@ package com.kai.custom.sms
 
 /**
  * Multiplatform SMS sender. Only the Android FOSS build actually sends — the
- * Play Store flavor doesn't declare `SEND_SMS`, so [hasPermission] returns
- * false there and [send] no-ops with a failure result. iOS/desktop/wasm stub
- * the same way.
+ * `foss` flavor declares `SEND_SMS`; other platforms stub with a failure result.
  */
 expect class SmsSender() {
     fun hasPermission(): Boolean

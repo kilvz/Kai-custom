@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kai.custom.SshAuthMethod
 import com.kai.custom.SshProfile
 import com.kai.custom.TerminalLine
+import com.kai.custom.openBatteryOptimizationSettings
 import com.kai.custom.ui.handCursor
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ssh_terminal_help_text
@@ -197,72 +198,74 @@ internal fun SshTerminalContent(
             }
         }
 
-        androidx.compose.material3.HorizontalDivider(
-            color = SshDimText.copy(alpha = 0.2f),
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "$",
-                style = monoStyle(14.sp, SshPrompt),
-                modifier = Modifier.padding(start = 8.dp),
+        if (isConnected) {
+            androidx.compose.material3.HorizontalDivider(
+                color = SshDimText.copy(alpha = 0.2f),
             )
-            Spacer(Modifier.width(8.dp))
-            TextField(
-                value = inputText,
-                onValueChange = { inputText = it },
+
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .focusRequester(focusRequester),
-                enabled = isConnected,
-                textStyle = monoStyle(14.sp, SshText),
-                placeholder = {
-                    Text(
-                        text = stringResource(Res.string.ssh_terminal_input_placeholder),
-                        style = monoStyle(14.sp, SshDimText),
-                    )
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    cursorColor = SshPrompt,
-                ),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
-                keyboardActions = KeyboardActions(
-                    onGo = {
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "$",
+                    style = monoStyle(14.sp, SshPrompt),
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                TextField(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(focusRequester),
+                    enabled = isConnected,
+                    textStyle = monoStyle(14.sp, SshText),
+                    placeholder = {
+                        Text(
+                            text = stringResource(Res.string.ssh_terminal_input_placeholder),
+                            style = monoStyle(14.sp, SshDimText),
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        cursorColor = SshPrompt,
+                    ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
+                    keyboardActions = KeyboardActions(
+                        onGo = {
+                            if (canSubmit) {
+                                sshViewModel.executeCommand(inputText.trim())
+                                inputText = ""
+                            }
+                        },
+                    ),
+                    singleLine = true,
+                )
+                IconButton(
+                    onClick = {
                         if (canSubmit) {
                             sshViewModel.executeCommand(inputText.trim())
                             inputText = ""
                         }
                     },
-                ),
-                singleLine = true,
-            )
-            IconButton(
-                onClick = {
-                    if (canSubmit) {
-                        sshViewModel.executeCommand(inputText.trim())
-                        inputText = ""
-                    }
-                },
-                enabled = canSubmit,
-                modifier = Modifier.handCursor(),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = stringResource(Res.string.terminal_run_content_description),
-                    tint = if (canSubmit) SshPrompt else SshDimText,
-                    modifier = Modifier.size(20.dp),
-                )
+                    enabled = canSubmit,
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = stringResource(Res.string.terminal_run_content_description),
+                        tint = if (canSubmit) SshPrompt else SshDimText,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
         }
     }
@@ -310,7 +313,10 @@ private fun DisconnectedSshContent(
             TerminalProfileSelector(
                 profiles = state.profiles,
                 activeProfileName = state.activeProfileName,
-                onSelectProfile = onSelectProfile,
+                onSelectProfile = { name ->
+                    onSelectProfile(name)
+                    showAddForm = true
+                },
             )
             Spacer(Modifier.height(12.dp))
         }
@@ -369,7 +375,7 @@ private fun DisconnectedSshContent(
                 ) {
                     RadioButton(selected = state.authMethod == SshAuthMethod.PASSWORD, onClick = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Password", style = MaterialTheme.typography.bodyMedium)
+                    Text("Password", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                 }
                 Row(
                     modifier = Modifier
@@ -384,7 +390,7 @@ private fun DisconnectedSshContent(
                 ) {
                     RadioButton(selected = state.authMethod == SshAuthMethod.KEY, onClick = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Private Key", style = MaterialTheme.typography.bodyMedium)
+                    Text("Private Key", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -452,8 +458,21 @@ private fun DisconnectedSshContent(
             }
         }
 
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = "SSH connections may disconnect if battery optimization is enabled.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        OutlinedButton(
+            onClick = { openBatteryOptimizationSettings() },
+            modifier = Modifier.handCursor(),
+        ) {
+            Text("Battery Optimization Settings", style = MaterialTheme.typography.bodySmall)
+        }
+
         if (onOpenSettings != null) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
             OutlinedButton(
                 onClick = onOpenSettings,
                 modifier = Modifier.handCursor(),

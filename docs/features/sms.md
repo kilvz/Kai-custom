@@ -1,18 +1,17 @@
 # SMS
 
-**Last verified:** 2026-05-14
+**Last verified:** 2026-05-27
 
-> SMS is **FOSS-only** and **Android-only**. The Play Store variant of Kai does not declare `READ_SMS` or `SEND_SMS` and the feature is invisible there — no settings, no tools, no code path. Play Store's SMS/Call Log Permissions policy restricts both permissions to default SMS handlers, which Kai is not.
+> SMS is **Android-only**. The `foss` flavor declares `READ_SMS` and `SEND_SMS`; iOS, desktop, and wasm return no-op stubs.
 
-Kai on the FOSS Android build can **read** incoming SMS messages and **draft** outgoing SMS for the user to review and send. Read and Send are independent user opt-ins: the user can let Kai read SMS without also letting it send, and vice versa. Sending is always gated by an explicit user tap in a review banner — the AI never sends directly.
+Kai can **read** incoming SMS messages and **draft** outgoing SMS for the user to review and send. Read and Send are independent user opt-ins: the user can let Kai read SMS without also letting it send, and vice versa. Sending is always gated by an explicit user tap in a review banner — the AI never sends directly.
 
 ## Availability
 
-- **FOSS Android build**: fully available. Read and Send are separate opt-ins.
-- **Play Store Android build**: feature is invisible — neither `READ_SMS` nor `SEND_SMS` is declared in the Play flavor's merged manifest, the runtime support check returns false, the settings section is hidden, and the SMS tools are never registered.
+- **Android**: fully available. Read and Send are separate opt-ins.
 - **iOS / desktop / web**: unsupported. No-op stubs.
 
-The FOSS gate is purely manifest-based: the `foss` product flavor contributes `androidApp/src/foss/AndroidManifest.xml` declaring both `READ_SMS` and `SEND_SMS`, while the `playStore` flavor does not. At runtime the app queries `PackageManager.getPackageInfo(…, GET_PERMISSIONS).requestedPermissions` to decide whether to show the feature.
+The gate is manifest-based: `androidApp/src/foss/AndroidManifest.xml` declares both `READ_SMS` and `SEND_SMS`. At runtime the app queries `PackageManager.getPackageInfo(…, GET_PERMISSIONS).requestedPermissions` to decide whether to show the feature.
 
 ## Scope
 
@@ -91,7 +90,7 @@ No SMS-specific push notification. New SMS surface via the existing heartbeat no
 
 ## Settings UI
 
-The SMS section appears in **Settings → Agent** only when `isSmsSupported` is true (FOSS build). It contains two independent sub-toggles in one card:
+The SMS section appears in **Settings → Agent** only when `isSmsSupported` is true. It contains two independent sub-toggles in one card:
 
 **Read incoming SMS** (requires `READ_SMS`):
 
@@ -111,7 +110,7 @@ The SMS section appears in **Settings → Agent** only when `isSmsSupported` is 
 
 | File | Purpose |
 |---|---|
-| `androidApp/src/foss/AndroidManifest.xml` | Declares `READ_SMS` and `SEND_SMS` in the FOSS flavor only |
+| `androidApp/src/foss/AndroidManifest.xml` | Declares `READ_SMS` and `SEND_SMS` |
 | `composeApp/src/commonMain/.../data/SmsModels.kt` | `SmsMessage`, `SmsSyncState`, `SmsDraft`, `SmsDraftStatus` data classes |
 | `composeApp/src/commonMain/.../data/SmsStore.kt` | Pending inbox queue + sync state persistence |
 | `composeApp/src/commonMain/.../data/SmsDraftStore.kt` | Outgoing-draft persistence with status transitions |

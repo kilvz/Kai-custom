@@ -1,3 +1,0 @@
-Add local model context configuration
-Fix undo snackbars not executing after leaving screen
-Improve filetype checks for file attachments

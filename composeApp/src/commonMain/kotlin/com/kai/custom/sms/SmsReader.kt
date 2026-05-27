@@ -3,10 +3,9 @@ package com.kai.custom.sms
 import com.kai.custom.data.SmsMessage
 
 /**
- * Multiplatform SMS reader. Only the Android FOSS build returns real data — the
- * feature is gated by `READ_SMS` being declared in the merged manifest, which is
- * only the case for the `foss` product flavor. iOS, desktop, and wasm return
- * no-op stubs.
+ * Multiplatform SMS reader. Only the Android build returns real data — the
+ * feature is gated by `READ_SMS` being declared in the merged manifest.
+ * iOS, desktop, and wasm return no-op stubs.
  */
 expect class SmsReader() {
     /**

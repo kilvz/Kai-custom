@@ -117,3 +117,5 @@ actual suspend fun saveFileToDevice(bytes: ByteArray, baseName: String, extensio
 actual fun sendHeartbeatNotification(title: String, body: String) = Unit
 
 actual fun openTtsSettings() = Unit
+
+actual fun openBatteryOptimizationSettings() = Unit
