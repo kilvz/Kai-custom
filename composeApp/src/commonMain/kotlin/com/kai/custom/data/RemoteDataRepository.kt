@@ -688,6 +688,7 @@ class RemoteDataRepository(
         }
         // Process every attached file: classify, compress/encode, and build an Attachment.
         // readBytes() is suspend, so this happens before the StateFlow.update block.
+        val binaryFilesToWrite = mutableListOf<Pair<String, ByteArray>>()
         val attachments = files.map { file ->
             val fileMimeType = file.mimeType()?.toString()
             val fileName = file.name
@@ -732,23 +733,46 @@ class RemoteDataRepository(
                     fileName = fileName,
                 )
 
-                FileCategory.BINARY -> Attachment(
-                    data = Base64.encode(rawBytes),
-                    mimeType = fileMimeType ?: "application/octet-stream",
-                    fileName = fileName,
-                )
+                FileCategory.BINARY -> {
+                    binaryFilesToWrite.add(fileName to rawBytes)
+                    Attachment(
+                        data = Base64.encode(rawBytes),
+                        mimeType = fileMimeType ?: "application/octet-stream",
+                        fileName = fileName,
+                    )
+                }
 
                 FileCategory.UNSUPPORTED -> throw UnsupportedFileTypeException()
             }
         }.toImmutableList()
 
-        if (question != null) {
+        // Write binary attachments to the sandbox filesystem so the AI can read
+        // them via shell commands (execute_shell_command tool). The sandbox path
+        // is appended to the question text so the AI knows where to find the file.
+        var finalQuestion = question
+        if (binaryFilesToWrite.isNotEmpty()) {
+            val sandboxReady = sandboxController.status.value.ready
+            if (sandboxReady) {
+                val pathNotes = StringBuilder()
+                for ((fileName, rawBytes) in binaryFilesToWrite) {
+                    val sandboxPath = "/root/uploads/$fileName"
+                    if (sandboxController.writeBinaryFile(sandboxPath, rawBytes)) {
+                        pathNotes.append("\n[File saved to sandbox: $sandboxPath]")
+                    }
+                }
+                if (pathNotes.isNotEmpty() && question != null) {
+                    finalQuestion = question + pathNotes.toString()
+                }
+            }
+        }
+
+        if (finalQuestion != null) {
             chatHistory.update {
                 it.toMutableList().apply {
                     add(
                         History(
                             role = History.Role.USER,
-                            content = question,
+                            content = finalQuestion,
                             attachments = attachments,
                             uiSubmission = uiSubmission,
                         ),
