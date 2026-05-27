@@ -2,6 +2,7 @@ package com.kai.custom.tools
 
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.MemoryCategory
+import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.httpClient
 import com.kai.custom.network.tools.ParameterSchema
@@ -205,6 +206,12 @@ object CommonTools {
         descriptionRes = Res.string.tool_memory_reinforce_description,
     )
 
+    val searchMemoriesToolInfo = ToolInfo(
+        id = "search_memories",
+        name = "Search Memories",
+        description = "Search stored memories by keyword",
+    )
+
     val openUrlTool = object : Tool {
         override val schema = ToolSchema(
             name = "open_url",
@@ -272,7 +279,7 @@ object CommonTools {
         runOpenCodeToolInfo,
         runAdbToolInfo,
     ) +
-        listOf(memoryStoreToolInfo, memoryForgetToolInfo, memoryLearnToolInfo, memoryReinforceToolInfo) +
+        listOf(memoryStoreToolInfo, memoryForgetToolInfo, memoryLearnToolInfo, memoryReinforceToolInfo, searchMemoriesToolInfo) +
         SchedulingTools.schedulingToolDefinitions +
         HeartbeatTools.heartbeatToolDefinitions +
         EmailTools.emailToolDefinitions +
@@ -288,6 +295,7 @@ object CommonTools {
         memoryForgetToolInfo.id,
         memoryLearnToolInfo.id,
         memoryReinforceToolInfo.id,
+        searchMemoriesToolInfo.id,
     ) + SchedulingTools.schedulingToolDefinitions.map { it.id }.toSet() +
         HeartbeatTools.heartbeatToolDefinitions.map { it.id }.toSet() +
         EmailTools.emailToolDefinitions.map { it.id }.toSet() +
@@ -397,10 +405,42 @@ object CommonTools {
         }
     }
 
+    fun searchMemoriesTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "search_memories",
+            description = "Search your stored memories by keyword. Use this to look up what you know about a topic, find preferences, or recall past learnings.",
+            parameters = mapOf(
+                "query" to ParameterSchema(type = "string", description = "The search query to find matching memories", required = true),
+                "limit" to ParameterSchema(type = "integer", description = "Maximum number of results (default 10)", required = false),
+            ),
+        )
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val query = args["query"]?.toString() ?: return mapOf("success" to false, "error" to "Missing query")
+            val limit = (args["limit"] as? Number)?.toInt() ?: 10
+            val results = memoryStore.searchMemories(query, limit)
+            return mapOf(
+                "success" to true,
+                "query" to query,
+                "count" to results.size,
+                "results" to results.map { entry ->
+                    mapOf(
+                        "key" to entry.key,
+                        "content" to entry.content,
+                        "category" to entry.category.name,
+                        "hit_count" to entry.hitCount,
+                        "source" to (entry.source ?: ""),
+                    )
+                },
+            )
+        }
+    }
+
     fun getMemoryTools(memoryStore: MemoryStore): List<Tool> = listOf(
         memoryStoreTool(memoryStore),
         memoryForgetTool(memoryStore),
         memoryLearnTool(memoryStore),
         memoryReinforceTool(memoryStore),
+        searchMemoriesTool(memoryStore),
     )
 }

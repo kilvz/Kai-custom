@@ -105,20 +105,6 @@ internal const val DEFAULT_ACTING_SECTION =
         "See work through to a usable result."
 
 /**
- * Advanced memory guidance — references `memory_learn` (not in `LOCAL_TOOL_ALLOWLIST`)
- * and `memory_reinforce`. Only composed into the `CHAT_REMOTE` variant; the on-device
- * variant omits it entirely because small Gemma models can't reliably call
- * `memory_learn` (4 params + enum).
- */
-internal const val DEFAULT_STRUCTURED_LEARNING_SECTION =
-    "## Structured Learning\n" +
-        "Use memory_learn to record categorized learnings:\n" +
-        "- Record user corrections and preferences as PREFERENCE entries\n" +
-        "- Record things that worked well as LEARNING entries\n" +
-        "- Record error resolutions as ERROR entries\n" +
-        "Use memory_reinforce when a stored learning produced a good outcome."
-
-/**
  * Teaches the model how the two automation mechanisms differ. Only composed into the
  * `CHAT_REMOTE` variant — scheduling tools aren't in the local allowlist, and the
  * heartbeat-is-user-controlled rule doesn't matter on-device. Placed before the
@@ -178,14 +164,6 @@ internal fun buildChatSystemPrompt(
     if (!memoryInstructions.isNullOrEmpty()) {
         if (isNotEmpty()) append("\n\n")
         append(memoryInstructions)
-    }
-
-    // Structured Learning references memory_learn / memory_reinforce, so it only makes sense
-    // when memory is enabled (those tools are absent otherwise). Remote-only — memory_learn
-    // isn't in the local allowlist.
-    if (variant == SystemPromptVariant.CHAT_REMOTE && memoryEnabled) {
-        if (isNotEmpty()) append("\n\n")
-        append(DEFAULT_STRUCTURED_LEARNING_SECTION)
     }
 
     // Semantic memory section — most relevant memories from vector/FTS search appear

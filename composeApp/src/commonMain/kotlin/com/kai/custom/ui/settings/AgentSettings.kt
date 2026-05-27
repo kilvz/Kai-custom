@@ -128,18 +128,7 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                             isSchedulingEnabled = uiState.isSchedulingEnabled,
                             onToggleScheduling = actions.onToggleScheduling,
                         )
-                    }
-                    SettingsCard {
-                        MemoryList(
-                            memories = uiState.memories,
-                            onDeleteMemory = actions.onDeleteMemory,
-                            onUpdateMemory = actions.onUpdateMemory,
-                            isMemoryEnabled = uiState.isMemoryEnabled,
-                            onToggleMemory = actions.onToggleMemory,
-                            onExportPalace = actions.onExportPalace,
-                            onImportPalace = actions.onImportPalace,
-                        )
-                    }
+                }
                 }
                 Column(
                     modifier = Modifier.weight(1f),
