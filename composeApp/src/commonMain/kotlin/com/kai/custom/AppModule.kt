@@ -30,6 +30,7 @@ import com.kai.custom.splinterlands.SplinterlandsStore
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.tools.NotificationPermissionController
+import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
 import com.kai.custom.ui.chat.ChatViewModel
@@ -47,6 +48,7 @@ val appModule = module {
     single<NotificationPermissionController> { NotificationPermissionController() }
     single<SmsPermissionController> { SmsPermissionController() }
     single<SmsSendPermissionController> { SmsSendPermissionController() }
+    single<MicrophonePermissionController> { MicrophonePermissionController() }
     single<SmsReader> { SmsReader() }
     single<SmsSender> { SmsSender() }
     single<NotificationListenerController> { NotificationListenerController() }
@@ -152,5 +154,5 @@ val appModule = module {
     viewModel { SandboxPackagesViewModel(get<SandboxController>()) }
     viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
-    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>()) }
+    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>()) }
 }
