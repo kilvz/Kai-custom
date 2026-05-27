@@ -620,13 +620,13 @@ private fun ChatModeScreen(
                             val listState = rememberLazyListState()
                             val componentScope = rememberCoroutineScope()
 
-                            LaunchedEffect(uiState.history.size) {
-                                // Capture history at effect start to prevent race conditions
+                            LaunchedEffect(uiState.history.size, uiState.wasVoiceInput) {
                                 val history = uiState.history
                                 if (history.isNotEmpty()) {
                                     listState.scrollToItem(history.lastIndex)
                                     val lastMessage = history.last()
-                                    if (uiState.isSpeechOutputEnabled && lastMessage.role == History.Role.ASSISTANT) {
+                                    val shouldSpeak = uiState.isSpeechOutputEnabled || uiState.wasVoiceInput
+                                    if (shouldSpeak && lastMessage.role == History.Role.ASSISTANT) {
                                         componentScope.launch(getBackgroundDispatcher()) {
                                             textToSpeech?.stop()
                                             uiState.actions.setIsSpeaking(true, lastMessage.id)
@@ -638,6 +638,9 @@ private fun ChatModeScreen(
                                                 // Handle TTS errors gracefully (service failure, audio issues, etc.)
                                             } finally {
                                                 uiState.actions.setIsSpeaking(false, lastMessage.id)
+                                                if (uiState.wasVoiceInput) {
+                                                    uiState.actions.clearVoiceInputFlag()
+                                                }
                                             }
                                         }
                                     }

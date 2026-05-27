@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kai.custom.SpeechToText
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.wakeword.WakeWordController
+import com.kai.custom.wakeword.WakeWordMode
 import com.kai.custom.data.Conversation
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.FreeMode
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -78,6 +80,7 @@ class ChatViewModel(
         discardSmsDraft = ::discardSmsDraft,
         startVoiceInput = ::startVoiceInput,
         stopVoiceInput = ::stopVoiceInput,
+        clearVoiceInputFlag = ::clearVoiceInputFlag,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
     private var currentJob: Job? = null
@@ -120,6 +123,23 @@ class ChatViewModel(
                     doStartVoiceInput()
                 }
             }
+        }
+
+        // Restart wake word after AI finishes loading (voice query response complete)
+        viewModelScope.launch {
+            _state
+                .map { it.isLoading }
+                .distinctUntilChanged()
+                .collect { loading ->
+                    if (!loading && _state.value.wasVoiceInput && dataRepository.isWakeWordEnabled()) {
+                        wakeWordController.startListening(
+                            dataRepository.getWakeWordPhrase(),
+                            WakeWordMode.valueOf(dataRepository.getWakeWordMode()),
+                            dataRepository.getWakeWordTemplate(),
+                        )
+                        _state.update { it.copy(wasVoiceInput = false) }
+                    }
+                }
         }
 
         viewModelScope.launch {
@@ -331,22 +351,46 @@ class ChatViewModel(
     }
 
     private fun doStartVoiceInput() {
+        // Pause wake word detection so SpeechRecognizer can use the mic
+        val wasWakeWordEnabled = dataRepository.isWakeWordEnabled()
+        if (wasWakeWordEnabled) {
+            wakeWordController.stopListening()
+        }
         _state.update { it.copy(isVoiceInputActive = true, voiceInputPartial = "") }
         speechToText.startListening(
             onPartialResult = { partial -> _state.update { it.copy(voiceInputPartial = partial) } },
             onFinalResult = { final ->
                 _state.update { it.copy(isVoiceInputActive = false) }
                 if (final.isNotBlank()) {
-                    ask(final.trim())
+                    _state.update { it.copy(wasVoiceInput = true) }
+                    val speakToolEnabled = dataRepository.getToolDefinitions()
+                        .any { it.id == "speak_text" && it.isEnabled }
+                    val voiceText = if (speakToolEnabled) {
+                        "[The user spoke this via voice input. Read your full response aloud using the speak_text tool if sandbox is available. If sandbox is not available, respond in text and the app will speak it for you.]\n${final.trim()}"
+                    } else final.trim()
+                    ask(voiceText)
                 }
             },
-            onError = { _state.update { it.copy(isVoiceInputActive = false) } },
+            onError = {
+                _state.update { it.copy(isVoiceInputActive = false) }
+            },
         )
     }
 
     private fun stopVoiceInput() {
         speechToText.stopListening()
+        if (dataRepository.isWakeWordEnabled()) {
+                    wakeWordController.startListening(
+                        dataRepository.getWakeWordPhrase(),
+                        WakeWordMode.valueOf(dataRepository.getWakeWordMode()),
+                        dataRepository.getWakeWordTemplate(),
+                    )
+        }
         _state.update { it.copy(isVoiceInputActive = false) }
+    }
+
+    private fun clearVoiceInputFlag() {
+        _state.update { it.copy(wasVoiceInput = false) }
     }
 
     private fun selectService(instanceId: String) {

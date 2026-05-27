@@ -102,6 +102,7 @@ data class ChatUiState(
     val isRestoring: Boolean = true,
     val isVoiceInputActive: Boolean = false,
     val voiceInputPartial: String = "",
+    val wasVoiceInput: Boolean = false,
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id

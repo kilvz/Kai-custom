@@ -109,6 +109,10 @@ interface DataRepository {
     fun setWakeWordEnabled(enabled: Boolean)
     fun getWakeWordPhrase(): String
     fun setWakeWordPhrase(phrase: String)
+    fun getWakeWordMode(): String
+    fun setWakeWordMode(mode: String)
+    fun getWakeWordTemplate(): String
+    fun setWakeWordTemplate(template: String)
 
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean

@@ -1769,6 +1769,18 @@ class RemoteDataRepository(
         appSettings.setWakeWordPhrase(phrase)
     }
 
+    override fun getWakeWordMode(): String = appSettings.getWakeWordMode()
+
+    override fun setWakeWordMode(mode: String) {
+        appSettings.setWakeWordMode(mode)
+    }
+
+    override fun getWakeWordTemplate(): String = appSettings.getWakeWordTemplate()
+
+    override fun setWakeWordTemplate(template: String) {
+        appSettings.setWakeWordTemplate(template)
+    }
+
     override fun getHeartbeatConfig(): HeartbeatConfig = heartbeatManager.getConfig()
 
     override fun setHeartbeatEnabled(enabled: Boolean) {

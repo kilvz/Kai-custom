@@ -39,9 +39,14 @@ class WakeWordService : Service() {
             private set
     }
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var detectJob: Job? = null
     private var currentPhrase: String = "hey kai"
+    private var currentMode: String = "GENERAL"
+    private var currentTemplate: FloatArray? = null
+    private var lastDetectionMs: Long = 0L
+    private val detectionCooldownMs: Long = 3000L
+    private var serviceStartMs: Long = 0L
 
     override fun onCreate() {
         super.onCreate()
@@ -51,7 +56,12 @@ class WakeWordService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         currentPhrase = intent?.getStringExtra("WAKE_WORD_PHRASE") ?: "hey kai"
-        Log.d(TAG, "onStartCommand phrase=$currentPhrase")
+        currentMode = intent?.getStringExtra("WAKE_WORD_MODE") ?: "GENERAL"
+        val templateStr = intent?.getStringExtra("WAKE_WORD_TEMPLATE") ?: ""
+        currentTemplate = if (templateStr.isNotBlank()) {
+            WakeWordMatcher.deserializeTemplate(templateStr)
+        } else null
+        Log.d(TAG, "onStartCommand phrase=$currentPhrase mode=$currentMode hasTemplate=${currentTemplate != null}")
 
         val notification = buildNotification()
         try {
@@ -71,14 +81,24 @@ class WakeWordService : Service() {
             return START_NOT_STICKY
         }
 
-        WakeWordInterpreter.load(this)
-        if (!WakeWordInterpreter.isLoaded) {
-            Log.e(TAG, "model failed to load")
+        if (currentMode == "GENERAL") {
+            WakeWordInterpreter.load(this)
+            if (!WakeWordInterpreter.isLoaded) {
+                Log.e(TAG, "model failed to load, falling back to personal mode")
+                if (currentTemplate == null) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
+            }
+        } else if (currentTemplate == null) {
+            Log.w(TAG, "personal mode but no template enrolled")
             stopSelf()
             return START_NOT_STICKY
         }
-        Log.d(TAG, "model loaded successfully")
 
+        // Recreate scope in case previous scope was cancelled in onDestroy
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        serviceStartMs = System.currentTimeMillis()
         isRunning = true
         detectJob = scope.launch {
             listenLoop()
@@ -122,42 +142,78 @@ class WakeWordService : Service() {
         Log.d(TAG, "AudioRecord initialized, starting recording")
 
         audioRecord.startRecording()
+        Log.d(TAG, "recording state=${audioRecord.recordingState}")
+
         val buffer = ShortArray(bufferSize)
         val floatBuffer = FloatArray(bufferSize)
         val mfccProcessor = MfccProcessor()
 
         var framesProcessed = 0
-        while (currentCoroutineContext().isActive) {
-            val read = audioRecord.read(buffer, 0, bufferSize)
-            if (read > 0) {
-                for (i in 0 until read) {
-                    floatBuffer[i] = buffer[i].toFloat() / 32768f
-                }
-                val features = mfccProcessor.compute(floatBuffer, read)
-                val score = detectWakeWord(features)
-                framesProcessed++
-                if (framesProcessed % 50 == 0) {
-                    Log.d(TAG, "processed $framesProcessed frames, last score=$score")
-                }
-                if (score > WakeWordInterpreter.THRESHOLD) {
-                    Log.i(TAG, "WAKE WORD DETECTED! score=$score")
-                    _wakeWordDetected.tryEmit(currentPhrase)
-                }
-            } else if (read < 0) {
-                Log.e(TAG, "AudioRecord read error: $read")
-            }
-        }
+        var readCount = 0
+        var zeroCount = 0
+        try {
+            while (currentCoroutineContext().isActive) {
+                val read = audioRecord.read(buffer, 0, bufferSize)
+                readCount++
+                if (read > 0) {
+                    for (i in 0 until read) {
+                        floatBuffer[i] = buffer[i].toFloat() / 32768f
+                    }
 
-        Log.d(TAG, "listenLoop ending")
-        audioRecord.stop()
+                    // Compute energy of this frame — skip silent/low frames
+                    var energy = 0f
+                    for (i in 0 until read) {
+                        energy += floatBuffer[i] * floatBuffer[i]
+                    }
+                    val hasVoice = energy > 2.0f
+
+                    val features = mfccProcessor.compute(floatBuffer, read)
+                    val score = detectWakeWord(features)
+                    framesProcessed++
+                    if (framesProcessed % 50 == 0) {
+                        Log.d(TAG, "processed $framesProcessed frames, last score=$score mode=$currentMode energy=$energy hasVoice=$hasVoice reads=$readCount zeros=$zeroCount")
+                    }
+                    val now = System.currentTimeMillis()
+                    // Skip detection during startup grace period (3s) and silent frames
+                    if (now - serviceStartMs < 3000 || !hasVoice) continue
+
+                    val threshold = if (currentMode == "PERSONAL") 0.8f else WakeWordInterpreter.THRESHOLD
+                    if (score > threshold) {
+                        if (now - lastDetectionMs > detectionCooldownMs) {
+                            lastDetectionMs = now
+                            Log.i(TAG, "WAKE WORD DETECTED! score=$score mode=$currentMode threshold=$threshold energy=$energy")
+                            _wakeWordDetected.tryEmit(currentPhrase)
+                        } else {
+                            Log.d(TAG, "suppressed (cooldown) score=$score")
+                        }
+                    }
+                } else if (read == 0) {
+                    zeroCount++
+                    if (zeroCount == 1) Log.w(TAG, "read() returned 0 (no audio data)")
+                } else {
+                    Log.e(TAG, "AudioRecord read error: $read")
+                }
+                if (readCount == 1 && read <= 0) {
+                    // first read gave no data, log and keep trying
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "listenLoop exception: $e")
+        }
+        Log.d(TAG, "listenLoop ending (processed=$framesProcessed reads=$readCount zeros=$zeroCount)")
+        try { audioRecord.stop() } catch (e: Exception) { Log.e(TAG, "stop error: $e") }
         audioRecord.release()
     }
 
     private fun detectWakeWord(features: Array<FloatArray>): Float {
-        return try {
-            WakeWordInterpreter.run(features)
-        } catch (_: Exception) {
-            0f
+        return if (currentMode == "PERSONAL" && currentTemplate != null) {
+            WakeWordMatcher.cosineSimilarity(features, currentTemplate!!)
+        } else {
+            try {
+                WakeWordInterpreter.run(features)
+            } catch (_: Exception) {
+                0f
+            }
         }
     }
 
