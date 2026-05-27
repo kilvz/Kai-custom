@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kai.custom.SandboxSessions
 import com.kai.custom.TerminalLine
+import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ConversationStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -25,6 +26,7 @@ private val TRANSCRIPT_SAVE_DEBOUNCE = 500.milliseconds
 class LinuxSandboxManager(
     private val context: Context,
     private val conversationStorage: ConversationStorage,
+    private val appSettings: AppSettings,
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -202,7 +204,9 @@ class LinuxSandboxManager(
         rootfsPath = rootfsPath,
         homePath = homePath,
         tmpPath = tmpPath,
-    )
+    ).apply {
+        sandboxStorageMountEnabled = appSettings.isSandboxStorageMountEnabled()
+    }
 
     // One bash session per logical caller (chat conversation, terminal scratch,
     // package-manager UI, etc.). Lazily created on first access; tracked here so

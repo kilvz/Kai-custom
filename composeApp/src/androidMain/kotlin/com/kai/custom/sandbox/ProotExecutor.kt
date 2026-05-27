@@ -56,6 +56,8 @@ class ProotExecutor(
     private val homePath: String,
     private val tmpPath: String,
 ) {
+    /** When false, the /sdcard bind mount is omitted from proot args. */
+    var sandboxStorageMountEnabled: Boolean = true
 
     fun execute(
         command: String,
@@ -130,8 +132,9 @@ class ProotExecutor(
         return ProotHandle(process, cancelled, listOf(stdoutFuture, stderrFuture))
     }
 
-    private val storageBind: String? by lazy {
-        when {
+    private fun storageBind(): String? {
+        if (!sandboxStorageMountEnabled) return null
+        return when {
             File("/storage/emulated/0").exists() -> "--bind=/storage/emulated/0:/sdcard"
             File("/storage/self/primary").exists() -> "--bind=/storage/self/primary:/sdcard"
             else -> null
@@ -146,7 +149,7 @@ class ProotExecutor(
         add("--bind=/sys")
         add("--bind=$homePath:/root")
         add("--bind=$tmpPath:/tmp")
-        storageBind?.let { add(it) }
+        storageBind()?.let { add(it) }
         add("-0")
         add("-w")
         add(workingDir)

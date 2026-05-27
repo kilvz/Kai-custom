@@ -330,6 +330,7 @@ fun SettingsScreen(
         actions = viewModel.actions,
         sandboxState = sandboxState,
         onToggleSandbox = sandboxViewModel::onToggleSandbox,
+        onToggleStorageMount = sandboxViewModel::onToggleStorageMount,
         onSetupSandbox = sandboxViewModel::onSetupSandbox,
         onCancelSandbox = sandboxViewModel::onCancelSandbox,
         onResetSandbox = sandboxViewModel::onResetSandbox,
@@ -345,6 +346,7 @@ fun SettingsScreenContent(
     actions: SettingsActions = SettingsActions.NoOp,
     sandboxState: SandboxUiState = SandboxUiState(),
     onToggleSandbox: (Boolean) -> Unit = {},
+    onToggleStorageMount: (Boolean) -> Unit = {},
     onSetupSandbox: () -> Unit = {},
     onCancelSandbox: () -> Unit = {},
     onResetSandbox: () -> Unit = {},
@@ -483,6 +485,7 @@ fun SettingsScreenContent(
                                 SandboxSettingsCard(
                                     sandboxState = sandboxState,
                                     onToggleSandbox = onToggleSandbox,
+                                    onToggleStorageMount = onToggleStorageMount,
                                     onSetupSandbox = onSetupSandbox,
                                     onCancelSandbox = onCancelSandbox,
                                     onResetSandbox = onResetSandbox,

@@ -37,6 +37,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun SandboxSettingsCard(
     sandboxState: SandboxUiState,
     onToggleSandbox: (Boolean) -> Unit,
+    onToggleStorageMount: (Boolean) -> Unit,
     onSetupSandbox: () -> Unit,
     onCancelSandbox: () -> Unit,
     onResetSandbox: () -> Unit,
@@ -108,6 +109,32 @@ internal fun SandboxSettingsCard(
                         Text(stringResource(Res.string.settings_sandbox_uninstall))
                     }
                 }
+            }
+        }
+
+        if (sandboxState.sandboxReady) {
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "User storage mount (/sdcard)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Text(
+                        text = "Let the AI access files on your device storage",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = sandboxState.isSandboxStorageMountEnabled,
+                    onCheckedChange = onToggleStorageMount,
+                )
             }
         }
     }
