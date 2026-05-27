@@ -9,26 +9,9 @@
 <br>
 </div>
 
-An AI assistant that remembers you, runs on-device or via 24+ LLM providers, and controls phone features through voice or text. **Fully open-source, zero telemetry, no Google Play Services required.**
+An AI assistant that remembers you, runs on-device or via 25+ API providers, and can control phone features through text or voice. Fully open-source, zero telemetry, no Google Play Services required.
 
 ## Features
-
-### Wake Word Detection ("Hey Kai")
-
-Hands-free activation with dual-mode detection:
-
-- **GENERAL mode** — on-device TFLite model (TinyConv) detects "hey kai" without enrollment, ~5 MB model bundled in the APK
-- **PERSONAL mode** — cosine similarity on your enrolled voice template for higher accuracy; 3-step enrollment crops to the loudest 1 second of each utterance
-- **Adaptive energy baseline** — running decaying average adjusts to ambient noise (rain, fan, road noise); only processes audio when energy exceeds 2x baseline
-- **Anti-flap** — service rejects restart within 2s of `onDestroy` to break false-trigger loops
-- **Trigger debounce** — 3s cooldown between successive detections
-- **Mic handover** — wake word pauses before SpeechRecognizer starts, restarts automatically after the AI finishes responding
-
-### Voice Input & Response
-
-- **Speech-to-text** via Android `SpeechRecognizer` — manual mic button or wake word triggered
-- **Auto-voice-response** — when input is spoken, the AI replies using `speak_text` tool with edge-tts voices
-- **Preferred language** — 27 language options (English, Arabic, Chinese, French, German, Hindi, Japanese, Korean, Spanish, and more), each mapped to its edge-tts voice; injected into the AI's system prompt so it responds in the correct language
 
 ### Persistent Memory (KaiMemPalace)
 
@@ -39,7 +22,24 @@ A local semantic memory graph that stores facts, preferences, and learnings acro
 - **search_memories tool** — the AI can semantic-search its own memory store on demand
 - **Local variant** — trimmed memory instructions for on-device models without external API access
 - **Heartbeat-driven learning** — periodic self-checks review and promote memories autonomously
-- **Encrypted** — all memory data stored locally with encryption
+
+### 25+ LLM Providers
+
+Multi-service with automatic failover across 27 backend types:
+
+Anthropic · OpenAI · Gemini · DeepSeek · Mistral · xAI · OpenRouter · Groq · NVIDIA · Cerebras · Ollama Cloud · Together AI · Hugging Face · Venice AI · Moonshot AI · Z.AI · MiniMax · AIHubMix · Deep Infra · Fireworks AI · OpenCode · PublicAI · OpenAI-Compatible · LiteRT On-Device · Free tier (no API key)
+
+### On-Device Inference
+
+Run AI models locally using LiteRT with no internet connection:
+
+| Model | Size | GPU Memory | Context |
+|-------|------|-----------|---------|
+| Qwen3 0.6B | 614 MB | 300 MB | 4K/32K |
+| Gemma 4 E2B IT | 2.6 GB | 676 MB | 4K/32K |
+| Gemma 4 E4B IT | 3.7 GB | 710 MB | 4K/32K |
+
+Models download from HuggingFace on first use.
 
 ### Phone Tools (Android Only)
 
@@ -64,24 +64,9 @@ A built-in Linux environment that the AI uses to execute shell commands, run scr
 
 - **Alpine Linux** via [proot](https://proot-me.github.io/), no root required, ~3 MB download
 - **Optional packages** — one-tap install bash, curl, wget, git, jq, python3, pip, Node.js
-- **Binary file write** — non-image attachments (Excel, Word, PDF) are written to `/root/uploads/` so the AI can read them via shell commands
+- **Binary file write** — non-image, non-PDF attachments (Excel, Word, etc.) are written to `/root/uploads/` so the AI can read them via shell commands
 - **Interactive terminal** — manual command input alongside the AI
 - **Secure** — sandboxed inside the app, no host system access
-
-### 24+ LLM Providers
-
-Multi-service with automatic failover:
-
-Anthropic · OpenAI · Gemini · DeepSeek · Mistral · xAI · OpenRouter · Groq · NVIDIA · Cerebras · Ollama Cloud · Together AI · Hugging Face · Venice AI · Moonshot AI · Z.AI · MiniMax · AIHubMix · Deep Infra · Fireworks AI · OpenCode · OpenAI-Compatible · LiteRT On-Device · Free tier (no API key)
-
-### On-Device Inference
-
-Run AI models locally using LiteRT with no internet connection:
-
-- **Qwen3 0.6B** — 614 MB model, 300 MB GPU memory, 4K default context
-- **Gemma 4 E2B IT** — 2.6 GB model, 676 MB GPU memory, 4K default context
-- **Gemma 4 E4B IT** — 3.7 GB model, 710 MB GPU memory, 4K default context
-- Models download from HuggingFace on first use
 
 ### MCP Server Support
 
@@ -122,16 +107,40 @@ Cron and one-shot scheduled tasks:
 - Cron expressions for recurring tasks
 - Execution log with last 10 results
 
+### Voice Input
+
+Speech-to-text via Android `SpeechRecognizer` with manual mic button. Supports 27 languages for recognition. When input is spoken, the AI can reply using `speak_text` tool with edge-tts voices. Preferred language setting in General Settings injects the target language and voice into the AI's system prompt.
+
+### Text to Speech
+
+edge-tts voices mapped per preferred language (27 languages). The AI uses `speak_text` tool to read responses aloud.
+
 ### Settings & Storage
 
-- **Encrypted conversations** — local XOR encryption with per-install key
-- **Settings export/import** — full backup/restore as JSON (excludes secrets: daemon state, app opens, encryption key)
+- **Conversations** stored as JSON in app-local preferences (plaintext, not encrypted)
+- **Settings export/import** — full backup/restore as JSON (excludes: daemon state, app opens, encryption key)
 - **Customizable soul** — editable system prompt defines the AI's personality, rules, and behavior
-- **Text-to-speech** — edge-tts voices per preferred language
 
 ### Splinterlands Auto-Battle (Android)
 
 Automated Wild Ranked battles with LLM-powered team strategy. Configure priority-ordered LLM services, add Hive account, and Kai finds matches, picks teams, and submits on-chain. Falls back to a greedy picker if all services fail.
+
+---
+
+### Experimental: Wake Word Detection ("Hey Kai")
+
+> ⚠️ **Experimental.** May trigger on ambient noise or fail to detect in noisy environments. Accuracy depends on device hardware and ambient conditions.
+
+Hands-free activation with dual-mode detection:
+
+- **GENERAL mode** — on-device TFLite model detects "hey kai" without enrollment
+- **PERSONAL mode** — cosine similarity on your enrolled voice template for higher accuracy; 3-step enrollment crops to the loudest 1 second of each utterance
+- **Adaptive energy baseline** — running decaying average adjusts to ambient noise (rain, fan); only processes audio when energy exceeds 2x baseline
+- **Anti-flap** — service rejects restart within 2s of `onDestroy` to break false-trigger loops
+- **Trigger debounce** — 3s cooldown between successive detections
+- **Mic handover** — wake word pauses before SpeechRecognizer starts, restarts after the AI finishes responding
+
+---
 
 ## Quick Start
 
@@ -158,12 +167,10 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 | Area | Upstream Kai | Kai 9001 |
 |------|-------------|----------|
 | Build | Proprietary SDKs (Firebase, Crashlytics, Analytics) | **FOSS-only** |
-| Wake word | None | **"Hey Kai"** with GENERAL (TFLite) + PERSONAL (cosine similarity) modes |
-| Voice | Manual mic button | Wake word + auto-voice-response + 27-language TTS |
+| Voice | Manual mic button | STT + TTS + 27-language edge-tts |
 | Phone integration | None | **8 phone tools** (location, contacts, battery, wifi, etc.) |
 | Memory tools | Basic recall/store | **search_memories tool** + heartbeat promotion + local variant |
 | Platform | Android + iOS + Desktop + Web | **Android-only** |
-| Sandbox | Read-only file access | **Binary write** — AI can read Excel, Word, PDF via shell |
 | Terminal | OOM with large output | **Per-item SelectionContainer** fixes ANR |
 | Version | Tracks upstream (2.x.x) | **Custom 1.x.x** |
 | GitHub issues | Disabled | **Integration request template** enabled |
