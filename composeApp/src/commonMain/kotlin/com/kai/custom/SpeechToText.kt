@@ -5,6 +5,7 @@ interface SpeechToText {
         onPartialResult: (String) -> Unit,
         onFinalResult: (String) -> Unit,
         onError: (String) -> Unit,
+        language: String = "en",
     )
     fun stopListening()
     fun cancel()
