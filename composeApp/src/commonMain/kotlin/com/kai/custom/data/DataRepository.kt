@@ -107,6 +107,8 @@ interface DataRepository {
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean
     fun setSandboxEnabled(enabled: Boolean)
+    fun isSandboxStorageMountEnabled(): Boolean
+    fun setSandboxStorageMountEnabled(enabled: Boolean)
 
     // Heartbeat
     fun getHeartbeatConfig(): HeartbeatConfig

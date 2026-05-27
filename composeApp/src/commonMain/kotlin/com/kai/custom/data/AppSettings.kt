@@ -322,6 +322,12 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SANDBOX_ENABLED, enabled)
     }
 
+    fun isSandboxStorageMountEnabled(): Boolean = settings.getBoolean(KEY_SANDBOX_STORAGE_MOUNT, true)
+
+    fun setSandboxStorageMountEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_SANDBOX_STORAGE_MOUNT, enabled)
+    }
+
     fun getScheduledTasksJson(): String = settings.getString(KEY_SCHEDULED_TASKS, "[]")
 
     fun setScheduledTasksJson(json: String) {
@@ -592,6 +598,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_MODEL_CONTEXT_PREFIX = "model_context_"
 
         const val KEY_SANDBOX_ENABLED = "sandbox_enabled"
+        const val KEY_SANDBOX_STORAGE_MOUNT = "sandbox_storage_mount"
 
         // Basic memory guidance shared by every chat variant. The advanced `## Structured
         // Learning` block lives in `ChatSystemPromptBuilder.DEFAULT_STRUCTURED_LEARNING_SECTION`

@@ -23,6 +23,7 @@ data class SandboxUiState(
     val sandboxDiskUsageMB: Long = 0,
     val sandboxPackagesInstalled: Boolean = false,
     val isSandboxEnabled: Boolean = true,
+    val isSandboxStorageMountEnabled: Boolean = true,
     val isWorking: Boolean = false,
     val hasError: Boolean = false,
 )
@@ -42,6 +43,7 @@ class SandboxViewModel(
             SandboxUiState(
                 showSandbox = currentPlatform is Platform.Mobile.Android,
                 isSandboxEnabled = dataRepository.isSandboxEnabled(),
+                isSandboxStorageMountEnabled = dataRepository.isSandboxStorageMountEnabled(),
             ),
         ),
     )
@@ -70,6 +72,11 @@ class SandboxViewModel(
     fun onToggleSandbox(enabled: Boolean) {
         dataRepository.setSandboxEnabled(enabled)
         _state.update { it.copy(isSandboxEnabled = enabled) }
+    }
+
+    fun onToggleStorageMount(enabled: Boolean) {
+        dataRepository.setSandboxStorageMountEnabled(enabled)
+        _state.update { it.copy(isSandboxStorageMountEnabled = enabled) }
     }
 
     fun onSetupSandbox() {
