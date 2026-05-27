@@ -95,6 +95,9 @@ class TaskScheduler(
     fun start() {
         if (!enabled || taskStore == null || appSettings == null) return
         if (activeJob?.isActive == true) return
+        // Ensure saved conversations are loaded before any save can occur,
+        // preventing the daemon-only path from wiping history with an empty list.
+        dataRepository.loadConversations()
         activeJob = schedulerScope.launch {
             while (isActive) {
                 delay(POLL_INTERVAL_MS.milliseconds)

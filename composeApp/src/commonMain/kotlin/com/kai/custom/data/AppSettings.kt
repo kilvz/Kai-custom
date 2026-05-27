@@ -1,6 +1,7 @@
 package com.kai.custom.data
 
 import com.kai.custom.defaultUiScale
+import com.kai.custom.data.getDefaultLanguage
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -335,6 +336,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SANDBOX_STORAGE_MOUNT, enabled)
     }
 
+    // Preferred language
+    fun getPreferredLanguage(): String = settings.getString(KEY_PREFERRED_LANGUAGE, getDefaultLanguage())
+
+    fun setPreferredLanguage(lang: String) {
+        settings.putString(KEY_PREFERRED_LANGUAGE, lang)
+    }
+
     // Wake word detection
     private val _wakeWordEnabledFlow = MutableStateFlow(settings.getBoolean(KEY_WAKE_WORD_ENABLED, false))
     val wakeWordEnabledFlow: StateFlow<Boolean> = _wakeWordEnabledFlow
@@ -644,6 +652,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_WAKE_WORD_PHRASE = "wake_word_phrase"
         const val KEY_WAKE_WORD_MODE = "wake_word_mode"
         const val KEY_WAKE_WORD_TEMPLATE = "wake_word_template"
+        const val KEY_PREFERRED_LANGUAGE = "preferred_language"
 
         // Full memory guidance for remote models — references all memory tools.
         const val DEFAULT_MEMORY_INSTRUCTIONS =

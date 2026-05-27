@@ -127,6 +127,7 @@ class SettingsViewModel(
         wakeWordMode = dataRepository.getWakeWordMode(),
         wakeWordEnrolled = dataRepository.getWakeWordTemplate().isNotBlank(),
         isEnrolling = false,
+        preferredLanguage = dataRepository.getPreferredLanguage(),
         uiScale = dataRepository.getUiScale(),
         showUiScale = currentPlatform is Platform.Desktop,
         mcpServers = buildMcpServerEntries().toImmutableList(),
@@ -182,6 +183,7 @@ class SettingsViewModel(
         onToggleFreeFallback = ::onToggleFreeFallback,
         onToggleWakeWord = ::onToggleWakeWord,
         onChangeWakeWordPhrase = ::onChangeWakeWordPhrase,
+        onChangePreferredLanguage = ::onChangePreferredLanguage,
         onChangeWakeWordMode = ::onChangeWakeWordMode,
         onEnrollWakeWord = ::onEnrollWakeWord,
         onChangeUiScale = ::onChangeUiScale,
@@ -678,6 +680,11 @@ class SettingsViewModel(
     private fun onChangeWakeWordPhrase(phrase: String) {
         dataRepository.setWakeWordPhrase(phrase)
         _state.update { it.copy(wakeWordPhrase = phrase) }
+    }
+
+    private fun onChangePreferredLanguage(lang: String) {
+        dataRepository.setPreferredLanguage(lang)
+        _state.update { it.copy(preferredLanguage = lang) }
     }
 
     private fun onChangeWakeWordMode(mode: String) {

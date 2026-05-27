@@ -157,13 +157,13 @@ private fun AppContent(
         }
     }
 
-    // Set TTS voice to match system language
+    // Set TTS voice to match preferred language
     @OptIn(ExperimentalVoiceApi::class)
     LaunchedEffect(textToSpeech) {
         val tts = textToSpeech ?: return@LaunchedEffect
-        val systemLanguage = Locale.current.language
+        val preferredLang = appSettings.getPreferredLanguage()
         val matchingVoice = tts.voices
-            .firstOrNull { it.languageTag.startsWith(systemLanguage) }
+            .firstOrNull { it.languageTag.startsWith(preferredLang) }
         if (matchingVoice != null) {
             tts.currentVoice = matchingVoice
         }

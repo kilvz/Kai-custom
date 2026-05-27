@@ -26,6 +26,8 @@ class AndroidWakeWordController : WakeWordController {
         get() = WakeWordService.isRunning
 
     override fun startListening(phrase: String, mode: WakeWordMode, template: String) {
+        Log.d(tag, "startListening called — stack trace follows")
+        Log.d(tag, Log.getStackTraceString(Exception("startListening stack trace")))
         val intent = Intent(context, WakeWordService::class.java).apply {
             putExtra("WAKE_WORD_PHRASE", phrase)
             putExtra("WAKE_WORD_MODE", mode.name)
