@@ -159,6 +159,7 @@ kotlin {
             implementation(libs.bouncycastle.provider)
             implementation(libs.slf4j.nop)
             implementation(libs.litert.lm.jvm)
+            implementation(libs.jsch)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
