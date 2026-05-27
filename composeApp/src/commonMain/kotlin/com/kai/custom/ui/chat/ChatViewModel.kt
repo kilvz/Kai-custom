@@ -82,6 +82,7 @@ class ChatViewModel(
         stopVoiceInput = ::stopVoiceInput,
         clearVoiceInputFlag = ::clearVoiceInputFlag,
         editMessage = ::editMessage,
+        truncateFrom = ::truncateFrom,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
     private var currentJob: Job? = null
@@ -365,6 +366,7 @@ class ChatViewModel(
         if (wasWakeWordEnabled) {
             wakeWordController.stopListening()
         }
+        val preferredLang = dataRepository.getPreferredLanguage()
         _state.update { it.copy(isVoiceInputActive = true, voiceInputPartial = "") }
         speechToText.startListening(
             onPartialResult = { partial -> _state.update { it.copy(voiceInputPartial = partial) } },
@@ -374,11 +376,10 @@ class ChatViewModel(
                     _state.update { it.copy(wasVoiceInput = true) }
                     val speakToolEnabled = dataRepository.getToolDefinitions()
                         .any { it.id == "speak_text" && it.isEnabled }
-                    val preferredLang = dataRepository.getPreferredLanguage()
                     val langOpt = com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLang }
                     val voiceHint = if (speakToolEnabled) {
                         val voice = langOpt?.edgeTtsVoice ?: "en-US-AndrewNeural"
-                        "[The user spoke this via voice input. The preferred language is ${langOpt?.displayName ?: "English"}. Read your full response aloud using the speak_text tool with voice=$voice. If sandbox is not available, respond in text and the app will speak it for you.]\n${final.trim()}"
+                        "[The user spoke this via voice input. The preferred language is ${langOpt?.displayName ?: "English"} but they may be speaking another language. Detect the actual language from this transcription and respond in that language using the speak_text tool with a matching voice.]\n${final.trim()}"
                     } else {
                         final.trim()
                     }
@@ -388,6 +389,7 @@ class ChatViewModel(
             onError = {
                 _state.update { it.copy(isVoiceInputActive = false) }
             },
+            language = preferredLang,
         )
     }
 
@@ -561,6 +563,10 @@ class ChatViewModel(
         if (_state.value.isLoading) return
         dataRepository.truncateFrom(messageId)
         submitUiCallback(event, data)
+    }
+
+    private fun truncateFrom(messageId: String) {
+        dataRepository.truncateFrom(messageId)
     }
 
     private fun editMessage(messageId: String, newContent: String) {

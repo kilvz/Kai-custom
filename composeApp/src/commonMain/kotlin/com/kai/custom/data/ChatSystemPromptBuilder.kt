@@ -148,16 +148,19 @@ internal fun buildChatSystemPrompt(
 ): String = buildString {
     append(soul)
 
-    // Language instruction — tell the AI which language to respond in
-    if (preferredLanguage != "en") {
-        if (isNotEmpty()) append("\n\n")
-        val langName = com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLanguage }?.displayName ?: preferredLanguage
-        append("## Language\nRespond in $langName. All your responses must be in $langName.\n")
-        append("When using the speak_text tool, use the appropriate voice for $langName (e.g. ${com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLanguage }?.edgeTtsVoice ?: "en-US-AndrewNeural"}).")
+    // Language preference — adapt to the user's language
+    if (isNotEmpty()) append("\n\n")
+    val langName = if (preferredLanguage != "en") {
+        com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLanguage }?.displayName ?: preferredLanguage
     } else {
-        if (isNotEmpty()) append("\n\n")
-        append("## Language\nRespond in English. When using the speak_text tool, use the voice en-US-AndrewNeural.")
+        "English"
     }
+    val defaultVoice = if (preferredLanguage != "en") {
+        com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLanguage }?.edgeTtsVoice ?: "en-US-AndrewNeural"
+    } else {
+        "en-US-AndrewNeural"
+    }
+    append("## Language\nYour preferred language is $langName. Adapt to the user's language in both text and voice. Speak in the same language the user uses — if they write in Indonesian, respond and speak in Indonesian; if they write in English, respond and speak in English. When using speak_text, always pick the voice that matches the language you're speaking. Default voice: $defaultVoice.")
 
     if (isNotEmpty()) append("\n\n")
     append(DEFAULT_HONESTY_RULE)

@@ -27,6 +27,7 @@ class AndroidSpeechToText : SpeechToText {
         onPartialResult: (String) -> Unit,
         onFinalResult: (String) -> Unit,
         onError: (String) -> Unit,
+        language: String,
     ) {
         if (isListening) return
         if (!isAvailable) {
@@ -81,6 +82,7 @@ class AndroidSpeechToText : SpeechToText {
 
         val intent = android.content.Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         }
         recognizer?.startListening(intent)

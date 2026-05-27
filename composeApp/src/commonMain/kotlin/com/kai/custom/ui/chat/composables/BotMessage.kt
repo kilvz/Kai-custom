@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -37,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -49,13 +49,11 @@ import com.kai.custom.ui.markdown.MarkdownContent
 import com.kai.custom.ui.markdown.parseMarkdown
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.bot_message_copy_content_description
-import kai.composeapp.generated.resources.bot_message_flag_content_description
 import kai.composeapp.generated.resources.bot_message_regenerate_content_description
 import kai.composeapp.generated.resources.bot_message_speech_content_description
 import kai.composeapp.generated.resources.bot_message_thinking_expand_content_description
 import kai.composeapp.generated.resources.bot_message_thinking_label
 import kai.composeapp.generated.resources.ic_copy
-import kai.composeapp.generated.resources.ic_flag
 import kai.composeapp.generated.resources.ic_refresh
 import kai.composeapp.generated.resources.ic_stop
 import kai.composeapp.generated.resources.ic_volume_up
@@ -74,6 +72,7 @@ internal fun BotMessage(
     isSpeaking: Boolean,
     setIsSpeaking: (Boolean) -> Unit,
     onRegenerate: (() -> Unit)? = null,
+    onFork: (() -> Unit)? = null,
     isInteractive: Boolean = false,
     onUiCallback: ((event: String, data: Map<String, String>) -> Unit)? = null,
     frozen: FrozenSubmission? = null,
@@ -178,14 +177,11 @@ internal fun BotMessage(
                 clipboardManager.setText(buildAnnotatedString { append(message) })
             },
         )
-        run {
-            val uriHandler = LocalUriHandler.current
+        if (onFork != null) {
             SmallIconButton(
-                iconResource = Res.drawable.ic_flag,
-                contentDescription = stringResource(Res.string.bot_message_flag_content_description),
-                onClick = {
-                    uriHandler.openUri("https://form.jotform.com/250014908169355")
-                },
+                imageVector = Icons.AutoMirrored.Filled.CallSplit,
+                contentDescription = "Fork conversation",
+                onClick = onFork,
             )
         }
         if (onRegenerate != null) {
