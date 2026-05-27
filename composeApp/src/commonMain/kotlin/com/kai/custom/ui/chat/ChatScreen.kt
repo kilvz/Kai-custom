@@ -800,6 +800,8 @@ private fun ChatModeScreen(
                                 ) {
                                     items(uiState.history, key = { it.id }, contentType = { it.role }) { history ->
                                         when (history.role) {
+                                            History.Role.SYSTEM -> {}
+
                                             History.Role.USER -> {
                                                 // Submissions are shown by the paired assistant's frozen kai-ui card
                                                 // above; the "Responded with: …" text bubble would be redundant.
