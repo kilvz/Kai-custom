@@ -65,6 +65,12 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 - JDK 17+
 - No Google Play Services, no Firebase, no proprietary SDKs
 
+## License
+
+Apache License 2.0. See [LICENSE.txt](LICENSE.txt).
+
+Based on [Kai](https://github.com/SimonSchubert/Kai) by Simon Schubert — this is a modified fork.
+
 ## Credits
 
 - Original Kai by [SimonSchubert](https://github.com/SimonSchubert/Kai)
