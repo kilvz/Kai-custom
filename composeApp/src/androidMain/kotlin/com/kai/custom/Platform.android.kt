@@ -575,7 +575,8 @@ actual fun getAvailableTools(): List<Tool> {
                                 // Request a single location update
                                 val latch = java.util.concurrent.CountDownLatch(1)
                                 var result: Map<String, Any> = mapOf("success" to false, "error" to "Could not get location")
-                                locationManager.requestSingleUpdate(provider, object : android.location.LocationListener {
+                                @Suppress("DEPRECATION")
+                                val locationListener = object : android.location.LocationListener {
                                     override fun onLocationChanged(loc: android.location.Location) {
                                         result = mapOf(
                                             "success" to true,
@@ -587,10 +588,14 @@ actual fun getAvailableTools(): List<Tool> {
                                         )
                                         latch.countDown()
                                     }
+                                    @Deprecated("Deprecated in Java")
                                     override fun onStatusChanged(p0: String?, p1: Int, p2: android.os.Bundle?) {}
                                     override fun onProviderEnabled(p0: String) {}
                                     override fun onProviderDisabled(p0: String) {}
-                                }, null)
+                                }
+                                locationManager.requestLocationUpdates(provider, 0L, 0f, locationListener)
+                                latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
+                                locationManager.removeUpdates(locationListener)
                                 latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
                                 result
                             }
@@ -837,6 +842,7 @@ actual fun getAvailableTools(): List<Tool> {
                         }
                         return try {
                             val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                            @Suppress("DEPRECATION")
                             val wifiInfo = wifiManager.connectionInfo
                             if (wifiInfo == null || wifiInfo.networkId == -1) {
                                 return mapOf("success" to true, "connected" to false, "message" to "Not connected to WiFi")
@@ -846,6 +852,7 @@ actual fun getAvailableTools(): List<Tool> {
                             val rssi = wifiInfo.rssi
                             val frequency = wifiInfo.frequency
                             val linkSpeed = wifiInfo.linkSpeed
+                            @Suppress("DEPRECATION")
                             val signalBars = WifiManager.calculateSignalLevel(rssi, 5)
                             mapOf(
                                 "success" to true,

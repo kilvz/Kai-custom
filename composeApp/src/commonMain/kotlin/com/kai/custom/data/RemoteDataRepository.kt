@@ -1509,6 +1509,56 @@ class RemoteDataRepository(
         }
     }
 
+    override suspend fun editAndBranch(messageId: String, newContent: String): Boolean {
+        if (!sandboxController.status.value.ready) return false
+
+        saveCurrentConversation()
+
+        val oldHistory = chatHistory.value.toList()
+        val oldConversationId = _currentConversationId.value ?: return false
+
+        // Store full conversation transcript in MemPalace
+        val transcript = buildString {
+            for (h in oldHistory) {
+                val role = when (h.role) {
+                    History.Role.USER -> "User"
+                    History.Role.ASSISTANT -> "Assistant"
+                    History.Role.TOOL -> "Tool"
+                    History.Role.TOOL_EXECUTING -> "Tool (executing)"
+                }
+                append("$role: ${h.content}\n")
+            }
+        }
+        memoryStore.store(
+            key = "branch_${oldConversationId}",
+            content = transcript,
+            category = MemoryCategory.GENERAL,
+            source = "conversation_branch",
+        )
+
+        val editIndex = oldHistory.indexOfFirst { it.id == messageId }
+        if (editIndex < 0) return false
+
+        // Start fresh conversation
+        startNewChat()
+
+        // Add system preamble + edited message as first user input
+        val branchContext = "[SYSTEM] The user branched from a previous conversation. " +
+            "Use `search_memories` to find the original context if needed."
+        chatHistory.update {
+            mutableListOf(
+                History(
+                    role = History.Role.USER,
+                    content = "$branchContext\n\n${newContent.trim()}",
+                ),
+            )
+        }
+
+        // Trigger AI response with existing history (question=null so ask() doesn't re-add)
+        ask(null, emptyList(), null)
+        return true
+    }
+
     override fun restoreCurrentConversation() {
         // One-time migration for existing users: pin the latest conversation as the new
         // "current" pointer so the upgrade is non-disruptive.

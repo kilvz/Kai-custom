@@ -85,6 +85,7 @@ import com.kai.custom.onDragAndDropEventDropped
 import com.kai.custom.ui.chat.composables.BotMessage
 import com.kai.custom.ui.chat.composables.ChatHistorySheet
 import com.kai.custom.ui.chat.composables.CircleIconButton
+import com.kai.custom.ui.chat.EditMessageDialog
 import com.kai.custom.ui.chat.composables.EmptyState
 import com.kai.custom.ui.chat.composables.ErrorMessage
 import com.kai.custom.ui.chat.composables.HeartbeatBanner
@@ -472,6 +473,8 @@ private fun ChatModeScreen(
     var showHistorySheet by remember { mutableStateOf(false) }
     var isSandboxOpen by rememberSaveable { mutableStateOf(initialSandboxOpen) }
     var isSshOpen by rememberSaveable { mutableStateOf(false) }
+    var editingMessageId by remember { mutableStateOf<String?>(null) }
+    var editingMessageContent by remember { mutableStateOf("") }
     // Hoisted here so the draft survives toggling the sandbox/terminal view, which
     // removes QuestionInput from composition and would otherwise drop the text.
     var questionInputText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -804,6 +807,14 @@ private fun ChatModeScreen(
                                                     UserMessage(
                                                         message = history.content,
                                                         attachments = history.attachments,
+                                                        onEdit = if (isSandboxAvailable) {
+                                                            {
+                                                                editingMessageId = history.id
+                                                                editingMessageContent = history.content
+                                                            }
+                                                        } else {
+                                                            null
+                                                        },
                                                     )
                                                 }
                                             }
@@ -945,6 +956,22 @@ private fun ChatModeScreen(
             modifier = Modifier.align(BottomCenter).padding(bottom = 80.dp),
         ) { data ->
             Snackbar(snackbarData = data)
+        }
+
+        val messageId = editingMessageId
+        if (messageId != null) {
+            EditMessageDialog(
+                initialContent = editingMessageContent,
+                onDismiss = {
+                    editingMessageId = null
+                    editingMessageContent = ""
+                },
+                onSave = { newContent ->
+                    editingMessageId = null
+                    editingMessageContent = ""
+                    uiState.actions.editMessage?.invoke(messageId, newContent)
+                },
+            )
         }
     }
 

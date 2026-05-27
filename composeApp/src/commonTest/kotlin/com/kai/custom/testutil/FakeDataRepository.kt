@@ -273,6 +273,8 @@ class FakeDataRepository : DataRepository {
         }
     }
 
+    override suspend fun editAndBranch(messageId: String, newContent: String): Boolean = false
+
     override fun restoreCurrentConversation() {
         // No-op in tests
     }

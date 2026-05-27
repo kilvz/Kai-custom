@@ -81,6 +81,7 @@ class ChatViewModel(
         startVoiceInput = ::startVoiceInput,
         stopVoiceInput = ::stopVoiceInput,
         clearVoiceInputFlag = ::clearVoiceInputFlag,
+        editMessage = ::editMessage,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
     private var currentJob: Job? = null
@@ -560,6 +561,13 @@ class ChatViewModel(
         if (_state.value.isLoading) return
         dataRepository.truncateFrom(messageId)
         submitUiCallback(event, data)
+    }
+
+    private fun editMessage(messageId: String, newContent: String) {
+        if (_state.value.isLoading) return
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.editAndBranch(messageId, newContent)
+        }
     }
 
     private fun goBackInteractiveMode() {

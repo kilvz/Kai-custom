@@ -31,4 +31,5 @@ data class ChatActions(
     val startVoiceInput: () -> Unit,
     val stopVoiceInput: () -> Unit,
     val clearVoiceInputFlag: () -> Unit,
+    val editMessage: ((messageId: String, content: String) -> Unit)?,
 )
