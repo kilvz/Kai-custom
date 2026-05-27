@@ -48,6 +48,8 @@ object ScreenshotTestData {
         goBackInteractiveMode = { },
         sendSmsDraft = {},
         discardSmsDraft = {},
+        startVoiceInput = {},
+        stopVoiceInput = {},
     )
 
     val chatEmptyState = ChatUiState(

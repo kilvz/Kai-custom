@@ -1,6 +1,7 @@
 package com.kai.custom.ui.chat.composables
 
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -27,6 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
@@ -72,6 +75,7 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_attach
 import kai.composeapp.generated.resources.ic_file
 import kai.composeapp.generated.resources.ic_image
+import kai.composeapp.generated.resources.ic_mic
 import kai.composeapp.generated.resources.ic_stop
 import kai.composeapp.generated.resources.ic_up
 import kai.composeapp.generated.resources.prompt_ask_question
@@ -95,6 +99,9 @@ fun QuestionInput(
     cancel: () -> Unit = {},
     availableServices: ImmutableList<ServiceEntry> = persistentListOf(),
     onSelectService: (String) -> Unit = {},
+    isVoiceInputActive: Boolean = false,
+    onStartVoiceInput: () -> Unit = {},
+    onStopVoiceInput: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -213,8 +220,16 @@ fun QuestionInput(
                     }
                     if (isLoading) {
                         TrailingIcon(icon = Res.drawable.ic_stop, onClick = cancel, isPulsing = true)
+                    } else if (isVoiceInputActive) {
+                        VoiceRecordingIcon(onClick = onStopVoiceInput)
                     } else if (textState.text.isNotBlank()) {
                         TrailingIcon(icon = Res.drawable.ic_up, onClick = { submitQuestion() })
+                    } else {
+                        CircleIconButton(
+                            icon = Icons.Filled.Mic,
+                            onClick = onStartVoiceInput,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             },
@@ -333,6 +348,38 @@ internal fun CircleIconButton(
             modifier = Modifier.size(24.dp),
             contentDescription = null,
             tint = tint,
+        )
+    }
+}
+
+@Composable
+internal fun VoiceRecordingIcon(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val infiniteTransition = rememberInfiniteTransition()
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 600, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+    )
+    Box(
+        modifier = modifier
+            .size(42.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.error.copy(alpha = pulseAlpha), CircleShape)
+            .handCursor()
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            vectorResource(Res.drawable.ic_mic),
+            modifier = Modifier.size(24.dp),
+            contentDescription = null,
+            tint = Color.White,
         )
     }
 }

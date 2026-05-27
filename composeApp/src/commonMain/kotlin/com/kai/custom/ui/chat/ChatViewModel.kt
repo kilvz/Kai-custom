@@ -2,6 +2,7 @@ package com.kai.custom.ui.chat
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kai.custom.SpeechToText
 import com.kai.custom.data.Conversation
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.FreeMode
@@ -42,6 +43,7 @@ import kotlin.time.Duration.Companion.seconds
 class ChatViewModel(
     private val dataRepository: DataRepository,
     private val taskScheduler: TaskScheduler,
+    private val speechToText: SpeechToText,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -69,6 +71,8 @@ class ChatViewModel(
         goBackInteractiveMode = ::goBackInteractiveMode,
         sendSmsDraft = ::sendSmsDraft,
         discardSmsDraft = ::discardSmsDraft,
+        startVoiceInput = ::startVoiceInput,
+        stopVoiceInput = ::stopVoiceInput,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
     private var currentJob: Job? = null
@@ -295,6 +299,26 @@ class ChatViewModel(
         _state.update {
             it.copy(isLoading = false)
         }
+    }
+
+    private fun startVoiceInput() {
+        if (!speechToText.isAvailable) {
+            _state.update { it.copy(snackbarMessage = null) }
+            return
+        }
+        _state.update { it.copy(isVoiceInputActive = true, voiceInputPartial = "") }
+        speechToText.startListening(
+            onPartialResult = { partial -> _state.update { it.copy(voiceInputPartial = partial) } },
+            onFinalResult = { final ->
+                _state.update { it.copy(isVoiceInputActive = false, voiceInputPartial = final) }
+            },
+            onError = { _state.update { it.copy(isVoiceInputActive = false) } },
+        )
+    }
+
+    private fun stopVoiceInput() {
+        speechToText.stopListening()
+        _state.update { it.copy(isVoiceInputActive = false) }
     }
 
     private fun selectService(instanceId: String) {
