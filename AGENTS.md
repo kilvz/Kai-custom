@@ -9,7 +9,7 @@ Android-only builds. Repo: `kilvz/Kai-custom`.
 - **Minor** bump (1.X.0) — any new feature, tool, or non-trivial improvement
 - Patch (1.0.X) — bug fixes only (deprecated; all changes should be at least minor)
 
-## What We Built This Session (v1.2.0)
+## What We Built This Session (v1.4.0)
 
 ### Phone Tools (8 new tools)
 - `PhoneTools.kt` in `composeApp/src/commonMain/kotlin/com/kai/custom/tools/` — ToolInfo definitions
@@ -61,7 +61,7 @@ Android-only builds. Repo: `kilvz/Kai-custom`.
 | `composeApp/src/commonMain/kotlin/com/kai/custom/SandboxController.kt` | `writeBinaryFile()` interface |
 | `composeApp/src/androidMain/kotlin/com/kai/custom/SandboxController.android.kt` | Android `writeBinaryFile` impl (writes raw bytes to sandbox) |
 | `composeApp/src/commonMain/kotlin/com/kai/custom/data/RemoteDataRepository.kt` | `ask()` writes binary attachments to sandbox |
-| `gradle/libs.versions.toml` | Version: appVersion = "1.2.0" |
+| `gradle/libs.versions.toml` | Version: appVersion = "1.4.0" |
 | `composeApp/src/commonMain/kotlin/com/kai/custom/tools/CommonTools.kt` | search_memories tool + all memory tool definitions |
 | `composeApp/src/commonMain/kotlin/com/kai/custom/data/AppSettings.kt` | DEFAULT_MEMORY_INSTRUCTIONS, DEFAULT_LOCAL_MEMORY_INSTRUCTIONS, setMemoryInstructions() |
 | `composeApp/src/commonMain/kotlin/com/kai/custom/data/ChatSystemPromptBuilder.kt` | System prompt builder (memory sections, no more DEFAULT_STRUCTURED_LEARNING_SECTION) |
