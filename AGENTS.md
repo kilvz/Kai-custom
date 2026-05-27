@@ -12,7 +12,6 @@ Public FOSS fork of Kai. Kotlin Multiplatform (Compose Multiplatform).
 
 ## What This Repo Excludes
 - **No Play Store files**: no `androidApp/src/playStore/`, no `com.kilv.ai` package override, no permission stripping overlay
-- Play Store variant lives in a separate private repo: `github.com/kilvz/k-ai` (cloned locally at `F:\Kai\playstore\source\`)
 
 ## Build Commands
 ```powershell
@@ -45,7 +44,7 @@ adb install -r androidApp\build\outputs\apk\foss\debug\androidApp-foss-debug.apk
 | `composeApp/src/commonMain/kotlin/com/kai/custom/tools/PhoneTools.kt` | 8 phone tool definitions |
 | `composeApp/src/androidMain/kotlin/com/kai/custom/Platform.android.kt` | Tool implementations + perms + promote_learning gating |
 | `androidApp/src/foss/AndroidManifest.xml` | SMS + notification listener (FOSS-only features) |
-| `PRIVACY.md` | Privacy policy (shared with k-ai Play Store listing) |
+| `PRIVACY.md` | Privacy policy |
 | `gradle/libs.versions.toml` | Version: `appVersion`, `android-versionCode` |
 | `androidApp/src/main/AndroidManifest.xml` | All Android permissions (30+) |
 
@@ -66,11 +65,3 @@ Current: `1.10.0` (versionCode `115`) — update in `gradle/libs.versions.toml`
 - **Never** add Play Store code (no `androidApp/src/playStore/`, no `isPlayStore` gating in build.gradle.kts)
 - **Always** build with `--no-configuration-cache` to avoid cache corruption
 - iOS/Desktop/WasmJS builds cannot be tested on this Windows machine
-- When syncing features to k-ai, cherry-pick commits (not full merge)
-
-## Related Repos
-| Repo | Local Path | Purpose |
-|------|-----------|---------|
-| `kilvz/Kai-custom` | `F:\Kai\` | Public FOSS (this repo) |
-| `kilvz/k-ai` | `F:\Kai\playstore\source\` | Private Play Store variant |
-| `SimonSchubert/Kai` | via `upstream` remote | Original upstream |
