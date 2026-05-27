@@ -1,7 +1,7 @@
 # Kai 9001
 
 > **Android-only** fork of [Kai](https://github.com/SimonSchubert/Kai) — an open-source AI assistant with persistent memory.  
-> v1.4.0 · FOSS-only · No proprietary SDKs.
+> v1.5.0 · FOSS-only · No proprietary SDKs.
 
 <div align="center">
 <img src="site/img/logo_animation.gif" height="80">
