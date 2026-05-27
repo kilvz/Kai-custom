@@ -3,6 +3,7 @@ package com.kai.custom.ui.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -107,8 +109,14 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                         WakeWordSection(
                             isWakeWordEnabled = uiState.isWakeWordEnabled,
                             wakeWordPhrase = uiState.wakeWordPhrase,
+                            wakeWordMode = uiState.wakeWordMode,
+                            wakeWordEnrolled = uiState.wakeWordEnrolled,
+                            isEnrolling = uiState.isEnrolling,
+                            wakeWordEnrollmentMessage = uiState.wakeWordEnrollmentMessage,
                             onToggleWakeWord = actions.onToggleWakeWord,
                             onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
+                            onChangeWakeWordMode = actions.onChangeWakeWordMode,
+                            onEnrollWakeWord = actions.onEnrollWakeWord,
                         )
                     }
                     SettingsCard {
@@ -157,8 +165,14 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     WakeWordSection(
                         isWakeWordEnabled = uiState.isWakeWordEnabled,
                         wakeWordPhrase = uiState.wakeWordPhrase,
+                        wakeWordMode = uiState.wakeWordMode,
+                        wakeWordEnrolled = uiState.wakeWordEnrolled,
+                        isEnrolling = uiState.isEnrolling,
+                        wakeWordEnrollmentMessage = uiState.wakeWordEnrollmentMessage,
                         onToggleWakeWord = actions.onToggleWakeWord,
                         onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
+                        onChangeWakeWordMode = actions.onChangeWakeWordMode,
+                        onEnrollWakeWord = actions.onEnrollWakeWord,
                     )
                 }
                 SettingsCard {
@@ -318,8 +332,14 @@ private fun ThemeModePicker(
 private fun WakeWordSection(
     isWakeWordEnabled: Boolean,
     wakeWordPhrase: String,
+    wakeWordMode: String,
+    wakeWordEnrolled: Boolean,
+    isEnrolling: Boolean,
+    wakeWordEnrollmentMessage: String = "",
     onToggleWakeWord: (Boolean) -> Unit,
     onChangeWakeWordPhrase: (String) -> Unit,
+    onChangeWakeWordMode: (String) -> Unit,
+    onEnrollWakeWord: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -349,6 +369,83 @@ private fun WakeWordSection(
                 label = { Text("Wake word phrase") },
                 singleLine = true,
             )
+            Spacer(Modifier.height(8.dp))
+            // Mode selector
+            val modes = listOf("GENERAL" to "General (anyone)", "PERSONAL" to "Personal (your voice)")
+            Text(
+                text = "Detection mode",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Spacer(Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                modes.forEach { (value, label) ->
+                    OutlinedButton(
+                        onClick = { onChangeWakeWordMode(value) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(
+                            text = label,
+                            color = if (wakeWordMode == value)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+            if (wakeWordMode == "PERSONAL") {
+                Spacer(Modifier.height(8.dp))
+                if (wakeWordEnrolled) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = CenterVertically,
+                    ) {
+                        Text(
+                            text = "Your voice enrolled",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        OutlinedButton(
+                            onClick = onEnrollWakeWord,
+                            enabled = !isEnrolling,
+                        ) {
+                            if (isEnrolling) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                )
+                            } else {
+                                Text("Re-enroll")
+                            }
+                        }
+                    }
+                } else {
+                    OutlinedButton(
+                        onClick = onEnrollWakeWord,
+                        enabled = !isEnrolling,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        if (isEnrolling) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text("Enroll your voice")
+                        }
+                    }
+                }
+                if (isEnrolling && wakeWordEnrollmentMessage.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = wakeWordEnrollmentMessage,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
         }
     }
 }

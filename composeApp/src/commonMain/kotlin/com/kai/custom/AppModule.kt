@@ -151,7 +151,7 @@ val appModule = module {
     single<SandboxController> { createSandboxController() }
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<NotificationPermissionController>(), get<TaskScheduler>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
     viewModel { SandboxPackagesViewModel(get<SandboxController>()) }

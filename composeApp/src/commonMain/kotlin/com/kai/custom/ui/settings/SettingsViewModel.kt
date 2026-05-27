@@ -7,6 +7,7 @@ import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
 import com.kai.custom.openTtsSettings
+import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.data.ImportSection
 import com.kai.custom.data.Service
 import com.kai.custom.data.TaskScheduler
@@ -62,6 +63,7 @@ class SettingsViewModel(
     private val daemonController: DaemonController,
     private val notificationPermissionController: NotificationPermissionController,
     private val taskScheduler: TaskScheduler,
+    private val wakeWordController: WakeWordController,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -122,6 +124,9 @@ class SettingsViewModel(
         isFreeFallbackEnabled = dataRepository.isFreeFallbackEnabled(),
         isWakeWordEnabled = dataRepository.isWakeWordEnabled(),
         wakeWordPhrase = dataRepository.getWakeWordPhrase(),
+        wakeWordMode = dataRepository.getWakeWordMode(),
+        wakeWordEnrolled = dataRepository.getWakeWordTemplate().isNotBlank(),
+        isEnrolling = false,
         uiScale = dataRepository.getUiScale(),
         showUiScale = currentPlatform is Platform.Desktop,
         mcpServers = buildMcpServerEntries().toImmutableList(),
@@ -177,6 +182,8 @@ class SettingsViewModel(
         onToggleFreeFallback = ::onToggleFreeFallback,
         onToggleWakeWord = ::onToggleWakeWord,
         onChangeWakeWordPhrase = ::onChangeWakeWordPhrase,
+        onChangeWakeWordMode = ::onChangeWakeWordMode,
+        onEnrollWakeWord = ::onEnrollWakeWord,
         onChangeUiScale = ::onChangeUiScale,
         onAddMcpServer = ::onAddMcpServer,
         onRemoveMcpServer = ::onRemoveMcpServer,
@@ -671,6 +678,27 @@ class SettingsViewModel(
     private fun onChangeWakeWordPhrase(phrase: String) {
         dataRepository.setWakeWordPhrase(phrase)
         _state.update { it.copy(wakeWordPhrase = phrase) }
+    }
+
+    private fun onChangeWakeWordMode(mode: String) {
+        dataRepository.setWakeWordMode(mode)
+        _state.update { it.copy(wakeWordMode = mode) }
+    }
+
+    private fun onEnrollWakeWord() {
+        val phrase = dataRepository.getWakeWordPhrase()
+        _state.update { it.copy(isEnrolling = true, wakeWordEnrollmentMessage = "Getting ready...") }
+        viewModelScope.launch(backgroundDispatcher) {
+            val template = wakeWordController.enroll(phrase) { msg ->
+                _state.update { it.copy(wakeWordEnrollmentMessage = msg) }
+            }
+            if (template != null) {
+                dataRepository.setWakeWordTemplate(template)
+                _state.update { it.copy(wakeWordEnrolled = true, isEnrolling = false, wakeWordEnrollmentMessage = "") }
+            } else {
+                _state.update { it.copy(isEnrolling = false, wakeWordEnrollmentMessage = "") }
+            }
+        }
     }
 
     private fun onDownloadLocalModel(model: LocalModel) {

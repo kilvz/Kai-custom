@@ -180,7 +180,6 @@ def _truncate_to_1sec(audio: np.ndarray) -> np.ndarray:
 
 
 def _ensure_ffmpeg():
-    from pydub import AudioSegment
     from pydub.utils import which
     if which("ffmpeg") is not None:
         return
@@ -188,16 +187,21 @@ def _ensure_ffmpeg():
     ff_exe = os.path.join(ff_dir, "ffmpeg.exe")
     os.environ["PATH"] = ff_dir + os.pathsep + os.environ.get("PATH", "")
     if os.path.exists(ff_exe):
+        from pydub import AudioSegment
         AudioSegment.converter = ff_exe
         return
-    # fallback: env var
     env_val = os.environ.get("FFMPEG_BINARY")
     if env_val and os.path.exists(env_val):
+        from pydub import AudioSegment
         AudioSegment.converter = env_val
+
+_ensure_ffmpeg()
+
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="pydub")
 
 async def generate_kai_samples(count: int) -> list[np.ndarray]:
     from pydub import AudioSegment
-    _ensure_ffmpeg()
     voices = [
         "en-US-JennyNeural",
         "en-US-GuyNeural",
@@ -294,10 +298,15 @@ def load_other_samples(sc_dir: str, max_per_word: int = 200) -> list[np.ndarray]
 
 # ── Model (Keras) ──────────────────────────────────────────────────────
 
-def build_model():
+def build_model(mean_std: tuple | None = None):
     import tensorflow as tf
+    norm_layer = tf.keras.layers.Normalization(
+        axis=-1, mean=mean_std[0] if mean_std else None,
+        variance=mean_std[1] if mean_std else None,
+    )
     model = tf.keras.Sequential([
         tf.keras.layers.Input(shape=INPUT_SHAPE, name="mfcc_input"),
+        norm_layer,
         tf.keras.layers.Reshape((NUM_FRAMES, NUM_MFCC, 1)),
         tf.keras.layers.Conv2D(8, (10, 8), activation="relu", padding="same"),
         tf.keras.layers.MaxPooling2D((2, 2)),
@@ -363,12 +372,7 @@ async def main():
     idx = np.random.permutation(len(X))
     X, y = X[idx], y[idx]
 
-    # Normalize per-feature
-    mean = X.mean(axis=(0, 1), keepdims=True)
-    std = X.std(axis=(0, 1), keepdims=True) + 1e-8
-    X = (X - mean) / std
-
-    # Split
+    # Split (normalize inside model — no manual normalization needed)
     split = int(0.8 * len(X))
     X_train, X_test = X[:split], X[split:]
     y_train, y_test = y[:split], y[split:]
@@ -376,7 +380,10 @@ async def main():
 
     # Step 4: Train
     print(f"\n[4] Training model ({args.epochs} epochs) ...")
-    model = build_model()
+    # Compute mean/variance from training set for Normalization layer
+    norm_mean = X_train.mean(axis=(0, 1), keepdims=False)  # shape (13,)
+    norm_var = X_train.var(axis=(0, 1), keepdims=False) + 1e-8
+    model = build_model(mean_std=(norm_mean, norm_var))
     model.summary()
     history = model.fit(
         X_train, y_train,

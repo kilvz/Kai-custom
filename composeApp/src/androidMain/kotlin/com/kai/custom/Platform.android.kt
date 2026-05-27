@@ -535,6 +535,7 @@ actual fun getAvailableTools(): List<Tool> {
                         }
                         return try {
                             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+                            @Suppress("DEPRECATION")
                             val provider = locationManager.getBestProvider(android.location.Criteria().apply { accuracy = android.location.Criteria.ACCURACY_FINE }, true)
                             if (provider == null) {
                                 return mapOf("success" to false, "error" to "No location provider available. Enable GPS or network location.")

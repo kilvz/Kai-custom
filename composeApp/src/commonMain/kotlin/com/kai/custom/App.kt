@@ -142,12 +142,16 @@ private fun AppContent(
     val microphonePermissionController = koinInject<MicrophonePermissionController>()
     SetupMicrophonePermissionHandler(microphonePermissionController)
 
-    // Wake word — start/stop listening when the Voice toggle changes in Settings
+    // Wake word — start/stop listening when the Voice toggle or mode changes
     val wakeWordController = koinInject<WakeWordController>()
     val isWakeWordEnabled by appSettings.wakeWordEnabledFlow.collectAsStateWithLifecycle(false)
-    LaunchedEffect(isWakeWordEnabled) {
+    val wakeWordMode by appSettings.wakeWordModeFlow.collectAsStateWithLifecycle(appSettings.getWakeWordMode())
+    LaunchedEffect(isWakeWordEnabled, wakeWordMode) {
         if (isWakeWordEnabled) {
-            wakeWordController.startListening(appSettings.getWakeWordPhrase())
+            val phrase = appSettings.getWakeWordPhrase()
+            val mode = appSettings.getWakeWordMode()
+            val template = appSettings.getWakeWordTemplate()
+            wakeWordController.startListening(phrase, com.kai.custom.wakeword.WakeWordMode.valueOf(mode), template)
         } else {
             wakeWordController.stopListening()
         }

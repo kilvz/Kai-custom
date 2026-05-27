@@ -30,4 +30,5 @@ data class ChatActions(
     val discardSmsDraft: (String) -> Unit,
     val startVoiceInput: () -> Unit,
     val stopVoiceInput: () -> Unit,
+    val clearVoiceInputFlag: () -> Unit,
 )

@@ -352,6 +352,22 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_WAKE_WORD_PHRASE, phrase)
     }
 
+    fun getWakeWordMode(): String = settings.getString(KEY_WAKE_WORD_MODE, "GENERAL")
+
+    private val _wakeWordModeFlow = MutableStateFlow(getWakeWordMode())
+    val wakeWordModeFlow: StateFlow<String> = _wakeWordModeFlow
+
+    fun setWakeWordMode(mode: String) {
+        settings.putString(KEY_WAKE_WORD_MODE, mode)
+        _wakeWordModeFlow.value = mode
+    }
+
+    fun getWakeWordTemplate(): String = settings.getString(KEY_WAKE_WORD_TEMPLATE, "")
+
+    fun setWakeWordTemplate(template: String) {
+        settings.putString(KEY_WAKE_WORD_TEMPLATE, template)
+    }
+
     fun getScheduledTasksJson(): String = settings.getString(KEY_SCHEDULED_TASKS, "[]")
 
     fun setScheduledTasksJson(json: String) {
@@ -626,6 +642,8 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SANDBOX_STORAGE_MOUNT = "sandbox_storage_mount"
         const val KEY_WAKE_WORD_ENABLED = "wake_word_enabled"
         const val KEY_WAKE_WORD_PHRASE = "wake_word_phrase"
+        const val KEY_WAKE_WORD_MODE = "wake_word_mode"
+        const val KEY_WAKE_WORD_TEMPLATE = "wake_word_template"
 
         // Full memory guidance for remote models — references all memory tools.
         const val DEFAULT_MEMORY_INSTRUCTIONS =
