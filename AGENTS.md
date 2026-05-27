@@ -4,7 +4,12 @@
 **Kai 9001** — Android fork of Kai. Kotlin Multiplatform (Compose Multiplatform).
 Android-only builds. Repo: `kilvz/Kai-custom`.
 
-## What We Built This Session (v1.0.1)
+## Versioning Convention
+- **Major** bump (X.0.0) — breaking changes, new architectural patterns, major feature additions
+- **Minor** bump (1.X.0) — any new feature, tool, or non-trivial improvement
+- Patch (1.0.X) — bug fixes only (deprecated; all changes should be at least minor)
+
+## What We Built This Session (v1.2.0)
 
 ### Phone Tools (8 new tools)
 - `PhoneTools.kt` in `composeApp/src/commonMain/kotlin/com/kai/custom/tools/` — ToolInfo definitions
@@ -34,6 +39,15 @@ Android-only builds. Repo: `kilvz/Kai-custom`.
 - Files written only when sandbox is `Ready`; falls back to text stub silently if sandbox not available
 - Fixes the root cause of the DeepSeek error when uploading Excel files — AI can now actually access the file content instead of only seeing `[Attached file: ...]`
 
+### Memory System Overhaul
+- Added `search_memories(query, limit)` tool — AI can now query its own memory store on demand
+- Rewrote `DEFAULT_MEMORY_INSTRUCTIONS` as a dedicated `## Memory System` header covering all 6 memory tools
+- Added `DEFAULT_LOCAL_MEMORY_INSTRUCTIONS` (trimmed for on-device models without memory_learn/promote_learning)
+- Variant-aware default selection in `getActiveSystemPrompt()`
+- Fixed `promote_learning` gating: now controlled by `isMemoryEnabled()` instead of `isSchedulingEnabled()`
+- Fixed `AgentSettings.kt` double MemoryList rendering
+- Added `setMemoryInstructions()` + `hasCustomMemoryInstructions()` to `AppSettings`
+
 ## Key Files
 | File | Purpose |
 |------|---------|
@@ -47,7 +61,14 @@ Android-only builds. Repo: `kilvz/Kai-custom`.
 | `composeApp/src/commonMain/kotlin/com/kai/custom/SandboxController.kt` | `writeBinaryFile()` interface |
 | `composeApp/src/androidMain/kotlin/com/kai/custom/SandboxController.android.kt` | Android `writeBinaryFile` impl (writes raw bytes to sandbox) |
 | `composeApp/src/commonMain/kotlin/com/kai/custom/data/RemoteDataRepository.kt` | `ask()` writes binary attachments to sandbox |
-| `gradle/libs.versions.toml` | Version: appVersion = "1.0.1" |
+| `gradle/libs.versions.toml` | Version: appVersion = "1.2.0" |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/tools/CommonTools.kt` | search_memories tool + all memory tool definitions |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/data/AppSettings.kt` | DEFAULT_MEMORY_INSTRUCTIONS, DEFAULT_LOCAL_MEMORY_INSTRUCTIONS, setMemoryInstructions() |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/data/ChatSystemPromptBuilder.kt` | System prompt builder (memory sections, no more DEFAULT_STRUCTURED_LEARNING_SECTION) |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/data/RemoteDataRepository.kt` | Variant-aware default selection, LOCAL_TOOL_ALLOWLIST |
+| `composeApp/src/androidMain/kotlin/com/kai/custom/Platform.android.kt` | promote_learning gated by memoryEnabled |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/tools/HeartbeatTools.kt` | getPromoteLearningTool() replaces getHeartbeatTools() |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/ui/settings/AgentSettings.kt` | Fixed double MemoryList rendering |
 
 ## Build & Deploy
 ```powershell
