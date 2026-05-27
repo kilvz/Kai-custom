@@ -26,3 +26,4 @@ fastlane/README.md
 .opencode
 *.tar.gz
 tools/speech_commands/
+*.tflite
