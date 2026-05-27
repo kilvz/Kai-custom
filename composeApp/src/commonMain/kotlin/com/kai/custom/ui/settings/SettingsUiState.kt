@@ -48,6 +48,7 @@ enum class SettingsTab {
     General,
     Agent,
     Services,
+    SSH,
     Tools,
     Sandbox,
     Integrations,

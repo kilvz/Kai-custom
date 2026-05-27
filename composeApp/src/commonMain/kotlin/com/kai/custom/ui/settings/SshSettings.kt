@@ -59,6 +59,7 @@ internal fun SshSettingsCard(
     onAuthMethodChanged: (SshAuthMethod) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onPrivateKeyChanged: (String) -> Unit,
+    onPassphraseChanged: (String) -> Unit = {},
     onConnect: () -> Unit,
     onDisconnect: () -> Unit,
     onClearTranscript: () -> Unit = {},
@@ -157,9 +158,18 @@ internal fun SshSettingsCard(
                 OutlinedTextField(
                     value = sshState.privateKey,
                     onValueChange = onPrivateKeyChanged,
-                    label = { Text("Private Key (PEM)") },
+                    label = { Text("Private Key (PEM, OpenSSH, PPK)") },
                     minLines = 4,
                     maxLines = 8,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = sshState.passphrase,
+                    onValueChange = onPassphraseChanged,
+                    label = { Text("Passphrase (optional)") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

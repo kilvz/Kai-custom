@@ -17,16 +17,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -42,19 +53,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kai.custom.SshAuthMethod
+import com.kai.custom.SshProfile
 import com.kai.custom.TerminalLine
 import com.kai.custom.ui.handCursor
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ssh_terminal_help_text
 import kai.composeapp.generated.resources.ssh_terminal_input_placeholder
-import kai.composeapp.generated.resources.ssh_terminal_not_connected
 import kai.composeapp.generated.resources.ssh_terminal_title
 import kai.composeapp.generated.resources.terminal_run_content_description
 import org.jetbrains.compose.resources.stringResource
@@ -76,6 +91,7 @@ private fun monoStyle(size: TextUnit, color: Color = Color.Unspecified) = TextSt
 internal fun SshTerminalContent(
     sshViewModel: SshViewModel,
     modifier: Modifier = Modifier,
+    onOpenSettings: (() -> Unit)? = null,
 ) {
     val state by sshViewModel.state.collectAsStateWithLifecycle()
     val isRunning by sshViewModel.isRunning.collectAsStateWithLifecycle()
@@ -104,15 +120,19 @@ internal fun SshTerminalContent(
             .imePadding(),
     ) {
         if (!isConnected) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(Res.string.ssh_terminal_not_connected),
-                    style = monoStyle(14.sp, SshDimText),
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                DisconnectedSshContent(
+                    state = state,
+                    onHostChanged = sshViewModel::onHostChanged,
+                    onPortChanged = sshViewModel::onPortChanged,
+                    onUsernameChanged = sshViewModel::onUsernameChanged,
+                    onAuthMethodChanged = sshViewModel::onAuthMethodChanged,
+                    onPasswordChanged = sshViewModel::onPasswordChanged,
+                    onPrivateKeyChanged = sshViewModel::onPrivateKeyChanged,
+                    onPassphraseChanged = sshViewModel::onPassphraseChanged,
+                    onSelectProfile = sshViewModel::selectProfile,
+                    onConnect = sshViewModel::connect,
+                    onOpenSettings = onOpenSettings,
                 )
             }
         } else {
@@ -243,6 +263,267 @@ internal fun SshTerminalContent(
                     tint = if (canSubmit) SshPrompt else SshDimText,
                     modifier = Modifier.size(20.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DisconnectedSshContent(
+    state: SshUiState,
+    onHostChanged: (String) -> Unit,
+    onPortChanged: (String) -> Unit,
+    onUsernameChanged: (String) -> Unit,
+    onAuthMethodChanged: (SshAuthMethod) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onPrivateKeyChanged: (String) -> Unit,
+    onPassphraseChanged: (String) -> Unit,
+    onSelectProfile: (String) -> Unit,
+    onConnect: () -> Unit,
+    onOpenSettings: (() -> Unit)? = null,
+) {
+    val scrollState = rememberScrollState()
+    var showAddForm by remember {
+        mutableStateOf(state.profiles.isEmpty())
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        Text(
+            text = "SSH Terminal",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Connect to a remote server to execute commands",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(16.dp))
+
+        if (state.profiles.isNotEmpty()) {
+            TerminalProfileSelector(
+                profiles = state.profiles,
+                activeProfileName = state.activeProfileName,
+                onSelectProfile = onSelectProfile,
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+
+        if (!showAddForm && state.profiles.isNotEmpty()) {
+            OutlinedButton(
+                onClick = { showAddForm = true },
+                modifier = Modifier.fillMaxWidth().handCursor(),
+            ) {
+                Text("Add Server")
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        if (showAddForm) {
+            OutlinedTextField(
+                value = state.host,
+                onValueChange = onHostChanged,
+                label = { Text("Host") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(8.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = state.port,
+                    onValueChange = onPortChanged,
+                    label = { Text("Port") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(120.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                OutlinedTextField(
+                    value = state.username,
+                    onValueChange = onUsernameChanged,
+                    label = { Text("Username") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+
+            Column(Modifier.selectableGroup()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = state.authMethod == SshAuthMethod.PASSWORD,
+                            onClick = { onAuthMethodChanged(SshAuthMethod.PASSWORD) },
+                            role = Role.RadioButton,
+                        )
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = state.authMethod == SshAuthMethod.PASSWORD, onClick = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Password", style = MaterialTheme.typography.bodyMedium)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = state.authMethod == SshAuthMethod.KEY,
+                            onClick = { onAuthMethodChanged(SshAuthMethod.KEY) },
+                            role = Role.RadioButton,
+                        )
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(selected = state.authMethod == SshAuthMethod.KEY, onClick = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Private Key", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+
+            if (state.authMethod == SshAuthMethod.PASSWORD) {
+                OutlinedTextField(
+                    value = state.password,
+                    onValueChange = onPasswordChanged,
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                OutlinedTextField(
+                    value = state.privateKey,
+                    onValueChange = onPrivateKeyChanged,
+                    label = { Text("Private Key") },
+                    minLines = 3,
+                    maxLines = 6,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = state.passphrase,
+                    onValueChange = onPassphraseChanged,
+                    label = { Text("Passphrase (optional)") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+
+            val conn = state.connectionState
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Button(
+                    onClick = onConnect,
+                    enabled = !conn.connecting && state.host.isNotBlank() && state.username.isNotBlank(),
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text(if (conn.connecting) "Connecting..." else "Connect")
+                }
+                if (conn.error != null) {
+                    Text(
+                        text = conn.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
+
+            if (state.profiles.isNotEmpty()) {
+                Spacer(Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = { showAddForm = false },
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text("Cancel")
+                }
+            }
+        }
+
+        if (onOpenSettings != null) {
+            Spacer(Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = onOpenSettings,
+                modifier = Modifier.handCursor(),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                Text("SSH Settings")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TerminalProfileSelector(
+    profiles: List<SshProfile>,
+    activeProfileName: String,
+    onSelectProfile: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val activeLabel = if (activeProfileName.isNotBlank()) activeProfileName else "Select profile..."
+    Column {
+        Text(
+            text = "Saved Profiles",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(4.dp))
+        Box {
+            OutlinedButton(
+                onClick = { expanded = true },
+                modifier = Modifier.fillMaxWidth().handCursor(),
+            ) {
+                Text(activeLabel, maxLines = 1)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth(0.9f),
+            ) {
+                if (activeProfileName.isNotBlank()) {
+                    DropdownMenuItem(
+                        text = { Text("None (manual entry)") },
+                        onClick = {
+                            onSelectProfile("")
+                            expanded = false
+                        },
+                    )
+                }
+                profiles.forEach { profile ->
+                    DropdownMenuItem(
+                        text = {
+                            Column {
+                                Text(profile.name, style = MaterialTheme.typography.bodyMedium)
+                                Text(
+                                    "${profile.username}@${profile.host}:${profile.port}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        },
+                        onClick = {
+                            onSelectProfile(profile.name)
+                            expanded = false
+                        },
+                    )
+                }
             }
         }
     }

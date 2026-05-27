@@ -28,7 +28,8 @@ class AndroidSshConnectionManager : SshConnectionManager {
             session?.disconnect()
 
             if (config.authMethod == SshAuthMethod.KEY && config.privateKey.isNotBlank()) {
-                jsch.addIdentity("kai_ssh_key", config.privateKey.toByteArray(), null, null)
+                val passphraseBytes = if (config.passphrase.isNotBlank()) config.passphrase.toByteArray() else null
+                jsch.addIdentity("kai_ssh_key", config.privateKey.toByteArray(), null, passphraseBytes)
             }
 
             val s = jsch.getSession(config.username, config.host, config.port).apply {

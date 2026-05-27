@@ -24,6 +24,7 @@ data class SshUiState(
     val authMethod: SshAuthMethod = SshAuthMethod.PASSWORD,
     val password: String = "",
     val privateKey: String = "",
+    val passphrase: String = "",
     val connectionState: SshConnectionState = SshConnectionState(),
     val transcript: List<TerminalLine> = emptyList(),
     val profiles: List<SshProfile> = emptyList(),
@@ -43,6 +44,7 @@ class SshViewModel(
             authMethod = appSettings.getSshAuthMethod(),
             password = appSettings.getSshPassword(),
             privateKey = appSettings.getSshPrivateKey(),
+            passphrase = appSettings.getSshPassphrase(),
             profiles = appSettings.getSshProfiles(),
             activeProfileName = appSettings.getActiveSshProfileName(),
         )
@@ -74,6 +76,7 @@ class SshViewModel(
             authMethod = profile.authMethod,
             password = profile.password,
             privateKey = profile.privateKey,
+            passphrase = profile.passphrase,
             profiles = appSettings.getSshProfiles(),
         )
     }
@@ -98,6 +101,7 @@ class SshViewModel(
             authMethod = s.authMethod,
             password = s.password,
             privateKey = s.privateKey,
+            passphrase = s.passphrase,
         )
         appSettings.saveSshProfile(profile)
         appSettings.setActiveSshProfileName(name)
@@ -131,6 +135,10 @@ class SshViewModel(
         _configState.value = _configState.value.copy(privateKey = key)
     }
 
+    fun onPassphraseChanged(passphrase: String) {
+        _configState.value = _configState.value.copy(passphrase = passphrase)
+    }
+
     fun saveSettings() {
         val s = _configState.value
         appSettings.setSshHost(s.host)
@@ -139,6 +147,7 @@ class SshViewModel(
         appSettings.setSshAuthMethod(s.authMethod)
         appSettings.setSshPassword(s.password)
         appSettings.setSshPrivateKey(s.privateKey)
+        appSettings.setSshPassphrase(s.passphrase)
     }
 
     fun connect() {
@@ -154,6 +163,7 @@ class SshViewModel(
                     authMethod = s.authMethod,
                     password = s.password,
                     privateKey = s.privateKey,
+                    passphrase = s.passphrase,
                 )
             )
         }
