@@ -26,6 +26,14 @@ Android-only builds. Repo: `kilvz/Kai-custom`.
 - URL: `https://github.com/kilvz/Kai-custom/issues/new?template=integration_request.yml`
 - Issues were disabled on the repo — enabled via `gh repo edit --enable-issues=true`
 
+### Sandbox File Write for Binary Attachments (Excel, Word, etc.)
+- Added `writeBinaryFile(path, data)` to `SandboxController` interface + Android implementation + NoOp stubs
+- `RemoteDataRepository.ask()` now writes binary files (non-image, non-PDF, non-text) to sandbox at `/root/uploads/{filename}`
+- Sandbox paths are appended to the question text as `\n[File saved to sandbox: /root/uploads/filename.xlsx]`
+- The AI can read these files using `execute_shell_command` with e.g. `python3 -c "import openpyxl; ..." /root/uploads/file.xlsx`
+- Files written only when sandbox is `Ready`; falls back to text stub silently if sandbox not available
+- Fixes the root cause of the DeepSeek error when uploading Excel files — AI can now actually access the file content instead of only seeing `[Attached file: ...]`
+
 ## Key Files
 | File | Purpose |
 |------|---------|
@@ -36,6 +44,9 @@ Android-only builds. Repo: `kilvz/Kai-custom`.
 | `composeApp/src/commonMain/kotlin/com/kai/custom/ui/settings/IntegrationsSettings.kt` | "Open GitHub Issue" button |
 | `composeApp/src/commonMain/kotlin/com/kai/custom/ui/settings/ServicesSettings.kt` | FreeSettings card with sponsor button |
 | `androidApp/src/main/AndroidManifest.xml` | All Android permissions |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/SandboxController.kt` | `writeBinaryFile()` interface |
+| `composeApp/src/androidMain/kotlin/com/kai/custom/SandboxController.android.kt` | Android `writeBinaryFile` impl (writes raw bytes to sandbox) |
+| `composeApp/src/commonMain/kotlin/com/kai/custom/data/RemoteDataRepository.kt` | `ask()` writes binary attachments to sandbox |
 | `gradle/libs.versions.toml` | Version: appVersion = "1.0.1" |
 
 ## Build & Deploy
