@@ -130,18 +130,30 @@ class ProotExecutor(
         return ProotHandle(process, cancelled, listOf(stdoutFuture, stderrFuture))
     }
 
-    private fun buildProcessArgs(command: String, workingDir: String): Array<String> = arrayOf(
-        prootPath,
-        "--rootfs=$rootfsPath",
-        "--bind=/dev",
-        "--bind=/proc",
-        "--bind=/sys",
-        "--bind=$homePath:/root",
-        "--bind=$tmpPath:/tmp",
-        "-0",
-        "-w", workingDir,
-        "/bin/sh", "-c", command,
-    )
+    private val storageBind: String? by lazy {
+        when {
+            File("/storage/emulated/0").exists() -> "--bind=/storage/emulated/0:/sdcard"
+            File("/storage/self/primary").exists() -> "--bind=/storage/self/primary:/sdcard"
+            else -> null
+        }
+    }
+
+    private fun buildProcessArgs(command: String, workingDir: String): Array<String> = buildList {
+        add(prootPath)
+        add("--rootfs=$rootfsPath")
+        add("--bind=/dev")
+        add("--bind=/proc")
+        add("--bind=/sys")
+        add("--bind=$homePath:/root")
+        add("--bind=$tmpPath:/tmp")
+        storageBind?.let { add(it) }
+        add("-0")
+        add("-w")
+        add(workingDir)
+        add("/bin/sh")
+        add("-c")
+        add(command)
+    }.toTypedArray()
 
     private fun buildEnvVars(extraEnv: Map<String, String>): Array<String> {
         val loaderPath = File(prootPath).parent.orEmpty() + "/libproot-loader.so"
