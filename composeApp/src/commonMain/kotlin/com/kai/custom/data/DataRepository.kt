@@ -191,6 +191,11 @@ interface DataRepository {
     fun exportPalace(): ByteArray
     fun importPalace(data: ByteArray)
 
+    // Conversation branching — edits a message, stores old conversation in MemPalace,
+    // starts a new conversation with the edited message, and triggers AI response.
+    // Returns true if sandbox was available and branching succeeded.
+    suspend fun editAndBranch(messageId: String, newContent: String): Boolean
+
     // Background ask with tools (no chat history update, supports tool-calling loop)
     suspend fun askWithTools(prompt: String, instanceId: String? = null): String
 

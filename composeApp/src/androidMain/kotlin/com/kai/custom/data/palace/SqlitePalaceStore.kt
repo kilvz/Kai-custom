@@ -175,7 +175,7 @@ class SqlitePalaceStore(context: Context) : PalaceStore {
 
     override fun initialize() {
         val db = dbHelper.writableDatabase
-        db.rawQuery("PRAGMA journal_mode=WAL", null)?.use { it.moveToFirst() }
+        db.rawQuery("PRAGMA journal_mode=WAL", null).use { it.moveToFirst() }
         db.execSQL("PRAGMA foreign_keys=ON")
         fts5Available = dbHelper.isFts5Available()
         if (fts5Available) {

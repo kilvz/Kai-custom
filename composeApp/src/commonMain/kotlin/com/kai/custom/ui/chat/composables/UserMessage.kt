@@ -12,10 +12,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -43,10 +47,14 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 internal fun UserMessage(
     message: String,
     attachments: ImmutableList<Attachment> = persistentListOf(),
+    onEdit: (() -> Unit)? = null,
 ) {
     val showFullScreen = LocalShowFullScreenImage.current
     SelectionContainer {
-        Row(Modifier.padding(16.dp)) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.Bottom,
+        ) {
             Spacer(Modifier.weight(1f))
             Column(
                 modifier = Modifier
@@ -109,6 +117,19 @@ internal fun UserMessage(
                     Text(
                         text = message,
                         color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+            if (onEdit != null) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit message",
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        modifier = Modifier.size(18.dp),
                     )
                 }
             }
