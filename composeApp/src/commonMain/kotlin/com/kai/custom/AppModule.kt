@@ -1,5 +1,6 @@
 package com.kai.custom
 
+import com.kai.custom.SpeechToText
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ConversationStorage
 import com.kai.custom.data.DataRepository
@@ -144,11 +145,12 @@ val appModule = module {
     }
     single<DaemonController> { createDaemonController() }
     single<SandboxController> { createSandboxController() }
+    single<SpeechToText> { createSpeechToText() }
     viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<NotificationPermissionController>(), get<TaskScheduler>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
     viewModel { SandboxPackagesViewModel(get<SandboxController>()) }
     viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
-    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>()) }
+    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>()) }
 }

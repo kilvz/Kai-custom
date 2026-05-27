@@ -472,6 +472,14 @@ private fun ChatModeScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Stream voice partial results into the input field in real time
+    LaunchedEffect(uiState.voiceInputPartial) {
+        val partial = uiState.voiceInputPartial
+        if (partial.isNotEmpty()) {
+            questionInputText = TextFieldValue(partial)
+        }
+    }
+
     // When the active conversation changes (e.g. user starts a new chat from the
     // top bar or taps the heartbeat banner), collapse the sandbox view so the
     // user lands on the chat they just opened. Tracking the previous id avoids
@@ -900,6 +908,9 @@ private fun ChatModeScreen(
                     cancel = uiState.actions.cancel,
                     availableServices = uiState.availableServices,
                     onSelectService = uiState.actions.selectService,
+                    isVoiceInputActive = uiState.isVoiceInputActive,
+                    onStartVoiceInput = uiState.actions.startVoiceInput,
+                    onStopVoiceInput = uiState.actions.stopVoiceInput,
                 )
             }
         }
