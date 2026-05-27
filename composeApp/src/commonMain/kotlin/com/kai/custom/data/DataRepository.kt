@@ -104,6 +104,12 @@ interface DataRepository {
     fun isDaemonEnabled(): Boolean
     fun setDaemonEnabled(enabled: Boolean)
 
+    // Wake word detection
+    fun isWakeWordEnabled(): Boolean
+    fun setWakeWordEnabled(enabled: Boolean)
+    fun getWakeWordPhrase(): String
+    fun setWakeWordPhrase(phrase: String)
+
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean
     fun setSandboxEnabled(enabled: Boolean)

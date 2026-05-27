@@ -3,4 +3,7 @@
     <string name="daemon_channel_name">Kai 9001 Background Service</string>
     <string name="daemon_channel_description">Keeps Kai 9001 running for scheduled task execution</string>
     <string name="daemon_notification_text">Daemon is running</string>
+    <string name="wake_word_channel_name">Wake Word Detection</string>
+    <string name="wake_word_channel_description">Listening for wake word in the background</string>
+    <string name="wake_word_notification_text">Listening for wake word…</string>
 </resources>

@@ -34,6 +34,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.svg.SvgDecoder
 import com.kai.custom.data.AppSettings
+import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.NotificationPermissionController
@@ -140,6 +141,17 @@ private fun AppContent(
 
     val microphonePermissionController = koinInject<MicrophonePermissionController>()
     SetupMicrophonePermissionHandler(microphonePermissionController)
+
+    // Wake word — start/stop listening when the Voice toggle changes in Settings
+    val wakeWordController = koinInject<WakeWordController>()
+    val isWakeWordEnabled by appSettings.wakeWordEnabledFlow.collectAsStateWithLifecycle(false)
+    LaunchedEffect(isWakeWordEnabled) {
+        if (isWakeWordEnabled) {
+            wakeWordController.startListening(appSettings.getWakeWordPhrase())
+        } else {
+            wakeWordController.stopListening()
+        }
+    }
 
     // Set TTS voice to match system language
     @OptIn(ExperimentalVoiceApi::class)
