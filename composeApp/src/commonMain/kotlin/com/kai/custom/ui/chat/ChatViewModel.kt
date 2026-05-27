@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.SpeechToText
 import com.kai.custom.tools.MicrophonePermissionController
+import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.data.Conversation
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.FreeMode
@@ -47,6 +48,7 @@ class ChatViewModel(
     private val taskScheduler: TaskScheduler,
     private val speechToText: SpeechToText,
     private val microphonePermissionController: MicrophonePermissionController,
+    private val wakeWordController: WakeWordController,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -110,6 +112,15 @@ class ChatViewModel(
         }
         taskScheduler.isLoadingCheck = { _state.value.isLoading }
         taskScheduler.start()
+
+        // Observe wake word detection — trigger voice input when phrase is heard
+        viewModelScope.launch {
+            wakeWordController.wakeWordDetected.collect { phrase ->
+                if (!_state.value.isVoiceInputActive && !_state.value.isLoading) {
+                    doStartVoiceInput()
+                }
+            }
+        }
 
         viewModelScope.launch {
             dataRepository.smsDrafts.collect { drafts ->

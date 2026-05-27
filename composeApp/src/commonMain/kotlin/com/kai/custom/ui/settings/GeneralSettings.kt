@@ -3,6 +3,9 @@ package com.kai.custom.ui.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -101,9 +104,17 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                         )
                     }
                     SettingsCard {
+                        WakeWordSection(
+                            isWakeWordEnabled = uiState.isWakeWordEnabled,
+                            wakeWordPhrase = uiState.wakeWordPhrase,
+                            onToggleWakeWord = actions.onToggleWakeWord,
+                            onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
+                        )
+                    }
+                    SettingsCard {
                         TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
                     }
-                }
+                } // end second column staggered
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -140,6 +151,14 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                         onExportSettings = actions.onExportSettings,
                         onPrepareExport = actions.onPrepareExport,
                         onImportSettings = actions.onImportSettings,
+                    )
+                }
+                SettingsCard {
+                    WakeWordSection(
+                        isWakeWordEnabled = uiState.isWakeWordEnabled,
+                        wakeWordPhrase = uiState.wakeWordPhrase,
+                        onToggleWakeWord = actions.onToggleWakeWord,
+                        onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
                     )
                 }
                 SettingsCard {
@@ -291,6 +310,45 @@ private fun ThemeModePicker(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WakeWordSection(
+    isWakeWordEnabled: Boolean,
+    wakeWordPhrase: String,
+    onToggleWakeWord: (Boolean) -> Unit,
+    onChangeWakeWordPhrase: (String) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = CenterVertically,
+        ) {
+            Text(
+                text = "Voice",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Switch(checked = isWakeWordEnabled, onCheckedChange = onToggleWakeWord)
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Wake word detection — say \"hey kai\" to start voice input hands-free",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (isWakeWordEnabled) {
+            Spacer(Modifier.height(8.dp))
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = wakeWordPhrase,
+                onValueChange = onChangeWakeWordPhrase,
+                label = { Text("Wake word phrase") },
+                singleLine = true,
+            )
         }
     }
 }

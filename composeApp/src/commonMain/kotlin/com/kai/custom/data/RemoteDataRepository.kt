@@ -1756,6 +1756,19 @@ class RemoteDataRepository(
         appSettings.setSandboxStorageMountEnabled(enabled)
     }
 
+    // Wake word
+    override fun isWakeWordEnabled(): Boolean = appSettings.isWakeWordEnabled()
+
+    override fun setWakeWordEnabled(enabled: Boolean) {
+        appSettings.setWakeWordEnabled(enabled)
+    }
+
+    override fun getWakeWordPhrase(): String = appSettings.getWakeWordPhrase()
+
+    override fun setWakeWordPhrase(phrase: String) {
+        appSettings.setWakeWordPhrase(phrase)
+    }
+
     override fun getHeartbeatConfig(): HeartbeatConfig = heartbeatManager.getConfig()
 
     override fun setHeartbeatEnabled(enabled: Boolean) {

@@ -104,6 +104,7 @@ kotlin {
             implementation(libs.material)
             implementation(libs.bouncycastle.provider)
             implementation(libs.litert.lm)
+            implementation(libs.tensorflow.lite)
             implementation(libs.shizuku.api)
             implementation(libs.shizuku.provider)
         }

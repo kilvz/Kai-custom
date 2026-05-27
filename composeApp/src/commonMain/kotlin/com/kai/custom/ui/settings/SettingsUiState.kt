@@ -103,6 +103,8 @@ data class SettingsUiState(
     val isShizukuEnabled: Boolean = false,
     val shizukuPermissionGranted: Boolean = false,
     val isFreeFallbackEnabled: Boolean = true,
+    val isWakeWordEnabled: Boolean = false,
+    val wakeWordPhrase: String = "hey kai",
     val uiScale: Float = 1.0f,
     val showUiScale: Boolean = false,
     val mcpServers: ImmutableList<McpServerUiState> = persistentListOf(),

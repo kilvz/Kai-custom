@@ -120,6 +120,8 @@ class SettingsViewModel(
         isShizukuEnabled = dataRepository.isShizukuEnabled(),
         shizukuPermissionGranted = isShizukuPermissionGranted(),
         isFreeFallbackEnabled = dataRepository.isFreeFallbackEnabled(),
+        isWakeWordEnabled = dataRepository.isWakeWordEnabled(),
+        wakeWordPhrase = dataRepository.getWakeWordPhrase(),
         uiScale = dataRepository.getUiScale(),
         showUiScale = currentPlatform is Platform.Desktop,
         mcpServers = buildMcpServerEntries().toImmutableList(),
@@ -173,6 +175,8 @@ class SettingsViewModel(
         onToggleShizuku = ::onToggleShizuku,
         onOpenShizukuPermission = ::onOpenShizukuPermission,
         onToggleFreeFallback = ::onToggleFreeFallback,
+        onToggleWakeWord = ::onToggleWakeWord,
+        onChangeWakeWordPhrase = ::onChangeWakeWordPhrase,
         onChangeUiScale = ::onChangeUiScale,
         onAddMcpServer = ::onAddMcpServer,
         onRemoveMcpServer = ::onRemoveMcpServer,
@@ -657,6 +661,16 @@ class SettingsViewModel(
     private fun onToggleFreeFallback(enabled: Boolean) {
         dataRepository.setFreeFallbackEnabled(enabled)
         _state.update { it.copy(isFreeFallbackEnabled = enabled) }
+    }
+
+    private fun onToggleWakeWord(enabled: Boolean) {
+        dataRepository.setWakeWordEnabled(enabled)
+        _state.update { it.copy(isWakeWordEnabled = enabled) }
+    }
+
+    private fun onChangeWakeWordPhrase(phrase: String) {
+        dataRepository.setWakeWordPhrase(phrase)
+        _state.update { it.copy(wakeWordPhrase = phrase) }
     }
 
     private fun onDownloadLocalModel(model: LocalModel) {
