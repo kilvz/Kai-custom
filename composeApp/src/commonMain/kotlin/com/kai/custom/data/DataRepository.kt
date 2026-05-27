@@ -234,4 +234,6 @@ interface DataRepository {
     fun startLocalModelDownload(model: LocalModel)
     fun cancelLocalModelDownload()
     suspend fun deleteLocalModel(modelId: String)
+
+    fun addSystemMessage(content: String)
 }

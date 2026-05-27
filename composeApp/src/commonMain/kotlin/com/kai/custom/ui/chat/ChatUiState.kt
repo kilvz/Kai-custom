@@ -128,6 +128,7 @@ data class History(
     enum class Role {
         USER,
         ASSISTANT,
+        SYSTEM,
         TOOL_EXECUTING,
         TOOL,
     }
@@ -219,6 +220,8 @@ fun History.toGroqMessageDto(
     )
 
     History.Role.TOOL_EXECUTING -> OpenAICompatibleChatRequestDto.Message(role = "assistant", content = JsonPrimitive(content))
+
+    History.Role.SYSTEM -> OpenAICompatibleChatRequestDto.Message(role = "user", content = JsonPrimitive(content))
 }
 
 fun History.toAnthropicContentBlocks(): JsonElement = when (role) {
@@ -314,6 +317,8 @@ fun History.toAnthropicContentBlocks(): JsonElement = when (role) {
     }
 
     History.Role.TOOL_EXECUTING -> JsonPrimitive(content)
+
+    History.Role.SYSTEM -> JsonPrimitive(content)
 }
 
 private val geminiJsonParser = SharedJson
@@ -327,6 +332,8 @@ fun History.toGeminiMessageDto(): GeminiChatRequestDto.Content {
 
         // Tool results are sent as user role with functionResponse
         History.Role.ASSISTANT, History.Role.TOOL_EXECUTING -> "model"
+
+        History.Role.SYSTEM -> "user"
     }
     return GeminiChatRequestDto.Content(
         parts = buildList {

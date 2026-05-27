@@ -1393,6 +1393,7 @@ class RemoteDataRepository(
                             History.Role.ASSISTANT -> "assistant"
                             History.Role.TOOL -> "tool"
                             History.Role.TOOL_EXECUTING -> "tool" // Should not happen due to filter
+                            History.Role.SYSTEM -> "system"
                         },
                         content = h.content,
                         attachments = h.attachments,
@@ -1456,6 +1457,7 @@ class RemoteDataRepository(
                 role = when (m.role) {
                     "user" -> History.Role.USER
                     "tool" -> History.Role.TOOL
+                    "system" -> History.Role.SYSTEM
                     else -> History.Role.ASSISTANT
                 },
                 content = m.content,
@@ -1525,6 +1527,7 @@ class RemoteDataRepository(
                     History.Role.ASSISTANT -> "Assistant"
                     History.Role.TOOL -> "Tool"
                     History.Role.TOOL_EXECUTING -> "Tool (executing)"
+                    History.Role.SYSTEM -> "System"
                 }
                 append("$role: ${h.content}\n")
             }
@@ -1548,8 +1551,12 @@ class RemoteDataRepository(
         chatHistory.update {
             mutableListOf(
                 History(
+                    role = History.Role.SYSTEM,
+                    content = branchContext,
+                ),
+                History(
                     role = History.Role.USER,
-                    content = "$branchContext\n\n${newContent.trim()}",
+                    content = newContent.trim(),
                 ),
             )
         }
@@ -2195,5 +2202,14 @@ class RemoteDataRepository(
 
     override suspend fun deleteLocalModel(modelId: String) {
         localInferenceEngine?.deleteModel(modelId)
+    }
+
+    override fun addSystemMessage(content: String) {
+        chatHistory.update { current ->
+            current + History(
+                role = History.Role.SYSTEM,
+                content = content,
+            )
+        }
     }
 }

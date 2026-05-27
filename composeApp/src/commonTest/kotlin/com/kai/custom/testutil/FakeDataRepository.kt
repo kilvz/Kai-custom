@@ -597,4 +597,6 @@ class FakeDataRepository : DataRepository {
     override fun startLocalModelDownload(model: LocalModel) {}
     override fun cancelLocalModelDownload() {}
     override suspend fun deleteLocalModel(modelId: String) {}
+
+    override fun addSystemMessage(content: String) {}
 }

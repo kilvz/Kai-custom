@@ -280,10 +280,11 @@ class ChatViewModel(
             } else {
                 "No kai-ui code fence found in your response."
             }
-            val retryMessage = "[SYSTEM] Your previous response failed to render as interactive UI. $errorDetail " +
+            val retryMessage = "Your previous response failed to render as interactive UI. $errorDetail " +
                 "Remember: respond with ONLY a single ```kai-ui code fence containing valid JSON. No text outside the fence."
 
-            dataRepository.ask(retryMessage, emptyList())
+            dataRepository.addSystemMessage(retryMessage)
+            dataRepository.ask("(ui render error — see system message above)", emptyList())
         }
     }
 
@@ -379,11 +380,14 @@ class ChatViewModel(
                     val langOpt = com.kai.custom.data.languageOptions.firstOrNull { it.code == preferredLang }
                     val voiceHint = if (speakToolEnabled) {
                         val voice = langOpt?.edgeTtsVoice ?: "en-US-AndrewNeural"
-                        "[The user spoke this via voice input. The preferred language is ${langOpt?.displayName ?: "English"} but they may be speaking another language. Detect the actual language from this transcription and respond in that language using the speak_text tool with a matching voice.]\n${final.trim()}"
+                        "[The user spoke this via voice input. The preferred language is ${langOpt?.displayName ?: "English"} but they may be speaking another language. Detect the actual language from this transcription and respond in that language using the speak_text tool with a matching voice.]"
                     } else {
-                        final.trim()
+                        ""
                     }
-                    ask(voiceHint)
+                    if (voiceHint.isNotEmpty()) {
+                        dataRepository.addSystemMessage(voiceHint)
+                    }
+                    ask(final.trim())
                 }
             },
             onError = {
