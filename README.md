@@ -164,16 +164,52 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 
 ## What's Different from Upstream
 
-| Area | Upstream Kai | Kai 9001 |
-|------|-------------|----------|
-| Build | Proprietary SDKs (Firebase, Crashlytics, Analytics) | **FOSS-only** |
-| Voice | Manual mic button | STT + TTS + 27-language edge-tts |
-| Phone integration | None | **8 phone tools** (location, contacts, battery, wifi, etc.) |
-| Memory tools | Basic recall/store | **search_memories tool** + heartbeat promotion + local variant |
-| Platform | Android + iOS + Desktop + Web | **Android-only** |
-| Terminal | OOM with large output | **Per-item SelectionContainer** fixes ANR |
-| Version | Tracks upstream (2.x.x) | **Custom 1.x.x** |
-| GitHub issues | Disabled | **Integration request template** enabled |
+### Fork-Added Features
+
+| Feature | Details |
+|---------|---------|
+| **Wake word "Hey Kai"** | Full subsystem: TFLite on-device model (GENERAL) + cosine similarity enrollment (PERSONAL), 3-step enrollment, adaptive energy baseline, anti-flap, trigger debounce, mic handover. Foreground service with `FOREGROUND_SERVICE_MICROPHONE`. Toggleable in Settings. |
+| **8 Phone tools** | GPS location, contacts, device info, battery stats, network info, wifi details, clipboard, installed apps. Each individually toggleable, permission-gated per tool. |
+| **`search_memories` tool** | AI can semantic-search its own memory store on demand via sandbox (kai-mempalace), falls back to FTS5. Upstream only has store/forget/learn/reinforce. |
+| **`writeBinaryFile`** | Binary attachments (Excel, Word, etc.) written to sandbox at `/root/uploads/` so AI can read them via shell. Upstream only wrote text files. |
+| **`speak_text` tool** | TTS via edge-tts in Linux sandbox, 27 language voices. Gated behind sandbox availability. |
+| **Shizuku integration** | `run_adb` tool executes shell commands with ADB-level privileges via Shizuku. `ShizukuManager` + `ShizukuProvider` declared in manifest. |
+| **`run_opencode` tool** | Delegate complex coding tasks to opencode's autonomous agent in sandbox. |
+| **30+ Android permissions** | Location, contacts, phone state, camera, audio record, body sensors, activity recognition, bluetooth, external storage, WiFi state, query all packages, system alert window, install packages, read logs, biometric, vibrate. |
+| **GitHub Issue button** | Links to `https://github.com/kilvz/Kai-custom/issues/new?template=integration_request.yml` in Settings > Integrations. |
+| **Sponsor button** | Links to original author's GitHub Sponsors in FreeSettings card. Upstream shows full sponsor list with avatars. |
+| **Notification title** | "Kai 9001" (upstream: "Kai 9000") |
+
+### Fork-Modified Features
+
+| Feature | Upstream | Kai 9001 |
+|---------|----------|----------|
+| **Build flavor** | FOSS + Play Store (Firebase, Crashlytics, Analytics) | **FOSS-only** — zero proprietary SDKs |
+| **Platform targets** | Android + iOS + Desktop + Web + WasmJS | **Android-only** — other targets stubbed |
+| **Memory system** | Basic recall/store, `getHeartbeatTools()` gated by scheduling, `DEFAULT_STRUCTURED_LEARNING_SECTION` | `search_memories` tool, `promote_learning` gated by memory (not scheduling), `DEFAULT_MEMORY_INSTRUCTIONS` + `DEFAULT_LOCAL_MEMORY_INSTRUCTIONS` with variant-aware selection, fixed double MemoryList rendering |
+| **Terminal (SelectionContainer)** | Wraps entire `LazyColumn` — causes OOM/ANR on large output | **Per-item** `SelectionContainer` wrapping each `Text` — fixes OOM/ANR |
+| **Tool gating** | `getHeartbeatTools()` gated by `isSchedulingEnabled()` | `promote_learning` gated by `isMemoryEnabled()`; phone tools, ADB, speak_text, opencode added with their own gates |
+| **Conversation storage** | `loadConversations()` called from UI path only | Also called in `TaskScheduler.start()` for daemon-only path, preventing wipe from empty-list persist |
+| **Think-tag stripping** | Regex `<think>.*?</think>` only | Also handles lone `</think>` without `<think>` (Qwen3-Thinking edge case) |
+| **Package / identity** | `com.inspiredandroid.kai`, `Kai 9000` | `com.kai.custom`, `Kai 9001` |
+| **App icon** | Purple overlapping circles | **Red** overlapping circles |
+| **Version scheme** | Tracks upstream (2.x.x) | Custom 1.x.x — major = breaking, minor = features, patch = bugs |
+| **GitHub issues** | Disabled | Enabled with integration request template |
+
+### Features Present in Both (No Meaningful Changes)
+
+- **LLM providers**: Identical — 27 providers: Free, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, NVIDIA, Cerebras, Ollama Cloud, LongCat, Together, HuggingFace, Venice, Moonshot, Z.AI, MiniMax, AIHubMix, Deep Infra, Fireworks AI, OpenCode, PublicAI, OpenAI-Compatible, LiteRT
+- **Common tools**: Local time, IP location, URL open, web search, fetch URL, memory store/forget/learn/reinforce — structurally identical
+- **SMS / Email / Calendar / Notification tools**: Identical logic
+- **MCP support**: Full Streamable HTTP MCP server manager with curated free servers (Fetch, DeepWiki, Sequential Thinking, Context7, Globalping, CoinGecko, Manifold Markets, Find-A-Domain)
+- **LiteRT on-device inference**: Same Qwen3 0.6B + Gemma 4 (E2B, E4B) model support
+- **Heartbeat**: Same 30-minute autonomous self-check (8am–10pm), push notification on issues
+- **Dynamic UI (kai-ui)**: Same interactive screen generation with buttons, inputs, forms
+- **Task scheduler**: Same cron + one-shot scheduled tasks with exponential backoff
+- **Sandbox base**: Same Alpine Linux via proot, shell execution, file read/write/delete
+- **Settings UI**: Same tabs layout (General, Services, Agent, Integrations, Tools, Terminal, Sandbox, About), theme picker, daemon toggle
+- **Encrypted prefs**: Both use `dev.spght:encryptedprefs-ktx` for app settings storage
+- **Koin DI**: Same dependency injection framework
 
 ## License
 
