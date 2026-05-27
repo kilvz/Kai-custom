@@ -3,6 +3,7 @@ package com.kai.custom.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.SpeechToText
+import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.data.Conversation
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.FreeMode
@@ -19,6 +20,7 @@ import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.extension
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.conversation_untitled
+import kai.composeapp.generated.resources.microphone_permission_required
 import kai.composeapp.generated.resources.error_unsupported_file_type
 import kai.composeapp.generated.resources.litert_no_model_warning
 import kotlinx.collections.immutable.persistentListOf
@@ -44,6 +46,7 @@ class ChatViewModel(
     private val dataRepository: DataRepository,
     private val taskScheduler: TaskScheduler,
     private val speechToText: SpeechToText,
+    private val microphonePermissionController: MicrophonePermissionController,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -303,14 +306,28 @@ class ChatViewModel(
 
     private fun startVoiceInput() {
         if (!speechToText.isAvailable) {
-            _state.update { it.copy(snackbarMessage = null) }
+            viewModelScope.launch {
+                val granted = microphonePermissionController.requestPermission()
+                if (granted) {
+                    doStartVoiceInput()
+                } else {
+                    _state.update { it.copy(snackbarMessage = Res.string.microphone_permission_required) }
+                }
+            }
             return
         }
+        doStartVoiceInput()
+    }
+
+    private fun doStartVoiceInput() {
         _state.update { it.copy(isVoiceInputActive = true, voiceInputPartial = "") }
         speechToText.startListening(
             onPartialResult = { partial -> _state.update { it.copy(voiceInputPartial = partial) } },
             onFinalResult = { final ->
-                _state.update { it.copy(isVoiceInputActive = false, voiceInputPartial = final) }
+                _state.update { it.copy(isVoiceInputActive = false) }
+                if (final.isNotBlank()) {
+                    ask(final.trim())
+                }
             },
             onError = { _state.update { it.copy(isVoiceInputActive = false) } },
         )

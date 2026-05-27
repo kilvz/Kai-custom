@@ -40,6 +40,8 @@ import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.SetupCalendarPermissionHandler
 import com.kai.custom.tools.SetupNotificationPermissionHandler
 import com.kai.custom.tools.SetupSmsPermissionHandler
+import com.kai.custom.tools.MicrophonePermissionController
+import com.kai.custom.tools.SetupMicrophonePermissionHandler
 import com.kai.custom.tools.SetupSmsSendPermissionHandler
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
@@ -135,6 +137,9 @@ private fun AppContent(
 
     val smsSendPermissionController = koinInject<SmsSendPermissionController>()
     SetupSmsSendPermissionHandler(smsSendPermissionController)
+
+    val microphonePermissionController = koinInject<MicrophonePermissionController>()
+    SetupMicrophonePermissionHandler(microphonePermissionController)
 
     // Set TTS voice to match system language
     @OptIn(ExperimentalVoiceApi::class)
