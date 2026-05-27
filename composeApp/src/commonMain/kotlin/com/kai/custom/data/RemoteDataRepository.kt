@@ -117,6 +117,7 @@ internal val LOCAL_TOOL_ALLOWLIST = setOf(
     "memory_store",
     "memory_forget",
     "memory_reinforce",
+    "search_memories",
     "execute_shell_command",
 )
 
@@ -1583,7 +1584,14 @@ class RemoteDataRepository(
         val schedulingEnabled = appSettings.isSchedulingEnabled()
 
         val memoryInstructions = if (memoryEnabled) {
-            appSettings.getMemoryInstructions().ifEmpty { null }
+            if (appSettings.hasCustomMemoryInstructions()) {
+                appSettings.getMemoryInstructions().ifEmpty { null }
+            } else {
+                when (variant) {
+                    SystemPromptVariant.CHAT_REMOTE -> AppSettings.DEFAULT_MEMORY_INSTRUCTIONS
+                    SystemPromptVariant.CHAT_LOCAL -> AppSettings.DEFAULT_LOCAL_MEMORY_INSTRUCTIONS
+                }
+            }
         } else {
             null
         }

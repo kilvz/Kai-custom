@@ -278,10 +278,10 @@ actual fun getAvailableTools(): List<Tool> {
     return buildList {
         if (appSettings.isMemoryEnabled()) {
             addAll(CommonTools.getMemoryTools(memoryStore))
+            addAll(listOf(HeartbeatTools.getPromoteLearningTool(memoryStore, appSettings)))
         }
         if (appSettings.isSchedulingEnabled()) {
             addAll(SchedulingTools.getSchedulingTools(taskStore))
-            addAll(HeartbeatTools.getHeartbeatTools(memoryStore, appSettings))
         }
         if (appSettings.isToolEnabled(CommonTools.localTimeTool.schema.name)) {
             add(CommonTools.localTimeTool)
