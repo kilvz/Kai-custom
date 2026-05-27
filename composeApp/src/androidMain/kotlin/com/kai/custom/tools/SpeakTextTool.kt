@@ -1,6 +1,9 @@
 package com.kai.custom.tools
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import com.kai.custom.SandboxSessions
 import com.kai.custom.data.currentConversationIdOrNull
@@ -16,6 +19,8 @@ import java.io.File
 object SpeakTextTool : Tool {
     private val context: Context by inject(Context::class.java)
     private val sandboxManager: LinuxSandboxManager by inject(LinuxSandboxManager::class.java)
+
+    private var edgeTtsInstalled = false
 
     val toolInfo = CommonTools.speakTextToolInfo
 
@@ -43,17 +48,29 @@ object SpeakTextTool : Tool {
         val sessionId = currentConversationIdOrNull() ?: SandboxSessions.DEFAULT
         val shell = sandboxManager.shellFor(sessionId)
 
-        val installResult = shell.run(
-            command = "pip install edge-tts 2>&1 | tail -3",
-            timeoutSeconds = 60,
-        )
-        if (installResult["success"] != true) {
-            val stderr = (installResult["stderr"] as? String).orEmpty()
-            val stdout = (installResult["stdout"] as? String).orEmpty()
-            return mapOf(
-                "success" to false,
-                "error" to "Failed to install edge-tts: ${stderr.ifEmpty { stdout }}",
+        if (!edgeTtsInstalled) {
+            val checkResult = shell.run(
+                command = "pip list 2>/dev/null | grep -qi edge-tts && echo INSTALLED || echo MISSING",
+                timeoutSeconds = 15,
             )
+            val checkOut = (checkResult["stdout"] as? String).orEmpty()
+            edgeTtsInstalled = checkOut.contains("INSTALLED", ignoreCase = true)
+
+            if (!edgeTtsInstalled) {
+                val installResult = shell.run(
+                    command = "pip install edge-tts 2>&1 | tail -5",
+                    timeoutSeconds = 90,
+                )
+                if (installResult["success"] != true) {
+                    val stderr = (installResult["stderr"] as? String).orEmpty()
+                    val stdout = (installResult["stdout"] as? String).orEmpty()
+                    return mapOf(
+                        "success" to false,
+                        "error" to "Failed to install edge-tts: ${stderr.ifEmpty { stdout }}",
+                    )
+                }
+                edgeTtsInstalled = true
+            }
         }
 
         val outputFile = "/root/kai_speech.mp3"
@@ -86,27 +103,58 @@ object SpeakTextTool : Tool {
         }
 
         val hostFile = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, outputFile)
-        if (hostFile != null && hostFile.exists()) {
-            try {
-                val mp = MediaPlayer()
-                mp.setDataSource(hostFile.absolutePath)
-                mp.prepareAsync()
-                mp.setOnPreparedListener { player ->
-                    player.start()
-                }
-                mp.setOnCompletionListener { it.release() }
-                mp.setOnErrorListener { mp2, _, _ -> mp2.release(); true }
-            } catch (_: Exception) {
-                // playback failed — still return success for generation
-            }
+        if (hostFile == null || !hostFile.exists()) {
+            return mapOf(
+                "success" to true,
+                "file" to outputFile,
+                "file_size" to fileSize,
+                "message" to "Speech file generated but could not be located on host for playback.",
+            )
         }
 
-        return mapOf(
-            "success" to true,
-            "file" to outputFile,
-            "file_size" to fileSize,
-            "message" to "Speech generated and playing now.",
-        )
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+            .build()
+        val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        return try {
+            val mp = MediaPlayer()
+            mp.setAudioAttributes(audioAttributes)
+            mp.setOnPreparedListener { player ->
+                player.start()
+            }
+            mp.setOnCompletionListener { player ->
+                audioManager.abandonAudioFocusRequest(focusRequest)
+                player.release()
+            }
+            mp.setOnErrorListener { player, _, _ ->
+                audioManager.abandonAudioFocusRequest(focusRequest)
+                player.release()
+                true
+            }
+            mp.setDataSource(hostFile.absolutePath)
+            audioManager.requestAudioFocus(focusRequest)
+            mp.prepareAsync()
+
+            mapOf(
+                "success" to true,
+                "file" to outputFile,
+                "file_size" to fileSize,
+                "message" to "Speech generated and playing now.",
+            )
+        } catch (e: Exception) {
+            audioManager.abandonAudioFocusRequest(focusRequest)
+            mapOf(
+                "success" to false,
+                "error" to "Speech generated but playback failed: ${e.message}",
+                "file" to outputFile,
+                "file_size" to fileSize,
+            )
+        }
     }
 
     private fun shellQuote(value: String): String = "'" + value.replace("'", "'\\''") + "'"
