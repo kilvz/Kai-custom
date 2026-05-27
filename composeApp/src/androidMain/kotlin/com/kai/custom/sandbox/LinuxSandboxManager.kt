@@ -295,6 +295,10 @@ class LinuxSandboxManager(
                 val rootfsDir = File(sandboxDir, "rootfs")
                 val executor = createProotExecutor()
 
+                // Show progress immediately so the button hides and progress UI
+                // appears while we run `apk update` (can take 30-60s per mirror).
+                _state.value = SandboxState.Installing("Updating package lists...")
+
                 // Refresh the APK cache before installing. `apk add` without
                 // --no-cache relies on the cached index; if the rootfs was set up
                 // in a prior session the cache may be stale or absent. We also

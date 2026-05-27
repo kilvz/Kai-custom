@@ -2,6 +2,7 @@ package com.kai.custom
 
 import android.content.Context
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.kai.custom.data.MemoryEntry
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SessionShell
@@ -15,6 +16,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.io.IOException
@@ -332,6 +342,200 @@ class AndroidSandboxController : SandboxController {
         } else {
             Result.failure(IllegalStateException("rename failed"))
         }
+    }
+
+    // ── memory semantic search via sandbox + kai-mempalace ──────────────
+
+    private var searchDepsReady = false
+
+    override suspend fun searchMemories(
+        memories: List<MemoryEntry>,
+        query: String,
+        limit: Int,
+    ): List<MemoryEntry>? {
+        if (_status.value.ready != true) return null
+        if (memories.isEmpty() || query.isBlank()) return null
+
+        return withContext(Dispatchers.IO) {
+            val shell = sandboxManager.shellFor(SandboxSessions.SYSTEM)
+
+            if (!ensureSearchDeps(shell)) return@withContext null
+
+            val inputObj = buildJsonObject {
+                putJsonArray("memories") {
+                    memories.forEach { mem ->
+                        addJsonObject {
+                            put("key", mem.key)
+                            put("content", mem.content)
+                            put("category", mem.category.name)
+                            put("hit_count", mem.hitCount)
+                        }
+                    }
+                }
+                put("query", query)
+                put("limit", limit)
+            }
+
+            val dataFile = File(sandboxManager.tmpPath, "__kai_search.json")
+            try {
+                dataFile.parentFile?.mkdirs()
+                dataFile.writeText(inputObj.toString())
+            } catch (_: Exception) {
+                return@withContext null
+            }
+
+            val result = shell.run(
+                command = "python3 /root/kai_search.py /tmp/__kai_search.json",
+                timeoutSeconds = 30,
+            )
+            val stdout = result["stdout"] as? String ?: ""
+            val exitCode = result["exit_code"] as? Int ?: -1
+            if (exitCode != 0 || stdout.isBlank()) return@withContext null
+
+            try {
+                val parsed = Json.parseToJsonElement(stdout).jsonArray
+                val scoredKeys = parsed.mapNotNull { obj ->
+                    val jo = obj.jsonObject
+                    val key = jo["key"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                    val score = jo["score"]?.jsonPrimitive?.content?.toDoubleOrNull() ?: 0.0
+                    if (score > 0.01) key else null
+                }
+                val keyToEntry = memories.associateBy { it.key }
+                scoredKeys.mapNotNull { keyToEntry[it] }.take(limit)
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
+    private suspend fun ensureSearchDeps(shell: SessionShell): Boolean {
+        if (searchDepsReady) return true
+
+        try {
+            val kaiMempalaceDir = File(sandboxManager.homePath, "kai-mempalace")
+            if (!kaiMempalaceDir.isDirectory) {
+                android.util.Log.i("SandboxSearch", "Cloning kai-mempalace...")
+                val clone = shell.run(
+                    command = "git clone --depth 1 https://github.com/kilvz/kai-mempalace.git /root/kai-mempalace 2>&1 | tail -5",
+                    timeoutSeconds = 60,
+                )
+                if (clone["success"] != true) {
+                    val err = (clone["stderr"] as? String).orEmpty()
+                    android.util.Log.w("SandboxSearch", "git clone failed: $err")
+                    return false
+                }
+            }
+
+            android.util.Log.i("SandboxSearch", "Installing kai-mempalace Python dependencies...")
+            // Try Alpine packages first (musl-compatible), fall back to pip
+            var depsOk = shell.run(
+                command = "python3 -c 'import faiss, scipy, yaml, dateutil; print(\"OK\")' 2>&1",
+                timeoutSeconds = 15,
+            )
+            if ((depsOk["stdout"] as? String)?.trim() != "OK") {
+                val apkInstall = shell.run(
+                    command = "apk add py3-faiss py3-scipy py3-yaml py3-dateutil 2>&1 | tail -5",
+                    timeoutSeconds = 120,
+                )
+                depsOk = shell.run(
+                    command = "python3 -c 'import faiss, scipy, yaml, dateutil; print(\"OK\")' 2>&1",
+                    timeoutSeconds = 15,
+                )
+            }
+            if ((depsOk["stdout"] as? String)?.trim() != "OK") {
+                val install = shell.run(
+                    command = "pip install faiss-cpu scipy pyyaml python-dateutil 2>&1 | tail -5",
+                    timeoutSeconds = 180,
+                )
+                if (install["success"] != true) {
+                    val err = (install["stderr"] as? String).orEmpty()
+                    android.util.Log.w("SandboxSearch", "pip install deps failed: $err")
+                    return false
+                }
+            }
+
+            val wrapperFile = File(sandboxManager.homePath, "kai_search.py")
+            if (!wrapperFile.exists()) {
+                wrapperFile.parentFile?.mkdirs()
+                wrapperFile.writeText(SEARCH_WRAPPER)
+            }
+
+            searchDepsReady = true
+            return true
+        } catch (e: Exception) {
+            android.util.Log.w("SandboxSearch", "search deps setup failed", e)
+            return false
+        }
+    }
+
+    private companion object {
+        val SEARCH_WRAPPER = """
+            |import json, sys, os
+            |sys.path.insert(0, os.path.expanduser('/root/kai-mempalace'))
+            |
+            |from embedder import NumpyEmbedder
+            |import numpy as np
+            |
+            |try:
+            |    import faiss
+            |    HAS_FAISS = True
+            |except ImportError:
+            |    HAS_FAISS = False
+            |
+            |data = json.load(open(sys.argv[1]))
+            |memories = data['memories']
+            |query = data['query']
+            |limit = data.get('limit', 10)
+            |
+            |if not memories or not query:
+            |    print('[]')
+            |    sys.exit(0)
+            |
+            |texts = [m['content'] for m in memories] + [query]
+            |embedder = NumpyEmbedder()
+            |vectors = embedder.embed(texts)
+            |
+            |query_vec = vectors[-1]
+            |doc_vecs = vectors[:-1]
+            |
+            |if HAS_FAISS:
+            |    qv = query_vec.reshape(1, -1).astype(np.float32)
+            |    dv = doc_vecs.astype(np.float32)
+            |    faiss.normalize_L2(qv)
+            |    faiss.normalize_L2(dv)
+            |    idx = faiss.IndexFlatIP(embedder.dimension)
+            |    idx.add(dv)
+            |    k = min(limit, idx.ntotal)
+            |    if k == 0:
+            |        print('[]')
+            |        sys.exit(0)
+            |    dists, idxs = idx.search(qv, k)
+            |    results = []
+            |    for i in range(k):
+            |        pos = int(idxs[0][i])
+            |        score = float(dists[0][i])
+            |        if score > 0.01:
+            |            mem = dict(memories[pos])
+            |            mem['score'] = round(score, 4)
+            |            results.append(mem)
+            |else:
+            |    qn = np.linalg.norm(query_vec)
+            |    if qn == 0:
+            |        print('[]')
+            |        sys.exit(0)
+            |    dn = np.linalg.norm(doc_vecs, axis=1)
+            |    sims = np.dot(doc_vecs, query_vec) / (dn * qn + 1e-10)
+            |    top = np.argsort(sims)[::-1][:limit]
+            |    results = []
+            |    for pos in top:
+            |        score = float(sims[pos])
+            |        if score > 0.01:
+            |            mem = dict(memories[pos])
+            |            mem['score'] = round(score, 4)
+            |            results.append(mem)
+            |
+            |print(json.dumps(results, ensure_ascii=False))
+        """.trimMargin()
     }
 }
 

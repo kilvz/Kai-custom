@@ -1,5 +1,6 @@
 package com.kai.custom.tools
 
+import com.kai.custom.SandboxController
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.MemoryCategory
 import com.kai.custom.data.MemoryEntry
@@ -405,7 +406,10 @@ object CommonTools {
         }
     }
 
-    fun searchMemoriesTool(memoryStore: MemoryStore) = object : Tool {
+    fun searchMemoriesTool(
+        memoryStore: MemoryStore,
+        sandboxController: SandboxController? = null,
+    ) = object : Tool {
         override val schema = ToolSchema(
             name = "search_memories",
             description = "Search your stored memories by keyword. Use this to look up what you know about a topic, find preferences, or recall past learnings.",
@@ -418,6 +422,30 @@ object CommonTools {
         override suspend fun execute(args: Map<String, Any>): Any {
             val query = args["query"]?.toString() ?: return mapOf("success" to false, "error" to "Missing query")
             val limit = (args["limit"] as? Number)?.toInt() ?: 10
+
+            // Try sandbox semantic search (kai-mempalace) first
+            if (sandboxController != null) {
+                val allMemories = memoryStore.getAllMemories()
+                val sandboxResults = sandboxController.searchMemories(allMemories, query, limit)
+                if (sandboxResults != null) {
+                    return mapOf(
+                        "success" to true,
+                        "query" to query,
+                        "count" to sandboxResults.size,
+                        "results" to sandboxResults.map { entry ->
+                            mapOf(
+                                "key" to entry.key,
+                                "content" to entry.content,
+                                "category" to entry.category.name,
+                                "hit_count" to entry.hitCount,
+                                "source" to (entry.source ?: ""),
+                            )
+                        },
+                    )
+                }
+            }
+
+            // Fall back to FTS5
             val results = memoryStore.searchMemories(query, limit)
             return mapOf(
                 "success" to true,
@@ -436,11 +464,14 @@ object CommonTools {
         }
     }
 
-    fun getMemoryTools(memoryStore: MemoryStore): List<Tool> = listOf(
+    fun getMemoryTools(
+        memoryStore: MemoryStore,
+        sandboxController: SandboxController? = null,
+    ): List<Tool> = listOf(
         memoryStoreTool(memoryStore),
         memoryForgetTool(memoryStore),
         memoryLearnTool(memoryStore),
         memoryReinforceTool(memoryStore),
-        searchMemoriesTool(memoryStore),
+        searchMemoriesTool(memoryStore, sandboxController),
     )
 }

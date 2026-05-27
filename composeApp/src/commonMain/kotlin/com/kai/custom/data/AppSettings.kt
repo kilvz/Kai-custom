@@ -613,12 +613,19 @@ class AppSettings(internal val settings: Settings) {
             "## Memory System\n" +
                 "You have persistent memory across conversations. Your stored memories are listed below grouped by category.\n\n" +
                 "Use these tools to manage your memory:\n" +
-                "- `search_memories` — Search your stored memories by keyword at any time\n" +
+                "- `search_memories` — Search your stored memories by keyword at any time (uses kai-mempalace FAISS/TF-IDF semantic search when the Linux sandbox is Ready)\n" +
                 "- `memory_store` — Save important information about the user (preferences, facts, projects, goals)\n" +
                 "- `memory_learn` — Save categorized learnings (LEARNING for things that worked, ERROR for error resolutions, PREFERENCE for user corrections)\n" +
                 "- `memory_reinforce` — Increment hit count when a stored memory produced a good outcome\n" +
                 "- `promote_learning` — Promote well-reinforced memories (5+ hits) into your permanent system prompt (soul)\n" +
                 "- `memory_forget` — Delete outdated or incorrect memories\n" +
+                "When the Linux sandbox is available, you can manage your own FAISS-powered memory palace directly via `execute_shell_command`:\n" +
+                "  python3 /root/kai-mempalace/cli.py init\n" +
+                "  python3 /root/kai-mempalace/cli.py add --wing <wing> --room <room> --content \"<text>\"\n" +
+                "  python3 /root/kai-mempalace/cli.py search \"<query>\"\n" +
+                "  python3 /root/kai-mempalace/cli.py kg-add --subject <s> --predicate <p> --object <o>\n" +
+                "  python3 /root/kai-mempalace/cli.py diary --agent <name> --entry \"<text>\"\n" +
+                "See /root/kai-mempalace/README.md for all 24 CLI commands.\n" +
                 "Do not store trivial or transient information."
 
         // Trimmed memory guidance for on-device models — only mentions tools in LOCAL_TOOL_ALLOWLIST.
@@ -626,10 +633,12 @@ class AppSettings(internal val settings: Settings) {
             "## Memory System\n" +
                 "You have persistent memory across conversations. Your stored memories are listed below grouped by category.\n\n" +
                 "Use these tools to manage your memory:\n" +
-                "- `search_memories` — Search your stored memories by keyword at any time\n" +
+                "- `search_memories` — Search your stored memories by keyword at any time (uses kai-mempalace FAISS/TF-IDF semantic search when sandbox is Ready)\n" +
                 "- `memory_store` — Save important information about the user (preferences, facts, projects, goals)\n" +
                 "- `memory_reinforce` — Increment hit count when a stored memory produced a good outcome\n" +
                 "- `memory_forget` — Delete outdated or incorrect memories\n" +
+                "When `execute_shell_command` is available, you can manage your own FAISS-powered memory palace via:\n" +
+                "  python3 /root/kai-mempalace/cli.py\n" +
                 "Do not store trivial or transient information."
     }
 }
