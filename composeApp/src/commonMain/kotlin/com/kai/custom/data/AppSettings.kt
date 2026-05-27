@@ -347,7 +347,7 @@ class AppSettings(internal val settings: Settings) {
     }
 
     // SSH connection
-    fun isSshEnabled(): Boolean = settings.getBoolean(KEY_SSH_ENABLED, false)
+    fun isSshEnabled(): Boolean = settings.getBoolean(KEY_SSH_ENABLED, true)
 
     fun setSshEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_SSH_ENABLED, enabled)

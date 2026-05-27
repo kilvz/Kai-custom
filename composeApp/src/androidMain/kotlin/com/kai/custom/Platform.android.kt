@@ -62,7 +62,6 @@ import com.kai.custom.tools.SpeakTextTool
 import com.kai.custom.tools.SmsTools
 import com.kai.custom.tools.SshCommandTool
 import com.kai.custom.tools.SshConnectTool
-import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshDisconnectTool
 import com.kai.custom.tools.WebSearchTool
 import com.russhwolf.settings.BuildConfig
@@ -124,9 +123,9 @@ actual val isEmailSupported: Boolean = true
 
 // Evaluated lazily because we need the Koin-injected Context. Whether READ_SMS
 // is declared in the merged manifest is a build-time property (foss flavor adds
-// it, playStore does not), so caching the first result is safe for the process
-// lifetime. The try/catch guards screenshot / unit-test environments that may
-// call `getPlatformToolDefinitions()` before Koin has been started.
+// it), so caching the first result is safe for the process lifetime. The try/catch
+// guards unit-test environments that may call `getPlatformToolDefinitions()` before
+// Koin has been started.
 actual val isSmsSupported: Boolean by lazy {
     try {
         val context: Context by inject(Context::class.java)
@@ -137,7 +136,7 @@ actual val isSmsSupported: Boolean by lazy {
 }
 
 // Same lazy pattern as `isSmsSupported`: probe the merged manifest for the listener
-// service. Foss flavor declares it, playStore does not.
+// service. Foss flavor declares it.
 actual val isNotificationsSupported: Boolean by lazy {
     try {
         val context: Context by inject(Context::class.java)
@@ -480,7 +479,6 @@ actual fun getAvailableTools(): List<Tool> {
         if (appSettings.isSandboxEnabled()) {
             add(ShellCommandTool)
             add(ProcessManagerTool)
-            add(SshConfigureHostTool)
             add(SpeakTextTool)
             add(OpenCodeTool)
         }
