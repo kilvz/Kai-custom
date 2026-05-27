@@ -107,6 +107,8 @@ import com.kai.custom.ui.markdown.parseMarkdown
 import com.kai.custom.ui.sandbox.SandboxTabsContent
 import com.kai.custom.ui.settings.SandboxUiState
 import com.kai.custom.ui.settings.SandboxViewModel
+import com.kai.custom.ui.settings.SshTerminalContent
+import com.kai.custom.ui.settings.SshViewModel
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.fallback_answered_by
 import kai.composeapp.generated.resources.fallback_service_failed
@@ -135,6 +137,7 @@ fun ChatScreen(
     textToSpeech: TextToSpeechInstance?,
     onNavigateToSettings: () -> Unit,
     isSandboxAvailable: Boolean = false,
+    isSshAvailable: Boolean = false,
     navigationTabBar: (@Composable () -> Unit)? = null,
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -144,6 +147,7 @@ fun ChatScreen(
         textToSpeech = textToSpeech,
         onNavigateToSettings = onNavigateToSettings,
         isSandboxAvailable = isSandboxAvailable,
+        isSshAvailable = isSshAvailable,
         navigationTabBar = navigationTabBar,
     )
 }
@@ -154,6 +158,7 @@ fun ChatScreenContent(
     textToSpeech: TextToSpeechInstance? = null,
     onNavigateToSettings: () -> Unit = {},
     isSandboxAvailable: Boolean = false,
+    isSshAvailable: Boolean = false,
     navigationTabBar: (@Composable () -> Unit)? = null,
     initialSandboxOpen: Boolean = false,
     previewSandboxState: SandboxUiState? = null,
@@ -167,6 +172,7 @@ fun ChatScreenContent(
             textToSpeech = textToSpeech,
             onNavigateToSettings = onNavigateToSettings,
             isSandboxAvailable = isSandboxAvailable,
+            isSshAvailable = isSshAvailable,
             navigationTabBar = navigationTabBar,
             initialSandboxOpen = initialSandboxOpen,
             previewSandboxState = previewSandboxState,
@@ -457,6 +463,7 @@ private fun ChatModeScreen(
     textToSpeech: TextToSpeechInstance?,
     onNavigateToSettings: () -> Unit,
     isSandboxAvailable: Boolean,
+    isSshAvailable: Boolean = false,
     navigationTabBar: (@Composable () -> Unit)?,
     initialSandboxOpen: Boolean = false,
     previewSandboxState: SandboxUiState? = null,
@@ -464,6 +471,7 @@ private fun ChatModeScreen(
 ) {
     var showHistorySheet by remember { mutableStateOf(false) }
     var isSandboxOpen by rememberSaveable { mutableStateOf(initialSandboxOpen) }
+    var isSshOpen by rememberSaveable { mutableStateOf(false) }
     // Hoisted here so the draft survives toggling the sandbox/terminal view, which
     // removes QuestionInput from composition and would otherwise drop the text.
     var questionInputText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -473,14 +481,15 @@ private fun ChatModeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // When the active conversation changes (e.g. user starts a new chat from the
-    // top bar or taps the heartbeat banner), collapse the sandbox view so the
+    // top bar or taps the heartbeat banner), collapse the sandbox/SSH view so the
     // user lands on the chat they just opened. Tracking the previous id avoids
     // firing on the initial composition — important when returning from Settings,
     // where rememberSaveable has just restored isSandboxOpen.
     var lastConversationId by remember { mutableStateOf(uiState.currentConversationId) }
     LaunchedEffect(uiState.currentConversationId) {
         if (lastConversationId != uiState.currentConversationId) {
-            if (isSandboxOpen) isSandboxOpen = false
+            isSandboxOpen = false
+            isSshOpen = false
             lastConversationId = uiState.currentConversationId
         }
     }
@@ -516,7 +525,16 @@ private fun ChatModeScreen(
                 isSandboxAvailable = isSandboxAvailable,
                 isSandboxOpen = isSandboxOpen,
                 isShellExecuting = isShellExecuting,
-                onToggleSandbox = { isSandboxOpen = !isSandboxOpen },
+                onToggleSandbox = {
+                    isSandboxOpen = !isSandboxOpen
+                    if (isSandboxOpen) isSshOpen = false
+                },
+                isSshAvailable = isSshAvailable,
+                isSshOpen = isSshOpen,
+                onToggleSsh = {
+                    isSshOpen = !isSshOpen
+                    if (isSshOpen) isSandboxOpen = false
+                },
                 onShowHistory = {
                     keyboardController?.hide()
                     showHistorySheet = true
@@ -530,6 +548,7 @@ private fun ChatModeScreen(
                     uiState.heartbeatConversationId?.let { uiState.actions.loadConversation(it) }
                     uiState.actions.clearUnreadHeartbeat()
                     isSandboxOpen = false
+                    isSshOpen = false
                 },
                 onDismiss = {
                     uiState.actions.clearUnreadHeartbeat()
@@ -553,7 +572,19 @@ private fun ChatModeScreen(
                 )
             }
 
-            if (isSandboxOpen) {
+            if (isSshOpen) {
+                val isPreview = LocalInspectionMode.current
+                val sshViewModel = if (!isPreview) koinViewModel<SshViewModel>() else null
+                if (sshViewModel != null) {
+                    SshTerminalContent(
+                        sshViewModel = sshViewModel,
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    )
+                }
+            } else if (isSandboxOpen) {
                 val isPreview = LocalInspectionMode.current
                 val sandboxViewModel = if (!isPreview) koinViewModel<SandboxViewModel>() else null
                 val liveState = sandboxViewModel?.state?.collectAsStateWithLifecycle()?.value
@@ -924,7 +955,10 @@ private fun ChatModeScreen(
             pendingConversationDeletion = uiState.pendingConversationDeletion,
             actions = uiState.actions,
             onDismiss = { showHistorySheet = false },
-            onConversationSelected = { isSandboxOpen = false },
+            onConversationSelected = {
+                isSandboxOpen = false
+                isSshOpen = false
+            },
         )
     }
 }

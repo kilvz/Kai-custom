@@ -33,6 +33,7 @@ val languageOptions: List<LanguageOption> = listOf(
     LanguageOption("he", "Hebrew", "he-IL-AvriNeural"),
     LanguageOption("ro", "Romanian", "ro-RO-EmilNeural"),
     LanguageOption("hu", "Hungarian", "hu-HU-NoemiNeural"),
+    LanguageOption("id", "Indonesian", "id-ID-ArdiNeural"),
 )
 
 fun getDefaultLanguage(): String {

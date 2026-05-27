@@ -107,6 +107,7 @@ kotlin {
             implementation(libs.tensorflow.lite)
             implementation(libs.shizuku.api)
             implementation(libs.shizuku.provider)
+            implementation(libs.jsch)
         }
         commonMain.dependencies {
             implementation(libs.compose.material3)

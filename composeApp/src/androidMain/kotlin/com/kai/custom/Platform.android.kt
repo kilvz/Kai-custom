@@ -60,7 +60,10 @@ import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SpeakTextTool
 import com.kai.custom.tools.SmsTools
+import com.kai.custom.tools.SshCommandTool
+import com.kai.custom.tools.SshConnectTool
 import com.kai.custom.tools.SshConfigureHostTool
+import com.kai.custom.tools.SshDisconnectTool
 import com.kai.custom.tools.WebSearchTool
 import com.russhwolf.settings.BuildConfig
 import com.russhwolf.settings.Settings
@@ -213,14 +216,17 @@ private fun createEncryptedPrefs(context: Context): android.content.SharedPrefer
     )
 }
 
-actual fun createLegacySettings(): Settings? {
-    val context: Context by inject(Context::class.java)
-    val prefs = context.getSharedPreferences("com.kai.custom_preferences", Context.MODE_PRIVATE)
-    return SharedPreferencesSettings(prefs)
-}
+    actual fun createLegacySettings(): Settings? {
+        return try {
+            Settings()
+        } catch (_: Exception) {
+            null
+        }
+    }
 
-// Tool definitions for Android platform
-actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
+    actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnectionManager()
+
+    actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     addAll(CommonTools.commonToolDefinitions)
     add(
         ToolInfo(
@@ -258,6 +264,9 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             descriptionRes = Res.string.tool_open_file_description,
         ),
     )
+    add(SshCommandTool.toolInfo)
+    add(SshConnectTool.toolInfo)
+    add(SshDisconnectTool.toolInfo)
     // Phone tools — full device access
     addAll(PhoneTools.phoneToolDefinitions)
     // SMS tools are intentionally absent here: availability is driven by the Agent-tab
@@ -474,6 +483,18 @@ actual fun getAvailableTools(): List<Tool> {
             add(SshConfigureHostTool)
             add(SpeakTextTool)
             add(OpenCodeTool)
+        }
+
+        if (appSettings.isSshEnabled()) {
+            if (appSettings.isToolEnabled(SshCommandTool.schema.name)) {
+                add(SshCommandTool)
+            }
+            if (appSettings.isToolEnabled(SshConnectTool.schema.name)) {
+                add(SshConnectTool)
+            }
+            if (appSettings.isToolEnabled(SshDisconnectTool.schema.name)) {
+                add(SshDisconnectTool)
+            }
         }
 
         if (appSettings.isToolEnabled(AdbTool.schema.name)) {

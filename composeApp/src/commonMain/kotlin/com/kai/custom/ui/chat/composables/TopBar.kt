@@ -28,11 +28,13 @@ import kai.composeapp.generated.resources.chat_history_content_description
 import kai.composeapp.generated.resources.ic_add
 import kai.composeapp.generated.resources.ic_history
 import kai.composeapp.generated.resources.ic_settings
+import kai.composeapp.generated.resources.ic_ssh
 import kai.composeapp.generated.resources.ic_volume_off
 import kai.composeapp.generated.resources.ic_volume_up
 import kai.composeapp.generated.resources.new_chat_content_description
 import kai.composeapp.generated.resources.sandbox_content_description
 import kai.composeapp.generated.resources.settings_content_description
+import kai.composeapp.generated.resources.ssh_content_description
 import kai.composeapp.generated.resources.toggle_speech_output_content_description
 import nl.marc_apps.tts.TextToSpeechInstance
 import org.jetbrains.compose.resources.stringResource
@@ -51,6 +53,9 @@ internal fun TopBar(
     isSandboxOpen: Boolean,
     isShellExecuting: Boolean,
     onToggleSandbox: () -> Unit,
+    isSshAvailable: Boolean = false,
+    isSshOpen: Boolean = false,
+    onToggleSsh: () -> Unit = {},
     onShowHistory: () -> Unit,
     navigationTabBar: (@Composable () -> Unit)? = null,
 ) {
@@ -59,7 +64,7 @@ internal fun TopBar(
             modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 64.dp),
         ) {
             Row(modifier = Modifier.align(Alignment.CenterStart)) {
-                LeadingButtons(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, isChatHistoryEmpty, hasSavedConversations, onShowHistory, isSandboxAvailable, isSandboxOpen, isShellExecuting, onToggleSandbox)
+                LeadingButtons(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, isChatHistoryEmpty, hasSavedConversations, onShowHistory, isSandboxAvailable, isSandboxOpen, isShellExecuting, onToggleSandbox, isSshAvailable, isSshOpen, onToggleSsh)
             }
             Box(modifier = Modifier.align(Alignment.Center)) {
                 navigationTabBar()
@@ -72,7 +77,7 @@ internal fun TopBar(
         }
     } else {
         Row {
-            LeadingButtons(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, isChatHistoryEmpty, hasSavedConversations, onShowHistory, isSandboxAvailable, isSandboxOpen, isShellExecuting, onToggleSandbox)
+            LeadingButtons(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions, isChatHistoryEmpty, hasSavedConversations, onShowHistory, isSandboxAvailable, isSandboxOpen, isShellExecuting, onToggleSandbox, isSshAvailable, isSshOpen, onToggleSsh)
             Spacer(Modifier.weight(1f))
             if (textToSpeech != null) {
                 SpeechToggleButton(textToSpeech, isSpeechOutputEnabled, isSpeaking, actions)
@@ -104,6 +109,9 @@ private fun LeadingButtons(
     isSandboxOpen: Boolean,
     isShellExecuting: Boolean,
     onToggleSandbox: () -> Unit,
+    isSshAvailable: Boolean = false,
+    isSshOpen: Boolean = false,
+    onToggleSsh: () -> Unit = {},
 ) {
     if (hasSavedConversations) {
         IconButton(
@@ -163,6 +171,29 @@ private fun LeadingButtons(
                 imageVector = Icons.Filled.Dns,
                 contentDescription = stringResource(Res.string.sandbox_content_description),
                 tint = if (isSandboxOpen) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onBackground
+                },
+            )
+        }
+    }
+    if (isSshAvailable) {
+        val sshPrimary = MaterialTheme.colorScheme.primary
+        val sshCheckedContainer = sshPrimary.copy(alpha = 0.2f)
+        IconToggleButton(
+            checked = isSshOpen,
+            onCheckedChange = { onToggleSsh() },
+            modifier = Modifier.handCursor(),
+            colors = IconButtonDefaults.iconToggleButtonColors(
+                checkedContainerColor = sshCheckedContainer,
+                checkedContentColor = MaterialTheme.colorScheme.primary,
+            ),
+        ) {
+            Icon(
+                imageVector = vectorResource(Res.drawable.ic_ssh),
+                contentDescription = stringResource(Res.string.ssh_content_description),
+                tint = if (isSshOpen) {
                     MaterialTheme.colorScheme.primary
                 } else {
                     MaterialTheme.colorScheme.onBackground
