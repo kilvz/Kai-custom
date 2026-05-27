@@ -17,9 +17,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kai.custom.ui.gradientMagenta
-import com.kai.custom.ui.gradientPurple
-import com.kai.custom.ui.gradientViolet
+import com.kai.custom.ui.gradientBlue1
+import com.kai.custom.ui.gradientBlue2
+import com.kai.custom.ui.gradientBlue3
 
 private const val STOP_A = 0f
 private const val STOP_B = 0.33f
@@ -44,9 +44,9 @@ fun Modifier.animatedGradientBorder(
     val colorStops = remember {
         arrayOf(
             0f to Color.Transparent,
-            0f to gradientPurple,
-            0f to gradientViolet,
-            0f to gradientMagenta,
+            0f to gradientBlue1,
+            0f to gradientBlue2,
+            0f to gradientBlue3,
             1f to Color.Transparent,
         )
     }
@@ -66,9 +66,9 @@ fun Modifier.animatedGradientBorder(
             var posA = (STOP_A - p + 1f) % 1f
             var posB = (STOP_B - p + 1f) % 1f
             var posC = (STOP_C - p + 1f) % 1f
-            var colA = gradientPurple
-            var colB = gradientViolet
-            var colC = gradientMagenta
+            var colA = gradientBlue1
+            var colB = gradientBlue2
+            var colC = gradientBlue3
             if (posA > posB) {
                 val tp = posA
                 posA = posB

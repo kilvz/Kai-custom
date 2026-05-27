@@ -36,19 +36,19 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-val darkPurple = Color(0xFF6200EE)
-val lightPurple = Color(0xff8063C5)
-val gradientBrush = androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(darkPurple, lightPurple))
+val darkBlue = Color(0xFF1565C0)
+val lightBlue = Color(0xFF42A5F5)
+val gradientBrush = androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(darkBlue, lightBlue))
 
 // Animated border gradient colors
-val gradientPurple = Color(0xFF9C27B0)
-val gradientViolet = Color(0xFF7C4DFF)
-val gradientMagenta = Color(0xFFE040FB)
+val gradientBlue1 = Color(0xFF1565C0)
+val gradientBlue2 = Color(0xFF1E88E5)
+val gradientBlue3 = Color(0xFF42A5F5)
 
 fun Modifier.handCursor() = pointerHoverIcon(PointerIcon.Hand, overrideDescendants = true)
 
 val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFBB86FC),
+    primary = Color(0xFF90CAF9),
     onPrimary = Color(0xFF000000),
     surface = Color(0xFF1E1E1E),
     background = Color(0xFF121212),
@@ -99,7 +99,7 @@ fun Modifier.kaiAdaptiveCardSurface(shape: Shape = CardDefaults.shape): Modifier
     )
 
 val LightColorScheme = lightColorScheme(
-    primary = darkPurple,
+    primary = darkBlue,
     onPrimary = Color(0xFFFFFFFF),
     surface = Color(0xFFF2F2F2),
     background = Color(0xFFFFFFFF),
