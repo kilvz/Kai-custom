@@ -11,7 +11,7 @@ Public FOSS fork of Kai. Kotlin Multiplatform (Compose Multiplatform).
 **Android-only builds** (iOS/Desktop/WasmJS targets exist in source but are not tested on this Windows machine).
 
 ## What This Repo Excludes
-- **No Play Store files**: no `androidApp/src/playStore/`, no `com.kilv.ai` package override, no permission stripping overlay
+- **No Play Store files**: no `androidApp/src/playStore/`, no Play Store package name override, no permission stripping overlay
 
 ## Build Commands
 ```powershell
@@ -62,6 +62,6 @@ Current: `1.10.0` (versionCode `115`) — update in `gradle/libs.versions.toml`
 - **Tools**: 30+ tools (shell, ssh, email, sms, web search, calendar, phone, etc.)
 
 ## Rules
-- **Never** add Play Store code (no `androidApp/src/playStore/`, no `isPlayStore` gating in build.gradle.kts)
+- **Never** add Play Store code (no `androidApp/src/playStore/`, no Play Store flavor gating in build.gradle.kts)
 - **Always** build with `--no-configuration-cache` to avoid cache corruption
 - iOS/Desktop/WasmJS builds cannot be tested on this Windows machine
