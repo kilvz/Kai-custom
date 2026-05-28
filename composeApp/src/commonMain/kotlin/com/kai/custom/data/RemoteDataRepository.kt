@@ -1518,9 +1518,13 @@ class RemoteDataRepository(
 
         val oldHistory = chatHistory.value.toList()
         val oldConversationId = _currentConversationId.value ?: return false
+        val forkedTitle = deriveTitle(oldHistory)
 
-        // Store full conversation transcript in MemPalace
         val transcript = buildString {
+            appendLine("[PREVIOUS CONVERSATION — BRANCH]")
+            appendLine("Title: $forkedTitle")
+            appendLine("Key: branch_${oldConversationId}")
+            appendLine()
             for (h in oldHistory) {
                 val role = when (h.role) {
                     History.Role.USER -> "User"
@@ -1529,7 +1533,7 @@ class RemoteDataRepository(
                     History.Role.TOOL_EXECUTING -> "Tool (executing)"
                     History.Role.SYSTEM -> "System"
                 }
-                append("$role: ${h.content}\n")
+                appendLine("$role: ${h.content}")
             }
         }
         memoryStore.store(
@@ -1573,8 +1577,13 @@ class RemoteDataRepository(
 
         val oldHistory = chatHistory.value.toList()
         val oldConversationId = _currentConversationId.value ?: return
+        val forkedTitle = deriveTitle(oldHistory)
 
         val transcript = buildString {
+            appendLine("[PREVIOUS CONVERSATION — BRANCH]")
+            appendLine("Title: $forkedTitle")
+            appendLine("Key: branch_${oldConversationId}")
+            appendLine()
             for (h in oldHistory) {
                 val role = when (h.role) {
                     History.Role.USER -> "User"
@@ -1583,7 +1592,7 @@ class RemoteDataRepository(
                     History.Role.TOOL_EXECUTING -> "Tool (executing)"
                     History.Role.SYSTEM -> "System"
                 }
-                append("$role: ${h.content}\n")
+                appendLine("$role: ${h.content}")
             }
         }
         memoryStore.store(
@@ -1594,6 +1603,21 @@ class RemoteDataRepository(
         )
 
         startNewChat()
+
+        if (forkedTitle.isNotEmpty()) {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val newId = Uuid.random().toString()
+            conversationStorage.saveConversation(
+                Conversation(
+                    id = newId,
+                    messages = emptyList(),
+                    createdAt = now,
+                    updatedAt = now,
+                    title = forkedTitle,
+                )
+            )
+            setCurrentConversationId(newId)
+        }
 
         val branchContext = "[SYSTEM] The user branched from a previous conversation. " +
             "Use `search_memories` to find the original context if needed."
