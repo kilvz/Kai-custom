@@ -4,8 +4,12 @@ import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -69,37 +73,42 @@ class AndroidSshConnectionManager : SshConnectionManager {
                 val channel = s.openChannel("exec") as ChannelExec
                 channel.setCommand(command)
 
-                val stdout = ByteArrayOutputStream()
-                val stderr = ByteArrayOutputStream()
+                val stdout = ByteArrayOutputStream(MAX_OUTPUT_BYTES)
+                val stderr = ByteArrayOutputStream(MAX_OUTPUT_BYTES)
 
                 val inputStream: InputStream = channel.getInputStream()
                 val errStream: InputStream = channel.getErrStream()
 
                 channel.connect(timeoutSeconds.toInt() * 1000)
 
-                val stdoutThread = thread {
-                    val buf = ByteArray(4096)
-                    while (true) {
-                        val len = inputStream.read(buf)
-                        if (len <= 0) break
-                        stdout.write(buf, 0, len)
+                coroutineScope {
+                    launch(Dispatchers.IO) {
+                        val buf = ByteArray(4096)
+                        while (isActive) {
+                            val len = inputStream.read(buf)
+                            if (len <= 0) break
+                            val remaining = MAX_OUTPUT_BYTES - stdout.size()
+                            if (remaining > 0) {
+                                stdout.write(buf, 0, minOf(len, remaining))
+                            }
+                        }
+                    }
+                    launch(Dispatchers.IO) {
+                        val buf = ByteArray(4096)
+                        while (isActive) {
+                            val len = errStream.read(buf)
+                            if (len <= 0) break
+                            val remaining = MAX_OUTPUT_BYTES - stderr.size()
+                            if (remaining > 0) {
+                                stderr.write(buf, 0, minOf(len, remaining))
+                            }
+                        }
+                    }
+
+                    while (!channel.isClosed && isActive) {
+                        delay(100)
                     }
                 }
-                val stderrThread = thread {
-                    val buf = ByteArray(4096)
-                    while (true) {
-                        val len = errStream.read(buf)
-                        if (len <= 0) break
-                        stderr.write(buf, 0, len)
-                    }
-                }
-
-                while (!channel.isClosed) {
-                    Thread.sleep(100)
-                }
-
-                stdoutThread.join(5000)
-                stderrThread.join(5000)
 
                 channel.disconnect()
 
@@ -138,11 +147,6 @@ class AndroidSshConnectionManager : SshConnectionManager {
 
     companion object {
         private const val MAX_TRANSCRIPT_LINES = 500
+        private const val MAX_OUTPUT_BYTES = 5 * 1024 * 1024 // 5 MB per stream
     }
-}
-
-private fun thread(block: () -> Unit): Thread {
-    val t = Thread(block)
-    t.start()
-    return t
 }

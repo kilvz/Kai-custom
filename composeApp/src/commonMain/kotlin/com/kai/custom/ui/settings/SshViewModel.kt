@@ -9,6 +9,7 @@ import com.kai.custom.SshConnectionState
 import com.kai.custom.SshProfile
 import com.kai.custom.TerminalLine
 import com.kai.custom.data.AppSettings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 data class SshUiState(
     val host: String = "",
@@ -173,6 +175,11 @@ class SshViewModel(
         viewModelScope.launch {
             sshConnectionManager.disconnect()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        runBlocking(Dispatchers.IO) { sshConnectionManager.disconnect() }
     }
 
     fun executeCommand(command: String) {

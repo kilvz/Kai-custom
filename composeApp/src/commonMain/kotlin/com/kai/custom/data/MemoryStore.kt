@@ -92,7 +92,8 @@ class MemoryStore(private val palace: PalaceStore) {
         )
     }
 
-    private fun allDrawers(): List<Drawer> = palace.getAllDrawers()
+    private fun allDrawers(max: Int = Int.MAX_VALUE): List<Drawer> =
+        palace.getAllDrawers().let { if (it.size <= max) it else it.take(max) }
 
     suspend fun store(
         key: String,
@@ -133,8 +134,8 @@ class MemoryStore(private val palace: PalaceStore) {
         updated
     }
 
-    fun getPromotionCandidates(minHits: Int = 5): List<MemoryEntry> =
-        allDrawers().mapNotNull { drawerToEntry(it) }.filter { it.hitCount >= minHits }
+    fun getPromotionCandidates(minHits: Int = 5, max: Int = 500): List<MemoryEntry> =
+        allDrawers(max).mapNotNull { drawerToEntry(it) }.filter { it.hitCount >= minHits }
 
     suspend fun forget(key: String): Boolean = mutex.withLock {
         val drawer = palace.getDrawerByMetadataKey("memory_key", key) ?: return@withLock false
@@ -142,8 +143,8 @@ class MemoryStore(private val palace: PalaceStore) {
         true
     }
 
-    fun getAllMemories(): List<MemoryEntry> =
-        allDrawers().mapNotNull { drawerToEntry(it) }
+    fun getAllMemories(max: Int = 1000): List<MemoryEntry> =
+        allDrawers(max).mapNotNull { drawerToEntry(it) }
 
     fun searchMemories(query: String, limit: Int = 10): List<MemoryEntry> {
         if (query.isBlank()) return emptyList()
