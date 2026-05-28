@@ -84,7 +84,12 @@ class ChatViewModel(
         editMessage = ::editMessage,
         truncateFrom = ::truncateFrom,
     )
-    private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith { "Free ${it.modelId.replaceFirstChar { c -> c.uppercase() }}" }
+    private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith {
+        when (it) {
+            FreeMode.FAST -> "Free Fast"
+            FreeMode.EXPERT -> "Free Expert"
+        }
+    }
     private var currentJob: Job? = null
     private var pendingConversationDeleteJob: Job? = null
     private val _state = MutableStateFlow(
