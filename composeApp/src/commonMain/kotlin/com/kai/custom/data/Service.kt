@@ -102,6 +102,7 @@ sealed class Service(
         settingsKeyPrefix = "",
         chatUrl = "https://api.kilv.my.id/chat/completions",
         modelsUrl = null,
+        reasoningRequestMode = ReasoningRequestMode.REASONING_CONTENT,
     )
 
     data object Groq : Service(
