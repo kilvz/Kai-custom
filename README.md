@@ -1,7 +1,6 @@
 # Kai 9001
 
-> **Android-only** fork of [Kai](https://github.com/SimonSchubert/Kai) — an open-source AI assistant with persistent memory.  
-> v1.6.0 · FOSS-only · No proprietary SDKs.
+> **Android-only** fork of [Kai](https://github.com/SimonSchubert/Kai) — an open-source AI assistant with persistent memory.
 
 <div align="center">
 <img src="site/img/logo_animation.gif" height="80">
@@ -27,7 +26,7 @@ A local semantic memory graph that stores facts, preferences, and learnings acro
 
 Multi-service with automatic failover across 27 backend types:
 
-Anthropic · OpenAI · Gemini · DeepSeek · Mistral · xAI · OpenRouter · Groq · NVIDIA · Cerebras · Ollama Cloud · Together AI · Hugging Face · Venice AI · Moonshot AI · Z.AI · MiniMax · AIHubMix · Deep Infra · Fireworks AI · OAI Agent · PublicAI · OpenAI-Compatible · LiteRT On-Device · Free tier (no API key)
+Anthropic · OpenAI · Gemini · DeepSeek · Mistral · xAI · OpenRouter · Groq · NVIDIA · Cerebras · Ollama Cloud · Together AI · Hugging Face · Venice AI · Moonshot AI · Z.AI · MiniMax · AIHubMix · Deep Infra · Fireworks AI · OpenCode · PublicAI · OpenAI-Compatible · LiteRT On-Device · Free tier (no API key)
 
 ### On-Device Inference
 
@@ -184,7 +183,7 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 | **`writeBinaryFile`** | Binary attachments (Excel, Word, etc.) written to sandbox at `/root/uploads/` so AI can read them via shell. Upstream only wrote text files. |
 | **`speak_text` tool** | TTS via edge-tts in Linux sandbox, 27 language voices. Gated behind sandbox availability. |
 | **Shizuku integration** | `run_adb` tool executes shell commands with ADB-level privileges via Shizuku. `ShizukuManager` + `ShizukuProvider` declared in manifest. |
-| **`run_opencode` tool** | Delegate complex coding tasks to an autonomous coding agent in sandbox. |
+| **`run_opencode` tool** | Delegate complex coding tasks to opencode's autonomous agent in sandbox. |
 | **SSH remote execution** | `ssh_connect` (save/use named profiles), `ssh_disconnect`, `ssh_execute_command` tools. Multi-profile storage. Interactive SSH terminal in chat with command input and live transcript. JSch-based, persistent sessions. |
 | **30+ Android permissions** | Location, contacts, phone state, camera, audio record, body sensors, activity recognition, bluetooth, external storage, WiFi state, query all packages, system alert window, install packages, read logs, biometric, vibrate. |
 | **GitHub Issue button** | Links to `https://github.com/kilvz/Kai-custom/issues/new?template=integration_request.yml` in Settings > Integrations. |
@@ -195,11 +194,11 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 
 | Feature | Upstream | Kai 9001 |
 |---------|----------|----------|
-| **Build flavor** | FOSS + store (Firebase, Crashlytics, Analytics) | **FOSS-only** — zero proprietary SDKs |
+| **Build flavor** | FOSS + Play Store (Firebase, Crashlytics, Analytics) | **FOSS-only** — zero proprietary SDKs |
 | **Platform targets** | Android + iOS + Desktop + Web + WasmJS | **Android-only** — other targets stubbed |
 | **Memory system** | Basic recall/store, `getHeartbeatTools()` gated by scheduling, `DEFAULT_STRUCTURED_LEARNING_SECTION` | `search_memories` tool, `promote_learning` gated by memory (not scheduling), `DEFAULT_MEMORY_INSTRUCTIONS` + `DEFAULT_LOCAL_MEMORY_INSTRUCTIONS` with variant-aware selection, fixed double MemoryList rendering |
 | **Terminal (SelectionContainer)** | Wraps entire `LazyColumn` — causes OOM/ANR on large output | **Per-item** `SelectionContainer` wrapping each `Text` — fixes OOM/ANR |
-| **Tool gating** | `getHeartbeatTools()` gated by `isSchedulingEnabled()` | `promote_learning` gated by `isMemoryEnabled()`; phone tools, ADB, speak_text, code agent added with their own gates |
+| **Tool gating** | `getHeartbeatTools()` gated by `isSchedulingEnabled()` | `promote_learning` gated by `isMemoryEnabled()`; phone tools, ADB, speak_text, opencode added with their own gates |
 | **Conversation storage** | `loadConversations()` called from UI path only | Also called in `TaskScheduler.start()` for daemon-only path, preventing wipe from empty-list persist |
 | **Think-tag stripping** | Regex `<think>.*?</think>` only | Also handles lone `</think>` without `<think>` (Qwen3-Thinking edge case) |
 | **Package / identity** | `com.inspiredandroid.kai`, `Kai 9000` | `com.kai.custom`, `Kai 9001` |
@@ -209,7 +208,7 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 
 ### Features Present in Both (No Meaningful Changes)
 
-- **LLM providers**: Identical — 27 providers: Free, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, NVIDIA, Cerebras, Ollama Cloud, LongCat, Together, HuggingFace, Venice, Moonshot, Z.AI, MiniMax, AIHubMix, Deep Infra, Fireworks AI, OAI Agent, PublicAI, OpenAI-Compatible, LiteRT
+- **LLM providers**: Identical — 27 providers: Free, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, NVIDIA, Cerebras, Ollama Cloud, LongCat, Together, HuggingFace, Venice, Moonshot, Z.AI, MiniMax, AIHubMix, Deep Infra, Fireworks AI, OpenCode, PublicAI, OpenAI-Compatible, LiteRT
 - **Common tools**: Local time, IP location, URL open, web search, fetch URL, memory store/forget/learn/reinforce — structurally identical
 - **SMS / Email / Calendar / Notification tools**: Identical logic
 - **MCP support**: Full Streamable HTTP MCP server manager with curated free servers (Fetch, DeepWiki, Sequential Thinking, Context7, Globalping, CoinGecko, Manifold Markets, Find-A-Domain)
