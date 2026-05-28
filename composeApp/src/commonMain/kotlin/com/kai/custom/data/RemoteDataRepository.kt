@@ -1567,6 +1567,8 @@ class RemoteDataRepository(
     }
 
     override suspend fun forkConversation(messageId: String) {
+        if (!sandboxController.status.value.ready) return
+
         saveCurrentConversation()
 
         val oldHistory = chatHistory.value.toList()
@@ -1592,6 +1594,14 @@ class RemoteDataRepository(
         )
 
         startNewChat()
+
+        val branchContext = "[SYSTEM] The user branched from a previous conversation. " +
+            "Use `search_memories` to find the original context if needed."
+        chatHistory.update {
+            mutableListOf(History(role = History.Role.SYSTEM, content = branchContext))
+        }
+
+        ask(null, emptyList(), null)
     }
 
     override fun restoreCurrentConversation() {
