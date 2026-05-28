@@ -458,15 +458,83 @@ fun SettingsScreenContent(
                     ) {
                         when (filteredUiState.currentTab) {
                             SettingsTab.General -> {
-                                GeneralContent(uiState = filteredUiState, actions = actions)
+                                GeneralContent(
+                                    actions = actions,
+                                    showDaemonToggle = filteredUiState.showDaemonToggle,
+                                    isDaemonEnabled = filteredUiState.isDaemonEnabled,
+                                    isDynamicUiEnabled = filteredUiState.isDynamicUiEnabled,
+                                    themeMode = filteredUiState.themeMode,
+                                    showUiScale = filteredUiState.showUiScale,
+                                    uiScale = filteredUiState.uiScale,
+                                    isWakeWordEnabled = filteredUiState.isWakeWordEnabled,
+                                    wakeWordPhrase = filteredUiState.wakeWordPhrase,
+                                    wakeWordMode = filteredUiState.wakeWordMode,
+                                    wakeWordEnrolled = filteredUiState.wakeWordEnrolled,
+                                    isEnrolling = filteredUiState.isEnrolling,
+                                    wakeWordEnrollmentMessage = filteredUiState.wakeWordEnrollmentMessage,
+                                    preferredLanguage = filteredUiState.preferredLanguage,
+                                )
                             }
 
                             SettingsTab.Agent -> {
-                                AgentContent(uiState = filteredUiState, actions = actions)
+                                AgentContent(
+                                    actions = actions,
+                                    soulText = filteredUiState.soulText,
+                                    memories = filteredUiState.memories,
+                                    isMemoryEnabled = filteredUiState.isMemoryEnabled,
+                                    scheduledTasks = filteredUiState.scheduledTasks,
+                                    isSchedulingEnabled = filteredUiState.isSchedulingEnabled,
+                                    isHeartbeatEnabled = filteredUiState.isHeartbeatEnabled,
+                                    heartbeatIntervalMinutes = filteredUiState.heartbeatIntervalMinutes,
+                                    heartbeatActiveHoursStart = filteredUiState.heartbeatActiveHoursStart,
+                                    heartbeatActiveHoursEnd = filteredUiState.heartbeatActiveHoursEnd,
+                                    heartbeatPrompt = filteredUiState.heartbeatPrompt,
+                                    heartbeatLog = filteredUiState.heartbeatLog,
+                                    heartbeatServiceEntries = filteredUiState.heartbeatServiceEntries,
+                                    heartbeatSelectedInstanceId = filteredUiState.heartbeatSelectedInstanceId,
+                                    isRefreshingHeartbeat = filteredUiState.isRefreshingHeartbeat,
+                                    showEmailToggle = filteredUiState.showEmailToggle,
+                                    isEmailEnabled = filteredUiState.isEmailEnabled,
+                                    emailAccounts = filteredUiState.emailAccounts,
+                                    emailPollIntervalMinutes = filteredUiState.emailPollIntervalMinutes,
+                                    emailPendingCount = filteredUiState.emailPendingCount,
+                                    emailSyncStates = filteredUiState.emailSyncStates,
+                                    refreshingEmailAccountIds = filteredUiState.refreshingEmailAccountIds,
+                                    showSmsSection = filteredUiState.showSmsSection,
+                                    isSmsEnabled = filteredUiState.isSmsEnabled,
+                                    smsPermissionGranted = filteredUiState.smsPermissionGranted,
+                                    smsPollIntervalMinutes = filteredUiState.smsPollIntervalMinutes,
+                                    smsPendingCount = filteredUiState.smsPendingCount,
+                                    smsSyncState = filteredUiState.smsSyncState,
+                                    isRefreshingSms = filteredUiState.isRefreshingSms,
+                                    isSmsSendEnabled = filteredUiState.isSmsSendEnabled,
+                                    smsSendPermissionGranted = filteredUiState.smsSendPermissionGranted,
+                                    showNotificationsSection = filteredUiState.showNotificationsSection,
+                                    isNotificationsEnabled = filteredUiState.isNotificationsEnabled,
+                                    notificationListenerAccessGranted = filteredUiState.notificationListenerAccessGranted,
+                                    notificationListenerBound = filteredUiState.notificationListenerBound,
+                                    notificationPendingCount = filteredUiState.notificationPendingCount,
+                                    showShizukuSection = filteredUiState.showShizukuSection,
+                                    isShizukuEnabled = filteredUiState.isShizukuEnabled,
+                                    shizukuPermissionGranted = filteredUiState.shizukuPermissionGranted,
+                                )
                             }
 
                             SettingsTab.Services -> {
-                                ServicesContent(uiState = filteredUiState, actions = actions)
+                                ServicesContent(
+                                    actions = actions,
+                                    configuredServices = filteredUiState.configuredServices,
+                                    expandedServiceId = filteredUiState.expandedServiceId,
+                                    localAvailableModels = filteredUiState.localAvailableModels,
+                                    totalDeviceMemoryBytes = filteredUiState.totalDeviceMemoryBytes,
+                                    localFreeSpaceBytes = filteredUiState.localFreeSpaceBytes,
+                                    localDownloadingModelId = filteredUiState.localDownloadingModelId,
+                                    localDownloadProgress = filteredUiState.localDownloadProgress,
+                                    localDownloadError = filteredUiState.localDownloadError,
+                                    modelContextTokens = filteredUiState.modelContextTokens,
+                                    availableServicesToAdd = filteredUiState.availableServicesToAdd,
+                                    isFreeFallbackEnabled = filteredUiState.isFreeFallbackEnabled,
+                                )
                             }
 
                             SettingsTab.Integrations -> {

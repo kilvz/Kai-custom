@@ -58,7 +58,22 @@ import org.jetbrains.compose.resources.vectorResource
 import kotlin.math.roundToInt
 
 @Composable
-internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) {
+internal fun GeneralContent(
+    actions: SettingsActions,
+    showDaemonToggle: Boolean,
+    isDaemonEnabled: Boolean,
+    isDynamicUiEnabled: Boolean,
+    themeMode: ThemeMode,
+    showUiScale: Boolean,
+    uiScale: Float,
+    isWakeWordEnabled: Boolean,
+    wakeWordPhrase: String,
+    wakeWordMode: String,
+    wakeWordEnrolled: Boolean,
+    isEnrolling: Boolean,
+    wakeWordEnrollmentMessage: String,
+    preferredLanguage: String,
+) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
         if (useStaggered) {
@@ -70,23 +85,23 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    if (uiState.showDaemonToggle) {
+                    if (showDaemonToggle) {
                         SettingsCard {
                             DaemonModeToggle(
-                                isDaemonEnabled = uiState.isDaemonEnabled,
+                                isDaemonEnabled = isDaemonEnabled,
                                 onToggleDaemon = actions.onToggleDaemon,
                             )
                         }
                     }
                     SettingsCard {
                         DynamicUiToggle(
-                            isDynamicUiEnabled = uiState.isDynamicUiEnabled,
+                            isDynamicUiEnabled = isDynamicUiEnabled,
                             onToggleDynamicUi = actions.onToggleDynamicUi,
                         )
                     }
                     SettingsCard {
                         ThemeModePicker(
-                            themeMode = uiState.themeMode,
+                            themeMode = themeMode,
                             onChangeThemeMode = actions.onChangeThemeMode,
                         )
                     }
@@ -95,10 +110,10 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    if (uiState.showUiScale) {
+                    if (showUiScale) {
                         SettingsCard {
                             UiScaleSection(
-                                uiScale = uiState.uiScale,
+                                uiScale = uiScale,
                                 onChangeUiScale = actions.onChangeUiScale,
                             )
                         }
@@ -112,12 +127,12 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     }
                     SettingsCard {
                         WakeWordSection(
-                            isWakeWordEnabled = uiState.isWakeWordEnabled,
-                            wakeWordPhrase = uiState.wakeWordPhrase,
-                            wakeWordMode = uiState.wakeWordMode,
-                            wakeWordEnrolled = uiState.wakeWordEnrolled,
-                            isEnrolling = uiState.isEnrolling,
-                            wakeWordEnrollmentMessage = uiState.wakeWordEnrollmentMessage,
+                            isWakeWordEnabled = isWakeWordEnabled,
+                            wakeWordPhrase = wakeWordPhrase,
+                            wakeWordMode = wakeWordMode,
+                            wakeWordEnrolled = wakeWordEnrolled,
+                            isEnrolling = isEnrolling,
+                            wakeWordEnrollmentMessage = wakeWordEnrollmentMessage,
                             onToggleWakeWord = actions.onToggleWakeWord,
                             onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
                             onChangeWakeWordMode = actions.onChangeWakeWordMode,
@@ -126,7 +141,7 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                     }
                     SettingsCard {
                         LanguageSection(
-                            preferredLanguage = uiState.preferredLanguage,
+                            preferredLanguage = preferredLanguage,
                             onChangePreferredLanguage = actions.onChangePreferredLanguage,
                         )
                     }
@@ -137,30 +152,30 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (uiState.showDaemonToggle) {
+                if (showDaemonToggle) {
                     SettingsCard {
                         DaemonModeToggle(
-                            isDaemonEnabled = uiState.isDaemonEnabled,
+                            isDaemonEnabled = isDaemonEnabled,
                             onToggleDaemon = actions.onToggleDaemon,
                         )
                     }
                 }
                 SettingsCard {
                     DynamicUiToggle(
-                        isDynamicUiEnabled = uiState.isDynamicUiEnabled,
+                        isDynamicUiEnabled = isDynamicUiEnabled,
                         onToggleDynamicUi = actions.onToggleDynamicUi,
                     )
                 }
                 SettingsCard {
                     ThemeModePicker(
-                        themeMode = uiState.themeMode,
+                        themeMode = themeMode,
                         onChangeThemeMode = actions.onChangeThemeMode,
                     )
                 }
-                if (uiState.showUiScale) {
+                if (showUiScale) {
                     SettingsCard {
                         UiScaleSection(
-                            uiScale = uiState.uiScale,
+                            uiScale = uiScale,
                             onChangeUiScale = actions.onChangeUiScale,
                         )
                     }
@@ -174,12 +189,12 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                 }
                 SettingsCard {
                     WakeWordSection(
-                        isWakeWordEnabled = uiState.isWakeWordEnabled,
-                        wakeWordPhrase = uiState.wakeWordPhrase,
-                        wakeWordMode = uiState.wakeWordMode,
-                        wakeWordEnrolled = uiState.wakeWordEnrolled,
-                        isEnrolling = uiState.isEnrolling,
-                        wakeWordEnrollmentMessage = uiState.wakeWordEnrollmentMessage,
+                        isWakeWordEnabled = isWakeWordEnabled,
+                        wakeWordPhrase = wakeWordPhrase,
+                        wakeWordMode = wakeWordMode,
+                        wakeWordEnrolled = wakeWordEnrolled,
+                        isEnrolling = isEnrolling,
+                        wakeWordEnrollmentMessage = wakeWordEnrollmentMessage,
                         onToggleWakeWord = actions.onToggleWakeWord,
                         onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
                         onChangeWakeWordMode = actions.onChangeWakeWordMode,
@@ -188,7 +203,7 @@ internal fun GeneralContent(uiState: SettingsUiState, actions: SettingsActions) 
                 }
                 SettingsCard {
                     LanguageSection(
-                        preferredLanguage = uiState.preferredLanguage,
+                        preferredLanguage = preferredLanguage,
                         onChangePreferredLanguage = actions.onChangePreferredLanguage,
                     )
                 }
