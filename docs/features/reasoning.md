@@ -9,7 +9,7 @@ Reasoning-capable models (DeepSeek R1, GLM thinking, Qwen thinking, Kimi thinkin
 OpenAI's chat-completions schema has no standardized place for prior-turn reasoning, so each provider invented their own. The result is three sources of variation:
 
 - **Field name** — `reasoning_content` (DeepSeek lineage), `reasoning` (OpenRouter/Cerebras lineage), `reasoning_details[]` (preserves thought signatures for Anthropic/Gemini via OpenRouter), or embedded `<think>...</think>` tags inside `content` (MiniMax M2 native, older Magistral).
-- **Whether echoing back is required** — some providers reconstruct internal state from it (Z.AI Coding Plan, OpenCode Zen via DeepSeek route, Kimi `k2.6` with `thinking.keep="all"`); others accept it as a no-op; others reject any unknown field outright.
+- **Whether echoing back is required** — some providers reconstruct internal state from it (Z.AI Coding Plan, API gateway via DeepSeek route, Kimi `k2.6` with `thinking.keep="all"`); others accept it as a no-op; others reject any unknown field outright.
 - **Paired flags** — preservation sometimes requires an additional request flag (Z.AI `clear_thinking: false`, Fireworks `reasoning_history: "preserved"`).
 
 ## Outgoing assistant-message behavior matrix
@@ -22,7 +22,7 @@ Behavior of each provider when an `assistant`-role message with prior `tool_call
 | DeepSeek | **Required** | `reasoning_content` | Thinking-mode models (deepseek-chat, deepseek-v3.2, deepseek-v4-pro) return 400 (`The reasoning_content in the thinking mode must be passed back to the API`) if the field is missing on a follow-up turn after tool_calls. The legacy `deepseek-reasoner` doesn't expose tools so the gate `if (toolCalls != null)` keeps it unaffected | [api-docs.deepseek.com/guides/thinking_mode](https://api-docs.deepseek.com/guides/thinking_mode) |
 | Cerebras | **Rejected (wrong field)** | `reasoning` (not `reasoning_content`) | GLM-4.7 multi-step returns 400 when sent `reasoning_content`; expects `reasoning`. Kai sends neither (mode = `NONE`) | [inference-docs.cerebras.ai/api-reference/chat-completions](https://inference-docs.cerebras.ai/api-reference/chat-completions) |
 | Z.AI Coding Plan | **Required** | `reasoning_content` | Preserved Thinking is on by default on `/api/coding/paas/v4`; dropping the field breaks reasoning coherence | [docs.z.ai/guides/capabilities/thinking-mode](https://docs.z.ai/guides/capabilities/thinking-mode) |
-| OpenCode Zen (DeepSeek route) | **Required** | `reasoning_content` | Pass-through gateway. When routing to DeepSeek-V4 Pro thinking, once any assistant message carries reasoning, all subsequent assistant messages must | [opencode.ai/docs/zen/](https://opencode.ai/docs/zen/) |
+| API gateway (DeepSeek route) | **Required** | `reasoning_content` | Pass-through gateway. When routing to DeepSeek-V4 Pro thinking, once any assistant message carries reasoning, all subsequent assistant messages must | [docs](https://opencode.ai/docs/zen/) |
 | Moonshot / Kimi | **Required for `kimi-k2.6` with `thinking.keep="all"`** | `reasoning_content` | Only that specific model + flag combination requires the echo. Other Kimi thinking models accept it as a no-op. Kai does not currently set `thinking.keep` | [platform.kimi.com/docs/api/chat](https://platform.kimi.com/docs/api/chat) |
 | Fireworks AI | **Accepted (documented)** | `reasoning_content` | Officially supported field on `ChatMessage`. Full preservation also requires `reasoning_history: "preserved"` on the request — Kai does not set this | [docs.fireworks.ai/api-reference/post-chatcompletions](https://docs.fireworks.ai/api-reference/post-chatcompletions) |
 | Z.AI standard | **Accepted (documented, inert without flag)** | `reasoning_content` | Preserved Thinking is opt-in on `/api/paas/v4`; without `clear_thinking: false` (which Kai does not send) the echo is ignored | [docs.z.ai/guides/capabilities/thinking-mode](https://docs.z.ai/guides/capabilities/thinking-mode) |
@@ -37,7 +37,7 @@ Behavior of each provider when an `assistant`-role message with prior `tool_call
 
 Kai gates the field on `Service.reasoningRequestMode` (`NONE` or `REASONING_CONTENT`). When `REASONING_CONTENT` is set and the prior assistant turn carried `tool_calls`, Kai emits the field on the next request.
 
-Services currently set to `REASONING_CONTENT`: DeepSeek, OpenRouter, LongCat, Venice, Moonshot, Z.AI, Z.AI Coding Plan, MiniMax, Fireworks, OpenCode.
+Services currently set to `REASONING_CONTENT`: DeepSeek, OpenRouter, LongCat, Venice, Moonshot, Z.AI, Z.AI Coding Plan, MiniMax, Fireworks, OAI Agent.
 
 All other services use the default `NONE` (the field is stripped on send). This is the safe default — any service we don't yet have evidence about will not regress.
 

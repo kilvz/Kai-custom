@@ -26,7 +26,7 @@ actual class SmsPermissionController actual constructor() {
     private val permissionResultFlow = MutableStateFlow<Boolean?>(null)
 
     actual fun hasPermission(): Boolean {
-        // If READ_SMS is not declared in the merged manifest (Play Store flavor),
+        // If READ_SMS is not declared in the merged manifest (store flavor),
         // checkSelfPermission returns DENIED — but we also guard explicitly so the
         // UI can distinguish "not available" from "not granted".
         return ContextCompat.checkSelfPermission(

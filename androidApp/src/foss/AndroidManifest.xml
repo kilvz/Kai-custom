@@ -3,8 +3,8 @@
 
     <!--
       SMS read/send are opt-in, FOSS-only features. These permissions are intentionally
-      declared only in the `foss` product flavor so the Play Store variant never
-      requests them (Play policy restricts READ_SMS and SEND_SMS to default SMS
+      declared only in the `foss` product flavor so the store variant never
+      requests them (store policy restricts READ_SMS and SEND_SMS to default SMS
       handlers). The SMS feature gates itself at runtime on READ_SMS being declared
       in the merged manifest, so the Play variant never shows the feature at all.
       Read and send are independent user opt-ins at runtime.
@@ -13,7 +13,7 @@
     <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <!--
-      Notification reading is FOSS-only for the same reason as SMS: Play Store policy
+      Notification reading is FOSS-only for the same reason as SMS: store policy
       restricts BIND_NOTIFICATION_LISTENER_SERVICE to a narrow set of approved use
       cases. The feature gates itself at runtime by probing for the listener service
       in the merged manifest, so the Play variant never shows the feature at all.

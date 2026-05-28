@@ -10,7 +10,7 @@ import com.kai.custom.data.SmsMessage
 expect class SmsReader() {
     /**
      * True when this build can ever read SMS at all — i.e. Android + `READ_SMS`
-     * declared in the merged manifest. False on Play Store variant and non-Android.
+     * declared in the merged manifest. False on store variant and non-Android.
      */
     fun isSupported(): Boolean
 

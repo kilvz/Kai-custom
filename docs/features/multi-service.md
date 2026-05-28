@@ -77,7 +77,7 @@ The **OpenAI-Compatible API** service supports a custom base URL, defaulting to 
 | AIHubMix | `aihubmix` | Yes | OpenAI-compatible |
 | Deep Infra | `deepinfra` | Yes | OpenAI-compatible |
 | Fireworks AI | `fireworksai` | Yes | OpenAI-compatible |
-| OpenCode | `opencode` | Yes | OpenAI-compatible |
+| OAI Agent | `opencode` | Yes | OpenAI-compatible |
 | Public AI | `publicai` | Yes | OpenAI-compatible |
 | OpenAI-Compatible API | `openai-compatible` | No (optional) | OpenAI-compatible |
 | Local Model | `litert` | No | On-device (LiteRT LM) |

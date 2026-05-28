@@ -687,10 +687,10 @@
 ### Features
 - Add topic headers
 - Add content localizations
-- Add automated Play Store screenshot localization
+- Add automated store screenshot localization
 
 ### Improvements
-- Remove SMS permissions to pass Play Store review
+- Remove SMS permissions to pass store review
 
 ## v1.7.0 — 2026-02-16
 
@@ -713,7 +713,7 @@
 
 ### Improvements
 - Add missing ProGuard rules
-- Separate FOSS and Play Store build flavors
+- Separate FOSS and store build flavors
 
 ## v1.6.1 — 2026-02-11
 
