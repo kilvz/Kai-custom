@@ -178,12 +178,10 @@ internal fun FreeSettings(
             Spacer(Modifier.height(12.dp))
             val uriHandler = LocalUriHandler.current
             Button(
-                onClick = { uriHandler.openUri("https://github.com/sponsors/SimonSchubert") },
+                onClick = { uriHandler.openUri("https://github.com/sponsors/kilvz") },
                 modifier = Modifier.align(CenterHorizontally).handCursor(),
             ) {
-                Icon(Icons.Default.Favorite, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(Res.string.settings_become_sponsor))
+                Text("❤️ ${stringResource(Res.string.settings_become_sponsor)}")
             }
         }
     }
