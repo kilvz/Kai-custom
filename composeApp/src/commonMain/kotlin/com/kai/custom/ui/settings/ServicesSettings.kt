@@ -188,11 +188,24 @@ internal fun FreeSettings(
 }
 
 @Composable
-internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions) {
+internal fun ServicesContent(
+    actions: SettingsActions,
+    configuredServices: ImmutableList<ConfiguredServiceEntry>,
+    expandedServiceId: String?,
+    localAvailableModels: ImmutableList<LocalModel>,
+    totalDeviceMemoryBytes: Long,
+    localFreeSpaceBytes: Long,
+    localDownloadingModelId: String?,
+    localDownloadProgress: Float?,
+    localDownloadError: DownloadError?,
+    modelContextTokens: ImmutableMap<String, Int>,
+    availableServicesToAdd: ImmutableList<Service>,
+    isFreeFallbackEnabled: Boolean,
+) {
     var showAddServiceSheet by remember { mutableStateOf(false) }
 
     // Configured services list
-    val entries = uiState.configuredServices
+    val entries = configuredServices
     ReorderableColumn(
         list = entries,
         onSettle = { fromIndex, toIndex ->
@@ -206,31 +219,31 @@ internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions)
             ReorderableItem {
                 ConfiguredServiceCardContent(
                     entry = entry,
-                    isExpanded = uiState.expandedServiceId == entry.instanceId,
-                    onExpand = { actions.onExpandService(if (uiState.expandedServiceId == entry.instanceId) null else entry.instanceId) },
+                    isExpanded = expandedServiceId == entry.instanceId,
+                    onExpand = { actions.onExpandService(if (expandedServiceId == entry.instanceId) null else entry.instanceId) },
                     onChangeApiKey = { apiKey -> actions.onChangeApiKey(entry.instanceId, apiKey) },
                     onChangeBaseUrl = { baseUrl -> actions.onChangeBaseUrl(entry.instanceId, baseUrl) },
                     onSelectModel = { modelId -> actions.onSelectModel(entry.instanceId, modelId) },
                     onRemove = { actions.onRemoveService(entry.instanceId) },
                     isDragging = isDragging,
                     dragHandleModifier = if (entries.size >= 2) Modifier.draggableHandle() else null,
-                    localAvailableModels = uiState.localAvailableModels,
-                    totalDeviceMemoryBytes = uiState.totalDeviceMemoryBytes,
-                    localFreeSpaceBytes = uiState.localFreeSpaceBytes,
-                    localDownloadingModelId = uiState.localDownloadingModelId,
-                    localDownloadProgress = uiState.localDownloadProgress,
-                    localDownloadError = uiState.localDownloadError,
+                    localAvailableModels = localAvailableModels,
+                    totalDeviceMemoryBytes = totalDeviceMemoryBytes,
+                    localFreeSpaceBytes = localFreeSpaceBytes,
+                    localDownloadingModelId = localDownloadingModelId,
+                    localDownloadProgress = localDownloadProgress,
+                    localDownloadError = localDownloadError,
                     onDownloadLocalModel = actions.onDownloadLocalModel,
                     onCancelLocalModelDownload = actions.onCancelLocalModelDownload,
                     onDeleteLocalModel = actions.onDeleteLocalModel,
                     onChangeModelContextTokens = actions.onChangeModelContextTokens,
-                    modelContextTokens = uiState.modelContextTokens,
+                    modelContextTokens = modelContextTokens,
                 )
             }
         }
     }
 
-    if (uiState.availableServicesToAdd.isNotEmpty()) {
+    if (availableServicesToAdd.isNotEmpty()) {
         Spacer(Modifier.height(12.dp))
         OutlinedButton(onClick = { showAddServiceSheet = true }, modifier = Modifier.handCursor()) {
             Text(stringResource(Res.string.settings_add_service))
@@ -240,7 +253,7 @@ internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions)
     Spacer(Modifier.height(16.dp))
     FreeSettings(
         showFallbackToggle = entries.isNotEmpty(),
-        isFreeFallbackEnabled = uiState.isFreeFallbackEnabled,
+        isFreeFallbackEnabled = isFreeFallbackEnabled,
         onToggleFreeFallback = actions.onToggleFreeFallback,
     )
 
@@ -253,7 +266,7 @@ internal fun ServicesContent(uiState: SettingsUiState, actions: SettingsActions)
             val addServiceScrollState = rememberScrollState()
             Box {
                 Column(modifier = Modifier.verticalScroll(addServiceScrollState).padding(16.dp)) {
-                    val services = uiState.availableServicesToAdd
+                    val services = availableServicesToAdd
                     services.forEachIndexed { index, service ->
                         val isFirst = index == 0
                         val isLast = index == services.lastIndex

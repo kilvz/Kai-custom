@@ -38,9 +38,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.kai.custom.data.EmailAccount
+import com.kai.custom.data.EmailSyncState
 import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.ScheduledTask
+import com.kai.custom.data.ServiceEntry
+import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.TaskTrigger
 import com.kai.custom.saveFileToDevice
 import com.kai.custom.ui.KaiOutlinedTextField
@@ -89,6 +93,8 @@ import kai.composeapp.generated.resources.settings_task_details_status
 import kai.composeapp.generated.resources.settings_task_details_trigger
 import kotlinx.coroutines.launch
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
@@ -97,7 +103,47 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Instant
 
 @Composable
-internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
+internal fun AgentContent(
+    actions: SettingsActions,
+    soulText: String,
+    memories: ImmutableList<MemoryEntry>,
+    isMemoryEnabled: Boolean,
+    scheduledTasks: ImmutableList<ScheduledTask>,
+    isSchedulingEnabled: Boolean,
+    isHeartbeatEnabled: Boolean,
+    heartbeatIntervalMinutes: Int,
+    heartbeatActiveHoursStart: Int,
+    heartbeatActiveHoursEnd: Int,
+    heartbeatPrompt: String,
+    heartbeatLog: ImmutableList<HeartbeatLogEntry>,
+    heartbeatServiceEntries: ImmutableList<ServiceEntry>,
+    heartbeatSelectedInstanceId: String?,
+    isRefreshingHeartbeat: Boolean,
+    showEmailToggle: Boolean,
+    isEmailEnabled: Boolean,
+    emailAccounts: ImmutableList<EmailAccount>,
+    emailPollIntervalMinutes: Int,
+    emailPendingCount: Int,
+    emailSyncStates: ImmutableMap<String, EmailSyncState>,
+    refreshingEmailAccountIds: ImmutableSet<String>,
+    showSmsSection: Boolean,
+    isSmsEnabled: Boolean,
+    smsPermissionGranted: Boolean,
+    smsPollIntervalMinutes: Int,
+    smsPendingCount: Int,
+    smsSyncState: SmsSyncState,
+    isRefreshingSms: Boolean,
+    isSmsSendEnabled: Boolean,
+    smsSendPermissionGranted: Boolean,
+    showNotificationsSection: Boolean,
+    isNotificationsEnabled: Boolean,
+    notificationListenerAccessGranted: Boolean,
+    notificationListenerBound: Boolean,
+    notificationPendingCount: Int,
+    showShizukuSection: Boolean,
+    isShizukuEnabled: Boolean,
+    shizukuPermissionGranted: Boolean,
+) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
         if (useStaggered) {
@@ -111,10 +157,10 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                 ) {
                 SettingsCard {
                     MemoryList(
-                        memories = uiState.memories,
+                        memories = memories,
                         onDeleteMemory = actions.onDeleteMemory,
                         onUpdateMemory = actions.onUpdateMemory,
-                        isMemoryEnabled = uiState.isMemoryEnabled,
+                        isMemoryEnabled = isMemoryEnabled,
                         onToggleMemory = actions.onToggleMemory,
                         onExportPalace = actions.onExportPalace,
                         onImportPalace = actions.onImportPalace,
@@ -122,10 +168,10 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                 }
                 SettingsCard {
                     ScheduledTaskList(
-                            tasks = uiState.scheduledTasks,
-                            heartbeatLog = uiState.heartbeatLog,
+                            tasks = scheduledTasks,
+                            heartbeatLog = heartbeatLog,
                             onCancelTask = actions.onCancelTask,
-                            isSchedulingEnabled = uiState.isSchedulingEnabled,
+                            isSchedulingEnabled = isSchedulingEnabled,
                             onToggleScheduling = actions.onToggleScheduling,
                         )
                 }
@@ -136,15 +182,15 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                 ) {
                     SettingsCard {
                         HeartbeatSection(
-                            isHeartbeatEnabled = uiState.isHeartbeatEnabled,
-                            heartbeatIntervalMinutes = uiState.heartbeatIntervalMinutes,
-                            activeHoursStart = uiState.heartbeatActiveHoursStart,
-                            activeHoursEnd = uiState.heartbeatActiveHoursEnd,
-                            heartbeatPrompt = uiState.heartbeatPrompt,
-                            heartbeatLog = uiState.heartbeatLog,
-                            heartbeatServiceEntries = uiState.heartbeatServiceEntries,
-                            heartbeatSelectedInstanceId = uiState.heartbeatSelectedInstanceId,
-                            isRefreshing = uiState.isRefreshingHeartbeat,
+                            isHeartbeatEnabled = isHeartbeatEnabled,
+                            heartbeatIntervalMinutes = heartbeatIntervalMinutes,
+                            activeHoursStart = heartbeatActiveHoursStart,
+                            activeHoursEnd = heartbeatActiveHoursEnd,
+                            heartbeatPrompt = heartbeatPrompt,
+                            heartbeatLog = heartbeatLog,
+                            heartbeatServiceEntries = heartbeatServiceEntries,
+                            heartbeatSelectedInstanceId = heartbeatSelectedInstanceId,
+                            isRefreshing = isRefreshingHeartbeat,
                             onToggleHeartbeat = actions.onToggleHeartbeat,
                             onChangeInterval = actions.onChangeHeartbeatInterval,
                             onChangeActiveHours = actions.onChangeHeartbeatActiveHours,
@@ -153,15 +199,15 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                             onRefresh = actions.onRefreshHeartbeat,
                         )
                     }
-                    if (uiState.showEmailToggle) {
+                    if (showEmailToggle) {
                         SettingsCard {
                             EmailSection(
-                                isEmailEnabled = uiState.isEmailEnabled,
-                                emailAccounts = uiState.emailAccounts,
-                                pollIntervalMinutes = uiState.emailPollIntervalMinutes,
-                                pendingCount = uiState.emailPendingCount,
-                                syncStates = uiState.emailSyncStates,
-                                refreshingAccountIds = uiState.refreshingEmailAccountIds,
+                                isEmailEnabled = isEmailEnabled,
+                                emailAccounts = emailAccounts,
+                                pollIntervalMinutes = emailPollIntervalMinutes,
+                                pendingCount = emailPendingCount,
+                                syncStates = emailSyncStates,
+                                refreshingAccountIds = refreshingEmailAccountIds,
                                 onToggleEmail = actions.onToggleEmail,
                                 onRemoveAccount = actions.onRemoveEmailAccount,
                                 onChangePollInterval = actions.onChangeEmailPollInterval,
@@ -169,17 +215,17 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                             )
                         }
                     }
-                    if (uiState.showSmsSection) {
+                    if (showSmsSection) {
                         SettingsCard {
                             SmsSection(
-                                isSmsEnabled = uiState.isSmsEnabled,
-                                permissionGranted = uiState.smsPermissionGranted,
-                                pollIntervalMinutes = uiState.smsPollIntervalMinutes,
-                                pendingCount = uiState.smsPendingCount,
-                                syncState = uiState.smsSyncState,
-                                isRefreshing = uiState.isRefreshingSms,
-                                isSmsSendEnabled = uiState.isSmsSendEnabled,
-                                sendPermissionGranted = uiState.smsSendPermissionGranted,
+                                isSmsEnabled = isSmsEnabled,
+                                permissionGranted = smsPermissionGranted,
+                                pollIntervalMinutes = smsPollIntervalMinutes,
+                                pendingCount = smsPendingCount,
+                                syncState = smsSyncState,
+                                isRefreshing = isRefreshingSms,
+                                isSmsSendEnabled = isSmsSendEnabled,
+                                sendPermissionGranted = smsSendPermissionGranted,
                                 onToggleSms = actions.onToggleSms,
                                 onChangePollInterval = actions.onChangeSmsPollInterval,
                                 onRefresh = actions.onRefreshSms,
@@ -187,24 +233,24 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                             )
                         }
                     }
-                    if (uiState.showNotificationsSection) {
+                    if (showNotificationsSection) {
                         SettingsCard {
                             NotificationsSection(
-                                isEnabled = uiState.isNotificationsEnabled,
-                                accessGranted = uiState.notificationListenerAccessGranted,
-                                listenerBound = uiState.notificationListenerBound,
-                                pendingCount = uiState.notificationPendingCount,
+                                isEnabled = isNotificationsEnabled,
+                                accessGranted = notificationListenerAccessGranted,
+                                listenerBound = notificationListenerBound,
+                                pendingCount = notificationPendingCount,
                                 onToggle = actions.onToggleNotifications,
                                 onOpenAccessSettings = actions.onOpenNotificationListenerSettings,
                                 onClearPending = actions.onClearPendingNotifications,
                             )
                         }
                     }
-                    if (uiState.showShizukuSection) {
+                    if (showShizukuSection) {
                         SettingsCard {
                             ShizukuSection(
-                                isEnabled = uiState.isShizukuEnabled,
-                                permissionGranted = uiState.shizukuPermissionGranted,
+                                isEnabled = isShizukuEnabled,
+                                permissionGranted = shizukuPermissionGranted,
                                 onToggle = actions.onToggleShizuku,
                                 onOpenPermission = actions.onOpenShizukuPermission,
                             )
@@ -216,16 +262,16 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 SettingsCard {
                     SoulEditor(
-                        soulText = uiState.soulText,
+                        soulText = soulText,
                         onSaveSoul = actions.onSaveSoul,
                     )
                 }
                     SettingsCard {
                         MemoryList(
-                            memories = uiState.memories,
+                            memories = memories,
                             onDeleteMemory = actions.onDeleteMemory,
                             onUpdateMemory = actions.onUpdateMemory,
-                            isMemoryEnabled = uiState.isMemoryEnabled,
+                            isMemoryEnabled = isMemoryEnabled,
                             onToggleMemory = actions.onToggleMemory,
                             onExportPalace = actions.onExportPalace,
                             onImportPalace = actions.onImportPalace,
@@ -233,15 +279,15 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                     }
                     SettingsCard {
                         HeartbeatSection(
-                        isHeartbeatEnabled = uiState.isHeartbeatEnabled,
-                        heartbeatIntervalMinutes = uiState.heartbeatIntervalMinutes,
-                        activeHoursStart = uiState.heartbeatActiveHoursStart,
-                        activeHoursEnd = uiState.heartbeatActiveHoursEnd,
-                        heartbeatPrompt = uiState.heartbeatPrompt,
-                        heartbeatLog = uiState.heartbeatLog,
-                        heartbeatServiceEntries = uiState.heartbeatServiceEntries,
-                        heartbeatSelectedInstanceId = uiState.heartbeatSelectedInstanceId,
-                        isRefreshing = uiState.isRefreshingHeartbeat,
+                        isHeartbeatEnabled = isHeartbeatEnabled,
+                        heartbeatIntervalMinutes = heartbeatIntervalMinutes,
+                        activeHoursStart = heartbeatActiveHoursStart,
+                        activeHoursEnd = heartbeatActiveHoursEnd,
+                        heartbeatPrompt = heartbeatPrompt,
+                        heartbeatLog = heartbeatLog,
+                        heartbeatServiceEntries = heartbeatServiceEntries,
+                        heartbeatSelectedInstanceId = heartbeatSelectedInstanceId,
+                        isRefreshing = isRefreshingHeartbeat,
                         onToggleHeartbeat = actions.onToggleHeartbeat,
                         onChangeInterval = actions.onChangeHeartbeatInterval,
                         onChangeActiveHours = actions.onChangeHeartbeatActiveHours,
@@ -250,15 +296,15 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                         onRefresh = actions.onRefreshHeartbeat,
                     )
                 }
-                if (uiState.showEmailToggle) {
+                if (showEmailToggle) {
                     SettingsCard {
                         EmailSection(
-                            isEmailEnabled = uiState.isEmailEnabled,
-                            emailAccounts = uiState.emailAccounts,
-                            pollIntervalMinutes = uiState.emailPollIntervalMinutes,
-                            pendingCount = uiState.emailPendingCount,
-                            syncStates = uiState.emailSyncStates,
-                            refreshingAccountIds = uiState.refreshingEmailAccountIds,
+                            isEmailEnabled = isEmailEnabled,
+                            emailAccounts = emailAccounts,
+                            pollIntervalMinutes = emailPollIntervalMinutes,
+                            pendingCount = emailPendingCount,
+                            syncStates = emailSyncStates,
+                            refreshingAccountIds = refreshingEmailAccountIds,
                             onToggleEmail = actions.onToggleEmail,
                             onRemoveAccount = actions.onRemoveEmailAccount,
                             onChangePollInterval = actions.onChangeEmailPollInterval,
@@ -266,17 +312,17 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                         )
                     }
                 }
-                if (uiState.showSmsSection) {
+                if (showSmsSection) {
                     SettingsCard {
                         SmsSection(
-                            isSmsEnabled = uiState.isSmsEnabled,
-                            permissionGranted = uiState.smsPermissionGranted,
-                            pollIntervalMinutes = uiState.smsPollIntervalMinutes,
-                            pendingCount = uiState.smsPendingCount,
-                            syncState = uiState.smsSyncState,
-                            isRefreshing = uiState.isRefreshingSms,
-                            isSmsSendEnabled = uiState.isSmsSendEnabled,
-                            sendPermissionGranted = uiState.smsSendPermissionGranted,
+                            isSmsEnabled = isSmsEnabled,
+                            permissionGranted = smsPermissionGranted,
+                            pollIntervalMinutes = smsPollIntervalMinutes,
+                            pendingCount = smsPendingCount,
+                            syncState = smsSyncState,
+                            isRefreshing = isRefreshingSms,
+                            isSmsSendEnabled = isSmsSendEnabled,
+                            sendPermissionGranted = smsSendPermissionGranted,
                             onToggleSms = actions.onToggleSms,
                             onChangePollInterval = actions.onChangeSmsPollInterval,
                             onRefresh = actions.onRefreshSms,
@@ -284,24 +330,24 @@ internal fun AgentContent(uiState: SettingsUiState, actions: SettingsActions) {
                         )
                     }
                 }
-                if (uiState.showNotificationsSection) {
+                if (showNotificationsSection) {
                     SettingsCard {
                         NotificationsSection(
-                            isEnabled = uiState.isNotificationsEnabled,
-                            accessGranted = uiState.notificationListenerAccessGranted,
-                            listenerBound = uiState.notificationListenerBound,
-                            pendingCount = uiState.notificationPendingCount,
+                            isEnabled = isNotificationsEnabled,
+                            accessGranted = notificationListenerAccessGranted,
+                            listenerBound = notificationListenerBound,
+                            pendingCount = notificationPendingCount,
                             onToggle = actions.onToggleNotifications,
                             onOpenAccessSettings = actions.onOpenNotificationListenerSettings,
                             onClearPending = actions.onClearPendingNotifications,
                         )
                     }
                 }
-                if (uiState.showShizukuSection) {
+                if (showShizukuSection) {
                     SettingsCard {
                         ShizukuSection(
-                            isEnabled = uiState.isShizukuEnabled,
-                            permissionGranted = uiState.shizukuPermissionGranted,
+                            isEnabled = isShizukuEnabled,
+                            permissionGranted = shizukuPermissionGranted,
                             onToggle = actions.onToggleShizuku,
                             onOpenPermission = actions.onOpenShizukuPermission,
                         )
