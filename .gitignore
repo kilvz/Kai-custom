@@ -24,3 +24,8 @@ fastlane/README.md
 .build-native/
 .claude
 .opencode
+*.tar.gz
+tools/speech_commands/
+*.tflite
+/playstore/
+AGENTS.md

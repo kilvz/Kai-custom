@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Welkom bij Kai 9000</string>
+    <string name="welcome_message">Welkom bij Kai 9001</string>
     <string name="prompt_ask_question">Stel een vraag</string>
     <string name="error_invalid_api_key">Ongeldige API-sleutel. Controleer uw instellingen.</string>
     <string name="error_rate_limit_exceeded">Aanvraaglimiet overschreden. Probeer het later opnieuw.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Opnieuw genereren</string>
     <string name="error_empty_response">Geen antwoord ontvangen. Probeer een nieuw gesprek te starten of uw bericht in te korten.</string>
     <string name="settings_daemon_mode">Daemon-modus</string>
-    <string name="settings_daemon_mode_description">Houd Kai 9000 op de achtergrond actief zodat geplande taken worden uitgevoerd, zelfs als de app niet op de voorgrond staat.</string>
+    <string name="settings_daemon_mode_description">Houd Kai 9001 op de achtergrond actief zodat geplande taken worden uitgevoerd, zelfs als de app niet op de voorgrond staat.</string>
     <string name="settings_scheduled_tasks">Geplande taken</string>
     <string name="settings_scheduled_tasks_description">Taken die door de AI zijn gepland voor toekomstige uitvoering. Vraag de AI om u eraan te herinneren of iets later uit te voeren om geplande taken aan te maken.</string>
     <string name="settings_scheduled_tasks_cancel">Taak annuleren</string>
@@ -230,7 +230,7 @@ Als iets aandacht nodig heeft (verouderde herinneringen, verlopen taken, gebruik
     <string name="interactive_welcome_title">Ik ben volledig operationeel.</string>
     <string name="interactive_welcome_subtitle">Vertel me wat je wilt doen.</string>
     <string name="interactive_back_content_description">Terug</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Interactieve modus verlaten</string>
     <string name="interactive_ui_parsing_failed">UI-analyse mislukt, opnieuw proberen…</string>
     <string name="settings_sponsors_monthly">Maandelijkse sponsors</string>

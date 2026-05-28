@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Tere tulemast Kai 9000'sse</string>
+    <string name="welcome_message">Tere tulemast Kai 9001'sse</string>
     <string name="prompt_ask_question">Esita küsimus</string>
     <string name="error_invalid_api_key">Kehtetu API võti. Kontrollige oma seadeid.</string>
     <string name="error_rate_limit_exceeded">Päringute limiit ületatud. Proovige hiljem uuesti.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Genereeri uuesti</string>
     <string name="error_empty_response">Vastust ei saadud. Proovige alustada uut vestlust või lühendada oma sõnumit.</string>
     <string name="settings_daemon_mode">Taustarežiim</string>
-    <string name="settings_daemon_mode_description">Hoidke Kai 9000 taustal töötamas, et ajastatud ülesanded täidetaks isegi siis, kui rakendus pole esiplaanil.</string>
+    <string name="settings_daemon_mode_description">Hoidke Kai 9001 taustal töötamas, et ajastatud ülesanded täidetaks isegi siis, kui rakendus pole esiplaanil.</string>
     <string name="settings_scheduled_tasks">Ajastatud ülesanded</string>
     <string name="settings_scheduled_tasks_description">AI poolt tulevikus täitmiseks ajastatud ülesanded. Paluge AI-l teid meelde tuletada või midagi hiljem käivitada, et luua ajastatud ülesandeid.</string>
     <string name="settings_scheduled_tasks_cancel">Tühista ülesanne</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Olen täielikult töökorras.</string>
     <string name="interactive_welcome_subtitle">Ütle mulle, mida soovid teha.</string>
     <string name="interactive_back_content_description">Tagasi</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Välju interaktiivsest režiimist</string>
     <string name="interactive_ui_parsing_failed">UI analüüs ebaõnnestus, proovin uuesti…</string>
     <string name="settings_sponsors_monthly">Igakuised sponsorid</string>

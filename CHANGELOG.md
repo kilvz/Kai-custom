@@ -1,3 +1,20 @@
+## v2.7.0 — 2026-05-26
+
+### Features
+- ADB tool now uses Shizuku.newProcess() directly instead of a persistent UserService Binder — simpler, more reliable, no custom AIDL
+- Sandbox toggle is always visible in settings regardless of install state
+- Non-image, non-PDF binary attachments (Excel, Word, etc.) now show a text stub so the AI knows they exist
+
+### Fixes
+- Fixed Alpine package installation failing on many devices by switching from `apk add --no-cache` to cached `apk update` + `apk add` with HTTPS→HTTP mirror fallback
+- Fixed ShizukuRemoteProcess.exitValue() throwing IllegalArgumentException instead of IllegalThreadStateException
+
+### Improvements
+- Clarified sandbox vs ADB distinction in shell tool descriptions
+- Added versionCode to generated Version.kt
+- Updated docs and improved error logging
+- Sponsor button in Settings pointing to original Kai author (SimonSchubert)
+
 ## v2.6.3 — 2026-05-24
 
 ### Fixes

@@ -1,6 +1,6 @@
 # Tools
 
-**Last verified:** 2026-05-28
+**Last verified:** 2026-05-26
 
 Kai's tools feature allows the AI to execute external functions during conversations — web search, notifications, calendar events, shell commands, memory operations, and more. Tools are defined with a schema, executed with safety guards, and managed through per-tool toggles in settings.
 
@@ -33,6 +33,7 @@ The component that looks up a tool by name, parses JSON arguments into a typed m
 | `get_location_from_ip` | Get estimated location from IP address | Enabled |
 | `open_url` | Open a URL, link, or local file on the device | Enabled |
 | `fetch_url` | Fetch an http(s) URL and return the response body to the agent (GET, POST, HEAD). Blocks private/loopback hosts; response is subject to the global 20K tool-result truncation. Used for reading pages and acting on links from emails (e.g. RFC 8058 one-click unsubscribe). | Enabled |
+| `run_adb` | Run shell commands with ADB-level privileges via Shizuku UserService. Access pm, am, dumpsys, settings, and other system tools outside the sandbox. Requires Shizuku app installed and permission granted. | Disabled |
 
 #### open_url platform behavior
 
@@ -158,7 +159,15 @@ Output limits: desktop 30,000 chars per stream, Android 15,000 chars per stream.
 
 The loop supports OpenAI-compatible, Gemini, and Anthropic provider formats, with provider-specific serialization of tool calls and results.
 
-## Safety Guards
+### Shizuku ADB (Android)
+
+The `run_adb` tool uses Shizuku's `UserService` mechanism to run shell commands with ADB-level (shell UID) privileges. It is independent of the Linux Sandbox — commands go through `Runtime.getRuntime().exec()` in a persistent Shizuku-hosted process rather than through proot.
+
+**Setup requirement:** The user must install [Shizuku](https://shizuku.rikka.app) and grant the app permission. Permission is requested on first use via the system Shizuku permission dialog.
+
+**Lifecycle:** The UserService is bound on first `run_adb` call with `daemon(false)`, kept alive for the session, and torn down via `stopService()` on app destruction. With `daemon(false)` the process exits naturally on unbind — no `System.exit(0)` needed. The service process identity (version code) is derived from the calling app's UID hash.
+
+**Architecture:** Communication is over Android Binder IPC. The client (`ShizukuManager`) sends `runCommand` requests to the server (`CommandService`) via a custom `ICommandService` interface using raw `Parcel` transactions. Results are serialized as JSON `CommandResultDto` objects.
 
 ### Iteration limit
 
@@ -184,7 +193,7 @@ Trimming preserves the tool-call pairing required by strict OpenAI-compatible pr
 
 ### Tool-call message sanitization (OpenAI-compatible)
 
-Strict OpenAI-compatible providers reject a request when an assistant message carrying `tool_calls` is not immediately followed by one tool response per `tool_call_id`, when a tool response has no preceding `tool_calls`, or when a `tool_calls` entry references a tool that is not also declared in the request's `tools[]` array (HTTP 400). Before every OpenAI-compatible request, the outgoing message list is sanitized to enforce these invariants: each assistant tool-call turn is paired with the tool responses that follow it, any tool call referencing a tool not declared on the current request (e.g. because the user toggled the tool off mid-conversation, or the request makes a final tools-less bailout call) is stripped along with its paired response, any tool call left unanswered (e.g. by an interrupted run or aggressive trimming) is stripped, orphan tool responses are dropped, and an assistant turn left with neither text nor tool calls is removed. Gemini and Anthropic use their own native serialization and are unaffected by this pass.
+Strict OpenAI-compatible providers reject a request when an assistant message carrying `tool_calls` is not immediately followed by one tool response per `tool_call_id`, or when a tool response has no preceding `tool_calls` (HTTP 400). Before every OpenAI-compatible request, the outgoing message list is sanitized to enforce this invariant: each assistant tool-call turn is paired with the tool responses that follow it, any tool call left unanswered (e.g. by an interrupted run or aggressive trimming) is stripped, orphan tool responses are dropped, and an assistant turn left with neither text nor tool calls is removed. Gemini and Anthropic use their own native serialization and are unaffected by this pass.
 
 ### Context window overflow protection
 
@@ -203,7 +212,7 @@ See [mcp.md](mcp.md) for the full MCP feature spec.
 Tool availability is controlled at multiple levels:
 
 - **Feature-level gates** — memory tools require memory enabled, scheduling/heartbeat tools require scheduling enabled, email tools require email enabled
-- **Sandbox install gate (Android)** — `execute_shell_command`, `manage_process`, and `ssh_configure_host` are surfaced only when the Linux sandbox is actually installed (Ready) *and* the sandbox toggle is on. Until the sandbox is installed these tools are not sent to the model at all; the sandbox toggle itself is hidden until install completes, so there is no state in which they ride along without a working sandbox behind them
+- **Sandbox toggle gate (Android)** — `execute_shell_command`, `manage_process`, and `ssh_configure_host` are surfaced when the sandbox toggle in Settings > Linux Sandbox is on. The toggle is always visible regardless of install state. When the sandbox is not installed, executing these tools returns an error guiding the user to set it up
 - **Per-tool toggles** — individual tools can be enabled or disabled in settings, persisted with a `tool_enabled_` key prefix
 - **Default state** — most tools default to enabled; `execute_shell_command` defaults to disabled
 - **Master-toggle-only** — memory, scheduling, and heartbeat tools have no individual per-tool toggle; they are on whenever their master switch in Settings → Agent is on (heartbeat is bundled with the scheduling switch)
@@ -282,3 +291,8 @@ The interactive-mode top bar shows only the static title — loading is surfaced
 | `composeApp/src/commonMain/.../ui/settings/SettingsScreen.kt` | ToolsContent, ToolItem, LinuxSandboxSection composables |
 | `composeApp/src/commonMain/.../ui/chat/composables/ToolMessage.kt` | Executing/completed UI indicators |
 | `composeApp/src/commonMain/.../data/AppSettings.kt` | Tool enabled state persistence |
+| `composeApp/src/androidMain/.../shizuku/ShizukuManager.kt` | Shizuku UserService client — bind, run commands, lifecycle |
+| `composeApp/src/androidMain/.../shizuku/ICommandService.kt` | Binder interface for Shizuku IPC (execute, destroy) |
+| `composeApp/src/androidMain/.../shizuku/CommandService.kt` | Shizuku UserService — receives commands, runs Runtime.exec() |
+| `composeApp/src/androidMain/.../shizuku/CommandResultDto.kt` | Serializable IPC result (stdout, stderr, exit code) |
+| `composeApp/src/androidMain/.../tools/AdbTool.kt` | run_adb tool definition — calls ShizukuManager |

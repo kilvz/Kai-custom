@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Вітаем у Kai 9000</string>
+    <string name="welcome_message">Вітаем у Kai 9001</string>
     <string name="prompt_ask_question">Задайце пытанне</string>
     <string name="error_invalid_api_key">Несапраўдны ключ API. Калі ласка, праверце свае налады.</string>
     <string name="error_rate_limit_exceeded">Ліміт запытаў перавышаны. Калі ласка, паспрабуйце пазней.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Перагенераваць</string>
     <string name="error_empty_response">Адказ не атрыманы. Паспрабуйце пачаць новы чат або скараціць паведамленне.</string>
     <string name="settings_daemon_mode">Рэжым дэмана</string>
-    <string name="settings_daemon_mode_description">Трымайце Kai 9000 запушчаным у фонавым рэжыме, каб запланаваныя задачы выконваліся нават калі праграма не на пярэднім плане.</string>
+    <string name="settings_daemon_mode_description">Трымайце Kai 9001 запушчаным у фонавым рэжыме, каб запланаваныя задачы выконваліся нават калі праграма не на пярэднім плане.</string>
     <string name="settings_scheduled_tasks">Запланаваныя задачы</string>
     <string name="settings_scheduled_tasks_description">Задачы, запланаваныя AI для будучага выканання. Папрасіце AI нагадаць вам або выканаць нешта пазней, каб стварыць запланаваныя задачы.</string>
     <string name="settings_scheduled_tasks_cancel">Скасаваць задачу</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Я цалкам працаздольны.</string>
     <string name="interactive_welcome_subtitle">Скажыце, што вы хочаце зрабіць.</string>
     <string name="interactive_back_content_description">Назад</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Выйсці з інтэрактыўнага рэжыму</string>
     <string name="interactive_ui_parsing_failed">Не ўдалося разабраць UI, паўторная спроба…</string>
     <string name="settings_sponsors_monthly">Штомесячныя спонсары</string>

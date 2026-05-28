@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000'ye Hoş Geldiniz</string>
+    <string name="welcome_message">Kai 9001'ye Hoş Geldiniz</string>
     <string name="prompt_ask_question">Soru sorun</string>
     <string name="error_invalid_api_key">Geçersiz API Anahtarı. Lütfen ayarlarınızı kontrol edin.</string>
     <string name="error_rate_limit_exceeded">İstek limiti aşıldı. Lütfen daha sonra tekrar deneyin.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Yeniden oluştur</string>
     <string name="error_empty_response">Yanıt alınamadı. Yeni bir sohbet başlatmayı veya mesajınızı kısaltmayı deneyin.</string>
     <string name="settings_daemon_mode">Arka Plan Modu</string>
-    <string name="settings_daemon_mode_description">Uygulama ön planda olmasa bile zamanlanmış görevlerin çalışması için Kai 9000'yi arka planda çalışır durumda tutun.</string>
+    <string name="settings_daemon_mode_description">Uygulama ön planda olmasa bile zamanlanmış görevlerin çalışması için Kai 9001'yi arka planda çalışır durumda tutun.</string>
     <string name="settings_scheduled_tasks">Zamanlanmış Görevler</string>
     <string name="settings_scheduled_tasks_description">AI tarafından gelecekte çalıştırılmak üzere zamanlanan görevler. Zamanlanmış görevler oluşturmak için AI'dan size hatırlatmasını veya daha sonra bir şey çalıştırmasını isteyin.</string>
     <string name="settings_scheduled_tasks_cancel">Görevi iptal et</string>
@@ -230,7 +230,7 @@ Bir şey dikkat gerektiriyorsa (eski anılar, vadesi geçmiş görevler, kullan�
     <string name="interactive_welcome_title">Tamamen operasyonelim.</string>
     <string name="interactive_welcome_subtitle">Ne yapmak istediğinizi söyleyin.</string>
     <string name="interactive_back_content_description">Geri</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Etkileşimli moddan çık</string>
     <string name="interactive_ui_parsing_failed">UI ayrıştırma başarısız oldu, tekrar deneniyor…</string>
     <string name="settings_sponsors_monthly">Aylık Sponsorlar</string>

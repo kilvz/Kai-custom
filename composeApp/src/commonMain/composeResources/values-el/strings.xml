@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Καλώς ήρθατε στο Kai 9000</string>
+    <string name="welcome_message">Καλώς ήρθατε στο Kai 9001</string>
     <string name="prompt_ask_question">Κάντε μια ερώτηση</string>
     <string name="error_invalid_api_key">Μη έγκυρο κλειδί API. Ελέγξτε τις ρυθμίσεις σας.</string>
     <string name="error_rate_limit_exceeded">Υπέρβαση ορίου αιτημάτων. Δοκιμάστε ξανά αργότερα.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Αναδημιουργία</string>
     <string name="error_empty_response">Δεν ελήφθη απάντηση. Δοκιμάστε να ξεκινήσετε μια νέα συνομιλία ή να συντομεύσετε το μήνυμά σας.</string>
     <string name="settings_daemon_mode">Λειτουργία Daemon</string>
-    <string name="settings_daemon_mode_description">Διατηρήστε το Kai 9000 σε λειτουργία στο παρασκήνιο ώστε οι προγραμματισμένες εργασίες να εκτελούνται ακόμα και όταν η εφαρμογή δεν είναι στο προσκήνιο.</string>
+    <string name="settings_daemon_mode_description">Διατηρήστε το Kai 9001 σε λειτουργία στο παρασκήνιο ώστε οι προγραμματισμένες εργασίες να εκτελούνται ακόμα και όταν η εφαρμογή δεν είναι στο προσκήνιο.</string>
     <string name="settings_scheduled_tasks">Προγραμματισμένες Εργασίες</string>
     <string name="settings_scheduled_tasks_description">Εργασίες προγραμματισμένες από την τεχνητή νοημοσύνη για μελλοντική εκτέλεση. Ζητήστε από την τεχνητή νοημοσύνη να σας υπενθυμίσει ή να εκτελέσει κάτι αργότερα για να δημιουργήσετε προγραμματισμένες εργασίες.</string>
     <string name="settings_scheduled_tasks_cancel">Ακύρωση εργασίας</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Είμαι πλήρως λειτουργικός.</string>
     <string name="interactive_welcome_subtitle">Πείτε μου τι θέλετε να κάνετε.</string>
     <string name="interactive_back_content_description">Πίσω</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Έξοδος από τη διαδραστική λειτουργία</string>
     <string name="interactive_ui_parsing_failed">Η ανάλυση UI απέτυχε, νέα προσπάθεια…</string>
     <string name="settings_sponsors_monthly">Μηνιαίοι χορηγοί</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Benvenuto in Kai 9000</string>
+    <string name="welcome_message">Benvenuto in Kai 9001</string>
     <string name="prompt_ask_question">Fai una domanda</string>
     <string name="error_invalid_api_key">Chiave API non valida. Controlla le impostazioni.</string>
     <string name="error_rate_limit_exceeded">Limite di richieste superato. Riprova più tardi.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Rigenera</string>
     <string name="error_empty_response">Nessuna risposta ricevuta. Prova ad avviare una nuova chat o ad accorciare il tuo messaggio.</string>
     <string name="settings_daemon_mode">Modalità Daemon</string>
-    <string name="settings_daemon_mode_description">Mantieni Kai 9000 in esecuzione in background in modo che le attività pianificate vengano eseguite anche quando l'app non è in primo piano.</string>
+    <string name="settings_daemon_mode_description">Mantieni Kai 9001 in esecuzione in background in modo che le attività pianificate vengano eseguite anche quando l'app non è in primo piano.</string>
     <string name="settings_scheduled_tasks">Attività pianificate</string>
     <string name="settings_scheduled_tasks_description">Attività pianificate dall'IA per l'esecuzione futura. Chiedi all'IA di ricordarti o di eseguire qualcosa in seguito per creare attività pianificate.</string>
     <string name="settings_scheduled_tasks_cancel">Annulla attività</string>
@@ -230,7 +230,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attività scadute, follow-up 
     <string name="interactive_welcome_title">Sono completamente operativo.</string>
     <string name="interactive_welcome_subtitle">Dimmi cosa vorresti fare.</string>
     <string name="interactive_back_content_description">Indietro</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Esci dalla modalità interattiva</string>
     <string name="interactive_ui_parsing_failed">Analisi dell'interfaccia non riuscita, nuovo tentativo…</string>
     <string name="settings_sponsors_monthly">Sponsor mensili</string>

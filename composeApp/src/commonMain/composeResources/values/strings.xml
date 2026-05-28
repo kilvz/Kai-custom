@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Welcome to Kai 9000</string>
+    <string name="welcome_message">Welcome to Kai 9001</string>
     <string name="prompt_ask_question">Ask a question</string>
     <string name="error_invalid_api_key">Invalid API Key. Please check your settings.</string>
     <string name="error_rate_limit_exceeded">Rate limit exceeded. Please try again later.</string>
@@ -56,6 +56,7 @@
     <string name="settings_tab_tools">Tools</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
     <string name="settings_tab_integrations">Integrations</string>
+    <string name="settings_tab_ssh">SSH</string>
     <string name="tools_count">%1$d Tools</string>
     <string name="waiting_thinking">Thinking…</string>
     <string name="waiting_working">Working…</string>
@@ -121,6 +122,8 @@
     <string name="tool_send_sms_description">Draft an SMS for the user to review and send</string>
     <string name="tool_reply_sms_name">Reply SMS</string>
     <string name="tool_reply_sms_description">Draft a reply to an SMS for the user to review and send</string>
+    <string name="tool_speak_text_name">Speak Text</string>
+    <string name="tool_speak_text_description">Read text aloud using neural text-to-speech via the Linux sandbox</string>
     <string name="tool_check_notifications_name">Check Notifications</string>
     <string name="tool_check_notifications_description">List recent unread notifications</string>
     <string name="tool_read_notification_name">Read Notification</string>
@@ -149,13 +152,19 @@
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_oled">OLED</string>
     <string name="settings_memories">Memories</string>
-    <string name="settings_memories_description">Memories stored by the AI during conversations. These are included in every message to provide context.</string>
+    <string name="settings_memories_description">Keyed memory entries stored in the palace database by category (general, preferences, learnings, errors). Each has an identifier key and content text. Does not include knowledge graph facts.</string>
     <string name="settings_memories_delete">Delete memory</string>
     <string name="settings_memories_show_all">Show all (%1$d)</string>
     <string name="settings_memories_all_title">All memories</string>
     <string name="settings_memories_edit_title">Edit memory</string>
     <string name="settings_memories_edit_save">Save</string>
     <string name="settings_memories_edit_cancel">Cancel</string>
+    <string name="settings_memories_export">Export</string>
+    <string name="settings_memories_import">Import</string>
+    <string name="settings_memories_export_success">Memories exported</string>
+    <string name="settings_memories_import_success">Memories imported</string>
+    <string name="settings_memories_export_error">Export failed</string>
+    <string name="settings_memories_import_error">Import failed</string>
     <string name="settings_scheduled_tasks">Scheduled Tasks</string>
     <string name="settings_scheduled_tasks_description">Tasks scheduled by the AI for future execution. Ask the AI to remind you or run something later to create scheduled tasks.</string>
     <string name="settings_scheduled_tasks_cancel">Cancel task</string>
@@ -171,7 +180,7 @@
     <string name="settings_task_details_no_heartbeat_runs">No heartbeat runs recorded yet.</string>
     <string name="settings_task_details_no_runs">No runs recorded yet.</string>
     <string name="settings_daemon_mode">Daemon Mode</string>
-    <string name="settings_daemon_mode_description">Keep Kai 9000 running in the background so scheduled tasks execute even when the app is not in the foreground.</string>
+    <string name="settings_daemon_mode_description">Keep Kai 9001 running in the background so scheduled tasks execute even when the app is not in the foreground.</string>
     <string name="settings_heartbeat">Heartbeat</string>
     <string name="settings_heartbeat_description">Periodic self-checks that let the AI review memories and tasks without user input. Runs every %1$d minutes during active hours.</string>
     <string name="settings_heartbeat_interval">Interval</string>
@@ -213,6 +222,16 @@
     <string name="sms_draft_banner_sent">Sent</string>
     <string name="sms_draft_banner_failed">Failed: %1$s</string>
     <string name="sms_draft_banner_dismiss">Dismiss</string>
+    <string name="tool_run_opencode_name">Run OpenCode</string>
+    <string name="tool_run_opencode_description">Delegate complex coding tasks to opencode's autonomous agent inside the Linux sandbox</string>
+    <string name="tool_run_adb_name">Run ADB</string>
+    <string name="tool_run_adb_description">Execute shell commands with ADB-level privileges via Shizuku</string>
+    <string name="settings_shizuku_label">Shizuku / ADB commands</string>
+    <string name="settings_shizuku_description">Allow Kai to run shell commands with ADB-level privileges via Shizuku</string>
+    <string name="settings_shizuku_not_available">Shizuku is not installed. Install from shizuku.rikka.app</string>
+    <string name="settings_shizuku_permission_required">Permission not granted. Tap below to authorize Kai in Shizuku.</string>
+    <string name="settings_shizuku_permission_button">Open Shizuku permission</string>
+    <string name="settings_shizuku_ready">Shizuku ready</string>
     <string name="litert_on_device_description">Run AI models directly on your device. No API key or internet required.</string>
     <string name="litert_download">Download</string>
     <string name="litert_cancel">Cancel</string>
@@ -297,7 +316,7 @@
     <string name="interactive_welcome_title">I'm completely operational.</string>
     <string name="interactive_welcome_subtitle">Tell me what you'd like to do.</string>
     <string name="interactive_back_content_description">Back</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Exit interactive mode</string>
     <string name="interactive_ui_parsing_failed">UI parsing failed, trying again…</string>
     <string name="conversation_untitled">Untitled</string>
@@ -338,6 +357,11 @@
     <string name="sandbox_packages_up_to_date">All packages up to date</string>
     <string name="sandbox_packages_upgrade_failed">Upgrade failed: %1$s</string>
     <string name="sandbox_content_description">Open Linux sandbox</string>
+    <string name="ssh_content_description">Open SSH terminal</string>
+    <string name="ssh_terminal_title">SSH Terminal</string>
+    <string name="ssh_terminal_help_text">Connected to SSH server. Type commands below.</string>
+    <string name="ssh_terminal_input_placeholder">enter command…</string>
+    <string name="ssh_terminal_not_connected">SSH not connected. Configure connection in Settings &gt; Tools.</string>
     <string name="sandbox_files_save_success">Saved</string>
     <string name="sandbox_files_save_failed">Save failed</string>
     <string name="sandbox_files_open_failed">Could not open externally</string>
@@ -383,4 +407,21 @@
     <string name="model_sort_date">Date</string>
     <string name="model_sort_score">Score</string>
     <string name="model_sort_context">Context</string>
+    <string name="tool_get_gps_location_name">Get GPS Location</string>
+    <string name="tool_get_gps_location_description">Get precise GPS location coordinates (latitude, longitude, accuracy)</string>
+    <string name="tool_read_contacts_name">Read Contacts</string>
+    <string name="tool_read_contacts_description">Search and read contacts from the device phonebook</string>
+    <string name="tool_get_device_info_name">Get Device Info</string>
+    <string name="tool_get_device_info_description">Get detailed device information including model, Android version, and hardware specs</string>
+    <string name="tool_get_battery_info_name">Get Battery Info</string>
+    <string name="tool_get_battery_info_description">Get battery level, charging status, and temperature</string>
+    <string name="tool_get_network_info_name">Get Network Info</string>
+    <string name="tool_get_network_info_description">Get current network connectivity details (WiFi/cellular status, IP, signal strength)</string>
+    <string name="tool_read_clipboard_name">Read Clipboard</string>
+    <string name="tool_read_clipboard_description">Read the current content of the system clipboard</string>
+    <string name="tool_list_installed_apps_name">List Installed Apps</string>
+    <string name="tool_list_installed_apps_description">List all installed applications on the device</string>
+    <string name="tool_get_wifi_info_name">Get WiFi Info</string>
+    <string name="tool_get_wifi_info_description">Get detailed WiFi connection information including SSID, signal strength, and frequency</string>
+    <string name="microphone_permission_required">Microphone permission required</string>
 </resources>

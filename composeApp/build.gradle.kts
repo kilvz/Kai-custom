@@ -16,8 +16,12 @@ composeCompiler {
 }
 
 kotlin {
-    androidLibrary {
-        namespace = "com.inspiredandroid.kai.shared"
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
+    android {
+        namespace = "com.kai.custom.shared"
         compileSdk =
             libs.versions.android.compileSdk
                 .get()
@@ -48,7 +52,7 @@ kotlin {
             // Must differ from the iosApp bundle identifier — iOS refuses to install a
             // .app whose embedded framework shares its parent's identifier (MIInstaller
             // error 57 / DuplicateIdentifier).
-            binaryOption("bundleId", "com.inspiredandroid.kai.composeapp")
+            binaryOption("bundleId", "com.kai.custom.composeapp")
         }
     }
 
@@ -100,6 +104,10 @@ kotlin {
             implementation(libs.material)
             implementation(libs.bouncycastle.provider)
             implementation(libs.litert.lm)
+            implementation(libs.tensorflow.lite)
+            implementation(libs.shizuku.api)
+            implementation(libs.shizuku.provider)
+            implementation(libs.jsch)
         }
         commonMain.dependencies {
             implementation(libs.compose.material3)
@@ -151,6 +159,7 @@ kotlin {
             implementation(libs.bouncycastle.provider)
             implementation(libs.slf4j.nop)
             implementation(libs.litert.lm.jvm)
+            implementation(libs.jsch)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -165,7 +174,7 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "com.inspiredandroid.kai.MainKt"
+        mainClass = "com.kai.custom.MainKt"
 
         buildTypes.release.proguard {
             configurationFiles.from(
@@ -220,20 +229,25 @@ class VersionGeneratorPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         project.afterEvaluate {
             val appVersion = libs.versions.appVersion.get()
+            val appVersionBase = libs.versions.appVersionBase.get()
 
             // Generate Kotlin version file
             val versionFile =
                 layout.buildDirectory
-                    .file("generated/src/commonMain/kotlin/com/inspiredandroid/kai/Version.kt")
+                    .file("generated/src/commonMain/kotlin/com/kai/custom/Version.kt")
                     .get()
                     .asFile
             versionFile.parentFile?.mkdirs()
+            val versionCode = libs.versions.android.versionCode.get()
+
             versionFile.writeText(
                 """
-                package com.inspiredandroid.kai
+                package com.kai.custom
 
                 object Version {
                     const val appVersion = "$appVersion"
+                    const val appVersionBase = "$appVersionBase"
+                    const val versionCode = $versionCode
                 }
                 """.trimIndent(),
             )

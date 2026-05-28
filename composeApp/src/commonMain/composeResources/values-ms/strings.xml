@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Selamat datang ke Kai 9000</string>
+    <string name="welcome_message">Selamat datang ke Kai 9001</string>
     <string name="prompt_ask_question">Tanya soalan</string>
     <string name="error_invalid_api_key">Kunci API tidak sah. Sila semak tetapan anda.</string>
     <string name="error_rate_limit_exceeded">Had kadar melebihi. Sila cuba lagi kemudian.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Jana semula</string>
     <string name="error_empty_response">Tiada respons diterima. Cuba mulakan sembang baharu atau pendekkan mesej anda.</string>
     <string name="settings_daemon_mode">Mod Daemon</string>
-    <string name="settings_daemon_mode_description">Biarkan Kai 9000 berjalan di latar belakang supaya tugas berjadual dilaksanakan walaupun aplikasi tidak di latar depan.</string>
+    <string name="settings_daemon_mode_description">Biarkan Kai 9001 berjalan di latar belakang supaya tugas berjadual dilaksanakan walaupun aplikasi tidak di latar depan.</string>
     <string name="settings_scheduled_tasks">Tugas Berjadual</string>
     <string name="settings_scheduled_tasks_description">Tugas yang dijadualkan oleh AI untuk pelaksanaan masa hadapan. Minta AI untuk mengingatkan anda atau menjalankan sesuatu kemudian untuk mencipta tugas berjadual.</string>
     <string name="settings_scheduled_tasks_cancel">Batalkan tugas</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Saya beroperasi sepenuhnya.</string>
     <string name="interactive_welcome_subtitle">Beritahu saya apa yang anda ingin lakukan.</string>
     <string name="interactive_back_content_description">Kembali</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Keluar daripada mod interaktif</string>
     <string name="interactive_ui_parsing_failed">Penghuraian UI gagal, mencuba semula…</string>
     <string name="settings_sponsors_monthly">Penaja Bulanan</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Bienvenue sur Kai 9000</string>
+    <string name="welcome_message">Bienvenue sur Kai 9001</string>
     <string name="prompt_ask_question">Poser une question</string>
     <string name="error_invalid_api_key">Clé API invalide. Veuillez vérifier vos paramètres.</string>
     <string name="error_rate_limit_exceeded">Limite de taux dépassée. Veuillez réessayer plus tard.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Régénérer</string>
     <string name="error_empty_response">Aucune réponse reçue. Essayez de démarrer une nouvelle conversation ou de raccourcir votre message.</string>
     <string name="settings_daemon_mode">Mode démon</string>
-    <string name="settings_daemon_mode_description">Gardez Kai 9000 en fonctionnement en arrière-plan afin que les tâches planifiées s'exécutent même lorsque l'application n'est pas au premier plan.</string>
+    <string name="settings_daemon_mode_description">Gardez Kai 9001 en fonctionnement en arrière-plan afin que les tâches planifiées s'exécutent même lorsque l'application n'est pas au premier plan.</string>
     <string name="settings_scheduled_tasks">Tâches planifiées</string>
     <string name="settings_scheduled_tasks_description">Tâches planifiées par l'IA pour une exécution future. Demandez à l'IA de vous rappeler ou d'exécuter quelque chose plus tard pour créer des tâches planifiées.</string>
     <string name="settings_scheduled_tasks_cancel">Annuler la tâche</string>
@@ -230,7 +230,7 @@ Si quelque chose nécessite de l'attention (souvenirs obsolètes, tâches échue
     <string name="interactive_welcome_title">Je suis pleinement opérationnel.</string>
     <string name="interactive_welcome_subtitle">Dites-moi ce que vous aimeriez faire.</string>
     <string name="interactive_back_content_description">Retour</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Quitter le mode interactif</string>
     <string name="interactive_ui_parsing_failed">Échec de l'analyse de l'interface, nouvel essai…</string>
     <string name="settings_sponsors_monthly">Sponsors mensuels</string>

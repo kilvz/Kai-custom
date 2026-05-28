@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Mirë se vini në Kai 9000</string>
+    <string name="welcome_message">Mirë se vini në Kai 9001</string>
     <string name="prompt_ask_question">Bëni një pyetje</string>
     <string name="error_invalid_api_key">Çelës API i pavlefshëm. Ju lutemi kontrolloni cilësimet tuaja.</string>
     <string name="error_rate_limit_exceeded">Kufiri i kërkesave u tejkalua. Ju lutemi provoni përsëri më vonë.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Rigjenero</string>
     <string name="error_empty_response">Nuk u mor asnjë përgjigje. Provoni të filloni një bisedë të re ose të shkurtoni mesazhin tuaj.</string>
     <string name="settings_daemon_mode">Mënyra Daemon</string>
-    <string name="settings_daemon_mode_description">Mbani Kai 9000 duke punuar në sfond në mënyrë që detyrat e programuara të ekzekutohen edhe kur aplikacioni nuk është në plan të parë.</string>
+    <string name="settings_daemon_mode_description">Mbani Kai 9001 duke punuar në sfond në mënyrë që detyrat e programuara të ekzekutohen edhe kur aplikacioni nuk është në plan të parë.</string>
     <string name="settings_scheduled_tasks">Detyra të programuara</string>
     <string name="settings_scheduled_tasks_description">Detyra të programuara nga AI për ekzekutim në të ardhmen. Kërkojini AI t'ju kujtojë ose të ekzekutojë diçka më vonë për të krijuar detyra të programuara.</string>
     <string name="settings_scheduled_tasks_cancel">Anulo detyrën</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Jam plotësisht operacional.</string>
     <string name="interactive_welcome_subtitle">Më tregoni çfarë dëshironi të bëni.</string>
     <string name="interactive_back_content_description">Prapa</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Dil nga mënyra ndërvepruese</string>
     <string name="interactive_ui_parsing_failed">Analizimi i UI dështoi, po provohet përsëri…</string>
     <string name="settings_sponsors_monthly">Sponsorë mujorë</string>

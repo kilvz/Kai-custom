@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Vitajte v Kai 9000</string>
+    <string name="welcome_message">Vitajte v Kai 9001</string>
     <string name="prompt_ask_question">Položte otázku</string>
     <string name="error_invalid_api_key">Neplatný API kľúč. Skontrolujte si nastavenia.</string>
     <string name="error_rate_limit_exceeded">Limit požiadaviek bol prekročený. Skúste to neskôr.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Vygenerovať znova</string>
     <string name="error_empty_response">Nebola prijatá žiadna odpoveď. Skúste začať nový chat alebo skrátiť správu.</string>
     <string name="settings_daemon_mode">Režim démona</string>
-    <string name="settings_daemon_mode_description">Ponechať Kai 9000 bežať na pozadí, aby sa naplánované úlohy vykonávali aj keď aplikácia nie je v popredí.</string>
+    <string name="settings_daemon_mode_description">Ponechať Kai 9001 bežať na pozadí, aby sa naplánované úlohy vykonávali aj keď aplikácia nie je v popredí.</string>
     <string name="settings_scheduled_tasks">Naplánované úlohy</string>
     <string name="settings_scheduled_tasks_description">Úlohy naplánované AI na budúce vykonanie. Požiadajte AI, aby vám pripomenulo alebo niečo spustilo neskôr na vytvorenie naplánovaných úloh.</string>
     <string name="settings_scheduled_tasks_cancel">Zrušiť úlohu</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Som plne funkčný.</string>
     <string name="interactive_welcome_subtitle">Povedzte mi, čo chcete urobiť.</string>
     <string name="interactive_back_content_description">Späť</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Ukončiť interaktívny režim</string>
     <string name="interactive_ui_parsing_failed">Analýza používateľského rozhrania zlyhala, skúšam znova…</string>
     <string name="settings_sponsors_monthly">Mesační sponzori</string>

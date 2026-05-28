@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Velkommen til Kai 9000</string>
+    <string name="welcome_message">Velkommen til Kai 9001</string>
     <string name="prompt_ask_question">Stil et spørgsmål</string>
     <string name="error_invalid_api_key">Ugyldig API-nøgle. Tjek venligst dine indstillinger.</string>
     <string name="error_rate_limit_exceeded">Hastighedsgrænse overskredet. Prøv venligst igen senere.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Generer igen</string>
     <string name="error_empty_response">Intet svar modtaget. Prøv at starte en ny chat eller forkorte din besked.</string>
     <string name="settings_daemon_mode">Dæmon-tilstand</string>
-    <string name="settings_daemon_mode_description">Hold Kai 9000 kørende i baggrunden, så planlagte opgaver udføres, selv når appen ikke er i forgrunden.</string>
+    <string name="settings_daemon_mode_description">Hold Kai 9001 kørende i baggrunden, så planlagte opgaver udføres, selv når appen ikke er i forgrunden.</string>
     <string name="settings_scheduled_tasks">Planlagte opgaver</string>
     <string name="settings_scheduled_tasks_description">Opgaver planlagt af AI til fremtidig udførelse. Bed AI om at minde dig eller køre noget senere for at oprette planlagte opgaver.</string>
     <string name="settings_scheduled_tasks_cancel">Annuller opgave</string>
@@ -230,7 +230,7 @@ Hvis noget kræver opmærksomhed (forældede erindringer, forfaldne opgaver, bru
     <string name="interactive_welcome_title">Jeg er fuldt operationel.</string>
     <string name="interactive_welcome_subtitle">Fortæl mig, hvad du gerne vil gøre.</string>
     <string name="interactive_back_content_description">Tilbage</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Forlad interaktiv tilstand</string>
     <string name="interactive_ui_parsing_failed">UI-analyse mislykkedes, prøver igen…</string>
     <string name="settings_sponsors_monthly">Månedlige sponsorer</string>

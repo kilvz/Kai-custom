@@ -1,218 +1,234 @@
-# Kai 9000
+# Kai 9001
 
-<img src="https://img.shields.io/badge/Platform-Web-f7df1c?logo=javascript" alt="Web"> <img src="https://img.shields.io/badge/Platform-Android-34a853.svg?logo=android" alt="Android" /> <img src="https://img.shields.io/badge/Platform-iOS-lightgrey.svg?logo=apple" alt="iOS" /> <img src="https://img.shields.io/badge/Platform-Windows/macOS/Linux-e10707.svg?logo=openjdk" alt="Platform JVM" />
+> **Android-only** fork of [Kai](https://github.com/SimonSchubert/Kai) — an open-source AI assistant with persistent memory.  
+> v1.6.0 · FOSS-only · No proprietary SDKs.
+
 <div align="center">
-
-<br>
 <img src="site/img/logo_animation.gif" height="80">
 <br>
 <br>
-
-An **open-source AI assistant with persistent memory** that runs on **Android, iOS, Windows, Mac, Linux, and Web**.
-
-**[Website](https://kai9000.com)** - **[Documentation](https://kai9000.com/docs/)**
 </div>
 
-## Installation
-
-[![App Store](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/app_store_badge.png)](https://apps.apple.com/us/app/kai-ai/id6758148023)
-[![Play Store](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/play_store_badge.png)](https://play.google.com/store/apps/details?id=com.inspiredandroid.kai)
-[![F-Droid](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/fdroid_badge.png)](https://f-droid.org/en/packages/com.inspiredandroid.kai/)
-[![Web](https://raw.githubusercontent.com/SimonSchubert/Kai/main/screenshots/web_badge.png)](https://kai9000.com/app/)
-
-Homebrew (macOS):
-
-```
-brew install --cask simonschubert/tap/kai
-```
-
-AUR (Arch Linux):
-
-```
-yay -S kai-bin
-```
-
-Winget (Windows):
-
-```
-winget install SimonSchubert.Kai
-```
-
-### Direct Downloads
-
-| Platform | Format | Download |
-|----------|--------|----------|
-| Android | APK | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| macOS | DMG | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Windows | MSI | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Linux | DEB | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Linux | RPM | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-| Linux | AppImage | [GitHub Releases](https://github.com/SimonSchubert/Kai/releases) |
-
-## AI That Builds Screens, Not Just Text
-
-Kai 9000's Interactive UI lets the AI generate full interactive screens — quizzes, dashboards, recipes, brainstorms, and more. Navigate by tapping buttons instead of scrolling through chat.
-
-<img src="screenshots/interactive-survival.png" alt="Survival Game" height="300"> <img src="screenshots/interactive-recipe.png" alt="Recipe Card" height="300"> <img src="screenshots/interactive-ecopulse.png" alt="EcoPulse Brainstorm" height="300"> <img src="screenshots/interactive-memories.png" alt="Memories" height="300">
+An AI assistant that remembers you, runs on-device or via 25+ API providers, and can control phone features through text or voice. Fully open-source, zero telemetry, no Google Play Services required.
 
 ## Features
 
-- **Persistent memory** — Kai remembers important details across conversations and uses them automatically
-- **Customizable soul** — Define the AI's personality and behavior with an editable system prompt
-- **Multi-service fallback** — 24 LLM providers with automatic failover
-- **On-device inference** — Run AI models locally on Android using LiteRT, no internet needed
-- **Tool execution** — Web search, notifications, calendar events, shell commands, and more
-- **MCP server support** — Connect to remote tool servers via the Model Context Protocol
-- **Autonomous heartbeat** — Periodic self-checks that surface anything needing attention
-- **Settings export/import** — Backup and restore all settings as a JSON file
-- **Encrypted storage** — Conversations stored locally with encryption
-- **Text to speech** — Listen to AI responses
-- **Linux Sandbox** — On Android, the AI can run shell commands, scripts, and tools in a secure sandboxed Linux environment
-- **Image attachments** — Attach images to any conversation
+### Persistent Memory (KaiMemPalace)
 
-## Linux Sandbox (Android)
+A local semantic memory graph that stores facts, preferences, and learnings across conversations:
 
-On Android, Kai includes a built-in Linux environment that the AI can use to execute shell commands, run scripts, and operate tools on your behalf. This turns Kai from a chat-only assistant into one that can take real action — installing packages, processing data, running Python scripts, and more.
+- **Automatic recall** — the AI queries memory before each response, pulling relevant context from past sessions
+- **Promotion** — memories with 5+ hits are promoted into the system prompt permanently
+- **search_memories tool** — the AI can semantic-search its own memory store on demand
+- **Local variant** — trimmed memory instructions for on-device models without external API access
+- **Heartbeat-driven learning** — periodic self-checks review and promote memories autonomously
 
-- **Powered by Alpine Linux** — A lightweight ~3 MB download sets up a full Linux userland via [proot](https://proot-me.github.io/), no root required
-- **Optional packages** — One tap installs bash, curl, wget, git, jq, python3, pip, and Node.js
-- **Interactive terminal** — A built-in terminal lets you run commands manually alongside the AI
-- **Secure** — Everything runs sandboxed inside the app with no access to the host system
+### 25+ LLM Providers
 
-Enable it in **Settings > Linux Sandbox**.
+Multi-service with automatic failover across 27 backend types:
 
-<img src="screenshots/mobile-7.png" alt="Linux Sandbox" height="300">
+Anthropic · OpenAI · Gemini · DeepSeek · Mistral · xAI · OpenRouter · Groq · NVIDIA · Cerebras · Ollama Cloud · Together AI · Hugging Face · Venice AI · Moonshot AI · Z.AI · MiniMax · AIHubMix · Deep Infra · Fireworks AI · OAI Agent · PublicAI · OpenAI-Compatible · LiteRT On-Device · Free tier (no API key)
 
-## Screenshots
+### On-Device Inference
 
-### Desktop
+Run AI models locally using LiteRT with no internet connection:
 
-<img src="screenshots/desktop-1.png" alt="Desktop App" height="300">
+| Model | Size | GPU Memory | Context |
+|-------|------|-----------|---------|
+| Qwen3 0.6B | 614 MB | 300 MB | 4K/32K |
+| Gemma 4 E2B IT | 2.6 GB | 676 MB | 4K/32K |
+| Gemma 4 E4B IT | 3.7 GB | 710 MB | 4K/32K |
 
-### Web
+Models download from HuggingFace on first use.
 
-<img src="screenshots/web-1.png" alt="Web App" height="300">
+### Phone Tools (Android Only)
 
-### Mobile
+Eight Android-specific tools, each individually toggleable in Settings:
 
-<img src="screenshots/mobile-1.png" alt="Mobile Screenshot 1" height="300"> <img src="screenshots/mobile-2.png" alt="Mobile Screenshot 2" height="300"> <img src="screenshots/mobile-3.png" alt="Mobile Screenshot 3" height="300"> <img src="screenshots/mobile-4.png" alt="Mobile Screenshot 4" height="300"> <img src="screenshots/mobile-5.png" alt="Mobile Screenshot 5" height="300"> <img src="screenshots/mobile-6.png" alt="Mobile Screenshot 6" height="300">
+| Tool | Permissions Required |
+|------|---------------------|
+| GPS location | `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` |
+| Contacts | `READ_CONTACTS` |
+| Device info | None |
+| Battery status | `BATTERY_STATS` |
+| Network info | `ACCESS_NETWORK_STATE` |
+| WiFi details | `ACCESS_FINE_LOCATION`, `ACCESS_WIFI_STATE` |
+| Clipboard | None |
+| Installed apps | `QUERY_ALL_PACKAGES` |
 
-## How It Works
+Tools request permissions at runtime; the user is directed to Android Settings to grant them.
 
-```
-                        ┌────────┐
-                        │  User  │
-                        └───┬────┘
-                            │ message
-                            ▼
-               ┌─────────────────────────┐
-               │          Chat           │
-               │                         │
-               │  prompt + memories      │
-               │        │                │
-               │        ▼                │
-               │    ┌────────┐           │
-               │    │   AI   │◀─┐        │
-               │    └───┬────┘  │        │
-               │        │   tool calls   │
-               │        │   & results    │
-               │        ▼      │        │
-               │    ┌────────┐ │        │
-               │    │ Tools  │─┘        │
-               │    └───┬────┘          │
-               │        │               │
-               └────────┼───────────────┘
-                        │ store / recall
-                        ▼
-               ┌─────────────────┐    hitCount >= 5
-               │     Memory      │───────────────────┐
-               │                 │                   │
-               │  facts, prefs,  │                   ▼
-               │  learnings      │          ┌────────────────┐
-               │                 │◀─delete──│ Promote into   │
-               └─────────────────┘          │ System Prompt  │
-                        ▲                   └────────────────┘
-                        │ reviews
-                        │
-               ┌─────────────────┐
-               │    Heartbeat    │
-               │                 │
-               │  autonomous     │
-               │  self-check     │
-               │  every 30 min   │
-               │  (8am–10pm)     │
-               │                 │
-               │  all good?      │
-               │  → stays silent │
-               │  needs action?  │
-               │  → notifies user│
-               └─────────────────┘
-```
+### SSH Remote Execution
 
-- **Chat** — User sends a message. The AI responds, calling tools (memory, web search, shell, etc.) in a loop until it has a final answer.
-- **Memory** — The AI stores and recalls facts, preferences, and learnings. Memories that prove useful (5+ hits) can be promoted into the system prompt permanently.
-- **Heartbeat** — A background self-check runs every 30 minutes. It reviews memories, pending tasks, and emails. If something needs attention, it notifies the user. Otherwise, it stays silent.
+Persistent SSH connection to one or more remote servers, configurable and usable by both the user and the AI:
 
-## Supported Services
+- **Multiple saved profiles** — save host, port, username, auth method (password or private key) per server; switch between them via dropdown in Settings
+- **AI-managed connections** — the AI can connect (`ssh_connect`), disconnect (`ssh_disconnect`), and execute commands (`ssh_execute_command`) on a remote server. The AI can save new profiles or reuse saved ones by name
+- **Interactive terminal** — SSH terminal button (terminal icon) in the chat top bar opens a live command log with manual input, just like the sandbox terminal
+- **Persistent session** — connection stays alive across commands so state (cwd, environment, exports) carries forward
+- **JSch-based** — pure Java SSH library, no native dependencies
 
-[Anthropic](https://console.anthropic.com) · [OpenAI](https://openai.com) · [Gemini](https://aistudio.google.com) · [DeepSeek](https://www.deepseek.com) · [Mistral](https://mistral.ai) · [xAI](https://x.ai) · [OpenRouter](https://openrouter.ai) · [Groq](https://groq.com) · [NVIDIA](https://developer.nvidia.com) · [Cerebras](https://cerebras.ai) · [Ollama Cloud](https://ollama.com) · [LongCat](https://longcat.chat) · [Together AI](https://together.ai) · [Hugging Face](https://huggingface.co) · [Venice AI](https://venice.ai) · [Moonshot AI](https://moonshot.cn) · [Z.AI](https://z.ai) · [MiniMax](https://minimax.io) · [AIHubMix](https://aihubmix.com) · [Deep Infra](https://deepinfra.com) · [Fireworks AI](https://fireworks.ai) · [OpenCode](https://opencode.ai) · OpenAI-Compatible API · LiteRT On-Device (Android) · Free tier (no API key needed)
+### Linux Sandbox
 
-## MCP Servers
+A built-in Linux environment that the AI uses to execute shell commands, run scripts, and operate tools:
 
-Kai supports the [Model Context Protocol](https://modelcontextprotocol.io/) for connecting to external tool servers. Go to **Settings > Tools > Add MCP Server** to connect to any Streamable HTTP MCP endpoint, or pick from a curated list of popular free servers:
+- **Alpine Linux** via [proot](https://proot-me.github.io/), no root required, ~3 MB download
+- **Optional packages** — one-tap install bash, curl, wget, git, jq, python3, pip, Node.js
+- **Binary file write** — non-image, non-PDF attachments (Excel, Word, etc.) are written to `/root/uploads/` so the AI can read them via shell commands
+- **Interactive terminal** — manual command input alongside the AI
+- **Secure** — sandboxed inside the app, no host system access
+
+### MCP Server Support
+
+Connect to external tool servers via the [Model Context Protocol](https://modelcontextprotocol.io/) (Streamable HTTP). Curated free servers include:
 
 | Server | Description |
 |--------|-------------|
-| Fetch | Fetch web content and convert HTML to markdown |
-| DeepWiki | AI-powered docs for any GitHub repo |
-| Sequential Thinking | Structured step-by-step problem-solving |
-| Context7 | Up-to-date library and framework docs |
-| Globalping | Ping, traceroute, DNS from global probes |
-| CoinGecko | Real-time crypto prices and market data |
-| Manifold Markets | Prediction market data and odds |
-| Find-A-Domain | Domain availability across 1,444+ TLDs |
+| Fetch | Web content to markdown |
+| DeepWiki | AI-powered GitHub docs |
+| Sequential Thinking | Structured problem-solving |
+| Context7 | Library/framework docs |
+| Globalping | Network diagnostics |
+| CoinGecko | Crypto prices |
+| Manifold Markets | Prediction markets |
+| Find-A-Domain | Domain availability (1,444+ TLDs) |
 
-All popular servers are free and require no API key. MCP servers auto-reconnect on app startup.
+MCP servers auto-reconnect on app startup. Add custom endpoints in Settings > Tools.
 
-## Integrations
+### Heartbeat
 
-### Splinterlands Auto-Battle (Android & Desktop)
+Autonomous periodic self-checks that run every 30 minutes (configurable, 8am–10pm window):
 
-Kai can automatically play [Splinterlands](https://splinterlands.com) Wild Ranked battles. Configure one or more LLM services in priority order, add your Hive account, and hit Start -- Kai will continuously find matches, pick teams using LLM-powered strategy, and submit them on-chain. Falls back to a simple greedy picker if all LLM services fail. Available in **Settings > Integrations**.
+- Reviews memories, pending tasks, emails, and SMS
+- If everything is fine, stays silent
+- If something needs attention, surfaces an in-app message or push notification
+- Runs in a foreground service, survives app backgrounding
 
-## Supported Languages
+### Dynamic UI
 
-Afrikaans, Albanian, Amharic, Arabic, Belarusian, Bengali, Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English, Estonian, Filipino, Finnish, French, German, Greek, Gujarati, Hebrew, Hindi, Hungarian, Indonesian, Italian, Japanese, Kazakh, Korean, Latvian, Lithuanian, Malay, Marathi, Norwegian, Persian, Polish, Portuguese, Punjabi, Romanian, Romansh, Russian, Serbian, Slovak, Slovenian, Spanish, Swahili, Swedish, Tamil, Telugu, Thai, Turkish, Ukrainian, Urdu, Vietnamese, Zulu
+The AI can generate interactive screens — quizzes, dashboards, recipes, brainstorms, forms — using a custom `kai-ui` markup language with buttons, inputs, lists, and real-time state. Tap buttons instead of scrolling through chat.
 
-## Contributing
+### Task Scheduler
 
-### Screenshot Automation
+Cron and one-shot scheduled tasks:
 
-Two separate screenshot pipelines exist, both using Compose screenshot tests:
+- Scheduled prompts executed by the AI at defined times
+- Exponential backoff on failure (up to 1 hour)
+- Cron expressions for recurring tasks
+- Execution log with last 10 results
 
-**README screenshots** — Used for this README. CI runs this automatically on every push and auto-commits any changes.
+### Voice Input
+
+Speech-to-text via Android `SpeechRecognizer` with manual mic button. Supports 27 languages for recognition. When input is spoken, the AI can reply using `speak_text` tool with edge-tts voices. Preferred language setting in General Settings injects the target language and voice into the AI's system prompt.
+
+### Text to Speech
+
+edge-tts voices mapped per preferred language (27 languages). The AI uses `speak_text` tool to read responses aloud.
+
+### Settings & Storage
+
+- **Conversations** stored as JSON in app-local preferences (plaintext, not encrypted)
+- **Settings export/import** — full backup/restore as JSON (excludes: daemon state, app opens, encryption key)
+- **Customizable soul** — editable system prompt defines the AI's personality, rules, and behavior
+
+### Splinterlands Auto-Battle (Android)
+
+Automated Wild Ranked battles with LLM-powered team strategy. Configure priority-ordered LLM services, add Hive account, and Kai finds matches, picks teams, and submits on-chain. Falls back to a greedy picker if all services fail.
+
+---
+
+### Experimental: Wake Word Detection ("Hey Kai")
+
+> ⚠️ **Experimental.** May trigger on ambient noise or fail to detect in noisy environments. Accuracy depends on device hardware and ambient conditions.
+
+Hands-free activation with dual-mode detection:
+
+- **GENERAL mode** — on-device TFLite model detects "hey kai" without enrollment
+- **PERSONAL mode** — cosine similarity on your enrolled voice template for higher accuracy; 3-step enrollment crops to the loudest 1 second of each utterance
+- **Adaptive energy baseline** — running decaying average adjusts to ambient noise (rain, fan); only processes audio when energy exceeds 2x baseline
+- **Anti-flap** — service rejects restart within 2s of `onDestroy` to break false-trigger loops
+- **Trigger debounce** — 3s cooldown between successive detections
+- **Mic handover** — wake word pauses before SpeechRecognizer starts, restarts after the AI finishes responding
+
+---
+
+## Quick Start
 
 ```bash
-./gradlew :screenshotTests:updateScreenshots
+# Build (FOSS only)
+.\gradlew.bat :androidApp:assembleFossDebug --no-configuration-cache
+
+# Deploy
+adb install -r androidApp\build\outputs\apk\foss\debug\androidApp-foss-debug.apk
 ```
 
-**Store screenshots** — Generates localized screenshots for the Play Store in all supported locales. Upload via fastlane.
+## Build Dependencies
 
-```bash
-./gradlew :screenshotTests:generateStoreScreenshots
-bundle exec fastlane android upload_screenshots
-```
+- Android SDK 34+
+- JDK 17+
+- No Google Play Services, no Firebase, no proprietary SDKs
 
-**Kai UI component screenshots** — Records golden images for `KaiUiScreenshotTest` only. Faster than recording the full suite when iterating on Kai UI components.
+## Installation
 
-```bash
-./gradlew :screenshotTests:recordKaiUiScreenshots
-```
+Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/releases).
 
-## Sponsors
+## What's Different from Upstream
 
-This project is open-source and maintained by a single developer. If you find this app useful, please consider sponsoring to help take it to the next level with more features and faster updates.
+### Fork-Added Features
+
+| Feature | Details |
+|---------|---------|
+| **Wake word "Hey Kai"** | Full subsystem: TFLite on-device model (GENERAL) + cosine similarity enrollment (PERSONAL), 3-step enrollment, adaptive energy baseline, anti-flap, trigger debounce, mic handover. Foreground service with `FOREGROUND_SERVICE_MICROPHONE`. Toggleable in Settings. |
+| **8 Phone tools** | GPS location, contacts, device info, battery stats, network info, wifi details, clipboard, installed apps. Each individually toggleable, permission-gated per tool. |
+| **`search_memories` tool** | AI can semantic-search its own memory store on demand via sandbox (kai-mempalace), falls back to FTS5. Upstream only has store/forget/learn/reinforce. |
+| **`writeBinaryFile`** | Binary attachments (Excel, Word, etc.) written to sandbox at `/root/uploads/` so AI can read them via shell. Upstream only wrote text files. |
+| **`speak_text` tool** | TTS via edge-tts in Linux sandbox, 27 language voices. Gated behind sandbox availability. |
+| **Shizuku integration** | `run_adb` tool executes shell commands with ADB-level privileges via Shizuku. `ShizukuManager` + `ShizukuProvider` declared in manifest. |
+| **`run_opencode` tool** | Delegate complex coding tasks to an autonomous coding agent in sandbox. |
+| **SSH remote execution** | `ssh_connect` (save/use named profiles), `ssh_disconnect`, `ssh_execute_command` tools. Multi-profile storage. Interactive SSH terminal in chat with command input and live transcript. JSch-based, persistent sessions. |
+| **30+ Android permissions** | Location, contacts, phone state, camera, audio record, body sensors, activity recognition, bluetooth, external storage, WiFi state, query all packages, system alert window, install packages, read logs, biometric, vibrate. |
+| **GitHub Issue button** | Links to `https://github.com/kilvz/Kai-custom/issues/new?template=integration_request.yml` in Settings > Integrations. |
+| **Sponsor button** | Links to original author's GitHub Sponsors in FreeSettings card. Upstream shows full sponsor list with avatars. |
+| **Notification title** | "Kai 9001" (upstream: "Kai 9000") |
+
+### Fork-Modified Features
+
+| Feature | Upstream | Kai 9001 |
+|---------|----------|----------|
+| **Build flavor** | FOSS + store (Firebase, Crashlytics, Analytics) | **FOSS-only** — zero proprietary SDKs |
+| **Platform targets** | Android + iOS + Desktop + Web + WasmJS | **Android-only** — other targets stubbed |
+| **Memory system** | Basic recall/store, `getHeartbeatTools()` gated by scheduling, `DEFAULT_STRUCTURED_LEARNING_SECTION` | `search_memories` tool, `promote_learning` gated by memory (not scheduling), `DEFAULT_MEMORY_INSTRUCTIONS` + `DEFAULT_LOCAL_MEMORY_INSTRUCTIONS` with variant-aware selection, fixed double MemoryList rendering |
+| **Terminal (SelectionContainer)** | Wraps entire `LazyColumn` — causes OOM/ANR on large output | **Per-item** `SelectionContainer` wrapping each `Text` — fixes OOM/ANR |
+| **Tool gating** | `getHeartbeatTools()` gated by `isSchedulingEnabled()` | `promote_learning` gated by `isMemoryEnabled()`; phone tools, ADB, speak_text, code agent added with their own gates |
+| **Conversation storage** | `loadConversations()` called from UI path only | Also called in `TaskScheduler.start()` for daemon-only path, preventing wipe from empty-list persist |
+| **Think-tag stripping** | Regex `<think>.*?</think>` only | Also handles lone `</think>` without `<think>` (Qwen3-Thinking edge case) |
+| **Package / identity** | `com.inspiredandroid.kai`, `Kai 9000` | `com.kai.custom`, `Kai 9001` |
+| **App icon** | Purple overlapping circles | **Red** overlapping circles |
+| **Version scheme** | Tracks upstream (2.x.x) | Custom 1.x.x — major = breaking, minor = features, patch = bugs |
+| **SSH integration** | None | JSch persistent SSH client: multi-profile management, interactive terminal in chat, AI tools (`ssh_connect`/`ssh_disconnect`/`ssh_execute_command`), profile save/reuse by AI |
+
+### Features Present in Both (No Meaningful Changes)
+
+- **LLM providers**: Identical — 27 providers: Free, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, NVIDIA, Cerebras, Ollama Cloud, LongCat, Together, HuggingFace, Venice, Moonshot, Z.AI, MiniMax, AIHubMix, Deep Infra, Fireworks AI, OAI Agent, PublicAI, OpenAI-Compatible, LiteRT
+- **Common tools**: Local time, IP location, URL open, web search, fetch URL, memory store/forget/learn/reinforce — structurally identical
+- **SMS / Email / Calendar / Notification tools**: Identical logic
+- **MCP support**: Full Streamable HTTP MCP server manager with curated free servers (Fetch, DeepWiki, Sequential Thinking, Context7, Globalping, CoinGecko, Manifold Markets, Find-A-Domain)
+- **LiteRT on-device inference**: Same Qwen3 0.6B + Gemma 4 (E2B, E4B) model support
+- **Heartbeat**: Same 30-minute autonomous self-check (8am–10pm), push notification on issues
+- **Dynamic UI (kai-ui)**: Same interactive screen generation with buttons, inputs, forms
+- **Task scheduler**: Same cron + one-shot scheduled tasks with exponential backoff
+- **Sandbox base**: Same Alpine Linux via proot, shell execution, file read/write/delete
+- **Settings UI**: Same tabs layout (General, Services, Agent, Integrations, Tools, Terminal, Sandbox, About), theme picker, daemon toggle
+- **Encrypted prefs**: Both use `dev.spght:encryptedprefs-ktx` for app settings storage
+- **Koin DI**: Same dependency injection framework
+
+## License
+
+Apache License 2.0. See [LICENSE.txt](LICENSE.txt).
+
+Based on [Kai](https://github.com/SimonSchubert/Kai) by Simon Schubert — this is a modified fork.
 
 ## Credits
 
+- Original Kai by [SimonSchubert](https://github.com/SimonSchubert/Kai)
 - Mistral: https://mistral.ai/

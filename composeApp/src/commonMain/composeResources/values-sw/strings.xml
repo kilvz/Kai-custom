@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Karibu kwenye Kai 9000</string>
+    <string name="welcome_message">Karibu kwenye Kai 9001</string>
     <string name="prompt_ask_question">Uliza swali</string>
     <string name="error_invalid_api_key">Ufunguo wa API si sahihi. Tafadhali angalia mipangilio yako.</string>
     <string name="error_rate_limit_exceeded">Kikomo cha kiwango kimezidishwa. Tafadhali jaribu tena baadaye.</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">Tengeneza upya</string>
     <string name="error_empty_response">Hakuna jibu lililopokelewa. Jaribu kuanza mazungumzo mapya au kufupisha ujumbe wako.</string>
     <string name="settings_daemon_mode">Hali ya Daemon</string>
-    <string name="settings_daemon_mode_description">Weka Kai 9000 iendelee kufanya kazi chinichini ili kazi zilizopangwa zitekelezwe hata wakati programu haiko mbele.</string>
+    <string name="settings_daemon_mode_description">Weka Kai 9001 iendelee kufanya kazi chinichini ili kazi zilizopangwa zitekelezwe hata wakati programu haiko mbele.</string>
     <string name="settings_scheduled_tasks">Kazi Zilizopangwa</string>
     <string name="settings_scheduled_tasks_description">Kazi zilizopangwa na AI kwa utekelezaji wa baadaye. Mwambie AI akukumbushe au atekeleze kitu baadaye ili kuunda kazi zilizopangwa.</string>
     <string name="settings_scheduled_tasks_cancel">Ghairi kazi</string>
@@ -229,7 +229,7 @@
     <string name="interactive_welcome_title">Niko tayari kabisa kufanya kazi.</string>
     <string name="interactive_welcome_subtitle">Niambie ungependa kufanya nini.</string>
     <string name="interactive_back_content_description">Rudi</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">Ondoka hali ya mwingiliano</string>
     <string name="interactive_ui_parsing_failed">Uchambuzi wa UI umeshindwa, inajaribu tena…</string>
     <string name="settings_sponsors_monthly">Wadhamini wa kila mwezi</string>

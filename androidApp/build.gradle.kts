@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.inspiredandroid.kai"
+    namespace = "com.kai.custom"
     compileSdk =
         libs.versions.android.compileSdk
             .get()
@@ -13,7 +13,7 @@ android {
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "com.inspiredandroid.kai"
+        applicationId = "com.kai.custom"
         minSdk =
             libs.versions.android.minSdk
                 .get()
@@ -31,9 +31,6 @@ android {
 
     flavorDimensions += "distribution"
     productFlavors {
-        create("playStore") {
-            dimension = "distribution"
-        }
         create("foss") {
             dimension = "distribution"
             isDefault = true
@@ -98,5 +95,4 @@ dependencies {
     implementation(libs.tts.compose)
     implementation(libs.compose.components.uiToolingPreview)
     debugImplementation(libs.compose.ui.tooling)
-    "playStoreImplementation"(libs.play.review)
 }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome_message">Kai 9000へようこそ</string>
+    <string name="welcome_message">Kai 9001へようこそ</string>
     <string name="prompt_ask_question">質問する</string>
     <string name="error_invalid_api_key">無効なAPIキーです。設定をご確認ください。</string>
     <string name="error_rate_limit_exceeded">レート制限を超えました。後でもう一度お試しください。</string>
@@ -78,7 +78,7 @@
     <string name="bot_message_regenerate_content_description">再生成</string>
     <string name="error_empty_response">応答がありませんでした。新しいチャットを開始するか、メッセージを短くしてみてください。</string>
     <string name="settings_daemon_mode">デーモンモード</string>
-    <string name="settings_daemon_mode_description">Kai 9000をバックグラウンドで実行し続け、アプリがフォアグラウンドにない場合でもスケジュールされたタスクが実行されるようにします。</string>
+    <string name="settings_daemon_mode_description">Kai 9001をバックグラウンドで実行し続け、アプリがフォアグラウンドにない場合でもスケジュールされたタスクが実行されるようにします。</string>
     <string name="settings_scheduled_tasks">スケジュールされたタスク</string>
     <string name="settings_scheduled_tasks_description">AIが将来の実行のためにスケジュールしたタスクです。スケジュールされたタスクを作成するには、AIにリマインドまたは後で何かを実行するよう依頼してください。</string>
     <string name="settings_scheduled_tasks_cancel">タスクをキャンセル</string>
@@ -230,7 +230,7 @@
     <string name="interactive_welcome_title">完全に稼働中です。</string>
     <string name="interactive_welcome_subtitle">何をしたいか教えてください。</string>
     <string name="interactive_back_content_description">戻る</string>
-    <string name="interactive_title">Kai 9000</string>
+    <string name="interactive_title">Kai 9001</string>
     <string name="interactive_exit_content_description">インタラクティブモードを終了</string>
     <string name="interactive_ui_parsing_failed">UIの解析に失敗しました。再試行中…</string>
     <string name="settings_sponsors_monthly">月間スポンサー</string>
