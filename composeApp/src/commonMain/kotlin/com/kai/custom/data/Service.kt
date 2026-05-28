@@ -34,8 +34,8 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
 enum class FreeMode(val modelId: String, val nameRes: StringResource, val icon: DrawableResource) {
-    FAST("fast", Res.string.service_free_fast, Res.drawable.ic_service_free_fast),
-    EXPERT("expert", Res.string.service_free_expert, Res.drawable.ic_service_free_expert),
+    FAST("fast-free", Res.string.service_free_fast, Res.drawable.ic_service_free_fast),
+    EXPERT("expert-free", Res.string.service_free_expert, Res.drawable.ic_service_free_expert),
     ;
 
     val instanceId: String get() = "free-$modelId"
