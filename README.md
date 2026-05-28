@@ -205,7 +205,6 @@ Download the APK from [GitHub Releases](https://github.com/kilvz/Kai-custom/rele
 | **Package / identity** | `com.inspiredandroid.kai`, `Kai 9000` | `com.kai.custom`, `Kai 9001` |
 | **App icon** | Purple overlapping circles | **Red** overlapping circles |
 | **Version scheme** | Tracks upstream (2.x.x) | Custom 1.x.x — major = breaking, minor = features, patch = bugs |
-| **GitHub issues** | Disabled | Enabled with integration request template |
 | **SSH integration** | None | JSch persistent SSH client: multi-profile management, interactive terminal in chat, AI tools (`ssh_connect`/`ssh_disconnect`/`ssh_execute_command`), profile save/reuse by AI |
 
 ### Features Present in Both (No Meaningful Changes)
