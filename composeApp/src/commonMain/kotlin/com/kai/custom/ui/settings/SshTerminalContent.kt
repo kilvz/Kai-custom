@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kai.custom.SshAuthMethod
 import com.kai.custom.SshProfile
 import com.kai.custom.TerminalLine
+import com.kai.custom.isBatteryOptimizationDisabled
 import com.kai.custom.openBatteryOptimizationSettings
 import com.kai.custom.ui.handCursor
 import kai.composeapp.generated.resources.Res
@@ -124,13 +125,6 @@ internal fun SshTerminalContent(
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 DisconnectedSshContent(
                     state = state,
-                    onHostChanged = sshViewModel::onHostChanged,
-                    onPortChanged = sshViewModel::onPortChanged,
-                    onUsernameChanged = sshViewModel::onUsernameChanged,
-                    onAuthMethodChanged = sshViewModel::onAuthMethodChanged,
-                    onPasswordChanged = sshViewModel::onPasswordChanged,
-                    onPrivateKeyChanged = sshViewModel::onPrivateKeyChanged,
-                    onPassphraseChanged = sshViewModel::onPassphraseChanged,
                     onSelectProfile = sshViewModel::selectProfile,
                     onConnect = sshViewModel::connect,
                     onOpenSettings = onOpenSettings,
@@ -274,21 +268,12 @@ internal fun SshTerminalContent(
 @Composable
 private fun DisconnectedSshContent(
     state: SshUiState,
-    onHostChanged: (String) -> Unit,
-    onPortChanged: (String) -> Unit,
-    onUsernameChanged: (String) -> Unit,
-    onAuthMethodChanged: (SshAuthMethod) -> Unit,
-    onPasswordChanged: (String) -> Unit,
-    onPrivateKeyChanged: (String) -> Unit,
-    onPassphraseChanged: (String) -> Unit,
     onSelectProfile: (String) -> Unit,
     onConnect: () -> Unit,
     onOpenSettings: (() -> Unit)? = null,
 ) {
     val scrollState = rememberScrollState()
-    var showAddForm by remember {
-        mutableStateOf(state.profiles.isEmpty())
-    }
+    val batteryOk = isBatteryOptimizationDisabled()
 
     Column(
         modifier = Modifier
@@ -310,20 +295,85 @@ private fun DisconnectedSshContent(
         Spacer(Modifier.height(16.dp))
 
         if (state.profiles.isNotEmpty()) {
-            TerminalProfileSelector(
-                profiles = state.profiles,
-                activeProfileName = state.activeProfileName,
-                onSelectProfile = { name ->
-                    onSelectProfile(name)
-                    showAddForm = true
-                },
+            Text(
+                text = "Saved Servers",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
+
+            state.profiles.forEach { profile ->
+                val isActive = profile.name == state.activeProfileName
+                val conn = state.connectionState
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = profile.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                text = "${profile.username}@${profile.host}:${profile.port}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                onSelectProfile(profile.name)
+                                onConnect()
+                            },
+                            enabled = !conn.connecting,
+                            modifier = Modifier.handCursor(),
+                        ) {
+                            Text(
+                                if (isActive && conn.connecting) "Connecting..."
+                                else if (isActive && conn.error != null) "Retry"
+                                else "Connect"
+                            )
+                        }
+                    }
+
+                    if (isActive && conn.error != null) {
+                        Text(
+                            text = conn.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
+                }
+
+                if (profile != state.profiles.last()) {
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
 
-        if (!showAddForm && state.profiles.isNotEmpty()) {
+        if (state.profiles.isEmpty()) {
+            Text(
+                text = "No saved servers. Add one in Settings.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+
+        if (onOpenSettings != null) {
             OutlinedButton(
-                onClick = { showAddForm = true },
+                onClick = onOpenSettings,
                 modifier = Modifier.fillMaxWidth().handCursor(),
             ) {
                 Text("Add Server")
@@ -331,160 +381,26 @@ private fun DisconnectedSshContent(
             Spacer(Modifier.height(12.dp))
         }
 
-        if (showAddForm) {
-            OutlinedTextField(
-                value = state.host,
-                onValueChange = onHostChanged,
-                label = { Text("Host") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+        if (!batteryOk) {
+            Text(
+                text = "SSH connections may disconnect if battery optimization is enabled.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = state.port,
-                    onValueChange = onPortChanged,
-                    label = { Text("Port") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(120.dp),
-                )
-                Spacer(Modifier.width(8.dp))
-                OutlinedTextField(
-                    value = state.username,
-                    onValueChange = onUsernameChanged,
-                    label = { Text("Username") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            Spacer(Modifier.height(12.dp))
-
-            Column(Modifier.selectableGroup()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = state.authMethod == SshAuthMethod.PASSWORD,
-                            onClick = { onAuthMethodChanged(SshAuthMethod.PASSWORD) },
-                            role = Role.RadioButton,
-                        )
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = state.authMethod == SshAuthMethod.PASSWORD, onClick = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Password", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = state.authMethod == SshAuthMethod.KEY,
-                            onClick = { onAuthMethodChanged(SshAuthMethod.KEY) },
-                            role = Role.RadioButton,
-                        )
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(selected = state.authMethod == SshAuthMethod.KEY, onClick = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Private Key", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-
-            if (state.authMethod == SshAuthMethod.PASSWORD) {
-                OutlinedTextField(
-                    value = state.password,
-                    onValueChange = onPasswordChanged,
-                    label = { Text("Password") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            } else {
-                OutlinedTextField(
-                    value = state.privateKey,
-                    onValueChange = onPrivateKeyChanged,
-                    label = { Text("Private Key") },
-                    minLines = 3,
-                    maxLines = 6,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = state.passphrase,
-                    onValueChange = onPassphraseChanged,
-                    label = { Text("Passphrase (optional)") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            Spacer(Modifier.height(12.dp))
-
-            val conn = state.connectionState
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Button(
-                    onClick = onConnect,
-                    enabled = !conn.connecting && state.host.isNotBlank() && state.username.isNotBlank(),
-                    modifier = Modifier.handCursor(),
-                ) {
-                    Text(if (conn.connecting) "Connecting..." else "Connect")
-                }
-                if (conn.error != null) {
-                    Text(
-                        text = conn.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-
-            if (state.profiles.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = { showAddForm = false },
-                    modifier = Modifier.handCursor(),
-                ) {
-                    Text("Cancel")
-                }
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = "SSH connections may disconnect if battery optimization is enabled.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        OutlinedButton(
-            onClick = { openBatteryOptimizationSettings() },
-            modifier = Modifier.handCursor(),
-        ) {
-            Text("Battery Optimization Settings", style = MaterialTheme.typography.bodySmall)
-        }
-
-        if (onOpenSettings != null) {
-            Spacer(Modifier.height(12.dp))
             OutlinedButton(
-                onClick = onOpenSettings,
+                onClick = { openBatteryOptimizationSettings() },
                 modifier = Modifier.handCursor(),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(Modifier.width(4.dp))
-                Text("SSH Settings")
+                Text("Battery Optimization Settings", style = MaterialTheme.typography.bodySmall)
             }
+
+            if (onOpenSettings != null) {
+                Spacer(Modifier.height(12.dp))
+            }
+        }
+
+        if (onOpenSettings != null && batteryOk) {
+            Spacer(Modifier.height(12.dp))
         }
     }
 }

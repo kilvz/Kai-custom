@@ -119,3 +119,4 @@ actual fun sendHeartbeatNotification(title: String, body: String) = Unit
 actual fun openTtsSettings() = Unit
 
 actual fun openBatteryOptimizationSettings() = Unit
+actual fun isBatteryOptimizationDisabled(): Boolean = true

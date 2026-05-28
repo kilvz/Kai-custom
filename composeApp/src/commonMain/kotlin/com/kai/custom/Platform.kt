@@ -88,6 +88,12 @@ expect fun openTtsSettings()
 
 expect fun openBatteryOptimizationSettings()
 
+/**
+ * Returns true if battery optimization is already disabled for this app.
+ * On non-Android platforms, returns true (no battery optimization concerns).
+ */
+expect fun isBatteryOptimizationDisabled(): Boolean
+
 @androidx.compose.runtime.Composable
 expect fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit)
 

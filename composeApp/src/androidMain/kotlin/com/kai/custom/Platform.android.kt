@@ -1036,3 +1036,10 @@ actual fun openBatteryOptimizationSettings() {
         // Battery optimization settings not available
     }
 }
+
+actual fun isBatteryOptimizationDisabled(): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
+    val context: Context by inject(Context::class.java)
+    val pm = context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+    return pm.isIgnoringBatteryOptimizations(context.packageName)
+}
