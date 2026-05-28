@@ -28,3 +28,4 @@ fastlane/README.md
 tools/speech_commands/
 *.tflite
 /playstore/
+AGENTS.md
