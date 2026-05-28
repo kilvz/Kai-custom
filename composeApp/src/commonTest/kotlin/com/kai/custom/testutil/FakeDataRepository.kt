@@ -275,6 +275,8 @@ class FakeDataRepository : DataRepository {
 
     override suspend fun editAndBranch(messageId: String, newContent: String): Boolean = false
 
+    override suspend fun forkConversation(messageId: String) = Unit
+
     override fun restoreCurrentConversation() {
         // No-op in tests
     }

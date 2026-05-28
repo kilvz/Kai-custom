@@ -1566,6 +1566,34 @@ class RemoteDataRepository(
         return true
     }
 
+    override suspend fun forkConversation(messageId: String) {
+        saveCurrentConversation()
+
+        val oldHistory = chatHistory.value.toList()
+        val oldConversationId = _currentConversationId.value ?: return
+
+        val transcript = buildString {
+            for (h in oldHistory) {
+                val role = when (h.role) {
+                    History.Role.USER -> "User"
+                    History.Role.ASSISTANT -> "Assistant"
+                    History.Role.TOOL -> "Tool"
+                    History.Role.TOOL_EXECUTING -> "Tool (executing)"
+                    History.Role.SYSTEM -> "System"
+                }
+                append("$role: ${h.content}\n")
+            }
+        }
+        memoryStore.store(
+            key = "branch_${oldConversationId}",
+            content = transcript,
+            category = MemoryCategory.GENERAL,
+            source = "conversation_branch",
+        )
+
+        startNewChat()
+    }
+
     override fun restoreCurrentConversation() {
         // One-time migration for existing users: pin the latest conversation as the new
         // "current" pointer so the upgrade is non-disruptive.

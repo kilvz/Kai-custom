@@ -54,6 +54,7 @@ interface DataRepository {
     fun regenerate()
     fun popLastExchange()
     fun truncateFrom(messageId: String)
+    suspend fun forkConversation(messageId: String)
     fun restoreCurrentConversation()
 
     // Tool management

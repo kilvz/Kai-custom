@@ -834,7 +834,9 @@ private fun ChatModeScreen(
                                                             uiState.actions.setIsSpeaking(it, history.id)
                                                         },
                                                         onRegenerate = if (isLastAssistant) uiState.actions.regenerate else null,
-                                                        onFork = { uiState.actions.truncateFrom(history.id) },
+                                                        onFork = {
+                                                            uiState.actions.forkConversation?.invoke(history.id)
+                                                        },
                                                         isInteractive = isLastAssistant && !uiState.isLoading && frozen == null,
                                                         onUiCallback = { event, data ->
                                                             uiState.actions.submitUiCallback(event, data)

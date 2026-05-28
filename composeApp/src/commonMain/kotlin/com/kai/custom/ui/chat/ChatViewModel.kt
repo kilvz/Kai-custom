@@ -83,6 +83,7 @@ class ChatViewModel(
         clearVoiceInputFlag = ::clearVoiceInputFlag,
         editMessage = ::editMessage,
         truncateFrom = ::truncateFrom,
+        forkConversation = ::forkConversation,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith {
         when (it) {
@@ -576,6 +577,12 @@ class ChatViewModel(
 
     private fun truncateFrom(messageId: String) {
         dataRepository.truncateFrom(messageId)
+    }
+
+    private fun forkConversation(messageId: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.forkConversation(messageId)
+        }
     }
 
     private fun editMessage(messageId: String, newContent: String) {
