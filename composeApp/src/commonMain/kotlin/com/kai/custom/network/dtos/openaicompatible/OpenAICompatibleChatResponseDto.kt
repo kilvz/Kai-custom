@@ -16,6 +16,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 private val toolCallMarkerRegex = Regex("<TOOLCALL>[\\s\\S]*?</TOOLCALL>|<TOOLCALL>[\\s\\S]*$")
+private val chatTemplateTokenRegex = Regex("</?assistant>|</?system>|</?user>|<\\|im_start\\||<\\|im_end\\|>|<\\|end_of_turn\\|>|</s>|<\\|eot_id\\|>")
 
 /**
  * Reads `message.content` whether the provider sends a plain string or an OpenAI-style array of
@@ -71,13 +72,16 @@ data class OpenAICompatibleChatResponseDto(
             val effectiveContent: String?
                 get() {
                     val raw = content?.takeIf { it.isNotBlank() } ?: effectiveReasoning
+                    if (raw == null) return null
+                    var cleaned = raw
                     // Some providers (e.g. Ollama) embed tool calls as <TOOLCALL>[...] markers
                     // in the content field alongside structured tool_calls — strip them.
-                    if (raw != null && !toolCalls.isNullOrEmpty()) {
-                        val stripped = raw.replace(toolCallMarkerRegex, "").trim()
-                        return stripped.takeIf { it.isNotBlank() }
+                    if (!toolCalls.isNullOrEmpty()) {
+                        cleaned = cleaned.replace(toolCallMarkerRegex, "").trim()
                     }
-                    return raw
+                    // Strip chat template tokens that some models leak into content
+                    cleaned = cleaned.replace(chatTemplateTokenRegex, "").trim()
+                    return cleaned.takeIf { it.isNotBlank() }
                 }
 
             /** True when the effective content comes from reasoning rather than [content]. */
