@@ -1043,3 +1043,28 @@ actual fun isBatteryOptimizationDisabled(): Boolean {
     val pm = context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
     return pm.isIgnoringBatteryOptimizations(context.packageName)
 }
+
+/**
+ * Detects whether the app is running inside an Android emulator by checking known
+ * emulator fingerprints, models, and manufacturer strings.
+ */
+private fun isEmulator(): Boolean {
+    val fingerprint = Build.FINGERPRINT
+    val model = Build.MODEL
+    val manufacturer = Build.MANUFACTURER
+    val product = Build.PRODUCT
+    val brand = Build.BRAND
+    val device = Build.DEVICE
+
+    return fingerprint.startsWith("generic") ||
+        fingerprint.startsWith("unknown") ||
+        model.contains("google_sdk") ||
+        model.contains("Emulator") ||
+        model.contains("Android SDK built for x86") ||
+        manufacturer.contains("Genymotion") ||
+        (brand.startsWith("generic") && device.startsWith("generic")) ||
+        "google_sdk" == product
+}
+
+actual fun defaultOpenAICompatibleBaseUrl(): String =
+    if (isEmulator()) "http://10.0.2.2:11434/v1" else "http://localhost:11434/v1"

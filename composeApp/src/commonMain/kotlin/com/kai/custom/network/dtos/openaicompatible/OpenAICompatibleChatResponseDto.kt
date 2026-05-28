@@ -17,6 +17,7 @@ import kotlinx.serialization.json.jsonPrimitive
 
 private val toolCallMarkerRegex = Regex("<TOOLCALL>[\\s\\S]*?</TOOLCALL>|<TOOLCALL>[\\s\\S]*$")
 private val chatTemplateTokenRegex = Regex("</?assistant>|</?system>|</?user>|<\\|im_start\\||<\\|im_end\\|>|<\\|end_of_turn\\|>|</s>|<\\|eot_id\\|>")
+private val thinkBlockRegex = Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL)
 
 /**
  * Reads `message.content` whether the provider sends a plain string or an OpenAI-style array of
@@ -58,7 +59,10 @@ data class OpenAICompatibleChatResponseDto(
             @Serializable(with = FlexibleContentSerializer::class)
             val content: String? = null,
             // DeepSeek returns `reasoning_content`; OpenRouter returns `reasoning`.
+            // Some providers may send non-string types (objects, arrays) for reasoning fields,
+            // so apply the same FlexibleContentSerializer protection as `content`.
             @SerialName("reasoning_content")
+            @Serializable(with = FlexibleContentSerializer::class)
             val reasoningContent: String? = null,
             val reasoning: String? = null,
             @SerialName("tool_calls")
@@ -81,6 +85,15 @@ data class OpenAICompatibleChatResponseDto(
                     }
                     // Strip chat template tokens that some models leak into content
                     cleaned = cleaned.replace(chatTemplateTokenRegex, "").trim()
+                    // Strip think blocks from reasoning models (Qwen3-Thinking, Gemma 4, etc.)
+                    if (cleaned.contains("</think>")) {
+                        if (!cleaned.contains("<think>")) {
+                            // Qwen3-Thinking omits opening <think> tag — everything before </think> is reasoning
+                            cleaned = cleaned.substringAfter("</think>").trim()
+                        } else {
+                            cleaned = thinkBlockRegex.replace(cleaned, "").trim()
+                        }
+                    }
                     return cleaned.takeIf { it.isNotBlank() }
                 }
 

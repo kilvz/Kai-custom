@@ -473,7 +473,7 @@ sealed class Service(
     companion object {
         val all: List<Service> get() = listOf(Free, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, Nvidia, Cerebras, OllamaCloud, LongCat, Together, HuggingFace, Venice, Moonshot, Zai, ZaiCodingPlan, Minimax, AiHubMix, DeepInfra, FireworksAI, OpenCode, PublicAI, OpenAICompatible, LiteRT)
 
-        const val DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "http://localhost:11434/v1"
+        val DEFAULT_OPENAI_COMPATIBLE_BASE_URL: String get() = com.kai.custom.defaultOpenAICompatibleBaseUrl()
 
         fun fromId(id: String): Service = all.find { it.id == id } ?: Free
     }

@@ -89,6 +89,12 @@ expect fun openTtsSettings()
 expect fun openBatteryOptimizationSettings()
 
 /**
+ * Returns the default base URL for the OpenAI-Compatible service (local Ollama).
+ * On Android emulators, returns the host-loopback address (10.0.2.2) instead of localhost.
+ */
+expect fun defaultOpenAICompatibleBaseUrl(): String
+
+/**
  * Returns true if battery optimization is already disabled for this app.
  * On non-Android platforms, returns true (no battery optimization concerns).
  */
