@@ -100,7 +100,7 @@ sealed class Service(
         requiresApiKey = false,
         defaultModel = null,
         settingsKeyPrefix = "",
-        chatUrl = "https://api.kai9000.com/chat/completions",
+        chatUrl = "https://api.kilv.my.id/chat/completions",
         modelsUrl = null,
     )
 
