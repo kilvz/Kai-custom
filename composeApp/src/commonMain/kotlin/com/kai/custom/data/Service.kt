@@ -4,6 +4,7 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_service_aihubmix
 import kai.composeapp.generated.resources.ic_service_atlascloud
 import kai.composeapp.generated.resources.ic_service_anthropic
+import kai.composeapp.generated.resources.ic_service_atlascloud
 import kai.composeapp.generated.resources.ic_service_cerebras
 import kai.composeapp.generated.resources.ic_service_deepinfra
 import kai.composeapp.generated.resources.ic_service_deepseek
@@ -104,6 +105,19 @@ sealed class Service(
         chatUrl = "https://api.kilv.my.id/chat/completions",
         modelsUrl = null,
         reasoningRequestMode = ReasoningRequestMode.REASONING_CONTENT,
+    )
+
+    data object AtlasCloud : Service(
+        id = "atlascloud",
+        displayName = "Atlas Cloud",
+        icon = Res.drawable.ic_service_atlascloud,
+        requiresApiKey = true,
+        defaultModel = null,
+        settingsKeyPrefix = "atlascloud",
+        chatUrl = "https://api.atlascloud.ai/v1/chat/completions",
+        modelsUrl = "https://api.atlascloud.ai/v1/models",
+        apiKeyUrl = "https://www.atlascloud.ai/console/api-keys",
+        apiKeyUrlDisplay = "atlascloud.ai/console/api-keys",
     )
 
     data object Groq : Service(
