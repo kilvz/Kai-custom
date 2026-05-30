@@ -26,6 +26,14 @@ private val ALPINE_MIRRORS = listOf(
     "https://mirror.csclub.uwaterloo.ca/alpine",
     "https://mirrors.tuna.tsinghua.edu.cn/alpine",
 )
+
+private const val UBUNTU_VERSION = "24.04"
+private const val UBUNTU_CODENAME = "noble"
+
+private val UBUNTU_MIRRORS = listOf(
+    "https://cdimage.ubuntu.com/ubuntu-base/releases",
+    "https://cloud-images.ubuntu.com/releases",
+)
 private const val TAR_BLOCK_SIZE = 512
 private const val TAR_NAME_OFFSET = 0
 private const val TAR_MODE_OFFSET = 100
@@ -36,18 +44,38 @@ private const val TAR_PREFIX_OFFSET = 345
 
 class RootfsDownloader(private val httpClient: HttpClient) {
 
-    val mirrors: List<String> = ALPINE_MIRRORS
+    fun getMirrors(distro: String): List<String> = when (distro) {
+        "ubuntu" -> UBUNTU_MIRRORS
+        else -> ALPINE_MIRRORS
+    }
 
-    fun getDownloadUrls(arch: String): List<String> = ALPINE_MIRRORS.map { base ->
-        "$base/$ALPINE_BRANCH/releases/$arch/alpine-minirootfs-$ALPINE_VERSION-$arch.tar.gz"
+    fun getDownloadUrls(arch: String, distro: String = "alpine"): List<String> = when (distro) {
+        "ubuntu" -> {
+            val ubuntuArch = toUbuntuArch(arch)
+            UBUNTU_MIRRORS.map { base ->
+                "$base/$UBUNTU_VERSION/release/ubuntu-base-$UBUNTU_VERSION-base-$ubuntuArch.tar.gz"
+            }
+        }
+        else -> ALPINE_MIRRORS.map { base ->
+            "$base/$ALPINE_BRANCH/releases/$arch/alpine-minirootfs-$ALPINE_VERSION-$arch.tar.gz"
+        }
+    }
+
+    private fun toUbuntuArch(arch: String): String = when (arch) {
+        "aarch64" -> "arm64"
+        "armhf" -> "armhf"
+        "x86_64" -> "amd64"
+        "x86" -> "i386"
+        else -> "arm64"
     }
 
     suspend fun download(
         arch: String,
         targetFile: File,
+        distro: String = "alpine",
         onProgress: (Float) -> Unit,
     ) {
-        val urls = getDownloadUrls(arch)
+        val urls = getDownloadUrls(arch, distro)
         var lastError: Exception? = null
         for ((index, url) in urls.withIndex()) {
             try {
@@ -61,7 +89,7 @@ class RootfsDownloader(private val httpClient: HttpClient) {
                 if (index < urls.lastIndex) onProgress(0f)
             }
         }
-        throw IOException("All Alpine mirrors failed", lastError)
+        throw IOException("All mirrors failed", lastError)
     }
 
     private suspend fun downloadFrom(
@@ -230,11 +258,24 @@ class RootfsDownloader(private val httpClient: HttpClient) {
         )
     }
 
-    fun writeRepositories(rootfsDir: File, mirrorBase: String) {
-        val apkDir = File(rootfsDir, "etc/apk")
-        apkDir.mkdirs()
-        File(apkDir, "repositories").writeText(
-            "$mirrorBase/$ALPINE_BRANCH/main\n$mirrorBase/$ALPINE_BRANCH/community\n",
-        )
+    fun writeRepositories(rootfsDir: File, mirrorBase: String, distro: String = "alpine") {
+        when (distro) {
+            "ubuntu" -> {
+                val sourcesDir = File(rootfsDir, "etc/apt")
+                sourcesDir.mkdirs()
+                File(sourcesDir, "sources.list").writeText(
+                    "deb http://archive.ubuntu.com/ubuntu/ $UBUNTU_CODENAME main restricted universe multiverse\n" +
+                        "deb http://archive.ubuntu.com/ubuntu/ ${UBUNTU_CODENAME}-updates main restricted universe multiverse\n" +
+                        "deb http://security.ubuntu.com/ubuntu/ ${UBUNTU_CODENAME}-security main restricted universe multiverse\n",
+                )
+            }
+            else -> {
+                val apkDir = File(rootfsDir, "etc/apk")
+                apkDir.mkdirs()
+                File(apkDir, "repositories").writeText(
+                    "$mirrorBase/$ALPINE_BRANCH/main\n$mirrorBase/$ALPINE_BRANCH/community\n",
+                )
+            }
+        }
     }
 }

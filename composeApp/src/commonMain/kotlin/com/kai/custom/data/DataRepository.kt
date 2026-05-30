@@ -122,6 +122,8 @@ interface DataRepository {
     fun setSandboxEnabled(enabled: Boolean)
     fun isSandboxStorageMountEnabled(): Boolean
     fun setSandboxStorageMountEnabled(enabled: Boolean)
+    fun getSandboxDistro(): String
+    fun setSandboxDistro(distro: String)
 
     // Heartbeat
     fun getHeartbeatConfig(): HeartbeatConfig

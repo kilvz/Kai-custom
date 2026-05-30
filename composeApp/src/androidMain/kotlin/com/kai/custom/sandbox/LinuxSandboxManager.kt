@@ -131,6 +131,7 @@ class LinuxSandboxManager(
 
     private suspend fun setupInternal() {
         val arch = getLinuxArch()
+        val distro = appSettings.getSandboxDistro()
 
         // Verify proot is available in nativeLibraryDir
         val proot = File(prootPath)
@@ -155,7 +156,7 @@ class LinuxSandboxManager(
             val tarGzFile = File(sandboxDir, "rootfs.tar.gz")
             try {
                 _state.value = SandboxState.Downloading(0f)
-                downloader.download(arch, tarGzFile) { progress ->
+                downloader.download(arch, tarGzFile, distro) { progress ->
                     _state.value = SandboxState.Downloading(progress)
                 }
 
@@ -172,17 +173,18 @@ class LinuxSandboxManager(
         downloader.writeResolvConf(rootfsDir)
 
         val executor = createProotExecutor()
+        val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
         var updated = false
-        for (mirror in downloader.mirrors) {
-            downloader.writeRepositories(rootfsDir, mirror)
-            val result = executor.execute("apk update", timeoutSeconds = 60)
+        for (mirror in downloader.getMirrors(distro)) {
+            downloader.writeRepositories(rootfsDir, mirror, distro)
+            val result = executor.execute(updateCmd, timeoutSeconds = 60)
             if (result["success"] as? Boolean == true) {
                 updated = true
                 break
             }
         }
         if (!updated) {
-            throw IllegalStateException("apk update failed on all Alpine mirrors")
+            throw IllegalStateException("$updateCmd failed on all mirrors")
         }
 
         _state.value = SandboxState.Ready
@@ -283,44 +285,42 @@ class LinuxSandboxManager(
 
     fun installPackages() {
         if (currentJob?.isActive == true) return
-        val packages = listOf(
-            "bash", "curl", "wget", "git", "jq", "python3", "py3-pip", "nodejs",
-            // Remote-server tooling (issue #214). apk add is idempotent so
-            // existing installs that bump into this list pay nothing for the
-            // already-present ones.
-            "openssh-client", "lftp", "rsync",
-        )
+        val distro = appSettings.getSandboxDistro()
+        val packages = if (distro == "ubuntu") {
+            listOf(
+                "bash", "curl", "wget", "git", "jq", "python3", "python3-pip", "nodejs",
+                "openssh-client", "lftp", "rsync",
+            )
+        } else {
+            listOf(
+                "bash", "curl", "wget", "git", "jq", "python3", "py3-pip", "nodejs",
+                "openssh-client", "lftp", "rsync",
+            )
+        }
+        val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
+        val installCmdPrefix = if (distro == "ubuntu") "DEBIAN_FRONTEND=noninteractive apt-get install -y" else "apk add"
+
         currentJob = scope.launch {
             try {
                 val rootfsDir = File(sandboxDir, "rootfs")
                 val executor = createProotExecutor()
 
-                // Show progress immediately so the button hides and progress UI
-                // appears while we run `apk update` (can take 30-60s per mirror).
                 _state.value = SandboxState.Installing("Updating package lists...")
 
-                // Refresh the APK cache before installing. `apk add` without
-                // --no-cache relies on the cached index; if the rootfs was set up
-                // in a prior session the cache may be stale or absent. We also
-                // avoid --no-cache because proot's ptrace can block TLS syscalls
-                // on some Android versions, causing "Permission denied" when apk
-                // tries to fetch the index over HTTPS. The cached index from `apk
-                // update` below avoids the need for HTTPS at install time.
                 var updated = false
-                for (mirror in downloader.mirrors) {
-                    downloader.writeRepositories(rootfsDir, mirror)
-                    val result = executor.execute("apk update", timeoutSeconds = 60)
+                for (mirror in downloader.getMirrors(distro)) {
+                    downloader.writeRepositories(rootfsDir, mirror, distro)
+                    val result = executor.execute(updateCmd, timeoutSeconds = 60)
                     if (result["success"] as? Boolean == true) {
                         updated = true
                         break
                     }
                 }
-                if (!updated) {
-                    // HTTPS mirrors all failed — retry with HTTP on each
-                    for (mirror in downloader.mirrors) {
+                if (!updated && distro != "ubuntu") {
+                    for (mirror in downloader.getMirrors(distro)) {
                         val httpMirror = mirror.replace("https://", "http://")
-                        downloader.writeRepositories(rootfsDir, httpMirror)
-                        val result = executor.execute("apk update", timeoutSeconds = 60)
+                        downloader.writeRepositories(rootfsDir, httpMirror, distro)
+                        val result = executor.execute(updateCmd, timeoutSeconds = 60)
                         if (result["success"] as? Boolean == true) {
                             updated = true
                             break
@@ -328,15 +328,15 @@ class LinuxSandboxManager(
                     }
                 }
                 if (!updated) {
-                    android.util.Log.e("LinuxSandbox", "apk update failed on all Alpine mirrors (HTTPS and HTTP)")
-                    _state.value = SandboxState.Error("apk update failed — check device network connectivity")
+                    android.util.Log.e("LinuxSandbox", "$updateCmd failed on all mirrors")
+                    _state.value = SandboxState.Error("$updateCmd failed — check device network connectivity")
                     return@launch
                 }
 
                 for (pkg in packages) {
                     ensureActive()
                     _state.value = SandboxState.Installing("Installing $pkg...")
-                    val result = executor.execute("apk add $pkg", timeoutSeconds = 120)
+                    val result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
                     ensureActive()
                     val success = result["success"] as? Boolean ?: false
                     if (!success) {
@@ -350,11 +350,6 @@ class LinuxSandboxManager(
                         return@launch
                     }
                 }
-                // Seed ~/.ssh/config with ControlMaster + keepalive defaults so any
-                // manual `ssh user@host` from now on multiplexes. Idempotent —
-                // skips when the kai:defaults block is already present. Failures
-                // here are non-fatal: openssh works without the defaults, just
-                // without the held-connection optimization.
                 runCatching { SshConfigManager(java.io.File(homePath)).ensureDefaults() }
                     .onFailure { android.util.Log.w("LinuxSandbox", "ssh defaults seed failed: ${it.message}") }
                 _state.value = SandboxState.Ready

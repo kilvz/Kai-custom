@@ -2,12 +2,17 @@ package com.kai.custom.mcp
 
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxSessions
+import com.kai.custom.data.AppSettings
+import com.kai.custom.data.MemoryStore
 import kotlinx.coroutines.delay
-import kotlin.time.Clock
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 
 class AltMemoryLifecycleManager(
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
+    private val appSettings: AppSettings,
+    private val memoryStore: MemoryStore,
 ) {
     companion object {
         private const val ALT_MEMORY_URL = "http://127.0.0.1:8316"
@@ -33,9 +38,36 @@ class AltMemoryLifecycleManager(
                     url = ALT_MEMORY_URL,
                 )
                 mcpServerManager.connectAndDiscoverTools(SERVER_ID)
+                runMigration()
             }
         } catch (_: Exception) {
         }
+    }
+
+    private suspend fun runMigration() {
+        if (appSettings.isAltMemoryMigrationComplete()) return
+        val client = mcpServerManager.getClient(SERVER_ID) ?: return
+        val memories = memoryStore.getAllMemories()
+        if (memories.isEmpty()) {
+            appSettings.setAltMemoryMigrationComplete(true)
+            return
+        }
+        var migrated = 0
+        var failed = 0
+        for (entry in memories) {
+            try {
+                client.callTool("memory_store", buildJsonObject {
+                    put("key", JsonPrimitive(entry.key))
+                    put("content", JsonPrimitive(entry.content))
+                    put("category", JsonPrimitive(entry.category.name))
+                    put("hit_count", JsonPrimitive(entry.hitCount))
+                })
+                migrated++
+            } catch (_: Exception) {
+                failed++
+            }
+        }
+        appSettings.setAltMemoryMigrationComplete(true)
     }
 
     private suspend fun installIfNeeded() {

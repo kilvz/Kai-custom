@@ -2,6 +2,8 @@ package com.kai.custom
 
 import android.content.Context
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.kai.custom.data.MemoryStore
+import com.kai.custom.data.AppSettings
 import com.kai.custom.mcp.AltMemoryLifecycleManager
 import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.sandbox.LinuxSandboxManager
@@ -29,9 +31,11 @@ class AndroidSandboxController : SandboxController {
     private val sandboxManager: LinuxSandboxManager by inject(LinuxSandboxManager::class.java)
     private val context: Context by inject(Context::class.java)
     private val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
+    private val memoryStore: MemoryStore by inject(MemoryStore::class.java)
+    private val appSettings: AppSettings by inject(AppSettings::class.java)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val altMemoryLifecycle = AltMemoryLifecycleManager(this, mcpServerManager)
+    private val altMemoryLifecycle = AltMemoryLifecycleManager(this, mcpServerManager, appSettings, memoryStore)
 
     private var cachedDiskUsageMB = 0L
     private var previousState: SandboxState? = null

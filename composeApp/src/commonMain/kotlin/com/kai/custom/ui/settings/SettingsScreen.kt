@@ -338,6 +338,7 @@ fun SettingsScreen(
         onCancelSandbox = sandboxViewModel::onCancelSandbox,
         onResetSandbox = sandboxViewModel::onResetSandbox,
         onInstallPackages = sandboxViewModel::onInstallPackages,
+        onDistroChanged = sandboxViewModel::onDistroChanged,
         sshState = sshState,
         sshViewModel = sshViewModel,
         onNavigateBack = onNavigateBack,
@@ -356,6 +357,7 @@ fun SettingsScreenContent(
     onCancelSandbox: () -> Unit = {},
     onResetSandbox: () -> Unit = {},
     onInstallPackages: () -> Unit = {},
+    onDistroChanged: (String) -> Unit = {},
     sshState: SshUiState = SshUiState(),
     sshViewModel: SshViewModel? = null,
     onNavigateBack: () -> Unit = {},
@@ -586,6 +588,7 @@ fun SettingsScreenContent(
                                     onCancelSandbox = onCancelSandbox,
                                     onResetSandbox = onResetSandbox,
                                     onInstallPackages = onInstallPackages,
+                                    onDistroChanged = onDistroChanged,
                                 )
                             }
                         }

@@ -1884,6 +1884,12 @@ class RemoteDataRepository(
         appSettings.setSandboxStorageMountEnabled(enabled)
     }
 
+    override fun getSandboxDistro(): String = appSettings.getSandboxDistro()
+
+    override fun setSandboxDistro(distro: String) {
+        appSettings.setSandboxDistro(distro)
+    }
+
     // Wake word
     override fun isWakeWordEnabled(): Boolean = appSettings.isWakeWordEnabled()
 

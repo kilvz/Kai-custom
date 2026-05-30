@@ -24,6 +24,7 @@ data class SandboxUiState(
     val sandboxPackagesInstalled: Boolean = false,
     val isSandboxEnabled: Boolean = true,
     val isSandboxStorageMountEnabled: Boolean = true,
+    val sandboxDistro: String = "alpine",
     val isWorking: Boolean = false,
     val hasError: Boolean = false,
 )
@@ -44,6 +45,7 @@ class SandboxViewModel(
                 showSandbox = currentPlatform is Platform.Mobile.Android,
                 isSandboxEnabled = dataRepository.isSandboxEnabled(),
                 isSandboxStorageMountEnabled = dataRepository.isSandboxStorageMountEnabled(),
+                sandboxDistro = dataRepository.getSandboxDistro(),
             ),
         ),
     )
@@ -93,5 +95,10 @@ class SandboxViewModel(
 
     fun onInstallPackages() {
         sandboxController.installPackages()
+    }
+
+    fun onDistroChanged(distro: String) {
+        dataRepository.setSandboxDistro(distro)
+        _state.update { it.copy(sandboxDistro = distro) }
     }
 }

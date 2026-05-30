@@ -339,6 +339,18 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SANDBOX_STORAGE_MOUNT, enabled)
     }
 
+    fun getSandboxDistro(): String = settings.getString(KEY_SANDBOX_DISTRO, "alpine")
+
+    fun setSandboxDistro(distro: String) {
+        settings.putString(KEY_SANDBOX_DISTRO, distro)
+    }
+
+    fun isAltMemoryMigrationComplete(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_MIGRATION_COMPLETE, false)
+
+    fun setAltMemoryMigrationComplete(complete: Boolean) {
+        settings.putBoolean(KEY_ALT_MEMORY_MIGRATION_COMPLETE, complete)
+    }
+
     // Preferred language
     fun getPreferredLanguage(): String = settings.getString(KEY_PREFERRED_LANGUAGE, getDefaultLanguage())
 
@@ -754,6 +766,7 @@ class AppSettings(internal val settings: Settings) {
 
         const val KEY_SANDBOX_ENABLED = "sandbox_enabled"
         const val KEY_SANDBOX_STORAGE_MOUNT = "sandbox_storage_mount"
+        const val KEY_SANDBOX_DISTRO = "sandbox_distro"
         const val KEY_WAKE_WORD_ENABLED = "wake_word_enabled"
         const val KEY_WAKE_WORD_PHRASE = "wake_word_phrase"
         const val KEY_WAKE_WORD_MODE = "wake_word_mode"
@@ -770,6 +783,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SSH_PASSPHRASE = "ssh_passphrase"
         const val KEY_SSH_PROFILES = "ssh_profiles"
         const val KEY_SSH_ACTIVE_PROFILE = "ssh_active_profile"
+        const val KEY_ALT_MEMORY_MIGRATION_COMPLETE = "alt_memory_migration_complete"
 
         // Full memory guidance for remote models — references all memory tools.
         const val DEFAULT_MEMORY_INSTRUCTIONS =
