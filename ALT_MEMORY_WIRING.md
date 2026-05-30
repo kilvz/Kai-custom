@@ -23,7 +23,7 @@ App (Kotlin/Android)
 ```
 
 ## Status
-✅ **Steps 1–9**: Complete
+✅ **All 10 steps complete** (v2.0.11)
 
 ## Steps
 
@@ -61,9 +61,9 @@ App (Kotlin/Android)
 - Added `getClient(serverId)` to `McpServerManager` to retrieve the active `McpClient`
 - Migration runs once; skips if flag set or no memories exist
 
-### 🔲 Step 10: Build + deploy
-- `.\gradlew.bat :androidApp:assembleFossRelease`
-- Deploy + push to GitHub
+### ✅ Step 10: Build + deploy
+- `.\gradlew.bat :androidApp:assembleFossRelease` — BUILD SUCCESSFUL (4m 14s)
+- `v2.0.11` released on GitHub: https://github.com/kilvz/Kai-custom/releases/tag/v2.0.11
 
 ## Files Changed
 | File | Change |

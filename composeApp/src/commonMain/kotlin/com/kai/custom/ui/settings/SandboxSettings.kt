@@ -6,17 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,7 +35,6 @@ import kai.composeapp.generated.resources.settings_sandbox_uninstall
 import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SandboxSettingsCard(
     sandboxState: SandboxUiState,
@@ -184,41 +178,23 @@ internal fun SandboxSettingsCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DistroSelector(
     distro: String,
     onDistroChanged: (String) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val distros = listOf("alpine" to "Alpine Linux", "ubuntu" to "Ubuntu")
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            value = distros.first { it.first == distro }.second,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Distribution") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .width(240.dp),
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(
+            selected = distro == "alpine",
+            onClick = { onDistroChanged("alpine") },
+            label = { Text("Alpine Linux") },
+            colors = FilterChipDefaults.filterChipColors(),
         )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            distros.forEach { (value, label) ->
-                DropdownMenuItem(
-                    text = { Text(label) },
-                    onClick = {
-                        onDistroChanged(value)
-                        expanded = false
-                    },
-                )
-            }
-        }
+        FilterChip(
+            selected = distro == "ubuntu",
+            onClick = { onDistroChanged("ubuntu") },
+            label = { Text("Ubuntu") },
+            colors = FilterChipDefaults.filterChipColors(),
+        )
     }
 }
