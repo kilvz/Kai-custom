@@ -16,7 +16,7 @@ import com.kai.custom.data.SmsStore
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.TaskStore
 import com.kai.custom.data.ToolExecutor
-import com.kai.custom.data.palace.PalaceStore
+import com.kai.custom.data.dimension.DimensionStore
 import com.kai.custom.data.runMigrations
 import com.kai.custom.email.EmailPoller
 import com.kai.custom.inference.createLocalInferenceEngine
@@ -71,7 +71,7 @@ val appModule = module {
         ToolExecutor()
     }
     single<MemoryStore> {
-        MemoryStore(get<PalaceStore>())
+        MemoryStore(get<DimensionStore>())
     }
     single<TaskStore> {
         TaskStore(get())

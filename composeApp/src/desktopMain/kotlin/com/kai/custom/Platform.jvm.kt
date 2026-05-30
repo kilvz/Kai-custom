@@ -152,12 +152,15 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = listOf(ShellCommandToo
 actual fun getAvailableTools(): List<Tool> {
     val appSettings: AppSettings by inject(AppSettings::class.java)
     val memoryStore: MemoryStore by inject(MemoryStore::class.java)
+    val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
     val taskStore: TaskStore by inject(TaskStore::class.java)
     val emailStore: EmailStore by inject(EmailStore::class.java)
     return buildList {
         addAll(CommonTools.getCommonTools(appSettings))
         if (appSettings.isMemoryEnabled()) {
-            addAll(CommonTools.getMemoryTools(memoryStore))
+            if (!mcpServerManager.isConnected("alt_memory")) {
+                addAll(CommonTools.getMemoryTools(memoryStore))
+            }
             addAll(listOf(HeartbeatTools.getPromoteLearningTool(memoryStore, appSettings)))
         }
         if (appSettings.isSchedulingEnabled()) {
@@ -171,7 +174,6 @@ actual fun getAvailableTools(): List<Tool> {
             addAll(EmailTools.getEmailTools(emailStore))
         }
 
-        val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
         addAll(mcpServerManager.getEnabledMcpTools())
     }
 }

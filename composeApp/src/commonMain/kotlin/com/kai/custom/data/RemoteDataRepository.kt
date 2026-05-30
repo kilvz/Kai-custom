@@ -1573,11 +1573,18 @@ class RemoteDataRepository(
     override suspend fun forkConversation(messageId: String) {
         if (!sandboxController.status.value.ready) return
 
+        val forkedMessage = chatHistory.value.find { it.id == messageId }
+        val forkedContent = forkedMessage?.content ?: return
+
         saveCurrentConversation()
 
         val oldHistory = chatHistory.value.toList()
         val oldConversationId = _currentConversationId.value ?: return
-        val forkedTitle = deriveTitle(oldHistory)
+        val forkedTitle = if (forkedContent.length <= 50) forkedContent
+            else forkedContent.take(50).let { t ->
+                val lastSpace = t.lastIndexOf(' ')
+                if (lastSpace > 20) t.substring(0, lastSpace) + "..." else t + "..."
+            }
 
         val transcript = buildString {
             appendLine("[PREVIOUS CONVERSATION — BRANCH]")
@@ -1614,6 +1621,7 @@ class RemoteDataRepository(
                     createdAt = now,
                     updatedAt = now,
                     title = forkedTitle,
+                    forkedFrom = forkedContent,
                 )
             )
             setCurrentConversationId(newId)
@@ -2075,9 +2083,9 @@ class RemoteDataRepository(
         return appSettings.importFromJson(jsonObject, toolIds, sections, replace)
     }
 
-    override fun exportPalace(): ByteArray = memoryStore.exportPalace()
+    override fun exportDimension(): ByteArray = memoryStore.exportDimension()
 
-    override fun importPalace(data: ByteArray) = memoryStore.importPalace(data)
+    override fun importDimension(data: ByteArray) = memoryStore.importDimension(data)
 
     override suspend fun askWithTools(prompt: String, instanceId: String?): String {
         // Selection: explicit instance > first remote > first on-device. The simple-tool

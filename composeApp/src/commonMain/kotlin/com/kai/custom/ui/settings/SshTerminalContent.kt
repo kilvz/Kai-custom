@@ -14,9 +14,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -98,7 +95,7 @@ internal fun SshTerminalContent(
     val state by sshViewModel.state.collectAsStateWithLifecycle()
     val isRunning by sshViewModel.isRunning.collectAsStateWithLifecycle()
     val focusRequester = remember { FocusRequester() }
-    val listState = rememberLazyListState()
+    val scrollState = rememberScrollState()
     val outputLines = state.transcript
     var inputText by remember { mutableStateOf("") }
     val isConnected = state.connectionState.connected
@@ -109,9 +106,9 @@ internal fun SshTerminalContent(
     }
 
     LaunchedEffect(isRunning, outputLines) {
-        snapshotFlow { outputLines.size }.collect { size ->
-            if (size > 0 && isRunning) {
-                listState.scrollToItem(size - 1)
+        snapshotFlow { outputLines.size }.collect {
+            if (isRunning && scrollState.value >= scrollState.maxValue - 500) {
+                scrollState.animateScrollTo(scrollState.maxValue)
             }
         }
     }
@@ -131,46 +128,37 @@ internal fun SshTerminalContent(
                 )
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                state = listState,
-            ) {
-                if (outputLines.isEmpty()) {
-                    item {
+            SelectionContainer {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                ) {
+                    if (outputLines.isEmpty()) {
                         Text(
                             text = stringResource(Res.string.ssh_terminal_help_text),
                             style = monoStyle(13.sp, SshDimText),
                         )
                     }
-                }
-                items(
-                    items = outputLines,
-                    contentType = { it::class },
-                ) { line ->
-                    when (line) {
-                        is TerminalLine.Command -> {
-                            Spacer(Modifier.height(4.dp))
-                            SelectionContainer {
+                    outputLines.forEach { line ->
+                        when (line) {
+                            is TerminalLine.Command -> {
+                                Spacer(Modifier.height(4.dp))
                                 Text(
                                     text = "$ ${line.text}",
                                     style = monoStyle(13.sp, SshPrompt),
                                 )
                             }
-                        }
-                        is TerminalLine.Output -> {
-                            SelectionContainer {
+                            is TerminalLine.Output -> {
                                 Text(
                                     text = line.text,
                                     style = monoStyle(13.sp),
                                     color = SshText,
                                 )
                             }
-                        }
-                        is TerminalLine.Error -> {
-                            SelectionContainer {
+                            is TerminalLine.Error -> {
                                 Text(
                                     text = line.text,
                                     style = monoStyle(13.sp, SshError),
@@ -178,9 +166,7 @@ internal fun SshTerminalContent(
                             }
                         }
                     }
-                }
-                if (isRunning) {
-                    item {
+                    if (isRunning) {
                         Spacer(Modifier.height(4.dp))
                         CircularProgressIndicator(
                             modifier = Modifier.size(14.dp),

@@ -5,7 +5,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.kai.custom.data.TaskScheduler
-import com.kai.custom.data.palace.palaceModule
+import com.kai.custom.data.dimension.dimensionModule
 import com.kai.custom.sandbox.sandboxModule
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
@@ -19,7 +19,7 @@ class KaiApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@KaiApplication)
-            modules(appModule, sandboxModule, palaceModule)
+            modules(appModule, sandboxModule, dimensionModule)
         }
         // Track app foreground state so the scheduler only pushes a heartbeat notification
         // when the in-app banner isn't visible. ViewModel lifecycle is the wrong signal —

@@ -36,11 +36,12 @@ internal fun SmallIconButton(
 internal fun SmallIconButton(
     imageVector: ImageVector,
     contentDescription: String? = null,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     SmallIconButtonBox(onClick) {
         Icon(
-            modifier = Modifier.size(20.dp),
+            modifier = modifier.size(20.dp),
             imageVector = imageVector,
             contentDescription = contentDescription,
             tint = MaterialTheme.colorScheme.onBackground,

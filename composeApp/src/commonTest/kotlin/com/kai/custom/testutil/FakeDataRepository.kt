@@ -575,11 +575,11 @@ class FakeDataRepository : DataRepository {
 
     override fun importSettingsFromJson(json: String, sections: Set<ImportSection>, replace: Boolean): Int = 0
 
-    private var palaceData = ByteArray(0)
+    private var dimensionData = ByteArray(0)
 
-    override fun exportPalace(): ByteArray = palaceData
+    override fun exportDimension(): ByteArray = dimensionData
 
-    override fun importPalace(data: ByteArray) { palaceData = data }
+    override fun importDimension(data: ByteArray) { dimensionData = data }
 
     // On-device inference (LiteRT)
     var localInferenceAvailable = false

@@ -162,8 +162,8 @@ internal fun AgentContent(
                         onUpdateMemory = actions.onUpdateMemory,
                         isMemoryEnabled = isMemoryEnabled,
                         onToggleMemory = actions.onToggleMemory,
-                        onExportPalace = actions.onExportPalace,
-                        onImportPalace = actions.onImportPalace,
+                        onExportDimension = actions.onExportDimension,
+                        onImportDimension = actions.onImportDimension,
                     )
                 }
                 SettingsCard {
@@ -273,8 +273,8 @@ internal fun AgentContent(
                             onUpdateMemory = actions.onUpdateMemory,
                             isMemoryEnabled = isMemoryEnabled,
                             onToggleMemory = actions.onToggleMemory,
-                            onExportPalace = actions.onExportPalace,
-                            onImportPalace = actions.onImportPalace,
+                            onExportDimension = actions.onExportDimension,
+                            onImportDimension = actions.onImportDimension,
                         )
                     }
                     SettingsCard {
@@ -471,8 +471,8 @@ private fun MemoryList(
     onUpdateMemory: (String, String) -> Unit,
     isMemoryEnabled: Boolean,
     onToggleMemory: (Boolean) -> Unit,
-    onExportPalace: suspend () -> ByteArray,
-    onImportPalace: (ByteArray) -> Unit,
+    onExportDimension: suspend () -> ByteArray,
+    onImportDimension: (ByteArray) -> Unit,
 ) {
     var showAllDialog by remember { mutableStateOf(false) }
     var editingMemory by remember { mutableStateOf<MemoryEntry?>(null) }
@@ -485,12 +485,12 @@ private fun MemoryList(
     val previewMemories = remember(sortedMemories) { sortedMemories.take(5).toImmutableList() }
 
     val filePickerLauncher = rememberFilePickerLauncher(
-        type = FileKitType.File(extensions = listOf("kai-palace")),
+        type = FileKitType.File(extensions = listOf("kai-dimension")),
     ) { file ->
         if (file != null) {
             scope.launch {
                 try {
-                    onImportPalace(file.readBytes())
+                    onImportDimension(file.readBytes())
                     importResult = "import_success"
                 } catch (_: Exception) {
                     importResult = "import_error"
@@ -534,8 +534,8 @@ private fun MemoryList(
                     onClick = {
                         scope.launch {
                             try {
-                                val data = onExportPalace()
-                                saveFileToDevice(data, "kai-memories", "kai-palace")
+                                val data = onExportDimension()
+                                saveFileToDevice(data, "kai-memories", "kai-dimension")
                                 importResult = "export_success"
                             } catch (_: Exception) {
                                 importResult = "export_error"

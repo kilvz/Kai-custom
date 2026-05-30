@@ -188,11 +188,11 @@ interface DataRepository {
     fun getExportPreview(): Map<ImportSection, String?>
     fun importSettingsFromJson(json: String, sections: Set<ImportSection>, replace: Boolean): Int
 
-    // Palace/MemPalace export/import
-    fun exportPalace(): ByteArray
-    fun importPalace(data: ByteArray)
+    // Dimension export/import
+    fun exportDimension(): ByteArray
+    fun importDimension(data: ByteArray)
 
-    // Conversation branching — edits a message, stores old conversation in MemPalace,
+    // Conversation branching — edits a message, stores old conversation,
     // starts a new conversation with the edited message, and triggers AI response.
     // Returns true if sandbox was available and branching succeeded.
     suspend fun editAndBranch(messageId: String, newContent: String): Boolean

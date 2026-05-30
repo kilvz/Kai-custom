@@ -423,7 +423,7 @@ object CommonTools {
             val query = args["query"]?.toString() ?: return mapOf("success" to false, "error" to "Missing query")
             val limit = (args["limit"] as? Number)?.toInt() ?: 10
 
-            // Try sandbox semantic search (kai-mempalace) first
+            // Try sandbox semantic search (alt-memory) first
             if (sandboxController != null) {
                 val allMemories = memoryStore.getAllMemories()
                 val sandboxResults = sandboxController.searchMemories(allMemories, query, limit)

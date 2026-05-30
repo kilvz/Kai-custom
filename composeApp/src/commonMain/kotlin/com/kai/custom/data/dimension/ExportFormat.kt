@@ -1,20 +1,20 @@
-package com.kai.custom.data.palace
+package com.kai.custom.data.dimension
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PalaceExport(
+data class DimensionExport(
     val version: Int = 1,
     val exportedAt: Long,
-    val drawers: List<DrawerExport>,
+    val entities: List<EntityExport>,
     val kgFacts: List<FactExport>,
 )
 
 @Serializable
-data class DrawerExport(
+data class EntityExport(
     val id: String,
-    val wingId: String,
-    val roomId: String,
+    val realm: String,
+    val domain: String,
     val content: String,
     val sourceFile: String? = null,
     val metadata: Map<String, String> = emptyMap(),
@@ -30,6 +30,6 @@ data class FactExport(
     val `object`: String,
     val validFrom: Long? = null,
     val validTo: Long? = null,
-    val sourceDrawerId: String? = null,
+    val sourceEntityId: String? = null,
     val createdAt: Long,
 )

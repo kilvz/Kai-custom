@@ -428,4 +428,5 @@
     <string name="tool_get_wifi_info_name">Get WiFi Info</string>
     <string name="tool_get_wifi_info_description">Get detailed WiFi connection information including SSID, signal strength, and frequency</string>
     <string name="microphone_permission_required">Microphone permission required</string>
+    <string name="forked_from_banner">Forked from: %1$s</string>
 </resources>

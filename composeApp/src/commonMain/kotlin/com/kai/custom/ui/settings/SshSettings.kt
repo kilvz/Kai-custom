@@ -275,19 +275,19 @@ internal fun SshSettingsCard(
                         .padding(8.dp),
                 ) {
                     val transcript = sshState.transcript
-                    LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
-                        items(transcript) { line ->
-                            when (line) {
-                                is TerminalLine.Command -> {
-                                    Text(
-                                        text = "$ ${line.text}",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontSize = 12.sp,
-                                        color = Color(0xFF6CB6FF),
-                                    )
-                                }
-                                is TerminalLine.Output -> {
-                                    SelectionContainer {
+                    SelectionContainer {
+                        LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                            items(transcript) { line ->
+                                when (line) {
+                                    is TerminalLine.Command -> {
+                                        Text(
+                                            text = "$ ${line.text}",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 12.sp,
+                                            color = Color(0xFF6CB6FF),
+                                        )
+                                    }
+                                    is TerminalLine.Output -> {
                                         Text(
                                             text = line.text,
                                             fontFamily = FontFamily.Monospace,
@@ -295,9 +295,7 @@ internal fun SshSettingsCard(
                                             color = Color(0xFFD4D4D4),
                                         )
                                     }
-                                }
-                                is TerminalLine.Error -> {
-                                    SelectionContainer {
+                                    is TerminalLine.Error -> {
                                         Text(
                                             text = line.text,
                                             fontFamily = FontFamily.Monospace,

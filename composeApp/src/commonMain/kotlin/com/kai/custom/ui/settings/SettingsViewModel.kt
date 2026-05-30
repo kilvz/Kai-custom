@@ -201,8 +201,8 @@ class SettingsViewModel(
         onPrepareExport = ::onPrepareExport,
         onImportSettings = ::onImportSettings,
         onUndoDelete = ::onUndoDelete,
-        onExportPalace = { dataRepository.exportPalace() },
-        onImportPalace = { data -> dataRepository.importPalace(data) },
+        onExportDimension = { dataRepository.exportDimension() },
+        onImportDimension = { data -> dataRepository.importDimension(data) },
     )
 
     private val _state = MutableStateFlow(buildFullState())

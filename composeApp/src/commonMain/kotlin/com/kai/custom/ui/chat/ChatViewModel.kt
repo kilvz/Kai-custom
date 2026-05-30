@@ -197,13 +197,18 @@ class ChatViewModel(
                     updatedAt = it.updatedAt,
                     isHeartbeat = isHeartbeat,
                     isInteractive = isInteractive,
+                    forkedFrom = it.forkedFrom,
                 )
             }
+        val currentForkedFrom = conversationId?.let { id ->
+            conversations.firstOrNull { it.id == id }?.forkedFrom
+        }
         state.copy(
             history = history.toImmutableList(),
             supportedFileExtensions = dataRepository.supportedFileExtensions().toImmutableList(),
             savedConversations = summaries.toImmutableList(),
             currentConversationId = conversationId,
+            currentConversationForkedFrom = currentForkedFrom,
             hasUnreadHeartbeat = hasUnreadHeartbeat,
         )
     }.distinctUntilChanged().stateIn(

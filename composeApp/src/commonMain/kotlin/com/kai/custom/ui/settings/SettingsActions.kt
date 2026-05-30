@@ -68,8 +68,8 @@ data class SettingsActions(
     val onPrepareExport: () -> Map<ImportSection, String?>,
     val onImportSettings: (ByteArray, Set<ImportSection>, Boolean) -> ImportResult,
     val onUndoDelete: () -> Unit,
-    val onExportPalace: suspend () -> ByteArray,
-    val onImportPalace: (ByteArray) -> Unit,
+    val onExportDimension: suspend () -> ByteArray,
+    val onImportDimension: (ByteArray) -> Unit,
 ) {
     companion object {
         val NoOp = SettingsActions(
@@ -132,8 +132,8 @@ data class SettingsActions(
             onPrepareExport = { emptyMap() },
             onImportSettings = { _, _, _ -> ImportResult.Failure },
             onUndoDelete = {},
-            onExportPalace = { ByteArray(0) },
-            onImportPalace = {},
+            onExportDimension = { ByteArray(0) },
+            onImportDimension = {},
         )
     }
 }

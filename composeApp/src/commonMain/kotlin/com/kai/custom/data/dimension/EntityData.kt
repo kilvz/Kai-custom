@@ -1,12 +1,12 @@
-package com.kai.custom.data.palace
+package com.kai.custom.data.dimension
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Drawer(
+data class EntityData(
     val id: String,
-    val wingId: String,
-    val roomId: String,
+    val realm: String,
+    val domain: String,
     val content: String,
     val sourceFile: String? = null,
     val metadata: Map<String, String> = emptyMap(),
@@ -15,7 +15,7 @@ data class Drawer(
 )
 
 @Serializable
-data class Wing(
+data class Realm(
     val id: String,
     val name: String,
     val description: String = "",
@@ -23,9 +23,9 @@ data class Wing(
 )
 
 @Serializable
-data class Room(
+data class Domain(
     val id: String,
-    val wingId: String,
+    val realm: String,
     val name: String,
     val description: String = "",
     val createdAt: Long,
@@ -39,12 +39,12 @@ data class KGFact(
     val `object`: String,
     val validFrom: Long? = null,
     val validTo: Long? = null,
-    val sourceDrawerId: String? = null,
+    val sourceEntityId: String? = null,
     val createdAt: Long,
 )
 
 data class SearchResult(
-    val drawer: Drawer,
+    val entity: EntityData,
     val score: Double,
     val snippet: String = "",
 )

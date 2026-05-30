@@ -14,10 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -126,7 +126,7 @@ fun TerminalContent(
     sessionViewModel: SandboxSessionViewModel? = null,
 ) {
     val scope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
+    val scrollState = rememberScrollState()
 
     val sessionInputText = sessionViewModel?.inputText?.collectAsStateWithLifecycle()?.value
     val sessionIsRunning = sessionViewModel?.isRunning?.collectAsStateWithLifecycle()?.value
@@ -202,13 +202,10 @@ fun TerminalContent(
         }
     }
 
-    // Jump to the tail whenever the session changes. The size-based auto-scroll
-    // below covers per-append scrolling — keying this effect on outputLines too
-    // would re-fire on every line and thrash listState during heavy bursts.
+    // Jump to the tail whenever the session changes.
     val scrollPulse = sessionViewModel?.scrollToEndPulse?.collectAsStateWithLifecycle()?.value
     LaunchedEffect(scrollPulse) {
-        val size = outputLines.size
-        if (size > 0) listState.scrollToItem(size - 1)
+        scrollState.animateScrollTo(scrollState.maxValue)
     }
 
     Column(
@@ -237,47 +234,38 @@ fun TerminalContent(
             }
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            state = listState,
-        ) {
-            if (outputLines.isEmpty()) {
-                item {
+        SelectionContainer {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+                if (outputLines.isEmpty()) {
                     Text(
                         text = stringResource(Res.string.terminal_help_text),
                         style = monoStyle(13.sp, colors.dimText),
                     )
                 }
-            }
-            items(
-                items = outputLines,
-                contentType = { it::class },
-            ) { line ->
-                when (line) {
-                    is TerminalLine.Command -> {
-                        Spacer(Modifier.height(4.dp))
-                        SelectionContainer {
+                outputLines.forEach { line ->
+                    when (line) {
+                        is TerminalLine.Command -> {
+                            Spacer(Modifier.height(4.dp))
                             Text(
                                 text = "$ ${line.text}",
                                 style = monoStyle(13.sp, colors.prompt),
                             )
                         }
-                    }
 
-                    is TerminalLine.Output -> {
-                        SelectionContainer {
+                        is TerminalLine.Output -> {
                             Text(
                                 text = parseAnsiToAnnotatedString(line.text, colors.text),
                                 style = monoStyle(13.sp),
                             )
                         }
-                    }
 
-                    is TerminalLine.Error -> {
-                        SelectionContainer {
+                        is TerminalLine.Error -> {
                             Text(
                                 text = parseAnsiToAnnotatedString(line.text, colors.error),
                                 style = monoStyle(13.sp),
@@ -285,9 +273,7 @@ fun TerminalContent(
                         }
                     }
                 }
-            }
-            if (isRunning) {
-                item {
+                if (isRunning) {
                     Spacer(Modifier.height(4.dp))
                     CircularProgressIndicator(
                         modifier = Modifier.size(14.dp),
@@ -304,21 +290,12 @@ fun TerminalContent(
         // — under heavy output, the per-line measure pass contends with the
         // background snapshot writer (proot stdio reader) on Compose's snapshot
         // locks, and queuing a scroll per emission can ANR the main thread.
-        LaunchedEffect(listState, isRunning, outputLines) {
-            snapshotFlow { outputLines.size }.conflate().collect { size ->
-                if (size == 0) return@collect
-                val layout = listState.layoutInfo
-                val total = layout.totalItemsCount
-                if (total == 0) return@collect
-                val lastVisible = layout.visibleItemsInfo.lastOrNull()?.index ?: -1
-                // Don't yank the user back if they've scrolled up to read older output.
-                if (lastVisible >= total - 2) {
-                    // Target the output line index, not total - 1: layoutInfo is
-                    // from the previous measure pass and can point past the current
-                    // interval list right after isRunning toggles off (trailing
-                    // progress item gone) or after a session swap, which crashes
-                    // inside MutableIntervalList.get during forceRemeasure.
-                    listState.scrollToItem(size - 1)
+        LaunchedEffect(isRunning, outputLines) {
+            snapshotFlow { scrollState.maxValue }.conflate().collect { max ->
+                if (max == 0) return@collect
+                // Don't yank the user back if they've scrolled up.
+                if (scrollState.value >= max - 200) {
+                    scrollState.animateScrollTo(max)
                 }
             }
         }

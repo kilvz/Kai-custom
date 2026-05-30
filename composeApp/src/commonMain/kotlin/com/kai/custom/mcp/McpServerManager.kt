@@ -27,6 +27,15 @@ class McpServerManager(private val appSettings: AppSettings) {
     private var cachedServersJson: String? = null
     private var cachedServers: List<McpServerConfig> = emptyList()
 
+    /** Servers managed internally (not persisted to settings, not user-removable). */
+    private val builtInServers = mutableMapOf<String, McpServerConfig>()
+
+    /** Register a built-in MCP server that is hidden from user settings. */
+    fun registerBuiltInServer(id: String, name: String, url: String, headers: Map<String, String> = emptyMap()) {
+        builtInServers[id] = McpServerConfig(id = id, name = name, url = url, headers = headers, isEnabled = true)
+    }
+
+    /** User-configured servers from AppSettings (excludes built-in). */
     fun getServers(): List<McpServerConfig> {
         val jsonStr = appSettings.getMcpServersJson()
         if (jsonStr.isBlank()) return emptyList()
@@ -40,6 +49,10 @@ class McpServerManager(private val appSettings: AppSettings) {
             emptyList()
         }
     }
+
+    /** All servers including built-in. */
+    private fun getAllServers(): List<McpServerConfig> =
+        getServers() + builtInServers.values.toList()
 
     private fun saveServers(servers: List<McpServerConfig>) {
         val jsonStr = json.encodeToString(kotlinx.serialization.builtins.ListSerializer(McpServerConfig.serializer()), servers)
@@ -58,6 +71,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     fun removeServer(serverId: String) {
+        if (builtInServers.containsKey(serverId)) return
         val servers = getServers().toMutableList()
         servers.removeAll { it.id == serverId }
         saveServers(servers)
@@ -67,6 +81,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     fun setServerEnabled(serverId: String, enabled: Boolean) {
+        if (builtInServers.containsKey(serverId)) return
         val servers = getServers().toMutableList()
         val index = servers.indexOfFirst { it.id == serverId }
         if (index >= 0) {
@@ -81,7 +96,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     suspend fun connectAndDiscoverTools(serverId: String): Result<List<McpToolMetadata>> {
-        val server = getServers().find { it.id == serverId }
+        val server = getAllServers().find { it.id == serverId }
             ?: return Result.failure(McpException("Server not found: $serverId"))
 
         // Close existing client if any
@@ -115,7 +130,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     fun getEnabledMcpTools(): List<Tool> {
-        val enabledServers = getServers().filter { it.isEnabled }.map { it.id }.toSet()
+        val enabledServers = getAllServers().filter { it.isEnabled }.map { it.id }.toSet()
         return buildList {
             for ((serverId, tools) in discoveredTools) {
                 if (serverId !in enabledServers) continue
@@ -144,7 +159,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     suspend fun connectEnabledServers() {
-        val enabledServers = getServers().filter { it.isEnabled }
+        val enabledServers = getAllServers().filter { it.isEnabled }
         coroutineScope {
             enabledServers
                 .filter { !clients.containsKey(it.id) }
@@ -153,7 +168,6 @@ class McpServerManager(private val appSettings: AppSettings) {
                         try {
                             connectAndDiscoverTools(server.id)
                         } catch (_: Exception) {
-                            // Individual server failures shouldn't block others
                         }
                     }
                 }

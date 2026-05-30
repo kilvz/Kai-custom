@@ -82,7 +82,9 @@ private object WebKoinHelper : KoinComponent {
 actual fun getAvailableTools(): List<Tool> = buildList {
     addAll(CommonTools.getCommonTools(WebKoinHelper.appSettings))
     if (WebKoinHelper.appSettings.isMemoryEnabled()) {
-        addAll(CommonTools.getMemoryTools(WebKoinHelper.memoryStore))
+        if (!WebKoinHelper.mcpServerManager.isConnected("alt_memory")) {
+            addAll(CommonTools.getMemoryTools(WebKoinHelper.memoryStore))
+        }
     }
     if (WebKoinHelper.appSettings.isSchedulingEnabled()) {
         addAll(SchedulingTools.getSchedulingTools(WebKoinHelper.taskStore))
