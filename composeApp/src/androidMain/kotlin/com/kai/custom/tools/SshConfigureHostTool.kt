@@ -1,5 +1,6 @@
 package com.kai.custom.tools
 
+import com.kai.custom.data.AppSettings
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
@@ -10,32 +11,16 @@ import com.kai.custom.sandbox.SshConfigManager
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
-private const val TOOL_DESCRIPTION = """Register a named SSH host alias in the Linux sandbox so subsequent execute_shell_command calls can run `ssh <alias>` instead of repeating user/host/port/identity flags every time.
-
-What this writes inside the sandbox:
-- ~/.ssh/config: a Host block for the alias. Calling again with the same alias replaces the previous block (idempotent).
-- Defaults block at the top of the config on first use: ServerAliveInterval + ServerAliveCountMax (keep idle TCP connections alive through NAT) and StrictHostKeyChecking=accept-new (auto-accept new host keys into ~/.ssh/known_hosts on first connect, but still reject changed keys — sane TOFU without an interactive prompt this shell can't answer).
-- Optionally appends a line to ~/.ssh/known_hosts to skip the first-connect TOFU step entirely.
-
-This tool does NOT create or upload private keys. To make a key usable, the user must place it under ~/.ssh in the sandbox separately. Be aware that any key text passed through chat (including via execute_shell_command's `cat > ~/.ssh/id_x <<EOF ...`) goes to the model provider in cleartext — ask the user before doing that.
-
-Password-only remotes: openssh inside this sandbox can't field interactive password prompts on its own (no PTY; ssh reads from /dev/tty, not stdin, so heredoc fallback does not work). Install sshpass once (`apk add sshpass` via execute_shell_command) and invoke as `sshpass -p '<password>' ssh <alias> '<remote-cmd>'`, or `sshpass -f <file> ssh <alias>` to keep the password out of the command line. sshpass fakes a PTY internally, which is the only path that actually delivers a password.
-
-Connection persistence ("held connections") is NOT available — openssh's ControlMaster multiplexing requires the link() syscall to create its control socket, and Android blocks link() for app processes regardless of file ownership. Each ssh call does a full handshake. Don't fight this; don't try to seed your own ControlPath.
-
-After configuring, drive ssh from execute_shell_command:
-- `ssh myalias 'remote cmd'`
-- `scp file myalias:`
-- `sftp myalias`
-Auth, port, identity all come from the config block — no flags needed. ALWAYS invoke by the alias, never `user@hostname`; bypassing the alias bypasses every setting this tool just wrote."""
-
 object SshConfigureHostTool : Tool {
-
     private val sandboxManager: LinuxSandboxManager by inject(LinuxSandboxManager::class.java)
+    private val appSettings: AppSettings by inject(AppSettings::class.java)
 
-    override val schema = ToolSchema(
+    private fun installCmd(): String = if (appSettings.getSandboxDistro() == "ubuntu") "apt-get install -y" else "apk add"
+
+    override val schema: ToolSchema
+        get() = ToolSchema(
         name = "ssh_configure_host",
-        description = TOOL_DESCRIPTION,
+        description = buildDescription(),
         parameters = mapOf(
             "alias" to ParameterSchema(
                 "string",
@@ -69,6 +54,27 @@ object SshConfigureHostTool : Tool {
             ),
         ),
     )
+
+    private fun buildDescription(): String = buildString {
+        appendLine("Register a named SSH host alias in the Linux sandbox so subsequent execute_shell_command calls can run `ssh <alias>` instead of repeating user/host/port/identity flags every time.")
+        appendLine()
+        appendLine("What this writes inside the sandbox:")
+        appendLine("- ~/.ssh/config: a Host block for the alias. Calling again with the same alias replaces the previous block (idempotent).")
+        appendLine("- Defaults block at the top of the config on first use: ServerAliveInterval + ServerAliveCountMax (keep idle TCP connections alive through NAT) and StrictHostKeyChecking=accept-new (auto-accept new host keys into ~/.ssh/known_hosts on first connect, but still reject changed keys — sane TOFU without an interactive prompt this shell can't answer).")
+        appendLine("- Optionally appends a line to ~/.ssh/known_hosts to skip the first-connect TOFU step entirely.")
+        appendLine()
+        appendLine("This tool does NOT create or upload private keys. To make a key usable, the user must place it under ~/.ssh in the sandbox separately. Be aware that any key text passed through chat (including via execute_shell_command's `cat > ~/.ssh/id_x <<EOF ...`) goes to the model provider in cleartext — ask the user before doing that.")
+        appendLine()
+        append("Password-only remotes: openssh inside this sandbox can't field interactive password prompts on its own (no PTY; ssh reads from /dev/tty, not stdin, so heredoc fallback does not work). Install sshpass once (`${installCmd()} sshpass` via execute_shell_command) and invoke as `sshpass -p '<password>' ssh <alias> '<remote-cmd>'`, or `sshpass -f <file> ssh <alias>` to keep the password out of the command line. sshpass fakes a PTY internally, which is the only path that actually delivers a password.")
+        appendLine()
+        appendLine("Connection persistence (\"held connections\") is NOT available — openssh's ControlMaster multiplexing requires the link() syscall to create its control socket, and Android blocks link() for app processes regardless of file ownership. Each ssh call does a full handshake. Don't fight this; don't try to seed your own ControlPath.")
+        appendLine()
+        appendLine("After configuring, drive ssh from execute_shell_command:")
+        appendLine("- `ssh myalias 'remote cmd'`")
+        appendLine("- `scp file myalias:`")
+        appendLine("- `sftp myalias`")
+        append("Auth, port, identity all come from the config block — no flags needed. ALWAYS invoke by the alias, never `user@hostname`; bypassing the alias bypasses every setting this tool just wrote.")
+    }
 
     override suspend fun execute(args: Map<String, Any>): Any {
         if (sandboxManager.state.value !is SandboxState.Ready) {

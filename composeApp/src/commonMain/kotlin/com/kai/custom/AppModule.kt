@@ -165,7 +165,7 @@ val appModule = module {
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
-    viewModel { SandboxPackagesViewModel(get<SandboxController>()) }
+    viewModel { SandboxPackagesViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
     viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>(), get<WakeWordController>()) }
