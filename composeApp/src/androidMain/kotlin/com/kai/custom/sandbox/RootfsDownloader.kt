@@ -32,7 +32,11 @@ private const val UBUNTU_CODENAME = "noble"
 
 private val UBUNTU_MIRRORS = listOf(
     "https://cdimage.ubuntu.com/ubuntu-base/releases",
-    "https://cloud-images.ubuntu.com/releases",
+)
+
+private val UBUNTU_APT_MIRRORS = listOf(
+    "http://archive.ubuntu.com/ubuntu/",
+    "http://ports.ubuntu.com/ubuntu-ports/",
 )
 private const val TAR_BLOCK_SIZE = 512
 private const val TAR_NAME_OFFSET = 0
@@ -45,17 +49,12 @@ private const val TAR_PREFIX_OFFSET = 345
 class RootfsDownloader(private val httpClient: HttpClient) {
 
     fun getMirrors(distro: String): List<String> = when (distro) {
-        "ubuntu" -> UBUNTU_MIRRORS
+        "ubuntu" -> UBUNTU_APT_MIRRORS
         else -> ALPINE_MIRRORS
     }
 
     fun getDownloadUrls(arch: String, distro: String = "alpine"): List<String> = when (distro) {
-        "ubuntu" -> {
-            val ubuntuArch = toUbuntuArch(arch)
-            UBUNTU_MIRRORS.map { base ->
-                "$base/$UBUNTU_VERSION/release/ubuntu-base-$UBUNTU_VERSION-base-$ubuntuArch.tar.gz"
-            }
-        }
+        "ubuntu" -> UBUNTU_MIRRORS.map { "$it/$UBUNTU_VERSION/release/" }
         else -> ALPINE_MIRRORS.map { base ->
             "$base/$ALPINE_BRANCH/releases/$arch/alpine-minirootfs-$ALPINE_VERSION-$arch.tar.gz"
         }
@@ -75,7 +74,8 @@ class RootfsDownloader(private val httpClient: HttpClient) {
         distro: String = "alpine",
         onProgress: (Float) -> Unit,
     ) {
-        val urls = getDownloadUrls(arch, distro)
+        val urls = if (distro == "ubuntu") resolveUbuntuDownloadUrls(arch)
+        else getDownloadUrls(arch, "alpine")
         var lastError: Exception? = null
         for ((index, url) in urls.withIndex()) {
             try {
@@ -90,6 +90,30 @@ class RootfsDownloader(private val httpClient: HttpClient) {
             }
         }
         throw IOException("All mirrors failed", lastError)
+    }
+
+    private suspend fun resolveUbuntuDownloadUrls(arch: String): List<String> {
+        val ubuntuArch = toUbuntuArch(arch)
+        val dirUrl = "https://cdimage.ubuntu.com/ubuntu-base/releases/$UBUNTU_VERSION/release/"
+        val filename = fetchLatestUbuntuRootfs(dirUrl, ubuntuArch)
+        return UBUNTU_MIRRORS.map { "$it/$UBUNTU_VERSION/release/$filename" }
+    }
+
+    private suspend fun fetchLatestUbuntuRootfs(dirUrl: String, arch: String): String {
+        val html = httpClient.prepareGet(dirUrl).execute { response ->
+            val channel = response.bodyAsChannel()
+            val baos = java.io.ByteArrayOutputStream()
+            val buf = ByteArray(BUFFER_SIZE)
+            while (!channel.isClosedForRead) {
+                val read = channel.readAvailable(buf)
+                if (read <= 0) break
+                baos.write(buf, 0, read)
+            }
+            baos.toString("UTF-8")
+        }
+        val regex = """ubuntu-base-\d+\.\d+\.\d+-base-$arch\.tar\.gz""".toRegex()
+        return regex.findAll(html).map { it.value }.lastOrNull()
+            ?: throw IOException("No Ubuntu base rootfs found for $arch at $dirUrl")
     }
 
     private suspend fun downloadFrom(
@@ -264,9 +288,9 @@ class RootfsDownloader(private val httpClient: HttpClient) {
                 val sourcesDir = File(rootfsDir, "etc/apt")
                 sourcesDir.mkdirs()
                 File(sourcesDir, "sources.list").writeText(
-                    "deb http://archive.ubuntu.com/ubuntu/ $UBUNTU_CODENAME main restricted universe multiverse\n" +
-                        "deb http://archive.ubuntu.com/ubuntu/ ${UBUNTU_CODENAME}-updates main restricted universe multiverse\n" +
-                        "deb http://security.ubuntu.com/ubuntu/ ${UBUNTU_CODENAME}-security main restricted universe multiverse\n",
+                    "deb $mirrorBase $UBUNTU_CODENAME main restricted universe multiverse\n" +
+                        "deb $mirrorBase ${UBUNTU_CODENAME}-updates main restricted universe multiverse\n" +
+                        "deb $mirrorBase ${UBUNTU_CODENAME}-security main restricted universe multiverse\n",
                 )
             }
             else -> {

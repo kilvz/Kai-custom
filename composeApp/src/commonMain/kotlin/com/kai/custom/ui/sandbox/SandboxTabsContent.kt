@@ -114,8 +114,12 @@ internal fun SandboxTabsContent(
     } else {
         Column(modifier = modifier.fillMaxWidth()) {
             SettingsCard {
+                val distroLabel = when (sandboxState.sandboxDistro) {
+                    "ubuntu" -> "Ubuntu"
+                    else -> "Alpine Linux"
+                }
                 Text(
-                    text = "Alpine Linux",
+                    text = distroLabel,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )

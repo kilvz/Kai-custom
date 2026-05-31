@@ -75,8 +75,11 @@ val appModule = module {
     single<SqliteMemoryStore> {
         SqliteMemoryStore(get<DimensionStore>())
     }
-    single<MemoryStore> {
+    single<MemoryStoreProvider> {
         MemoryStoreProvider(get<SqliteMemoryStore>())
+    }
+    single<MemoryStore> {
+        get<MemoryStoreProvider>()
     }
     single<TaskStore> {
         TaskStore(get())

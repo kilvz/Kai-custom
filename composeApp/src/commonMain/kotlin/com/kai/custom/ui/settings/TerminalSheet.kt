@@ -306,6 +306,7 @@ fun TerminalContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(colors.inputBg)
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

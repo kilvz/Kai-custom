@@ -335,7 +335,7 @@
     <string name="settings_open_github_issue">Open GitHub Issue</string>
     <string name="notification_channel_name">AI Notifications</string>
     <string name="notification_channel_description">Notifications sent by AI assistant</string>
-    <string name="settings_sandbox_description">Install a Linux environment so the AI can run shell commands, scripts, and tools on your behalf. Runs securely inside the app. ~3 MB download.</string>
+    <string name="settings_sandbox_description">Install a Linux environment so the AI can run shell commands, scripts, and tools on your behalf. Runs securely inside the app. Download size varies by distribution.</string>
     <string name="settings_sandbox_install">Install</string>
     <string name="settings_sandbox_install_packages">Install Basic Packages</string>
     <string name="settings_sandbox_subtab_terminal">Terminal</string>
