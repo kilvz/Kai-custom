@@ -292,6 +292,11 @@ class RootfsDownloader(private val httpClient: HttpClient) {
                         "deb $mirrorBase ${UBUNTU_CODENAME}-updates main restricted universe multiverse\n" +
                         "deb $mirrorBase ${UBUNTU_CODENAME}-security main restricted universe multiverse\n",
                 )
+                // Remove default ubuntu.sources to avoid duplicate multiverse entries
+                val defaultSources = File(sourcesDir, "sources.list.d/ubuntu.sources")
+                if (defaultSources.exists()) defaultSources.delete()
+                val defaultSourcesList = File(sourcesDir, "sources.list.d/ubuntu.list")
+                if (defaultSourcesList.exists()) defaultSourcesList.delete()
             }
             else -> {
                 val apkDir = File(rootfsDir, "etc/apk")
