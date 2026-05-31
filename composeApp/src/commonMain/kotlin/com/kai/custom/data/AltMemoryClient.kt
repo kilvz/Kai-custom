@@ -12,6 +12,8 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.time.Clock
 
+import com.kai.custom.data.dimension.KGFact
+
 class AltMemoryClient(
     private val client: McpClient,
     private val appSettings: AppSettings,
@@ -119,6 +121,125 @@ class AltMemoryClient(
                 })
             }
         } catch (_: Exception) {
+        }
+    }
+
+    // Knowledge graph
+
+    override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val response = client.callTool("dimension_kg_add", buildJsonObject {
+            put("subject", JsonPrimitive(subject))
+            put("predicate", JsonPrimitive(predicate))
+            put("object", JsonPrimitive(`object`))
+        })
+        return parseKGFact(response) ?: KGFact(
+            id = "kg_${subject.hashCode().toUInt().toString(16)}_${predicate.hashCode().toUInt().toString(16)}_$now",
+            subject = subject,
+            predicate = predicate,
+            `object` = `object`,
+            createdAt = now,
+        )
+    }
+
+    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> {
+        return try {
+            val response = runBlocking {
+                client.callTool("dimension_kg_query", buildJsonObject {
+                    entity?.let { put("entity", JsonPrimitive(it)) }
+                    relation?.let { put("relation", JsonPrimitive(it)) }
+                    put("limit", JsonPrimitive(limit.toString()))
+                })
+            }
+            parseKGFactList(response)
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {
+        try {
+            client.callTool("dimension_kg_invalidate", buildJsonObject {
+                put("subject", JsonPrimitive(subject))
+                put("predicate", JsonPrimitive(predicate))
+                put("object", JsonPrimitive(`object`))
+            })
+        } catch (_: Exception) {
+        }
+    }
+
+    // Diary
+
+    override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
+        client.callTool("dimension_diary_write", buildJsonObject {
+            put("agent_name", JsonPrimitive(agentName))
+            put("content", JsonPrimitive(content))
+            put("topic", JsonPrimitive(topic))
+        })
+    }
+
+    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
+        return try {
+            val response = runBlocking {
+                client.callTool("dimension_diary_read", buildJsonObject {
+                    put("agent_name", JsonPrimitive(agentName))
+                    put("last_n", JsonPrimitive(lastN.toString()))
+                })
+            }
+            parseDiaryEntryList(response)
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    // KG parsing helpers
+
+    private fun parseKGFact(response: String): KGFact? {
+        return try {
+            val json = parseJsonElement(response)
+            val obj = if (json is kotlinx.serialization.json.JsonObject) json else json.jsonObject
+            KGFact(
+                id = obj["id"]?.jsonPrimitive?.content ?: return null,
+                subject = obj["subject"]?.jsonPrimitive?.content ?: "",
+                predicate = obj["predicate"]?.jsonPrimitive?.content ?: "",
+                `object` = obj["object"]?.jsonPrimitive?.content ?: "",
+                createdAt = obj["created_at"]?.jsonPrimitive?.content?.toLongOrNull() ?: obj["createdAt"]?.jsonPrimitive?.content?.toLongOrNull() ?: Clock.System.now().toEpochMilliseconds(),
+                validFrom = obj["valid_from"]?.jsonPrimitive?.content?.toLongOrNull() ?: obj["validFrom"]?.jsonPrimitive?.content?.toLongOrNull(),
+                validTo = obj["valid_to"]?.jsonPrimitive?.content?.toLongOrNull() ?: obj["validTo"]?.jsonPrimitive?.content?.toLongOrNull(),
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun parseKGFactList(response: String): List<KGFact> {
+        if (response.isBlank()) return emptyList()
+        return try {
+            val json = parseJsonElement(response)
+            val arr = json.jsonObject["facts"]?.jsonArray ?: json.jsonObject["results"]?.jsonArray
+            arr?.mapNotNull { parseKGFact(it.toString()) } ?: listOfNotNull(parseKGFact(response))
+        } catch (_: Exception) {
+            listOfNotNull(parseKGFact(response))
+        }
+    }
+
+    private fun parseDiaryEntryList(response: String): List<DiaryEntry> {
+        if (response.isBlank()) return emptyList()
+        return try {
+            val json = parseJsonElement(response)
+            val arr = json.jsonObject["entries"]?.jsonArray ?: json.jsonObject["results"]?.jsonArray ?: json.jsonArray
+            arr.mapNotNull { elem ->
+                val obj = if (elem is kotlinx.serialization.json.JsonObject) elem else elem.jsonObject
+                DiaryEntry(
+                    id = obj["id"]?.jsonPrimitive?.content ?: "",
+                    agentName = obj["agent_name"]?.jsonPrimitive?.content ?: obj["agentName"]?.jsonPrimitive?.content ?: "",
+                    topic = obj["topic"]?.jsonPrimitive?.content ?: "general",
+                    content = obj["content"]?.jsonPrimitive?.content ?: "",
+                    createdAt = obj["created_at"]?.jsonPrimitive?.content?.toLongOrNull() ?: obj["createdAt"]?.jsonPrimitive?.content?.toLongOrNull() ?: Clock.System.now().toEpochMilliseconds(),
+                )
+            }
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 

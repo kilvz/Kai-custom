@@ -1,6 +1,7 @@
 package com.kai.custom.data
 
 import androidx.compose.runtime.Immutable
+import com.kai.custom.data.dimension.KGFact
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,6 +22,15 @@ data class MemoryEntry(
     val category: MemoryCategory = MemoryCategory.GENERAL,
     val hitCount: Int = 1,
     val source: String? = null,
+)
+
+@Serializable
+data class DiaryEntry(
+    val id: String,
+    val agentName: String,
+    val topic: String = "general",
+    val content: String,
+    val createdAt: Long,
 )
 
 interface MemoryStore {
@@ -46,4 +56,13 @@ interface MemoryStore {
     fun exportDimension(): ByteArray
 
     fun importDimension(data: ByteArray)
+
+    // Knowledge graph
+    suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact
+    fun queryFacts(entity: String? = null, relation: String? = null, limit: Int = 20): List<KGFact>
+    suspend fun invalidateFact(subject: String, predicate: String, `object`: String)
+
+    // Diary
+    suspend fun diaryWrite(agentName: String, content: String, topic: String = "general")
+    fun diaryRead(agentName: String, lastN: Int = 10): List<DiaryEntry>
 }

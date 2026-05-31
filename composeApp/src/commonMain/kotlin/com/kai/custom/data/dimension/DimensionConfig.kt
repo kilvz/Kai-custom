@@ -10,6 +10,8 @@ object DimensionConfig {
     const val DOMAIN_LEARNINGS = "learnings"
     const val DOMAIN_ERRORS = "errors"
     const val DOMAIN_PROJECT = "project"
+    const val DOMAIN_DIARY = "diary"
+    const val DOMAIN_KG = "knowledge_graph"
 
     data class DefaultRealm(
         val id: String,

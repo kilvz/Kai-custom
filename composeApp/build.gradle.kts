@@ -105,6 +105,8 @@ kotlin {
             implementation(libs.bouncycastle.provider)
             implementation(libs.litert.lm)
             implementation(libs.tensorflow.lite)
+            implementation(libs.tensorflow.lite.task.text)
+            implementation("com.google.auto.value:auto-value-annotations:1.10.4")
             implementation(libs.shizuku.api)
             implementation(libs.shizuku.provider)
             implementation(libs.jsch)

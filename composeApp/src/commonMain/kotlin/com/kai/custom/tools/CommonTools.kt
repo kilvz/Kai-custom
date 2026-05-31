@@ -474,4 +474,155 @@ object CommonTools {
         memoryReinforceTool(memoryStore),
         searchMemoriesTool(memoryStore, sandboxController),
     )
+
+    // Knowledge graph tools
+
+    val kgAddToolInfo = ToolInfo(
+        id = "kg_add",
+        name = "Add KG Fact",
+        description = "Add a fact to the knowledge graph: subject -> predicate -> object. Use for relationships between entities.",
+    )
+
+    val kgQueryToolInfo = ToolInfo(
+        id = "kg_query",
+        name = "Query KG",
+        description = "Query the knowledge graph for facts about an entity or relation.",
+    )
+
+    val kgInvalidateToolInfo = ToolInfo(
+        id = "kg_invalidate",
+        name = "Invalidate KG Fact",
+        description = "Mark a knowledge graph fact as no longer true.",
+    )
+
+    fun kgAddTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "kg_add",
+            description = "Add a fact to the knowledge graph: subject -> predicate -> object. Use for relationships between entities (e.g. 'Alice' -> 'works_at' -> 'Acme Corp').",
+            parameters = mapOf(
+                "subject" to ParameterSchema(type = "string", description = "The subject entity", required = true),
+                "predicate" to ParameterSchema(type = "string", description = "The relationship type (e.g. works_at, loves, parent_of)", required = true),
+                "object" to ParameterSchema(type = "string", description = "The object entity", required = true),
+            ),
+        )
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val subject = args["subject"]?.toString() ?: return mapOf("success" to false, "error" to "Missing subject")
+            val predicate = args["predicate"]?.toString() ?: return mapOf("success" to false, "error" to "Missing predicate")
+            val `object` = args["object"]?.toString() ?: return mapOf("success" to false, "error" to "Missing object")
+            val fact = memoryStore.addFact(subject, predicate, `object`)
+            return mapOf("success" to true, "id" to fact.id, "subject" to fact.subject, "predicate" to fact.predicate, "object" to fact.`object`)
+        }
+    }
+
+    fun kgQueryTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "kg_query",
+            description = "Query the knowledge graph for facts about an entity or relation. Returns matching facts with subject, predicate, and object.",
+            parameters = mapOf(
+                "entity" to ParameterSchema(type = "string", description = "Entity to find facts about (matches both subject and object)", required = false),
+                "relation" to ParameterSchema(type = "string", description = "Filter by relationship type (predicate)", required = false),
+                "limit" to ParameterSchema(type = "integer", description = "Maximum results (default 20)", required = false),
+            ),
+        )
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val entity = args["entity"]?.toString()
+            val relation = args["relation"]?.toString()
+            val limit = (args["limit"] as? Number)?.toInt() ?: 20
+            val results = memoryStore.queryFacts(entity, relation, limit)
+            return mapOf(
+                "success" to true,
+                "count" to results.size,
+                "facts" to results.map { fact ->
+                    mapOf("id" to fact.id, "subject" to fact.subject, "predicate" to fact.predicate, "object" to fact.`object`, "created_at" to fact.createdAt)
+                },
+            )
+        }
+    }
+
+    fun kgInvalidateTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "kg_invalidate",
+            description = "Mark a knowledge graph fact as no longer true. Provide the exact subject, predicate, and object of the fact to invalidate.",
+            parameters = mapOf(
+                "subject" to ParameterSchema(type = "string", description = "Subject of the fact to invalidate", required = true),
+                "predicate" to ParameterSchema(type = "string", description = "Predicate of the fact to invalidate", required = true),
+                "object" to ParameterSchema(type = "string", description = "Object of the fact to invalidate", required = true),
+            ),
+        )
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val subject = args["subject"]?.toString() ?: return mapOf("success" to false, "error" to "Missing subject")
+            val predicate = args["predicate"]?.toString() ?: return mapOf("success" to false, "error" to "Missing predicate")
+            val `object` = args["object"]?.toString() ?: return mapOf("success" to false, "error" to "Missing object")
+            memoryStore.invalidateFact(subject, predicate, `object`)
+            return mapOf("success" to true, "subject" to subject, "predicate" to predicate, "object" to `object`, "message" to "Fact invalidated")
+        }
+    }
+
+    fun getKgTools(memoryStore: MemoryStore): List<Tool> = listOf(
+        kgAddTool(memoryStore),
+        kgQueryTool(memoryStore),
+        kgInvalidateTool(memoryStore),
+    )
+
+    // Diary tools
+
+    val diaryWriteToolInfo = ToolInfo(
+        id = "diary_write",
+        name = "Write Diary",
+        description = "Write an entry to the agent's personal diary. Use for introspection, observations, and session summaries.",
+    )
+
+    val diaryReadToolInfo = ToolInfo(
+        id = "diary_read",
+        name = "Read Diary",
+        description = "Read recent entries from the agent's personal diary.",
+    )
+
+    fun diaryWriteTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "diary_write",
+            description = "Write an entry to your personal diary. Use for introspection, observations, session summaries, and reflections.",
+            parameters = mapOf(
+                "content" to ParameterSchema(type = "string", description = "The diary entry content", required = true),
+                "topic" to ParameterSchema(type = "string", description = "Optional topic tag (default: general)", required = false),
+            ),
+        )
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val content = args["content"]?.toString() ?: return mapOf("success" to false, "error" to "Missing content")
+            val topic = args["topic"]?.toString() ?: "general"
+            memoryStore.diaryWrite("kai", content, topic)
+            return mapOf("success" to true, "topic" to topic, "message" to "Diary entry written")
+        }
+    }
+
+    fun diaryReadTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "diary_read",
+            description = "Read recent entries from your personal diary. Returns entries sorted by recency.",
+            parameters = mapOf(
+                "last_n" to ParameterSchema(type = "integer", description = "Number of recent entries to read (default 10)", required = false),
+            ),
+        )
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val lastN = (args["last_n"] as? Number)?.toInt() ?: 10
+            val entries = memoryStore.diaryRead("kai", lastN)
+            return mapOf(
+                "success" to true,
+                "count" to entries.size,
+                "entries" to entries.map { entry ->
+                    mapOf("id" to entry.id, "topic" to entry.topic, "content" to entry.content, "created_at" to entry.createdAt)
+                },
+            )
+        }
+    }
+
+    fun getDiaryTools(memoryStore: MemoryStore): List<Tool> = listOf(
+        diaryWriteTool(memoryStore),
+        diaryReadTool(memoryStore),
+    )
 }

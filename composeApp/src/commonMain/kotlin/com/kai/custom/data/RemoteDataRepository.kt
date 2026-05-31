@@ -6,6 +6,7 @@ import com.kai.custom.SandboxController
 import com.kai.custom.compressImageBytes
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.providers.buildAnthropicMessages
+import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.data.providers.buildOpenAIMessages
 import com.kai.custom.email.EmailPoller
 import com.kai.custom.formatFileSize
@@ -1853,6 +1854,12 @@ class RemoteDataRepository(
     override suspend fun updateMemoryContent(key: String, content: String) {
         memoryStore.updateContent(key, content)
     }
+
+    override fun queryKgFacts(entity: String?, relation: String?, limit: Int): List<KGFact> =
+        memoryStore.queryFacts(entity, relation, limit)
+
+    override fun countDimensionEntities(): Long =
+        memoryStore.getAllMemories().size.toLong()
 
     override fun isSchedulingEnabled(): Boolean = appSettings.isSchedulingEnabled()
 

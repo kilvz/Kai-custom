@@ -1,8 +1,8 @@
 [versions]
 agp = "9.2.1"
-appVersion = "2.0.16"
+appVersion = "3.0.0"
 appVersionBase = "2.6.3"
-android-versionCode = "131"
+android-versionCode = "132"
 android-compileSdk = "36"
 android-minSdk = "26"
 android-targetSdk = "36"
@@ -34,6 +34,7 @@ bouncycastle = "1.84"
 reorderable = "3.1.0"
 litert-lm = "0.12.0"
 tensorflowLite = "2.16.1"
+tensorflowLiteTaskText = "0.4.4"
 materialIcons = "1.7.3"
 shizuku = "13.1.5"
 jsch = "0.1.55"
@@ -94,6 +95,7 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 litert-lm = { module = "com.google.ai.edge.litertlm:litertlm-android", version.ref = "litert-lm" }
 litert-lm-jvm = { module = "com.google.ai.edge.litertlm:litertlm-jvm", version.ref = "litert-lm" }
 tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
+tensorflow-lite-task-text = { module = "org.tensorflow:tensorflow-lite-task-text", version.ref = "tensorflowLiteTaskText" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "shizuku" }
 shizuku-provider = { module = "dev.rikka.shizuku:provider", version.ref = "shizuku" }
 jsch = { module = "com.jcraft:jsch", version.ref = "jsch" }

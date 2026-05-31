@@ -475,6 +475,7 @@ private fun MemoryList(
     onImportDimension: (ByteArray) -> Unit,
 ) {
     var showAllDialog by remember { mutableStateOf(false) }
+    var showMemoryManager by remember { mutableStateOf(false) }
     var editingMemory by remember { mutableStateOf<MemoryEntry?>(null) }
     var importResult by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -552,6 +553,12 @@ private fun MemoryList(
                 ) {
                     Text(stringResource(Res.string.settings_memories_import))
                 }
+                OutlinedButton(
+                    onClick = { showMemoryManager = true },
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text("Manage")
+                }
             }
             importResult?.let { result ->
                 Spacer(Modifier.height(4.dp))
@@ -590,6 +597,13 @@ private fun MemoryList(
                 onUpdateMemory(memory.key, newContent)
                 editingMemory = null
             },
+        )
+    }
+
+    if (showMemoryManager) {
+        MemoryManagementSheet(
+            onDismiss = { showMemoryManager = false },
+            onDeleteMemory = onDeleteMemory,
         )
     }
 }

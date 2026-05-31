@@ -24,10 +24,13 @@ interface DimensionStore {
 
     fun searchEntities(query: String, limit: Int = 10): List<SearchResult>
 
+    fun searchSimilar(embedding: List<Float>, limit: Int = 10, minScore: Double = 0.5): List<SearchResult>
+
     fun putFact(fact: KGFact): KGFact
     fun getFactsBySubject(subject: String): List<KGFact>
     fun getFactsByObject(`object`: String): List<KGFact>
     fun queryKGE(relation: String? = null, limit: Int = 20): List<KGFact>
+    fun searchFacts(query: String, limit: Int = 10): List<KGFact>
     fun deleteFact(id: String): Boolean
 
     fun getExportData(): ByteArray

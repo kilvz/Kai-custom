@@ -13,7 +13,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 private const val DB_NAME = "kai_dimension.db"
-private const val DB_VERSION = 2
+private const val DB_VERSION = 3
 
 private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
 
@@ -77,7 +77,9 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            // Fresh schema — no migration needed yet
+            if (oldVersion < 3) {
+                db.execSQL("ALTER TABLE entities ADD COLUMN embedding TEXT")
+            }
         }
     }
 
@@ -198,6 +200,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     override fun putEntity(entity: EntityData): EntityData {
         val contentHash = sha256(entity.content)
         val existing = getEntity(entity.id)
+        val embeddingJson = entity.embedding?.let { json.encodeToString(it) }
         if (existing != null) {
             db.update("entities", ContentValues().apply {
                 put("realm", entity.realm)
@@ -207,6 +210,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                 put("metadata", json.encodeToString(entity.metadata))
                 put("content_hash", contentHash)
                 put("updated_at", entity.updatedAt)
+                if (embeddingJson != null) put("embedding", embeddingJson)
             }, "id = ?", arrayOf(entity.id))
         } else {
             db.insert("entities", null, ContentValues().apply {
@@ -219,6 +223,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                 put("content_hash", contentHash)
                 put("created_at", entity.createdAt)
                 put("updated_at", entity.updatedAt)
+                if (embeddingJson != null) put("embedding", embeddingJson)
             })
         }
         return entity
@@ -278,10 +283,21 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             buildList {
                 while (it.moveToNext()) {
                     val entity = cursorToEntity(it)
-                    add(SearchResult(entity, 0.5))
+                    add(SearchResult(entity, 0.5, entity.content.take(200)))
                 }
             }
         }
+    }
+
+    override fun searchSimilar(embedding: List<Float>, limit: Int, minScore: Double): List<SearchResult> {
+        val all = getAllEntities().filter { it.embedding != null }
+        val scored = all.mapNotNull { entity ->
+            val e = entity.embedding ?: return@mapNotNull null
+            val sim = cosineSimilarity(embedding, e)
+            if (sim < minScore) return@mapNotNull null
+            SearchResult(entity, sim, entity.content.take(200))
+        }
+        return scored.sortedByDescending { it.score }.take(limit)
     }
 
     // Knowledge graph operations
@@ -331,6 +347,16 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         return cursorToFacts(cursor)
     }
 
+    override fun searchFacts(query: String, limit: Int): List<KGFact> {
+        if (query.isBlank()) return emptyList()
+        val likeQuery = "%${query.replace("'", "''")}%"
+        val cursor = db.query("kg_facts", null,
+            "subject LIKE ? OR predicate LIKE ? OR object LIKE ?",
+            arrayOf(likeQuery, likeQuery, likeQuery), null, null,
+            "created_at DESC", limit.toString())
+        return cursorToFacts(cursor)
+    }
+
     override fun deleteFact(id: String): Boolean {
         return db.delete("kg_facts", "id = ?", arrayOf(id)) > 0
     }
@@ -343,7 +369,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         val export = DimensionExport(
             exportedAt = System.currentTimeMillis(),
             entities = entities.map { e ->
-                EntityExport(e.id, e.realm, e.domain, e.content, e.sourceFile, e.metadata, e.createdAt, e.updatedAt)
+                EntityExport(e.id, e.realm, e.domain, e.content, e.sourceFile, e.metadata, e.createdAt, e.updatedAt, e.embedding)
             },
             kgFacts = facts.map { f ->
                 FactExport(f.id, f.subject, f.predicate, f.`object`, f.validFrom, f.validTo, f.sourceEntityId, f.createdAt)
@@ -372,6 +398,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                         metadata = entityExport.metadata,
                         createdAt = entityExport.createdAt,
                         updatedAt = entityExport.updatedAt,
+                        embedding = entityExport.embedding,
                     )
                     putEntity(entity)
                 }
@@ -407,6 +434,12 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         } catch (_: Exception) {
             emptyMap()
         }
+        val embedding = try {
+            val colIdx = cursor.getColumnIndex("embedding")
+            if (colIdx >= 0 && !cursor.isNull(colIdx)) {
+                json.decodeFromString<List<Float>>(cursor.getString(colIdx))
+            } else null
+        } catch (_: Exception) { null }
         return EntityData(
             id = cursor.getString(cursor.getColumnIndexOrThrow("id")),
             realm = cursor.getString(cursor.getColumnIndexOrThrow("realm")),
@@ -416,6 +449,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             metadata = metadata,
             createdAt = cursor.getLong(cursor.getColumnIndexOrThrow("created_at")),
             updatedAt = cursor.getLong(cursor.getColumnIndexOrThrow("updated_at")),
+            embedding = embedding,
         )
     }
 
@@ -444,6 +478,20 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     private fun sha256(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         return digest.digest(input.toByteArray()).joinToString("") { "%02x".format(it) }
+    }
+
+    private fun cosineSimilarity(a: List<Float>, b: List<Float>): Double {
+        if (a.size != b.size || a.isEmpty()) return 0.0
+        var dot = 0.0
+        var normA = 0.0
+        var normB = 0.0
+        for (i in a.indices) {
+            dot += a[i] * b[i]
+            normA += a[i] * a[i]
+            normB += b[i] * b[i]
+        }
+        val denom = kotlin.math.sqrt(normA) * kotlin.math.sqrt(normB)
+        return if (denom == 0.0) 0.0 else dot / denom
     }
 
     override fun toString(): String = "SqliteDimensionStore(db=$DB_NAME, ready=$ready)"

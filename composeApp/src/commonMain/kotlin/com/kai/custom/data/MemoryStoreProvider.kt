@@ -1,5 +1,6 @@
 package com.kai.custom.data
 
+import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.mcp.McpClient
 
 class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemoryStore {
@@ -43,4 +44,19 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override fun exportDimension(): ByteArray = delegate.exportDimension()
 
     override fun importDimension(data: ByteArray) = delegate.importDimension(data)
+
+    override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact =
+        delegate.addFact(subject, predicate, `object`)
+
+    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> =
+        delegate.queryFacts(entity, relation, limit)
+
+    override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) =
+        delegate.invalidateFact(subject, predicate, `object`)
+
+    override suspend fun diaryWrite(agentName: String, content: String, topic: String) =
+        delegate.diaryWrite(agentName, content, topic)
+
+    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> =
+        delegate.diaryRead(agentName, lastN)
 }

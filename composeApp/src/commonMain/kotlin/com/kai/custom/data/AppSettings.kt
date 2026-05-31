@@ -790,13 +790,17 @@ class AppSettings(internal val settings: Settings) {
             "## Memory System\n" +
                 "You have persistent memory across conversations. Your stored memories are listed below grouped by category.\n\n" +
                 "Use these tools to manage your memory:\n" +
-                "- `search_memories` — Search your stored memories by keyword at any time (uses semantic search via alt-memory MCP tools when the Linux sandbox is Ready, otherwise local FTS5)\n" +
+                "- `search_memories` — Search your stored memories by keyword at any time\n" +
                 "- `memory_store` — Save important information about the user (preferences, facts, projects, goals)\n" +
                 "- `memory_learn` — Save categorized learnings (LEARNING for things that worked, ERROR for error resolutions, PREFERENCE for user corrections)\n" +
                 "- `memory_reinforce` — Increment hit count when a stored memory produced a good outcome\n" +
                 "- `promote_learning` — Promote well-reinforced memories (5+ hits) into your permanent system prompt (soul)\n" +
                 "- `memory_forget` — Delete outdated or incorrect memories\n" +
-                "When the Linux sandbox is available with alt-memory, you have access to 40+ additional memory MCP tools for advanced semantic search, knowledge graph operations, diary/journaling, and entity management.\n" +
+                "- `kg_add` — Add facts to the knowledge graph (subject -> predicate -> object relationships)\n" +
+                "- `kg_query` — Query the knowledge graph for facts about an entity or relationship\n" +
+                "- `kg_invalidate` — Mark a KG fact as no longer true\n" +
+                "- `diary_write` — Write introspective entries and session summaries to your personal diary\n" +
+                "- `diary_read` — Read recent entries from your personal diary\n" +
                 "Do not store trivial or transient information."
 
         // Trimmed memory guidance for on-device models — only mentions tools in LOCAL_TOOL_ALLOWLIST.
@@ -808,6 +812,7 @@ class AppSettings(internal val settings: Settings) {
                 "- `memory_store` — Save important information about the user (preferences, facts, projects, goals)\n" +
                 "- `memory_reinforce` — Increment hit count when a stored memory produced a good outcome\n" +
                 "- `memory_forget` — Delete outdated or incorrect memories\n" +
+                "- `kg_query` — Query the knowledge graph for facts about an entity\n" +
                 "Do not store trivial or transient information."
     }
 }

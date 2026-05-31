@@ -289,9 +289,9 @@ actual fun getAvailableTools(): List<Tool> {
 
     return buildList {
         if (appSettings.isMemoryEnabled()) {
-            if (!mcpServerManager.isConnected("alt_memory")) {
-                addAll(CommonTools.getMemoryTools(memoryStore, sandboxController))
-            }
+            addAll(CommonTools.getMemoryTools(memoryStore, sandboxController))
+            addAll(CommonTools.getKgTools(memoryStore))
+            addAll(CommonTools.getDiaryTools(memoryStore))
             addAll(listOf(HeartbeatTools.getPromoteLearningTool(memoryStore, appSettings)))
         }
         if (appSettings.isSchedulingEnabled()) {

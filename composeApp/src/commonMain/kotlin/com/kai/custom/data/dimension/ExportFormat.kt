@@ -20,6 +20,7 @@ data class EntityExport(
     val metadata: Map<String, String> = emptyMap(),
     val createdAt: Long,
     val updatedAt: Long,
+    val embedding: List<Float>? = null,
 )
 
 @Serializable

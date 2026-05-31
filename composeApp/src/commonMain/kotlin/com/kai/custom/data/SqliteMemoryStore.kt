@@ -3,6 +3,7 @@ package com.kai.custom.data
 import com.kai.custom.data.dimension.DimensionConfig
 import com.kai.custom.data.dimension.DimensionStore
 import com.kai.custom.data.dimension.EntityData
+import com.kai.custom.data.dimension.KGFact
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
@@ -137,4 +138,63 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
     override fun exportDimension(): ByteArray = dimension.getExportData()
 
     override fun importDimension(data: ByteArray) = dimension.importFromData(data)
+
+    // Knowledge graph
+
+    override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val id = "kg_${subject.hashCode().toUInt().toString(16)}_${predicate.hashCode().toUInt().toString(16)}_$now"
+        val fact = KGFact(id = id, subject = subject, predicate = predicate, `object` = `object`, createdAt = now)
+        return dimension.putFact(fact)
+    }
+
+    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> {
+        if (entity != null) {
+            val bySubject = dimension.getFactsBySubject(entity)
+            val byObject = dimension.getFactsByObject(entity)
+            val all = (bySubject + byObject).distinct().sortedByDescending { it.createdAt }
+            return if (relation != null) all.filter { it.predicate == relation }.take(limit) else all.take(limit)
+        }
+        return dimension.queryKGE(relation, limit)
+    }
+
+    override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {
+        val facts = dimension.getFactsBySubject(subject).filter { it.predicate == predicate && it.`object` == `object` }
+        for (fact in facts) {
+            dimension.putFact(fact.copy(validTo = Clock.System.now().toEpochMilliseconds()))
+        }
+    }
+
+    // Diary
+
+    override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val id = "diary_${agentName}_${now}"
+        val entity = EntityData(
+            id = id,
+            realm = DimensionConfig.REALM_AGENT,
+            domain = DimensionConfig.DOMAIN_DIARY,
+            content = content,
+            metadata = mapOf("agent_name" to agentName, "topic" to topic, "type" to "diary_entry"),
+            createdAt = now,
+            updatedAt = now,
+        )
+        dimension.putEntity(entity)
+    }
+
+    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
+        val all = dimension.getEntitiesByDomain(DimensionConfig.REALM_AGENT, DimensionConfig.DOMAIN_DIARY)
+            .filter { it.metadata["agent_name"] == agentName }
+            .sortedByDescending { it.createdAt }
+            .take(lastN)
+        return all.map { entity ->
+            DiaryEntry(
+                id = entity.id,
+                agentName = agentName,
+                topic = entity.metadata["topic"] ?: "general",
+                content = entity.content,
+                createdAt = entity.createdAt,
+            )
+        }
+    }
 }

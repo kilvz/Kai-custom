@@ -205,3 +205,9 @@
 }
 -dontwarn com.google.gson.**
 -dontwarn sun.misc.Unsafe
+
+# TFLite Task Text — USE Lite embedding model. AutoValue annotation is
+# only a compile-time dependency; the missing class at runtime is harmless.
+-dontwarn com.google.auto.value.**
+-keep class org.tensorflow.lite.task.text.** { *; }
+-dontwarn org.tensorflow.lite.task.text.**
