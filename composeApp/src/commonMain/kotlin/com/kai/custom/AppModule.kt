@@ -9,7 +9,9 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailStore
 import com.kai.custom.data.HeartbeatManager
 import com.kai.custom.data.MemoryStore
+import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.data.NotificationStore
+import com.kai.custom.data.SqliteMemoryStore
 import com.kai.custom.data.RemoteDataRepository
 import com.kai.custom.data.SmsDraftStore
 import com.kai.custom.data.SmsStore
@@ -70,8 +72,11 @@ val appModule = module {
     single<ToolExecutor> {
         ToolExecutor()
     }
+    single<SqliteMemoryStore> {
+        SqliteMemoryStore(get<DimensionStore>())
+    }
     single<MemoryStore> {
-        MemoryStore(get<DimensionStore>())
+        MemoryStoreProvider(get<SqliteMemoryStore>())
     }
     single<TaskStore> {
         TaskStore(get())

@@ -13,7 +13,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 private const val DB_NAME = "kai_dimension.db"
-private const val DB_VERSION = 1
+private const val DB_VERSION = 2
 
 private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
 
@@ -53,14 +53,6 @@ private const val SQL_CREATE_ENTITIES = """
     )
 """
 
-private const val SQL_CREATE_ENTITIES_FTS = """
-    CREATE VIRTUAL TABLE IF NOT EXISTS entities_fts USING fts5(
-        content,
-        content='entities',
-        content_rowid='rowid'
-    )
-"""
-
 private const val SQL_CREATE_KG_FACTS = """
     CREATE TABLE IF NOT EXISTS kg_facts (
         id TEXT PRIMARY KEY,
@@ -74,26 +66,6 @@ private const val SQL_CREATE_KG_FACTS = """
     )
 """
 
-// FTS triggers: keep entities_fts in sync
-private const val SQL_FTS_INSERT = """
-    CREATE TRIGGER IF NOT EXISTS entities_ai AFTER INSERT ON entities BEGIN
-        INSERT INTO entities_fts(rowid, content) VALUES (new.rowid, new.content);
-    END
-"""
-
-private const val SQL_FTS_DELETE = """
-    CREATE TRIGGER IF NOT EXISTS entities_ad AFTER DELETE ON entities BEGIN
-        INSERT INTO entities_fts(entities_fts, rowid, content) VALUES('delete', old.rowid, old.content);
-    END
-"""
-
-private const val SQL_FTS_UPDATE = """
-    CREATE TRIGGER IF NOT EXISTS entities_au AFTER UPDATE ON entities BEGIN
-        INSERT INTO entities_fts(entities_fts, rowid, content) VALUES('delete', old.rowid, old.content);
-        INSERT INTO entities_fts(rowid, content) VALUES (new.rowid, new.content);
-    END
-"""
-
 class SqliteDimensionStore(context: Context) : DimensionStore {
 
     private val dbHelper = object : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -101,11 +73,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             db.execSQL(SQL_CREATE_REALMS)
             db.execSQL(SQL_CREATE_DOMAINS)
             db.execSQL(SQL_CREATE_ENTITIES)
-            db.execSQL(SQL_CREATE_ENTITIES_FTS)
             db.execSQL(SQL_CREATE_KG_FACTS)
-            db.execSQL(SQL_FTS_INSERT)
-            db.execSQL(SQL_FTS_DELETE)
-            db.execSQL(SQL_FTS_UPDATE)
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -124,11 +92,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             db.execSQL(SQL_CREATE_REALMS)
             db.execSQL(SQL_CREATE_DOMAINS)
             db.execSQL(SQL_CREATE_ENTITIES)
-            db.execSQL(SQL_CREATE_ENTITIES_FTS)
             db.execSQL(SQL_CREATE_KG_FACTS)
-            db.execSQL(SQL_FTS_INSERT)
-            db.execSQL(SQL_FTS_DELETE)
-            db.execSQL(SQL_FTS_UPDATE)
 
             for (realm in DimensionConfig.defaultRealms) {
                 ensureRealm(Realm(realm.id, realm.name, realm.description, System.currentTimeMillis()))
@@ -308,31 +272,6 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
 
     override fun searchEntities(query: String, limit: Int): List<SearchResult> {
         if (query.isBlank()) return emptyList()
-
-        try {
-            val ftsQuery = query.split(" ").joinToString(" AND ") { "\"$it\"" }
-            val sql = """
-                SELECT e.*, rank
-                FROM entities_fts
-                JOIN entities e ON entities_fts.rowid = e.rowid
-                WHERE entities_fts MATCH ?
-                ORDER BY rank
-                LIMIT ?
-            """
-            val cursor = db.rawQuery(sql, arrayOf(ftsQuery, limit.toString()))
-            return cursor.use {
-                buildList {
-                    while (it.moveToNext()) {
-                        val entity = cursorToEntity(it)
-                        val rankCol = it.getColumnIndex("rank")
-                        val score = if (rankCol >= 0) 1.0 / (1.0 + it.getDouble(rankCol)) else 0.5
-                        add(SearchResult(entity, score))
-                    }
-                }
-            }
-        } catch (_: Exception) {
-        }
-
         val likeQuery = "%${query.replace("'", "''")}%"
         val cursor = db.query("entities", null, "content LIKE ?", arrayOf(likeQuery), null, null, null, limit.toString())
         return cursor.use {
