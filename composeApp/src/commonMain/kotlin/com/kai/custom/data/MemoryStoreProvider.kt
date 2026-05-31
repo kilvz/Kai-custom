@@ -33,6 +33,17 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     override suspend fun forget(key: String): Boolean = delegate.forget(key)
 
+    override suspend fun storeProtected(
+        key: String,
+        content: String,
+        category: MemoryCategory,
+        source: String?,
+    ): MemoryEntry = delegate.storeProtected(key, content, category, source)
+
+    override fun getUserMemories(max: Int): List<MemoryEntry> = delegate.getUserMemories(max)
+
+    override fun getBehaviorMemories(): List<MemoryEntry> = delegate.getBehaviorMemories()
+
     override fun getAllMemories(max: Int): List<MemoryEntry> = delegate.getAllMemories(max)
 
     override fun searchMemories(query: String, limit: Int): List<MemoryEntry> =

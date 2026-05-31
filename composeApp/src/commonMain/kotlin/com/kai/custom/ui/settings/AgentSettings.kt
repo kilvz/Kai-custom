@@ -106,6 +106,7 @@ import kotlin.time.Instant
 internal fun AgentContent(
     actions: SettingsActions,
     soulText: String,
+    personaName: String,
     memories: ImmutableList<MemoryEntry>,
     isMemoryEnabled: Boolean,
     scheduledTasks: ImmutableList<ScheduledTask>,
@@ -263,7 +264,9 @@ internal fun AgentContent(
                 SettingsCard {
                     SoulEditor(
                         soulText = soulText,
+                        personaName = personaName,
                         onSaveSoul = actions.onSaveSoul,
+                        onChangePersonaName = actions.onChangePersonaName,
                     )
                 }
                     SettingsCard {
@@ -361,7 +364,9 @@ internal fun AgentContent(
 @Composable
 private fun SoulEditor(
     soulText: String,
+    personaName: String,
     onSaveSoul: (String) -> Unit,
+    onChangePersonaName: (String) -> Unit,
 ) {
     val localizedDefault = stringResource(Res.string.default_soul)
     val displayText = soulText.ifEmpty { localizedDefault }
@@ -401,6 +406,24 @@ private fun SoulEditor(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(12.dp))
+
+        var editedPersonaName by remember(personaName) { mutableStateOf(personaName) }
+        KaiOutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = editedPersonaName,
+            onValueChange = {
+                editedPersonaName = it
+                onChangePersonaName(it)
+            },
+            singleLine = true,
+            label = {
+                Text(
+                    text = "Persona name",
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            },
+        )
+        Spacer(Modifier.height(8.dp))
 
         KaiOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),

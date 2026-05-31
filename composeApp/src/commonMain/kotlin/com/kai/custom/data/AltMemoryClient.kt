@@ -68,8 +68,36 @@ class AltMemoryClient(
         return existing.copy(hitCount = existing.hitCount + 1, updatedAt = now)
     }
 
+    override suspend fun storeProtected(
+        key: String,
+        content: String,
+        category: MemoryCategory,
+        source: String?,
+    ): MemoryEntry {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val args = buildJsonObject {
+            put("key", JsonPrimitive(key))
+            put("content", JsonPrimitive(content))
+            put("category", JsonPrimitive(category.name))
+            put("protected", JsonPrimitive("true"))
+            if (source != null) put("source", JsonPrimitive(source))
+        }
+        client.callTool("memory_store", args)
+        return MemoryEntry(
+            key = key,
+            content = content,
+            createdAt = now,
+            updatedAt = now,
+            category = category,
+            source = source,
+            protected = true,
+        )
+    }
+
     override suspend fun forget(key: String): Boolean {
         try {
+            val existing = findEntryByKey(key)
+            if (existing?.protected == true) return false
             client.callTool("memory_forget", buildJsonObject {
                 put("key", JsonPrimitive(key))
             })
@@ -77,6 +105,14 @@ class AltMemoryClient(
         } catch (_: Exception) {
             return false
         }
+    }
+
+    override fun getUserMemories(max: Int): List<MemoryEntry> {
+        return getAllMemories(max).filter { !it.protected }
+    }
+
+    override fun getBehaviorMemories(): List<MemoryEntry> {
+        return getAllMemories().filter { it.protected }
     }
 
     override fun getAllMemories(max: Int): List<MemoryEntry> {

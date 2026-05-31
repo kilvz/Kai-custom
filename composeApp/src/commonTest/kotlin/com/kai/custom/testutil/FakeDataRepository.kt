@@ -1,6 +1,7 @@
 package com.kai.custom.testutil
 
 import com.kai.custom.data.Conversation
+import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
@@ -199,6 +200,26 @@ class FakeDataRepository : DataRepository {
         }
     }
 
+    override fun getRecentExchanges(pairCount: Int): String {
+        val history = chatHistory.value
+        val userIndices = history.mapIndexedNotNull { idx, h ->
+            if (h.role == History.Role.USER) idx else null
+        }
+        val recent = if (userIndices.size > pairCount) {
+            history.subList(userIndices[userIndices.size - pairCount], history.size)
+        } else {
+            history
+        }
+        return buildString {
+            for (h in recent) {
+                if (h.role == History.Role.USER || h.role == History.Role.ASSISTANT) {
+                    val role = if (h.role == History.Role.USER) "User" else "Assistant"
+                    appendLine("$role: ${h.content}")
+                }
+            }
+        }
+    }
+
     override fun clearHistory() {
         clearHistoryCalls++
         chatHistory.value = emptyList()
@@ -332,15 +353,42 @@ class FakeDataRepository : DataRepository {
     }
 
     // Soul (system prompt)
-    private var soulText = ""
+    private var soulUser = ""
+    private var soulAuto = ""
+    private var personaName = "Kai"
 
-    override fun getSoulText(): String = soulText
-
-    override fun setSoulText(text: String) {
-        soulText = text
+    override fun getSoulText(): String {
+        val combined = if (soulAuto.isNotEmpty()) {
+            if (soulUser.isNotEmpty()) "$soulUser\n\n## Behavior Notes\n$soulAuto" else "## Behavior Notes\n$soulAuto"
+        } else {
+            soulUser
+        }
+        return combined
     }
 
-    override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? = soulText.ifEmpty { null }
+    override fun getSoulUser(): String = soulUser
+
+    override fun setSoulUser(text: String) {
+        soulUser = text
+    }
+
+    override fun getSoulAuto(): String = soulAuto
+
+    override fun setSoulAuto(text: String) {
+        soulAuto = text
+    }
+
+    override fun setSoulText(text: String) {
+        soulUser = text
+    }
+
+    override fun getPersonaName(): String = personaName
+
+    override fun setPersonaName(name: String) {
+        personaName = name
+    }
+
+    override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? = getSoulText().ifEmpty { null }
 
     // Memory management
     private var dynamicUiEnabled = true
@@ -606,4 +654,24 @@ class FakeDataRepository : DataRepository {
     override suspend fun deleteLocalModel(modelId: String) {}
 
     override fun addSystemMessage(content: String) {}
+
+    // Knowledge graph
+    override fun queryKgFacts(entity: String?, relation: String?, limit: Int): List<KGFact> = emptyList()
+
+    // Dimension stats
+    override fun countDimensionEntities(): Long = 0L
+
+    // Wake word
+    override fun isWakeWordEnabled(): Boolean = false
+    override fun setWakeWordEnabled(enabled: Boolean) {}
+    override fun getWakeWordPhrase(): String = "hey kai"
+    override fun setWakeWordPhrase(phrase: String) {}
+    override fun getWakeWordMode(): String = "GENERAL"
+    override fun setWakeWordMode(mode: String) {}
+    override fun getWakeWordTemplate(): String = ""
+    override fun setWakeWordTemplate(template: String) {}
+
+    // Language
+    override fun getPreferredLanguage(): String = "en"
+    override fun setPreferredLanguage(lang: String) {}
 }

@@ -6,6 +6,9 @@ import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.testutil.FakeDataRepository
+import com.kai.custom.testutil.TestSpeechToText
+import com.kai.custom.testutil.TestWakeWordController
+import com.kai.custom.tools.MicrophonePermissionController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,6 +28,9 @@ class ChatViewModelLiteRTTest {
     private val testDispatcher = StandardTestDispatcher()
     private val unconfinedDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeRepository: FakeDataRepository
+    private val testSpeechToText = TestSpeechToText()
+    private val testWakeWordController = TestWakeWordController()
+    private val testMicrophonePermissionController = MicrophonePermissionController()
 
     @BeforeTest
     fun setup() {
@@ -39,7 +45,7 @@ class ChatViewModelLiteRTTest {
 
     private fun createViewModel(): ChatViewModel {
         val noOpScheduler = TaskScheduler(fakeRepository, enabled = false)
-        return ChatViewModel(fakeRepository, noOpScheduler, unconfinedDispatcher)
+        return ChatViewModel(fakeRepository, noOpScheduler, testSpeechToText, testMicrophonePermissionController, testWakeWordController, unconfinedDispatcher)
     }
 
     private fun litertServiceEntry() = ServiceEntry(

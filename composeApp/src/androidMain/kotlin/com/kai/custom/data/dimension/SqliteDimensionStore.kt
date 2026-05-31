@@ -13,7 +13,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 private const val DB_NAME = "kai_dimension.db"
-private const val DB_VERSION = 3
+private const val DB_VERSION = 4
 
 private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
 
@@ -79,6 +79,9 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             if (oldVersion < 3) {
                 db.execSQL("ALTER TABLE entities ADD COLUMN embedding TEXT")
+            }
+            if (oldVersion < 4) {
+                db.execSQL("ALTER TABLE entities ADD COLUMN protected INTEGER NOT NULL DEFAULT 0")
             }
         }
     }
@@ -210,6 +213,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                 put("metadata", json.encodeToString(entity.metadata))
                 put("content_hash", contentHash)
                 put("updated_at", entity.updatedAt)
+                put("protected", if (entity.protected) 1 else 0)
                 if (embeddingJson != null) put("embedding", embeddingJson)
             }, "id = ?", arrayOf(entity.id))
         } else {
@@ -223,6 +227,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                 put("content_hash", contentHash)
                 put("created_at", entity.createdAt)
                 put("updated_at", entity.updatedAt)
+                put("protected", if (entity.protected) 1 else 0)
                 if (embeddingJson != null) put("embedding", embeddingJson)
             })
         }
@@ -369,7 +374,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         val export = DimensionExport(
             exportedAt = System.currentTimeMillis(),
             entities = entities.map { e ->
-                EntityExport(e.id, e.realm, e.domain, e.content, e.sourceFile, e.metadata, e.createdAt, e.updatedAt, e.embedding)
+                EntityExport(e.id, e.realm, e.domain, e.content, e.sourceFile, e.metadata, e.createdAt, e.updatedAt, e.embedding, e.protected)
             },
             kgFacts = facts.map { f ->
                 FactExport(f.id, f.subject, f.predicate, f.`object`, f.validFrom, f.validTo, f.sourceEntityId, f.createdAt)
@@ -399,6 +404,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                         createdAt = entityExport.createdAt,
                         updatedAt = entityExport.updatedAt,
                         embedding = entityExport.embedding,
+                        protected = entityExport.protected,
                     )
                     putEntity(entity)
                 }
@@ -440,6 +446,10 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
                 json.decodeFromString<List<Float>>(cursor.getString(colIdx))
             } else null
         } catch (_: Exception) { null }
+        val protected = try {
+            val colIdx = cursor.getColumnIndex("protected")
+            colIdx >= 0 && cursor.getInt(colIdx) == 1
+        } catch (_: Exception) { false }
         return EntityData(
             id = cursor.getString(cursor.getColumnIndexOrThrow("id")),
             realm = cursor.getString(cursor.getColumnIndexOrThrow("realm")),
@@ -450,6 +460,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             createdAt = cursor.getLong(cursor.getColumnIndexOrThrow("created_at")),
             updatedAt = cursor.getLong(cursor.getColumnIndexOrThrow("updated_at")),
             embedding = embedding,
+            protected = protected,
         )
     }
 

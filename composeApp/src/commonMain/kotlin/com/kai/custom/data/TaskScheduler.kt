@@ -34,9 +34,13 @@ class TaskScheduler(
     private val smsStore: SmsStore? = null,
     private val smsPoller: SmsPoller? = null,
     private val notificationStore: NotificationStore? = null,
+    private val memoryStore: MemoryStore? = null,
     private val enabled: Boolean = true,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) {
+    private val heartbeatMemoryExtractor: HeartbeatMemoryExtractor? by lazy {
+        if (memoryStore != null) HeartbeatMemoryExtractor(memoryStore, dataRepository) else null
+    }
     private companion object {
         const val POLL_INTERVAL_MS = 60_000L
         const val MAX_BACKOFF_MS = 3_600_000L // 1 hour
@@ -155,6 +159,7 @@ class TaskScheduler(
                 ?: emptyList()
             val heartbeatPrompt = manager.buildHeartbeatPrompt(recentResponses, pendingEmails, pendingSms, pendingNotifications)
             val response = dataRepository.askWithTools(heartbeatPrompt, manager.getConfig().heartbeatInstanceId)
+            heartbeatMemoryExtractor?.extractFromHeartbeat(response)
             manager.markHeartbeatExecuted()
             manager.recordHeartbeat(success = true)
             if (response.isNotBlank() && "HEARTBEAT_OK" !in response) {

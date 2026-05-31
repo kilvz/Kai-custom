@@ -41,6 +41,8 @@ interface DataRepository {
     suspend fun validateConnection(service: Service, instanceId: String)
 
     suspend fun ask(question: String?, files: List<PlatformFile>, uiSubmission: UiSubmission? = null)
+    /** Recent user+assistant exchange pairs formatted as "User: ...\nAssistant: ...". */
+    fun getRecentExchanges(pairCount: Int = 3): String
     fun clearHistory()
     fun currentService(): Service
     fun isUsingSharedKey(): Boolean
@@ -73,8 +75,20 @@ interface DataRepository {
     suspend fun connectEnabledMcpServers()
 
     // Soul (system prompt)
+    /** Combined soul: user-edited text + auto behavior summary (for system prompt). */
     fun getSoulText(): String
+    /** User-edited portion only (shown in Settings). */
+    fun getSoulUser(): String
+    fun setSoulUser(text: String)
+    /** Auto-generated behavior summary (updated by heartbeat). */
+    fun getSoulAuto(): String
+    fun setSoulAuto(text: String)
+    /** Kept for backward compat — delegates to setSoulUser. */
     fun setSoulText(text: String)
+
+    // Persona
+    fun getPersonaName(): String
+    fun setPersonaName(name: String)
     suspend fun getActiveSystemPrompt(variant: SystemPromptVariant = SystemPromptVariant.CHAT_REMOTE, searchQuery: String? = null): String?
 
     // Memory management

@@ -490,6 +490,7 @@ fun SettingsScreenContent(
                                 AgentContent(
                                     actions = actions,
                                     soulText = filteredUiState.soulText,
+                                    personaName = filteredUiState.personaName,
                                     memories = filteredUiState.memories,
                                     isMemoryEnabled = filteredUiState.isMemoryEnabled,
                                     scheduledTasks = filteredUiState.scheduledTasks,

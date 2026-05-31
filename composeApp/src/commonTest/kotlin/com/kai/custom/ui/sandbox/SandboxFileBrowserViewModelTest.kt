@@ -65,6 +65,7 @@ class SandboxFileBrowserViewModelTest {
             files[path] = content
             return true
         }
+        override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = false
         override suspend fun openFile(path: String): Result<Unit> = Result.success(Unit)
 
         override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean {

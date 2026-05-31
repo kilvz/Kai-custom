@@ -54,7 +54,7 @@ fun AppSettings.exportToJson(
     }
 
     if (ImportSection.SOUL in sections) {
-        val soul = getSoulText()
+        val soul = getSoulUser()
         if (soul.isNotBlank()) map["soul_text"] = JsonPrimitive(soul)
     }
 

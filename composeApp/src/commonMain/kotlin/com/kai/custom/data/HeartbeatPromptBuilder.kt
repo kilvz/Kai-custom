@@ -51,6 +51,7 @@ internal data class HeartbeatPromotionCandidate(
  * @param pendingSms new SMS polled since the last heartbeat pickup; empty list = section omitted
  * @param pendingNotifications new notifications captured since the last heartbeat pickup; empty list = section omitted
  * @param promotionCandidates memory promotion candidates; empty list = section omitted
+ * @param learnedPatterns behavior memories (protected); empty list = section omitted
  */
 internal fun buildHeartbeatPrompt(
     customOrDefaultPrompt: String,
@@ -62,6 +63,7 @@ internal fun buildHeartbeatPrompt(
     pendingSms: List<HeartbeatPendingSms>,
     pendingNotifications: List<HeartbeatPendingNotification>,
     promotionCandidates: List<HeartbeatPromotionCandidate>,
+    learnedPatterns: List<MemoryEntry> = emptyList(),
 ): String = buildString {
     append(customOrDefaultPrompt)
     append("\n")
@@ -180,6 +182,21 @@ internal fun buildHeartbeatPrompt(
                 append(": ")
                 append(notif.preview)
             }
+            append('\n')
+        }
+    }
+
+    if (learnedPatterns.isNotEmpty()) {
+        append("\n## Learned Patterns\n")
+        append("These are behavioral patterns and preferences I've observed about the user. ")
+        append("Review them — if any seem outdated or incorrect, update your understanding.\n")
+        for (entry in learnedPatterns) {
+            append("- **")
+            append(entry.key)
+            append("**")
+            if (entry.hitCount > 1) append(" (reinforced ").append(entry.hitCount).append("x)")
+            append(": ")
+            append(entry.content)
             append('\n')
         }
     }

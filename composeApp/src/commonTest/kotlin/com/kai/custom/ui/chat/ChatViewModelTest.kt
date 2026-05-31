@@ -13,6 +13,9 @@ import com.kai.custom.network.GenericNetworkException
 import com.kai.custom.network.OpenAICompatibleInvalidApiKeyException
 import com.kai.custom.network.OpenAICompatibleRateLimitExceededException
 import com.kai.custom.testutil.FakeDataRepository
+import com.kai.custom.testutil.TestSpeechToText
+import com.kai.custom.testutil.TestWakeWordController
+import com.kai.custom.tools.MicrophonePermissionController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -35,6 +38,9 @@ class ChatViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val unconfinedDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeRepository: FakeDataRepository
+    private val testSpeechToText = TestSpeechToText()
+    private val testWakeWordController = TestWakeWordController()
+    private val testMicrophonePermissionController = MicrophonePermissionController()
 
     @BeforeTest
     fun setup() {
@@ -49,7 +55,7 @@ class ChatViewModelTest {
 
     private fun createViewModel(): ChatViewModel {
         val noOpScheduler = TaskScheduler(fakeRepository, enabled = false)
-        return ChatViewModel(fakeRepository, noOpScheduler, unconfinedDispatcher)
+        return ChatViewModel(fakeRepository, noOpScheduler, testSpeechToText, testMicrophonePermissionController, testWakeWordController, unconfinedDispatcher)
     }
 
     @Test
@@ -57,7 +63,7 @@ class ChatViewModelTest {
         // Isolated paused dispatcher so the launched restore coroutine doesn't run synchronously.
         val backgroundDispatcher = StandardTestDispatcher()
         val noOpScheduler = TaskScheduler(fakeRepository, enabled = false)
-        val viewModel = ChatViewModel(fakeRepository, noOpScheduler, backgroundDispatcher)
+        val viewModel = ChatViewModel(fakeRepository, noOpScheduler, testSpeechToText, testMicrophonePermissionController, testWakeWordController, backgroundDispatcher)
 
         viewModel.state.test {
             // Restore hasn't run yet — initial state still has isRestoring=true.

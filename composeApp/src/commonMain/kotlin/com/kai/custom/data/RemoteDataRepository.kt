@@ -65,8 +65,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -167,6 +170,12 @@ class RemoteDataRepository(
     private val sandboxController: SandboxController,
     private val localInferenceEngine: LocalInferenceEngine? = null,
 ) : DataRepository {
+
+    private val autoMemoryLearner = AutoMemoryLearner(
+        memoryStore = memoryStore,
+        dataRepository = this,
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+    )
 
     private val prettyJson = Json { prettyPrint = true }
 
@@ -844,6 +853,7 @@ class RemoteDataRepository(
                         )
                     }
                 }
+                autoMemoryLearner.onExchangeComplete()
                 saveCurrentConversation()
                 return
             }
@@ -1412,6 +1422,26 @@ class RemoteDataRepository(
         conversationStorage.saveConversation(conversation)
     }
 
+    override fun getRecentExchanges(pairCount: Int): String {
+        val history = chatHistory.value
+        val userIndices = history.mapIndexedNotNull { idx, h ->
+            if (h.role == History.Role.USER) idx else null
+        }
+        val recent = if (userIndices.size > pairCount) {
+            history.subList(userIndices[userIndices.size - pairCount], history.size)
+        } else {
+            history
+        }
+        return buildString {
+            for (h in recent) {
+                if (h.role == History.Role.USER || h.role == History.Role.ASSISTANT) {
+                    val role = if (h.role == History.Role.USER) "User" else "Assistant"
+                    appendLine("$role: ${h.content}")
+                }
+            }
+        }
+    }
+
     override fun clearHistory() {
         chatHistory.update {
             emptyList()
@@ -1702,8 +1732,28 @@ class RemoteDataRepository(
     // Soul (system prompt)
     override fun getSoulText(): String = appSettings.getSoulText()
 
+    override fun getSoulUser(): String = appSettings.getSoulUser()
+
+    override fun setSoulUser(text: String) {
+        appSettings.setSoulUser(text)
+    }
+
+    override fun getSoulAuto(): String = appSettings.getSoulAuto()
+
+    override fun setSoulAuto(text: String) {
+        appSettings.setSoulAuto(text)
+    }
+
     override fun setSoulText(text: String) {
-        appSettings.setSoulText(text)
+        appSettings.setSoulUser(text)
+    }
+
+    private val personaManager: PersonaManager by lazy { PersonaManager(appSettings) }
+
+    override fun getPersonaName(): String = personaManager.getCurrentPersonaName()
+
+    override fun setPersonaName(name: String) {
+        personaManager.setCurrentPersonaName(name)
     }
 
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? {
@@ -1711,20 +1761,7 @@ class RemoteDataRepository(
         val memoryEnabled = appSettings.isMemoryEnabled()
         val schedulingEnabled = appSettings.isSchedulingEnabled()
 
-        val memoryInstructions = if (memoryEnabled) {
-            if (appSettings.hasCustomMemoryInstructions()) {
-                appSettings.getMemoryInstructions().ifEmpty { null }
-            } else {
-                when (variant) {
-                    SystemPromptVariant.CHAT_REMOTE -> AppSettings.DEFAULT_MEMORY_INSTRUCTIONS
-                    SystemPromptVariant.CHAT_LOCAL -> AppSettings.DEFAULT_LOCAL_MEMORY_INSTRUCTIONS
-                }
-            }
-        } else {
-            null
-        }
-
-        val memories = if (memoryEnabled) memoryStore.getAllMemories() else emptyList()
+        val memories = if (memoryEnabled) memoryStore.getUserMemories() else emptyList()
         val byCategory = memories.groupBy { it.category }
 
         val relevantMemories = if (memoryEnabled && !searchQuery.isNullOrBlank()) {
@@ -1737,10 +1774,6 @@ class RemoteDataRepository(
         val pendingTasks = tasksSplit.scheduled
         val heartbeatAdditions = tasksSplit.heartbeatAdditions
 
-        // Surface connected email accounts so the AI knows they exist in regular chat,
-        // not just during heartbeats. Only the remote variant uses this — email tools
-        // aren't in the local allowlist. Gated on the email toggle: if the user has email
-        // off, the AI shouldn't reference the accounts.
         val emailAccounts = if (variant == SystemPromptVariant.CHAT_REMOTE && appSettings.isEmailEnabled()) {
             emailStore.getAccounts().map { account ->
                 val state = emailStore.getSyncState(account.id)
@@ -1756,9 +1789,6 @@ class RemoteDataRepository(
         }
 
         val service = currentService()
-        // On-device services store the active model ID per-instance, not globally, so
-        // `getSelectedModelId` comes back blank for LiteRT. Fall back to the first
-        // configured on-device instance's model ID in that case.
         val modelId = appSettings.getSelectedModelId(service).ifBlank {
             if (service.isOnDevice) {
                 getConfiguredServiceInstances()
@@ -1789,9 +1819,6 @@ class RemoteDataRepository(
             else -> ChatPromptUiMode.NONE
         }
 
-        // Tool-use guidance is only worth sending when the model is actually given tools.
-        // Mirror the tool list the request will carry: remote uses the full set (when the
-        // model supports tools), local uses the allowlist-filtered set.
         val hasTools = when (variant) {
             SystemPromptVariant.CHAT_REMOTE -> !isLimited && getAvailableTools().isNotEmpty()
             SystemPromptVariant.CHAT_LOCAL -> getLocalSafeTools().isNotEmpty()
@@ -1803,7 +1830,7 @@ class RemoteDataRepository(
             hasTools = hasTools,
             memoryEnabled = memoryEnabled,
             schedulingEnabled = schedulingEnabled,
-            memoryInstructions = memoryInstructions,
+            memoryInstructions = null,
             generalMemories = byCategory[MemoryCategory.GENERAL].orEmpty(),
             preferenceMemories = byCategory[MemoryCategory.PREFERENCE].orEmpty(),
             learningMemories = byCategory[MemoryCategory.LEARNING].orEmpty(),

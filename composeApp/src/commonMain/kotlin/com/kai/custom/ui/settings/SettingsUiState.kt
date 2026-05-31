@@ -62,6 +62,7 @@ data class SettingsUiState(
     val availableServicesToAdd: ImmutableList<Service> = persistentListOf(),
     val tools: ImmutableList<ToolInfo> = persistentListOf(),
     val soulText: String = "",
+    val personaName: String = "Kai",
     val isDynamicUiEnabled: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.System,
     val isMemoryEnabled: Boolean = true,

@@ -2,7 +2,10 @@ package com.kai.custom.ui.chat
 
 import app.cash.turbine.test
 import com.kai.custom.data.TaskScheduler
+import com.kai.custom.NoOpSpeechToText
 import com.kai.custom.testutil.FakeDataRepository
+import com.kai.custom.tools.MicrophonePermissionController
+import com.kai.custom.wakeword.NoOpWakeWordController
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +35,9 @@ class ChatViewModelFileAttachmentTest {
     private val testDispatcher = StandardTestDispatcher()
     private val unconfinedDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeRepository: FakeDataRepository
+    private val testSpeechToText = NoOpSpeechToText()
+    private val testWakeWordController = NoOpWakeWordController()
+    private val testMicrophonePermissionController = MicrophonePermissionController()
 
     @BeforeTest
     fun setup() {
@@ -46,7 +52,7 @@ class ChatViewModelFileAttachmentTest {
 
     private fun createViewModel(): ChatViewModel {
         val noOpScheduler = TaskScheduler(fakeRepository, enabled = false)
-        return ChatViewModel(fakeRepository, noOpScheduler, unconfinedDispatcher)
+        return ChatViewModel(fakeRepository, noOpScheduler, testSpeechToText, testMicrophonePermissionController, testWakeWordController, unconfinedDispatcher)
     }
 
     private fun tempPlatformFile(extension: String): PlatformFile {

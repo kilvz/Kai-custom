@@ -252,11 +252,53 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_FREE_SERVICE_PRIMARY, primary)
     }
 
-    // Soul (system prompt)
-    fun getSoulText(): String = settings.getString(KEY_SOUL, "")
+    // Soul — user-edited + auto-generated behavior summary
+    fun getSoulUser(): String {
+        val stored = settings.getStringOrNull(KEY_SOUL_USER) ?: return migrateSoulFromLegacy()
+        return stored
+    }
 
+    fun setSoulUser(text: String) {
+        settings.putString(KEY_SOUL_USER, text)
+    }
+
+    fun getSoulAuto(): String = settings.getString(KEY_SOUL_AUTO, "")
+
+    fun setSoulAuto(text: String) {
+        settings.putString(KEY_SOUL_AUTO, text)
+    }
+
+    /** Combined soul for system prompt: persona prefix + user text + auto behavior summary. */
+    fun getSoulText(): String {
+        val persona = "You are ${getPersonaName()}."
+        val user = getSoulUser()
+        val auto = getSoulAuto()
+        val combined = if (auto.isNotEmpty()) {
+            if (user.isNotEmpty()) "$user\n\n## Behavior Notes\n$auto" else "## Behavior Notes\n$auto"
+        } else {
+            user
+        }
+        return if (combined.isNotEmpty()) "$persona\n\n$combined" else persona
+    }
+
+    /** Kept for backward compat — writes to soul_user only. */
     fun setSoulText(text: String) {
-        settings.putString(KEY_SOUL, text)
+        settings.putString(KEY_SOUL_USER, text)
+    }
+
+    fun getPersonaName(): String = settings.getString(KEY_PERSONA_NAME, "Kai")
+
+    fun setPersonaName(name: String) {
+        settings.putString(KEY_PERSONA_NAME, name)
+    }
+
+    private fun migrateSoulFromLegacy(): String {
+        val old = settings.getString("soul_text", "")
+        if (old.isNotEmpty()) {
+            settings.putString(KEY_SOUL_USER, old)
+            settings.remove("soul_text")
+        }
+        return old
     }
 
     // Memory
@@ -265,15 +307,6 @@ class AppSettings(internal val settings: Settings) {
     fun setMemoryEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_MEMORY_ENABLED, enabled)
     }
-
-    fun getMemoryInstructions(): String = settings.getString(KEY_MEMORY_INSTRUCTIONS, DEFAULT_MEMORY_INSTRUCTIONS)
-
-    fun setMemoryInstructions(value: String) {
-        settings.putString(KEY_MEMORY_INSTRUCTIONS, value)
-        settings.putBoolean(KEY_HAS_CUSTOM_MEMORY_INSTRUCTIONS, true)
-    }
-
-    fun hasCustomMemoryInstructions(): Boolean = settings.getBoolean(KEY_HAS_CUSTOM_MEMORY_INSTRUCTIONS, false)
 
     // Agent memories
     fun getMemoriesJson(): String = settings.getString(KEY_AGENT_MEMORIES, "[]")
@@ -710,10 +743,10 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_ENCRYPTION_KEY = "encryption_key"
         const val KEY_MIGRATION_COMPLETE = "migration_complete_v1"
         const val KEY_TOOL_PREFIX = "tool_enabled_"
-        const val KEY_SOUL = "soul_text"
+        const val KEY_SOUL_USER = "soul_user"
+        const val KEY_SOUL_AUTO = "soul_auto"
+        const val KEY_PERSONA_NAME = "current_persona"
         const val KEY_MEMORY_ENABLED = "memory_enabled"
-        const val KEY_MEMORY_INSTRUCTIONS = "memory_instructions"
-        const val KEY_HAS_CUSTOM_MEMORY_INSTRUCTIONS = "has_custom_memory_instructions"
         const val KEY_AGENT_MEMORIES = "agent_memories"
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
@@ -784,35 +817,5 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SSH_PROFILES = "ssh_profiles"
         const val KEY_SSH_ACTIVE_PROFILE = "ssh_active_profile"
         const val KEY_ALT_MEMORY_MIGRATION_COMPLETE = "alt_memory_migration_complete"
-
-        // Full memory guidance for remote models — references all memory tools.
-        const val DEFAULT_MEMORY_INSTRUCTIONS =
-            "## Memory System\n" +
-                "You have persistent memory across conversations. Your stored memories are listed below grouped by category.\n\n" +
-                "Use these tools to manage your memory:\n" +
-                "- `search_memories` — Search your stored memories by keyword at any time\n" +
-                "- `memory_store` — Save important information about the user (preferences, facts, projects, goals)\n" +
-                "- `memory_learn` — Save categorized learnings (LEARNING for things that worked, ERROR for error resolutions, PREFERENCE for user corrections)\n" +
-                "- `memory_reinforce` — Increment hit count when a stored memory produced a good outcome\n" +
-                "- `promote_learning` — Promote well-reinforced memories (5+ hits) into your permanent system prompt (soul)\n" +
-                "- `memory_forget` — Delete outdated or incorrect memories\n" +
-                "- `kg_add` — Add facts to the knowledge graph (subject -> predicate -> object relationships)\n" +
-                "- `kg_query` — Query the knowledge graph for facts about an entity or relationship\n" +
-                "- `kg_invalidate` — Mark a KG fact as no longer true\n" +
-                "- `diary_write` — Write introspective entries and session summaries to your personal diary\n" +
-                "- `diary_read` — Read recent entries from your personal diary\n" +
-                "Do not store trivial or transient information."
-
-        // Trimmed memory guidance for on-device models — only mentions tools in LOCAL_TOOL_ALLOWLIST.
-        const val DEFAULT_LOCAL_MEMORY_INSTRUCTIONS =
-            "## Memory System\n" +
-                "You have persistent memory across conversations. Your stored memories are listed below grouped by category.\n\n" +
-                "Use these tools to manage your memory:\n" +
-                "- `search_memories` — Search your stored memories by keyword at any time\n" +
-                "- `memory_store` — Save important information about the user (preferences, facts, projects, goals)\n" +
-                "- `memory_reinforce` — Increment hit count when a stored memory produced a good outcome\n" +
-                "- `memory_forget` — Delete outdated or incorrect memories\n" +
-                "- `kg_query` — Query the knowledge graph for facts about an entity\n" +
-                "Do not store trivial or transient information."
     }
 }

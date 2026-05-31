@@ -132,6 +132,7 @@ class HeartbeatManager(
         } else {
             emptyList()
         }
+        val learnedPatterns = memoryStore.getBehaviorMemories()
         val promotionCandidates = memoryStore.getPromotionCandidates().map { entry ->
             HeartbeatPromotionCandidate(
                 key = entry.key,
@@ -150,6 +151,7 @@ class HeartbeatManager(
             pendingSms = heartbeatSms,
             pendingNotifications = heartbeatNotifications,
             promotionCandidates = promotionCandidates,
+            learnedPatterns = learnedPatterns,
         )
     }
 

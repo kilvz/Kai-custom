@@ -17,7 +17,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -27,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,11 +49,15 @@ fun MemoryManagementSheet(
     var memories by remember { mutableStateOf<List<MemoryEntry>>(emptyList()) }
     var kgFacts by remember { mutableStateOf<List<KGFact>>(emptyList()) }
 
+    var showProtected by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         entityCount = dataRepository.countDimensionEntities()
         kgFacts = dataRepository.queryKgFacts()
         memories = dataRepository.getMemories()
     }
+
+    val displayedMemories = if (showProtected) memories else memories.filter { !it.protected }
 
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Stats", "Memories", "KG Facts")
@@ -72,7 +78,7 @@ fun MemoryManagementSheet(
             )
             Spacer(Modifier.height(12.dp))
 
-            ScrollableTabRow(selectedTabIndex = selectedTab) {
+            PrimaryScrollableTabRow(selectedTabIndex = selectedTab) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
@@ -85,7 +91,7 @@ fun MemoryManagementSheet(
 
             when (selectedTab) {
                 0 -> StatsTab(entityCount, realms)
-                1 -> MemoriesTab(memories, onDeleteMemory)
+                1 -> MemoriesTab(displayedMemories, showProtected, onShowProtectedToggle = { showProtected = it }, onDeleteMemory = onDeleteMemory)
                 2 -> KgFactsTab(kgFacts)
             }
             Spacer(Modifier.height(16.dp))
@@ -126,7 +132,29 @@ private fun StatsTab(entityCount: Long, realms: Map<String, List<String>>) {
 }
 
 @Composable
-private fun MemoriesTab(memories: List<MemoryEntry>, onDeleteMemory: (String) -> Unit) {
+private fun MemoriesTab(
+    memories: List<MemoryEntry>,
+    showProtected: Boolean,
+    onShowProtectedToggle: (Boolean) -> Unit,
+    onDeleteMemory: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Switch(
+            checked = showProtected,
+            onCheckedChange = onShowProtectedToggle,
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = "Show protected",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+    Spacer(Modifier.height(8.dp))
+
     if (memories.isEmpty()) {
         Text(
             text = "No memories stored.",

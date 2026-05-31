@@ -32,14 +32,14 @@ object HeartbeatTools {
             val memory = memories.find { it.key == memoryKey }
                 ?: return mapOf("success" to false, "error" to "Memory not found: $memoryKey")
 
-            // Append to soul text
-            val currentSoul = appSettings.getSoulText()
-            val newSoul = if (currentSoul.isEmpty()) {
+            // Append to auto soul (heartbeat-managed, not user-editable)
+            val currentAuto = appSettings.getSoulAuto()
+            val newAuto = if (currentAuto.isEmpty()) {
                 soulAddition
             } else {
-                "$currentSoul\n\n$soulAddition"
+                "$currentAuto\n\n$soulAddition"
             }
-            appSettings.setSoulText(newSoul)
+            appSettings.setSoulAuto(newAuto)
 
             // Remove the promoted memory
             memoryStore.forget(memoryKey)

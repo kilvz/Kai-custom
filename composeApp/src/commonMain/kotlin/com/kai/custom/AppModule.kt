@@ -154,6 +154,7 @@ val appModule = module {
             get<SmsStore>(),
             get<SmsPoller>(),
             get<NotificationStore>(),
+            get<MemoryStore>(),
         )
     }
     single<DaemonController> { createDaemonController() }

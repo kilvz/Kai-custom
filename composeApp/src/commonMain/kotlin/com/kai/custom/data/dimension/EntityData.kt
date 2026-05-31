@@ -13,6 +13,7 @@ data class EntityData(
     val createdAt: Long,
     val updatedAt: Long,
     val embedding: List<Float>? = null,
+    val protected: Boolean = false,
 )
 
 @Serializable

@@ -22,6 +22,7 @@ data class MemoryEntry(
     val category: MemoryCategory = MemoryCategory.GENERAL,
     val hitCount: Int = 1,
     val source: String? = null,
+    val protected: Boolean = false,
 )
 
 @Serializable
@@ -46,6 +47,17 @@ interface MemoryStore {
     suspend fun reinforceMemory(key: String): MemoryEntry?
 
     suspend fun forget(key: String): Boolean
+
+    suspend fun storeProtected(
+        key: String,
+        content: String,
+        category: MemoryCategory = MemoryCategory.LEARNING,
+        source: String? = null,
+    ): MemoryEntry
+
+    fun getUserMemories(max: Int = 1000): List<MemoryEntry>
+
+    fun getBehaviorMemories(): List<MemoryEntry>
 
     fun getAllMemories(max: Int = 1000): List<MemoryEntry>
 

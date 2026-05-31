@@ -75,11 +75,12 @@ class SettingsViewModel(
         configuredServices = buildConfiguredServiceEntries().toImmutableList(),
         availableServicesToAdd = computeAvailableServices().toImmutableList(),
         tools = dataRepository.getToolDefinitions().toImmutableList(),
-        soulText = dataRepository.getSoulText(),
+        soulText = dataRepository.getSoulUser(),
+        personaName = dataRepository.getPersonaName(),
         isDynamicUiEnabled = dataRepository.isDynamicUiEnabled(),
         themeMode = dataRepository.getThemeMode(),
         isMemoryEnabled = dataRepository.isMemoryEnabled(),
-        memories = dataRepository.getMemories().toImmutableList(),
+        memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList(),
         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
         scheduledTasks = dataRepository.getScheduledTasks().toImmutableList(),
         isDaemonEnabled = dataRepository.isDaemonEnabled(),
@@ -152,6 +153,7 @@ class SettingsViewModel(
         onSelectModel = ::onSelectModel,
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
+        onChangePersonaName = ::onChangePersonaName,
         onToggleDynamicUi = ::onToggleDynamicUi,
         onChangeThemeMode = ::onChangeThemeMode,
         onToggleMemory = ::onToggleMemory,
@@ -431,8 +433,13 @@ class SettingsViewModel(
     }
 
     private fun onSaveSoul(text: String) {
-        dataRepository.setSoulText(text)
+        dataRepository.setSoulUser(text)
         _state.update { it.copy(soulText = text) }
+    }
+
+    private fun onChangePersonaName(name: String) {
+        dataRepository.setPersonaName(name)
+        _state.update { it.copy(personaName = name) }
     }
 
     private fun onToggleDynamicUi(enabled: Boolean) {
@@ -462,7 +469,7 @@ class SettingsViewModel(
     private fun onUpdateMemory(key: String, content: String) {
         viewModelScope.launch(backgroundDispatcher) {
             dataRepository.updateMemoryContent(key, content)
-            _state.update { it.copy(memories = dataRepository.getMemories().toImmutableList()) }
+            _state.update { it.copy(memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList()) }
         }
     }
 
@@ -910,7 +917,7 @@ class SettingsViewModel(
         when (deletion) {
             is PendingDeletion.Memory -> {
                 dataRepository.deleteMemory(deletion.key)
-                _state.update { it.copy(memories = dataRepository.getMemories().toImmutableList()) }
+            _state.update { it.copy(memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList()) }
             }
 
             is PendingDeletion.Task -> {

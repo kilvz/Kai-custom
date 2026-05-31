@@ -48,6 +48,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
             category = category,
             hitCount = hitCount,
             source = source,
+            protected = e.protected,
         )
     }
 
@@ -115,11 +116,49 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
     override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> =
         allEntities(max).mapNotNull { entityToEntry(it) }.filter { it.hitCount >= minHits }
 
+    override suspend fun storeProtected(
+        key: String,
+        content: String,
+        category: MemoryCategory,
+        source: String?,
+    ): MemoryEntry = mutex.withLock {
+        val now = Clock.System.now().toEpochMilliseconds()
+        val existing = findEntryByKey(key)
+        val entry = existing?.copy(
+            content = content,
+            updatedAt = now,
+            category = category,
+            source = source ?: existing.source,
+            protected = true,
+        ) ?: MemoryEntry(
+            key = key,
+            content = content,
+            createdAt = now,
+            updatedAt = now,
+            category = category,
+            source = source,
+            protected = true,
+        )
+        dimension.putEntity(entryToEntity(entry))
+        entry
+    }
+
     override suspend fun forget(key: String): Boolean = mutex.withLock {
         val entity = dimension.getEntityByMetadataKey("memory_key", key) ?: return@withLock false
+        val entry = entityToEntry(entity)
+        if (entry?.protected == true) return@withLock false
         dimension.deleteEntity(entity.id)
         true
     }
+
+    override fun getUserMemories(max: Int): List<MemoryEntry> =
+        dimension.searchEntities("", Int.MAX_VALUE).mapNotNull { entityToEntry(it.entity) }
+            .filter { !it.protected }
+            .take(max)
+
+    override fun getBehaviorMemories(): List<MemoryEntry> =
+        allEntities(Int.MAX_VALUE).mapNotNull { entityToEntry(it) }
+            .filter { it.protected }
 
     override fun getAllMemories(max: Int): List<MemoryEntry> =
         allEntities(max).mapNotNull { entityToEntry(it) }
