@@ -307,6 +307,7 @@ internal val StatusColorUnknown = Color(0xFF9E9E9E)
 
 @Composable
 fun SettingsScreen(
+    initialTab: String = "",
     viewModel: SettingsViewModel = koinViewModel(),
     sandboxViewModel: SandboxViewModel = koinViewModel(),
     sshViewModel: SshViewModel = koinViewModel(),
@@ -326,6 +327,13 @@ fun SettingsScreen(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(initialTab) {
+        if (initialTab.isNotBlank()) {
+            val tab = try { SettingsTab.valueOf(initialTab) } catch (_: Exception) { null }
+            if (tab != null) viewModel.actions.onSelectTab(tab)
+        }
     }
 
     SettingsScreenContent(

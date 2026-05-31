@@ -48,7 +48,7 @@ internal fun TopBar(
     actions: ChatActions,
     isChatHistoryEmpty: Boolean,
     hasSavedConversations: Boolean,
-    onNavigateToSettings: () -> Unit,
+    onNavigateToSettings: (String) -> Unit,
     isSandboxAvailable: Boolean,
     isSandboxOpen: Boolean,
     isShellExecuting: Boolean,
@@ -84,7 +84,7 @@ internal fun TopBar(
             }
             IconButton(
                 modifier = Modifier.handCursor(),
-                onClick = onNavigateToSettings,
+                onClick = { onNavigateToSettings("") },
             ) {
                 Icon(
                     imageVector = vectorResource(Res.drawable.ic_settings),

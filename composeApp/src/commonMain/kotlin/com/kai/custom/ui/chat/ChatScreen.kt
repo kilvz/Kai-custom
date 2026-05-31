@@ -139,7 +139,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ChatScreen(
     viewModel: ChatViewModel = koinViewModel(),
     textToSpeech: TextToSpeechInstance?,
-    onNavigateToSettings: () -> Unit,
+    onNavigateToSettings: (String) -> Unit,
     isSandboxAvailable: Boolean = false,
     isSshAvailable: Boolean = false,
     navigationTabBar: (@Composable () -> Unit)? = null,
@@ -160,7 +160,7 @@ fun ChatScreen(
 fun ChatScreenContent(
     uiState: ChatUiState,
     textToSpeech: TextToSpeechInstance? = null,
-    onNavigateToSettings: () -> Unit = {},
+    onNavigateToSettings: (String) -> Unit = {},
     isSandboxAvailable: Boolean = false,
     isSshAvailable: Boolean = false,
     navigationTabBar: (@Composable () -> Unit)? = null,
@@ -465,7 +465,7 @@ private fun InteractiveModeContent(
 private fun ChatModeScreen(
     uiState: ChatUiState,
     textToSpeech: TextToSpeechInstance?,
-    onNavigateToSettings: () -> Unit,
+    onNavigateToSettings: (String) -> Unit,
     isSandboxAvailable: Boolean,
     isSshAvailable: Boolean = false,
     navigationTabBar: (@Composable () -> Unit)?,
@@ -527,7 +527,7 @@ private fun ChatModeScreen(
                 actions = uiState.actions,
                 isChatHistoryEmpty = uiState.history.isEmpty(),
                 hasSavedConversations = filteredConversations.any { it.id != uiState.currentConversationId },
-                onNavigateToSettings = onNavigateToSettings,
+                onNavigateToSettings = { onNavigateToSettings("") },
                 isSandboxAvailable = isSandboxAvailable,
                 isSandboxOpen = isSandboxOpen,
                 isShellExecuting = isShellExecuting,
@@ -610,7 +610,7 @@ private fun ChatModeScreen(
                 if (sshViewModel != null) {
                     SshTerminalContent(
                         sshViewModel = sshViewModel,
-                        onOpenSettings = onNavigateToSettings,
+                        onOpenSettings = { onNavigateToSettings("SSH") },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()

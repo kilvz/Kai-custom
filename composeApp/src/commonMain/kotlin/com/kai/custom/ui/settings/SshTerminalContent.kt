@@ -2,6 +2,7 @@
 
 package com.kai.custom.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -128,10 +129,11 @@ internal fun SshTerminalContent(
                 )
             }
         } else {
-            SelectionContainer {
+            SelectionContainer(
+                modifier = Modifier.weight(1f).fillMaxWidth()
+            ) {
                 Column(
                     modifier = Modifier
-                        .weight(1f)
                         .fillMaxWidth()
                         .verticalScroll(scrollState)
                         .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -186,6 +188,7 @@ internal fun SshTerminalContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(SshInputBg)
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {

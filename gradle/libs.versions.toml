@@ -1,8 +1,8 @@
 [versions]
 agp = "9.2.1"
-appVersion = "2.0.15"
+appVersion = "2.0.16"
 appVersionBase = "2.6.3"
-android-versionCode = "130"
+android-versionCode = "131"
 android-compileSdk = "36"
 android-minSdk = "26"
 android-targetSdk = "36"

@@ -69,6 +69,7 @@ class SandboxViewModel(
         sandboxPackagesInstalled = status.packagesInstalled,
         isWorking = status.working,
         hasError = status.error,
+        sandboxDistro = dataRepository.getSandboxDistro(),
     )
 
     fun onToggleSandbox(enabled: Boolean) {

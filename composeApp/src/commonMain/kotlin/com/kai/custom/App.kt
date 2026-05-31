@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.toRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -74,7 +75,7 @@ object Home
 
 @Serializable
 @SerialName("settings")
-object Settings
+data class Settings(val tab: String = "")
 
 @Composable
 fun App(
@@ -212,7 +213,7 @@ private fun AppContent(
                         SegmentedButton(
                             selected = !isHome,
                             onClick = {
-                                navController.navigate(Settings) {
+                                navController.navigate(Settings(tab = "")) {
                                     popUpTo(Home)
                                     launchSingleTop = true
                                 }
@@ -234,15 +235,16 @@ private fun AppContent(
                         ChatScreen(
                             viewModel = chatViewModel,
                             textToSpeech = textToSpeech,
-                            onNavigateToSettings = {
-                                navController.navigate(Settings)
+                            onNavigateToSettings = { tab ->
+                                navController.navigate(Settings(tab = tab))
                             },
                             isSandboxAvailable = currentPlatform is Platform.Mobile.Android,
                             isSshAvailable = currentPlatform is Platform.Mobile.Android,
                             navigationTabBar = if (showTabBar) navigationTabBar else null,
                         )
                     }
-                    composable<Settings> {
+                    composable<Settings> { backStackEntry ->
+                        val settingsRoute: Settings = backStackEntry.toRoute()
                         if (showTabBar) {
                             DisposableEffect(Unit) {
                                 onDispose {
@@ -251,6 +253,7 @@ private fun AppContent(
                             }
                         }
                         SettingsScreen(
+                            initialTab = settingsRoute.tab,
                             onNavigateBack = {
                                 chatViewModel.refreshSettings()
                                 navController.navigateUp()

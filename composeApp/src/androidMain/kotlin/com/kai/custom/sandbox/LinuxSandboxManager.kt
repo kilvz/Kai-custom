@@ -177,7 +177,7 @@ class LinuxSandboxManager(
         var updated = false
         for (mirror in downloader.getMirrors(distro)) {
             downloader.writeRepositories(rootfsDir, mirror, distro)
-            val result = executor.execute(updateCmd, timeoutSeconds = 60)
+            val result = executor.execute(updateCmd, timeoutSeconds = 180)
             if (result["success"] as? Boolean == true) {
                 updated = true
                 break
@@ -310,7 +310,7 @@ class LinuxSandboxManager(
                 var updated = false
                 for (mirror in downloader.getMirrors(distro)) {
                     downloader.writeRepositories(rootfsDir, mirror, distro)
-                    val result = executor.execute(updateCmd, timeoutSeconds = 60)
+                    val result = executor.execute(updateCmd, timeoutSeconds = 180)
                     if (result["success"] as? Boolean == true) {
                         updated = true
                         break
@@ -320,7 +320,7 @@ class LinuxSandboxManager(
                     for (mirror in downloader.getMirrors(distro)) {
                         val httpMirror = mirror.replace("https://", "http://")
                         downloader.writeRepositories(rootfsDir, httpMirror, distro)
-                        val result = executor.execute(updateCmd, timeoutSeconds = 60)
+            val result = executor.execute(updateCmd, timeoutSeconds = 180)
                         if (result["success"] as? Boolean == true) {
                             updated = true
                             break

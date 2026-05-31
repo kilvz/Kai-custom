@@ -234,10 +234,11 @@ fun TerminalContent(
             }
         }
 
-        SelectionContainer {
+        SelectionContainer(
+            modifier = Modifier.weight(1f).fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
