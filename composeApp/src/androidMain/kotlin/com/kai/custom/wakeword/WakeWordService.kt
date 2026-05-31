@@ -68,20 +68,23 @@ class WakeWordService : Service() {
         } else null
         Log.d(TAG, "onStartCommand phrase=$currentPhrase mode=$currentMode hasTemplate=${currentTemplate != null}")
 
-        // Anti-flap: if we were destroyed less than ANTI_FLAP_MS ago, reject immediately
-        val sinceStop = System.currentTimeMillis() - lastStoppedMs
-        if (sinceStop < ANTI_FLAP_MS) {
-            Log.w(TAG, "anti-flap: stopped ${sinceStop}ms ago, rejecting restart")
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
+        // Must call startForeground() before any early return — Android crashes with
+        // RemoteServiceException if startForegroundService() was used but startForeground()
+        // is never called (e.g. anti-flap, permission denied, missing template).
         val notification = buildNotification()
         try {
             startForeground(NOTIFICATION_ID, notification)
             Log.d(TAG, "foreground notification posted")
         } catch (e: Exception) {
             Log.e(TAG, "startForeground failed: $e")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        // Anti-flap: if we were destroyed less than ANTI_FLAP_MS ago, reject immediately
+        val sinceStop = System.currentTimeMillis() - lastStoppedMs
+        if (sinceStop < ANTI_FLAP_MS) {
+            Log.w(TAG, "anti-flap: stopped ${sinceStop}ms ago, rejecting restart")
             stopSelf()
             return START_NOT_STICKY
         }
