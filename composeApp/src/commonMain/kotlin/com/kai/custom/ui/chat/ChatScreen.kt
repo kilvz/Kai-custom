@@ -610,6 +610,7 @@ private fun ChatModeScreen(
                 if (sshViewModel != null) {
                     SshTerminalContent(
                         sshViewModel = sshViewModel,
+                        onOpenSettings = onNavigateToSettings,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth()
