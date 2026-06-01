@@ -121,6 +121,7 @@ internal fun AgentContent(
     memories: ImmutableList<MemoryEntry>,
     isMemoryEnabled: Boolean,
     isAltMemoryEnabled: Boolean,
+    altMemoryInstalled: Boolean,
     sandboxReady: Boolean,
     onToggleAltMemory: (Boolean) -> Unit,
     scheduledTasks: ImmutableList<ScheduledTask>,
@@ -171,19 +172,20 @@ internal fun AgentContent(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     SettingsCard {
-                        MemoryList(
-                            memories = memories,
-                            onDeleteMemory = actions.onDeleteMemory,
-                            onUpdateMemory = actions.onUpdateMemory,
-                            isMemoryEnabled = isMemoryEnabled,
-                            isAltMemoryEnabled = isAltMemoryEnabled,
-                            sandboxReady = sandboxReady,
-                            onToggleMemory = actions.onToggleMemory,
-                            onToggleAltMemory = onToggleAltMemory,
-                            onExportDimension = actions.onExportDimension,
-                            onImportDimension = actions.onImportDimension,
-                        )
-                    }
+                MemoryList(
+                        memories = memories,
+                        onDeleteMemory = actions.onDeleteMemory,
+                        onUpdateMemory = actions.onUpdateMemory,
+                        isMemoryEnabled = isMemoryEnabled,
+                        isAltMemoryEnabled = isAltMemoryEnabled,
+                        altMemoryInstalled = altMemoryInstalled,
+                        sandboxReady = sandboxReady,
+                        onToggleMemory = actions.onToggleMemory,
+                        onToggleAltMemory = onToggleAltMemory,
+                        onExportDimension = actions.onExportDimension,
+                        onImportDimension = actions.onImportDimension,
+                    )
+                }
                     SettingsCard {
                         ScheduledTaskList(
                             tasks = scheduledTasks,
@@ -299,6 +301,7 @@ internal fun AgentContent(
                         onUpdateMemory = actions.onUpdateMemory,
                         isMemoryEnabled = isMemoryEnabled,
                         isAltMemoryEnabled = isAltMemoryEnabled,
+                        altMemoryInstalled = altMemoryInstalled,
                         sandboxReady = sandboxReady,
                         onToggleMemory = actions.onToggleMemory,
                         onToggleAltMemory = onToggleAltMemory,
@@ -655,6 +658,7 @@ private fun MemoryList(
     onUpdateMemory: (String, String) -> Unit,
     isMemoryEnabled: Boolean,
     isAltMemoryEnabled: Boolean,
+    altMemoryInstalled: Boolean,
     sandboxReady: Boolean,
     onToggleMemory: (Boolean) -> Unit,
     onToggleAltMemory: (Boolean) -> Unit,
@@ -697,7 +701,11 @@ private fun MemoryList(
         Spacer(Modifier.height(4.dp))
         ToggleableHeadline(
             title = "Alt-memory",
-            description = if (sandboxReady) "Vector memory with semantic search (install on enable)" else "Requires sandbox to be installed first",
+            description = when {
+                !sandboxReady -> "Requires sandbox to be installed first"
+                !altMemoryInstalled -> "Not installed — tap to install"
+                else -> "Vector memory with semantic search"
+            },
             checked = isAltMemoryEnabled,
             enabled = sandboxReady,
             onCheckedChange = onToggleAltMemory,

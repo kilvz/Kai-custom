@@ -362,6 +362,12 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_ALT_MEMORY_ENABLED, enabled)
     }
 
+    fun isAltMemoryInstalled(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_INSTALLED, false)
+
+    fun setAltMemoryInstalled(installed: Boolean) {
+        settings.putBoolean(KEY_ALT_MEMORY_INSTALLED, installed)
+    }
+
     // Agent memories
     fun getMemoriesJson(): String = settings.getString(KEY_AGENT_MEMORIES, "[]")
 
@@ -874,6 +880,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_ACTIVE_PERSONA_ID = "active_persona_id"
         const val KEY_MEMORY_ENABLED = "memory_enabled"
         const val KEY_ALT_MEMORY_ENABLED = "alt_memory_enabled"
+        const val KEY_ALT_MEMORY_INSTALLED = "alt_memory_installed"
         const val KEY_AGENT_MEMORIES = "agent_memories"
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"

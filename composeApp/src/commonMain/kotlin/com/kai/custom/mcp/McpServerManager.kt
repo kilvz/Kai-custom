@@ -69,6 +69,13 @@ class McpServerManager(private val appSettings: AppSettings) {
         return config
     }
 
+    fun removeBuiltInServer(serverId: String) {
+        builtInServers.remove(serverId)
+        clients[serverId]?.close()
+        clients.remove(serverId)
+        discoveredTools.remove(serverId)
+    }
+
     fun removeServer(serverId: String) {
         if (builtInServers.containsKey(serverId)) return
         val servers = getServers().toMutableList()

@@ -110,6 +110,8 @@ interface DataRepository {
     fun setMemoryEnabled(enabled: Boolean)
     fun isAltMemoryEnabled(): Boolean
     fun setAltMemoryEnabled(enabled: Boolean)
+    fun isAltMemoryInstalled(): Boolean
+    fun setAltMemoryInstalled(installed: Boolean)
     fun getMemories(): List<MemoryEntry>
     fun getSchemaResetMessage(): String?
     suspend fun deleteMemory(key: String)

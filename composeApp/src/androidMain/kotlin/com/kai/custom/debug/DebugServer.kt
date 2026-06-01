@@ -22,6 +22,7 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -182,6 +183,23 @@ class DebugServer(
                     }
                     sandboxController.installPackages()
                     call.respondText("Sandbox package install started", ContentType.Text.Plain)
+                }
+
+                post("/sandbox/exec") {
+                    val err = auth(call) ?: return@post
+                    if (sandboxController == null) {
+                        call.respondText(json.encodeToString(ErrorResponse("SandboxController not available")), ContentType.Application.Json, HttpStatusCode.ServiceUnavailable)
+                        return@post
+                    }
+                    val command = call.receiveText().trim()
+                    if (command.isBlank()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing command body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val useRoot = call.request.queryParameters["root"]?.toBooleanStrictOrNull() ?: false
+                    val timeout = call.request.queryParameters["timeout"]?.toLongOrNull() ?: 60L
+                    val output = sandboxController.executeCommand(command, useRoot = useRoot, timeoutSeconds = timeout)
+                    call.respondText(output, ContentType.Text.Plain)
                 }
 
                 post("/reset") {

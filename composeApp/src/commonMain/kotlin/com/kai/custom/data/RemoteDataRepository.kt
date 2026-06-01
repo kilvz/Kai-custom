@@ -678,9 +678,10 @@ class RemoteDataRepository(
 
     private fun getOrderedFallbackEntries(): List<FallbackEntry> {
         val instances = getConfiguredServiceInstances()
+        val hasLocalModels = localInferenceEngine?.getDownloadedModels()?.isNotEmpty() ?: false
         val entries = instances.map { FallbackEntry(instanceId = it.instanceId, service = Service.fromId(it.serviceId)) }
             .filter { it.service != Service.Free }
-            .filter { !it.service.isOnDevice || localInferenceEngine != null }
+            .filter { !it.service.isOnDevice || hasLocalModels }
         val freeEntry = FallbackEntry(instanceId = "free", service = Service.Free)
         return if (entries.isEmpty()) {
             listOf(freeEntry)
@@ -1939,6 +1940,12 @@ class RemoteDataRepository(
 
     override fun setAltMemoryEnabled(enabled: Boolean) {
         appSettings.setAltMemoryEnabled(enabled)
+    }
+
+    override fun isAltMemoryInstalled(): Boolean = appSettings.isAltMemoryInstalled()
+
+    override fun setAltMemoryInstalled(installed: Boolean) {
+        appSettings.setAltMemoryInstalled(installed)
     }
 
     override fun setMemoryEnabled(enabled: Boolean) {

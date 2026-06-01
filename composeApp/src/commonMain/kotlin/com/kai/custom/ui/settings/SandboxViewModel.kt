@@ -105,6 +105,12 @@ class SandboxViewModel(
         sandboxController.installPackages()
     }
 
+    fun onInstallAltMemory() {
+        viewModelScope.launch {
+            sandboxController.installAltMemoryPackage()
+        }
+    }
+
     fun onDistroChanged(distro: String) {
         dataRepository.setSandboxDistro(distro)
         _state.update { it.copy(sandboxDistro = distro) }

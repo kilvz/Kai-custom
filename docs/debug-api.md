@@ -34,6 +34,9 @@ All endpoints (except `/health`) require `Authorization: Bearer <token>` header.
 | `GET` | `/memories` | Yes | All stored memories |
 | `GET` | `/settings` | Yes | All settings as flat JSON |
 | `POST` | `/chat` | Yes | Send message to AI with **full tool-calling** |
+| `POST` | `/sandbox/setup` | Yes | Start Linux sandbox setup |
+| `POST` | `/sandbox/install-packages` | Yes | Start basic sandbox package install |
+| `POST` | `/sandbox/exec` | Yes | Run a raw Linux sandbox command and return output |
 | `POST` | `/settings/{key}` | Yes | Update a single setting |
 | `POST` | `/reset` | Yes | Clear conversation history |
 
@@ -195,6 +198,33 @@ Update any writable setting.
 {"error": "Unknown setting: foo"}
 ```
 
+### `POST /sandbox/setup`
+
+Starts Linux sandbox setup. Returns immediately with `text/plain`: `Sandbox setup started`.
+
+### `POST /sandbox/install-packages`
+
+Starts installation of the standard sandbox package set. Returns immediately with `text/plain`: `Sandbox package install started`.
+
+### `POST /sandbox/exec`
+
+Runs a raw command inside the Linux sandbox and returns combined command output as `text/plain`.
+
+**Request body:** plain text shell command.
+
+**Query parameters:**
+- `root=true|false` — whether to use the sandbox root path. Defaults to `false`.
+- `timeout=<seconds>` — command timeout. Defaults to `60`.
+
+**Examples:**
+```powershell
+$token = (curl.exe -s http://localhost:18500/health | python -c "import sys,json; print(json.load(sys.stdin)['token'])")
+curl.exe -s -X POST "http://localhost:18500/sandbox/exec?timeout=60&root=false" -H "Authorization: Bearer $token" -H "Content-Type: text/plain" --data-binary "python3 -m pip --version"
+curl.exe -s -X POST "http://localhost:18500/sandbox/exec?timeout=600&root=false" -H "Authorization: Bearer $token" -H "Content-Type: text/plain" --data-binary "python3 -m pip install --no-cache-dir --break-system-packages six"
+```
+
+Use this endpoint for diagnostics where `/chat` would be too indirect. It executes through `SandboxController.executeCommand()` and does not involve the model/tool loop.
+
 ### `POST /reset`
 
 Clears the current conversation history. Returns `text/plain`: `Conversation reset`
@@ -254,6 +284,7 @@ while ($true) { curl.exe -s http://localhost:18500/state -H "Authorization: Bear
 │  │  ├─ /memories                        │    │
 │  │  ├─ /settings                        │    │
 │  │  ├─ /chat      → askWithTools()      │    │
+│  │  ├─ /sandbox/exec → sandbox command  │    │
 │  │  ├─ /settings/{key}                  │    │
 │  │  └─ /reset                           │    │
 │  │                                       │    │

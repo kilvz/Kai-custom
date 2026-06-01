@@ -95,6 +95,7 @@ class SettingsViewModel(
         themeMode = dataRepository.getThemeMode(),
         isMemoryEnabled = dataRepository.isMemoryEnabled(),
         isAltMemoryEnabled = dataRepository.isAltMemoryEnabled(),
+        altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
         memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList(),
         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
         scheduledTasks = dataRepository.getScheduledTasks().toImmutableList(),
@@ -558,14 +559,18 @@ class SettingsViewModel(
         _state.update { it.copy(isMemoryEnabled = enabled) }
     }
 
-private fun onToggleAltMemory(enabled: Boolean) {
-    dataRepository.setAltMemoryEnabled(enabled)
-    _state.update { it.copy(isAltMemoryEnabled = enabled) }
-    viewModelScope.launch {
-        if (enabled) sandboxController.startAltMemory()
-        else sandboxController.stopAltMemory()
+    private fun onToggleAltMemory(enabled: Boolean) {
+        if (enabled && !dataRepository.isAltMemoryInstalled()) {
+            _state.update { it.copy(currentTab = SettingsTab.Sandbox) }
+            return
+        }
+        dataRepository.setAltMemoryEnabled(enabled)
+        _state.update { it.copy(isAltMemoryEnabled = enabled) }
+        viewModelScope.launch {
+            if (enabled) sandboxController.startAltMemory()
+            else sandboxController.stopAltMemory()
+        }
     }
-}
 
     private fun onDeleteMemory(key: String) {
         commitPendingDeletion()

@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private const val MAX_OUTPUT_LENGTH = 15_000
 private const val DEFAULT_TIMEOUT_SECONDS = 30L
-private const val MAX_TIMEOUT_SECONDS = 180L
+private const val MAX_TIMEOUT_SECONDS = 600L
 
 class ProotHandle internal constructor(
     private val process: Process,
@@ -59,7 +59,10 @@ class ProotExecutor(
     /** When false, the /sdcard bind mount is omitted from proot args. */
     var sandboxStorageMountEnabled: Boolean = true
 
-    /** When true and su is available, the proot command is wrapped in `su -c` for real root. */
+    /**
+     * When true and su is available, the proot command is wrapped in `su -c` for real root.
+     * When false, proot runs as the app user (no su wrapper).
+     */
     var sandboxRootEnabled: Boolean = false
 
     fun execute(

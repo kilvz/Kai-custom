@@ -450,6 +450,10 @@ class FakeDataRepository : DataRepository {
 
     override fun setAltMemoryEnabled(enabled: Boolean) {}
 
+    override fun isAltMemoryInstalled(): Boolean = false
+
+    override fun setAltMemoryInstalled(installed: Boolean) {}
+
     override fun setMemoryEnabled(enabled: Boolean) {
         memoryEnabled = enabled
     }

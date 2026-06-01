@@ -353,6 +353,7 @@ fun SettingsScreen(
         onCancelSandbox = sandboxViewModel::onCancelSandbox,
         onResetSandbox = sandboxViewModel::onResetSandbox,
         onInstallPackages = sandboxViewModel::onInstallPackages,
+        onInstallAltMemory = sandboxViewModel::onInstallAltMemory,
         onDistroChanged = sandboxViewModel::onDistroChanged,
         sshState = sshState,
         sshViewModel = sshViewModel,
@@ -373,6 +374,7 @@ fun SettingsScreenContent(
     onCancelSandbox: () -> Unit = {},
     onResetSandbox: () -> Unit = {},
     onInstallPackages: () -> Unit = {},
+    onInstallAltMemory: () -> Unit = {},
     onDistroChanged: (String) -> Unit = {},
     sshState: SshUiState = SshUiState(),
     sshViewModel: SshViewModel? = null,
@@ -509,6 +511,7 @@ fun SettingsScreenContent(
                                     memories = filteredUiState.memories,
                                     isMemoryEnabled = filteredUiState.isMemoryEnabled,
                                     isAltMemoryEnabled = filteredUiState.isAltMemoryEnabled,
+                                    altMemoryInstalled = filteredUiState.altMemoryInstalled,
                                     sandboxReady = filteredUiState.sandboxReady,
                                     onToggleAltMemory = actions.onToggleAltMemory,
                                     scheduledTasks = filteredUiState.scheduledTasks,
@@ -631,6 +634,7 @@ fun SettingsScreenContent(
                                     onCancelSandbox = onCancelSandbox,
                                     onResetSandbox = onResetSandbox,
                                     onInstallPackages = onInstallPackages,
+                                    onInstallAltMemory = onInstallAltMemory,
                                     onDistroChanged = onDistroChanged,
                                 )
                             }

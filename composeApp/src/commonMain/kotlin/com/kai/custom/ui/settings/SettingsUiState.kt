@@ -72,6 +72,7 @@ data class SettingsUiState(
     val themeMode: ThemeMode = ThemeMode.System,
     val isMemoryEnabled: Boolean = true,
     val isAltMemoryEnabled: Boolean = false,
+    val altMemoryInstalled: Boolean = false,
     val sandboxReady: Boolean = false,
     val memories: ImmutableList<MemoryEntry> = persistentListOf(),
     val isSchedulingEnabled: Boolean = true,

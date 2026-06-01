@@ -8,6 +8,7 @@ import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.mcp.AltMemoryLifecycleManager
 import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.sandbox.LinuxSandboxManager
+import com.kai.custom.sandbox.ProotExecutor
 import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SessionShell
 import com.kai.custom.sandbox.openFileWithIntent
@@ -158,11 +159,43 @@ class AndroidSandboxController : SandboxController {
         sandboxManager.clearTranscript(sessionId)
     }
 
-    override suspend fun executeCommand(command: String, sessionId: String): String = withContext(Dispatchers.IO) {
+    override suspend fun executeCommand(command: String, sessionId: String, useRoot: Boolean, timeoutSeconds: Long): String = withContext(Dispatchers.IO) {
         val state = sandboxManager.state.value
         if (state !is SandboxState.Ready) return@withContext SANDBOX_NOT_READY
 
-        val result = sandboxManager.shellFor(sessionId).run(command, timeoutSeconds = 30)
+        if (!useRoot) {
+            val executor = ProotExecutor(
+                prootPath = sandboxManager.prootPath,
+                libDir = File(sandboxManager.rootfsPath).parent!!,
+                rootfsPath = sandboxManager.rootfsPath,
+                homePath = sandboxManager.homePath,
+                tmpPath = sandboxManager.tmpPath,
+            ).apply {
+                sandboxStorageMountEnabled = appSettings.isSandboxStorageMountEnabled()
+                sandboxRootEnabled = false
+            }
+            val result = executor.execute(command, timeoutSeconds = timeoutSeconds)
+            val stdout = result["stdout"] as? String ?: ""
+            val stderr = result["stderr"] as? String ?: ""
+            val exitCode = result["exit_code"] as? Int
+            val error = result["error"] as? String
+            return@withContext buildString {
+                if (stdout.isNotEmpty()) append(stdout)
+                if (stderr.isNotEmpty()) {
+                    if (isNotEmpty()) append("\n")
+                    append(stderr)
+                }
+                if (error != null) {
+                    if (isNotEmpty()) append("\n")
+                    append(error)
+                }
+                if (exitCode != null && exitCode != 0 && isEmpty()) {
+                    append("Exit code: $exitCode")
+                }
+            }
+        }
+
+        val result = sandboxManager.shellFor(sessionId).run(command, timeoutSeconds = timeoutSeconds)
 
         val stdout = result["stdout"] as? String ?: ""
         val stderr = result["stderr"] as? String ?: ""
@@ -351,10 +384,79 @@ class AndroidSandboxController : SandboxController {
     // Falls through to FTS5 local search (interface default returns null).
 
     override suspend fun startAltMemory() {
+        android.util.Log.i("SandboxController", "startAltMemory called, sandboxReady=${_status.value.ready}")
         altMemoryLifecycle.setupAndStart()
     }
 
+    override suspend fun installAltMemoryPackage(): Boolean {
+        android.util.Log.i("SandboxController", "installAltMemoryPackage called")
+        val current = sandboxManager.state.value
+        if (current !is SandboxState.Ready) {
+            android.util.Log.w("SandboxController", "installAltMemoryPackage: sandbox not ready, state=$current")
+            return false
+        }
+
+        fun updateStatus(
+            working: Boolean = false,
+            error: Boolean = false,
+            progress: Float? = null,
+            statusText: String = "",
+        ) {
+            _status.value = _status.value.copy(
+                working = working,
+                error = error,
+                progress = progress,
+                statusText = statusText,
+            )
+        }
+
+        return withContext(Dispatchers.IO) {
+            updateStatus(working = true, statusText = "Checking Alt-Memory…")
+
+            val executor = sandboxManager.createProotExecutor()
+
+            val check = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
+            if (check["success"] as? Boolean == true && (check["stdout"] as? String)?.trim() == "1") {
+                appSettings.setAltMemoryInstalled(true)
+                updateStatus()
+                android.util.Log.i("SandboxController", "Alt-Memory already installed")
+                return@withContext true
+            }
+
+            updateStatus(working = true, statusText = "Installing Alt-Memory (pip)…")
+
+            val install = executor.execute(
+                "pip install --no-cache-dir --break-system-packages --root-user-action=ignore --retries 10 --timeout 30 alt-memory 2>&1",
+                timeoutSeconds = 600,
+            )
+            if (install["success"] as? Boolean != true) {
+                val stderr = install["stderr"] as? String ?: ""
+                val stdout = install["stdout"] as? String ?: ""
+                val error = install["error"] as? String ?: ""
+                val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
+                android.util.Log.e("SandboxController", "pip install failed: $msg")
+                updateStatus(error = true, statusText = "Alt-Memory install failed: $msg")
+                return@withContext false
+            }
+
+            updateStatus(working = true, statusText = "Verifying Alt-Memory…")
+
+            val verify = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
+            val ok = verify["success"] as? Boolean == true && (verify["stdout"] as? String)?.trim() == "1"
+            if (!ok) {
+                updateStatus(error = true, statusText = "Alt-Memory install: import check failed")
+                return@withContext false
+            }
+
+            appSettings.setAltMemoryInstalled(true)
+            updateStatus()
+            android.util.Log.i("SandboxController", "Alt-Memory installed successfully")
+            true
+        }
+    }
+
     override suspend fun stopAltMemory() {
+        android.util.Log.i("SandboxController", "stopAltMemory called")
         altMemoryLifecycle.stop()
     }
 }

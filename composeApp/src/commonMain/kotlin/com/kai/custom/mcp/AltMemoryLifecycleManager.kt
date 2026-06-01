@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
+
 class AltMemoryLifecycleManager(
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
@@ -29,12 +30,23 @@ class AltMemoryLifecycleManager(
 
     private var started = false
 
+    /**
+     * Ensure alt-memory Python package is installed. Returns true when
+     * installation succeeded (or was already installed). Idempotent.
+     */
+    suspend fun ensureInstalled(): Boolean {
+        if (appSettings.isAltMemoryInstalled()) return true
+        val ok = installIfNeeded()
+        if (ok) appSettings.setAltMemoryInstalled(true)
+        return ok
+    }
+
     suspend fun setupAndStart() {
         if (started) return
+        if (!appSettings.isAltMemoryInstalled()) return
         started = true
 
         try {
-            installIfNeeded()
             startMcpServer()
             if (waitForReady()) {
                 mcpServerManager.registerBuiltInServer(
@@ -56,8 +68,9 @@ class AltMemoryLifecycleManager(
             sandboxController.executeCommand(
                 command = "pkill -f 'alt-memory.*mcp' 2>/dev/null || true",
                 sessionId = SandboxSessions.SYSTEM,
+                useRoot = false,
             )
-            mcpServerManager.removeServer(SERVER_ID)
+            mcpServerManager.removeBuiltInServer(SERVER_ID)
         } catch (_: Exception) {
         }
     }
@@ -134,38 +147,44 @@ class AltMemoryLifecycleManager(
         }
     }
 
-    private suspend fun installIfNeeded() {
+    private suspend fun installIfNeeded(): Boolean {
         val check = sandboxController.executeCommand(
             command = "python3 -c 'import alt_memory; print(1)' 2>/dev/null",
             sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
         )
-        if (check.trim() == "1") return
+        if (check.trim() == "1") return true
 
-        sandboxController.executeCommand(
-            command = "pip install alt-memory > /tmp/alt-install.log 2>&1 &",
+        // Run pip install synchronously (no &) with a generous timeout.
+        // Background processes don't survive a one-shot proot shell, so we
+        // avoid the old pattern of "pip … &" + polling a log file.
+        val install = sandboxController.executeCommand(
+            command = "pip install alt-memory --break-system-packages 2>&1",
             sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+            timeoutSeconds = 180,
         )
-        repeat(24) {
-            delay(5_000L)
-            val status = sandboxController.executeCommand(
-                command = "tail -1 /tmp/alt-install.log 2>/dev/null || echo ''",
-                sessionId = SandboxSessions.SYSTEM,
-            )
-            val trimmed = status.trim()
-            if (trimmed.contains("Successfully installed") || trimmed.contains("already satisfied")) return
-        }
+        // Verify
+        val verify = sandboxController.executeCommand(
+            command = "python3 -c 'import alt_memory; print(1)' 2>/dev/null",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+        )
+        return verify.trim() == "1"
     }
 
     private suspend fun startMcpServer() {
         val checkCmd = sandboxController.executeCommand(
             command = "pgrep -f 'alt-memory.*mcp' || true",
             sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
         )
         if (checkCmd.trim().isNotEmpty()) return
 
         sandboxController.executeCommand(
             command = "nohup alt-memory mcp --transport sse --port 8316 > /tmp/alt-memory.log 2>&1 &",
             sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
         )
     }
 

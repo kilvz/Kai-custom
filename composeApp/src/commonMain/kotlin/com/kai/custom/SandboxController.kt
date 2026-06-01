@@ -65,6 +65,8 @@ interface SandboxController {
     suspend fun executeCommand(
         command: String,
         sessionId: String = SandboxSessions.DEFAULT,
+        useRoot: Boolean = true,
+        timeoutSeconds: Long = 30,
     ): String
     suspend fun executeCommandStreaming(
         command: String,
@@ -109,6 +111,7 @@ interface SandboxController {
 
     suspend fun startAltMemory() {}
     suspend fun stopAltMemory() {}
+    suspend fun installAltMemoryPackage(): Boolean = false
 }
 
 expect fun createSandboxController(): SandboxController
