@@ -35,9 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kai.custom.isDebugBuild
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.languageOptions
+import com.kai.custom.isDebugBuild
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.KaiSlider
 import com.kai.custom.ui.handCursor

@@ -29,10 +29,10 @@ import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
-import com.kai.custom.telegram.TelegramPoller
 import com.kai.custom.splinterlands.SplinterlandsApi
 import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
+import com.kai.custom.telegram.TelegramPoller
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController

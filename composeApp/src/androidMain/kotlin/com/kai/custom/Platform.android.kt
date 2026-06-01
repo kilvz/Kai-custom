@@ -2,6 +2,8 @@ package com.kai.custom
 
 import android.Manifest
 import android.app.usage.NetworkStatsManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,8 +13,6 @@ import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Environment
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.provider.ContactsContract
@@ -33,8 +33,8 @@ import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.NotificationStore
 import com.kai.custom.data.SmsDraftStore
 import com.kai.custom.data.SmsStore
-import com.kai.custom.data.TelegramStore
 import com.kai.custom.data.TaskStore
+import com.kai.custom.data.TelegramStore
 import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
@@ -42,11 +42,11 @@ import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.notifications.NotificationReader
 import com.kai.custom.notifications.declaresNotificationListener
+import com.kai.custom.root.RootManager
 import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
-import com.kai.custom.root.RootManager
 import com.kai.custom.tools.AdbTool
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.CalendarRepository
@@ -1092,23 +1092,29 @@ actual fun getAvailableTools(): List<Tool> {
                             val ops = java.util.ArrayList<android.content.ContentProviderOperation>()
                             val rawContactId = ops.size
                             ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI).withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null).withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null).build())
-                            ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name).build())
-                            if (phone != null) {
-                                ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                            ops.add(
+                                android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
                                     .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
-                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
-                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE).build())
+                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name).build(),
+                            )
+                            if (phone != null) {
+                                ops.add(
+                                    android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                        .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+                                        .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE).build(),
+                                )
                             }
                             if (email != null) {
-                                ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
-                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
-                                    .withValue(ContactsContract.CommonDataKinds.Email.DATA, email)
-                                    .withValue(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME).build())
+                                ops.add(
+                                    android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                        .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                        .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                                        .withValue(ContactsContract.CommonDataKinds.Email.DATA, email)
+                                        .withValue(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME).build(),
+                                )
                             }
                             context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
                             mapOf("success" to true, "message" to "Contact '$name' created")
@@ -1129,6 +1135,7 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Get cellular network info: operator, signal strength, network type",
                         parameters = emptyMap(),
                     )
+                    @Suppress("DEPRECATION")
                     override suspend fun execute(args: Map<String, Any>): Any {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                             return mapOf("success" to false, "error" to "Phone state permission not granted")
@@ -1175,9 +1182,11 @@ actual fun getAvailableTools(): List<Tool> {
                             "scan" to ParameterSchema("boolean", "Whether to perform a scan for new devices (default false)", false),
                         ),
                     )
+                    @Suppress("DEPRECATION")
                     override suspend fun execute(args: Map<String, Any>): Any {
                         return try {
-                            val btAdapter = BluetoothAdapter.getDefaultAdapter()
+                            val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
+                            val btAdapter = bluetoothManager.adapter
                             if (btAdapter == null) {
                                 return mapOf("success" to false, "error" to "Bluetooth not supported on this device")
                             }
@@ -1245,19 +1254,20 @@ actual fun getAvailableTools(): List<Tool> {
                             "filter" to ParameterSchema("string", "Filter logs by tag or keyword", false),
                         ),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        return try {
-                            val lines = (args["lines"] as? Number)?.toInt()?.coerceIn(10, 1000) ?: 100
-                            val filter = args["filter"]?.toString()?.trim()?.takeIf { it.isNotEmpty() }
-                            val cmd = mutableListOf("logcat", "-d", "-t", lines.toString())
-                            filter?.let { cmd.add("-s"); cmd.add(it) }
-                            val process = ProcessBuilder(cmd).redirectErrorStream(true).start()
-                            val output = process.inputStream.bufferedReader().readText()
-                            process.waitFor()
-                            mapOf("success" to true, "logs" to output, "line_count" to output.lines().size)
-                        } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to read logs: ${e.message}")
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val lines = (args["lines"] as? Number)?.toInt()?.coerceIn(10, 1000) ?: 100
+                        val filter = args["filter"]?.toString()?.trim()?.takeIf { it.isNotEmpty() }
+                        val cmd = mutableListOf("logcat", "-d", "-t", lines.toString())
+                        filter?.let {
+                            cmd.add("-s")
+                            cmd.add(it)
                         }
+                        val process = ProcessBuilder(cmd).redirectErrorStream(true).start()
+                        val output = process.inputStream.bufferedReader().readText()
+                        process.waitFor()
+                        mapOf("success" to true, "logs" to output, "line_count" to output.lines().size)
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to read logs: ${e.message}")
                     }
                 },
             )

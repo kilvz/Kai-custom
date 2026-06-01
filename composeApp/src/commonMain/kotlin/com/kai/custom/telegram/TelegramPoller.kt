@@ -43,10 +43,12 @@ class TelegramPoller(
 
             val response = json.decodeFromString<TelegramGetUpdatesResponse>(responseText)
             if (!response.ok) {
-                telegramStore.updateSyncState(syncState.copy(
-                    lastAttemptEpochMs = attemptAt,
-                    lastError = "API returned ok=false",
-                ))
+                telegramStore.updateSyncState(
+                    syncState.copy(
+                        lastAttemptEpochMs = attemptAt,
+                        lastError = "API returned ok=false",
+                    ),
+                )
                 return
             }
 
@@ -73,17 +75,21 @@ class TelegramPoller(
                 }
             }
 
-            telegramStore.updateSyncState(syncState.copy(
-                lastUpdateId = newMaxUpdateId,
-                lastSyncEpochMs = attemptAt,
-                lastAttemptEpochMs = attemptAt,
-                lastError = null,
-            ))
+            telegramStore.updateSyncState(
+                syncState.copy(
+                    lastUpdateId = newMaxUpdateId,
+                    lastSyncEpochMs = attemptAt,
+                    lastAttemptEpochMs = attemptAt,
+                    lastError = null,
+                ),
+            )
         } catch (e: Exception) {
-            telegramStore.updateSyncState(syncState.copy(
-                lastAttemptEpochMs = attemptAt,
-                lastError = e.message ?: e::class.simpleName ?: "Poll failed",
-            ))
+            telegramStore.updateSyncState(
+                syncState.copy(
+                    lastAttemptEpochMs = attemptAt,
+                    lastError = e.message ?: e::class.simpleName ?: "Poll failed",
+                ),
+            )
         }
     }
 
@@ -107,11 +113,13 @@ class TelegramPoller(
             val url = "https://api.telegram.org/bot$token/sendMessage"
             client.post(url) {
                 contentType(ContentType.Application.Json)
-                setBody(mapOf(
-                    "chat_id" to chatId,
-                    "text" to text,
-                    "reply_to_message_id" to replyToMessageId,
-                ))
+                setBody(
+                    mapOf(
+                        "chat_id" to chatId,
+                        "text" to text,
+                        "reply_to_message_id" to replyToMessageId,
+                    ),
+                )
             }
         } catch (_: Exception) {
         }

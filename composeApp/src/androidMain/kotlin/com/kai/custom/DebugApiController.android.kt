@@ -23,7 +23,9 @@ class AndroidDebugApiController : DebugApiController {
         if (server?.isRunning == true) return
         val sandboxController = try {
             org.koin.java.KoinJavaComponent.inject<SandboxController>(SandboxController::class.java).value
-        } catch (_: Exception) { null }
+        } catch (_: Exception) {
+            null
+        }
         val s = DebugServer(dataRepository, memoryStore, appSettings, toolExecutor, sandboxController)
         s.start()
         server = s

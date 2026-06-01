@@ -12,7 +12,6 @@ import com.kai.custom.email.EmailPoller
 import com.kai.custom.formatFileSize
 import com.kai.custom.getAvailableTools
 import com.kai.custom.getPlatformToolDefinitions
-import com.kai.custom.runBlockingCompat
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -41,6 +40,7 @@ import com.kai.custom.network.dtos.openaicompatible.extractInlineToolCalls
 import com.kai.custom.network.toUiError
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.runBlockingCompat
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManager
 import com.kai.custom.skills.SkillManifest

@@ -56,10 +56,12 @@ class DebugServer(
 
         embeddedServer(CIO, port = 18500, host = "127.0.0.1") {
             install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    ignoreUnknownKeys = true
-                })
+                json(
+                    Json {
+                        prettyPrint = true
+                        ignoreUnknownKeys = true
+                    },
+                )
             }
             routing {
                 get("/health") {
@@ -82,16 +84,21 @@ class DebugServer(
 
                 get("/state") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(StateResponse(
-                        historyCount = dataRepository.chatHistory.value.size,
-                        memoryCount = memoryStore.getAllMemories().size,
-                        toolCount = getAvailableTools().size,
-                        isDaemonEnabled = dataRepository.isDaemonEnabled(),
-                        isMemoryEnabled = dataRepository.isMemoryEnabled(),
-                        isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
-                        isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
-                        currentServiceId = "",
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            StateResponse(
+                                historyCount = dataRepository.chatHistory.value.size,
+                                memoryCount = memoryStore.getAllMemories().size,
+                                toolCount = getAvailableTools().size,
+                                isDaemonEnabled = dataRepository.isDaemonEnabled(),
+                                isMemoryEnabled = dataRepository.isMemoryEnabled(),
+                                isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
+                                isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
+                                currentServiceId = "",
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 get("/tools") {
@@ -108,30 +115,35 @@ class DebugServer(
 
                 get("/settings") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(mapOf(
-                        "soul_text" to dataRepository.getSoulUser(),
-                        "persona_name" to dataRepository.getPersonaName(),
-                        "free_service_primary" to dataRepository.isFreeServicePrimary().toString(),
-                        "memory_enabled" to dataRepository.isMemoryEnabled().toString(),
-                        "scheduling_enabled" to dataRepository.isSchedulingEnabled().toString(),
-                        "daemon_enabled" to dataRepository.isDaemonEnabled().toString(),
-                        "heartbeat_enabled" to dataRepository.getHeartbeatConfig().enabled.toString(),
-                        "sandbox_enabled" to dataRepository.isSandboxEnabled().toString(),
-                        "sandbox_storage_mount_enabled" to dataRepository.isSandboxStorageMountEnabled().toString(),
-                        "sandbox_root_enabled" to dataRepository.isSandboxRootEnabled().toString(),
-                        "root_enabled" to dataRepository.isRootEnabled().toString(),
-                        "shizuku_enabled" to dataRepository.isShizukuEnabled().toString(),
-                        "notifications_enabled" to dataRepository.isNotificationsEnabled().toString(),
-                        "dynamic_ui_enabled" to dataRepository.isDynamicUiEnabled().toString(),
-                        "email_enabled" to dataRepository.isEmailEnabled().toString(),
-                        "sms_enabled" to dataRepository.isSmsEnabled().toString(),
-                        "telegram_enabled" to dataRepository.isTelegramEnabled().toString(),
-                        "wake_word_enabled" to dataRepository.isWakeWordEnabled().toString(),
-                        "preferred_language" to dataRepository.getPreferredLanguage(),
-                        "debug_api_enabled" to dataRepository.isDebugApiEnabled().toString(),
-                        "alt_memory_enabled" to dataRepository.isAltMemoryEnabled().toString(),
-                        "sandbox_distro" to appSettings.getSandboxDistro(),
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            mapOf(
+                                "soul_text" to dataRepository.getSoulUser(),
+                                "persona_name" to dataRepository.getPersonaName(),
+                                "free_service_primary" to dataRepository.isFreeServicePrimary().toString(),
+                                "memory_enabled" to dataRepository.isMemoryEnabled().toString(),
+                                "scheduling_enabled" to dataRepository.isSchedulingEnabled().toString(),
+                                "daemon_enabled" to dataRepository.isDaemonEnabled().toString(),
+                                "heartbeat_enabled" to dataRepository.getHeartbeatConfig().enabled.toString(),
+                                "sandbox_enabled" to dataRepository.isSandboxEnabled().toString(),
+                                "sandbox_storage_mount_enabled" to dataRepository.isSandboxStorageMountEnabled().toString(),
+                                "sandbox_root_enabled" to dataRepository.isSandboxRootEnabled().toString(),
+                                "root_enabled" to dataRepository.isRootEnabled().toString(),
+                                "shizuku_enabled" to dataRepository.isShizukuEnabled().toString(),
+                                "notifications_enabled" to dataRepository.isNotificationsEnabled().toString(),
+                                "dynamic_ui_enabled" to dataRepository.isDynamicUiEnabled().toString(),
+                                "email_enabled" to dataRepository.isEmailEnabled().toString(),
+                                "sms_enabled" to dataRepository.isSmsEnabled().toString(),
+                                "telegram_enabled" to dataRepository.isTelegramEnabled().toString(),
+                                "wake_word_enabled" to dataRepository.isWakeWordEnabled().toString(),
+                                "preferred_language" to dataRepository.getPreferredLanguage(),
+                                "debug_api_enabled" to dataRepository.isDebugApiEnabled().toString(),
+                                "alt_memory_enabled" to dataRepository.isAltMemoryEnabled().toString(),
+                                "sandbox_distro" to appSettings.getSandboxDistro(),
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/chat") {
@@ -194,27 +206,49 @@ class DebugServer(
                         val v = updateRequest.value
                         when (key) {
                             "soul_text" -> dataRepository.setSoulText(v)
+
                             "persona_name" -> dataRepository.setPersonaName(v)
+
                             "preferred_language" -> dataRepository.setPreferredLanguage(v)
+
                             "free_service_primary" -> dataRepository.setFreeServicePrimary(v.toBoolean())
+
                             "memory_enabled" -> dataRepository.setMemoryEnabled(v.toBoolean())
+
                             "scheduling_enabled" -> dataRepository.setSchedulingEnabled(v.toBoolean())
+
                             "daemon_enabled" -> dataRepository.setDaemonEnabled(v.toBoolean())
+
                             "heartbeat_enabled" -> dataRepository.setHeartbeatEnabled(v.toBoolean())
+
                             "sandbox_enabled" -> dataRepository.setSandboxEnabled(v.toBoolean())
+
                             "sandbox_storage_mount_enabled" -> dataRepository.setSandboxStorageMountEnabled(v.toBoolean())
+
                             "sandbox_root_enabled" -> dataRepository.setSandboxRootEnabled(v.toBoolean())
+
                             "root_enabled" -> dataRepository.setRootEnabled(v.toBoolean())
+
                             "shizuku_enabled" -> dataRepository.setShizukuEnabled(v.toBoolean())
+
                             "notifications_enabled" -> dataRepository.setNotificationsEnabled(v.toBoolean())
+
                             "dynamic_ui_enabled" -> dataRepository.setDynamicUiEnabled(v.toBoolean())
+
                             "email_enabled" -> dataRepository.setEmailEnabled(v.toBoolean())
+
                             "sms_enabled" -> dataRepository.setSmsEnabled(v.toBoolean())
+
                             "telegram_enabled" -> dataRepository.setTelegramEnabled(v.toBoolean())
+
                             "wake_word_enabled" -> dataRepository.setWakeWordEnabled(v.toBoolean())
+
                             "debug_api_enabled" -> dataRepository.setDebugApiEnabled(v.toBoolean())
+
                             "alt_memory_enabled" -> dataRepository.setAltMemoryEnabled(v.toBoolean())
+
                             "sandbox_distro" -> appSettings.setSandboxDistro(v)
+
                             else -> {
                                 call.respondText(json.encodeToString(ErrorResponse("Unknown setting: $key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                                 return@post

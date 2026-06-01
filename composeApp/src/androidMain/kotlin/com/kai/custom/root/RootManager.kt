@@ -87,6 +87,5 @@ object RootManager {
         }
     }
 
-    private fun readStream(stream: java.io.InputStream): String =
-        BufferedReader(InputStreamReader(stream)).use { it.readText() }
+    private fun readStream(stream: java.io.InputStream): String = BufferedReader(InputStreamReader(stream)).use { it.readText() }
 }

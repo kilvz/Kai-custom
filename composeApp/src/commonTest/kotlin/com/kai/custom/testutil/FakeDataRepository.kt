@@ -18,9 +18,9 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.ServiceInstance
 import com.kai.custom.data.SmsDraft
-import com.kai.custom.data.TelegramSyncState
 import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.SystemPromptVariant
+import com.kai.custom.data.TelegramSyncState
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.inference.DownloadError

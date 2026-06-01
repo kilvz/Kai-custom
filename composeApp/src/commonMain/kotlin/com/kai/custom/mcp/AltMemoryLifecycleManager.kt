@@ -62,6 +62,7 @@ class AltMemoryLifecycleManager(
                         MemoryCategory.LEARNING,
                         MemoryCategory.ERROR,
                         -> DimensionConfig.REALM_AGENT
+
                         MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
                     }
                     val domain = when (entry.category) {
@@ -77,14 +78,17 @@ class AltMemoryLifecycleManager(
                             put("realm", JsonPrimitive(realm))
                             put("domain", JsonPrimitive(domain))
                             put("content", JsonPrimitive(entry.content))
-                            put("metadata", buildJsonObject {
-                                put("memory_key", JsonPrimitive(entry.key))
-                                put("category", JsonPrimitive(entry.category.name))
-                                put("hit_count", JsonPrimitive(entry.hitCount.toString()))
-                                put("type", JsonPrimitive("memory_entry"))
-                                entry.source?.let { put("source", JsonPrimitive(it)) }
-                                if (entry.protected) put("protected", JsonPrimitive("true"))
-                            })
+                            put(
+                                "metadata",
+                                buildJsonObject {
+                                    put("memory_key", JsonPrimitive(entry.key))
+                                    put("category", JsonPrimitive(entry.category.name))
+                                    put("hit_count", JsonPrimitive(entry.hitCount.toString()))
+                                    put("type", JsonPrimitive("memory_entry"))
+                                    entry.source?.let { put("source", JsonPrimitive(it)) }
+                                    if (entry.protected) put("protected", JsonPrimitive("true"))
+                                },
+                            )
                         },
                     )
                     migrated++

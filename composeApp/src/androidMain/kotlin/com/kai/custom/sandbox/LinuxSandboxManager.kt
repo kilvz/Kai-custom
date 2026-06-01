@@ -413,8 +413,6 @@ class LinuxSandboxManager(
         return total / (1024 * 1024)
     }
 
-    fun arePackagesInstalled(): Boolean {
-        return File(rootfsPath, "usr/bin/python3").exists() &&
-            File(rootfsPath, "usr/bin/ssh").exists()
-    }
+    fun arePackagesInstalled(): Boolean = File(rootfsPath, "usr/bin/python3").exists() &&
+        File(rootfsPath, "usr/bin/ssh").exists()
 }

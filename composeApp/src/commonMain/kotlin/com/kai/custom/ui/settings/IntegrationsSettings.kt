@@ -44,8 +44,8 @@ import kai.composeapp.generated.resources.settings_request_integration_descripti
 import kai.composeapp.generated.resources.settings_request_integration_title
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun IntegrationsContent(

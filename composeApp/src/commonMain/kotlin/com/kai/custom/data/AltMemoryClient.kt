@@ -27,6 +27,7 @@ class AltMemoryClient(
         MemoryCategory.LEARNING,
         MemoryCategory.ERROR,
         -> DimensionConfig.REALM_AGENT
+
         MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
     }
 
@@ -78,7 +79,9 @@ class AltMemoryClient(
                 isBuiltIn = false,
             )
         }
-    } catch (_: Exception) { emptyList() }
+    } catch (_: Exception) {
+        emptyList()
+    }
 
     override suspend fun syncPersonaToRemote(config: PersonaConfig) {
         try {
@@ -134,13 +137,16 @@ class AltMemoryClient(
             buildJsonObject {
                 put("entity_id", JsonPrimitive(key))
                 put("content", JsonPrimitive(content))
-                put("metadata", buildMetadata(
-                    key = key,
-                    category = existing.category,
-                    source = existing.source,
-                    hitCount = existing.hitCount,
-                    protected = existing.protected,
-                ))
+                put(
+                    "metadata",
+                    buildMetadata(
+                        key = key,
+                        category = existing.category,
+                        source = existing.source,
+                        hitCount = existing.hitCount,
+                        protected = existing.protected,
+                    ),
+                )
             },
         )
         return existing.copy(content = content, updatedAt = now)
@@ -154,13 +160,16 @@ class AltMemoryClient(
             "update_entity",
             buildJsonObject {
                 put("entity_id", JsonPrimitive(key))
-                put("metadata", buildMetadata(
-                    key = key,
-                    category = existing.category,
-                    source = existing.source,
-                    hitCount = newHitCount,
-                    protected = existing.protected,
-                ))
+                put(
+                    "metadata",
+                    buildMetadata(
+                        key = key,
+                        category = existing.category,
+                        source = existing.source,
+                        hitCount = newHitCount,
+                        protected = existing.protected,
+                    ),
+                )
             },
         )
         return existing.copy(hitCount = newHitCount, updatedAt = now)
@@ -206,11 +215,9 @@ class AltMemoryClient(
         }
     }
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> =
-        getAllMemories(max).filter { !it.protected }
+    override fun getUserMemories(max: Int): List<MemoryEntry> = getAllMemories(max).filter { !it.protected }
 
-    override fun getBehaviorMemories(): List<MemoryEntry> =
-        getAllMemories().filter { it.protected }
+    override fun getBehaviorMemories(): List<MemoryEntry> = getAllMemories().filter { it.protected }
 
     override fun getAllMemories(max: Int): List<MemoryEntry> = try {
         val response = runBlockingCompat {
@@ -378,10 +385,12 @@ class AltMemoryClient(
             // search returns JSON array directly (from MCP text content)
             val arr = when (parsed) {
                 is JsonArray -> parsed
+
                 is JsonObject -> {
                     // Could be wrapped in {results: [...]}
                     parsed["results"]?.jsonArray ?: parsed["memories"]?.jsonArray ?: return emptyList()
                 }
+
                 else -> return emptyList()
             }
             arr.mapNotNull { element ->
@@ -403,11 +412,13 @@ class AltMemoryClient(
             val parsed = parseJsonElement(response)
             when (parsed) {
                 is JsonArray -> parsed.mapNotNull { it.jsonObject }
+
                 is JsonObject -> {
                     parsed["results"]?.jsonArray?.mapNotNull { it.jsonObject }
                         ?: parsed["entities"]?.jsonArray?.mapNotNull { it.jsonObject }
                         ?: listOfNotNull(parsed)
                 }
+
                 else -> emptyList()
             }
         } catch (_: Exception) {
@@ -424,7 +435,11 @@ class AltMemoryClient(
 
     private fun parseMemoryEntryFromAlt(key: String, content: String, meta: JsonObject): MemoryEntry? {
         val catStr = meta["category"]?.jsonPrimitive?.contentOrNull ?: "GENERAL"
-        val category = try { MemoryCategory.valueOf(catStr) } catch (_: Exception) { MemoryCategory.GENERAL }
+        val category = try {
+            MemoryCategory.valueOf(catStr)
+        } catch (_: Exception) {
+            MemoryCategory.GENERAL
+        }
         val hitCount = meta["hit_count"]?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: 1
         val source = meta["source"]?.jsonPrimitive?.contentOrNull
         val protected = meta["protected"]?.jsonPrimitive?.contentOrNull == "true"
@@ -462,7 +477,9 @@ class AltMemoryClient(
                 validTo = obj["valid_to"]?.jsonPrimitive?.content?.toLongOrNull()
                     ?: obj["validTo"]?.jsonPrimitive?.content?.toLongOrNull(),
             )
-        } catch (_: Exception) { null }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private fun parseKGFactList(response: String): List<KGFact> {
@@ -500,7 +517,9 @@ class AltMemoryClient(
                         ?: Clock.System.now().toEpochMilliseconds(),
                 )
             }
-        } catch (_: Exception) { emptyList() }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     override fun schemaResetMessage(): String? = null
@@ -511,7 +530,6 @@ class AltMemoryClient(
             isLenient = true
         }
 
-        private fun parseJsonElement(response: String): JsonElement =
-            jsonElementParser.parseToJsonElement(response)
+        private fun parseJsonElement(response: String): JsonElement = jsonElementParser.parseToJsonElement(response)
     }
 }
