@@ -384,4 +384,5 @@
     <string name="settings_theme_light">Светлая</string>
     <string name="settings_theme_dark">Цёмная</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Навык выдалены</string>
 </resources>

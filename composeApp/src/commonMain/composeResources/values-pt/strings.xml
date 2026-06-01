@@ -384,4 +384,5 @@ Se algo precisar de atenção (memórias desatualizadas, tarefas vencidas, acomp
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Escuro</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Competência removida</string>
 </resources>

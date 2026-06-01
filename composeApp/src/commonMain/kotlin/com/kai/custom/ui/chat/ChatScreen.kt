@@ -284,6 +284,9 @@ private fun InteractiveModeScreen(uiState: ChatUiState) {
                         cancel = uiState.actions.cancel,
                         availableServices = interactiveServices,
                         onSelectService = uiState.actions.selectService,
+                        installedSkills = uiState.installedSkills,
+                        activeSkill = uiState.activeSkill,
+                        onSetActiveSkill = uiState.actions.onSetActiveSkill,
                     )
                 }
             }
@@ -983,6 +986,9 @@ private fun ChatModeScreen(
                     isVoiceInputActive = uiState.isVoiceInputActive,
                     onStartVoiceInput = uiState.actions.startVoiceInput,
                     onStopVoiceInput = uiState.actions.stopVoiceInput,
+                    installedSkills = uiState.installedSkills,
+                    activeSkill = uiState.activeSkill,
+                    onSetActiveSkill = uiState.actions.onSetActiveSkill,
                 )
             }
         }

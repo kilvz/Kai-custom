@@ -384,4 +384,5 @@
     <string name="settings_theme_light">Hele</string>
     <string name="settings_theme_dark">Tume</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Oskus eemaldatud</string>
 </resources>

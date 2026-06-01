@@ -43,6 +43,8 @@ interface MemoryStore {
 
     fun getPromotionCandidates(minHits: Int = 5, max: Int = 500): List<MemoryEntry>
 
+    fun schemaResetMessage(): String? = null
+
     fun exportDimension(): ByteArray
 
     fun importDimension(data: ByteArray)

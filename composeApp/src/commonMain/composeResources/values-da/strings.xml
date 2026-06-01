@@ -385,4 +385,5 @@ Hvis noget kræver opmærksomhed (forældede erindringer, forfaldne opgaver, bru
     <string name="settings_theme_light">Lys</string>
     <string name="settings_theme_dark">Mørk</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Færdighed fjernet</string>
 </resources>

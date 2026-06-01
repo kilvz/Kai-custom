@@ -14,6 +14,8 @@ import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.network.dtos.SponsorsResponseDto
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
@@ -125,6 +127,11 @@ data class SettingsUiState(
     val currentSponsors: ImmutableList<SponsorsResponseDto.Sponsor> = persistentListOf(),
     val pastSponsors: ImmutableList<SponsorsResponseDto.Sponsor> = persistentListOf(),
     val pendingDeletion: PendingDeletion? = null,
+    val installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
+    val activeSkill: SkillManifest? = null,
+    val marketplaceSkills: ImmutableList<RegistrySkillEntry> = persistentListOf(),
+    val isBrowsingMarketplace: Boolean = false,
+    val schemaResetMessage: String? = null,
 )
 
 @Immutable
@@ -150,6 +157,7 @@ sealed interface PendingDeletion {
     data class EmailAccount(val id: String) : PendingDeletion
     data class Service(val instanceId: String) : PendingDeletion
     data class McpServer(val serverId: String) : PendingDeletion
+    data class Skill(val id: String) : PendingDeletion
 }
 
 sealed interface ImportResult {

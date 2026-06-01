@@ -384,4 +384,5 @@
     <string name="settings_theme_light">روشن</string>
     <string name="settings_theme_dark">تیره</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">مهارت حذف شد</string>
 </resources>

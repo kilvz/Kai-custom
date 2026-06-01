@@ -383,4 +383,5 @@
     <string name="settings_theme_light">ہلکی</string>
     <string name="settings_theme_dark">گہری</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">مہارت ہٹا دی گئی</string>
 </resources>

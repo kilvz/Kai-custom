@@ -429,4 +429,24 @@
     <string name="tool_get_wifi_info_description">Get detailed WiFi connection information including SSID, signal strength, and frequency</string>
     <string name="microphone_permission_required">Microphone permission required</string>
     <string name="forked_from_banner">Forked from: %1$s</string>
+    <string name="snackbar_skill_removed">Skill removed</string>
+    <string name="settings_skills">Skills</string>
+    <string name="settings_skills_description">Skills are executable instructions that extend the AI\'s capabilities.</string>
+    <string name="settings_skills_needs_sandbox">Skills require the Linux Sandbox to be installed.</string>
+    <string name="settings_skills_setup_sandbox">Setup Sandbox</string>
+    <string name="settings_skills_none">No skills installed</string>
+    <string name="settings_skills_add">Add</string>
+    <string name="settings_skills_builtin">Built-in</string>
+    <string name="settings_skills_remove">Remove</string>
+    <string name="settings_skills_add_github">Add from GitHub</string>
+    <string name="settings_skills_github_url">GitHub URL</string>
+    <string name="settings_skills_github_hint">Owner/repo/path or full URL</string>
+    <string name="settings_skills_installing">Installing…</string>
+    <string name="settings_skills_cancel">Cancel</string>
+    <string name="settings_skills_install">Install</string>
+    <string name="settings_skills_browse">Browse marketplaces</string>
+    <string name="settings_skills_browse_loading">Loading…</string>
+    <string name="settings_skills_browse_failed">Failed to load marketplaces</string>
+    <string name="settings_skills_search">Search skills…</string>
+    <string name="settings_skills_search_empty">No skills found matching your search</string>
 </resources>

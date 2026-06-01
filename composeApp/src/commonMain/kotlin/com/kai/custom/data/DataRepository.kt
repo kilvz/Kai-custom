@@ -6,6 +6,8 @@ import com.kai.custom.inference.EngineState
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.mcp.McpServerConfig
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.ui.chat.History
 import com.kai.custom.ui.settings.SettingsModel
 import io.github.vinceglb.filekit.PlatformFile
@@ -80,6 +82,7 @@ interface DataRepository {
     fun isMemoryEnabled(): Boolean
     fun setMemoryEnabled(enabled: Boolean)
     fun getMemories(): List<MemoryEntry>
+    fun getSchemaResetMessage(): String?
     suspend fun deleteMemory(key: String)
     suspend fun updateMemoryContent(key: String, content: String)
 
@@ -237,6 +240,15 @@ interface DataRepository {
     fun startLocalModelDownload(model: LocalModel)
     fun cancelLocalModelDownload()
     suspend fun deleteLocalModel(modelId: String)
+
+    // Skills
+    fun getInstalledSkills(): List<SkillManifest>
+    fun getActiveSkill(): SkillManifest?
+    fun setActiveSkill(skill: SkillManifest?)
+    suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest>
+    suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest>
+    suspend fun uninstallSkill(id: String)
+    suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>>
 
     fun addSystemMessage(content: String)
 }

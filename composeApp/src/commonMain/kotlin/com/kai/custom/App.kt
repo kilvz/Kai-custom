@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
@@ -54,6 +55,7 @@ import com.kai.custom.ui.chat.ChatScreen
 import com.kai.custom.ui.chat.ChatViewModel
 import com.kai.custom.ui.components.FullScreenImageHost
 import com.kai.custom.ui.handCursor
+import com.kai.custom.ui.rememberSandboxAwareUriHandler
 import com.kai.custom.ui.settings.SettingsScreen
 import com.kai.custom.ui.withBlackBackground
 import kai.composeapp.generated.resources.Res
@@ -185,7 +187,13 @@ private fun AppContent(
         ThemeMode.OledBlack -> darkColorScheme.withBlackBackground()
     }
 
-    CompositionLocalProvider(LocalDensity provides scaledDensity) {
+    val sandboxController = koinInject<SandboxController>()
+    val sandboxAwareUriHandler = rememberSandboxAwareUriHandler(sandboxController)
+
+    CompositionLocalProvider(
+        LocalDensity provides scaledDensity,
+        LocalUriHandler provides sandboxAwareUriHandler,
+    ) {
         Theme(colorScheme = effectiveColorScheme) {
             FullScreenImageHost {
                 val chatViewModel: ChatViewModel = koinViewModel()

@@ -384,4 +384,5 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attività scadute, follow-up 
     <string name="settings_theme_light">Chiaro</string>
     <string name="settings_theme_dark">Scuro</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Competenza rimossa</string>
 </resources>

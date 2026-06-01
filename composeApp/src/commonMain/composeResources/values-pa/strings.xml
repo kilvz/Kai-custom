@@ -383,4 +383,5 @@
     <string name="settings_theme_light">ਹਲਕਾ</string>
     <string name="settings_theme_dark">ਗੂੜ੍ਹਾ</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">ਕੁਸ਼ਲਤਾ ਹਟਾਈ ਗਈ</string>
 </resources>

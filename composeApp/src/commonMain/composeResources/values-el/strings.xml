@@ -384,4 +384,5 @@
     <string name="settings_theme_light">Ανοιχτό</string>
     <string name="settings_theme_dark">Σκούρο</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Η δεξιότητα αφαιρέθηκε</string>
 </resources>

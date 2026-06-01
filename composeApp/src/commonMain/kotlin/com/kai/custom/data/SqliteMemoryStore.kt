@@ -111,6 +111,8 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         updated
     }
 
+    override fun schemaResetMessage(): String? = dimension.schemaResetMessage()
+
     override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> =
         allEntities(max).mapNotNull { entityToEntry(it) }.filter { it.hitCount >= minHits }
 

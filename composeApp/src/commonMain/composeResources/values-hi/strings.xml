@@ -384,4 +384,5 @@
     <string name="settings_theme_light">लाइट</string>
     <string name="settings_theme_dark">डार्क</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Skill हटाई गई</string>
 </resources>

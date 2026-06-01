@@ -24,6 +24,8 @@ import com.kai.custom.inference.EngineState
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.mcp.McpServerConfig
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.tools.CommonTools
 import com.kai.custom.ui.chat.History
 import com.kai.custom.ui.settings.SettingsModel
@@ -384,6 +386,8 @@ class FakeDataRepository : DataRepository {
 
     override fun getMemories(): List<MemoryEntry> = memories.toList()
 
+    override fun getSchemaResetMessage(): String? = null
+
     override suspend fun deleteMemory(key: String) {
         memories.removeAll { it.key == key }
     }
@@ -604,6 +608,21 @@ class FakeDataRepository : DataRepository {
     override fun startLocalModelDownload(model: LocalModel) {}
     override fun cancelLocalModelDownload() {}
     override suspend fun deleteLocalModel(modelId: String) {}
+
+    // Skills
+    private val installedSkills = mutableListOf<SkillManifest>()
+    private var activeSkill: SkillManifest? = null
+
+    override fun getInstalledSkills(): List<SkillManifest> = installedSkills.toList()
+    override fun getActiveSkill(): SkillManifest? = activeSkill
+    override fun setActiveSkill(skill: SkillManifest?) { activeSkill = skill }
+    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> =
+        Result.failure(UnsupportedOperationException("installSkillFromGitHub not implemented in FakeDataRepository"))
+    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> =
+        Result.failure(UnsupportedOperationException("installSkillFromRegistryEntry not implemented in FakeDataRepository"))
+    override suspend fun uninstallSkill(id: String) {}
+    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> =
+        Result.success(emptyList())
 
     override fun addSystemMessage(content: String) {}
 }

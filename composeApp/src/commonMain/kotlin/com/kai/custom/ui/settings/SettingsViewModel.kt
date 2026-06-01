@@ -24,6 +24,9 @@ import com.kai.custom.isSmsSupported
 import com.kai.custom.requestShizukuPermission
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.AnthropicInsufficientCreditsException
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
+import com.kai.custom.skills.parseGitHubSkillUrl
 import com.kai.custom.network.AnthropicInvalidApiKeyException
 import com.kai.custom.network.AnthropicOverloadedException
 import com.kai.custom.network.AnthropicRateLimitExceededException
@@ -137,6 +140,9 @@ class SettingsViewModel(
         localDownloadingModelId = dataRepository.getLocalDownloadingModelId()?.value,
         localDownloadProgress = dataRepository.getLocalDownloadProgress()?.value,
         modelContextTokens = buildModelContextTokensMap(),
+        installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
+        activeSkill = dataRepository.getActiveSkill(),
+        schemaResetMessage = dataRepository.getSchemaResetMessage(),
     )
 
     // Bound once so downstream Compose skipping works — a new SettingsActions
@@ -203,6 +209,10 @@ class SettingsViewModel(
         onUndoDelete = ::onUndoDelete,
         onExportDimension = { dataRepository.exportDimension() },
         onImportDimension = { data -> dataRepository.importDimension(data) },
+        onInstallGitHub = ::onInstallSkillFromGitHub,
+        onInstallBrowsed = ::onInstallSkillFromBrowsed,
+        onUninstallSkill = ::onUninstallSkill,
+        onBrowseMarketplaceSkills = ::onBrowseMarketplaceSkills,
     )
 
     private val _state = MutableStateFlow(buildFullState())
@@ -951,6 +961,16 @@ class SettingsViewModel(
                 dataRepository.removeMcpServer(deletion.serverId)
                 refreshMcpServers()
             }
+
+            is PendingDeletion.Skill -> {
+                dataRepository.uninstallSkill(deletion.id)
+                _state.update {
+                    it.copy(
+                        installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
+                        activeSkill = dataRepository.getActiveSkill(),
+                    )
+                }
+            }
         }
         // Guard against a stale async deletion clobbering a newer pending one from a rapid second Remove click.
         _state.update { state ->
@@ -976,6 +996,49 @@ class SettingsViewModel(
             executeDeletion(deletion)
         }
         super.onCleared()
+    }
+
+    // Skill management
+
+    private fun onInstallSkillFromGitHub(githubUrl: String) {
+        viewModelScope.launch {
+            val source = parseGitHubSkillUrl(githubUrl)
+            if (source == null) return@launch
+            val result = dataRepository.installSkillFromGitHub(source.owner, source.repo, source.ref, source.path)
+            result.onSuccess {
+                _state.update {
+                    it.copy(installedSkills = dataRepository.getInstalledSkills().toImmutableList())
+                }
+            }
+        }
+    }
+
+    private fun onInstallSkillFromBrowsed(entry: RegistrySkillEntry) {
+        viewModelScope.launch {
+            val result = dataRepository.installSkillFromRegistryEntry(entry)
+            result.onSuccess {
+                _state.update {
+                    it.copy(installedSkills = dataRepository.getInstalledSkills().toImmutableList())
+                }
+            }
+        }
+    }
+
+    private fun onUninstallSkill(id: String) {
+        _state.update { it.copy(pendingDeletion = PendingDeletion.Skill(id)) }
+    }
+
+    private fun onBrowseMarketplaceSkills() {
+        _state.update { it.copy(isBrowsingMarketplace = true) }
+        viewModelScope.launch {
+            val result = dataRepository.browseMarketplaceSkills()
+            _state.update {
+                it.copy(
+                    marketplaceSkills = result.getOrDefault(emptyList()).toImmutableList(),
+                    isBrowsingMarketplace = false,
+                )
+            }
+        }
     }
 
     private fun checkAllConnections() {

@@ -1,6 +1,7 @@
 package com.kai.custom.ui.chat
 
 import androidx.compose.runtime.Immutable
+import com.kai.custom.skills.SkillManifest
 import io.github.vinceglb.filekit.PlatformFile
 
 @Immutable
@@ -34,4 +35,5 @@ data class ChatActions(
     val editMessage: ((messageId: String, content: String) -> Unit)?,
     val truncateFrom: (String) -> Unit,
     val forkConversation: ((String) -> Unit)?,
+    val onSetActiveSkill: (SkillManifest?) -> Unit = {},
 )

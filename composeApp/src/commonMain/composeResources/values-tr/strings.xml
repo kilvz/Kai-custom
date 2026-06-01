@@ -384,4 +384,5 @@ Bir şey dikkat gerektiriyorsa (eski anılar, vadesi geçmiş görevler, kullan�
     <string name="settings_theme_light">Açık</string>
     <string name="settings_theme_dark">Koyu</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Beceri kaldırıldı</string>
 </resources>

@@ -383,4 +383,5 @@
     <string name="settings_theme_light">Ашық</string>
     <string name="settings_theme_dark">Қара</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Дағды жойылды</string>
 </resources>

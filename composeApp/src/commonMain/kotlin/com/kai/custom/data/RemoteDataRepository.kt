@@ -39,6 +39,9 @@ import com.kai.custom.network.dtos.openaicompatible.extractInlineToolCalls
 import com.kai.custom.network.toUiError
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
+import com.kai.custom.skills.SkillManager
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSendResult
@@ -165,6 +168,7 @@ class RemoteDataRepository(
     private val mcpServerManager: McpServerManager,
     private val sandboxController: SandboxController,
     private val localInferenceEngine: LocalInferenceEngine? = null,
+    private val skillManager: SkillManager? = null,
 ) : DataRepository {
 
     private val prettyJson = Json { prettyPrint = true }
@@ -763,6 +767,27 @@ class RemoteDataRepository(
                 }
                 if (pathNotes.isNotEmpty() && question != null) {
                     finalQuestion = question + pathNotes.toString()
+                }
+            }
+        }
+
+        // Prepend active skill body to the next user message so the AI runs
+        // in skill context. Skilled question is added as a system message so
+        // it precedes the user's actual request in context without being
+        // editable by the user.
+        val activeSkill = getActiveSkill()
+        if (activeSkill != null && finalQuestion != null) {
+            val skillBody = activeSkill.body
+            if (skillBody.isNotBlank()) {
+                chatHistory.update {
+                    it.toMutableList().apply {
+                        add(
+                            History(
+                                role = History.Role.SYSTEM,
+                                content = "## Active Skill: ${activeSkill.displayName}\n$skillBody",
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -1846,6 +1871,8 @@ class RemoteDataRepository(
 
     override fun getMemories(): List<MemoryEntry> = memoryStore.getAllMemories()
 
+    override fun getSchemaResetMessage(): String? = memoryStore.schemaResetMessage()
+
     override suspend fun deleteMemory(key: String) {
         memoryStore.forget(key)
     }
@@ -2278,6 +2305,36 @@ class RemoteDataRepository(
 
     override suspend fun deleteLocalModel(modelId: String) {
         localInferenceEngine?.deleteModel(modelId)
+    }
+
+    // Skills
+    override fun getInstalledSkills(): List<SkillManifest> = skillManager?.getInstalled() ?: emptyList()
+
+    override fun getActiveSkill(): SkillManifest? {
+        val activeId = appSettings.getActiveSkillId() ?: return null
+        return skillManager?.getSkill(activeId)
+    }
+
+    override fun setActiveSkill(skill: SkillManifest?) {
+        appSettings.setActiveSkillId(skill?.id)
+    }
+
+    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> {
+        return skillManager?.installFromGitHub(owner, repo, ref, path)
+            ?: Result.failure(IllegalStateException("SkillManager not available"))
+    }
+
+    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> {
+        return skillManager?.installFromRegistryEntry(entry)
+            ?: Result.failure(IllegalStateException("SkillManager not available"))
+    }
+
+    override suspend fun uninstallSkill(id: String) {
+        skillManager?.uninstall(id)
+    }
+
+    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> {
+        return skillManager?.browseMarketplaces() ?: Result.failure(IllegalStateException("SkillManager not available"))
     }
 
     override fun addSystemMessage(content: String) {

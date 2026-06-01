@@ -6,6 +6,7 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.mcp.PopularMcpServer
+import com.kai.custom.skills.RegistrySkillEntry
 
 @Immutable
 data class SettingsActions(
@@ -70,6 +71,10 @@ data class SettingsActions(
     val onUndoDelete: () -> Unit,
     val onExportDimension: suspend () -> ByteArray,
     val onImportDimension: (ByteArray) -> Unit,
+    val onInstallGitHub: (String) -> Unit,
+    val onInstallBrowsed: (RegistrySkillEntry) -> Unit,
+    val onUninstallSkill: (String) -> Unit,
+    val onBrowseMarketplaceSkills: () -> Unit,
 ) {
     companion object {
         val NoOp = SettingsActions(
@@ -134,6 +139,10 @@ data class SettingsActions(
             onUndoDelete = {},
             onExportDimension = { ByteArray(0) },
             onImportDimension = {},
+            onInstallGitHub = {},
+            onInstallBrowsed = {},
+            onUninstallSkill = {},
+            onBrowseMarketplaceSkills = {},
         )
     }
 }

@@ -383,4 +383,5 @@
     <string name="settings_theme_light">בהיר</string>
     <string name="settings_theme_dark">כהה</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">הכישור הוסר</string>
 </resources>

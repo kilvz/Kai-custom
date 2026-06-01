@@ -68,6 +68,8 @@ private const val SQL_CREATE_KG_FACTS = """
 
 class SqliteDimensionStore(context: Context) : DimensionStore {
 
+    private var schemaResetMessage: String? = null
+
     private val dbHelper = object : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
         override fun onCreate(db: SQLiteDatabase) {
             db.execSQL(SQL_CREATE_REALMS)
@@ -79,6 +81,15 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             // Fresh schema — no migration needed yet
         }
+
+        override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            db.execSQL("DROP TABLE IF EXISTS kg_facts")
+            db.execSQL("DROP TABLE IF EXISTS entities")
+            db.execSQL("DROP TABLE IF EXISTS domains")
+            db.execSQL("DROP TABLE IF EXISTS realms")
+            onCreate(db)
+            schemaResetMessage = "Database schema reset (v$oldVersion → v$newVersion)"
+        }
     }
 
     private val db: SQLiteDatabase get() = dbHelper.writableDatabase
@@ -86,6 +97,8 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     private var ready = false
 
     override fun isReady(): Boolean = ready
+
+    override fun schemaResetMessage(): String? = schemaResetMessage
 
     override fun initialize() {
         try {
