@@ -39,7 +39,7 @@
    <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
-        android:name="com.kai.custom.KaiApplication"
+        android:name="com.inspiredandroid.kai.KaiApplication"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -52,7 +52,7 @@
         <activity
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
-            android:name="com.kai.custom.MainActivity"
+            android:name="com.inspiredandroid.kai.MainActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -78,15 +78,15 @@
             android:multiprocess="false"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
         <service
-            android:name="com.kai.custom.DaemonService"
+            android:name="com.inspiredandroid.kai.DaemonService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
         <service
-            android:name="com.kai.custom.inference.ModelDownloadService"
+            android:name="com.inspiredandroid.kai.inference.ModelDownloadService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
         <service
-            android:name="com.kai.custom.wakeword.WakeWordService"
+            android:name="com.inspiredandroid.kai.wakeword.WakeWordService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
         <uses-native-library android:name="libvndksupport.so" android:required="false"/>

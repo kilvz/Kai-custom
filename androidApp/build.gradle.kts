@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kai.custom"
+    namespace = "com.inspiredandroid.kai"
     compileSdk =
         libs.versions.android.compileSdk
             .get()
@@ -13,7 +13,7 @@ android {
     ndkVersion = "29.0.14206865"
 
     defaultConfig {
-        applicationId = "com.kai.custom"
+        applicationId = "com.inspiredandroid.kai"
         minSdk =
             libs.versions.android.minSdk
                 .get()
