@@ -64,6 +64,8 @@ actual val isEmailSupported: Boolean = true
 
 actual val isSmsSupported: Boolean = false
 
+actual val isTelegramSupported: Boolean = false
+
 actual val isNotificationsSupported: Boolean = false
 
 actual val isSplinterlandsSupported: Boolean = false

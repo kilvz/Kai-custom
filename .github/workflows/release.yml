@@ -50,6 +50,7 @@ jobs:
   dmg:
     name: Generate DMG
     runs-on: macos-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,6 +75,7 @@ jobs:
   msi:
     name: Generate MSI
     runs-on: windows-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,6 +98,7 @@ jobs:
   deb:
     name: Generate DEB
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -120,6 +123,7 @@ jobs:
   rpm:
     name: Generate RPM
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -146,6 +150,7 @@ jobs:
   linux-tar:
     name: Generate Linux Tarball
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -174,6 +179,7 @@ jobs:
   appimage:
     name: Generate AppImage
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -241,49 +247,9 @@ jobs:
           name: appimage-package
           path: Kai-*.AppImage
 
-  flatpak:
-    name: Generate Flatpak
-    needs: [linux-tar]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
-      - name: Download Linux Tarball
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: linux-tar-package
-      - name: Install Flatpak and Builder
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder
-          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
-      - name: Build Flatpak
-        run: |
-          # Copy tarball to flatpak dir and compute sha256
-          cp Kai-linux-x86_64.tar.gz flatpak/
-          SHA256=$(sha256sum Kai-linux-x86_64.tar.gz | cut -d' ' -f1)
-
-          # Patch manifest to use local tarball instead of URL
-          cd flatpak
-          sed -i "s|url: https://github.com/SimonSchubert/Kai/releases/download/.*|path: Kai-linux-x86_64.tar.gz|" io.github.simonschubert.Kai.yaml
-          sed -i "s|sha256: .*|sha256: ${SHA256}|" io.github.simonschubert.Kai.yaml
-
-          # Build and bundle
-          flatpak-builder --repo=repo --force-clean build-dir io.github.simonschubert.Kai.yaml
-          flatpak build-bundle repo ../Kai.flatpak io.github.simonschubert.Kai
-      - name: Upload Flatpak Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flatpak-package
-          path: Kai.flatpak
-
   release:
-    name: Release APK, DMG, MSI, DEB, RPM, AppImage, Flatpak and Tarball
-    needs: [apk, dmg, msi, deb, rpm, appimage, linux-tar, flatpak]
+    name: Release APK
+    needs: [apk]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -297,41 +263,6 @@ jobs:
         with:
           name: signed-apk
 
-      - name: Download DMG Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: dmg-package
-
-      - name: Download MSI Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: msi-package
-
-      - name: Download DEB Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: deb-package
-
-      - name: Download RPM Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: rpm-package
-
-      - name: Download AppImage Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: appimage-package
-
-      - name: Download Linux Tarball Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: linux-tar-package
-
-      - name: Download Flatpak Artifact
-        uses: actions/download-artifact@v4.1.7
-        with:
-          name: flatpak-package
-
       - name: List downloaded files (for debugging)
         run: ls -la
 
@@ -339,13 +270,6 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           mv androidApp-foss-release-signed.apk "Kai-${VERSION}-android.apk"
-          mv *.dmg "Kai-${VERSION}-macos.dmg"
-          mv *.msi "Kai-${VERSION}-windows.msi"
-          mv *.deb "Kai-${VERSION}-linux.deb"
-          mv *.rpm "Kai-${VERSION}-linux.rpm"
-          mv *.AppImage "Kai-${VERSION}-linux.AppImage"
-          mv Kai-linux-x86_64.tar.gz "Kai-${VERSION}-linux-x86_64.tar.gz"
-          mv Kai.flatpak "Kai-${VERSION}-linux.flatpak"
 
       - name: Extract changelog
         run: |
@@ -369,15 +293,3 @@ jobs:
           name: Release ${{ github.ref_name }}
           body_path: changelog.txt
           files: Kai-*
-
-      - name: Sync winget-pkgs fork
-        env:
-          GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
-        run: gh repo sync SimonSchubert/winget-pkgs --source microsoft/winget-pkgs --branch master --force
-
-      - name: Publish to WinGet
-        uses: vedantmgoyal9/winget-releaser@v2
-        with:
-          identifier: SimonSchubert.Kai
-          installers-regex: '\.msi$'
-          token: ${{ secrets.WINGET_TOKEN }}

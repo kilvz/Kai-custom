@@ -1,3 +1,9 @@
+## v3.2.2 — 2026-06-01
+
+### Improvements
+- Add `isTelegramSupported` actual for desktop (true), iOS (false), WasmJS (false) — enables cross-platform compilation
+- Clean up CI workflows: remove upstream-specific jobs (flatpak, aur, static pages, broken unit tests), make desktop packaging best-effort (continue-on-error), release only depends on APK
+
 ## v3.1.3-beta — 2026-06-01
 
 ### Fixes
