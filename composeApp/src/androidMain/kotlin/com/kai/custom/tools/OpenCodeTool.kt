@@ -65,7 +65,9 @@ object OpenCodeTool : Tool {
 
         val envPrefix = if (envVars.isNotEmpty()) {
             envVars.entries.joinToString(" ") { "${it.key}=${shellQuote(it.value)}" } + " "
-        } else ""
+        } else {
+            ""
+        }
 
         val cmd = "cd \"$directory\" && ${envPrefix}opencode run --format json --agent \"$agent\" ${shellQuote(task)}"
         val result = shell.run(command = cmd, timeoutSeconds = timeout.toLong())

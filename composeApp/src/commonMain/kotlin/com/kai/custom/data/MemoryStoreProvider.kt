@@ -25,23 +25,19 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         source: String?,
     ): MemoryEntry = delegate.store(key, content, category, source)
 
-    override suspend fun updateContent(key: String, content: String): MemoryEntry? =
-        delegate.updateContent(key, content)
+    override suspend fun updateContent(key: String, content: String): MemoryEntry? = delegate.updateContent(key, content)
 
-    override suspend fun reinforceMemory(key: String): MemoryEntry? =
-        delegate.reinforceMemory(key)
+    override suspend fun reinforceMemory(key: String): MemoryEntry? = delegate.reinforceMemory(key)
 
     override suspend fun forget(key: String): Boolean = delegate.forget(key)
 
     override fun getAllMemories(max: Int): List<MemoryEntry> = delegate.getAllMemories(max)
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> =
-        delegate.searchMemories(query, limit)
+    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> = delegate.searchMemories(query, limit)
 
     override fun schemaResetMessage(): String? = delegate.schemaResetMessage()
 
-    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> =
-        delegate.getPromotionCandidates(minHits, max)
+    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> = delegate.getPromotionCandidates(minHits, max)
 
     override fun exportDimension(): ByteArray = delegate.exportDimension()
 

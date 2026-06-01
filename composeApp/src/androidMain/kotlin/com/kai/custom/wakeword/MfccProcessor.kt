@@ -1,9 +1,9 @@
 package com.kai.custom.wakeword
 
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.log10
 import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.log10
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 class MfccProcessor(
@@ -110,9 +110,12 @@ class MfccProcessor(
             }
             j = j xor bit
             if (i < j) {
-                val tr = re[j]; val ti = im[j]
-                re[j] = re[i]; im[j] = im[i]
-                re[i] = tr; im[i] = ti
+                val tr = re[j]
+                val ti = im[j]
+                re[j] = re[i]
+                im[j] = im[i]
+                re[i] = tr
+                im[i] = ti
             }
         }
 
@@ -126,14 +129,18 @@ class MfccProcessor(
                 var wIm = 0f
                 val half = len / 2
                 for (k in 0 until half) {
-                    val uRe = re[i + k]; val uIm = im[i + k]
+                    val uRe = re[i + k]
+                    val uIm = im[i + k]
                     val vRe = re[i + k + half] * wRe - im[i + k + half] * wIm
                     val vIm = re[i + k + half] * wIm + im[i + k + half] * wRe
-                    re[i + k] = uRe + vRe; im[i + k] = uIm + vIm
-                    re[i + k + half] = uRe - vRe; im[i + k + half] = uIm - vIm
+                    re[i + k] = uRe + vRe
+                    im[i + k] = uIm + vIm
+                    re[i + k + half] = uRe - vRe
+                    im[i + k + half] = uIm - vIm
                     val nwRe = wRe * wlenRe - wIm * wlenIm
                     val nwIm = wRe * wlenIm + wIm * wlenRe
-                    wRe = nwRe; wIm = nwIm
+                    wRe = nwRe
+                    wIm = nwIm
                 }
             }
             len *= 2
@@ -141,15 +148,14 @@ class MfccProcessor(
 
         if (invert) {
             for (i in 0 until n) {
-                re[i] /= n; im[i] /= n
+                re[i] /= n
+                im[i] /= n
             }
         }
     }
 
-    private fun computeHamming(size: Int): FloatArray {
-        return FloatArray(size) { i ->
-            (0.54 - 0.46 * cos(2.0 * PI * i / (size - 1))).toFloat()
-        }
+    private fun computeHamming(size: Int): FloatArray = FloatArray(size) { i ->
+        (0.54 - 0.46 * cos(2.0 * PI * i / (size - 1))).toFloat()
     }
 
     private fun melToHz(mel: Double): Double = 700.0 * (Math.pow(10.0, mel / 2595.0) - 1.0)

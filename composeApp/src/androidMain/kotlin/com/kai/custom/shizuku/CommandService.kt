@@ -52,7 +52,7 @@ class CommandService : ICommandService {
                         stderr = stderr,
                         timedOut = true,
                         error = "Command timed out after ${timeoutMs}ms",
-                    )
+                    ),
                 )
             } else {
                 Json.encodeToString(
@@ -61,7 +61,7 @@ class CommandService : ICommandService {
                         stdout = stdout,
                         stderr = stderr,
                         timedOut = false,
-                    )
+                    ),
                 )
             }
         } catch (e: Throwable) {
@@ -71,7 +71,7 @@ class CommandService : ICommandService {
                     exitCode = -1,
                     timedOut = false,
                     error = e.message ?: "Unknown error",
-                )
+                ),
             )
         }
     }
@@ -81,7 +81,5 @@ class CommandService : ICommandService {
         System.exit(0)
     }
 
-    private fun readStream(stream: java.io.InputStream): String {
-        return BufferedReader(InputStreamReader(stream)).use { it.readText() }
-    }
+    private fun readStream(stream: java.io.InputStream): String = BufferedReader(InputStreamReader(stream)).use { it.readText() }
 }

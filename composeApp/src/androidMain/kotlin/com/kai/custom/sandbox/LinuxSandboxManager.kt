@@ -84,8 +84,10 @@ class LinuxSandboxManager(
         val rootfsOk = rootfs.isDirectory
         val prootExists = proot.exists()
         val prootExec = proot.canExecute()
-        android.util.Log.d("LinuxSandbox",
-            "checkExistingInstallation: rootfs=$rootfs dir=$rootfsOk proot=$prootPath exists=$prootExists canExec=$prootExec")
+        android.util.Log.d(
+            "LinuxSandbox",
+            "checkExistingInstallation: rootfs=$rootfs dir=$rootfsOk proot=$prootPath exists=$prootExists canExec=$prootExec",
+        )
         if (rootfsOk && prootExists && prootExec) {
             _state.value = SandboxState.Ready
         }
@@ -320,7 +322,7 @@ class LinuxSandboxManager(
                     for (mirror in downloader.getMirrors(distro)) {
                         val httpMirror = mirror.replace("https://", "http://")
                         downloader.writeRepositories(rootfsDir, httpMirror, distro)
-            val result = executor.execute(updateCmd, timeoutSeconds = 180)
+                        val result = executor.execute(updateCmd, timeoutSeconds = 180)
                         if (result["success"] as? Boolean == true) {
                             updated = true
                             break

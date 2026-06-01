@@ -79,6 +79,11 @@ import kai.composeapp.generated.resources.settings_notifications_listener_bound
 import kai.composeapp.generated.resources.settings_notifications_listener_disconnected
 import kai.composeapp.generated.resources.settings_notifications_manage_apps
 import kai.composeapp.generated.resources.settings_notifications_queued
+import kai.composeapp.generated.resources.settings_shizuku_description
+import kai.composeapp.generated.resources.settings_shizuku_label
+import kai.composeapp.generated.resources.settings_shizuku_permission_button
+import kai.composeapp.generated.resources.settings_shizuku_permission_required
+import kai.composeapp.generated.resources.settings_shizuku_ready
 import kai.composeapp.generated.resources.settings_sms_description
 import kai.composeapp.generated.resources.settings_sms_last_poll
 import kai.composeapp.generated.resources.settings_sms_permission_button
@@ -94,11 +99,6 @@ import kai.composeapp.generated.resources.settings_sms_send_permission_required
 import kai.composeapp.generated.resources.settings_soul_reset
 import kai.composeapp.generated.resources.settings_soul_reset_cancel
 import kai.composeapp.generated.resources.settings_soul_save
-import kai.composeapp.generated.resources.settings_shizuku_label
-import kai.composeapp.generated.resources.settings_shizuku_description
-import kai.composeapp.generated.resources.settings_shizuku_permission_required
-import kai.composeapp.generated.resources.settings_shizuku_permission_button
-import kai.composeapp.generated.resources.settings_shizuku_ready
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet

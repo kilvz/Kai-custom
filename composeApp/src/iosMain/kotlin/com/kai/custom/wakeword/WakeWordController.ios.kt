@@ -10,6 +10,5 @@ class NoOpWakeWordController : WakeWordController {
     override fun stopListening() {}
     override suspend fun enroll(phrase: String, onStatus: (String) -> Unit): String? = null
 
-    private fun kotlinx.coroutines.flow.MutableSharedFlow<String>.asSharedFlow() =
-        this as kotlinx.coroutines.flow.SharedFlow<String>
+    private fun kotlinx.coroutines.flow.MutableSharedFlow<String>.asSharedFlow() = this as kotlinx.coroutines.flow.SharedFlow<String>
 }

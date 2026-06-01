@@ -98,8 +98,8 @@ import kai.composeapp.generated.resources.settings_add_service
 import kai.composeapp.generated.resources.settings_api_key_label
 import kai.composeapp.generated.resources.settings_api_key_optional_label
 import kai.composeapp.generated.resources.settings_base_url_label
-import kai.composeapp.generated.resources.settings_free_fallback
 import kai.composeapp.generated.resources.settings_become_sponsor
+import kai.composeapp.generated.resources.settings_free_fallback
 import kai.composeapp.generated.resources.settings_free_tier_description
 import kai.composeapp.generated.resources.settings_free_tier_title
 import kai.composeapp.generated.resources.settings_openai_compatible_or_other_service
@@ -123,8 +123,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import sh.calvin.reorderable.ReorderableColumn
 import kotlin.math.roundToInt
-
-
 
 @Composable
 internal fun FreeSettings(

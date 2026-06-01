@@ -15,7 +15,10 @@ import java.util.zip.GZIPOutputStream
 private const val DB_NAME = "kai_dimension.db"
 private const val DB_VERSION = 2
 
-private val json = Json { ignoreUnknownKeys = true; encodeDefaults = false }
+private val json = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = false
+}
 
 private const val SQL_CREATE_REALMS = """
     CREATE TABLE IF NOT EXISTS realms (
@@ -128,24 +131,32 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     override fun ensureRealm(realm: Realm): Realm {
         val existing = getRealm(realm.id)
         if (existing != null) return existing
-        db.insert("realms", null, ContentValues().apply {
-            put("id", realm.id)
-            put("name", realm.name)
-            put("description", realm.description)
-            put("created_at", realm.createdAt)
-        })
+        db.insert(
+            "realms",
+            null,
+            ContentValues().apply {
+                put("id", realm.id)
+                put("name", realm.name)
+                put("description", realm.description)
+                put("created_at", realm.createdAt)
+            },
+        )
         return realm
     }
 
     override fun getRealm(realmId: String): Realm? {
         val cursor = db.query("realms", null, "id = ?", arrayOf(realmId), null, null, null)
         return cursor.use {
-            if (it.moveToFirst()) Realm(
-                id = it.getString(it.getColumnIndexOrThrow("id")),
-                name = it.getString(it.getColumnIndexOrThrow("name")),
-                description = it.getString(it.getColumnIndexOrThrow("description")),
-                createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
-            ) else null
+            if (it.moveToFirst()) {
+                Realm(
+                    id = it.getString(it.getColumnIndexOrThrow("id")),
+                    name = it.getString(it.getColumnIndexOrThrow("name")),
+                    description = it.getString(it.getColumnIndexOrThrow("description")),
+                    createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
+                )
+            } else {
+                null
+            }
         }
     }
 
@@ -154,12 +165,14 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         return cursor.use {
             buildList {
                 while (it.moveToNext()) {
-                    add(Realm(
-                        id = it.getString(it.getColumnIndexOrThrow("id")),
-                        name = it.getString(it.getColumnIndexOrThrow("name")),
-                        description = it.getString(it.getColumnIndexOrThrow("description")),
-                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
-                    ))
+                    add(
+                        Realm(
+                            id = it.getString(it.getColumnIndexOrThrow("id")),
+                            name = it.getString(it.getColumnIndexOrThrow("name")),
+                            description = it.getString(it.getColumnIndexOrThrow("description")),
+                            createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
+                        ),
+                    )
                 }
             }
         }
@@ -170,22 +183,28 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     override fun ensureDomain(realm: String, domainId: String, name: String, description: String): Domain {
         val existing = db.query("domains", null, "id = ? AND realm = ?", arrayOf(domainId, realm), null, null, null)
         existing.use {
-            if (it.moveToFirst()) return Domain(
-                id = it.getString(it.getColumnIndexOrThrow("id")),
-                realm = it.getString(it.getColumnIndexOrThrow("realm")),
-                name = it.getString(it.getColumnIndexOrThrow("name")),
-                description = it.getString(it.getColumnIndexOrThrow("description")),
-                createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
-            )
+            if (it.moveToFirst()) {
+                return Domain(
+                    id = it.getString(it.getColumnIndexOrThrow("id")),
+                    realm = it.getString(it.getColumnIndexOrThrow("realm")),
+                    name = it.getString(it.getColumnIndexOrThrow("name")),
+                    description = it.getString(it.getColumnIndexOrThrow("description")),
+                    createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
+                )
+            }
         }
         val domain = Domain(domainId, realm, name, description, System.currentTimeMillis())
-        db.insert("domains", null, ContentValues().apply {
-            put("id", domain.id)
-            put("realm", domain.realm)
-            put("name", domain.name)
-            put("description", domain.description)
-            put("created_at", domain.createdAt)
-        })
+        db.insert(
+            "domains",
+            null,
+            ContentValues().apply {
+                put("id", domain.id)
+                put("realm", domain.realm)
+                put("name", domain.name)
+                put("description", domain.description)
+                put("created_at", domain.createdAt)
+            },
+        )
         return domain
     }
 
@@ -194,13 +213,15 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         return cursor.use {
             buildList {
                 while (it.moveToNext()) {
-                    add(Domain(
-                        id = it.getString(it.getColumnIndexOrThrow("id")),
-                        realm = it.getString(it.getColumnIndexOrThrow("realm")),
-                        name = it.getString(it.getColumnIndexOrThrow("name")),
-                        description = it.getString(it.getColumnIndexOrThrow("description")),
-                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
-                    ))
+                    add(
+                        Domain(
+                            id = it.getString(it.getColumnIndexOrThrow("id")),
+                            realm = it.getString(it.getColumnIndexOrThrow("realm")),
+                            name = it.getString(it.getColumnIndexOrThrow("name")),
+                            description = it.getString(it.getColumnIndexOrThrow("description")),
+                            createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
+                        ),
+                    )
                 }
             }
         }
@@ -212,27 +233,36 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         val contentHash = sha256(entity.content)
         val existing = getEntity(entity.id)
         if (existing != null) {
-            db.update("entities", ContentValues().apply {
-                put("realm", entity.realm)
-                put("domain", entity.domain)
-                put("content", entity.content)
-                put("source_file", entity.sourceFile)
-                put("metadata", json.encodeToString(entity.metadata))
-                put("content_hash", contentHash)
-                put("updated_at", entity.updatedAt)
-            }, "id = ?", arrayOf(entity.id))
+            db.update(
+                "entities",
+                ContentValues().apply {
+                    put("realm", entity.realm)
+                    put("domain", entity.domain)
+                    put("content", entity.content)
+                    put("source_file", entity.sourceFile)
+                    put("metadata", json.encodeToString(entity.metadata))
+                    put("content_hash", contentHash)
+                    put("updated_at", entity.updatedAt)
+                },
+                "id = ?",
+                arrayOf(entity.id),
+            )
         } else {
-            db.insert("entities", null, ContentValues().apply {
-                put("id", entity.id)
-                put("realm", entity.realm)
-                put("domain", entity.domain)
-                put("content", entity.content)
-                put("source_file", entity.sourceFile)
-                put("metadata", json.encodeToString(entity.metadata))
-                put("content_hash", contentHash)
-                put("created_at", entity.createdAt)
-                put("updated_at", entity.updatedAt)
-            })
+            db.insert(
+                "entities",
+                null,
+                ContentValues().apply {
+                    put("id", entity.id)
+                    put("realm", entity.realm)
+                    put("domain", entity.domain)
+                    put("content", entity.content)
+                    put("source_file", entity.sourceFile)
+                    put("metadata", json.encodeToString(entity.metadata))
+                    put("content_hash", contentHash)
+                    put("created_at", entity.createdAt)
+                    put("updated_at", entity.updatedAt)
+                },
+            )
         }
         return entity
     }
@@ -266,13 +296,9 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         }
     }
 
-    override fun deleteEntity(id: String): Boolean {
-        return db.delete("entities", "id = ?", arrayOf(id)) > 0
-    }
+    override fun deleteEntity(id: String): Boolean = db.delete("entities", "id = ?", arrayOf(id)) > 0
 
-    override fun countEntities(): Long {
-        return android.database.DatabaseUtils.queryNumEntries(db, "entities")
-    }
+    override fun countEntities(): Long = android.database.DatabaseUtils.queryNumEntries(db, "entities")
 
     override fun getEntityByMetadataKey(key: String, value: String): EntityData? {
         val cursor = db.query("entities", null, "metadata LIKE ?", arrayOf("%\"$key\":\"$value\"%"), null, null, null)
@@ -303,25 +329,34 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         val existing = db.query("kg_facts", null, "id = ?", arrayOf(fact.id), null, null, null)
         existing.use {
             if (it.moveToFirst()) {
-                db.update("kg_facts", ContentValues().apply {
-                    put("subject", fact.subject)
-                    put("predicate", fact.predicate)
-                    put("object", fact.`object`)
-                    put("valid_from", fact.validFrom)
-                    put("valid_to", fact.validTo)
-                    put("source_entity_id", fact.sourceEntityId)
-                }, "id = ?", arrayOf(fact.id))
+                db.update(
+                    "kg_facts",
+                    ContentValues().apply {
+                        put("subject", fact.subject)
+                        put("predicate", fact.predicate)
+                        put("object", fact.`object`)
+                        put("valid_from", fact.validFrom)
+                        put("valid_to", fact.validTo)
+                        put("source_entity_id", fact.sourceEntityId)
+                    },
+                    "id = ?",
+                    arrayOf(fact.id),
+                )
             } else {
-                db.insert("kg_facts", null, ContentValues().apply {
-                    put("id", fact.id)
-                    put("subject", fact.subject)
-                    put("predicate", fact.predicate)
-                    put("object", fact.`object`)
-                    put("valid_from", fact.validFrom)
-                    put("valid_to", fact.validTo)
-                    put("source_entity_id", fact.sourceEntityId)
-                    put("created_at", fact.createdAt)
-                })
+                db.insert(
+                    "kg_facts",
+                    null,
+                    ContentValues().apply {
+                        put("id", fact.id)
+                        put("subject", fact.subject)
+                        put("predicate", fact.predicate)
+                        put("object", fact.`object`)
+                        put("valid_from", fact.validFrom)
+                        put("valid_to", fact.validTo)
+                        put("source_entity_id", fact.sourceEntityId)
+                        put("created_at", fact.createdAt)
+                    },
+                )
             }
         }
         return fact
@@ -344,9 +379,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         return cursorToFacts(cursor)
     }
 
-    override fun deleteFact(id: String): Boolean {
-        return db.delete("kg_facts", "id = ?", arrayOf(id)) > 0
-    }
+    override fun deleteFact(id: String): Boolean = db.delete("kg_facts", "id = ?", arrayOf(id)) > 0
 
     // Backup
 
@@ -435,16 +468,18 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     private fun cursorToFacts(cursor: android.database.Cursor): List<KGFact> = cursor.use {
         buildList {
             while (it.moveToNext()) {
-                add(KGFact(
-                    id = it.getString(it.getColumnIndexOrThrow("id")),
-                    subject = it.getString(it.getColumnIndexOrThrow("subject")),
-                    predicate = it.getString(it.getColumnIndexOrThrow("predicate")),
-                    `object` = it.getString(it.getColumnIndexOrThrow("object")),
-                    validFrom = it.getLongOrNull(it.getColumnIndexOrThrow("valid_from")),
-                    validTo = it.getLongOrNull(it.getColumnIndexOrThrow("valid_to")),
-                    sourceEntityId = it.getString(it.getColumnIndexOrThrow("source_entity_id")),
-                    createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
-                ))
+                add(
+                    KGFact(
+                        id = it.getString(it.getColumnIndexOrThrow("id")),
+                        subject = it.getString(it.getColumnIndexOrThrow("subject")),
+                        predicate = it.getString(it.getColumnIndexOrThrow("predicate")),
+                        `object` = it.getString(it.getColumnIndexOrThrow("object")),
+                        validFrom = it.getLongOrNull(it.getColumnIndexOrThrow("valid_from")),
+                        validTo = it.getLongOrNull(it.getColumnIndexOrThrow("valid_to")),
+                        sourceEntityId = it.getString(it.getColumnIndexOrThrow("source_entity_id")),
+                        createdAt = it.getLong(it.getColumnIndexOrThrow("created_at")),
+                    ),
+                )
             }
         }
     }

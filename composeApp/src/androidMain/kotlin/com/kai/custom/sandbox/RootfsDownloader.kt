@@ -55,6 +55,7 @@ class RootfsDownloader(private val httpClient: HttpClient) {
 
     fun getDownloadUrls(arch: String, distro: String = "alpine"): List<String> = when (distro) {
         "ubuntu" -> UBUNTU_MIRRORS.map { "$it/$UBUNTU_VERSION/release/" }
+
         else -> ALPINE_MIRRORS.map { base ->
             "$base/$ALPINE_BRANCH/releases/$arch/alpine-minirootfs-$ALPINE_VERSION-$arch.tar.gz"
         }
@@ -74,8 +75,11 @@ class RootfsDownloader(private val httpClient: HttpClient) {
         distro: String = "alpine",
         onProgress: (Float) -> Unit,
     ) {
-        val urls = if (distro == "ubuntu") resolveUbuntuDownloadUrls(arch)
-        else getDownloadUrls(arch, "alpine")
+        val urls = if (distro == "ubuntu") {
+            resolveUbuntuDownloadUrls(arch)
+        } else {
+            getDownloadUrls(arch, "alpine")
+        }
         var lastError: Exception? = null
         for ((index, url) in urls.withIndex()) {
             try {
@@ -298,6 +302,7 @@ class RootfsDownloader(private val httpClient: HttpClient) {
                 val defaultSourcesList = File(sourcesDir, "sources.list.d/ubuntu.list")
                 if (defaultSourcesList.exists()) defaultSourcesList.delete()
             }
+
             else -> {
                 val apkDir = File(rootfsDir, "etc/apk")
                 apkDir.mkdirs()

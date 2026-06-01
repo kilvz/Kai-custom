@@ -10,15 +10,12 @@ import com.kai.custom.data.AppSettings
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
-import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.tools.CommonTools
 import com.kai.custom.tools.HeartbeatTools
-import kai.composeapp.generated.resources.Res
-import kai.composeapp.generated.resources.tool_send_notification_description
-import kai.composeapp.generated.resources.tool_send_notification_name
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.SchedulingTools
 import com.russhwolf.settings.Settings
@@ -29,6 +26,9 @@ import io.github.vinceglb.filekit.download
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.js.Js
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_send_notification_description
+import kai.composeapp.generated.resources.tool_send_notification_name
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.coroutines.CoroutineContext
@@ -120,8 +120,7 @@ actual fun getAvailableTools(): List<Tool> = buildList {
                     description = "Get basic device info from browser environment",
                     parameters = emptyMap(),
                 )
-                override suspend fun execute(args: Map<String, Any>): Any =
-                    mapOf("success" to true, "platform" to "WasmJS", "os" to mapOf("name" to "Web (Wasm)"))
+                override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to true, "platform" to "WasmJS", "os" to mapOf("name" to "Web (Wasm)"))
             },
         )
     }
@@ -132,48 +131,47 @@ actual fun getAvailableTools(): List<Tool> = buildList {
                 description = "Read clipboard content (not available on WasmJS)",
                 parameters = emptyMap(),
             )
-            override suspend fun execute(args: Map<String, Any>): Any =
-                mapOf("success" to false, "error" to "Clipboard API not available on WasmJS")
+            override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "Clipboard API not available on WasmJS")
         })
     }
     if (WebKoinHelper.appSettings.isToolEnabled("send_notification")) {
         add(object : Tool {
             override val schema = ToolSchema(
-                "send_notification", "Send notification (not available on WasmJS)",
+                "send_notification",
+                "Send notification (not available on WasmJS)",
                 mapOf("title" to ParameterSchema("string", "Title", false), "message" to ParameterSchema("string", "Message", true)),
             )
-            override suspend fun execute(args: Map<String, Any>): Any =
-                mapOf("success" to false, "error" to "Notification API not available on WasmJS")
+            override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "Notification API not available on WasmJS")
         })
     }
     if (WebKoinHelper.appSettings.isToolEnabled(PhoneTools.gpsLocationToolInfo.id)) {
         add(object : Tool {
             override val schema = ToolSchema(
-                name = "get_gps_location", description = "GPS location (not available on WasmJS)",
+                name = "get_gps_location",
+                description = "GPS location (not available on WasmJS)",
                 parameters = emptyMap(),
             )
-            override suspend fun execute(args: Map<String, Any>): Any =
-                mapOf("success" to false, "error" to "GPS not available on WasmJS")
+            override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS not available on WasmJS")
         })
     }
     if (WebKoinHelper.appSettings.isToolEnabled(PhoneTools.batteryInfoToolInfo.id)) {
         add(object : Tool {
             override val schema = ToolSchema(
-                name = "get_battery_info", description = "Battery info (not available on WasmJS)",
+                name = "get_battery_info",
+                description = "Battery info (not available on WasmJS)",
                 parameters = emptyMap(),
             )
-            override suspend fun execute(args: Map<String, Any>): Any =
-                mapOf("success" to false, "error" to "Battery info not available on WasmJS")
+            override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "Battery info not available on WasmJS")
         })
     }
     if (WebKoinHelper.appSettings.isToolEnabled(PhoneTools.networkInfoToolInfo.id)) {
         add(object : Tool {
             override val schema = ToolSchema(
-                name = "get_network_info", description = "Network info (not available on WasmJS)",
+                name = "get_network_info",
+                description = "Network info (not available on WasmJS)",
                 parameters = emptyMap(),
             )
-            override suspend fun execute(args: Map<String, Any>): Any =
-                mapOf("success" to false, "error" to "Network info not available on WasmJS")
+            override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "Network info not available on WasmJS")
         })
     }
     addAll(WebKoinHelper.mcpServerManager.getEnabledMcpTools())

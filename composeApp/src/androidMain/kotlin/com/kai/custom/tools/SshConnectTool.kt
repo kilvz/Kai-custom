@@ -127,7 +127,9 @@ object SshConnectTool : Tool {
             val availableProfiles = appSettings.getSshProfiles()
             val profilesList = if (availableProfiles.isNotEmpty()) {
                 " Available profiles: ${availableProfiles.joinToString { p -> "'${p.name}' (${p.username}@${p.host}:${p.port})" }}"
-            } else ""
+            } else {
+                ""
+            }
             mapOf("success" to true as Any, "message" to "$connMsg$profileMsg.$profilesList" as Any)
         } else {
             mapOf("success" to false as Any, "error" to (result.exceptionOrNull()?.message ?: "Connection failed") as Any)

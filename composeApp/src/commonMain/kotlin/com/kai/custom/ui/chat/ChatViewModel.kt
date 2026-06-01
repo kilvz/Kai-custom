@@ -3,9 +3,6 @@ package com.kai.custom.ui.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.SpeechToText
-import com.kai.custom.tools.MicrophonePermissionController
-import com.kai.custom.wakeword.WakeWordController
-import com.kai.custom.wakeword.WakeWordMode
 import com.kai.custom.data.Conversation
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.FreeMode
@@ -13,19 +10,22 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.UiSubmission
-import com.kai.custom.skills.SkillManifest
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.network.toUiError
+import com.kai.custom.skills.SkillManifest
+import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.ui.markdown.KaiUiBlock
 import com.kai.custom.ui.markdown.KaiUiError
 import com.kai.custom.ui.markdown.parseMarkdown
+import com.kai.custom.wakeword.WakeWordController
+import com.kai.custom.wakeword.WakeWordMode
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.extension
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.conversation_untitled
-import kai.composeapp.generated.resources.microphone_permission_required
 import kai.composeapp.generated.resources.error_unsupported_file_type
 import kai.composeapp.generated.resources.litert_no_model_warning
+import kai.composeapp.generated.resources.microphone_permission_required
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
@@ -131,9 +131,9 @@ class ChatViewModel(
             var lastTriggerMs = 0L
             wakeWordController.wakeWordDetected.collect { phrase ->
                 val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
-                if (now - lastTriggerMs > 3000
-                    && !_state.value.isVoiceInputActive
-                    && !_state.value.isLoading
+                if (now - lastTriggerMs > 3000 &&
+                    !_state.value.isVoiceInputActive &&
+                    !_state.value.isLoading
                 ) {
                     lastTriggerMs = now
                     doStartVoiceInput()
@@ -147,8 +147,8 @@ class ChatViewModel(
                 .map { it.isLoading }
                 .distinctUntilChanged()
                 .collect { loading ->
-                    if (!loading && !_state.value.isVoiceInputActive
-                        && _state.value.wasVoiceInput && dataRepository.isWakeWordEnabled()
+                    if (!loading && !_state.value.isVoiceInputActive &&
+                        _state.value.wasVoiceInput && dataRepository.isWakeWordEnabled()
                     ) {
                         wakeWordController.startListening(
                             dataRepository.getWakeWordPhrase(),
@@ -420,11 +420,11 @@ class ChatViewModel(
     private fun stopVoiceInput() {
         speechToText.stopListening()
         if (dataRepository.isWakeWordEnabled()) {
-                    wakeWordController.startListening(
-                        dataRepository.getWakeWordPhrase(),
-                        WakeWordMode.valueOf(dataRepository.getWakeWordMode()),
-                        dataRepository.getWakeWordTemplate(),
-                    )
+            wakeWordController.startListening(
+                dataRepository.getWakeWordPhrase(),
+                WakeWordMode.valueOf(dataRepository.getWakeWordMode()),
+                dataRepository.getWakeWordTemplate(),
+            )
         }
         _state.update { it.copy(isVoiceInputActive = false) }
     }

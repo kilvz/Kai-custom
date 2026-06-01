@@ -5,13 +5,16 @@ import android.os.IBinder
 import android.os.IInterface
 import android.os.Parcel
 
-abstract class ICommandService : Binder(), IInterface {
+abstract class ICommandService :
+    Binder(),
+    IInterface {
 
     companion object {
         const val DESCRIPTOR = "com.kai.custom.shizuku.ICommandService"
-        const val TRANSACTION_executeCommand = 1
+        const val TRANSACTION_EXECUTE_COMMAND = 1
+
         /** Shizuku server sends this to kill the UserService process */
-        const val TRANSACTION_destroy = 16777115
+        const val TRANSACTION_DESTROY = 16777115
     }
 
     override fun asBinder(): IBinder = this
@@ -25,7 +28,7 @@ abstract class ICommandService : Binder(), IInterface {
 
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
         when (code) {
-            TRANSACTION_executeCommand -> {
+            TRANSACTION_EXECUTE_COMMAND -> {
                 data.enforceInterface(DESCRIPTOR)
                 val command = data.readString() ?: return false
                 val timeoutMs = data.readLong()
@@ -33,7 +36,8 @@ abstract class ICommandService : Binder(), IInterface {
                 reply?.writeString(result)
                 return true
             }
-            TRANSACTION_destroy, 16777114 -> {
+
+            TRANSACTION_DESTROY, 16777114 -> {
                 data.enforceInterface(DESCRIPTOR)
                 destroy()
                 return true

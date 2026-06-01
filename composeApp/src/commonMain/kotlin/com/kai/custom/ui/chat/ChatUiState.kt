@@ -11,9 +11,9 @@ import com.kai.custom.data.SharedJson
 import com.kai.custom.data.SmsDraft
 import com.kai.custom.data.UiSubmission
 import com.kai.custom.network.UiError
-import com.kai.custom.skills.SkillManifest
 import com.kai.custom.network.dtos.gemini.GeminiChatRequestDto
 import com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
+import com.kai.custom.skills.SkillManifest
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -56,9 +56,11 @@ private fun List<Attachment>.splitForMessage(): AttachmentSplit {
                 if (att.fileName != null) prefix.append("--- ${att.fileName} ---\n")
                 prefix.append(decoded).append("\n\n")
             }
+
             att.mimeType.startsWith("image/") || att.mimeType == "application/pdf" -> {
                 binaries.add(att)
             }
+
             else -> {
                 // Non-image, non-PDF binary — add a text stub so the AI knows the file exists.
                 val name = att.fileName ?: "attached file"

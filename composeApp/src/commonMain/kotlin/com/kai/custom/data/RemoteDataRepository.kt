@@ -40,8 +40,8 @@ import com.kai.custom.network.toUiError
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.skills.RegistrySkillEntry
-import com.kai.custom.skills.SkillManifest
 import com.kai.custom.skills.SkillManager
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSendResult
@@ -1415,9 +1415,14 @@ class RemoteDataRepository(
                         id = h.id,
                         role = when (h.role) {
                             History.Role.USER -> "user"
+
                             History.Role.ASSISTANT -> "assistant"
+
                             History.Role.TOOL -> "tool"
-                            History.Role.TOOL_EXECUTING -> "tool" // Should not happen due to filter
+
+                            History.Role.TOOL_EXECUTING -> "tool"
+
+                            // Should not happen due to filter
                             History.Role.SYSTEM -> "system"
                         },
                         content = h.content,
@@ -1548,7 +1553,7 @@ class RemoteDataRepository(
         val transcript = buildString {
             appendLine("[PREVIOUS CONVERSATION — BRANCH]")
             appendLine("Title: $forkedTitle")
-            appendLine("Key: branch_${oldConversationId}")
+            appendLine("Key: branch_$oldConversationId")
             appendLine()
             for (h in oldHistory) {
                 val role = when (h.role) {
@@ -1562,7 +1567,7 @@ class RemoteDataRepository(
             }
         }
         memoryStore.store(
-            key = "branch_${oldConversationId}",
+            key = "branch_$oldConversationId",
             content = transcript,
             category = MemoryCategory.GENERAL,
             source = "conversation_branch",
@@ -1605,16 +1610,19 @@ class RemoteDataRepository(
 
         val oldHistory = chatHistory.value.toList()
         val oldConversationId = _currentConversationId.value ?: return
-        val forkedTitle = if (forkedContent.length <= 50) forkedContent
-            else forkedContent.take(50).let { t ->
+        val forkedTitle = if (forkedContent.length <= 50) {
+            forkedContent
+        } else {
+            forkedContent.take(50).let { t ->
                 val lastSpace = t.lastIndexOf(' ')
                 if (lastSpace > 20) t.substring(0, lastSpace) + "..." else t + "..."
             }
+        }
 
         val transcript = buildString {
             appendLine("[PREVIOUS CONVERSATION — BRANCH]")
             appendLine("Title: $forkedTitle")
-            appendLine("Key: branch_${oldConversationId}")
+            appendLine("Key: branch_$oldConversationId")
             appendLine()
             for (h in oldHistory) {
                 val role = when (h.role) {
@@ -1628,7 +1636,7 @@ class RemoteDataRepository(
             }
         }
         memoryStore.store(
-            key = "branch_${oldConversationId}",
+            key = "branch_$oldConversationId",
             content = transcript,
             category = MemoryCategory.GENERAL,
             source = "conversation_branch",
@@ -1647,7 +1655,7 @@ class RemoteDataRepository(
                     updatedAt = now,
                     title = forkedTitle,
                     forkedFrom = forkedContent,
-                )
+                ),
             )
             setCurrentConversationId(newId)
         }
@@ -2319,23 +2327,17 @@ class RemoteDataRepository(
         appSettings.setActiveSkillId(skill?.id)
     }
 
-    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> {
-        return skillManager?.installFromGitHub(owner, repo, ref, path)
-            ?: Result.failure(IllegalStateException("SkillManager not available"))
-    }
+    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> = skillManager?.installFromGitHub(owner, repo, ref, path)
+        ?: Result.failure(IllegalStateException("SkillManager not available"))
 
-    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> {
-        return skillManager?.installFromRegistryEntry(entry)
-            ?: Result.failure(IllegalStateException("SkillManager not available"))
-    }
+    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = skillManager?.installFromRegistryEntry(entry)
+        ?: Result.failure(IllegalStateException("SkillManager not available"))
 
     override suspend fun uninstallSkill(id: String) {
         skillManager?.uninstall(id)
     }
 
-    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> {
-        return skillManager?.browseMarketplaces() ?: Result.failure(IllegalStateException("SkillManager not available"))
-    }
+    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> = skillManager?.browseMarketplaces() ?: Result.failure(IllegalStateException("SkillManager not available"))
 
     override fun addSystemMessage(content: String) {
         chatHistory.update { current ->

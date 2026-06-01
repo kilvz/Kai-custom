@@ -1,8 +1,8 @@
 package com.kai.custom.data
 
 import com.kai.custom.SshProfile
-import com.kai.custom.defaultUiScale
 import com.kai.custom.data.getDefaultLanguage
+import com.kai.custom.defaultUiScale
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -385,7 +385,11 @@ class AppSettings(internal val settings: Settings) {
 
     fun getSshAuthMethod(): com.kai.custom.SshAuthMethod {
         val name = settings.getString(KEY_SSH_AUTH_METHOD, com.kai.custom.SshAuthMethod.PASSWORD.name)
-        return try { com.kai.custom.SshAuthMethod.valueOf(name) } catch (_: Exception) { com.kai.custom.SshAuthMethod.PASSWORD }
+        return try {
+            com.kai.custom.SshAuthMethod.valueOf(name)
+        } catch (_: Exception) {
+            com.kai.custom.SshAuthMethod.PASSWORD
+        }
     }
 
     fun setSshAuthMethod(method: com.kai.custom.SshAuthMethod) {

@@ -91,11 +91,11 @@ import kai.composeapp.generated.resources.settings_task_details_schedule
 import kai.composeapp.generated.resources.settings_task_details_scheduled_for
 import kai.composeapp.generated.resources.settings_task_details_status
 import kai.composeapp.generated.resources.settings_task_details_trigger
-import kotlinx.coroutines.launch
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
@@ -155,26 +155,26 @@ internal fun AgentContent(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                SettingsCard {
-                    MemoryList(
-                        memories = memories,
-                        onDeleteMemory = actions.onDeleteMemory,
-                        onUpdateMemory = actions.onUpdateMemory,
-                        isMemoryEnabled = isMemoryEnabled,
-                        onToggleMemory = actions.onToggleMemory,
-                        onExportDimension = actions.onExportDimension,
-                        onImportDimension = actions.onImportDimension,
-                    )
-                }
-                SettingsCard {
-                    ScheduledTaskList(
+                    SettingsCard {
+                        MemoryList(
+                            memories = memories,
+                            onDeleteMemory = actions.onDeleteMemory,
+                            onUpdateMemory = actions.onUpdateMemory,
+                            isMemoryEnabled = isMemoryEnabled,
+                            onToggleMemory = actions.onToggleMemory,
+                            onExportDimension = actions.onExportDimension,
+                            onImportDimension = actions.onImportDimension,
+                        )
+                    }
+                    SettingsCard {
+                        ScheduledTaskList(
                             tasks = scheduledTasks,
                             heartbeatLog = heartbeatLog,
                             onCancelTask = actions.onCancelTask,
                             isSchedulingEnabled = isSchedulingEnabled,
                             onToggleScheduling = actions.onToggleScheduling,
                         )
-                }
+                    }
                 }
                 Column(
                     modifier = Modifier.weight(1f),
@@ -266,19 +266,19 @@ internal fun AgentContent(
                         onSaveSoul = actions.onSaveSoul,
                     )
                 }
-                    SettingsCard {
-                        MemoryList(
-                            memories = memories,
-                            onDeleteMemory = actions.onDeleteMemory,
-                            onUpdateMemory = actions.onUpdateMemory,
-                            isMemoryEnabled = isMemoryEnabled,
-                            onToggleMemory = actions.onToggleMemory,
-                            onExportDimension = actions.onExportDimension,
-                            onImportDimension = actions.onImportDimension,
-                        )
-                    }
-                    SettingsCard {
-                        HeartbeatSection(
+                SettingsCard {
+                    MemoryList(
+                        memories = memories,
+                        onDeleteMemory = actions.onDeleteMemory,
+                        onUpdateMemory = actions.onUpdateMemory,
+                        isMemoryEnabled = isMemoryEnabled,
+                        onToggleMemory = actions.onToggleMemory,
+                        onExportDimension = actions.onExportDimension,
+                        onImportDimension = actions.onImportDimension,
+                    )
+                }
+                SettingsCard {
+                    HeartbeatSection(
                         isHeartbeatEnabled = isHeartbeatEnabled,
                         heartbeatIntervalMinutes = heartbeatIntervalMinutes,
                         activeHoursStart = heartbeatActiveHoursStart,

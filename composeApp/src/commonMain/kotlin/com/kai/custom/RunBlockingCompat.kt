@@ -1,8 +1,8 @@
 package com.kai.custom
 
+import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlinx.coroutines.CoroutineScope
 
 internal expect fun <T> runBlockingCompat(
     context: CoroutineContext = EmptyCoroutineContext,

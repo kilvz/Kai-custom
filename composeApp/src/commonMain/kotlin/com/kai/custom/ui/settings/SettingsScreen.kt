@@ -128,8 +128,8 @@ import com.kai.custom.inference.estimateGpuMemoryMb
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.dtos.SponsorsResponseDto
 import com.kai.custom.network.tools.ToolInfo
-import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.saveFileToDevice
+import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.ui.KaiClearableTextField
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.KaiSlider
@@ -254,8 +254,8 @@ import kai.composeapp.generated.resources.settings_tab_general
 import kai.composeapp.generated.resources.settings_tab_integrations
 import kai.composeapp.generated.resources.settings_tab_sandbox
 import kai.composeapp.generated.resources.settings_tab_services
-import kai.composeapp.generated.resources.settings_tab_tools
 import kai.composeapp.generated.resources.settings_tab_ssh
+import kai.composeapp.generated.resources.settings_tab_tools
 import kai.composeapp.generated.resources.settings_task_details_consecutive_failures
 import kai.composeapp.generated.resources.settings_task_details_created
 import kai.composeapp.generated.resources.settings_task_details_last_result
@@ -333,7 +333,11 @@ fun SettingsScreen(
 
     LaunchedEffect(initialTab) {
         if (initialTab.isNotBlank()) {
-            val tab = try { SettingsTab.valueOf(initialTab) } catch (_: Exception) { null }
+            val tab = try {
+                SettingsTab.valueOf(initialTab)
+            } catch (_: Exception) {
+                null
+            }
             if (tab != null) viewModel.actions.onSelectTab(tab)
         }
     }

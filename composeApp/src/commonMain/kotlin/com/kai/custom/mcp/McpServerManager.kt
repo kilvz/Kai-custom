@@ -51,8 +51,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     /** All servers including built-in. */
-    private fun getAllServers(): List<McpServerConfig> =
-        getServers() + builtInServers.values.toList()
+    private fun getAllServers(): List<McpServerConfig> = getServers() + builtInServers.values.toList()
 
     private fun saveServers(servers: List<McpServerConfig>) {
         val jsonStr = json.encodeToString(kotlinx.serialization.builtins.ListSerializer(McpServerConfig.serializer()), servers)

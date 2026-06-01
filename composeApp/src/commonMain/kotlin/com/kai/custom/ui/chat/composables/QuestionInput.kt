@@ -173,7 +173,9 @@ fun QuestionInput(
                 val lastSlash = beforeCursor.lastIndexOf('/')
                 if (lastSlash >= 0 && (lastSlash == 0 || beforeCursor[lastSlash - 1] == ' ' || beforeCursor[lastSlash - 1] == '\n')) {
                     beforeCursor.substring(lastSlash + 1)
-                } else null
+                } else {
+                    null
+                }
             }
         }
         if (slashQuery != null && installedSkills.isNotEmpty()) {

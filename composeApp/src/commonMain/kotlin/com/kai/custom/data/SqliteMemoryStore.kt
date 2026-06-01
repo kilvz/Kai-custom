@@ -25,7 +25,8 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         MemoryCategory.GENERAL,
         MemoryCategory.LEARNING,
         MemoryCategory.ERROR,
-            -> DimensionConfig.REALM_AGENT
+        -> DimensionConfig.REALM_AGENT
+
         MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
     }
 
@@ -69,8 +70,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         )
     }
 
-    private fun allEntities(max: Int = Int.MAX_VALUE): List<EntityData> =
-        dimension.getAllEntities().let { if (it.size <= max) it else it.take(max) }
+    private fun allEntities(max: Int = Int.MAX_VALUE): List<EntityData> = dimension.getAllEntities().let { if (it.size <= max) it else it.take(max) }
 
     override suspend fun store(
         key: String,
@@ -113,8 +113,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override fun schemaResetMessage(): String? = dimension.schemaResetMessage()
 
-    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> =
-        allEntities(max).mapNotNull { entityToEntry(it) }.filter { it.hitCount >= minHits }
+    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> = allEntities(max).mapNotNull { entityToEntry(it) }.filter { it.hitCount >= minHits }
 
     override suspend fun forget(key: String): Boolean = mutex.withLock {
         val entity = dimension.getEntityByMetadataKey("memory_key", key) ?: return@withLock false
@@ -122,8 +121,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         true
     }
 
-    override fun getAllMemories(max: Int): List<MemoryEntry> =
-        allEntities(max).mapNotNull { entityToEntry(it) }
+    override fun getAllMemories(max: Int): List<MemoryEntry> = allEntities(max).mapNotNull { entityToEntry(it) }
 
     override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
         if (query.isBlank()) return emptyList()

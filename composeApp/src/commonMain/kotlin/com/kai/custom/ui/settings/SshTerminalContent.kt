@@ -130,7 +130,7 @@ internal fun SshTerminalContent(
             }
         } else {
             SelectionContainer(
-                modifier = Modifier.weight(1f).fillMaxWidth()
+                modifier = Modifier.weight(1f).fillMaxWidth(),
             ) {
                 Column(
                     modifier = Modifier
@@ -153,6 +153,7 @@ internal fun SshTerminalContent(
                                     style = monoStyle(13.sp, SshPrompt),
                                 )
                             }
+
                             is TerminalLine.Output -> {
                                 Text(
                                     text = line.text,
@@ -160,6 +161,7 @@ internal fun SshTerminalContent(
                                     color = SshText,
                                 )
                             }
+
                             is TerminalLine.Error -> {
                                 Text(
                                     text = line.text,
@@ -326,9 +328,13 @@ private fun DisconnectedSshContent(
                             modifier = Modifier.handCursor(),
                         ) {
                             Text(
-                                if (isActive && conn.connecting) "Connecting..."
-                                else if (isActive && conn.error != null) "Retry"
-                                else "Connect"
+                                if (isActive && conn.connecting) {
+                                    "Connecting..."
+                                } else if (isActive && conn.error != null) {
+                                    "Retry"
+                                } else {
+                                    "Connect"
+                                },
                             )
                         }
                     }

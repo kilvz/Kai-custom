@@ -17,15 +17,12 @@ import com.kai.custom.data.EncryptedFileSettings
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
-import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sendHeartbeatNotification
 import com.kai.custom.tools.CommonTools
-import kai.composeapp.generated.resources.Res
-import kai.composeapp.generated.resources.tool_send_notification_description
-import kai.composeapp.generated.resources.tool_send_notification_name
 import com.kai.custom.tools.EmailTools
 import com.kai.custom.tools.HeartbeatTools
 import com.kai.custom.tools.PhoneTools
@@ -40,6 +37,9 @@ import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.cio.CIO
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_send_notification_description
+import kai.composeapp.generated.resources.tool_send_notification_name
 import kotlinx.coroutines.Dispatchers
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
@@ -236,15 +236,13 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Read the current content of the system clipboard",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        return try {
-                            val clipboard = java.awt.Toolkit.getDefaultToolkit().systemClipboard
-                            val contents = clipboard.getContents(null)
-                            val text = contents?.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor)?.toString()
-                            mapOf("success" to true, "content" to (text ?: ""), "has_content" to (text != null))
-                        } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to read clipboard: ${e.message}")
-                        }
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val clipboard = java.awt.Toolkit.getDefaultToolkit().systemClipboard
+                        val contents = clipboard.getContents(null)
+                        val text = contents?.getTransferData(java.awt.datatransfer.DataFlavor.stringFlavor)?.toString()
+                        mapOf("success" to true, "content" to (text ?: ""), "has_content" to (text != null))
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to read clipboard: ${e.message}")
                     }
                 },
             )
@@ -257,28 +255,26 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Get current network connectivity details (interfaces, IP addresses)",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        return try {
-                            var ipAddress = ""
-                            val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
-                            while (interfaces.hasMoreElements()) {
-                                val intf = interfaces.nextElement()
-                                if (intf.isUp && !intf.isLoopback) {
-                                    val addrs = intf.inetAddresses
-                                    while (addrs.hasMoreElements()) {
-                                        val addr = addrs.nextElement()
-                                        if (addr is java.net.Inet4Address && !addr.isLoopbackAddress) {
-                                            ipAddress = addr.hostAddress ?: ""
-                                            break
-                                        }
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        var ipAddress = ""
+                        val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+                        while (interfaces.hasMoreElements()) {
+                            val intf = interfaces.nextElement()
+                            if (intf.isUp && !intf.isLoopback) {
+                                val addrs = intf.inetAddresses
+                                while (addrs.hasMoreElements()) {
+                                    val addr = addrs.nextElement()
+                                    if (addr is java.net.Inet4Address && !addr.isLoopbackAddress) {
+                                        ipAddress = addr.hostAddress ?: ""
+                                        break
                                     }
-                                    if (ipAddress.isNotEmpty()) break
                                 }
+                                if (ipAddress.isNotEmpty()) break
                             }
-                            mapOf("success" to true, "ip_address" to ipAddress)
-                        } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to get network info: ${e.message}")
                         }
+                        mapOf("success" to true, "ip_address" to ipAddress)
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to get network info: ${e.message}")
                     }
                 },
             )
@@ -312,49 +308,50 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Get battery level and charging status (Desktop)",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        return try {
-                            val os = System.getProperty("os.name").lowercase()
-                            val result = when {
-                                os.contains("win") -> {
-                                    val proc = Runtime.getRuntime().exec(arrayOf("wmic", "path", "Win32_Battery", "Get", "EstimatedChargeRemaining,BatteryStatus"))
-                                    val output = proc.inputStream.bufferedReader().readText().trim()
-                                    val lines = output.lines().filter { it.isNotBlank() }
-                                    if (lines.size >= 2) {
-                                        val parts = lines[1].trim().split("\\s+".toRegex())
-                                        val pct = parts.getOrNull(0)?.toIntOrNull() ?: -1
-                                        val status = parts.getOrNull(1)?.toIntOrNull() ?: -1
-                                        val charging = status == 2 || status == 6 || status == 7
-                                        mapOf("success" to true, "level_percent" to pct, "is_charging" to charging, "health" to "unknown")
-                                    } else {
-                                        mapOf("success" to false, "error" to "No battery found")
-                                    }
-                                }
-                                os.contains("mac") -> {
-                                    val proc = Runtime.getRuntime().exec(arrayOf("pmset", "-g", "batt"))
-                                    val output = proc.inputStream.bufferedReader().readText().trim()
-                                    val match = Regex("(\\d+)%").find(output)
-                                    val pct = match?.groupValues?.get(1)?.toIntOrNull() ?: -1
-                                    val charging = output.contains("charging") || output.contains("AC Power")
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val os = System.getProperty("os.name").lowercase()
+                        val result = when {
+                            os.contains("win") -> {
+                                val proc = Runtime.getRuntime().exec(arrayOf("wmic", "path", "Win32_Battery", "Get", "EstimatedChargeRemaining,BatteryStatus"))
+                                val output = proc.inputStream.bufferedReader().readText().trim()
+                                val lines = output.lines().filter { it.isNotBlank() }
+                                if (lines.size >= 2) {
+                                    val parts = lines[1].trim().split("\\s+".toRegex())
+                                    val pct = parts.getOrNull(0)?.toIntOrNull() ?: -1
+                                    val status = parts.getOrNull(1)?.toIntOrNull() ?: -1
+                                    val charging = status == 2 || status == 6 || status == 7
                                     mapOf("success" to true, "level_percent" to pct, "is_charging" to charging, "health" to "unknown")
+                                } else {
+                                    mapOf("success" to false, "error" to "No battery found")
                                 }
-                                os.contains("nux") || os.contains("nix") -> {
-                                    val capFile = java.io.File("/sys/class/power_supply/BAT0/capacity")
-                                    val statusFile = java.io.File("/sys/class/power_supply/BAT0/status")
-                                    if (capFile.exists()) {
-                                        val pct = capFile.readText().trim().toIntOrNull() ?: -1
-                                        val charging = if (statusFile.exists()) statusFile.readText().trim() == "Charging" else false
-                                        mapOf("success" to true, "level_percent" to pct, "is_charging" to charging, "health" to "unknown")
-                                    } else {
-                                        mapOf("success" to false, "error" to "No battery found")
-                                    }
-                                }
-                                else -> mapOf("success" to false, "error" to "Unsupported OS: $os")
                             }
-                            result
-                        } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to get battery info: ${e.message}")
+
+                            os.contains("mac") -> {
+                                val proc = Runtime.getRuntime().exec(arrayOf("pmset", "-g", "batt"))
+                                val output = proc.inputStream.bufferedReader().readText().trim()
+                                val match = Regex("(\\d+)%").find(output)
+                                val pct = match?.groupValues?.get(1)?.toIntOrNull() ?: -1
+                                val charging = output.contains("charging") || output.contains("AC Power")
+                                mapOf("success" to true, "level_percent" to pct, "is_charging" to charging, "health" to "unknown")
+                            }
+
+                            os.contains("nux") || os.contains("nix") -> {
+                                val capFile = java.io.File("/sys/class/power_supply/BAT0/capacity")
+                                val statusFile = java.io.File("/sys/class/power_supply/BAT0/status")
+                                if (capFile.exists()) {
+                                    val pct = capFile.readText().trim().toIntOrNull() ?: -1
+                                    val charging = if (statusFile.exists()) statusFile.readText().trim() == "Charging" else false
+                                    mapOf("success" to true, "level_percent" to pct, "is_charging" to charging, "health" to "unknown")
+                                } else {
+                                    mapOf("success" to false, "error" to "No battery found")
+                                }
+                            }
+
+                            else -> mapOf("success" to false, "error" to "Unsupported OS: $os")
                         }
+                        result
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to get battery info: ${e.message}")
                     }
                 },
             )
@@ -367,8 +364,7 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Get GPS location (not available on Desktop)",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any =
-                        mapOf("success" to false, "error" to "GPS location is not available on Desktop")
+                    override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS location is not available on Desktop")
                 },
             )
         }

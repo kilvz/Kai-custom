@@ -2,8 +2,8 @@ package com.kai.custom.data
 
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_service_aihubmix
-import kai.composeapp.generated.resources.ic_service_atlascloud
 import kai.composeapp.generated.resources.ic_service_anthropic
+import kai.composeapp.generated.resources.ic_service_atlascloud
 import kai.composeapp.generated.resources.ic_service_cerebras
 import kai.composeapp.generated.resources.ic_service_deepinfra
 import kai.composeapp.generated.resources.ic_service_deepseek

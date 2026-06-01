@@ -588,7 +588,9 @@ class FakeDataRepository : DataRepository {
 
     override fun exportDimension(): ByteArray = dimensionData
 
-    override fun importDimension(data: ByteArray) { dimensionData = data }
+    override fun importDimension(data: ByteArray) {
+        dimensionData = data
+    }
 
     // On-device inference (LiteRT)
     var localInferenceAvailable = false
@@ -615,14 +617,13 @@ class FakeDataRepository : DataRepository {
 
     override fun getInstalledSkills(): List<SkillManifest> = installedSkills.toList()
     override fun getActiveSkill(): SkillManifest? = activeSkill
-    override fun setActiveSkill(skill: SkillManifest?) { activeSkill = skill }
-    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> =
-        Result.failure(UnsupportedOperationException("installSkillFromGitHub not implemented in FakeDataRepository"))
-    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> =
-        Result.failure(UnsupportedOperationException("installSkillFromRegistryEntry not implemented in FakeDataRepository"))
+    override fun setActiveSkill(skill: SkillManifest?) {
+        activeSkill = skill
+    }
+    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromGitHub not implemented in FakeDataRepository"))
+    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromRegistryEntry not implemented in FakeDataRepository"))
     override suspend fun uninstallSkill(id: String) {}
-    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> =
-        Result.success(emptyList())
+    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> = Result.success(emptyList())
 
     override fun addSystemMessage(content: String) {}
 }

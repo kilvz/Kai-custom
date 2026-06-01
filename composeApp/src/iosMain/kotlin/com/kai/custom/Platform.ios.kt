@@ -10,15 +10,12 @@ import com.kai.custom.data.EmailStore
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
-import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sendHeartbeatNotification
 import com.kai.custom.tools.CommonTools
-import kai.composeapp.generated.resources.Res
-import kai.composeapp.generated.resources.tool_send_notification_description
-import kai.composeapp.generated.resources.tool_send_notification_name
 import com.kai.custom.tools.EmailTools
 import com.kai.custom.tools.HeartbeatTools
 import com.kai.custom.tools.PhoneTools
@@ -35,6 +32,9 @@ import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.darwin.Darwin
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_send_notification_description
+import kai.composeapp.generated.resources.tool_send_notification_name
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
@@ -287,8 +287,7 @@ actual fun getAvailableTools(): List<Tool> = buildList {
                     description = "Get current GPS location coordinates",
                     parameters = emptyMap(),
                 )
-                override suspend fun execute(args: Map<String, Any>): Any =
-                    mapOf("success" to false, "error" to "GPS location requires CoreLocation struct interop not available in this Kotlin/Native version")
+                override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS location requires CoreLocation struct interop not available in this Kotlin/Native version")
             },
         )
     }
@@ -300,8 +299,7 @@ actual fun getAvailableTools(): List<Tool> = buildList {
                     description = "Get basic network connectivity status",
                     parameters = emptyMap(),
                 )
-                override suspend fun execute(args: Map<String, Any>): Any =
-                    mapOf("success" to true, "platform" to "iOS")
+                override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to true, "platform" to "iOS")
             },
         )
     }

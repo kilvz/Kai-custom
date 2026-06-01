@@ -204,6 +204,7 @@ internal fun SshSettingsCard(
                             color = MaterialTheme.colorScheme.primary,
                         )
                     }
+
                     conn.error != null -> {
                         Text(
                             text = conn.error,
@@ -287,6 +288,7 @@ internal fun SshSettingsCard(
                                             color = Color(0xFF6CB6FF),
                                         )
                                     }
+
                                     is TerminalLine.Output -> {
                                         Text(
                                             text = line.text,
@@ -295,6 +297,7 @@ internal fun SshSettingsCard(
                                             color = Color(0xFFD4D4D4),
                                         )
                                     }
+
                                     is TerminalLine.Error -> {
                                         Text(
                                             text = line.text,

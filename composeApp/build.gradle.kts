@@ -238,7 +238,9 @@ class VersionGeneratorPlugin : Plugin<Project> {
                     .get()
                     .asFile
             versionFile.parentFile?.mkdirs()
-            val versionCode = libs.versions.android.versionCode.get()
+            val versionCode =
+                libs.versions.android.versionCode
+                    .get()
 
             versionFile.writeText(
                 """

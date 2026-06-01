@@ -1,8 +1,6 @@
 package com.kai.custom
 
 import com.kai.custom.SpeechToText
-import com.kai.custom.wakeword.WakeWordController
-import com.kai.custom.wakeword.createWakeWordController
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ConversationStorage
 import com.kai.custom.data.DataRepository
@@ -11,10 +9,10 @@ import com.kai.custom.data.HeartbeatManager
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.data.NotificationStore
-import com.kai.custom.data.SqliteMemoryStore
 import com.kai.custom.data.RemoteDataRepository
 import com.kai.custom.data.SmsDraftStore
 import com.kai.custom.data.SmsStore
+import com.kai.custom.data.SqliteMemoryStore
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.TaskStore
 import com.kai.custom.data.ToolExecutor
@@ -25,18 +23,18 @@ import com.kai.custom.inference.createLocalInferenceEngine
 import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.network.Requests
 import com.kai.custom.notifications.NotificationReader
+import com.kai.custom.skills.SkillManager
+import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
-import com.kai.custom.skills.SkillManager
-import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.splinterlands.SplinterlandsApi
 import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
 import com.kai.custom.tools.CalendarPermissionController
+import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.tools.NotificationPermissionController
-import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
 import com.kai.custom.ui.chat.ChatViewModel
@@ -47,6 +45,8 @@ import com.kai.custom.ui.settings.SandboxViewModel
 import com.kai.custom.ui.settings.SettingsViewModel
 import com.kai.custom.ui.settings.SplinterlandsViewModel
 import com.kai.custom.ui.settings.SshViewModel
+import com.kai.custom.wakeword.WakeWordController
+import com.kai.custom.wakeword.createWakeWordController
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

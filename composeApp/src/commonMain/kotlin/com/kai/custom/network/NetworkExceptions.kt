@@ -94,17 +94,23 @@ fun Exception.toUiError(): UiError = when (this) {
     is OpenAICompatibleModelNotFoundException -> UiError.Resource(Res.string.error_openai_compatible_model_not_found)
 
     is OpenAICompatibleEmptyResponseException -> UiError.Resource(Res.string.error_empty_response)
+
     is OpenAICompatibleTimeoutException -> UiError.Resource(Res.string.error_openai_compatible_connection)
+
     is OpenAICompatibleServiceUnavailableException -> UiError.Resource(Res.string.error_service_unavailable)
+
     is OpenAICompatibleContentModerationException -> message?.takeIf { it.isNotBlank() }
         ?.let { UiError.ResourceWithDetail(Res.string.error_content_moderation, it) }
         ?: UiError.Resource(Res.string.error_content_moderation)
+
     is OpenAICompatibleProviderErrorException -> message?.takeIf { it.isNotBlank() }
         ?.let { UiError.ResourceWithDetail(Res.string.error_provider_error, it) }
         ?: UiError.Resource(Res.string.error_provider_error)
+
     is OpenAICompatibleBadRequestException -> message?.takeIf { it.isNotBlank() }
         ?.let { UiError.ResourceWithDetail(Res.string.error_bad_request, it) }
         ?: UiError.Resource(Res.string.error_bad_request)
+
     is InsufficientMemoryException -> UiError.Resource(Res.string.litert_error_insufficient_memory)
 
     is InferenceTimeoutException -> UiError.Resource(Res.string.litert_error_inference_timeout)

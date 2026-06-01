@@ -19,41 +19,41 @@ object SshConfigureHostTool : Tool {
 
     override val schema: ToolSchema
         get() = ToolSchema(
-        name = "ssh_configure_host",
-        description = buildDescription(),
-        parameters = mapOf(
-            "alias" to ParameterSchema(
-                "string",
-                "Short name used to invoke this host (e.g. 'prod', 'my-vps'). Must contain no whitespace.",
-                true,
+            name = "ssh_configure_host",
+            description = buildDescription(),
+            parameters = mapOf(
+                "alias" to ParameterSchema(
+                    "string",
+                    "Short name used to invoke this host (e.g. 'prod', 'my-vps'). Must contain no whitespace.",
+                    true,
+                ),
+                "hostname" to ParameterSchema(
+                    "string",
+                    "DNS name or IP of the remote machine.",
+                    true,
+                ),
+                "user" to ParameterSchema(
+                    "string",
+                    "SSH user. Omit to fall back to the openssh default (current user inside the sandbox).",
+                    false,
+                ),
+                "port" to ParameterSchema(
+                    "integer",
+                    "SSH port. Omit for 22.",
+                    false,
+                ),
+                "identity_file" to ParameterSchema(
+                    "string",
+                    "Path to the private key inside the sandbox. Relative names resolve under ~/.ssh (e.g. 'my-vps_id' → ~/.ssh/my-vps_id); absolute paths and ~-paths pass through. The file is not created by this tool.",
+                    false,
+                ),
+                "known_host_line" to ParameterSchema(
+                    "string",
+                    "Optional single line appended to ~/.ssh/known_hosts. Typically the output of `ssh-keyscan -t ed25519 <host>`. Deduplicated by exact-line match.",
+                    false,
+                ),
             ),
-            "hostname" to ParameterSchema(
-                "string",
-                "DNS name or IP of the remote machine.",
-                true,
-            ),
-            "user" to ParameterSchema(
-                "string",
-                "SSH user. Omit to fall back to the openssh default (current user inside the sandbox).",
-                false,
-            ),
-            "port" to ParameterSchema(
-                "integer",
-                "SSH port. Omit for 22.",
-                false,
-            ),
-            "identity_file" to ParameterSchema(
-                "string",
-                "Path to the private key inside the sandbox. Relative names resolve under ~/.ssh (e.g. 'my-vps_id' → ~/.ssh/my-vps_id); absolute paths and ~-paths pass through. The file is not created by this tool.",
-                false,
-            ),
-            "known_host_line" to ParameterSchema(
-                "string",
-                "Optional single line appended to ~/.ssh/known_hosts. Typically the output of `ssh-keyscan -t ed25519 <host>`. Deduplicated by exact-line match.",
-                false,
-            ),
-        ),
-    )
+        )
 
     private fun buildDescription(): String = buildString {
         appendLine("Register a named SSH host alias in the Linux sandbox so subsequent execute_shell_command calls can run `ssh <alias>` instead of repeating user/host/port/identity flags every time.")

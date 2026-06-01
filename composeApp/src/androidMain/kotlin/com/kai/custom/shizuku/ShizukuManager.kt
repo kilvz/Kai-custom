@@ -131,9 +131,7 @@ object ShizukuManager {
         }
     }
 
-    private fun readStream(stream: java.io.InputStream): String {
-        return BufferedReader(InputStreamReader(stream)).use { it.readText() }
-    }
+    private fun readStream(stream: java.io.InputStream): String = BufferedReader(InputStreamReader(stream)).use { it.readText() }
 
     private fun newProcess(cmd: Array<String>): Process {
         val clazz = Class.forName("rikka.shizuku.Shizuku")
