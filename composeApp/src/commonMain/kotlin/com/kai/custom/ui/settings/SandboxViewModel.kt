@@ -28,6 +28,7 @@ data class SandboxUiState(
     val sandboxDistro: String = "alpine",
     val isWorking: Boolean = false,
     val hasError: Boolean = false,
+    val altMemoryInstalled: Boolean = false,
 )
 
 class SandboxViewModel(
@@ -48,6 +49,7 @@ class SandboxViewModel(
                 isSandboxStorageMountEnabled = dataRepository.isSandboxStorageMountEnabled(),
                 isSandboxRootEnabled = dataRepository.isSandboxRootEnabled(),
                 sandboxDistro = dataRepository.getSandboxDistro(),
+                altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
             ),
         ),
     )
@@ -72,6 +74,7 @@ class SandboxViewModel(
         isWorking = status.working,
         hasError = status.error,
         sandboxDistro = dataRepository.getSandboxDistro(),
+        altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
     )
 
     fun onToggleSandbox(enabled: Boolean) {
@@ -107,7 +110,9 @@ class SandboxViewModel(
 
     fun onInstallAltMemory() {
         viewModelScope.launch {
-            sandboxController.installAltMemoryPackage()
+            val installed = sandboxController.installAltMemoryPackage()
+            dataRepository.setAltMemoryInstalled(installed)
+            _state.update { it.copy(altMemoryInstalled = installed) }
         }
     }
 

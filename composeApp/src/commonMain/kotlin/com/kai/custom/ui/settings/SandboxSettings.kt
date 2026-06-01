@@ -131,8 +131,10 @@ internal fun SandboxSettingsCard(
                             Text(stringResource(Res.string.settings_sandbox_install_packages))
                         }
                     }
-                    OutlinedButton(onClick = onInstallAltMemory, modifier = Modifier.handCursor()) {
-                        Text("Alt-Memory")
+                    if (!sandboxState.altMemoryInstalled) {
+                        OutlinedButton(onClick = onInstallAltMemory, modifier = Modifier.handCursor()) {
+                            Text("Alt-Memory")
+                        }
                     }
                     OutlinedButton(onClick = { showResetDialog = true }, modifier = Modifier.handCursor()) {
                         Text(stringResource(Res.string.settings_sandbox_uninstall))
