@@ -80,10 +80,7 @@ internal fun IntegrationsContent(
         }
 
         SettingsCard {
-            TelegramSection(
-                isEnabled = dataRepository.isTelegramEnabled(),
-                onToggle = { dataRepository.setTelegramEnabled(it) },
-            )
+            TelegramSection(dataRepository)
         }
 
         SettingsCard {
@@ -112,12 +109,9 @@ internal fun IntegrationsContent(
 }
 
 @Composable
-private fun TelegramSection(
-    isEnabled: Boolean,
-    onToggle: (Boolean) -> Unit,
-) {
+private fun TelegramSection(dataRepository: DataRepository) {
     val scope = rememberCoroutineScope()
-    val dataRepository: DataRepository = koinInject()
+    var isEnabled by remember { mutableStateOf(dataRepository.isTelegramEnabled()) }
     var botToken by remember { mutableStateOf(dataRepository.getTelegramBotToken()) }
     var authorizedIds by remember { mutableStateOf(dataRepository.getTelegramAuthorizedChatIds().joinToString(", ")) }
     var showToken by remember { mutableStateOf(false) }
@@ -129,7 +123,10 @@ private fun TelegramSection(
             title = "Telegram Bot",
             description = "Talk to the AI via Telegram",
             checked = isEnabled,
-            onCheckedChange = onToggle,
+            onCheckedChange = {
+                isEnabled = it
+                dataRepository.setTelegramEnabled(it)
+            },
             actions = {
                 Surface(
                     shape = RoundedCornerShape(4.dp),

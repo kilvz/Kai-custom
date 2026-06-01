@@ -1,3 +1,8 @@
+## v3.2.4 — 2026-06-01
+
+### Fixes
+- Fix Telegram toggle not responding: `isEnabled` now backed by local `MutableState` so switch recomposes on toggle
+
 ## v3.2.3 — 2026-06-01
 
 ### Fixes
