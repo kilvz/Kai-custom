@@ -121,6 +121,7 @@ class DebugServer(
                             mapOf(
                                 "soul_text" to dataRepository.getSoulUser(),
                                 "persona_name" to dataRepository.getPersonaName(),
+                                "active_persona_id" to dataRepository.getActivePersona().id,
                                 "free_service_primary" to dataRepository.isFreeServicePrimary().toString(),
                                 "memory_enabled" to dataRepository.isMemoryEnabled().toString(),
                                 "scheduling_enabled" to dataRepository.isSchedulingEnabled().toString(),
@@ -226,6 +227,8 @@ class DebugServer(
                             "soul_text" -> dataRepository.setSoulText(v)
 
                             "persona_name" -> dataRepository.setPersonaName(v)
+
+                            "active_persona_id" -> dataRepository.switchPersona(v)
 
                             "preferred_language" -> dataRepository.setPreferredLanguage(v)
 
