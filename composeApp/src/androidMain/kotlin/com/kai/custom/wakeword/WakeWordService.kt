@@ -22,9 +22,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class WakeWordService : Service() {
@@ -36,8 +36,10 @@ class WakeWordService : Service() {
         private const val ANTI_FLAP_MS = 2000L
         private val _wakeWordDetected = MutableSharedFlow<String>(extraBufferCapacity = 4)
         val wakeWordDetected: SharedFlow<String> = _wakeWordDetected.asSharedFlow()
+
         @Volatile var isRunning = false
             private set
+
         @Volatile var lastStoppedMs: Long = 0L
             private set
     }
@@ -50,6 +52,7 @@ class WakeWordService : Service() {
     private var lastDetectionMs: Long = 0L
     private val detectionCooldownMs: Long = 3000L
     private var serviceStartMs: Long = 0L
+
     @Volatile private var audioRecord: AudioRecord? = null
 
     override fun onCreate() {
@@ -65,7 +68,9 @@ class WakeWordService : Service() {
         val templateStr = intent?.getStringExtra("WAKE_WORD_TEMPLATE") ?: ""
         currentTemplate = if (templateStr.isNotBlank()) {
             WakeWordMatcher.deserializeTemplate(templateStr)
-        } else null
+        } else {
+            null
+        }
         Log.d(TAG, "onStartCommand phrase=$currentPhrase mode=$currentMode hasTemplate=${currentTemplate != null}")
 
         // Must call startForeground() before any early return — Android crashes with
@@ -134,7 +139,9 @@ class WakeWordService : Service() {
         val rec = audioRecord
         if (rec != null) {
             audioRecord = null
-            try { rec.stop() } catch (_: Exception) {}
+            try {
+                rec.stop()
+            } catch (_: Exception) {}
             rec.release()
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -146,7 +153,9 @@ class WakeWordService : Service() {
         val sampleRate = 16000
         val bufferSize = sampleRate // 1 second
         val minBufferSize = AudioRecord.getMinBufferSize(
-            sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
+            sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
         )
         val actualBufferSize = maxOf(bufferSize * 2, minBufferSize)
         Log.d(TAG, "bufferSize=$bufferSize minBufferSize=$minBufferSize actual=$actualBufferSize")
@@ -235,19 +244,19 @@ class WakeWordService : Service() {
         }
         Log.d(TAG, "listenLoop ending (processed=$framesProcessed reads=$readCount zeros=$zeroCount)")
         audioRecord = null
-        try { rec.stop() } catch (_: Exception) { }
+        try {
+            rec.stop()
+        } catch (_: Exception) { }
         rec.release()
     }
 
-    private fun detectWakeWord(features: Array<FloatArray>): Float {
-        return if (currentMode == "PERSONAL" && currentTemplate != null) {
-            WakeWordMatcher.cosineSimilarity(features, currentTemplate!!)
-        } else {
-            try {
-                WakeWordInterpreter.run(features)
-            } catch (_: Exception) {
-                0f
-            }
+    private fun detectWakeWord(features: Array<FloatArray>): Float = if (currentMode == "PERSONAL" && currentTemplate != null) {
+        WakeWordMatcher.cosineSimilarity(features, currentTemplate!!)
+    } else {
+        try {
+            WakeWordInterpreter.run(features)
+        } catch (_: Exception) {
+            0f
         }
     }
 
@@ -268,7 +277,9 @@ class WakeWordService : Service() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent,
+            this,
+            0,
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         return Notification.Builder(this, CHANNEL_ID)

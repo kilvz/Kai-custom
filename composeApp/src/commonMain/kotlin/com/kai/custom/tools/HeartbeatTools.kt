@@ -63,6 +63,7 @@ object HeartbeatTools {
 
     val heartbeatToolDefinitions = listOf(promoteLearningToolInfo)
 
-    fun getPromoteLearningTool(memoryStore: MemoryStore, appSettings: AppSettings): Tool =
-        promoteLearningTool(memoryStore, appSettings)
+    fun getPromoteLearningTool(memoryStore: MemoryStore, appSettings: AppSettings): Tool = promoteLearningTool(memoryStore, appSettings)
+
+    fun getHeartbeatTools(memoryStore: MemoryStore, appSettings: AppSettings): List<Tool> = listOf(promoteLearningTool(memoryStore, appSettings))
 }

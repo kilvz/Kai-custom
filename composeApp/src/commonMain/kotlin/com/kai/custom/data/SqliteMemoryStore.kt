@@ -26,7 +26,8 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         MemoryCategory.GENERAL,
         MemoryCategory.LEARNING,
         MemoryCategory.ERROR,
-            -> DimensionConfig.REALM_AGENT
+        -> DimensionConfig.REALM_AGENT
+
         MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
     }
 
@@ -71,8 +72,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         )
     }
 
-    private fun allEntities(max: Int = Int.MAX_VALUE): List<EntityData> =
-        dimension.getAllEntities().let { if (it.size <= max) it else it.take(max) }
+    private fun allEntities(max: Int = Int.MAX_VALUE): List<EntityData> = dimension.getAllEntities().let { if (it.size <= max) it else it.take(max) }
 
     override suspend fun store(
         key: String,

@@ -9,6 +9,7 @@ import com.kai.custom.SshConnectionState
 import com.kai.custom.SshProfile
 import com.kai.custom.TerminalLine
 import com.kai.custom.data.AppSettings
+import com.kai.custom.runBlockingCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 data class SshUiState(
     val host: String = "",
@@ -38,7 +38,7 @@ class SshViewModel(
     private val sshConnectionManager: SshConnectionManager,
 ) : ViewModel() {
 
-    private val _configState = MutableStateFlow(
+    private val configState = MutableStateFlow(
         SshUiState(
             host = appSettings.getSshHost(),
             port = appSettings.getSshPort().toString(),
@@ -49,28 +49,28 @@ class SshViewModel(
             passphrase = appSettings.getSshPassphrase(),
             profiles = appSettings.getSshProfiles(),
             activeProfileName = appSettings.getActiveSshProfileName(),
-        )
+        ),
     )
 
     private val _isRunning = MutableStateFlow(false)
     val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
 
     val state: StateFlow<SshUiState> = combine(
-        _configState,
+        configState,
         sshConnectionManager.connectionState,
         sshConnectionManager.transcript,
     ) { config, conn, transcript ->
         config.copy(connectionState = conn, transcript = transcript)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _configState.value)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), configState.value)
 
     fun selectProfile(name: String) {
         if (name.isBlank()) {
-            _configState.value = _configState.value.copy(activeProfileName = "")
+            configState.value = configState.value.copy(activeProfileName = "")
             return
         }
         val profile = appSettings.getSshProfiles().find { it.name == name } ?: return
         appSettings.setActiveSshProfileName(name)
-        _configState.value = _configState.value.copy(
+        configState.value = configState.value.copy(
             activeProfileName = name,
             host = profile.host,
             port = profile.port.toString(),
@@ -87,14 +87,14 @@ class SshViewModel(
         appSettings.deleteSshProfile(name)
         val profiles = appSettings.getSshProfiles()
         val activeName = if (appSettings.getActiveSshProfileName() == name) "" else appSettings.getActiveSshProfileName()
-        _configState.value = _configState.value.copy(
+        configState.value = configState.value.copy(
             profiles = profiles,
             activeProfileName = activeName,
         )
     }
 
     fun saveCurrentAsProfile(name: String) {
-        val s = _configState.value
+        val s = configState.value
         val profile = SshProfile(
             name = name,
             host = s.host,
@@ -107,42 +107,42 @@ class SshViewModel(
         )
         appSettings.saveSshProfile(profile)
         appSettings.setActiveSshProfileName(name)
-        _configState.value = _configState.value.copy(
+        configState.value = configState.value.copy(
             profiles = appSettings.getSshProfiles(),
             activeProfileName = name,
         )
     }
 
     fun onHostChanged(host: String) {
-        _configState.value = _configState.value.copy(host = host)
+        configState.value = configState.value.copy(host = host)
     }
 
     fun onPortChanged(port: String) {
-        _configState.value = _configState.value.copy(port = port)
+        configState.value = configState.value.copy(port = port)
     }
 
     fun onUsernameChanged(username: String) {
-        _configState.value = _configState.value.copy(username = username)
+        configState.value = configState.value.copy(username = username)
     }
 
     fun onAuthMethodChanged(method: SshAuthMethod) {
-        _configState.value = _configState.value.copy(authMethod = method)
+        configState.value = configState.value.copy(authMethod = method)
     }
 
     fun onPasswordChanged(password: String) {
-        _configState.value = _configState.value.copy(password = password)
+        configState.value = configState.value.copy(password = password)
     }
 
     fun onPrivateKeyChanged(key: String) {
-        _configState.value = _configState.value.copy(privateKey = key)
+        configState.value = configState.value.copy(privateKey = key)
     }
 
     fun onPassphraseChanged(passphrase: String) {
-        _configState.value = _configState.value.copy(passphrase = passphrase)
+        configState.value = configState.value.copy(passphrase = passphrase)
     }
 
     fun saveSettings() {
-        val s = _configState.value
+        val s = configState.value
         appSettings.setSshHost(s.host)
         appSettings.setSshPort(s.port.toIntOrNull() ?: 22)
         appSettings.setSshUsername(s.username)
@@ -154,7 +154,7 @@ class SshViewModel(
 
     fun connect() {
         saveSettings()
-        val s = _configState.value
+        val s = configState.value
         val port = s.port.toIntOrNull() ?: 22
         viewModelScope.launch {
             sshConnectionManager.connect(
@@ -166,7 +166,7 @@ class SshViewModel(
                     password = s.password,
                     privateKey = s.privateKey,
                     passphrase = s.passphrase,
-                )
+                ),
             )
         }
     }
@@ -179,7 +179,7 @@ class SshViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        runBlocking(Dispatchers.IO) { sshConnectionManager.disconnect() }
+        runBlockingCompat(Dispatchers.Default) { sshConnectionManager.disconnect() }
     }
 
     fun executeCommand(command: String) {

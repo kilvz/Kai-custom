@@ -1426,9 +1426,14 @@ class RemoteDataRepository(
                         id = h.id,
                         role = when (h.role) {
                             History.Role.USER -> "user"
+
                             History.Role.ASSISTANT -> "assistant"
+
                             History.Role.TOOL -> "tool"
-                            History.Role.TOOL_EXECUTING -> "tool" // Should not happen due to filter
+
+                            History.Role.TOOL_EXECUTING -> "tool"
+
+                            // Should not happen due to filter
                             History.Role.SYSTEM -> "system"
                         },
                         content = h.content,
@@ -1579,7 +1584,7 @@ class RemoteDataRepository(
         val transcript = buildString {
             appendLine("[PREVIOUS CONVERSATION — BRANCH]")
             appendLine("Title: $forkedTitle")
-            appendLine("Key: branch_${oldConversationId}")
+            appendLine("Key: branch_$oldConversationId")
             appendLine()
             for (h in oldHistory) {
                 val role = when (h.role) {
@@ -1593,7 +1598,7 @@ class RemoteDataRepository(
             }
         }
         memoryStore.store(
-            key = "branch_${oldConversationId}",
+            key = "branch_$oldConversationId",
             content = transcript,
             category = MemoryCategory.GENERAL,
             source = "conversation_branch",
@@ -1636,16 +1641,19 @@ class RemoteDataRepository(
 
         val oldHistory = chatHistory.value.toList()
         val oldConversationId = _currentConversationId.value ?: return
-        val forkedTitle = if (forkedContent.length <= 50) forkedContent
-            else forkedContent.take(50).let { t ->
+        val forkedTitle = if (forkedContent.length <= 50) {
+            forkedContent
+        } else {
+            forkedContent.take(50).let { t ->
                 val lastSpace = t.lastIndexOf(' ')
                 if (lastSpace > 20) t.substring(0, lastSpace) + "..." else t + "..."
             }
+        }
 
         val transcript = buildString {
             appendLine("[PREVIOUS CONVERSATION — BRANCH]")
             appendLine("Title: $forkedTitle")
-            appendLine("Key: branch_${oldConversationId}")
+            appendLine("Key: branch_$oldConversationId")
             appendLine()
             for (h in oldHistory) {
                 val role = when (h.role) {
@@ -1659,7 +1667,7 @@ class RemoteDataRepository(
             }
         }
         memoryStore.store(
-            key = "branch_${oldConversationId}",
+            key = "branch_$oldConversationId",
             content = transcript,
             category = MemoryCategory.GENERAL,
             source = "conversation_branch",
@@ -1678,7 +1686,7 @@ class RemoteDataRepository(
                     updatedAt = now,
                     title = forkedTitle,
                     forkedFrom = forkedContent,
-                )
+                ),
             )
             setCurrentConversationId(newId)
         }

@@ -53,12 +53,15 @@ class AltMemoryLifecycleManager(
             var failed = 0
             for (entry in memories) {
                 try {
-                    client.callTool("memory_store", buildJsonObject {
-                        put("key", JsonPrimitive(entry.key))
-                        put("content", JsonPrimitive(entry.content))
-                        put("category", JsonPrimitive(entry.category.name))
-                        put("hit_count", JsonPrimitive(entry.hitCount))
-                    })
+                    client.callTool(
+                        "memory_store",
+                        buildJsonObject {
+                            put("key", JsonPrimitive(entry.key))
+                            put("content", JsonPrimitive(entry.content))
+                            put("category", JsonPrimitive(entry.category.name))
+                            put("hit_count", JsonPrimitive(entry.hitCount))
+                        },
+                    )
                     migrated++
                 } catch (_: Exception) {
                     failed++

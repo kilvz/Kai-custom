@@ -25,7 +25,6 @@ import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.EmailStore
-import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.NotificationStore
 import com.kai.custom.data.SmsDraftStore
@@ -38,9 +37,11 @@ import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.notifications.NotificationReader
 import com.kai.custom.notifications.declaresNotificationListener
+import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
+import com.kai.custom.tools.AdbTool
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.CalendarRepository
 import com.kai.custom.tools.CalendarResult
@@ -51,15 +52,14 @@ import com.kai.custom.tools.NotificationHelper
 import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.NotificationResult
 import com.kai.custom.tools.NotificationTools
-import com.kai.custom.tools.AdbTool
 import com.kai.custom.tools.OpenCodeTool
 import com.kai.custom.tools.OpenFileTool
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
 import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.ShellCommandTool
-import com.kai.custom.tools.SpeakTextTool
 import com.kai.custom.tools.SmsTools
+import com.kai.custom.tools.SpeakTextTool
 import com.kai.custom.tools.SshCommandTool
 import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshConnectTool
@@ -155,7 +155,11 @@ actual fun isShizukuPermissionGranted(): Boolean = ShizukuManager.hasPermission
 
 actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {
     ShizukuManager.requestPermission(
-        onResult = if (onGranted != null) {{ granted -> if (granted) onGranted() }} else null,
+        onResult = if (onGranted != null) {
+            { granted -> if (granted) onGranted() }
+        } else {
+            null
+        },
     )
 }
 
@@ -216,17 +220,15 @@ private fun createEncryptedPrefs(context: Context): android.content.SharedPrefer
     )
 }
 
-    actual fun createLegacySettings(): Settings? {
-        return try {
-            Settings()
-        } catch (_: Exception) {
-            null
-        }
-    }
+actual fun createLegacySettings(): Settings? = try {
+    Settings()
+} catch (_: Exception) {
+    null
+}
 
-    actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnectionManager()
+actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnectionManager()
 
-    actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
+actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     addAll(CommonTools.commonToolDefinitions)
     add(
         ToolInfo(
@@ -562,6 +564,7 @@ actual fun getAvailableTools(): List<Tool> {
                         }
                         return try {
                             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+
                             @Suppress("DEPRECATION")
                             val provider = locationManager.getBestProvider(android.location.Criteria().apply { accuracy = android.location.Criteria.ACCURACY_FINE }, true)
                             if (provider == null) {
@@ -581,6 +584,7 @@ actual fun getAvailableTools(): List<Tool> {
                                 // Request a single location update
                                 val latch = java.util.concurrent.CountDownLatch(1)
                                 var result: Map<String, Any> = mapOf("success" to false, "error" to "Could not get location")
+
                                 @Suppress("DEPRECATION")
                                 val locationListener = object : android.location.LocationListener {
                                     override fun onLocationChanged(loc: android.location.Location) {
@@ -594,6 +598,7 @@ actual fun getAvailableTools(): List<Tool> {
                                         )
                                         latch.countDown()
                                     }
+
                                     @Deprecated("Deprecated in Java")
                                     override fun onStatusChanged(p0: String?, p1: Int, p2: android.os.Bundle?) {}
                                     override fun onProviderEnabled(p0: String) {}
@@ -655,7 +660,8 @@ actual fun getAvailableTools(): List<Tool> {
                                             ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                                             arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER),
                                             "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
-                                            arrayOf(id), null,
+                                            arrayOf(id),
+                                            null,
                                         )
                                         phoneCursor?.use { pc ->
                                             if (pc.moveToFirst()) {
@@ -690,13 +696,17 @@ actual fun getAvailableTools(): List<Tool> {
                             val mi = android.app.ActivityManager.MemoryInfo()
                             activityManager.getMemoryInfo(mi)
                             mapOf("total_ram_gb" to "%.2f".format(mi.totalMem.toDouble() / 1_073_741_824), "available_ram_gb" to "%.2f".format(mi.availMem.toDouble() / 1_073_741_824))
-                        } catch (_: Exception) { emptyMap<String, String>() }
+                        } catch (_: Exception) {
+                            emptyMap<String, String>()
+                        }
                         val storageInfo = try {
                             val stat = android.os.StatFs(Environment.getDataDirectory().path)
                             val total = stat.totalBytes
                             val free = stat.availableBytes
                             mapOf("total_storage_gb" to "%.2f".format(total.toDouble() / 1_073_741_824), "free_storage_gb" to "%.2f".format(free.toDouble() / 1_073_741_824))
-                        } catch (_: Exception) { emptyMap<String, String>() }
+                        } catch (_: Exception) {
+                            emptyMap<String, String>()
+                        }
                         return mapOf(
                             "success" to true,
                             "device" to mapOf(
@@ -780,53 +790,51 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Get current network connectivity details (WiFi/cellular status, IP, signal strength)",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        return try {
-                            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                            val network = connectivityManager.activeNetwork
-                            val caps = network?.let { connectivityManager.getNetworkCapabilities(it) }
-                            val isWifi = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
-                            val isCellular = caps?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
-                            val isEthernet = caps?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true
-                            val isVpn = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
-                            val hasInternet = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-                            val isMetered = connectivityManager.isActiveNetworkMetered
-                            // Try to get IP
-                            var ipAddress = ""
-                            try {
-                                val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
-                                while (interfaces.hasMoreElements()) {
-                                    val intf = interfaces.nextElement()
-                                    if (intf.isUp && !intf.isLoopback) {
-                                        val addrs = intf.inetAddresses
-                                        while (addrs.hasMoreElements()) {
-                                            val addr = addrs.nextElement()
-                                            if (addr is java.net.Inet4Address && !addr.isLoopbackAddress) {
-                                                ipAddress = addr.hostAddress ?: ""
-                                                break
-                                            }
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                        val network = connectivityManager.activeNetwork
+                        val caps = network?.let { connectivityManager.getNetworkCapabilities(it) }
+                        val isWifi = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+                        val isCellular = caps?.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) == true
+                        val isEthernet = caps?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true
+                        val isVpn = caps?.hasTransport(NetworkCapabilities.TRANSPORT_VPN) == true
+                        val hasInternet = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+                        val isMetered = connectivityManager.isActiveNetworkMetered
+                        // Try to get IP
+                        var ipAddress = ""
+                        try {
+                            val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+                            while (interfaces.hasMoreElements()) {
+                                val intf = interfaces.nextElement()
+                                if (intf.isUp && !intf.isLoopback) {
+                                    val addrs = intf.inetAddresses
+                                    while (addrs.hasMoreElements()) {
+                                        val addr = addrs.nextElement()
+                                        if (addr is java.net.Inet4Address && !addr.isLoopbackAddress) {
+                                            ipAddress = addr.hostAddress ?: ""
+                                            break
                                         }
-                                        if (ipAddress.isNotEmpty()) break
                                     }
+                                    if (ipAddress.isNotEmpty()) break
                                 }
-                            } catch (_: Exception) {}
-                            mapOf(
-                                "success" to true,
-                                "is_connected" to (network != null),
-                                "has_internet" to hasInternet,
-                                "transport" to when {
-                                    isWifi -> "wifi"
-                                    isCellular -> "cellular"
-                                    isEthernet -> "ethernet"
-                                    else -> "other"
-                                },
-                                "is_vpn" to isVpn,
-                                "is_metered" to isMetered,
-                                "ip_address" to ipAddress,
-                            )
-                        } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to get network info: ${e.message}")
-                        }
+                            }
+                        } catch (_: Exception) {}
+                        mapOf(
+                            "success" to true,
+                            "is_connected" to (network != null),
+                            "has_internet" to hasInternet,
+                            "transport" to when {
+                                isWifi -> "wifi"
+                                isCellular -> "cellular"
+                                isEthernet -> "ethernet"
+                                else -> "other"
+                            },
+                            "is_vpn" to isVpn,
+                            "is_metered" to isMetered,
+                            "ip_address" to ipAddress,
+                        )
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to get network info: ${e.message}")
                     }
                 },
             )
@@ -843,11 +851,13 @@ actual fun getAvailableTools(): List<Tool> {
                     )
                     override suspend fun execute(args: Map<String, Any>): Any {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        ) {
                             return mapOf("success" to false, "error" to "Location permission is required to read WiFi details. Grant location permission in Settings.")
                         }
                         return try {
                             val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
                             @Suppress("DEPRECATION")
                             val wifiInfo = wifiManager.connectionInfo
                             if (wifiInfo == null || wifiInfo.networkId == -1) {
@@ -858,6 +868,7 @@ actual fun getAvailableTools(): List<Tool> {
                             val rssi = wifiInfo.rssi
                             val frequency = wifiInfo.frequency
                             val linkSpeed = wifiInfo.linkSpeed
+
                             @Suppress("DEPRECATION")
                             val signalBars = WifiManager.calculateSignalLevel(rssi, 5)
                             mapOf(
@@ -932,7 +943,8 @@ actual fun getAvailableTools(): List<Tool> {
                             val activities = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(PackageManager.GET_META_DATA.toLong()))
                             } else {
-                                @Suppress("DEPRECATION") pm.queryIntentActivities(intent, PackageManager.GET_META_DATA)
+                                @Suppress("DEPRECATION")
+                                pm.queryIntentActivities(intent, PackageManager.GET_META_DATA)
                             }
                             val packages = pm.getInstalledPackages(0)
                             val appMap = packages.mapNotNull { pkg ->
@@ -942,11 +954,15 @@ actual fun getAvailableTools(): List<Tool> {
                                     val isSystem = (info.flags and android.content.pm.ApplicationInfo.FLAG_SYSTEM) != 0
                                     val hasLauncher = activities.any { it.activityInfo.packageName == pkg.packageName }
                                     Triple(pkg.packageName, appName, mapOf("is_system" to isSystem, "has_launcher" to hasLauncher, "version_name" to (pkg.versionName ?: "")))
-                                } catch (_: Exception) { null }
+                                } catch (_: Exception) {
+                                    null
+                                }
                             }
                             val filtered = if (query != null) {
                                 appMap.filter { (pkg, name, _) -> pkg.contains(query) || name.lowercase().contains(query) }
-                            } else appMap
+                            } else {
+                                appMap
+                            }
                             val sorted = filtered.sortedBy { (_, name, _) -> name.lowercase() }.take(limit)
                             mapOf(
                                 "success" to true,
@@ -1068,5 +1084,4 @@ private fun isEmulator(): Boolean {
         "google_sdk" == product
 }
 
-actual fun defaultOpenAICompatibleBaseUrl(): String =
-    if (isEmulator()) "http://10.0.2.2:11434/v1" else "http://localhost:11434/v1"
+actual fun defaultOpenAICompatibleBaseUrl(): String = if (isEmulator()) "http://10.0.2.2:11434/v1" else "http://localhost:11434/v1"

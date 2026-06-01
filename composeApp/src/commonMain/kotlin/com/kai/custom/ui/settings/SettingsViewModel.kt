@@ -6,8 +6,6 @@ import com.kai.custom.DaemonController
 import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
-import com.kai.custom.openTtsSettings
-import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.data.ImportSection
 import com.kai.custom.data.Service
 import com.kai.custom.data.TaskScheduler
@@ -21,7 +19,6 @@ import com.kai.custom.isNotificationsSupported
 import com.kai.custom.isShizukuPermissionGranted
 import com.kai.custom.isShizukuSupported
 import com.kai.custom.isSmsSupported
-import com.kai.custom.requestShizukuPermission
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.AnthropicInsufficientCreditsException
 import com.kai.custom.skills.RegistrySkillEntry
@@ -37,7 +34,13 @@ import com.kai.custom.network.OpenAICompatibleInvalidApiKeyException
 import com.kai.custom.network.OpenAICompatibleQuotaExhaustedException
 import com.kai.custom.network.OpenAICompatibleRateLimitExceededException
 import com.kai.custom.network.dtos.SponsorsResponseDto
+import com.kai.custom.openTtsSettings
+import com.kai.custom.requestShizukuPermission
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
+import com.kai.custom.skills.parseGitHubSkillUrl
 import com.kai.custom.tools.NotificationPermissionController
+import com.kai.custom.wakeword.WakeWordController
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get

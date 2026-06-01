@@ -2,6 +2,7 @@ package com.kai.custom.data
 
 import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.mcp.McpClient
+import kotlin.concurrent.Volatile
 
 class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemoryStore {
 
@@ -25,11 +26,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         source: String?,
     ): MemoryEntry = delegate.store(key, content, category, source)
 
-    override suspend fun updateContent(key: String, content: String): MemoryEntry? =
-        delegate.updateContent(key, content)
+    override suspend fun updateContent(key: String, content: String): MemoryEntry? = delegate.updateContent(key, content)
 
-    override suspend fun reinforceMemory(key: String): MemoryEntry? =
-        delegate.reinforceMemory(key)
+    override suspend fun reinforceMemory(key: String): MemoryEntry? = delegate.reinforceMemory(key)
 
     override suspend fun forget(key: String): Boolean = delegate.forget(key)
 
@@ -46,8 +45,7 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     override fun getAllMemories(max: Int): List<MemoryEntry> = delegate.getAllMemories(max)
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> =
-        delegate.searchMemories(query, limit)
+    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> = delegate.searchMemories(query, limit)
 
     override fun schemaResetMessage(): String? = delegate.schemaResetMessage()
 

@@ -1,7 +1,7 @@
 package com.kai.custom.data
 
 import com.kai.custom.mcp.McpClient
-import kotlinx.coroutines.runBlocking
+import com.kai.custom.runBlockingCompat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -48,23 +48,29 @@ class AltMemoryClient(
     override suspend fun updateContent(key: String, content: String): MemoryEntry? {
         val existing = findEntryByKey(key) ?: return null
         val now = Clock.System.now().toEpochMilliseconds()
-        client.callTool("memory_store", buildJsonObject {
-            put("key", JsonPrimitive(key))
-            put("content", JsonPrimitive(content))
-            put("category", JsonPrimitive(existing.category.name))
-        })
+        client.callTool(
+            "memory_store",
+            buildJsonObject {
+                put("key", JsonPrimitive(key))
+                put("content", JsonPrimitive(content))
+                put("category", JsonPrimitive(existing.category.name))
+            },
+        )
         return existing.copy(content = content, updatedAt = now)
     }
 
     override suspend fun reinforceMemory(key: String): MemoryEntry? {
         val existing = findEntryByKey(key) ?: return null
         val now = Clock.System.now().toEpochMilliseconds()
-        client.callTool("memory_store", buildJsonObject {
-            put("key", JsonPrimitive(key))
-            put("content", JsonPrimitive(existing.content))
-            put("category", JsonPrimitive(existing.category.name))
-            put("hit_count", JsonPrimitive(existing.hitCount + 1))
-        })
+        client.callTool(
+            "memory_store",
+            buildJsonObject {
+                put("key", JsonPrimitive(key))
+                put("content", JsonPrimitive(existing.content))
+                put("category", JsonPrimitive(existing.category.name))
+                put("hit_count", JsonPrimitive(existing.hitCount + 1))
+            },
+        )
         return existing.copy(hitCount = existing.hitCount + 1, updatedAt = now)
     }
 
@@ -119,18 +125,19 @@ class AltMemoryClient(
         return searchMemories("", max)
     }
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
-        return try {
-            val response = runBlocking {
-                client.callTool("memory_search", buildJsonObject {
+    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> = try {
+        val response = runBlockingCompat {
+            client.callTool(
+                "memory_search",
+                buildJsonObject {
                     put("query", JsonPrimitive(query))
                     put("n_results", JsonPrimitive(limit))
-                })
-            }
-            parseMemorySearchResponse(response)
-        } catch (_: Exception) {
-            emptyList()
+                },
+            )
         }
+        parseMemorySearchResponse(response)
+    } catch (_: Exception) {
+        emptyList()
     }
 
     override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> {
@@ -138,23 +145,24 @@ class AltMemoryClient(
         return all.filter { it.hitCount >= minHits }
     }
 
-    override fun exportDimension(): ByteArray {
-        return try {
-            val json = runBlocking {
-                client.callTool("dimension_export", buildJsonObject { })
-            }
-            json.encodeToByteArray()
-        } catch (_: Exception) {
-            ByteArray(0)
+    override fun exportDimension(): ByteArray = try {
+        val json = runBlockingCompat {
+            client.callTool("dimension_export", buildJsonObject { })
         }
+        json.encodeToByteArray()
+    } catch (_: Exception) {
+        ByteArray(0)
     }
 
     override fun importDimension(data: ByteArray) {
         try {
-            runBlocking {
-                client.callTool("dimension_import", buildJsonObject {
-                    put("data", JsonPrimitive(data.decodeToString()))
-                })
+            runBlockingCompat {
+                client.callTool(
+                    "dimension_import",
+                    buildJsonObject {
+                        put("data", JsonPrimitive(data.decodeToString()))
+                    },
+                )
             }
         } catch (_: Exception) {
         }
@@ -281,10 +289,13 @@ class AltMemoryClient(
 
     private fun findEntryByKey(key: String): MemoryEntry? {
         return try {
-            val response = runBlocking {
-                client.callTool("memory_retrieve", buildJsonObject {
-                    put("key", JsonPrimitive(key))
-                })
+            val response = runBlockingCompat {
+                client.callTool(
+                    "memory_retrieve",
+                    buildJsonObject {
+                        put("key", JsonPrimitive(key))
+                    },
+                )
             }
             if (response.isBlank()) return null
             parseMemoryEntry(response)
@@ -311,8 +322,11 @@ class AltMemoryClient(
     private fun parseMemoryEntry(response: String): MemoryEntry? {
         return try {
             val json = parseJsonElement(response)
-            val obj = if (json is kotlinx.serialization.json.JsonObject) json
-            else json.jsonObject
+            val obj = if (json is kotlinx.serialization.json.JsonObject) {
+                json
+            } else {
+                json.jsonObject
+            }
             val key = obj["key"]?.jsonPrimitive?.content ?: return null
             val content = obj["content"]?.jsonPrimitive?.content ?: ""
             val cat = try {
@@ -343,13 +357,12 @@ class AltMemoryClient(
         }
     }
 
-    private fun String.encodeToByteArray(): ByteArray = this.toByteArray(Charsets.UTF_8)
-
     companion object {
-        private val jsonElementParser = Json { ignoreUnknownKeys = true; isLenient = true }
-
-        private fun parseJsonElement(response: String): kotlinx.serialization.json.JsonElement {
-            return jsonElementParser.parseToJsonElement(response)
+        private val jsonElementParser = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
         }
+
+        private fun parseJsonElement(response: String): kotlinx.serialization.json.JsonElement = jsonElementParser.parseToJsonElement(response)
     }
 }

@@ -46,7 +46,9 @@ class AndroidWakeWordController : WakeWordController {
         val sampleRate = 16000
         val recordLen = (sampleRate * 1.8).toInt() // 1.8 seconds per sample
         val minBuf = AudioRecord.getMinBufferSize(
-            sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
+            sampleRate,
+            AudioFormat.CHANNEL_IN_MONO,
+            AudioFormat.ENCODING_PCM_16BIT,
         )
         val actualBuf = maxOf(recordLen * 2, minBuf)
 
@@ -66,8 +68,11 @@ class AndroidWakeWordController : WakeWordController {
             kotlinx.coroutines.delay(800)
 
             val record = AudioRecord(
-                MediaRecorder.AudioSource.MIC, sampleRate,
-                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, actualBuf,
+                MediaRecorder.AudioSource.MIC,
+                sampleRate,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                actualBuf,
             )
             if (record.state != AudioRecord.STATE_INITIALIZED) {
                 Log.e(tag, "AudioRecord not initialized at step $step")
@@ -105,15 +110,21 @@ class AndroidWakeWordController : WakeWordController {
                     for (i in offset until offset + windowLen) e += floatBuf[i] * floatBuf[i]
                     e
                 } ?: 0
-            } else 0
+            } else {
+                0
+            }
             val cropLen = minOf(windowLen, totalRead - cropStart)
             val cropped = if (cropStart > 0 || cropLen < totalRead) {
                 floatBuf.copyOfRange(cropStart, cropStart + cropLen)
-            } else floatBuf
+            } else {
+                floatBuf
+            }
             val features = mfccProcessor.compute(cropped, cropped.size)
-            templates.add(WakeWordMatcher.serializeTemplate(features).let {
-                WakeWordMatcher.deserializeTemplate(it)!!
-            })
+            templates.add(
+                WakeWordMatcher.serializeTemplate(features).let {
+                    WakeWordMatcher.deserializeTemplate(it)!!
+                },
+            )
             Log.d(tag, "step $step recorded, energy=$energy cropOffset=$cropStart")
             step++
         }

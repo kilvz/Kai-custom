@@ -10,11 +10,15 @@ import com.kai.custom.data.EmailStore
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.network.tools.ToolSchema
+import com.kai.custom.sendHeartbeatNotification
 import com.kai.custom.tools.CommonTools
 import com.kai.custom.tools.EmailTools
 import com.kai.custom.tools.HeartbeatTools
+import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.ui.icons.ArrowBackIos
 import com.russhwolf.settings.ExperimentalSettingsImplementation
@@ -28,6 +32,9 @@ import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.darwin.Darwin
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_send_notification_description
+import kai.composeapp.generated.resources.tool_send_notification_name
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.useContents
 import kotlinx.cinterop.usePinned
@@ -133,7 +140,23 @@ actual fun createSecureSettings(): Settings = KeychainSettings(service = "com.ka
 
 actual fun createLegacySettings(): Settings? = NSUserDefaultsSettings(platform.Foundation.NSUserDefaults.standardUserDefaults)
 
-actual fun getPlatformToolDefinitions(): List<ToolInfo> = CommonTools.commonToolDefinitions
+actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
+    addAll(CommonTools.commonToolDefinitions)
+    add(PhoneTools.deviceInfoToolInfo)
+    add(PhoneTools.clipboardToolInfo)
+    add(PhoneTools.batteryInfoToolInfo)
+    add(
+        ToolInfo(
+            id = "send_notification",
+            name = "Send Notification",
+            description = "Send a push notification to the device",
+            nameRes = Res.string.tool_send_notification_name,
+            descriptionRes = Res.string.tool_send_notification_description,
+        ),
+    )
+    add(PhoneTools.gpsLocationToolInfo)
+    add(PhoneTools.networkInfoToolInfo)
+}
 
 private object IosKoinHelper : KoinComponent {
     val appSettings: AppSettings by inject()
@@ -156,6 +179,129 @@ actual fun getAvailableTools(): List<Tool> = buildList {
     }
     if (IosKoinHelper.appSettings.isEmailEnabled()) {
         addAll(EmailTools.getEmailTools(IosKoinHelper.emailStore))
+    }
+    if (IosKoinHelper.appSettings.isToolEnabled(PhoneTools.deviceInfoToolInfo.id)) {
+        add(
+            object : Tool {
+                override val schema = ToolSchema(
+                    name = "get_device_info",
+                    description = "Get detailed device information including model, iOS version, and hardware specs",
+                    parameters = emptyMap(),
+                )
+                override suspend fun execute(args: Map<String, Any>): Any {
+                    val device = platform.UIKit.UIDevice.currentDevice
+                    val mem = platform.Foundation.NSProcessInfo.processInfo
+                    return mapOf(
+                        "success" to true,
+                        "device" to mapOf("model" to device.model, "name" to device.name, "system_name" to device.systemName),
+                        "os" to mapOf(
+                            "version" to device.systemVersion,
+                            "name" to "iOS",
+                        ),
+                        "hardware" to mapOf(
+                            "physical_memory_mb" to (mem.physicalMemory / 1_048_576u).toInt(),
+                            "processor_count" to mem.processorCount,
+                            "active_processor_count" to mem.activeProcessorCount,
+                        ),
+                    )
+                }
+            },
+        )
+    }
+    if (IosKoinHelper.appSettings.isToolEnabled(PhoneTools.clipboardToolInfo.id)) {
+        add(
+            object : Tool {
+                override val schema = ToolSchema(
+                    name = "read_clipboard",
+                    description = "Read the current content of the system clipboard",
+                    parameters = emptyMap(),
+                )
+                override suspend fun execute(args: Map<String, Any>): Any {
+                    try {
+                        val pasteboard = platform.UIKit.UIPasteboard.generalPasteboard
+                        val text = pasteboard.string
+                        return mapOf("success" to true, "content" to (text ?: ""), "has_content" to (text != null))
+                    } catch (e: Exception) {
+                        return mapOf("success" to false, "error" to "Failed to read clipboard: ${e.message}")
+                    }
+                }
+            },
+        )
+    }
+    if (IosKoinHelper.appSettings.isToolEnabled(PhoneTools.batteryInfoToolInfo.id)) {
+        add(
+            object : Tool {
+                override val schema = ToolSchema(
+                    name = "get_battery_info",
+                    description = "Get battery level, charging status, and temperature",
+                    parameters = emptyMap(),
+                )
+                override suspend fun execute(args: Map<String, Any>): Any {
+                    try {
+                        val device = platform.UIKit.UIDevice.currentDevice
+                        device.batteryMonitoringEnabled = true
+                        val level = device.batteryLevel
+                        val state = device.batteryState
+                        val levelPercent = if (level >= 0) (level * 100).toInt() else -1
+                        val isCharging = state == platform.UIKit.UIDeviceBatteryState.UIDeviceBatteryStateCharging ||
+                            state == platform.UIKit.UIDeviceBatteryState.UIDeviceBatteryStateFull
+                        return mapOf(
+                            "success" to true,
+                            "level_percent" to levelPercent,
+                            "is_charging" to isCharging,
+                            "health" to "unknown",
+                        )
+                    } catch (e: Exception) {
+                        return mapOf("success" to false, "error" to "Failed to get battery info: ${e.message}")
+                    }
+                }
+            },
+        )
+    }
+    if (IosKoinHelper.appSettings.isToolEnabled("send_notification")) {
+        add(
+            object : Tool {
+                override val schema = ToolSchema(
+                    "send_notification",
+                    "Send a push notification to the device",
+                    mapOf(
+                        "title" to ParameterSchema("string", "Notification title", false),
+                        "message" to ParameterSchema("string", "Notification content/body", true),
+                    ),
+                )
+                override suspend fun execute(args: Map<String, Any>): Any {
+                    val title = args["title"] as? String ?: "Kai"
+                    val message = args["message"] as? String
+                        ?: return mapOf("success" to false, "error" to "Message is required")
+                    sendHeartbeatNotification(title, message)
+                    return mapOf("success" to true, "message" to "Notification sent successfully")
+                }
+            },
+        )
+    }
+    if (IosKoinHelper.appSettings.isToolEnabled(PhoneTools.gpsLocationToolInfo.id)) {
+        add(
+            object : Tool {
+                override val schema = ToolSchema(
+                    name = "get_gps_location",
+                    description = "Get current GPS location coordinates",
+                    parameters = emptyMap(),
+                )
+                override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS location requires CoreLocation struct interop not available in this Kotlin/Native version")
+            },
+        )
+    }
+    if (IosKoinHelper.appSettings.isToolEnabled(PhoneTools.networkInfoToolInfo.id)) {
+        add(
+            object : Tool {
+                override val schema = ToolSchema(
+                    name = "get_network_info",
+                    description = "Get basic network connectivity status",
+                    parameters = emptyMap(),
+                )
+                override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to true, "platform" to "iOS")
+            },
+        )
     }
     addAll(IosKoinHelper.mcpServerManager.getEnabledMcpTools())
 }

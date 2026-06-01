@@ -486,6 +486,7 @@ private fun RenderButton(
     onCallback: (String, Map<String, String>) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+
     @Suppress("DEPRECATION")
     val clipboardManager = LocalClipboardManager.current
     var clicked by remember { mutableStateOf(false) }

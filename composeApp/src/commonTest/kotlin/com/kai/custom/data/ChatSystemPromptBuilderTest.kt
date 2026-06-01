@@ -60,6 +60,7 @@ class ChatSystemPromptBuilderTest {
         heartbeatAdditions: List<ScheduledTask> = emptyList(),
         emailAccounts: List<EmailAccountSummary> = emptyList(),
         uiMode: ChatPromptUiMode = ChatPromptUiMode.NONE,
+        activeSkill: com.inspiredandroid.kai.skills.SkillManifest? = null,
     ) = buildChatSystemPrompt(
         variant = variant,
         soul = soul,
@@ -77,6 +78,7 @@ class ChatSystemPromptBuilderTest {
         emailAccounts = emailAccounts,
         runtime = runtime,
         uiMode = uiMode,
+        activeSkill = activeSkill,
     )
 
     private val languageLine = "## Language"

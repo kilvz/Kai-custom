@@ -1,5 +1,7 @@
 package com.kai.custom.data
 
+import androidx.compose.ui.text.intl.Locale
+
 data class LanguageOption(
     val code: String,
     val displayName: String,
@@ -37,6 +39,6 @@ val languageOptions: List<LanguageOption> = listOf(
 )
 
 fun getDefaultLanguage(): String {
-    val systemLang = try { java.util.Locale.getDefault().language } catch (_: Exception) { "en" }
+    val systemLang = Locale.current.language
     return if (languageOptions.any { it.code == systemLang }) systemLang else "en"
 }

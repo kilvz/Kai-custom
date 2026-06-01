@@ -84,10 +84,10 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.supportsAgenticFlows
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.onDragAndDropEventDropped
+import com.kai.custom.ui.chat.EditMessageDialog
 import com.kai.custom.ui.chat.composables.BotMessage
 import com.kai.custom.ui.chat.composables.ChatHistorySheet
 import com.kai.custom.ui.chat.composables.CircleIconButton
-import com.kai.custom.ui.chat.EditMessageDialog
 import com.kai.custom.ui.chat.composables.EmptyState
 import com.kai.custom.ui.chat.composables.ErrorMessage
 import com.kai.custom.ui.chat.composables.HeartbeatBanner
@@ -115,8 +115,8 @@ import com.kai.custom.ui.settings.SshViewModel
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.fallback_answered_by
 import kai.composeapp.generated.resources.fallback_service_failed
-import kai.composeapp.generated.resources.forked_from_banner
 import kai.composeapp.generated.resources.fallback_trying_next
+import kai.composeapp.generated.resources.forked_from_banner
 import kai.composeapp.generated.resources.ic_stop
 import kai.composeapp.generated.resources.interactive_back_content_description
 import kai.composeapp.generated.resources.interactive_exit_content_description

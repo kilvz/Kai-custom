@@ -61,76 +61,75 @@ class AndroidSshConnectionManager : SshConnectionManager {
         _connectionState.value = SshConnectionState()
     }
 
-    override suspend fun executeCommand(command: String, timeoutSeconds: Long): Result<SshCommandResult> =
-        withContext(Dispatchers.IO) {
-            val s = session
-            if (s == null || !s.isConnected) {
-                _connectionState.value = SshConnectionState()
-                return@withContext Result.failure(Exception("SSH not connected"))
-            }
-            addTranscript(TerminalLine.Command(command))
-            try {
-                val channel = s.openChannel("exec") as ChannelExec
-                channel.setCommand(command)
+    override suspend fun executeCommand(command: String, timeoutSeconds: Long): Result<SshCommandResult> = withContext(Dispatchers.IO) {
+        val s = session
+        if (s == null || !s.isConnected) {
+            _connectionState.value = SshConnectionState()
+            return@withContext Result.failure(Exception("SSH not connected"))
+        }
+        addTranscript(TerminalLine.Command(command))
+        try {
+            val channel = s.openChannel("exec") as ChannelExec
+            channel.setCommand(command)
 
-                val stdout = ByteArrayOutputStream(MAX_OUTPUT_BYTES)
-                val stderr = ByteArrayOutputStream(MAX_OUTPUT_BYTES)
+            val stdout = ByteArrayOutputStream(MAX_OUTPUT_BYTES)
+            val stderr = ByteArrayOutputStream(MAX_OUTPUT_BYTES)
 
-                val inputStream: InputStream = channel.getInputStream()
-                val errStream: InputStream = channel.getErrStream()
+            val inputStream: InputStream = channel.getInputStream()
+            val errStream: InputStream = channel.getErrStream()
 
-                channel.connect(timeoutSeconds.toInt() * 1000)
+            channel.connect(timeoutSeconds.toInt() * 1000)
 
-                coroutineScope {
-                    launch(Dispatchers.IO) {
-                        val buf = ByteArray(4096)
-                        while (isActive) {
-                            val len = inputStream.read(buf)
-                            if (len <= 0) break
-                            val remaining = MAX_OUTPUT_BYTES - stdout.size()
-                            if (remaining > 0) {
-                                stdout.write(buf, 0, minOf(len, remaining))
-                            }
+            coroutineScope {
+                launch(Dispatchers.IO) {
+                    val buf = ByteArray(4096)
+                    while (isActive) {
+                        val len = inputStream.read(buf)
+                        if (len <= 0) break
+                        val remaining = MAX_OUTPUT_BYTES - stdout.size()
+                        if (remaining > 0) {
+                            stdout.write(buf, 0, minOf(len, remaining))
                         }
                     }
-                    launch(Dispatchers.IO) {
-                        val buf = ByteArray(4096)
-                        while (isActive) {
-                            val len = errStream.read(buf)
-                            if (len <= 0) break
-                            val remaining = MAX_OUTPUT_BYTES - stderr.size()
-                            if (remaining > 0) {
-                                stderr.write(buf, 0, minOf(len, remaining))
-                            }
+                }
+                launch(Dispatchers.IO) {
+                    val buf = ByteArray(4096)
+                    while (isActive) {
+                        val len = errStream.read(buf)
+                        if (len <= 0) break
+                        val remaining = MAX_OUTPUT_BYTES - stderr.size()
+                        if (remaining > 0) {
+                            stderr.write(buf, 0, minOf(len, remaining))
                         }
-                    }
-
-                    while (!channel.isClosed && isActive) {
-                        delay(100)
                     }
                 }
 
-                channel.disconnect()
-
-                val exitCode = channel.exitStatus
-                val outText = stdout.toString("UTF-8")
-                val errText = stderr.toString("UTF-8")
-
-                if (outText.isNotBlank()) addTranscript(TerminalLine.Output(outText))
-                if (errText.isNotBlank()) addTranscript(TerminalLine.Error(errText))
-
-                Result.success(
-                    SshCommandResult(
-                        stdout = outText,
-                        stderr = errText,
-                        exitCode = exitCode,
-                    )
-                )
-            } catch (e: Exception) {
-                addTranscript(TerminalLine.Error(e.message ?: "Command failed"))
-                Result.failure(e)
+                while (!channel.isClosed && isActive) {
+                    delay(100)
+                }
             }
+
+            channel.disconnect()
+
+            val exitCode = channel.exitStatus
+            val outText = stdout.toString("UTF-8")
+            val errText = stderr.toString("UTF-8")
+
+            if (outText.isNotBlank()) addTranscript(TerminalLine.Output(outText))
+            if (errText.isNotBlank()) addTranscript(TerminalLine.Error(errText))
+
+            Result.success(
+                SshCommandResult(
+                    stdout = outText,
+                    stderr = errText,
+                    exitCode = exitCode,
+                ),
+            )
+        } catch (e: Exception) {
+            addTranscript(TerminalLine.Error(e.message ?: "Command failed"))
+            Result.failure(e)
         }
+    }
 
     override fun clearTranscript() {
         transcriptLines.clear()

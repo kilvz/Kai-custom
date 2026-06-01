@@ -636,7 +636,9 @@ class FakeDataRepository : DataRepository {
 
     override fun exportDimension(): ByteArray = dimensionData
 
-    override fun importDimension(data: ByteArray) { dimensionData = data }
+    override fun importDimension(data: ByteArray) {
+        dimensionData = data
+    }
 
     // On-device inference (LiteRT)
     var localInferenceAvailable = false
