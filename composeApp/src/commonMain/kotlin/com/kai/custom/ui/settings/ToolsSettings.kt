@@ -24,6 +24,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.skills.RegistrySkillEntry
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
@@ -31,6 +33,7 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.settings_tools_description
 import kai.composeapp.generated.resources.settings_tools_none_available
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -45,6 +48,14 @@ internal fun ToolsContent(
     showAddMcpServerDialog: Boolean,
     onShowAddMcpServerDialog: (Boolean) -> Unit,
     onAddPopularMcpServer: (PopularMcpServer) -> Unit,
+    skills: ImmutableList<SkillManifest> = persistentListOf(),
+    activeSkill: SkillManifest? = null,
+    browsableSkills: ImmutableList<RegistrySkillEntry> = persistentListOf(),
+    isBrowsing: Boolean = false,
+    browseFailed: Boolean = false,
+    onInstallGitHub: (String) -> Unit = {},
+    onInstallBrowsed: (RegistrySkillEntry) -> Unit = {},
+    onUninstallSkill: (String) -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         // MCP Servers section
@@ -58,6 +69,25 @@ internal fun ToolsContent(
             showAddDialog = showAddMcpServerDialog,
             onShowAddDialog = onShowAddMcpServerDialog,
             onAddPopularMcpServer = onAddPopularMcpServer,
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        // Skills section — wrapped with sandbox check and state wiring
+        SkillsSection(
+            skills = skills,
+            onUninstallSkill = onUninstallSkill,
+            showAddDialog = false,
+            onShowAddDialog = {},
+            onInstallGitHub = onInstallGitHub,
+            onInstallBrowsed = onInstallBrowsed,
+            isInstalling = false,
+            installError = null,
+            browsableSkills = browsableSkills,
+            isBrowsing = isBrowsing,
+            browseFailed = browseFailed,
+            isSandboxInstalled = false,
+            onNavigateToSandbox = {},
         )
 
         Spacer(Modifier.height(24.dp))

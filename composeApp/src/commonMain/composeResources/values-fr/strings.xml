@@ -384,4 +384,5 @@ Si quelque chose nécessite de l'attention (souvenirs obsolètes, tâches échue
     <string name="settings_theme_light">Clair</string>
     <string name="settings_theme_dark">Sombre</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Compétence supprimée</string>
 </resources>

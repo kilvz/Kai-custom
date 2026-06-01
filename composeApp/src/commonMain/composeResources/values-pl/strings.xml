@@ -384,4 +384,5 @@ Jeśli coś wymaga uwagi (przestarzałe wspomnienia, zaległe zadania, dalsze dz
     <string name="settings_theme_light">Jasny</string>
     <string name="settings_theme_dark">Ciemny</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Umiejętność usunięta</string>
 </resources>

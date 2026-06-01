@@ -4,6 +4,8 @@ interface DimensionStore {
 
     fun isReady(): Boolean
 
+    fun schemaResetMessage(): String? = null
+
     fun initialize()
 
     fun ensureRealm(realm: Realm): Realm

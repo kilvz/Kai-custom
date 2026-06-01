@@ -63,6 +63,7 @@ import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.imageExtensions
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.ui.gradientBrush
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.outlineTextFieldColors
@@ -102,6 +103,9 @@ fun QuestionInput(
     isVoiceInputActive: Boolean = false,
     onStartVoiceInput: () -> Unit = {},
     onStopVoiceInput: () -> Unit = {},
+    installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
+    activeSkill: SkillManifest? = null,
+    onSetActiveSkill: (SkillManifest?) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -156,6 +160,37 @@ fun QuestionInput(
             type = FileKitType.File(extensions = supportedFileExtensions),
         ) { file ->
             if (file != null) addFile(file)
+        }
+
+        // Slash-command autocomplete for skills
+        val slashQuery = remember(textState.text) {
+            val text = textState.text
+            val cursor = textState.selection.start
+            if (cursor > 0 && text.getOrNull(cursor - 1) == '/') {
+                ""
+            } else {
+                val beforeCursor = text.substring(0, cursor.coerceAtMost(text.length))
+                val lastSlash = beforeCursor.lastIndexOf('/')
+                if (lastSlash >= 0 && (lastSlash == 0 || beforeCursor[lastSlash - 1] == ' ' || beforeCursor[lastSlash - 1] == '\n')) {
+                    beforeCursor.substring(lastSlash + 1)
+                } else null
+            }
+        }
+        if (slashQuery != null && installedSkills.isNotEmpty()) {
+            SkillAutocomplete(
+                skills = installedSkills,
+                query = slashQuery,
+                onSelect = { skill ->
+                    onSetActiveSkill(skill)
+                    val text = textState.text
+                    val cursor = textState.selection.start
+                    val beforeCursor = text.substring(0, cursor.coerceAtMost(text.length))
+                    val lastSlash = beforeCursor.lastIndexOf('/')
+                    val afterCursor = text.substring(cursor.coerceAtMost(text.length))
+                    val newText = beforeCursor.substring(0, lastSlash) + afterCursor
+                    onTextStateChange(TextFieldValue(text = newText, selection = TextRange(lastSlash)))
+                },
+            )
         }
 
         val focusRequester = remember { FocusRequester() }

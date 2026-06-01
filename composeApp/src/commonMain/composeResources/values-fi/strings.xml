@@ -385,4 +385,5 @@ Jos jokin vaatii huomiota (vanhentuneet muistot, erääntyneet tehtävät, käyt
     <string name="settings_theme_light">Vaalea</string>
     <string name="settings_theme_dark">Tumma</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Taito poistettu</string>
 </resources>

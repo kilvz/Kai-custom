@@ -732,9 +732,17 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_SPLINTERLANDS_BATTLE_LOG, json)
     }
 
+    fun getActiveSkillId(): String? = settings.getStringOrNull(KEY_ACTIVE_SKILL_ID)
+
+    fun setActiveSkillId(id: String?) {
+        if (id != null) settings.putString(KEY_ACTIVE_SKILL_ID, id) else settings.remove(KEY_ACTIVE_SKILL_ID)
+    }
+
     companion object {
         const val KEY_CURRENT_SERVICE_ID = "current_service_id"
         const val KEY_APP_OPENS = "app_opens"
+
+        const val KEY_ACTIVE_SKILL_ID = "active_skill_id"
 
         const val KEY_CONVERSATIONS = "conversations_json"
         const val KEY_CURRENT_CONVERSATION_ID = "current_conversation_id"

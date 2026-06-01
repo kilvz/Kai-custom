@@ -383,4 +383,5 @@
     <string name="settings_theme_light">Luminos</string>
     <string name="settings_theme_dark">Întunecat</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Abilitate eliminată</string>
 </resources>

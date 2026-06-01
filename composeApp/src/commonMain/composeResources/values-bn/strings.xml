@@ -384,4 +384,5 @@
     <string name="settings_theme_light">হালকা</string>
     <string name="settings_theme_dark">গাঢ়</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">দক্ষতা সরানো হয়েছে</string>
 </resources>

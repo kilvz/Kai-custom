@@ -28,6 +28,8 @@ import com.kai.custom.notifications.NotificationReader
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
+import com.kai.custom.skills.SkillManager
+import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.splinterlands.SplinterlandsApi
 import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
@@ -111,6 +113,12 @@ val appModule = module {
     single<HeartbeatManager> {
         HeartbeatManager(get(), get(), get(), get())
     }
+    single<SkillRegistry> {
+        SkillRegistry()
+    }
+    single<SkillManager> {
+        SkillManager(get(), get())
+    }
     single<McpServerManager> {
         McpServerManager(get())
     }
@@ -137,6 +145,7 @@ val appModule = module {
             mcpServerManager = get(),
             sandboxController = get(),
             localInferenceEngine = createLocalInferenceEngine(),
+            skillManager = get(),
         )
     }
     single<DataRepository> { get<RemoteDataRepository>() }

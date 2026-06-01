@@ -383,4 +383,5 @@
     <string name="settings_theme_light">Светла</string>
     <string name="settings_theme_dark">Тамна</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Вештина уклоњена</string>
 </resources>

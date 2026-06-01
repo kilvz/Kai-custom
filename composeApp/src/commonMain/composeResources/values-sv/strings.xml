@@ -384,4 +384,5 @@ Om något behöver uppmärksamhet (föråldrade minnen, förfallna uppgifter, an
     <string name="settings_theme_light">Ljust</string>
     <string name="settings_theme_dark">Mörkt</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Färdighet borttagen</string>
 </resources>

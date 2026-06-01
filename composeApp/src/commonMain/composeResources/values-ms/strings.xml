@@ -383,4 +383,5 @@
     <string name="settings_theme_light">Cerah</string>
     <string name="settings_theme_dark">Gelap</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Kemahiran dialih keluar</string>
 </resources>

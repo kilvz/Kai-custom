@@ -13,6 +13,7 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.UiSubmission
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.network.toUiError
 import com.kai.custom.ui.markdown.KaiUiBlock
@@ -84,6 +85,7 @@ class ChatViewModel(
         editMessage = ::editMessage,
         truncateFrom = ::truncateFrom,
         forkConversation = ::forkConversation,
+        onSetActiveSkill = ::setActiveSkill,
     )
     private val freeModeNames: Map<FreeMode, String> = FreeMode.entries.associateWith {
         when (it) {
@@ -210,6 +212,8 @@ class ChatViewModel(
             currentConversationId = conversationId,
             currentConversationForkedFrom = currentForkedFrom,
             hasUnreadHeartbeat = hasUnreadHeartbeat,
+            installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
+            activeSkill = dataRepository.getActiveSkill(),
         )
     }.distinctUntilChanged().stateIn(
         scope = viewModelScope,
@@ -347,6 +351,11 @@ class ChatViewModel(
                 isSpeechOutputEnabled = !it.isSpeechOutputEnabled,
             )
         }
+    }
+
+    private fun setActiveSkill(skill: SkillManifest?) {
+        dataRepository.setActiveSkill(skill)
+        _state.update { it.copy(activeSkill = skill) }
     }
 
     private fun cancel() {

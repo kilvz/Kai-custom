@@ -128,6 +128,7 @@ import com.kai.custom.inference.estimateGpuMemoryMb
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.dtos.SponsorsResponseDto
 import com.kai.custom.network.tools.ToolInfo
+import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.saveFileToDevice
 import com.kai.custom.ui.KaiClearableTextField
 import com.kai.custom.ui.KaiOutlinedTextField
@@ -280,6 +281,7 @@ import kai.composeapp.generated.resources.snackbar_email_removed
 import kai.composeapp.generated.resources.snackbar_mcp_server_removed
 import kai.composeapp.generated.resources.snackbar_memory_deleted
 import kai.composeapp.generated.resources.snackbar_service_removed
+import kai.composeapp.generated.resources.snackbar_skill_removed
 import kai.composeapp.generated.resources.snackbar_task_cancelled
 import kai.composeapp.generated.resources.snackbar_undo
 import kotlinx.collections.immutable.ImmutableList
@@ -378,6 +380,7 @@ fun SettingsScreenContent(
     val emailRemovedMsg = stringResource(Res.string.snackbar_email_removed)
     val serviceRemovedMsg = stringResource(Res.string.snackbar_service_removed)
     val mcpServerRemovedMsg = stringResource(Res.string.snackbar_mcp_server_removed)
+    val skillRemovedMsg = stringResource(Res.string.snackbar_skill_removed)
 
     LaunchedEffect(uiState.pendingDeletion) {
         val deletion = uiState.pendingDeletion ?: return@LaunchedEffect
@@ -388,6 +391,7 @@ fun SettingsScreenContent(
             is PendingDeletion.EmailAccount -> emailRemovedMsg
             is PendingDeletion.Service -> serviceRemovedMsg
             is PendingDeletion.McpServer -> mcpServerRemovedMsg
+            is PendingDeletion.Skill -> skillRemovedMsg
         }
         val result = snackbarHostState.showSnackbar(
             message = message,
@@ -585,6 +589,14 @@ fun SettingsScreenContent(
                                     showAddMcpServerDialog = filteredUiState.showAddMcpServerDialog,
                                     onShowAddMcpServerDialog = actions.onShowAddMcpServerDialog,
                                     onAddPopularMcpServer = actions.onAddPopularMcpServer,
+                                    skills = filteredUiState.installedSkills,
+                                    activeSkill = filteredUiState.activeSkill,
+                                    browsableSkills = filteredUiState.marketplaceSkills,
+                                    isBrowsing = filteredUiState.isBrowsingMarketplace,
+                                    browseFailed = false,
+                                    onInstallGitHub = actions.onInstallGitHub,
+                                    onInstallBrowsed = actions.onInstallBrowsed,
+                                    onUninstallSkill = actions.onUninstallSkill,
                                 )
                             }
 
@@ -621,6 +633,20 @@ fun SettingsScreenContent(
         ) { data ->
             Snackbar(snackbarData = data)
         }
+    }
+
+    var showSchemaResetDialog by remember { mutableStateOf(true) }
+    if (showSchemaResetDialog && uiState.schemaResetMessage != null) {
+        AlertDialog(
+            onDismissRequest = { showSchemaResetDialog = false },
+            title = { Text("Database Reset") },
+            text = { Text(uiState.schemaResetMessage) },
+            confirmButton = {
+                Button(onClick = { showSchemaResetDialog = false }) {
+                    Text("OK")
+                }
+            },
+        )
     }
 }
 

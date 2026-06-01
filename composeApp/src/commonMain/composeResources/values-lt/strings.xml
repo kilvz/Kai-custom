@@ -383,4 +383,5 @@
     <string name="settings_theme_light">Šviesi</string>
     <string name="settings_theme_dark">Tamsi</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Įgūdis pašalintas</string>
 </resources>

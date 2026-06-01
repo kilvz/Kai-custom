@@ -385,4 +385,5 @@ As iets aandag nodig het (verouderde herinneringe, verskuldigde take, gebruiker-
     <string name="settings_theme_light">Lig</string>
     <string name="settings_theme_dark">Donker</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Vaardigheid verwyder</string>
 </resources>

@@ -385,4 +385,5 @@ Si algo necesita atención (memorias obsoletas, tareas vencidas, seguimientos de
     <string name="settings_theme_light">Claro</string>
     <string name="settings_theme_dark">Oscuro</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Skill eliminado</string>
 </resources>

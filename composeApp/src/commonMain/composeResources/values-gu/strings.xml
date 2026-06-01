@@ -383,4 +383,5 @@
     <string name="settings_theme_light">હળવી</string>
     <string name="settings_theme_dark">ઘેરી</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Skill દૂર કરવામાં આવ્યી</string>
 </resources>

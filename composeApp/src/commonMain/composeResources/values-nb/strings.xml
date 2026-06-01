@@ -384,4 +384,5 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf√
     <string name="settings_theme_light">Lyst</string>
     <string name="settings_theme_dark">M√∏rkt</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Ferdighet fjernet</string>
 </resources>

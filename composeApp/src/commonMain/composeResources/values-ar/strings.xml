@@ -385,4 +385,5 @@
     <string name="settings_theme_light">فاتح</string>
     <string name="settings_theme_dark">داكن</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">تمت إزالة المهارة</string>
 </resources>

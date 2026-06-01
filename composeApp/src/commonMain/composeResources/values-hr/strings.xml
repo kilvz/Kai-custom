@@ -383,4 +383,5 @@
     <string name="settings_theme_light">Svijetla</string>
     <string name="settings_theme_dark">Tamna</string>
     <string name="settings_theme_oled">OLED</string>
+    <string name="snackbar_skill_removed">Vještina uklonjena</string>
 </resources>

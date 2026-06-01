@@ -11,6 +11,7 @@ import com.kai.custom.data.SharedJson
 import com.kai.custom.data.SmsDraft
 import com.kai.custom.data.UiSubmission
 import com.kai.custom.network.UiError
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.network.dtos.gemini.GeminiChatRequestDto
 import com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
 import io.github.vinceglb.filekit.PlatformFile
@@ -105,6 +106,8 @@ data class ChatUiState(
     val isVoiceInputActive: Boolean = false,
     val voiceInputPartial: String = "",
     val wasVoiceInput: Boolean = false,
+    val installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
+    val activeSkill: SkillManifest? = null,
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id

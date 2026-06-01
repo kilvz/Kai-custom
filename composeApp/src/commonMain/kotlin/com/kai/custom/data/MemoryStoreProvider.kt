@@ -49,6 +49,8 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override fun searchMemories(query: String, limit: Int): List<MemoryEntry> =
         delegate.searchMemories(query, limit)
 
+    override fun schemaResetMessage(): String? = delegate.schemaResetMessage()
+
     override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> =
         delegate.getPromotionCandidates(minHits, max)
 
