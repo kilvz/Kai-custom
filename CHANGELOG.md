@@ -1,3 +1,9 @@
+## v3.2.3 — 2026-06-01
+
+### Fixes
+- Fix Telegram section heading to use `ToggleableHeadline` component matching Splinterlands style
+- Fix `appVersionBase` from 2.6.3 → 2.7.0
+
 ## v3.2.2 — 2026-06-01
 
 ### Improvements

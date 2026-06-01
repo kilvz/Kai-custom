@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -81,7 +80,10 @@ internal fun IntegrationsContent(
         }
 
         SettingsCard {
-            TelegramSection(dataRepository)
+            TelegramSection(
+                isEnabled = dataRepository.isTelegramEnabled(),
+                onToggle = { dataRepository.setTelegramEnabled(it) },
+            )
         }
 
         SettingsCard {
@@ -110,54 +112,38 @@ internal fun IntegrationsContent(
 }
 
 @Composable
-private fun TelegramSection(dataRepository: DataRepository) {
+private fun TelegramSection(
+    isEnabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+) {
     val scope = rememberCoroutineScope()
-    var isEnabled by remember { mutableStateOf(dataRepository.isTelegramEnabled()) }
+    val dataRepository: DataRepository = koinInject()
     var botToken by remember { mutableStateOf(dataRepository.getTelegramBotToken()) }
     var authorizedIds by remember { mutableStateOf(dataRepository.getTelegramAuthorizedChatIds().joinToString(", ")) }
     var showToken by remember { mutableStateOf(false) }
     val syncState = remember { mutableStateOf(dataRepository.getTelegramSyncState()) }
     var statusMessage by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ToggleableHeadline(
+            title = "Telegram Bot",
+            description = "Talk to the AI via Telegram",
+            checked = isEnabled,
+            onCheckedChange = onToggle,
+            actions = {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                ) {
                     Text(
-                        text = "Telegram Bot",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        text = "Experimental",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                    ) {
-                        Text(
-                            text = "Experimental",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        )
-                    }
                 }
-                Text(
-                    text = "Talk to the AI via Telegram",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = {
-                    isEnabled = it
-                    dataRepository.setTelegramEnabled(it)
-                },
-            )
-        }
+            },
+        )
 
         if (isEnabled) {
             Spacer(Modifier.height(8.dp))
@@ -213,9 +199,7 @@ private fun TelegramSection(dataRepository: DataRepository) {
 
             Row {
                 OutlinedButton(
-                    onClick = {
-                        showToken = !showToken
-                    },
+                    onClick = { showToken = !showToken },
                 ) {
                     Text(if (showToken) "Hide" else "Show")
                 }
