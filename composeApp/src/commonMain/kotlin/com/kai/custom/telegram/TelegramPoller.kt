@@ -19,7 +19,7 @@ import kotlin.time.ExperimentalTime
 
 class TelegramPoller(
     private val telegramStore: TelegramStore,
-    private val dataRepository: DataRepository,
+    private val dataRepository: Lazy<DataRepository>,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
     private val client = httpClient {}
@@ -92,7 +92,7 @@ class TelegramPoller(
         if (authorized.isNotEmpty() && msg.chatId !in authorized) return
 
         try {
-            val response = dataRepository.askSilently(msg.text)
+            val response = dataRepository.value.askSilently(msg.text)
             if (response.isNotBlank()) {
                 sendMessage(msg.chatId, response, msg.messageId)
             }

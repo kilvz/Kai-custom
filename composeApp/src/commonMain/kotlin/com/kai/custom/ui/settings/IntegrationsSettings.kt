@@ -191,6 +191,11 @@ private fun TelegramSection(dataRepository: DataRepository) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
+            Text(
+                text = "Get one from @BotFather on Telegram — create a bot and copy the HTTP API token",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 value = botToken,

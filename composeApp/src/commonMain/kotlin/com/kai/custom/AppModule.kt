@@ -110,7 +110,7 @@ val appModule = module {
         TelegramStore(get())
     }
     single<TelegramPoller> {
-        TelegramPoller(get<TelegramStore>(), get<DataRepository>())
+        TelegramPoller(get<TelegramStore>(), lazy { get<DataRepository>() })
     }
     single<SplinterlandsStore> {
         SplinterlandsStore(get())
