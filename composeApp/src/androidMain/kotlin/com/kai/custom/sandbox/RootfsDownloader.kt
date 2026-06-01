@@ -20,11 +20,6 @@ private const val BUFFER_SIZE = 8192
 
 private val ALPINE_MIRRORS = listOf(
     "https://dl-cdn.alpinelinux.org/alpine",
-    "https://mirrors.edge.kernel.org/alpine",
-    "https://ftp.halifax.rwth-aachen.de/alpine",
-    "https://alpine.ethz.ch/alpine",
-    "https://mirror.csclub.uwaterloo.ca/alpine",
-    "https://mirrors.tuna.tsinghua.edu.cn/alpine",
 )
 
 private const val UBUNTU_VERSION = "24.04"

@@ -313,7 +313,6 @@ class LinuxSandboxManager(
         currentJob = scope.launch {
             try {
                 val rootfsDir = File(sandboxDir, "rootfs")
-                downloader.writeResolvConf(rootfsDir)
                 val executor = createProotExecutor()
 
                 _state.value = SandboxState.Installing("Updating package lists...")
