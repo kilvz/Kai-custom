@@ -21,7 +21,7 @@ kotlin {
     }
 
     android {
-        namespace = "com.inspiredandroid.kai"
+        namespace = "com.kai.custom.shared"
         compileSdk =
             libs.versions.android.compileSdk
                 .get()
@@ -52,7 +52,7 @@ kotlin {
             // Must differ from the iosApp bundle identifier — iOS refuses to install a
             // .app whose embedded framework shares its parent's identifier (MIInstaller
             // error 57 / DuplicateIdentifier).
-            binaryOption("bundleId", "com.inspiredandroid.kai.composeapp")
+            binaryOption("bundleId", "com.kai.custom.composeapp")
         }
     }
 
@@ -174,7 +174,7 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "com.inspiredandroid.kai.MainKt"
+        mainClass = "com.kai.custom.MainKt"
 
         buildTypes.release.proguard {
             configurationFiles.from(
@@ -234,7 +234,7 @@ class VersionGeneratorPlugin : Plugin<Project> {
             // Generate Kotlin version file
             val versionFile =
                 layout.buildDirectory
-                    .file("generated/src/commonMain/kotlin/com/inspiredandroid/kai/Version.kt")
+                    .file("generated/src/commonMain/kotlin/com/kai/custom/Version.kt")
                     .get()
                     .asFile
             versionFile.parentFile?.mkdirs()
@@ -242,7 +242,7 @@ class VersionGeneratorPlugin : Plugin<Project> {
 
             versionFile.writeText(
                 """
-                package com.inspiredandroid.kai
+                package com.kai.custom
 
                 object Version {
                     const val appVersion = "$appVersion"
