@@ -131,32 +131,54 @@ internal fun ToolsContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val columns = when {
-                    maxWidth >= 800.dp -> 3
-                    maxWidth >= 500.dp -> 2
-                    else -> 1
-                }
-                val rows = tools.chunked(columns)
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    rows.forEach { rowTools ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            rowTools.forEach { tool ->
-                                ToolItem(
-                                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                                    tool = tool,
-                                    onToggle = { enabled -> onToggleTool(tool.id, enabled) },
-                                )
-                            }
-                            // Fill empty slots so last row items don't stretch
-                            repeat(columns - rowTools.size) {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
+            val categories = mapOf(
+                "Device Info" to listOf("get_device_info", "get_battery_info", "get_phone_state"),
+                "Network & Location" to listOf("get_network_info", "get_wifi_info", "get_gps_location", "web_search", "get_location_from_ip"),
+                "Contacts & Calendar" to listOf("read_contacts", "write_contact", "read_calendar_events", "create_calendar_event"),
+                "Media & Clipboard" to listOf("list_media", "read_clipboard"),
+                "Apps & System" to listOf("list_installed_apps", "read_device_logs", "open_file", "open_url", "fetch_url"),
+                "Bluetooth" to listOf("scan_bluetooth_devices"),
+                "Notifications & Alarms" to listOf("send_notification", "set_alarm"),
+                "Shell & Automation" to listOf("execute_shell_command", "run_root", "run_adb", "run_opencode", "speak_text", "manage_process"),
+                "SSH" to listOf("ssh_command", "ssh_configure_host", "ssh_connect", "ssh_disconnect"),
+                "Email" to listOf("email_send", "email_search", "email_get", "email_list", "email_draft", "email_delete"),
+                "SMS" to listOf("sms_read", "sms_send", "sms_delete", "sms_list"),
+                "Scheduling" to listOf("task_create", "task_list", "task_delete"),
+                "Heartbeat" to listOf("promote_learning"),
+                "Memory" to listOf("memory_store", "memory_forget", "memory_reinforce", "search_memories", "memory_learn"),
+                "Telegram" to listOf("telegram_send"),
+            )
+            val grouped = mutableMapOf<String, MutableList<ToolInfo>>()
+            val uncategorized = mutableListOf<ToolInfo>()
+            for (tool in tools) {
+                var placed = false
+                for ((cat, ids) in categories) {
+                    if (tool.id in ids) {
+                        grouped.getOrPut(cat) { mutableListOf() }.add(tool)
+                        placed = true
+                        break
                     }
+                }
+                if (!placed) uncategorized.add(tool)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                for ((category, catTools) in grouped.toSortedMap()) {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                    )
+                    ToolGrid(catTools, onToggleTool)
+                }
+                if (uncategorized.isNotEmpty()) {
+                    Text(
+                        text = "Other",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                    )
+                    ToolGrid(uncategorized, onToggleTool)
                 }
             }
         }
@@ -215,6 +237,40 @@ internal fun RootSection(
                                 color = Color(0xFFC62828),
                             )
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ToolGrid(
+    catTools: List<ToolInfo>,
+    onToggleTool: (String, Boolean) -> Unit,
+) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val columns = when {
+            maxWidth >= 800.dp -> 3
+            maxWidth >= 500.dp -> 2
+            else -> 1
+        }
+        val rows = catTools.chunked(columns)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            rows.forEach { rowTools ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    rowTools.forEach { tool ->
+                        ToolItem(
+                            modifier = Modifier.weight(1f).fillMaxHeight(),
+                            tool = tool,
+                            onToggle = { enabled -> onToggleTool(tool.id, enabled) },
+                        )
+                    }
+                    repeat(columns - rowTools.size) {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
             }

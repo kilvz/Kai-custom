@@ -11,8 +11,12 @@ import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Environment
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.provider.AlarmClock
+import android.provider.CalendarContract
 import android.provider.ContactsContract
+import android.provider.MediaStore
 import android.telephony.TelephonyManager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -998,6 +1002,261 @@ actual fun getAvailableTools(): List<Tool> {
                             )
                         } catch (e: Exception) {
                             mapOf("success" to false, "error" to "Failed to list apps: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Read Calendar Events ──
+        if (appSettings.isToolEnabled(PhoneTools.readCalendarToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "read_calendar_events",
+                        description = "Read calendar events from the device calendar within an optional date range",
+                        parameters = mapOf(
+                            "start_date" to ParameterSchema("string", "Start date (ISO 8601, e.g. '2026-01-01'). Default: 7 days ago", false),
+                            "end_date" to ParameterSchema("string", "End date (ISO 8601). Default: 30 days from now", false),
+                            "max_events" to ParameterSchema("integer", "Maximum events to return (default 50)", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                            return mapOf("success" to false, "error" to "Calendar permission not granted")
+                        }
+                        return try {
+                            val startStr = args["start_date"]?.toString()
+                            val endStr = args["end_date"]?.toString()
+                            val maxEvents = (args["max_events"] as? Number)?.toInt()?.coerceIn(1, 200) ?: 50
+                            val startMillis = startStr?.let { java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).parse(it)?.time }
+                                ?: (System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000)
+                            val endMillis = endStr?.let { java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).parse(it)?.time }
+                                ?: (System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000)
+                            val uri = CalendarContract.Events.CONTENT_URI
+                            val projection = arrayOf(
+                                CalendarContract.Events._ID,
+                                CalendarContract.Events.TITLE,
+                                CalendarContract.Events.DESCRIPTION,
+                                CalendarContract.Events.DTSTART,
+                                CalendarContract.Events.DTEND,
+                                CalendarContract.Events.EVENT_LOCATION,
+                                CalendarContract.Events.ALL_DAY,
+                            )
+                            val selection = "${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTSTART} <= ?"
+                            val cursor = context.contentResolver.query(uri, projection, selection, arrayOf(startMillis.toString(), endMillis.toString()), "${CalendarContract.Events.DTSTART} ASC")
+                            val events = mutableListOf<Map<String, Any>>()
+                            cursor?.use { c ->
+                                var count = 0
+                                while (c.moveToNext() && count < maxEvents) {
+                                    val title = c.getString(c.getColumnIndexOrThrow(CalendarContract.Events.TITLE)) ?: "(no title)"
+                                    val desc = c.getString(c.getColumnIndexOrThrow(CalendarContract.Events.DESCRIPTION)) ?: ""
+                                    val loc = c.getString(c.getColumnIndexOrThrow(CalendarContract.Events.EVENT_LOCATION)) ?: ""
+                                    val dtStart = c.getLong(c.getColumnIndexOrThrow(CalendarContract.Events.DTSTART))
+                                    val dtEnd = c.getLong(c.getColumnIndexOrThrow(CalendarContract.Events.DTEND))
+                                    val allDay = c.getInt(c.getColumnIndexOrThrow(CalendarContract.Events.ALL_DAY)) == 1
+                                    events.add(mapOf("title" to title, "description" to desc, "location" to loc, "start_time" to dtStart, "end_time" to dtEnd, "all_day" to allDay))
+                                    count++
+                                }
+                            }
+                            mapOf("success" to true, "events" to events, "count" to events.size)
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to read calendar: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Write Contact ──
+        if (appSettings.isToolEnabled(PhoneTools.writeContactToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "write_contact",
+                        description = "Create a new contact in the device phonebook",
+                        parameters = mapOf(
+                            "name" to ParameterSchema("string", "Contact display name", true),
+                            "phone" to ParameterSchema("string", "Phone number", false),
+                            "email" to ParameterSchema("string", "Email address", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+                            return mapOf("success" to false, "error" to "Write contacts permission not granted")
+                        }
+                        return try {
+                            val name = args["name"]?.toString() ?: return mapOf("success" to false, "error" to "Name is required")
+                            val phone = args["phone"]?.toString()
+                            val email = args["email"]?.toString()
+                            val ops = java.util.ArrayList<android.content.ContentProviderOperation>()
+                            val rawContactId = ops.size
+                            ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI).withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null).withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null).build())
+                            ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name).build())
+                            if (phone != null) {
+                                ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+                                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE).build())
+                            }
+                            if (email != null) {
+                                ops.add(android.content.ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                                    .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                                    .withValue(ContactsContract.CommonDataKinds.Email.DATA, email)
+                                    .withValue(ContactsContract.CommonDataKinds.Email.TYPE, ContactsContract.CommonDataKinds.Email.TYPE_HOME).build())
+                            }
+                            context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+                            mapOf("success" to true, "message" to "Contact '$name' created")
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to create contact: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Get Phone State ──
+        if (appSettings.isToolEnabled(PhoneTools.getPhoneStateToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "get_phone_state",
+                        description = "Get cellular network info: operator, signal strength, network type",
+                        parameters = emptyMap(),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                            return mapOf("success" to false, "error" to "Phone state permission not granted")
+                        }
+                        return try {
+                            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                            mapOf(
+                                "success" to true,
+                                "network_operator" to (tm.networkOperatorName ?: ""),
+                                "network_country_iso" to (tm.networkCountryIso ?: ""),
+                                "phone_type" to when (tm.phoneType) {
+                                    TelephonyManager.PHONE_TYPE_GSM -> "gsm"
+                                    TelephonyManager.PHONE_TYPE_CDMA -> "cdma"
+                                    TelephonyManager.PHONE_TYPE_SIP -> "sip"
+                                    else -> "unknown"
+                                },
+                                "sim_operator" to (tm.simOperatorName ?: ""),
+                                "sim_country_iso" to (tm.simCountryIso ?: ""),
+                                "data_state" to when (tm.dataState) {
+                                    TelephonyManager.DATA_CONNECTED -> "connected"
+                                    TelephonyManager.DATA_CONNECTING -> "connecting"
+                                    TelephonyManager.DATA_DISCONNECTED -> "disconnected"
+                                    TelephonyManager.DATA_SUSPENDED -> "suspended"
+                                    else -> "unknown"
+                                },
+                                "roaming" to tm.isNetworkRoaming,
+                            )
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to get phone state: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Scan Bluetooth Devices ──
+        if (appSettings.isToolEnabled(PhoneTools.scanBluetoothToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "scan_bluetooth_devices",
+                        description = "List paired Bluetooth devices and scan for nearby devices",
+                        parameters = mapOf(
+                            "scan" to ParameterSchema("boolean", "Whether to perform a scan for new devices (default false)", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        return try {
+                            val btAdapter = BluetoothAdapter.getDefaultAdapter()
+                            if (btAdapter == null) {
+                                return mapOf("success" to false, "error" to "Bluetooth not supported on this device")
+                            }
+                            val paired = btAdapter.bondedDevices?.map { device ->
+                                mapOf("name" to (device.name ?: ""), "address" to device.address, "type" to device.type)
+                            } ?: emptyList()
+                            mapOf("success" to true, "paired_devices" to paired, "is_enabled" to btAdapter.isEnabled)
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to scan Bluetooth: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── List Media Files ──
+        if (appSettings.isToolEnabled(PhoneTools.listMediaToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "list_media",
+                        description = "List images, videos, and audio files on the device",
+                        parameters = mapOf(
+                            "type" to ParameterSchema("string", "Media type: 'image', 'video', 'audio', or 'all' (default 'all')", false),
+                            "limit" to ParameterSchema("integer", "Max items per type (default 20)", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        return try {
+                            val mediaType = args["type"]?.toString()?.lowercase() ?: "all"
+                            val limit = (args["limit"] as? Number)?.toInt()?.coerceIn(1, 100) ?: 20
+                            val results = mutableMapOf<String, Any>()
+                            fun queryMedia(uri: android.net.Uri, sortField: String): List<Map<String, Any>> {
+                                val list = mutableListOf<Map<String, Any>>()
+                                val cursor = context.contentResolver.query(uri, arrayOf("_id", "_display_name", "_size", "date_added"), null, null, "$sortField DESC LIMIT $limit")
+                                cursor?.use { c ->
+                                    while (c.moveToNext()) {
+                                        list.add(mapOf("name" to (c.getString(1) ?: ""), "size" to c.getLong(2), "date_added" to c.getLong(3)))
+                                    }
+                                }
+                                return list
+                            }
+                            if (mediaType == "all" || mediaType == "image") results["images"] = queryMedia(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "date_added")
+                            if (mediaType == "all" || mediaType == "video") results["videos"] = queryMedia(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, "date_added")
+                            if (mediaType == "all" || mediaType == "audio") results["audio"] = queryMedia(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, "date_added")
+                            results["success"] = true
+                            results
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to list media: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Read Device Logs ──
+        if (appSettings.isToolEnabled(PhoneTools.readLogsToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "read_device_logs",
+                        description = "Read recent system logs (logcat)",
+                        parameters = mapOf(
+                            "lines" to ParameterSchema("integer", "Number of recent log lines to return (default 100)", false),
+                            "filter" to ParameterSchema("string", "Filter logs by tag or keyword", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        return try {
+                            val lines = (args["lines"] as? Number)?.toInt()?.coerceIn(10, 1000) ?: 100
+                            val filter = args["filter"]?.toString()?.trim()?.takeIf { it.isNotEmpty() }
+                            val cmd = mutableListOf("logcat", "-d", "-t", lines.toString())
+                            filter?.let { cmd.add("-s"); cmd.add(it) }
+                            val process = ProcessBuilder(cmd).redirectErrorStream(true).start()
+                            val output = process.inputStream.bufferedReader().readText()
+                            process.waitFor()
+                            mapOf("success" to true, "logs" to output, "line_count" to output.lines().size)
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to read logs: ${e.message}")
                         }
                     }
                 },

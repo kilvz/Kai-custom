@@ -87,6 +87,44 @@ object PhoneTools {
         descriptionRes = Res.string.tool_list_installed_apps_description,
     )
 
+    // ── Missing permission tools ──
+
+    val readCalendarToolInfo = ToolInfo(
+        id = "read_calendar_events",
+        name = "Read Calendar Events",
+        description = "Read calendar events from the device calendar",
+    )
+
+    val writeContactToolInfo = ToolInfo(
+        id = "write_contact",
+        name = "Write Contact",
+        description = "Create or update a contact in the device phonebook",
+    )
+
+    val getPhoneStateToolInfo = ToolInfo(
+        id = "get_phone_state",
+        name = "Get Phone State",
+        description = "Get cellular network info, signal strength, operator name, device ID",
+    )
+
+    val scanBluetoothToolInfo = ToolInfo(
+        id = "scan_bluetooth_devices",
+        name = "Scan Bluetooth Devices",
+        description = "Scan for nearby Bluetooth devices and show paired devices",
+    )
+
+    val listMediaToolInfo = ToolInfo(
+        id = "list_media",
+        name = "List Media Files",
+        description = "List images, videos, and audio files on the device",
+    )
+
+    val readLogsToolInfo = ToolInfo(
+        id = "read_device_logs",
+        name = "Read Device Logs",
+        description = "Read recent system logs (logcat)",
+    )
+
     val phoneToolDefinitions = listOf(
         gpsLocationToolInfo,
         readContactsToolInfo,
@@ -96,5 +134,11 @@ object PhoneTools {
         wifiInfoToolInfo,
         clipboardToolInfo,
         installedAppsToolInfo,
+        readCalendarToolInfo,
+        writeContactToolInfo,
+        getPhoneStateToolInfo,
+        scanBluetoothToolInfo,
+        listMediaToolInfo,
+        readLogsToolInfo,
     )
 }
