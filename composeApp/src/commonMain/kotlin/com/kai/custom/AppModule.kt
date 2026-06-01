@@ -15,6 +15,7 @@ import com.kai.custom.data.SmsStore
 import com.kai.custom.data.SqliteMemoryStore
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.TaskStore
+import com.kai.custom.data.TelegramStore
 import com.kai.custom.data.ToolExecutor
 import com.kai.custom.data.dimension.DimensionStore
 import com.kai.custom.data.runMigrations
@@ -28,6 +29,7 @@ import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
+import com.kai.custom.telegram.TelegramPoller
 import com.kai.custom.splinterlands.SplinterlandsApi
 import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
@@ -104,6 +106,12 @@ val appModule = module {
     single<NotificationStore> {
         NotificationStore(get())
     }
+    single<TelegramStore> {
+        TelegramStore(get())
+    }
+    single<TelegramPoller> {
+        TelegramPoller(get<TelegramStore>(), get<DataRepository>())
+    }
     single<SplinterlandsStore> {
         SplinterlandsStore(get())
     }
@@ -146,6 +154,8 @@ val appModule = module {
             sandboxController = get(),
             localInferenceEngine = createLocalInferenceEngine(),
             skillManager = get(),
+            telegramStore = get(),
+            telegramPoller = get(),
         )
     }
     single<DataRepository> { get<RemoteDataRepository>() }
@@ -164,6 +174,8 @@ val appModule = module {
             get<SmsPoller>(),
             get<NotificationStore>(),
             get<MemoryStore>(),
+            telegramStore = get(),
+            telegramPoller = get(),
         )
     }
     single<DaemonController> { createDaemonController() }

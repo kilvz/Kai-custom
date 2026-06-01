@@ -18,6 +18,7 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.ServiceInstance
 import com.kai.custom.data.SmsDraft
+import com.kai.custom.data.TelegramSyncState
 import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.SystemPromptVariant
 import com.kai.custom.data.ThemeMode
@@ -711,4 +712,16 @@ class FakeDataRepository : DataRepository {
     // Language
     override fun getPreferredLanguage(): String = "en"
     override fun setPreferredLanguage(lang: String) {}
+
+    // Telegram
+    override fun isTelegramEnabled(): Boolean = false
+    override fun setTelegramEnabled(enabled: Boolean) {}
+    override fun getTelegramBotToken(): String = ""
+    override fun setTelegramBotToken(token: String) {}
+    override fun getTelegramAuthorizedChatIds(): Set<Long> = emptySet()
+    override fun setTelegramAuthorizedChatIds(ids: Set<Long>) {}
+    override fun getTelegramSyncState(): TelegramSyncState = TelegramSyncState()
+    override fun getPendingTelegramCount(): Int = 0
+    override suspend fun pollTelegram() {}
+    override suspend fun sendTelegramMessage(chatId: Long, text: String) {}
 }

@@ -67,6 +67,8 @@ expect val isSmsSupported: Boolean
  */
 expect val isNotificationsSupported: Boolean
 
+expect val isTelegramSupported: Boolean
+
 expect val isSplinterlandsSupported: Boolean
 
 /**

@@ -37,7 +37,7 @@ class AndroidSandboxController : SandboxController {
     private val dataRepository: DataRepository by inject(DataRepository::class.java)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val altMemoryLifecycle = AltMemoryLifecycleManager(this, mcpServerManager, appSettings, memoryStore, dataRepository)
+    private val altMemoryLifecycle by lazy { AltMemoryLifecycleManager(this, mcpServerManager, appSettings, memoryStore, dataRepository) }
 
     private var cachedDiskUsageMB = 0L
     private var previousState: SandboxState? = null

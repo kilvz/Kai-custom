@@ -284,4 +284,16 @@ interface DataRepository {
     suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>>
 
     fun addSystemMessage(content: String)
+
+    // Telegram Bot
+    fun isTelegramEnabled(): Boolean
+    fun setTelegramEnabled(enabled: Boolean)
+    fun getTelegramBotToken(): String
+    fun setTelegramBotToken(token: String)
+    fun getTelegramAuthorizedChatIds(): Set<Long>
+    fun setTelegramAuthorizedChatIds(ids: Set<Long>)
+    fun getTelegramSyncState(): TelegramSyncState
+    fun getPendingTelegramCount(): Int
+    suspend fun pollTelegram()
+    suspend fun sendTelegramMessage(chatId: Long, text: String)
 }

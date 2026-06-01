@@ -35,6 +35,8 @@ class TaskScheduler(
     private val smsPoller: SmsPoller? = null,
     private val notificationStore: NotificationStore? = null,
     private val memoryStore: MemoryStore? = null,
+    private val telegramStore: TelegramStore? = null,
+    private val telegramPoller: com.kai.custom.telegram.TelegramPoller? = null,
     private val enabled: Boolean = true,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) {
@@ -136,6 +138,11 @@ class TaskScheduler(
                 // when READ_SMS is declared in the merged manifest).
                 if (!isLoadingCheck() && isSmsSupported && appSettings.isSmsEnabled() && smsStore != null && smsPoller != null) {
                     checkNewSms()
+                }
+
+                // Telegram polling
+                if (!isLoadingCheck() && telegramStore?.isTelegramEnabled() == true && telegramPoller != null) {
+                    telegramPoller.poll()
                 }
             }
         }

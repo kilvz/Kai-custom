@@ -174,6 +174,8 @@ class RemoteDataRepository(
     private val sandboxController: SandboxController,
     private val localInferenceEngine: LocalInferenceEngine? = null,
     private val skillManager: SkillManager? = null,
+    private val telegramStore: TelegramStore? = null,
+    private val telegramPoller: com.kai.custom.telegram.TelegramPoller? = null,
 ) : DataRepository {
 
     private val autoMemoryLearner = AutoMemoryLearner(
@@ -2160,6 +2162,37 @@ class RemoteDataRepository(
 
     override suspend fun clearPendingNotifications() {
         notificationStore.clearPending()
+    }
+
+    // Telegram Bot
+    override fun isTelegramEnabled(): Boolean = telegramStore?.isTelegramEnabled() ?: false
+
+    override fun setTelegramEnabled(enabled: Boolean) {
+        telegramStore?.setTelegramEnabled(enabled)
+    }
+
+    override fun getTelegramBotToken(): String = telegramStore?.getBotToken() ?: ""
+
+    override fun setTelegramBotToken(token: String) {
+        telegramStore?.setBotToken(token)
+    }
+
+    override fun getTelegramAuthorizedChatIds(): Set<Long> = telegramStore?.getAuthorizedChatIds() ?: emptySet()
+
+    override fun setTelegramAuthorizedChatIds(ids: Set<Long>) {
+        telegramStore?.setAuthorizedChatIds(ids)
+    }
+
+    override fun getTelegramSyncState(): TelegramSyncState = telegramStore?.getSyncState() ?: TelegramSyncState()
+
+    override fun getPendingTelegramCount(): Int = telegramStore?.getPending()?.size ?: 0
+
+    override suspend fun pollTelegram() {
+        telegramPoller?.poll()
+    }
+
+    override suspend fun sendTelegramMessage(chatId: Long, text: String) {
+        telegramPoller?.sendProactiveMessage(chatId, text)
     }
 
     override fun getUiScale(): Float = appSettings.getUiScale()

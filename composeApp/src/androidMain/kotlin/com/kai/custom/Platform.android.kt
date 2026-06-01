@@ -29,6 +29,7 @@ import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.NotificationStore
 import com.kai.custom.data.SmsDraftStore
 import com.kai.custom.data.SmsStore
+import com.kai.custom.data.TelegramStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.network.tools.ParameterSchema
@@ -146,6 +147,8 @@ actual val isNotificationsSupported: Boolean by lazy {
         false
     }
 }
+
+actual val isTelegramSupported: Boolean = true
 
 actual val isSplinterlandsSupported: Boolean = true
 
@@ -270,6 +273,8 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(SshConfigureHostTool.toolInfo)
     add(SshConnectTool.toolInfo)
     add(SshDisconnectTool.toolInfo)
+    // Telegram tools
+    addAll(com.kai.custom.tools.telegramToolDefinitions)
     // Phone tools — full device access
     addAll(PhoneTools.phoneToolDefinitions)
     // SMS tools are intentionally absent here: availability is driven by the Agent-tab
@@ -545,6 +550,15 @@ actual fun getAvailableTools(): List<Tool> {
             if (notificationReader.hasAccess()) {
                 val notificationStore: NotificationStore by inject(NotificationStore::class.java)
                 addAll(NotificationTools.getNotificationTools(notificationStore, notificationReader))
+            }
+        }
+
+        // Telegram tools
+        if (isTelegramSupported) {
+            val telegramStore: TelegramStore by inject(TelegramStore::class.java)
+            val telegramPoller: com.kai.custom.telegram.TelegramPoller by inject(com.kai.custom.telegram.TelegramPoller::class.java)
+            if (telegramStore.isTelegramEnabled() && telegramStore.getBotToken().isNotBlank()) {
+                addAll(com.kai.custom.tools.getTelegramTools(telegramStore, telegramPoller))
             }
         }
 

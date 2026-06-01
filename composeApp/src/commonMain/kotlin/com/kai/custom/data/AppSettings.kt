@@ -284,7 +284,11 @@ class AppSettings(internal val settings: Settings) {
         } else {
             user
         }
-        return if (combined.isNotEmpty()) "$prefix\n\n$combined" else prefix
+        if (combined.isNotEmpty()) return "$prefix\n\n$combined"
+        val config = personaManagerSafe?.getPersona(personaId)
+        val defaultSoul = config?.defaultSoul
+        if (!defaultSoul.isNullOrEmpty()) return "$prefix\n\n$defaultSoul"
+        return prefix
     }
 
     /** Kept for backward compat — writes to soul_user for active persona. */
@@ -432,6 +436,45 @@ class AppSettings(internal val settings: Settings) {
 
     fun setPreferredLanguage(lang: String) {
         settings.putString(KEY_PREFERRED_LANGUAGE, lang)
+    }
+
+    // Telegram Bot (pure HTTP — works on all platforms)
+    fun isTelegramEnabled(): Boolean = settings.getBoolean(KEY_TELEGRAM_ENABLED, false)
+
+    fun setTelegramEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_TELEGRAM_ENABLED, enabled)
+    }
+
+    fun getTelegramBotToken(): String = settings.getString(KEY_TELEGRAM_BOT_TOKEN, "")
+
+    fun setTelegramBotToken(token: String) {
+        settings.putString(KEY_TELEGRAM_BOT_TOKEN, token)
+    }
+
+    fun getTelegramPendingJson(): String = settings.getString(KEY_TELEGRAM_PENDING, "")
+
+    fun setTelegramPendingJson(json: String) {
+        settings.putString(KEY_TELEGRAM_PENDING, json)
+    }
+
+    fun getTelegramSyncStateJson(): String = settings.getString(KEY_TELEGRAM_SYNC_STATE, "")
+
+    fun setTelegramSyncStateJson(json: String) {
+        settings.putString(KEY_TELEGRAM_SYNC_STATE, json)
+    }
+
+    fun getTelegramAuthorizedChatIds(): Set<Long> {
+        val raw = settings.getString(KEY_TELEGRAM_AUTHORIZED_CHAT_IDS, "")
+        if (raw.isBlank()) return emptySet()
+        return try {
+            raw.split(",").mapNotNull { it.trim().toLongOrNull() }.toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
+    fun setTelegramAuthorizedChatIds(ids: Set<Long>) {
+        settings.putString(KEY_TELEGRAM_AUTHORIZED_CHAT_IDS, ids.joinToString(","))
     }
 
     // SSH connection
@@ -871,6 +914,13 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SSH_PRIVATE_KEY = "ssh_private_key"
         const val KEY_SSH_PASSPHRASE = "ssh_passphrase"
         const val KEY_SSH_PROFILES = "ssh_profiles"
+
+        const val KEY_TELEGRAM_ENABLED = "telegram_enabled"
+        const val KEY_TELEGRAM_BOT_TOKEN = "telegram_bot_token"
+        const val KEY_TELEGRAM_PENDING = "telegram_pending"
+        const val KEY_TELEGRAM_SYNC_STATE = "telegram_sync_state"
+        const val KEY_TELEGRAM_POLL_INTERVAL = "telegram_poll_interval"
+        const val KEY_TELEGRAM_AUTHORIZED_CHAT_IDS = "telegram_authorized_chat_ids"
         const val KEY_SSH_ACTIVE_PROFILE = "ssh_active_profile"
         const val KEY_ALT_MEMORY_MIGRATION_COMPLETE = "alt_memory_migration_complete"
     }

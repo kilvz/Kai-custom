@@ -16,6 +16,7 @@ data class PersonaConfig(
     val style: PersonaPromptStyle = PersonaPromptStyle.KAI,
     val heartbeatStyle: PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI,
     val isBuiltIn: Boolean = false,
+    val defaultSoul: String = "",
 )
 
 class PersonaManager(private val appSettings: AppSettings) {
@@ -93,6 +94,7 @@ class PersonaManager(private val appSettings: AppSettings) {
                 style = PersonaPromptStyle.ALT,
                 heartbeatStyle = PersonaHeartbeatStyle.ALT,
                 isBuiltIn = true,
+                defaultSoul = "You are alt — streamlined and direct. No fluff, no filler. Just help.\n\nBe opinionated. Be concise. Be useful.\n\nHonesty over politeness. Actions over words. Privacy first.",
             ),
         )
     }
