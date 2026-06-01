@@ -12,15 +12,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.tools.ToolInfo
@@ -48,6 +53,10 @@ internal fun ToolsContent(
     showAddMcpServerDialog: Boolean,
     onShowAddMcpServerDialog: (Boolean) -> Unit,
     onAddPopularMcpServer: (PopularMcpServer) -> Unit,
+    showRootSection: Boolean = false,
+    isRootEnabled: Boolean = false,
+    rootAvailable: Boolean = false,
+    onToggleRoot: (Boolean) -> Unit = {},
     skills: ImmutableList<SkillManifest> = persistentListOf(),
     activeSkill: SkillManifest? = null,
     browsableSkills: ImmutableList<RegistrySkillEntry> = persistentListOf(),
@@ -56,8 +65,21 @@ internal fun ToolsContent(
     onInstallGitHub: (String) -> Unit = {},
     onInstallBrowsed: (RegistrySkillEntry) -> Unit = {},
     onUninstallSkill: (String) -> Unit = {},
+    isSandboxInstalled: Boolean = false,
+    onNavigateToSandbox: () -> Unit = {},
+    onBrowseMarketplaceSkills: () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
+        // Root section
+        if (showRootSection) {
+            RootSection(
+                isRootEnabled = isRootEnabled,
+                rootAvailable = rootAvailable,
+                onToggleRoot = onToggleRoot,
+            )
+            Spacer(Modifier.height(24.dp))
+        }
+
         // MCP Servers section
         McpServersSection(
             mcpServers = mcpServers,
@@ -86,8 +108,9 @@ internal fun ToolsContent(
             browsableSkills = browsableSkills,
             isBrowsing = isBrowsing,
             browseFailed = browseFailed,
-            isSandboxInstalled = false,
-            onNavigateToSandbox = {},
+            isSandboxInstalled = isSandboxInstalled,
+            onNavigateToSandbox = onNavigateToSandbox,
+            onBrowseMarketplaceSkills = onBrowseMarketplaceSkills,
         )
 
         Spacer(Modifier.height(24.dp))
@@ -132,6 +155,65 @@ internal fun ToolsContent(
                             repeat(columns - rowTools.size) {
                                 Spacer(modifier = Modifier.weight(1f))
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun RootSection(
+    isRootEnabled: Boolean,
+    rootAvailable: Boolean,
+    onToggleRoot: (Boolean) -> Unit,
+) {
+    Column {
+        ToggleableHeadline(
+            title = "Root Shell",
+            description = "Run shell commands with root privileges (UID 0) on this device",
+            checked = isRootEnabled,
+            onCheckedChange = onToggleRoot,
+        )
+
+        if (isRootEnabled) {
+            Spacer(Modifier.height(12.dp))
+            Surface(
+                color = Color(0xFFFFF3E0),
+                shape = CardDefaults.shape,
+                tonalElevation = 0.dp,
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = Color(0xFFE65100),
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
+                    Column {
+                        Text(
+                            text = "Root access gives full system control. Misuse can damage your device or void warranty.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF424242),
+                        )
+                        if (rootAvailable) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "✓ su binary detected",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFF2E7D32),
+                            )
+                        } else {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "✗ su not found — device may not be rooted",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFFC62828),
+                            )
                         }
                     }
                 }

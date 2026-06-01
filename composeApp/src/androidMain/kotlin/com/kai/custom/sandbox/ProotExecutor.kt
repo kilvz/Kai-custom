@@ -59,6 +59,9 @@ class ProotExecutor(
     /** When false, the /sdcard bind mount is omitted from proot args. */
     var sandboxStorageMountEnabled: Boolean = true
 
+    /** When true and su is available, the proot command is wrapped in `su -c` for real root. */
+    var sandboxRootEnabled: Boolean = false
+
     fun execute(
         command: String,
         timeoutSeconds: Long = DEFAULT_TIMEOUT_SECONDS,
@@ -69,7 +72,7 @@ class ProotExecutor(
 
         return try {
             val process = Runtime.getRuntime().exec(
-                buildProcessArgs(command, workingDir),
+                buildCommandArray(command, workingDir),
                 buildEnvVars(extraEnv),
                 File(rootfsPath).parentFile,
             )
@@ -118,7 +121,7 @@ class ProotExecutor(
         onStderr: (String) -> Unit,
     ): ProotHandle {
         val process = Runtime.getRuntime().exec(
-            buildProcessArgs(command, workingDir),
+            buildCommandArray(command, workingDir),
             buildEnvVars(extraEnv),
             File(rootfsPath).parentFile,
         )
@@ -141,22 +144,30 @@ class ProotExecutor(
         }
     }
 
-    private fun buildProcessArgs(command: String, workingDir: String): Array<String> = buildList {
-        add(prootPath)
-        add("--rootfs=$rootfsPath")
-        add("--bind=/dev")
-        add("--bind=/proc")
-        add("--bind=/sys")
-        add("--bind=$homePath:/root")
-        add("--bind=$tmpPath:/tmp")
-        storageBind()?.let { add(it) }
-        add("-0")
-        add("-w")
-        add(workingDir)
-        add("/bin/sh")
-        add("-c")
-        add(command)
-    }.toTypedArray()
+    private fun buildCommandArray(command: String, workingDir: String): Array<String> {
+        val prootArgs = buildList {
+            add(prootPath)
+            add("--rootfs=$rootfsPath")
+            add("--bind=/dev")
+            add("--bind=/proc")
+            add("--bind=/sys")
+            add("--bind=$homePath:/root")
+            add("--bind=$tmpPath:/tmp")
+            storageBind()?.let { add(it) }
+            add("-0")
+            add("-w")
+            add(workingDir)
+            add("/bin/sh")
+            add("-c")
+            add(command)
+        }.toTypedArray()
+
+        return if (sandboxRootEnabled) {
+            arrayOf("su", "-c") + prootArgs.joinToString(" ")
+        } else {
+            prootArgs
+        }
+    }
 
     private fun buildEnvVars(extraEnv: Map<String, String>): Array<String> {
         val loaderPath = File(prootPath).parent.orEmpty() + "/libproot-loader.so"

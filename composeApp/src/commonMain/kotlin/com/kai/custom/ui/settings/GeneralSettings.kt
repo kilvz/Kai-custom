@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kai.custom.isDebugBuild
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.languageOptions
 import com.kai.custom.ui.KaiOutlinedTextField
@@ -73,6 +74,9 @@ internal fun GeneralContent(
     isEnrolling: Boolean,
     wakeWordEnrollmentMessage: String,
     preferredLanguage: String,
+    showDebugApiSection: Boolean = false,
+    isDebugApiEnabled: Boolean = false,
+    debugApiRunning: Boolean = false,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
@@ -148,6 +152,15 @@ internal fun GeneralContent(
                     SettingsCard {
                         TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
                     }
+                    if (showDebugApiSection) {
+                        SettingsCard {
+                            DebugApiSection(
+                                isDebugApiEnabled = isDebugApiEnabled,
+                                debugApiRunning = debugApiRunning,
+                                onToggleDebugApi = actions.onToggleDebugApi,
+                            )
+                        }
+                    }
                 } // end second column staggered
             }
         } else {
@@ -209,6 +222,15 @@ internal fun GeneralContent(
                 }
                 SettingsCard {
                     TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
+                }
+                if (showDebugApiSection) {
+                    SettingsCard {
+                        DebugApiSection(
+                            isDebugApiEnabled = isDebugApiEnabled,
+                            debugApiRunning = debugApiRunning,
+                            onToggleDebugApi = actions.onToggleDebugApi,
+                        )
+                    }
                 }
             }
         }
@@ -640,5 +662,53 @@ private fun UiScaleSection(
             valueRange = 0.5f..2.0f,
             steps = steps,
         )
+    }
+}
+
+@Composable
+private fun DebugApiSection(
+    isDebugApiEnabled: Boolean,
+    debugApiRunning: Boolean,
+    onToggleDebugApi: (Boolean) -> Unit,
+) {
+    val showAdvanced = remember { mutableStateOf(false) }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showAdvanced.value = !showAdvanced.value }
+                .padding(vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Advanced",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = if (showAdvanced.value) "▼" else "▶",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        if (showAdvanced.value) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                ToggleableHeadline(
+                    title = "Debug API Server",
+                    description = if (debugApiRunning) "Running on 127.0.0.1:18500" else "HTTP server for debugging. Requires daemon. See logcat for auth token.",
+                    checked = isDebugApiEnabled,
+                    onCheckedChange = onToggleDebugApi,
+                )
+                if (isDebugBuild.not()) {
+                    Text(
+                        text = "Debug API is only available in debug builds",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+            }
+        }
     }
 }

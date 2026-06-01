@@ -446,6 +446,10 @@ class FakeDataRepository : DataRepository {
 
     override fun isMemoryEnabled(): Boolean = memoryEnabled
 
+    override fun isAltMemoryEnabled(): Boolean = true
+
+    override fun setAltMemoryEnabled(enabled: Boolean) {}
+
     override fun setMemoryEnabled(enabled: Boolean) {
         memoryEnabled = enabled
     }
@@ -618,12 +622,30 @@ class FakeDataRepository : DataRepository {
     }
 
     private var shizukuEnabled = false
+    private var rootEnabled = false
+    private var sandboxRootEnabled = false
+    private var debugApiEnabled = false
     private var notificationsEnabled = false
     private var notificationListenerAccessGranted = false
 
     override fun isShizukuEnabled(): Boolean = shizukuEnabled
     override fun setShizukuEnabled(enabled: Boolean) {
         shizukuEnabled = enabled
+    }
+
+    override fun isRootEnabled(): Boolean = rootEnabled
+    override fun setRootEnabled(enabled: Boolean) {
+        rootEnabled = enabled
+    }
+
+    override fun isSandboxRootEnabled(): Boolean = sandboxRootEnabled
+    override fun setSandboxRootEnabled(enabled: Boolean) {
+        sandboxRootEnabled = enabled
+    }
+
+    override fun isDebugApiEnabled(): Boolean = debugApiEnabled
+    override fun setDebugApiEnabled(enabled: Boolean) {
+        debugApiEnabled = enabled
     }
 
     override fun isNotificationsEnabled(): Boolean = notificationsEnabled

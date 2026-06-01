@@ -42,6 +42,7 @@ import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
+import com.kai.custom.root.RootManager
 import com.kai.custom.tools.AdbTool
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.CalendarRepository
@@ -57,6 +58,7 @@ import com.kai.custom.tools.OpenCodeTool
 import com.kai.custom.tools.OpenFileTool
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
+import com.kai.custom.tools.RootTool
 import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SmsTools
@@ -153,6 +155,10 @@ actual val isTelegramSupported: Boolean = true
 actual val isSplinterlandsSupported: Boolean = true
 
 actual val isShizukuSupported: Boolean = true
+
+actual val isRootSupported: Boolean = true
+
+actual fun isRootAvailable(): Boolean = com.kai.custom.root.RootManager.isAvailable
 
 actual fun isShizukuPermissionGranted(): Boolean = ShizukuManager.hasPermission
 
@@ -512,6 +518,10 @@ actual fun getAvailableTools(): List<Tool> {
 
         if (appSettings.isToolEnabled(AdbTool.schema.name)) {
             add(AdbTool)
+        }
+
+        if (appSettings.isRootEnabled() && RootManager.isAvailable) {
+            add(RootTool)
         }
 
         if (appSettings.isEmailEnabled()) {

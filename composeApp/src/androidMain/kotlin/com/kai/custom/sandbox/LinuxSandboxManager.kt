@@ -174,19 +174,26 @@ class LinuxSandboxManager(
         downloader.makeWritable(rootfsDir)
         downloader.writeResolvConf(rootfsDir)
 
-        val executor = createProotExecutor()
-        val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
-        var updated = false
-        for (mirror in downloader.getMirrors(distro)) {
-            downloader.writeRepositories(rootfsDir, mirror, distro)
-            val result = executor.execute(updateCmd, timeoutSeconds = 180)
-            if (result["success"] as? Boolean == true) {
-                updated = true
-                break
+        // Skip apk update/apt-get update if packages are already installed
+        val pythonBinary = if (distro == "ubuntu") "usr/bin/python3" else "usr/bin/python3"
+        val packagesAlreadyInstalled = File(rootfsDir, pythonBinary).exists() ||
+            File(rootfsDir, "usr/bin/ssh").exists()
+
+        if (!packagesAlreadyInstalled) {
+            val executor = createProotExecutor()
+            val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
+            var updated = false
+            for (mirror in downloader.getMirrors(distro)) {
+                downloader.writeRepositories(rootfsDir, mirror, distro)
+                val result = executor.execute(updateCmd, timeoutSeconds = 180)
+                if (result["success"] as? Boolean == true) {
+                    updated = true
+                    break
+                }
             }
-        }
-        if (!updated) {
-            throw IllegalStateException("$updateCmd failed on all mirrors")
+            if (!updated) {
+                throw IllegalStateException("$updateCmd failed on all mirrors")
+            }
         }
 
         _state.value = SandboxState.Ready
@@ -210,6 +217,7 @@ class LinuxSandboxManager(
         tmpPath = tmpPath,
     ).apply {
         sandboxStorageMountEnabled = appSettings.isSandboxStorageMountEnabled()
+        sandboxRootEnabled = appSettings.isSandboxRootEnabled() && appSettings.isRootEnabled()
     }
 
     // One bash session per logical caller (chat conversation, terminal scratch,
@@ -291,7 +299,7 @@ class LinuxSandboxManager(
         val packages = if (distro == "ubuntu") {
             listOf(
                 "bash", "curl", "wget", "git", "jq", "python3", "python3-pip", "nodejs",
-                "openssh-client", "lftp", "rsync",
+                "openssh-client", "lftp", "rsync", "apt-utils",
             )
         } else {
             listOf(
@@ -305,6 +313,7 @@ class LinuxSandboxManager(
         currentJob = scope.launch {
             try {
                 val rootfsDir = File(sandboxDir, "rootfs")
+                downloader.writeResolvConf(rootfsDir)
                 val executor = createProotExecutor()
 
                 _state.value = SandboxState.Installing("Updating package lists...")
@@ -406,10 +415,6 @@ class LinuxSandboxManager(
     }
 
     fun arePackagesInstalled(): Boolean {
-        if (_state.value !is SandboxState.Ready) return false
-        // Both checks must pass: existing installs that predate the SSH bundle
-        // will report not-installed and re-prompt, picking up the new packages
-        // on the next install run (apk skips already-installed ones).
         return File(rootfsPath, "usr/bin/python3").exists() &&
             File(rootfsPath, "usr/bin/ssh").exists()
     }

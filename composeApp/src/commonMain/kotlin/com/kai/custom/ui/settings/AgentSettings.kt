@@ -120,6 +120,8 @@ internal fun AgentContent(
     activePersonaId: String,
     memories: ImmutableList<MemoryEntry>,
     isMemoryEnabled: Boolean,
+    isAltMemoryEnabled: Boolean,
+    onToggleAltMemory: (Boolean) -> Unit,
     scheduledTasks: ImmutableList<ScheduledTask>,
     isSchedulingEnabled: Boolean,
     isHeartbeatEnabled: Boolean,
@@ -173,7 +175,9 @@ internal fun AgentContent(
                             onDeleteMemory = actions.onDeleteMemory,
                             onUpdateMemory = actions.onUpdateMemory,
                             isMemoryEnabled = isMemoryEnabled,
+                            isAltMemoryEnabled = isAltMemoryEnabled,
                             onToggleMemory = actions.onToggleMemory,
+                            onToggleAltMemory = onToggleAltMemory,
                             onExportDimension = actions.onExportDimension,
                             onImportDimension = actions.onImportDimension,
                         )
@@ -292,7 +296,9 @@ internal fun AgentContent(
                         onDeleteMemory = actions.onDeleteMemory,
                         onUpdateMemory = actions.onUpdateMemory,
                         isMemoryEnabled = isMemoryEnabled,
+                        isAltMemoryEnabled = isAltMemoryEnabled,
                         onToggleMemory = actions.onToggleMemory,
+                        onToggleAltMemory = onToggleAltMemory,
                         onExportDimension = actions.onExportDimension,
                         onImportDimension = actions.onImportDimension,
                     )
@@ -645,7 +651,9 @@ private fun MemoryList(
     onDeleteMemory: (String) -> Unit,
     onUpdateMemory: (String, String) -> Unit,
     isMemoryEnabled: Boolean,
+    isAltMemoryEnabled: Boolean,
     onToggleMemory: (Boolean) -> Unit,
+    onToggleAltMemory: (Boolean) -> Unit,
     onExportDimension: suspend () -> ByteArray,
     onImportDimension: (ByteArray) -> Unit,
 ) {
@@ -681,6 +689,13 @@ private fun MemoryList(
             description = stringResource(Res.string.settings_memories_description),
             checked = isMemoryEnabled,
             onCheckedChange = onToggleMemory,
+        )
+        Spacer(Modifier.height(4.dp))
+        ToggleableHeadline(
+            title = "Alt-memory",
+            description = "Vector memory with semantic search (auto-installed in sandbox)",
+            checked = isAltMemoryEnabled,
+            onCheckedChange = onToggleAltMemory,
         )
         Spacer(Modifier.height(12.dp))
 

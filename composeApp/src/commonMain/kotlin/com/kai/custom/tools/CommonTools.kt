@@ -210,7 +210,7 @@ object CommonTools {
     val searchMemoriesToolInfo = ToolInfo(
         id = "search_memories",
         name = "Search Memories",
-        description = "Search stored memories by keyword",
+        description = "Search stored memories by keyword (matches key and content)",
     )
 
     val openUrlTool = object : Tool {
@@ -325,7 +325,7 @@ object CommonTools {
     fun memoryStoreTool(memoryStore: MemoryStore) = object : Tool {
         override val schema = ToolSchema(
             name = "memory_store",
-            description = "Store or update a memory with a descriptive key. Use this proactively to remember user preferences, facts, and important information across conversations.",
+            description = "Store a memory. The key is searchable via search_memories — use a descriptive key so you can find it later.",
             parameters = mapOf(
                 "key" to ParameterSchema(type = "string", description = "Descriptive key for the memory (e.g. user_name, preferred_language, project_details)", required = true),
                 "content" to ParameterSchema(type = "string", description = "The content to store", required = true),
@@ -412,7 +412,7 @@ object CommonTools {
     ) = object : Tool {
         override val schema = ToolSchema(
             name = "search_memories",
-            description = "Search your stored memories by keyword. Use this to look up what you know about a topic, find preferences, or recall past learnings.",
+            description = "Search your stored memories by keyword (matches both key and content). To find a memory by its key, search the key value. To list everything, search a single letter.",
             parameters = mapOf(
                 "query" to ParameterSchema(type = "string", description = "The search query to find matching memories", required = true),
                 "limit" to ParameterSchema(type = "integer", description = "Maximum number of results (default 10)", required = false),

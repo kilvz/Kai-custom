@@ -107,6 +107,10 @@ actual val isSplinterlandsSupported: Boolean = true
 
 actual val isShizukuSupported: Boolean = false
 
+actual val isRootSupported: Boolean = false
+
+actual fun isRootAvailable(): Boolean = false
+
 actual fun isShizukuPermissionGranted(): Boolean = false
 
 actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {}

@@ -72,7 +72,7 @@ class AndroidSandboxController : SandboxController {
                 try {
                     val oldReady = previousState is SandboxState.Ready
                     _status.value = mapState(state)
-                    if (!oldReady && state is SandboxState.Ready) {
+                    if (!oldReady && state is SandboxState.Ready && appSettings.isAltMemoryEnabled()) {
                         scope.launch { altMemoryLifecycle.setupAndStart() }
                     }
                 } catch (e: Throwable) {

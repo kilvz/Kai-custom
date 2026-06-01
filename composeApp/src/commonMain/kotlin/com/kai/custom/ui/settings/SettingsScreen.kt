@@ -348,6 +348,7 @@ fun SettingsScreen(
         sandboxState = sandboxState,
         onToggleSandbox = sandboxViewModel::onToggleSandbox,
         onToggleStorageMount = sandboxViewModel::onToggleStorageMount,
+        onToggleSandboxRoot = sandboxViewModel::onToggleSandboxRoot,
         onSetupSandbox = sandboxViewModel::onSetupSandbox,
         onCancelSandbox = sandboxViewModel::onCancelSandbox,
         onResetSandbox = sandboxViewModel::onResetSandbox,
@@ -367,6 +368,7 @@ fun SettingsScreenContent(
     sandboxState: SandboxUiState = SandboxUiState(),
     onToggleSandbox: (Boolean) -> Unit = {},
     onToggleStorageMount: (Boolean) -> Unit = {},
+    onToggleSandboxRoot: (Boolean) -> Unit = {},
     onSetupSandbox: () -> Unit = {},
     onCancelSandbox: () -> Unit = {},
     onResetSandbox: () -> Unit = {},
@@ -491,6 +493,9 @@ fun SettingsScreenContent(
                                     isEnrolling = filteredUiState.isEnrolling,
                                     wakeWordEnrollmentMessage = filteredUiState.wakeWordEnrollmentMessage,
                                     preferredLanguage = filteredUiState.preferredLanguage,
+                                    showDebugApiSection = filteredUiState.showDebugApiSection,
+                                    isDebugApiEnabled = filteredUiState.isDebugApiEnabled,
+                                    debugApiRunning = filteredUiState.debugApiRunning,
                                 )
                             }
 
@@ -503,6 +508,8 @@ fun SettingsScreenContent(
                                     activePersonaId = filteredUiState.activePersonaId,
                                     memories = filteredUiState.memories,
                                     isMemoryEnabled = filteredUiState.isMemoryEnabled,
+                                    isAltMemoryEnabled = filteredUiState.isAltMemoryEnabled,
+                                    onToggleAltMemory = actions.onToggleAltMemory,
                                     scheduledTasks = filteredUiState.scheduledTasks,
                                     isSchedulingEnabled = filteredUiState.isSchedulingEnabled,
                                     isHeartbeatEnabled = filteredUiState.isHeartbeatEnabled,
@@ -595,6 +602,10 @@ fun SettingsScreenContent(
                                     showAddMcpServerDialog = filteredUiState.showAddMcpServerDialog,
                                     onShowAddMcpServerDialog = actions.onShowAddMcpServerDialog,
                                     onAddPopularMcpServer = actions.onAddPopularMcpServer,
+                                    showRootSection = filteredUiState.showRootSection,
+                                    isRootEnabled = filteredUiState.isRootEnabled,
+                                    rootAvailable = filteredUiState.rootAvailable,
+                                    onToggleRoot = actions.onToggleRoot,
                                     skills = filteredUiState.installedSkills,
                                     activeSkill = filteredUiState.activeSkill,
                                     browsableSkills = filteredUiState.marketplaceSkills,
@@ -603,6 +614,9 @@ fun SettingsScreenContent(
                                     onInstallGitHub = actions.onInstallGitHub,
                                     onInstallBrowsed = actions.onInstallBrowsed,
                                     onUninstallSkill = actions.onUninstallSkill,
+                                    isSandboxInstalled = sandboxState.sandboxReady,
+                                    onNavigateToSandbox = { actions.onSelectTab(SettingsTab.Sandbox) },
+                                    onBrowseMarketplaceSkills = actions.onBrowseMarketplaceSkills,
                                 )
                             }
 
@@ -611,6 +625,7 @@ fun SettingsScreenContent(
                                     sandboxState = sandboxState,
                                     onToggleSandbox = onToggleSandbox,
                                     onToggleStorageMount = onToggleStorageMount,
+                                    onToggleSandboxRoot = onToggleSandboxRoot,
                                     onSetupSandbox = onSetupSandbox,
                                     onCancelSandbox = onCancelSandbox,
                                     onResetSandbox = onResetSandbox,

@@ -83,7 +83,15 @@ internal fun SkillsSection(
     browseFailed: Boolean,
     isSandboxInstalled: Boolean,
     onNavigateToSandbox: () -> Unit,
+    onBrowseMarketplaceSkills: () -> Unit = {},
 ) {
+    var localShowAddDialog by remember { mutableStateOf(false) }
+    val effectiveShowAddDialog = showAddDialog || localShowAddDialog
+    val effectiveOnShowAddDialog: (Boolean) -> Unit = { v ->
+        localShowAddDialog = v
+        onShowAddDialog(v)
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(Res.string.settings_skills),
@@ -132,7 +140,7 @@ internal fun SkillsSection(
             Spacer(Modifier.height(8.dp))
 
             OutlinedButton(
-                onClick = { onShowAddDialog(true) },
+                onClick = { effectiveOnShowAddDialog(true) },
                 modifier = Modifier.align(Alignment.CenterHorizontally).handCursor(),
             ) {
                 Text(stringResource(Res.string.settings_skills_add))
@@ -140,9 +148,9 @@ internal fun SkillsSection(
         }
     }
 
-    if (showAddDialog && isSandboxInstalled) {
+    if (effectiveShowAddDialog && isSandboxInstalled) {
         AddSkillDialog(
-            onDismiss = { onShowAddDialog(false) },
+            onDismiss = { effectiveOnShowAddDialog(false) },
             onInstallGitHub = onInstallGitHub,
             onInstallBrowsed = onInstallBrowsed,
             isInstalling = isInstalling,
@@ -151,6 +159,7 @@ internal fun SkillsSection(
             isBrowsing = isBrowsing,
             browseFailed = browseFailed,
             installedIds = remember(skills) { skills.map { it.id }.toSet() },
+            onBrowseMarketplaceSkills = onBrowseMarketplaceSkills,
         )
     }
 }
@@ -220,10 +229,12 @@ private fun AddSkillDialog(
     isBrowsing: Boolean,
     browseFailed: Boolean,
     installedIds: Set<String>,
+    onBrowseMarketplaceSkills: () -> Unit = {},
 ) {
     var url by remember { mutableStateOf("") }
     var search by remember { mutableStateOf("") }
     var installingId by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) { onBrowseMarketplaceSkills() }
     LaunchedEffect(isInstalling) {
         if (!isInstalling) installingId = null
     }

@@ -78,6 +78,11 @@ expect val isSplinterlandsSupported: Boolean
  */
 expect val isShizukuSupported: Boolean
 
+expect val isRootSupported: Boolean
+
+/** Runtime check: true when su binary is available. On non-Android platforms, always false. */
+expect fun isRootAvailable(): Boolean
+
 expect fun isShizukuPermissionGranted(): Boolean
 
 expect fun requestShizukuPermission(onGranted: (() -> Unit)? = null)

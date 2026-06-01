@@ -322,7 +322,7 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     override fun searchEntities(query: String, limit: Int): List<SearchResult> {
         if (query.isBlank()) return emptyList()
         val likeQuery = "%${query.replace("'", "''")}%"
-        val cursor = db.query("entities", null, "content LIKE ?", arrayOf(likeQuery), null, null, null, limit.toString())
+        val cursor = db.query("entities", null, "content LIKE ? OR metadata LIKE ?", arrayOf(likeQuery, likeQuery), null, null, null, limit.toString())
         return cursor.use {
             buildList {
                 while (it.moveToNext()) {

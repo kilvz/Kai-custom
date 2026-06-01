@@ -355,6 +355,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_MEMORY_ENABLED, enabled)
     }
 
+    // Alt-memory (auto-installed in sandbox, user-toggleable)
+    fun isAltMemoryEnabled(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_ENABLED, true)
+
+    fun setAltMemoryEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_ALT_MEMORY_ENABLED, enabled)
+    }
+
     // Agent memories
     fun getMemoriesJson(): String = settings.getString(KEY_AGENT_MEMORIES, "[]")
 
@@ -749,6 +756,26 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SHIZUKU_ENABLED, enabled)
     }
 
+    // Root shell (Android-only with su; feature gate is Platform.isRootSupported)
+    fun isRootEnabled(): Boolean = settings.getBoolean(KEY_ROOT_ENABLED, false)
+
+    fun setRootEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_ROOT_ENABLED, enabled)
+    }
+
+    fun isSandboxRootEnabled(): Boolean = settings.getBoolean(KEY_SANDBOX_ROOT_ENABLED, false)
+
+    fun setSandboxRootEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_SANDBOX_ROOT_ENABLED, enabled)
+    }
+
+    // Debug API server (Android-only debug builds only; feature gate is Platform.isDebugBuild)
+    fun isDebugApiEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_API_ENABLED, false)
+
+    fun setDebugApiEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_DEBUG_API_ENABLED, enabled)
+    }
+
     // Notifications (FOSS-only, Android-only — settings layer is platform-agnostic, feature
     // gate is enforced by the listener service being declared only in foss/AndroidManifest.xml)
     fun isNotificationsEnabled(): Boolean = settings.getBoolean(KEY_NOTIFICATIONS_ENABLED, false)
@@ -846,6 +873,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_PERSONA_NAME = "current_persona" // legacy, use active_persona_id
         const val KEY_ACTIVE_PERSONA_ID = "active_persona_id"
         const val KEY_MEMORY_ENABLED = "memory_enabled"
+        const val KEY_ALT_MEMORY_ENABLED = "alt_memory_enabled"
         const val KEY_AGENT_MEMORIES = "agent_memories"
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
@@ -872,6 +900,9 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SMS_DRAFTS = "sms_drafts"
 
         const val KEY_SHIZUKU_ENABLED = "shizuku_enabled"
+        const val KEY_ROOT_ENABLED = "root_enabled"
+        const val KEY_SANDBOX_ROOT_ENABLED = "sandbox_root_enabled"
+        const val KEY_DEBUG_API_ENABLED = "debug_api_enabled"
 
         const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val KEY_NOTIFICATIONS_PENDING = "notifications_pending"

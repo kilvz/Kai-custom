@@ -179,11 +179,12 @@ val appModule = module {
         )
     }
     single<DaemonController> { createDaemonController() }
+    single<DebugApiController> { createDebugApiController() }
     single<SandboxController> { createSandboxController() }
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }

@@ -160,6 +160,7 @@ internal fun buildChatSystemPrompt(
             remaining = appendMemoryCategorySection("Learnings", learningMemories, withHitCount = true, remaining)
             appendMemoryCategorySection("Known Issues & Resolutions", errorMemories, withHitCount = false, remaining)
         }
+        if (memoryEnabled && isNotEmpty()) append("\n\nWhen you don't know something or need information, first search your memory with search_memories. If not found, search the internet with web_search. Save what you learn with memory_store.")
 
         if (variant == SystemPromptVariant.CHAT_REMOTE) {
             if (emailAccounts.isNotEmpty()) {

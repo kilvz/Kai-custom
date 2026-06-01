@@ -108,6 +108,8 @@ interface DataRepository {
     // Memory management
     fun isMemoryEnabled(): Boolean
     fun setMemoryEnabled(enabled: Boolean)
+    fun isAltMemoryEnabled(): Boolean
+    fun setAltMemoryEnabled(enabled: Boolean)
     fun getMemories(): List<MemoryEntry>
     fun getSchemaResetMessage(): String?
     suspend fun deleteMemory(key: String)
@@ -206,6 +208,16 @@ interface DataRepository {
     // Shizuku / ADB commands (Android-only; no-op on other platforms).
     fun isShizukuEnabled(): Boolean
     fun setShizukuEnabled(enabled: Boolean)
+
+    // Root shell (Android-only with su; no-op on other platforms).
+    fun isRootEnabled(): Boolean
+    fun setRootEnabled(enabled: Boolean)
+    fun isSandboxRootEnabled(): Boolean
+    fun setSandboxRootEnabled(enabled: Boolean)
+
+    // Debug API server (Android-only debug builds only).
+    fun isDebugApiEnabled(): Boolean
+    fun setDebugApiEnabled(enabled: Boolean)
 
     // Notifications (FOSS-only on Android; other platforms return stub values).
     // Per-app filtering is delegated to the system Notification Access "Apps" picker.

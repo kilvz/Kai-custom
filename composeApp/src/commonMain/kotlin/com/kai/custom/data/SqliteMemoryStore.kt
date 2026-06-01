@@ -152,7 +152,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         true
     }
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> = dimension.searchEntities("", Int.MAX_VALUE).mapNotNull { entityToEntry(it.entity) }
+    override fun getUserMemories(max: Int): List<MemoryEntry> = allEntities(Int.MAX_VALUE).mapNotNull { entityToEntry(it) }
         .filter { !it.protected }
         .take(max)
 

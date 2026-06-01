@@ -3,6 +3,7 @@ package com.kai.custom.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.DaemonController
+import com.kai.custom.DebugApiController
 import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
@@ -19,6 +20,8 @@ import com.kai.custom.httpClient
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.isEmailSupported
 import com.kai.custom.isNotificationsSupported
+import com.kai.custom.isRootAvailable
+import com.kai.custom.isRootSupported
 import com.kai.custom.isShizukuPermissionGranted
 import com.kai.custom.isShizukuSupported
 import com.kai.custom.isSmsSupported
@@ -67,6 +70,7 @@ import kotlin.time.Duration.Companion.seconds
 class SettingsViewModel(
     private val dataRepository: DataRepository,
     private val daemonController: DaemonController,
+    private val debugApiController: DebugApiController,
     private val notificationPermissionController: NotificationPermissionController,
     private val taskScheduler: TaskScheduler,
     private val wakeWordController: WakeWordController,
@@ -88,6 +92,7 @@ class SettingsViewModel(
         isDynamicUiEnabled = dataRepository.isDynamicUiEnabled(),
         themeMode = dataRepository.getThemeMode(),
         isMemoryEnabled = dataRepository.isMemoryEnabled(),
+        isAltMemoryEnabled = dataRepository.isAltMemoryEnabled(),
         memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList(),
         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
         scheduledTasks = dataRepository.getScheduledTasks().toImmutableList(),
@@ -130,6 +135,12 @@ class SettingsViewModel(
         showShizukuSection = isShizukuSupported,
         isShizukuEnabled = dataRepository.isShizukuEnabled(),
         shizukuPermissionGranted = isShizukuPermissionGranted(),
+        showRootSection = isRootSupported,
+        isRootEnabled = dataRepository.isRootEnabled(),
+        rootAvailable = isRootAvailable(),
+        showDebugApiSection = currentPlatform is Platform.Mobile.Android,
+        isDebugApiEnabled = dataRepository.isDebugApiEnabled(),
+        debugApiRunning = debugApiController.isRunning,
         isFreeFallbackEnabled = dataRepository.isFreeFallbackEnabled(),
         isWakeWordEnabled = dataRepository.isWakeWordEnabled(),
         wakeWordPhrase = dataRepository.getWakeWordPhrase(),
@@ -172,6 +183,7 @@ class SettingsViewModel(
         onToggleDynamicUi = ::onToggleDynamicUi,
         onChangeThemeMode = ::onChangeThemeMode,
         onToggleMemory = ::onToggleMemory,
+        onToggleAltMemory = ::onToggleAltMemory,
         onDeleteMemory = ::onDeleteMemory,
         onUpdateMemory = ::onUpdateMemory,
         onToggleScheduling = ::onToggleScheduling,
@@ -197,6 +209,8 @@ class SettingsViewModel(
         onClearPendingNotifications = ::onClearPendingNotifications,
         onToggleShizuku = ::onToggleShizuku,
         onOpenShizukuPermission = ::onOpenShizukuPermission,
+        onToggleRoot = ::onToggleRoot,
+        onToggleDebugApi = ::onToggleDebugApi,
         onToggleFreeFallback = ::onToggleFreeFallback,
         onToggleWakeWord = ::onToggleWakeWord,
         onChangeWakeWordPhrase = ::onChangeWakeWordPhrase,
@@ -537,6 +551,11 @@ class SettingsViewModel(
         _state.update { it.copy(isMemoryEnabled = enabled) }
     }
 
+    private fun onToggleAltMemory(enabled: Boolean) {
+        dataRepository.setAltMemoryEnabled(enabled)
+        _state.update { it.copy(isAltMemoryEnabled = enabled) }
+    }
+
     private fun onDeleteMemory(key: String) {
         commitPendingDeletion()
         _state.update { it.copy(pendingDeletion = PendingDeletion.Memory(key)) }
@@ -576,6 +595,16 @@ class SettingsViewModel(
             daemonController.stop()
         }
         _state.update { it.copy(isDaemonEnabled = enabled) }
+    }
+
+    private fun onToggleDebugApi(enabled: Boolean) {
+        dataRepository.setDebugApiEnabled(enabled)
+        if (enabled) {
+            debugApiController.start()
+        } else {
+            debugApiController.stop()
+        }
+        _state.update { it.copy(isDebugApiEnabled = enabled, debugApiRunning = debugApiController.isRunning) }
     }
 
     private fun onToggleHeartbeat(enabled: Boolean) {
@@ -750,6 +779,16 @@ class SettingsViewModel(
         requestShizukuPermission(onGranted = {
             _state.update { it.copy(shizukuPermissionGranted = true) }
         })
+    }
+
+    private fun onToggleRoot(enabled: Boolean) {
+        dataRepository.setRootEnabled(enabled)
+        _state.update {
+            it.copy(
+                isRootEnabled = enabled,
+                rootAvailable = isRootAvailable(),
+            )
+        }
     }
 
     private fun onOpenTtsSettings() {

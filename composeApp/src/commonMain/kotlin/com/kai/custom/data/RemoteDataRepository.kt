@@ -1096,6 +1096,7 @@ class RemoteDataRepository(
 
             val toolResults = executeToolCallsInParallel(
                 result.toolCalls.map { Triple(it.id, it.name, it.arguments) },
+                history,
             )
 
             history.update { h ->
@@ -1169,13 +1170,14 @@ class RemoteDataRepository(
      */
     private suspend fun executeToolCallsInParallel(
         toolCalls: List<Triple<String, String, String>>,
+        history: MutableStateFlow<List<History>> = chatHistory,
     ): List<Triple<String, String, String>> {
         // Add all TOOL_EXECUTING indicators first
         val executingIds = toolCalls.map { Uuid.random().toString() }
         for ((index, toolCall) in toolCalls.withIndex()) {
             val (_, name, _) = toolCall
             val toolDisplayName = toolExecutor.getToolDisplayName(name)
-            chatHistory.update {
+            history.update {
                 it.toMutableList().apply {
                     add(
                         History(
@@ -1208,8 +1210,8 @@ class RemoteDataRepository(
         }
 
         // Remove all TOOL_EXECUTING indicators
-        chatHistory.update { history ->
-            history.filter { h -> h.id !in executingIds }
+        history.update { h ->
+            h.filter { hh -> hh.id !in executingIds }
         }
 
         return results
@@ -1933,6 +1935,12 @@ class RemoteDataRepository(
 
     override fun isMemoryEnabled(): Boolean = appSettings.isMemoryEnabled()
 
+    override fun isAltMemoryEnabled(): Boolean = appSettings.isAltMemoryEnabled()
+
+    override fun setAltMemoryEnabled(enabled: Boolean) {
+        appSettings.setAltMemoryEnabled(enabled)
+    }
+
     override fun setMemoryEnabled(enabled: Boolean) {
         appSettings.setMemoryEnabled(enabled)
     }
@@ -2144,6 +2152,24 @@ class RemoteDataRepository(
         appSettings.setShizukuEnabled(enabled)
     }
 
+    override fun isRootEnabled(): Boolean = appSettings.isRootEnabled()
+
+    override fun setRootEnabled(enabled: Boolean) {
+        appSettings.setRootEnabled(enabled)
+    }
+
+    override fun isSandboxRootEnabled(): Boolean = appSettings.isSandboxRootEnabled()
+
+    override fun setSandboxRootEnabled(enabled: Boolean) {
+        appSettings.setSandboxRootEnabled(enabled)
+    }
+
+    override fun isDebugApiEnabled(): Boolean = appSettings.isDebugApiEnabled()
+
+    override fun setDebugApiEnabled(enabled: Boolean) {
+        appSettings.setDebugApiEnabled(enabled)
+    }
+
     override fun isNotificationsEnabled(): Boolean = appSettings.isNotificationsEnabled()
 
     override fun setNotificationsEnabled(enabled: Boolean) {
@@ -2224,39 +2250,37 @@ class RemoteDataRepository(
     override fun importDimension(data: ByteArray) = memoryStore.importDimension(data)
 
     override suspend fun askWithTools(prompt: String, instanceId: String?): String {
-        // Selection: explicit instance > first remote > first on-device. The simple-tool
-        // allowlist works at any context size, so on-device is always eligible for fallback.
-        val instances = getConfiguredServiceInstances()
-        val targetInstance = instanceId?.let { id -> instances.find { it.instanceId == id } }
-            ?: instances.firstOrNull { !Service.fromId(it.serviceId).isOnDevice }
-            ?: instances.firstOrNull { Service.fromId(it.serviceId).isOnDevice }
-            ?: return ""
-        val service = Service.fromId(targetInstance.serviceId)
+        // Selection: explicit instance > first fallback entry. Use getOrderedFallbackEntries()
+        // so Service.Free (free_service_primary) is included alongside configured instances.
+        val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
+        if (fallbackEntries.isEmpty()) return ""
+
+        val entry = instanceId?.let { id -> fallbackEntries.find { it.instanceId == id } }
+            ?: fallbackEntries.first()
+        val service = entry.service
         val messages = listOf(History(role = History.Role.USER, content = prompt))
         val systemPrompt = getActiveSystemPrompt()
         // Use a local history to avoid polluting the current conversation's chatHistory
         val localHistory = MutableStateFlow(messages)
-        return askWithService(service, messages, systemPrompt, targetInstance.instanceId, localHistory).content
+        return askWithService(service, messages, systemPrompt, entry.instanceId, localHistory).content
     }
 
     override suspend fun askSilently(question: String): String {
-        val service = currentService()
-        val firstInstance = getConfiguredServiceInstances().firstOrNull() ?: return ""
+        val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
+        if (fallbackEntries.isEmpty()) return ""
+
+        val entry = fallbackEntries.first()
         val messages = listOf(History(role = History.Role.USER, content = question))
 
-        if (service.isOnDevice) {
-            // Throwaway history — we don't want tool-execution rows leaking into the
-            // visible chatHistory for a "silent" call. LOCAL variant of the system
-            // prompt so small on-device models get the right section set.
+        if (entry.service.isOnDevice) {
             val localPrompt = getActiveSystemPrompt(SystemPromptVariant.CHAT_LOCAL)
-            return askWithLocalEngine(messages, localPrompt, firstInstance.instanceId, MutableStateFlow(messages))
+            return askWithLocalEngine(messages, localPrompt, entry.instanceId, MutableStateFlow(messages))
         }
 
         val systemPrompt = getActiveSystemPrompt()
+        val creds = instanceCredentials(entry.instanceId, entry.service)
 
-        val creds = instanceCredentials(firstInstance.instanceId, service)
-
-        val responseText = when (service) {
+        return when (entry.service) {
             Service.Gemini -> {
                 val geminiMessages = messages.map { it.toGeminiMessageDto() }
                 val response = requests.geminiChat(creds, geminiMessages, systemInstruction = systemPrompt).getOrThrow()
@@ -2270,13 +2294,11 @@ class RemoteDataRepository(
             }
 
             else -> {
-                val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt)
-                val response = requests.openAICompatibleChat(service, creds, openAIMessages).getOrThrow()
+                val openAIMessages = buildOpenAIMessages(entry.service, messages, systemPrompt)
+                val response = requests.openAICompatibleChat(entry.service, creds, openAIMessages).getOrThrow()
                 response.choices.firstOrNull()?.message?.effectiveContent ?: ""
             }
         }
-
-        return responseText
     }
 
     override suspend fun askSilentlyWithInstance(instanceId: String, prompt: String, timeoutMs: Long): String {

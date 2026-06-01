@@ -30,9 +30,9 @@ class PersonaManager(private val appSettings: AppSettings) {
         val raw = appSettings.settings.getStringOrNull(KEY_PERSONA_LIST) ?: return builtIns
         return try {
             val stored = json.decodeFromString<List<PersonaConfig>>(raw)
-            // ensure built-ins always exist even if deleted from serialized data
+            // built-ins first (canonical names), then custom stored entries
             val builtInIds = builtIns.map { it.id }.toSet()
-            val merged = stored.filter { !builtInIds.contains(it.id) || it.isBuiltIn } + builtIns
+            val merged = builtIns + stored.filter { it.id !in builtInIds }
             merged.distinctBy { it.id }
         } catch (_: Exception) {
             builtIns
@@ -89,12 +89,12 @@ class PersonaManager(private val appSettings: AppSettings) {
             ),
             PersonaConfig(
                 id = "alt",
-                name = "alt",
+                name = "Alt",
                 description = "Custom persona with streamlined behavior",
                 style = PersonaPromptStyle.ALT,
                 heartbeatStyle = PersonaHeartbeatStyle.ALT,
                 isBuiltIn = true,
-                defaultSoul = "You are alt — streamlined and direct. No fluff, no filler. Just help.\n\nBe opinionated. Be concise. Be useful.\n\nHonesty over politeness. Actions over words. Privacy first.",
+                defaultSoul = "You are Alt — streamlined and direct. No fluff, no filler. Just help.\n\nBe opinionated. Be concise. Be useful.\n\nHonesty over politeness. Actions over words. Privacy first.",
             ),
         )
     }
