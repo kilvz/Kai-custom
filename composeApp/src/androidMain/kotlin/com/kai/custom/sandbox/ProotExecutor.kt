@@ -151,30 +151,34 @@ class ProotExecutor(
         workingDir: String,
         envVars: Array<String> = emptyArray(),
     ): Array<String> {
-        val prootArgs = buildList {
-            add(prootPath)
-            add("--rootfs=$rootfsPath")
-            add("--bind=/dev")
-            add("--bind=/proc")
-            add("--bind=/sys")
-            add("--bind=$homePath:/root")
-            add("--bind=$tmpPath:/tmp")
-            storageBind()?.let { add(it) }
-            add("-0")
-            add("-w")
-            add(workingDir)
-            add("/bin/sh")
-            add("-c")
-            add(command)
-        }.toTypedArray()
+        // Prolog up to but not including the command — reused in both paths.
+        val prologParts = listOf(
+            prootPath,
+            "--rootfs=$rootfsPath",
+            "--bind=/dev",
+            "--bind=/proc",
+            "--bind=/sys",
+            "--bind=$homePath:/root",
+            "--bind=$tmpPath:/tmp",
+        ) + listOfNotNull(storageBind()) + listOf(
+            "-0",
+            "-w",
+            workingDir,
+            "/bin/sh",
+            "-c",
+        )
 
         return if (sandboxRootEnabled) {
             // `su` strips environment — prefix env vars using POSIX shell
             // syntax so LD_LIBRARY_PATH, PROOT_LOADER etc reach proot.
+            // The command must be shell-quoted so multi-word commands
+            // survive the outer sh -c as a single argument.
             val envPrefix = envVars.joinToString(" ") { "$it" }
-            arrayOf("su", "-c", "$envPrefix " + prootArgs.joinToString(" "))
+            val prolog = prologParts.joinToString(" ")
+            val quotedCmd = "'${command.replace("'", "'\\''")}'"
+            arrayOf("su", "-c", "$envPrefix $prolog $quotedCmd")
         } else {
-            prootArgs
+            (prologParts + command).toTypedArray()
         }
     }
 

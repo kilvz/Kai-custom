@@ -95,6 +95,7 @@ internal fun SandboxTabsContent(
                                 sandboxController = sandboxController,
                                 modifier = Modifier.fillMaxSize(),
                                 darkBackground = true,
+                                rootPrompt = sandboxState.isSandboxRootEnabled,
                                 initialLines = previewLines,
                                 sessionViewModel = sessionViewModel,
                             )

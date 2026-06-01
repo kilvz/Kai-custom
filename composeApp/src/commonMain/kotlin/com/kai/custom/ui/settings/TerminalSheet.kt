@@ -122,6 +122,7 @@ fun TerminalContent(
     modifier: Modifier = Modifier,
     showHeader: Boolean = false,
     darkBackground: Boolean = false,
+    rootPrompt: Boolean = false,
     initialLines: ImmutableList<TerminalLine> = persistentListOf(),
     sessionViewModel: SandboxSessionViewModel? = null,
 ) {
@@ -254,7 +255,7 @@ fun TerminalContent(
                         is TerminalLine.Command -> {
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = "$ ${line.text}",
+                                text = "${if (rootPrompt) "#" else "$"} ${line.text}",
                                 style = monoStyle(13.sp, colors.prompt),
                             )
                         }
@@ -312,7 +313,7 @@ fun TerminalContent(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "$",
+                text = if (rootPrompt) "#" else "$",
                 style = monoStyle(14.sp, colors.prompt),
                 modifier = Modifier.padding(start = 8.dp),
             )
