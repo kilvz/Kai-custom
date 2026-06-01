@@ -12,6 +12,7 @@ import com.kai.custom.email.EmailPoller
 import com.kai.custom.formatFileSize
 import com.kai.custom.getAvailableTools
 import com.kai.custom.getPlatformToolDefinitions
+import com.kai.custom.runBlockingCompat
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -1797,9 +1798,15 @@ class RemoteDataRepository(
 
     override fun getActivePersona(): PersonaConfig = personaManager.getActivePersona()
 
-    override fun savePersona(config: PersonaConfig) = personaManager.savePersona(config)
+    override fun savePersona(config: PersonaConfig) {
+        personaManager.savePersona(config)
+        runBlockingCompat { memoryStore.syncPersonaToRemote(config) }
+    }
 
-    override fun deletePersona(id: String) = personaManager.deletePersona(id)
+    override fun deletePersona(id: String) {
+        personaManager.deletePersona(id)
+        runBlockingCompat { memoryStore.deleteRemotePersona(id) }
+    }
 
     override fun getPersonaPromptStyle(): PersonaPromptStyle = personaManager.getActivePersona().style
 

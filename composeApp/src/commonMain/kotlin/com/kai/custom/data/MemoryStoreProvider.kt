@@ -23,6 +23,12 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         delegate.setPersona(personaId)
     }
 
+    override suspend fun fetchRemotePersonas(): List<PersonaConfig> = delegate.fetchRemotePersonas()
+
+    override suspend fun syncPersonaToRemote(config: PersonaConfig) = delegate.syncPersonaToRemote(config)
+
+    override suspend fun deleteRemotePersona(id: String) = delegate.deleteRemotePersona(id)
+
     override suspend fun store(
         key: String,
         content: String,

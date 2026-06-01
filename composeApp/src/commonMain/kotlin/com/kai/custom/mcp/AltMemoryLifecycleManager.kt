@@ -3,8 +3,11 @@ package com.kai.custom.mcp
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxSessions
 import com.kai.custom.data.AppSettings
-import com.kai.custom.data.MemoryStore
+import com.kai.custom.data.DataRepository
+import com.kai.custom.data.MemoryCategory
 import com.kai.custom.data.MemoryStoreProvider
+import com.kai.custom.data.PersonaManager
+import com.kai.custom.data.dimension.DimensionConfig
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -14,6 +17,7 @@ class AltMemoryLifecycleManager(
     private val mcpServerManager: McpServerManager,
     private val appSettings: AppSettings,
     private val memoryStore: MemoryStoreProvider,
+    private val dataRepository: DataRepository,
 ) {
     companion object {
         private const val ALT_MEMORY_URL = "http://127.0.0.1:8316"
@@ -53,13 +57,34 @@ class AltMemoryLifecycleManager(
             var failed = 0
             for (entry in memories) {
                 try {
+                    val realm = when (entry.category) {
+                        MemoryCategory.GENERAL,
+                        MemoryCategory.LEARNING,
+                        MemoryCategory.ERROR,
+                        -> DimensionConfig.REALM_AGENT
+                        MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
+                    }
+                    val domain = when (entry.category) {
+                        MemoryCategory.GENERAL -> DimensionConfig.DOMAIN_MEMORIES
+                        MemoryCategory.PREFERENCE -> DimensionConfig.DOMAIN_PREFERENCES
+                        MemoryCategory.LEARNING -> DimensionConfig.DOMAIN_LEARNINGS
+                        MemoryCategory.ERROR -> DimensionConfig.DOMAIN_ERRORS
+                    }
                     client.callTool(
-                        "memory_store",
+                        "add_entity",
                         buildJsonObject {
-                            put("key", JsonPrimitive(entry.key))
+                            put("entity_id", JsonPrimitive(entry.key))
+                            put("realm", JsonPrimitive(realm))
+                            put("domain", JsonPrimitive(domain))
                             put("content", JsonPrimitive(entry.content))
-                            put("category", JsonPrimitive(entry.category.name))
-                            put("hit_count", JsonPrimitive(entry.hitCount))
+                            put("metadata", buildJsonObject {
+                                put("memory_key", JsonPrimitive(entry.key))
+                                put("category", JsonPrimitive(entry.category.name))
+                                put("hit_count", JsonPrimitive(entry.hitCount.toString()))
+                                put("type", JsonPrimitive("memory_entry"))
+                                entry.source?.let { put("source", JsonPrimitive(it)) }
+                                if (entry.protected) put("protected", JsonPrimitive("true"))
+                            })
                         },
                     )
                     migrated++
@@ -71,6 +96,25 @@ class AltMemoryLifecycleManager(
         }
         // After migration, switch to alt-memory as the active backend
         memoryStore.useAltMemory(client, appSettings)
+
+        // Sync built-in personas (kai, alt) to alt-memory
+        for (builtIn in PersonaManager.builtIns) {
+            memoryStore.syncPersonaToRemote(builtIn)
+        }
+
+        // Set current active persona on alt-memory
+        val personaId = appSettings.getActivePersonaId()
+        memoryStore.setPersona(personaId)
+
+        // Fetch remote personas and merge with local list
+        val remotePersonas = memoryStore.fetchRemotePersonas()
+        val localPersonas = dataRepository.getAllPersonas()
+        val localIds = localPersonas.map { it.id }.toSet()
+        for (rp in remotePersonas) {
+            if (rp.id !in localIds) {
+                dataRepository.savePersona(rp)
+            }
+        }
     }
 
     private suspend fun installIfNeeded() {

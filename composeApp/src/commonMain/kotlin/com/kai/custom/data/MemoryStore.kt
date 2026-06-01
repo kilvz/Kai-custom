@@ -38,6 +38,15 @@ interface MemoryStore {
     /** Notify the store that the active persona changed. No-op by default. */
     suspend fun setPersona(personaId: String) { }
 
+    /** Fetch personas registered in the remote store (alt-memory). */
+    suspend fun fetchRemotePersonas(): List<PersonaConfig> = emptyList()
+
+    /** Push a persona config to the remote store. */
+    suspend fun syncPersonaToRemote(config: PersonaConfig) { }
+
+    /** Delete a persona from the remote store. */
+    suspend fun deleteRemotePersona(id: String) { }
+
     suspend fun store(
         key: String,
         content: String,

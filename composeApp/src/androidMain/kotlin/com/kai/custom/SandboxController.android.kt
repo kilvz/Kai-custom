@@ -3,6 +3,7 @@ package com.kai.custom
 import android.content.Context
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kai.custom.data.AppSettings
+import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.mcp.AltMemoryLifecycleManager
 import com.kai.custom.mcp.McpServerManager
@@ -33,9 +34,10 @@ class AndroidSandboxController : SandboxController {
     private val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
     private val memoryStore: MemoryStoreProvider by inject(MemoryStoreProvider::class.java)
     private val appSettings: AppSettings by inject(AppSettings::class.java)
+    private val dataRepository: DataRepository by inject(DataRepository::class.java)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    private val altMemoryLifecycle = AltMemoryLifecycleManager(this, mcpServerManager, appSettings, memoryStore)
+    private val altMemoryLifecycle = AltMemoryLifecycleManager(this, mcpServerManager, appSettings, memoryStore, dataRepository)
 
     private var cachedDiskUsageMB = 0L
     private var previousState: SandboxState? = null
