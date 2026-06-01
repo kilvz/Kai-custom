@@ -252,51 +252,94 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_FREE_SERVICE_PRIMARY, primary)
     }
 
-    // Soul — user-edited + auto-generated behavior summary
-    fun getSoulUser(): String {
-        val stored = settings.getStringOrNull(KEY_SOUL_USER) ?: return migrateSoulFromLegacy()
+    // Soul — user-edited + auto-generated behavior summary (per-persona)
+    fun getSoulUser(personaId: String = getActivePersonaId()): String {
+        val key = "soul_user_$personaId"
+        val stored = settings.getStringOrNull(key) ?: run {
+            // migrate legacy if this is the active persona
+            if (personaId == getActivePersonaId()) return migrateSoulFromLegacy(personaId)
+            return ""
+        }
         return stored
     }
 
-    fun setSoulUser(text: String) {
-        settings.putString(KEY_SOUL_USER, text)
+    fun setSoulUser(text: String, personaId: String = getActivePersonaId()) {
+        settings.putString("soul_user_$personaId", text)
     }
 
-    fun getSoulAuto(): String = settings.getString(KEY_SOUL_AUTO, "")
+    fun getSoulAuto(personaId: String = getActivePersonaId()): String = settings.getString("soul_auto_$personaId", "")
 
-    fun setSoulAuto(text: String) {
-        settings.putString(KEY_SOUL_AUTO, text)
+    fun setSoulAuto(text: String, personaId: String = getActivePersonaId()) {
+        settings.putString("soul_auto_$personaId", text)
     }
 
     /** Combined soul for system prompt: persona prefix + user text + auto behavior summary. */
-    fun getSoulText(): String {
-        val persona = "You are ${getPersonaName()}."
-        val user = getSoulUser()
-        val auto = getSoulAuto()
+    fun getSoulText(personaId: String = getActivePersonaId()): String {
+        val persona = getPersonaName(personaId)
+        val prefix = "You are $persona."
+        val user = getSoulUser(personaId)
+        val auto = getSoulAuto(personaId)
         val combined = if (auto.isNotEmpty()) {
             if (user.isNotEmpty()) "$user\n\n## Behavior Notes\n$auto" else "## Behavior Notes\n$auto"
         } else {
             user
         }
-        return if (combined.isNotEmpty()) "$persona\n\n$combined" else persona
+        return if (combined.isNotEmpty()) "$prefix\n\n$combined" else prefix
     }
 
-    /** Kept for backward compat — writes to soul_user only. */
+    /** Kept for backward compat — writes to soul_user for active persona. */
     fun setSoulText(text: String) {
-        settings.putString(KEY_SOUL_USER, text)
+        settings.putString("soul_user_${getActivePersonaId()}", text)
     }
 
-    fun getPersonaName(): String = settings.getString(KEY_PERSONA_NAME, "Kai")
-
-    fun setPersonaName(name: String) {
-        settings.putString(KEY_PERSONA_NAME, name)
+    fun getPersonaName(personaId: String = getActivePersonaId()): String {
+        val stored = settings.getStringOrNull(KEY_PERSONA_NAME)
+        // legacy single-key fallback
+        val config = personaManagerSafe?.getPersona(personaId)
+        return config?.name ?: stored ?: "Kai"
     }
 
-    private fun migrateSoulFromLegacy(): String {
+    fun getActivePersonaId(): String {
+        // migrate from legacy KEY_PERSONA_NAME to persona_manager
+        val legacy = settings.getStringOrNull(KEY_PERSONA_NAME)
+        if (legacy != null && settings.getStringOrNull(KEY_ACTIVE_PERSONA_ID) == null) {
+            // legacy key stores the persona name, not id — map it
+            val id = if (legacy == "alt" || legacy == "Kai") legacy.lowercase() else buildInsFirstId()
+            settings.putString(KEY_ACTIVE_PERSONA_ID, id)
+            settings.remove(KEY_PERSONA_NAME)
+            return id
+        }
+        return settings.getString(KEY_ACTIVE_PERSONA_ID, buildInsFirstId())
+    }
+
+    private fun buildInsFirstId(): String = "kai"
+
+    private val personaManagerSafe: PersonaManager? by lazy {
+        try {
+            PersonaManager(this)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun migrateSoulFromLegacy(personaId: String): String {
         val old = settings.getString("soul_text", "")
         if (old.isNotEmpty()) {
-            settings.putString(KEY_SOUL_USER, old)
+            settings.putString("soul_user_$personaId", old)
             settings.remove("soul_text")
+        }
+        // also migrate legacy soul_user/soul_auto to per-persona for alt
+        if (personaId == "alt") {
+            val legacyUser = settings.getStringOrNull(KEY_SOUL_USER)
+            if (legacyUser != null) {
+                settings.putString("soul_user_alt", legacyUser)
+                settings.remove(KEY_SOUL_USER)
+            }
+            val legacyAuto = settings.getStringOrNull(KEY_SOUL_AUTO)
+            if (legacyAuto != null) {
+                settings.putString("soul_auto_alt", legacyAuto)
+                settings.remove(KEY_SOUL_AUTO)
+            }
         }
         return old
     }
@@ -755,9 +798,10 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_ENCRYPTION_KEY = "encryption_key"
         const val KEY_MIGRATION_COMPLETE = "migration_complete_v1"
         const val KEY_TOOL_PREFIX = "tool_enabled_"
-        const val KEY_SOUL_USER = "soul_user"
-        const val KEY_SOUL_AUTO = "soul_auto"
-        const val KEY_PERSONA_NAME = "current_persona"
+        const val KEY_SOUL_USER = "soul_user" // legacy, use per-persona keys
+        const val KEY_SOUL_AUTO = "soul_auto" // legacy, use per-persona keys
+        const val KEY_PERSONA_NAME = "current_persona" // legacy, use active_persona_id
+        const val KEY_ACTIVE_PERSONA_ID = "active_persona_id"
         const val KEY_MEMORY_ENABLED = "memory_enabled"
         const val KEY_AGENT_MEMORIES = "agent_memories"
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"

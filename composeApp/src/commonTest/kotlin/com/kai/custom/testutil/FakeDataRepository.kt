@@ -1,7 +1,6 @@
 package com.kai.custom.testutil
 
 import com.kai.custom.data.Conversation
-import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
@@ -11,6 +10,9 @@ import com.kai.custom.data.HeartbeatConfig
 import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.ImportSection
 import com.kai.custom.data.MemoryEntry
+import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.PersonaHeartbeatStyle
+import com.kai.custom.data.PersonaPromptStyle
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
@@ -19,6 +21,7 @@ import com.kai.custom.data.SmsDraft
 import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.SystemPromptVariant
 import com.kai.custom.data.ThemeMode
+import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -390,6 +393,20 @@ class FakeDataRepository : DataRepository {
         personaName = name
     }
 
+    override fun getAllPersonas(): List<PersonaConfig> = emptyList()
+
+    override fun getActivePersona(): PersonaConfig = PersonaConfig(id = "kai", name = personaName, style = PersonaPromptStyle.KAI, heartbeatStyle = PersonaHeartbeatStyle.KAI, isBuiltIn = true)
+
+    override fun savePersona(config: PersonaConfig) {}
+
+    override fun deletePersona(id: String) {}
+
+    override fun getPersonaPromptStyle(): PersonaPromptStyle = PersonaPromptStyle.KAI
+
+    override fun getPersonaHeartbeatStyle(): PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI
+
+    override suspend fun switchPersona(personaId: String) {}
+
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? = getSoulText().ifEmpty { null }
 
     // Memory management
@@ -665,14 +682,13 @@ class FakeDataRepository : DataRepository {
 
     override fun getInstalledSkills(): List<SkillManifest> = installedSkills.toList()
     override fun getActiveSkill(): SkillManifest? = activeSkill
-    override fun setActiveSkill(skill: SkillManifest?) { activeSkill = skill }
-    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> =
-        Result.failure(UnsupportedOperationException("installSkillFromGitHub not implemented in FakeDataRepository"))
-    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> =
-        Result.failure(UnsupportedOperationException("installSkillFromRegistryEntry not implemented in FakeDataRepository"))
+    override fun setActiveSkill(skill: SkillManifest?) {
+        activeSkill = skill
+    }
+    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromGitHub not implemented in FakeDataRepository"))
+    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromRegistryEntry not implemented in FakeDataRepository"))
     override suspend fun uninstallSkill(id: String) {}
-    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> =
-        Result.success(emptyList())
+    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> = Result.success(emptyList())
 
     override fun addSystemMessage(content: String) {}
 

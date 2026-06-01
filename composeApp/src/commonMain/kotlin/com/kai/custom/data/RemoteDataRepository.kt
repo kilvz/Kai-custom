@@ -5,8 +5,8 @@ package com.kai.custom.data
 import com.kai.custom.SandboxController
 import com.kai.custom.compressImageBytes
 import com.kai.custom.currentPlatform
-import com.kai.custom.data.providers.buildAnthropicMessages
 import com.kai.custom.data.dimension.KGFact
+import com.kai.custom.data.providers.buildAnthropicMessages
 import com.kai.custom.data.providers.buildOpenAIMessages
 import com.kai.custom.email.EmailPoller
 import com.kai.custom.formatFileSize
@@ -41,8 +41,8 @@ import com.kai.custom.network.toUiError
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.skills.RegistrySkillEntry
-import com.kai.custom.skills.SkillManifest
 import com.kai.custom.skills.SkillManager
+import com.kai.custom.skills.SkillManifest
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSendResult
@@ -66,13 +66,13 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.default_soul
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -1783,14 +1783,36 @@ class RemoteDataRepository(
 
     private val personaManager: PersonaManager by lazy { PersonaManager(appSettings) }
 
-    override fun getPersonaName(): String = personaManager.getCurrentPersonaName()
+    override fun getPersonaName(): String {
+        val active = personaManager.getActivePersona()
+        return active.name
+    }
 
     override fun setPersonaName(name: String) {
-        personaManager.setCurrentPersonaName(name)
+        val active = personaManager.getActivePersona()
+        personaManager.savePersona(active.copy(name = name))
+    }
+
+    override fun getAllPersonas(): List<PersonaConfig> = personaManager.getAllPersonas()
+
+    override fun getActivePersona(): PersonaConfig = personaManager.getActivePersona()
+
+    override fun savePersona(config: PersonaConfig) = personaManager.savePersona(config)
+
+    override fun deletePersona(id: String) = personaManager.deletePersona(id)
+
+    override fun getPersonaPromptStyle(): PersonaPromptStyle = personaManager.getActivePersona().style
+
+    override fun getPersonaHeartbeatStyle(): PersonaHeartbeatStyle = personaManager.getActivePersona().heartbeatStyle
+
+    override suspend fun switchPersona(personaId: String) {
+        personaManager.setActivePersonaId(personaId)
+        memoryStore.setPersona(personaId)
     }
 
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? {
-        val soul = appSettings.getSoulText().ifEmpty { getString(Res.string.default_soul) }
+        val activePersona = personaManager.getActivePersona()
+        val soul = appSettings.getSoulText(activePersona.id).ifEmpty { getString(Res.string.default_soul) }
         val memoryEnabled = appSettings.isMemoryEnabled()
         val schedulingEnabled = appSettings.isSchedulingEnabled()
 
@@ -1875,6 +1897,7 @@ class RemoteDataRepository(
             runtime = runtime,
             uiMode = uiMode,
             preferredLanguage = appSettings.getPreferredLanguage(),
+            personaPromptStyle = getPersonaPromptStyle(),
         ).ifEmpty { null }
     }
 
@@ -1917,11 +1940,9 @@ class RemoteDataRepository(
         memoryStore.updateContent(key, content)
     }
 
-    override fun queryKgFacts(entity: String?, relation: String?, limit: Int): List<KGFact> =
-        memoryStore.queryFacts(entity, relation, limit)
+    override fun queryKgFacts(entity: String?, relation: String?, limit: Int): List<KGFact> = memoryStore.queryFacts(entity, relation, limit)
 
-    override fun countDimensionEntities(): Long =
-        memoryStore.getAllMemories().size.toLong()
+    override fun countDimensionEntities(): Long = memoryStore.getAllMemories().size.toLong()
 
     override fun isSchedulingEnabled(): Boolean = appSettings.isSchedulingEnabled()
 
@@ -2361,23 +2382,17 @@ class RemoteDataRepository(
         appSettings.setActiveSkillId(skill?.id)
     }
 
-    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> {
-        return skillManager?.installFromGitHub(owner, repo, ref, path)
-            ?: Result.failure(IllegalStateException("SkillManager not available"))
-    }
+    override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> = skillManager?.installFromGitHub(owner, repo, ref, path)
+        ?: Result.failure(IllegalStateException("SkillManager not available"))
 
-    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> {
-        return skillManager?.installFromRegistryEntry(entry)
-            ?: Result.failure(IllegalStateException("SkillManager not available"))
-    }
+    override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = skillManager?.installFromRegistryEntry(entry)
+        ?: Result.failure(IllegalStateException("SkillManager not available"))
 
     override suspend fun uninstallSkill(id: String) {
         skillManager?.uninstall(id)
     }
 
-    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> {
-        return skillManager?.browseMarketplaces() ?: Result.failure(IllegalStateException("SkillManager not available"))
-    }
+    override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> = skillManager?.browseMarketplaces() ?: Result.failure(IllegalStateException("SkillManager not available"))
 
     override fun addSystemMessage(content: String) {
         chatHistory.update { current ->

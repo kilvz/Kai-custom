@@ -63,7 +63,7 @@ Observations:
 $memoriesText
 
 Summary:
-""".trimIndent()
+        """.trimIndent()
 
         val summary = dataRepository.askSilently(condensePrompt)
         if (summary.isNotBlank()) {
@@ -91,7 +91,7 @@ Conversation context:
 $context
 
 JSON:
-""".trimIndent()
+        """.trimIndent()
 
     private data class ExtractedItem(
         val key: String,
@@ -111,7 +111,11 @@ JSON:
                 val key = (obj["key"] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
                 val content = (obj["content"] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
                 val catStr = (obj["category"] as? JsonPrimitive)?.content ?: "LEARNING"
-                val category = try { MemoryCategory.valueOf(catStr) } catch (_: Exception) { MemoryCategory.LEARNING }
+                val category = try {
+                    MemoryCategory.valueOf(catStr)
+                } catch (_: Exception) {
+                    MemoryCategory.LEARNING
+                }
                 ExtractedItem(key, content, category)
             }
         } catch (_: Exception) {

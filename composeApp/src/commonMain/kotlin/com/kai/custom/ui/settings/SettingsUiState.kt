@@ -5,6 +5,7 @@ import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
 import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.MemoryEntry
+import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
@@ -65,6 +66,8 @@ data class SettingsUiState(
     val tools: ImmutableList<ToolInfo> = persistentListOf(),
     val soulText: String = "",
     val personaName: String = "Kai",
+    val personas: ImmutableList<PersonaConfig> = persistentListOf(),
+    val activePersonaId: String = "kai",
     val isDynamicUiEnabled: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.System,
     val isMemoryEnabled: Boolean = true,

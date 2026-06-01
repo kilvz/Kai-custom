@@ -35,6 +35,9 @@ data class DiaryEntry(
 )
 
 interface MemoryStore {
+    /** Notify the store that the active persona changed. No-op by default. */
+    suspend fun setPersona(personaId: String) { }
+
     suspend fun store(
         key: String,
         content: String,

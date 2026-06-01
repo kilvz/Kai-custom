@@ -3,6 +3,7 @@
 package com.kai.custom.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,12 +17,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -42,6 +47,9 @@ import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
 import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.MemoryEntry
+import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.PersonaHeartbeatStyle
+import com.kai.custom.data.PersonaPromptStyle
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.SmsSyncState
@@ -94,6 +102,7 @@ import kai.composeapp.generated.resources.settings_task_details_trigger
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -107,6 +116,8 @@ internal fun AgentContent(
     actions: SettingsActions,
     soulText: String,
     personaName: String,
+    personas: ImmutableList<PersonaConfig>,
+    activePersonaId: String,
     memories: ImmutableList<MemoryEntry>,
     isMemoryEnabled: Boolean,
     scheduledTasks: ImmutableList<ScheduledTask>,
@@ -267,6 +278,12 @@ internal fun AgentContent(
                         personaName = personaName,
                         onSaveSoul = actions.onSaveSoul,
                         onChangePersonaName = actions.onChangePersonaName,
+                        personas = personas,
+                        activePersonaId = activePersonaId,
+                        onSwitchPersona = actions.onSwitchPersona,
+                        onSavePersona = actions.onSavePersona,
+                        onDeletePersona = actions.onDeletePersona,
+                        onCreatePersona = actions.onCreatePersona,
                     )
                 }
                 SettingsCard {
@@ -367,6 +384,12 @@ private fun SoulEditor(
     personaName: String,
     onSaveSoul: (String) -> Unit,
     onChangePersonaName: (String) -> Unit,
+    personas: ImmutableList<PersonaConfig> = persistentListOf(),
+    activePersonaId: String = "kai",
+    onSwitchPersona: (String) -> Unit = {},
+    onSavePersona: (PersonaConfig) -> Unit = {},
+    onDeletePersona: (String) -> Unit = {},
+    onCreatePersona: (String, PersonaPromptStyle, PersonaHeartbeatStyle) -> Unit = { _, _, _ -> },
 ) {
     val localizedDefault = stringResource(Res.string.default_soul)
     val displayText = soulText.ifEmpty { localizedDefault }
@@ -375,6 +398,7 @@ private fun SoulEditor(
     val maxChars = 4000
 
     var showResetDialog by remember { mutableStateOf(false) }
+    var showCreatePersonaDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -407,22 +431,71 @@ private fun SoulEditor(
         )
         Spacer(Modifier.height(12.dp))
 
-        var editedPersonaName by remember(personaName) { mutableStateOf(personaName) }
-        KaiOutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = editedPersonaName,
-            onValueChange = {
-                editedPersonaName = it
-                onChangePersonaName(it)
-            },
-            singleLine = true,
-            label = {
-                Text(
-                    text = "Persona name",
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            },
+        // Persona selector dropdown
+        var personaDropdownExpanded by remember { mutableStateOf(false) }
+        val activePersona = personas.find { it.id == activePersonaId }
+
+        Text(
+            text = "Persona",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(Modifier.height(4.dp))
+        Box {
+            OutlinedButton(
+                onClick = { personaDropdownExpanded = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = activePersona?.name ?: personaName,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(" \u25BE")
+            }
+            DropdownMenu(
+                expanded = personaDropdownExpanded,
+                onDismissRequest = { personaDropdownExpanded = false },
+            ) {
+                personas.forEach { p ->
+                    DropdownMenuItem(
+                        onClick = {
+                            personaDropdownExpanded = false
+                            if (p.id != activePersonaId) onSwitchPersona(p.id)
+                        },
+                        text = {
+                            Column {
+                                Text(p.name, fontWeight = if (p.id == activePersonaId) FontWeight.Bold else FontWeight.Normal)
+                                if (p.description.isNotEmpty()) {
+                                    Text(
+                                        p.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
+                HorizontalDivider()
+                DropdownMenuItem(
+                    onClick = {
+                        personaDropdownExpanded = false
+                        showCreatePersonaDialog = true
+                    },
+                    text = { Text("+ Create custom persona") },
+                )
+            }
+        }
+
+        if (activePersona?.isBuiltIn == false) {
+            Spacer(Modifier.height(4.dp))
+            OutlinedButton(
+                onClick = { onDeletePersona(activePersonaId) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Delete persona")
+            }
+        }
         Spacer(Modifier.height(8.dp))
 
         KaiOutlinedTextField(
@@ -485,6 +558,85 @@ private fun SoulEditor(
             },
         )
     }
+
+    if (showCreatePersonaDialog) {
+        CreatePersonaDialog(
+            onDismiss = { showCreatePersonaDialog = false },
+            onCreate = { name, style, hbStyle ->
+                showCreatePersonaDialog = false
+                onCreatePersona(name, style, hbStyle)
+            },
+        )
+    }
+}
+
+@Composable
+private fun CreatePersonaDialog(
+    onDismiss: () -> Unit,
+    onCreate: (name: String, style: PersonaPromptStyle, heartbeatStyle: PersonaHeartbeatStyle) -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var selectedStyle by remember { mutableStateOf(PersonaPromptStyle.ALT) }
+    var selectedHeartbeatStyle by remember { mutableStateOf(PersonaHeartbeatStyle.ALT) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Create Custom Persona") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                KaiOutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Persona name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text("Prompt Style", style = MaterialTheme.typography.bodySmall)
+                PersonaPromptStyle.entries.forEach { style ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        androidx.compose.material3.RadioButton(
+                            selected = selectedStyle == style,
+                            onClick = { selectedStyle = style },
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(style.name, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+                Text("Heartbeat Style", style = MaterialTheme.typography.bodySmall)
+                PersonaHeartbeatStyle.entries.forEach { style ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        androidx.compose.material3.RadioButton(
+                            selected = selectedHeartbeatStyle == style,
+                            onClick = { selectedHeartbeatStyle = style },
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(style.name, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (name.isNotBlank()) {
+                        onCreate(name.trim(), selectedStyle, selectedHeartbeatStyle)
+                    }
+                },
+                enabled = name.isNotBlank(),
+                modifier = Modifier.handCursor(),
+            ) {
+                Text("Create")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.handCursor(),
+            ) {
+                Text("Cancel")
+            }
+        },
+    )
 }
 
 @Composable

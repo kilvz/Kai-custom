@@ -98,15 +98,6 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             onCreate(db)
             schemaResetMessage = "Database schema reset (v$oldVersion → v$newVersion)"
         }
-
-        override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            db.execSQL("DROP TABLE IF EXISTS kg_facts")
-            db.execSQL("DROP TABLE IF EXISTS entities")
-            db.execSQL("DROP TABLE IF EXISTS domains")
-            db.execSQL("DROP TABLE IF EXISTS realms")
-            onCreate(db)
-            schemaResetMessage = "Database schema reset (v$oldVersion → v$newVersion)"
-        }
     }
 
     private val db: SQLiteDatabase get() = dbHelper.writableDatabase
@@ -248,31 +239,40 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
         val existing = getEntity(entity.id)
         val embeddingJson = entity.embedding?.let { json.encodeToString(it) }
         if (existing != null) {
-            db.update("entities", ContentValues().apply {
-                put("realm", entity.realm)
-                put("domain", entity.domain)
-                put("content", entity.content)
-                put("source_file", entity.sourceFile)
-                put("metadata", json.encodeToString(entity.metadata))
-                put("content_hash", contentHash)
-                put("updated_at", entity.updatedAt)
-                put("protected", if (entity.protected) 1 else 0)
-                if (embeddingJson != null) put("embedding", embeddingJson)
-            }, "id = ?", arrayOf(entity.id))
+            db.update(
+                "entities",
+                ContentValues().apply {
+                    put("realm", entity.realm)
+                    put("domain", entity.domain)
+                    put("content", entity.content)
+                    put("source_file", entity.sourceFile)
+                    put("metadata", json.encodeToString(entity.metadata))
+                    put("content_hash", contentHash)
+                    put("updated_at", entity.updatedAt)
+                    put("protected", if (entity.protected) 1 else 0)
+                    if (embeddingJson != null) put("embedding", embeddingJson)
+                },
+                "id = ?",
+                arrayOf(entity.id),
+            )
         } else {
-            db.insert("entities", null, ContentValues().apply {
-                put("id", entity.id)
-                put("realm", entity.realm)
-                put("domain", entity.domain)
-                put("content", entity.content)
-                put("source_file", entity.sourceFile)
-                put("metadata", json.encodeToString(entity.metadata))
-                put("content_hash", contentHash)
-                put("created_at", entity.createdAt)
-                put("updated_at", entity.updatedAt)
-                put("protected", if (entity.protected) 1 else 0)
-                if (embeddingJson != null) put("embedding", embeddingJson)
-            })
+            db.insert(
+                "entities",
+                null,
+                ContentValues().apply {
+                    put("id", entity.id)
+                    put("realm", entity.realm)
+                    put("domain", entity.domain)
+                    put("content", entity.content)
+                    put("source_file", entity.sourceFile)
+                    put("metadata", json.encodeToString(entity.metadata))
+                    put("content_hash", contentHash)
+                    put("created_at", entity.createdAt)
+                    put("updated_at", entity.updatedAt)
+                    put("protected", if (entity.protected) 1 else 0)
+                    if (embeddingJson != null) put("embedding", embeddingJson)
+                },
+            )
         }
         return entity
     }
@@ -403,16 +403,20 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
     override fun searchFacts(query: String, limit: Int): List<KGFact> {
         if (query.isBlank()) return emptyList()
         val likeQuery = "%${query.replace("'", "''")}%"
-        val cursor = db.query("kg_facts", null,
+        val cursor = db.query(
+            "kg_facts",
+            null,
             "subject LIKE ? OR predicate LIKE ? OR object LIKE ?",
-            arrayOf(likeQuery, likeQuery, likeQuery), null, null,
-            "created_at DESC", limit.toString())
+            arrayOf(likeQuery, likeQuery, likeQuery),
+            null,
+            null,
+            "created_at DESC",
+            limit.toString(),
+        )
         return cursorToFacts(cursor)
     }
 
-    override fun deleteFact(id: String): Boolean {
-        return db.delete("kg_facts", "id = ?", arrayOf(id)) > 0
-    }
+    override fun deleteFact(id: String): Boolean = db.delete("kg_facts", "id = ?", arrayOf(id)) > 0
 
     // Backup
 
@@ -492,12 +496,18 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             val colIdx = cursor.getColumnIndex("embedding")
             if (colIdx >= 0 && !cursor.isNull(colIdx)) {
                 json.decodeFromString<List<Float>>(cursor.getString(colIdx))
-            } else null
-        } catch (_: Exception) { null }
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        }
         val protected = try {
             val colIdx = cursor.getColumnIndex("protected")
             colIdx >= 0 && cursor.getInt(colIdx) == 1
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
         return EntityData(
             id = cursor.getString(cursor.getColumnIndexOrThrow("id")),
             realm = cursor.getString(cursor.getColumnIndexOrThrow("realm")),

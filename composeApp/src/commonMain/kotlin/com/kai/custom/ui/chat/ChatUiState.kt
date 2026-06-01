@@ -11,7 +11,6 @@ import com.kai.custom.data.SharedJson
 import com.kai.custom.data.SmsDraft
 import com.kai.custom.data.UiSubmission
 import com.kai.custom.network.UiError
-import com.kai.custom.skills.SkillManifest
 import com.kai.custom.network.dtos.gemini.GeminiChatRequestDto
 import com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
 import com.kai.custom.skills.SkillManifest

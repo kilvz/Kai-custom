@@ -1,7 +1,7 @@
 package com.kai.custom.data.dimension
 
-import kotlin.math.sqrt
 import kotlin.math.min
+import kotlin.math.sqrt
 
 class EmbeddingEngine {
 
@@ -15,13 +15,9 @@ class EmbeddingEngine {
 
     fun isAvailable(): Boolean = ready
 
-    suspend fun embed(text: String): List<Float> {
-        return computeFallbackEmbedding(text)
-    }
+    suspend fun embed(text: String): List<Float> = computeFallbackEmbedding(text)
 
-    suspend fun embedBatch(texts: List<String>): List<List<Float>> {
-        return texts.map { computeFallbackEmbedding(it) }
-    }
+    suspend fun embedBatch(texts: List<String>): List<List<Float>> = texts.map { computeFallbackEmbedding(it) }
 
     private fun computeFallbackEmbedding(text: String): List<Float> {
         if (text.isBlank()) return List(128) { 0f }

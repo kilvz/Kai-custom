@@ -7,6 +7,9 @@ import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.ImportSection
+import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.PersonaHeartbeatStyle
+import com.kai.custom.data.PersonaPromptStyle
 import com.kai.custom.data.Service
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.ThemeMode
@@ -21,9 +24,6 @@ import com.kai.custom.isShizukuSupported
 import com.kai.custom.isSmsSupported
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.AnthropicInsufficientCreditsException
-import com.kai.custom.skills.RegistrySkillEntry
-import com.kai.custom.skills.SkillManifest
-import com.kai.custom.skills.parseGitHubSkillUrl
 import com.kai.custom.network.AnthropicInvalidApiKeyException
 import com.kai.custom.network.AnthropicOverloadedException
 import com.kai.custom.network.AnthropicRateLimitExceededException
@@ -83,6 +83,8 @@ class SettingsViewModel(
         tools = dataRepository.getToolDefinitions().toImmutableList(),
         soulText = dataRepository.getSoulUser(),
         personaName = dataRepository.getPersonaName(),
+        personas = dataRepository.getAllPersonas().toImmutableList(),
+        activePersonaId = dataRepository.getActivePersona().id,
         isDynamicUiEnabled = dataRepository.isDynamicUiEnabled(),
         themeMode = dataRepository.getThemeMode(),
         isMemoryEnabled = dataRepository.isMemoryEnabled(),
@@ -163,6 +165,10 @@ class SettingsViewModel(
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onChangePersonaName = ::onChangePersonaName,
+        onSwitchPersona = ::onSwitchPersona,
+        onSavePersona = ::onSavePersona,
+        onDeletePersona = ::onDeletePersona,
+        onCreatePersona = ::onCreatePersona,
         onToggleDynamicUi = ::onToggleDynamicUi,
         onChangeThemeMode = ::onChangeThemeMode,
         onToggleMemory = ::onToggleMemory,
@@ -453,6 +459,67 @@ class SettingsViewModel(
     private fun onChangePersonaName(name: String) {
         dataRepository.setPersonaName(name)
         _state.update { it.copy(personaName = name) }
+    }
+
+    private fun onSwitchPersona(personaId: String) {
+        val config = dataRepository.getAllPersonas().find { it.id == personaId } ?: return
+        _state.update {
+            it.copy(
+                activePersonaId = personaId,
+                personaName = config.name,
+                soulText = dataRepository.getSoulUser(),
+            )
+        }
+        viewModelScope.launch {
+            dataRepository.switchPersona(personaId)
+        }
+    }
+
+    private fun onSavePersona(config: PersonaConfig) {
+        dataRepository.savePersona(config)
+        _state.update {
+            it.copy(
+                personas = dataRepository.getAllPersonas().toImmutableList(),
+                personaName = if (config.id == it.activePersonaId) config.name else it.personaName,
+            )
+        }
+    }
+
+    private fun onDeletePersona(id: String) {
+        dataRepository.deletePersona(id)
+        val active = dataRepository.getActivePersona()
+        _state.update {
+            it.copy(
+                personas = dataRepository.getAllPersonas().toImmutableList(),
+                activePersonaId = active.id,
+                personaName = active.name,
+                soulText = dataRepository.getSoulUser(),
+            )
+        }
+    }
+
+    private fun onCreatePersona(name: String, style: PersonaPromptStyle, heartbeatStyle: PersonaHeartbeatStyle) {
+        val id = "custom_${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}"
+        val config = PersonaConfig(
+            id = id,
+            name = name,
+            description = "Custom persona",
+            style = style,
+            heartbeatStyle = heartbeatStyle,
+            isBuiltIn = false,
+        )
+        dataRepository.savePersona(config)
+        _state.update {
+            it.copy(
+                personas = dataRepository.getAllPersonas().toImmutableList(),
+                activePersonaId = id,
+                personaName = name,
+                soulText = dataRepository.getSoulUser(),
+            )
+        }
+        viewModelScope.launch {
+            dataRepository.switchPersona(id)
+        }
     }
 
     private fun onToggleDynamicUi(enabled: Boolean) {
@@ -930,7 +997,7 @@ class SettingsViewModel(
         when (deletion) {
             is PendingDeletion.Memory -> {
                 dataRepository.deleteMemory(deletion.key)
-            _state.update { it.copy(memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList()) }
+                _state.update { it.copy(memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList()) }
             }
 
             is PendingDeletion.Task -> {

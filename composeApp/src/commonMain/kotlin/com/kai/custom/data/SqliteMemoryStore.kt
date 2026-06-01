@@ -115,8 +115,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override fun schemaResetMessage(): String? = dimension.schemaResetMessage()
 
-    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> =
-        allEntities(max).mapNotNull { entityToEntry(it) }.filter { it.hitCount >= minHits }
+    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> = allEntities(max).mapNotNull { entityToEntry(it) }.filter { it.hitCount >= minHits }
 
     override suspend fun storeProtected(
         key: String,
@@ -153,17 +152,14 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         true
     }
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> =
-        dimension.searchEntities("", Int.MAX_VALUE).mapNotNull { entityToEntry(it.entity) }
-            .filter { !it.protected }
-            .take(max)
+    override fun getUserMemories(max: Int): List<MemoryEntry> = dimension.searchEntities("", Int.MAX_VALUE).mapNotNull { entityToEntry(it.entity) }
+        .filter { !it.protected }
+        .take(max)
 
-    override fun getBehaviorMemories(): List<MemoryEntry> =
-        allEntities(Int.MAX_VALUE).mapNotNull { entityToEntry(it) }
-            .filter { it.protected }
+    override fun getBehaviorMemories(): List<MemoryEntry> = allEntities(Int.MAX_VALUE).mapNotNull { entityToEntry(it) }
+        .filter { it.protected }
 
-    override fun getAllMemories(max: Int): List<MemoryEntry> =
-        allEntities(max).mapNotNull { entityToEntry(it) }
+    override fun getAllMemories(max: Int): List<MemoryEntry> = allEntities(max).mapNotNull { entityToEntry(it) }
 
     override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
         if (query.isBlank()) return emptyList()
@@ -210,7 +206,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
         val now = Clock.System.now().toEpochMilliseconds()
-        val id = "diary_${agentName}_${now}"
+        val id = "diary_${agentName}_$now"
         val entity = EntityData(
             id = id,
             realm = DimensionConfig.REALM_AGENT,

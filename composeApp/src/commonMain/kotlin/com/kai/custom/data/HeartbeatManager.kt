@@ -72,6 +72,7 @@ class HeartbeatManager(
         pendingEmails: List<EmailMessage> = emptyList(),
         pendingSms: List<SmsMessage> = emptyList(),
         pendingNotifications: List<NotificationRecord> = emptyList(),
+        heartbeatStyle: PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI,
     ): String {
         val customPrompt = appSettings.getHeartbeatPrompt()
         val tasksSplit = taskStore.getPendingTasksPartitioned()
@@ -152,6 +153,7 @@ class HeartbeatManager(
             pendingNotifications = heartbeatNotifications,
             promotionCandidates = promotionCandidates,
             learnedPatterns = learnedPatterns,
+            heartbeatStyle = heartbeatStyle,
         )
     }
 

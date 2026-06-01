@@ -32,6 +32,38 @@ private const val MEMORY_BUDGET_CHARS = 1024
 internal const val DEFAULT_HONESTY_RULE =
     "Do not fabricate tool outputs, file contents, citations, or completed work."
 
+internal const val DEFAULT_TOOL_USE_SECTION =
+    "## Tool Use\n" +
+        "Use tools to verify work and resolve ambiguity. " +
+        "Don't ask the user for lookups you can do yourself. " +
+        "Check for a tool before saying a capability is unavailable. " +
+        "Summarize noisy output and state any uncertainty — don't dump raw logs."
+
+internal const val DEFAULT_ACTING_SECTION =
+    "## When to Act\n" +
+        "Take the most reasonable interpretation and proceed. " +
+        "Ask at most one clarifying question, only when genuinely blocked. " +
+        "If a first attempt fails, try another approach or explain the blocker. " +
+        "See work through to a usable result."
+
+internal const val DEFAULT_STRUCTURED_LEARNING_SECTION =
+    "## Structured Learning\n" +
+        "Use memory_learn to record categorized learnings:\n" +
+        "- Record user corrections and preferences as PREFERENCE entries\n" +
+        "- Record things that worked well as LEARNING entries\n" +
+        "- Record error resolutions as ERROR entries\n" +
+        "Use memory_reinforce when a stored learning produced a good outcome."
+
+internal const val DEFAULT_AUTOMATION_SECTION =
+    "## Automation\n" +
+        "Every form of \"run something without the user typing it\" goes through `schedule_task`. " +
+        "The tool has three mutually exclusive triggers:\n" +
+        "- `execute_at` — one-off at a specific datetime (reminders, \"check back at 3pm\").\n" +
+        "- `cron` — recurring on a schedule (\"every morning at 8\", \"every 15 minutes\").\n" +
+        "- `on_heartbeat: true` — appended to every heartbeat self-check. Use this when the user asks for *standing* heartbeat behaviour (e.g. \"greet me on every heartbeat\", \"always summarize new emails\", \"flag overdue tasks each check\"). These are `HEARTBEAT` trigger tasks and show up in `list_tasks` alongside time/cron tasks.\n" +
+        "Each scheduled or heartbeat run starts fresh, so embed any context the prompt needs. Use `list_tasks` / `cancel_task` to inspect or remove.\n" +
+        "Heartbeat itself (on/off toggle, interval, active hours) is user-controlled in Settings \u2192 Agent \u2192 Heartbeat \u2014 you cannot enable, disable, or reschedule it. If the user asks for recurring updates and heartbeat seems off, either schedule a cron task or tell them to enable Heartbeat in settings \u2014 never claim to have \"enabled\" or \"turned on\" heartbeat."
+
 internal fun buildChatSystemPrompt(
     variant: SystemPromptVariant,
     soul: String,
@@ -50,64 +82,115 @@ internal fun buildChatSystemPrompt(
     runtime: ChatPromptRuntimeContext,
     uiMode: ChatPromptUiMode,
     preferredLanguage: String = "en",
+    personaPromptStyle: PersonaPromptStyle = PersonaPromptStyle.KAI,
 ): String = buildString {
     append(soul)
 
-    if (isNotEmpty()) append("\n\n")
-    append("## Language\nAdapt to the user's language. Speak the language they write in.")
-
-    if (isNotEmpty()) append("\n\n")
-    append(DEFAULT_HONESTY_RULE)
-
-    if (memoryEnabled && (generalMemories.isNotEmpty() || preferenceMemories.isNotEmpty() || learningMemories.isNotEmpty() || errorMemories.isNotEmpty() || relevantMemories.isNotEmpty())) {
+    if (personaPromptStyle == PersonaPromptStyle.KAI) {
+        // Upstream-style prompt with full behavioral sections
         if (isNotEmpty()) append("\n\n")
-        append("## What I Know About You\n")
-        if (relevantMemories.isNotEmpty()) {
-            for (entry in relevantMemories) {
-                append("- **").append(entry.key).append("**")
-                if (entry.hitCount > 1) {
-                    append(" (reinforced ").append(entry.hitCount).append("x)")
-                }
-                append(": ").append(entry.content).append('\n')
-            }
+        append(DEFAULT_HONESTY_RULE)
+
+        if (hasTools) {
+            if (isNotEmpty()) append("\n\n")
+            append(DEFAULT_TOOL_USE_SECTION)
         }
-        val memoryBudget = MEMORY_BUDGET_CHARS
+        if (isNotEmpty()) append("\n\n")
+        append(DEFAULT_ACTING_SECTION)
+
+        if (!memoryInstructions.isNullOrEmpty()) {
+            if (isNotEmpty()) append("\n\n")
+            append(memoryInstructions)
+        }
+
+        if (variant == SystemPromptVariant.CHAT_REMOTE && memoryEnabled) {
+            if (isNotEmpty()) append("\n\n")
+            append(DEFAULT_STRUCTURED_LEARNING_SECTION)
+        }
+
+        val memoryBudget = when (variant) {
+            SystemPromptVariant.CHAT_REMOTE -> Int.MAX_VALUE
+            SystemPromptVariant.CHAT_LOCAL -> MEMORY_BUDGET_CHARS
+        }
         var remaining = memoryBudget
         remaining = appendMemoryCategorySection("Your Memories", generalMemories, withHitCount = false, remaining)
         remaining = appendMemoryCategorySection("User Preferences", preferenceMemories, withHitCount = false, remaining)
         remaining = appendMemoryCategorySection("Learnings", learningMemories, withHitCount = true, remaining)
         appendMemoryCategorySection("Known Issues & Resolutions", errorMemories, withHitCount = false, remaining)
-    }
 
-    if (variant == SystemPromptVariant.CHAT_REMOTE) {
-        if (emailAccounts.isNotEmpty()) {
-            append("\n\n## Email Accounts\n")
-            for (account in emailAccounts) {
-                append("- **").append(account.email).append("**: ")
-                if (account.lastError != null) {
-                    append("sync failing — ").append(account.lastError)
-                } else {
-                    append(account.unreadCount).append(" unread")
-                    if (account.lastSyncEpochMs > 0) {
-                        append(" (last sync: ").append(Instant.fromEpochMilliseconds(account.lastSyncEpochMs)).append(')')
+        if (variant == SystemPromptVariant.CHAT_REMOTE) {
+            if (schedulingEnabled) {
+                if (isNotEmpty()) append("\n\n")
+                append(DEFAULT_AUTOMATION_SECTION)
+            }
+            if (emailAccounts.isNotEmpty()) {
+                appendEmailAccountsSection(emailAccounts)
+            }
+            if (pendingTasks.isNotEmpty()) {
+                appendScheduledTasksSection(pendingTasks)
+            }
+            if (heartbeatAdditions.isNotEmpty()) {
+                appendHeartbeatAdditionsSection(heartbeatAdditions)
+            }
+        }
+    } else {
+        // ALT-style prompt (current custom behavior)
+        if (isNotEmpty()) append("\n\n")
+        append("## Language\nAdapt to the user's language. Speak the language they write in.")
+
+        if (isNotEmpty()) append("\n\n")
+        append(DEFAULT_HONESTY_RULE)
+
+        if (memoryEnabled && (generalMemories.isNotEmpty() || preferenceMemories.isNotEmpty() || learningMemories.isNotEmpty() || errorMemories.isNotEmpty() || relevantMemories.isNotEmpty())) {
+            if (isNotEmpty()) append("\n\n")
+            append("## What I Know About You\n")
+            if (relevantMemories.isNotEmpty()) {
+                for (entry in relevantMemories) {
+                    append("- **").append(entry.key).append("**")
+                    if (entry.hitCount > 1) {
+                        append(" (reinforced ").append(entry.hitCount).append("x)")
                     }
+                    append(": ").append(entry.content).append('\n')
                 }
-                append('\n')
             }
+            val memoryBudget = MEMORY_BUDGET_CHARS
+            var remaining = memoryBudget
+            remaining = appendMemoryCategorySection("Your Memories", generalMemories, withHitCount = false, remaining)
+            remaining = appendMemoryCategorySection("User Preferences", preferenceMemories, withHitCount = false, remaining)
+            remaining = appendMemoryCategorySection("Learnings", learningMemories, withHitCount = true, remaining)
+            appendMemoryCategorySection("Known Issues & Resolutions", errorMemories, withHitCount = false, remaining)
         }
-        if (pendingTasks.isNotEmpty()) {
-            append("\n\n## Scheduled Tasks\n")
-            for (t in pendingTasks) {
-                append("- **").append(t.description).append("** (id: ").append(t.id).append(", scheduled: ").append(t.scheduledAt).append(")")
-                if (t.cron != null) append(" [cron: ").append(t.cron).append("]")
-                append('\n')
+
+        if (variant == SystemPromptVariant.CHAT_REMOTE) {
+            if (emailAccounts.isNotEmpty()) {
+                append("\n\n## Email Accounts\n")
+                for (account in emailAccounts) {
+                    append("- **").append(account.email).append("**: ")
+                    if (account.lastError != null) {
+                        append("sync failing \u2014 ").append(account.lastError)
+                    } else {
+                        append(account.unreadCount).append(" unread")
+                        if (account.lastSyncEpochMs > 0) {
+                            append(" (last sync: ").append(Instant.fromEpochMilliseconds(account.lastSyncEpochMs)).append(')')
+                        }
+                    }
+                    append('\n')
+                }
             }
-        }
-        if (heartbeatAdditions.isNotEmpty()) {
-            append("\n\n## Heartbeat Additions\n")
-            append("Standing instructions that run on every heartbeat:\n")
-            for (t in heartbeatAdditions) {
-                append("- **").append(t.description).append("** (id: ").append(t.id).append("): ").append(t.prompt).append('\n')
+            if (pendingTasks.isNotEmpty()) {
+                append("\n\n## Scheduled Tasks\n")
+                for (t in pendingTasks) {
+                    append("- **").append(t.description).append("** (id: ").append(t.id).append(", scheduled: ").append(t.scheduledAt).append(")")
+                    if (t.cron != null) append(" [cron: ").append(t.cron).append("]")
+                    append('\n')
+                }
+            }
+            if (heartbeatAdditions.isNotEmpty()) {
+                append("\n\n## Heartbeat Additions\n")
+                append("Standing instructions that run on every heartbeat:\n")
+                for (t in heartbeatAdditions) {
+                    append("- **").append(t.description).append("** (id: ").append(t.id).append("): ").append(t.prompt).append('\n')
+                }
             }
         }
     }
@@ -132,7 +215,6 @@ private fun StringBuilder.appendMemoryCategorySection(
     if (entries.isEmpty() || remainingBudget <= 0) return remainingBudget
     val section = StringBuilder()
     section.append("\n\n## ").append(header).append("\n")
-    val headerLen = section.length
     var included = 0
     for (entry in entries) {
         if (entry.protected) continue
@@ -151,6 +233,64 @@ private fun StringBuilder.appendMemoryCategorySection(
     return (remainingBudget - section.length).coerceAtLeast(0)
 }
 
+private fun StringBuilder.appendEmailAccountsSection(accounts: List<EmailAccountSummary>) {
+    append("\n\n## Email Accounts\n")
+    append("The user has these email accounts connected. Use them via the existing email tools \u2014 ")
+    append("do NOT suggest adding, re-authenticating, or connecting a new account unless the user explicitly asks.\n")
+    append("**Sending policy**: before calling `compose_email` or `reply_email`, present the full draft (to, subject, body) in chat and get explicit confirmation (\"send it\" / \"looks good\" / \"yes\"). Never call the send tools on the same turn you draft \u2014 the user must have a chance to correct tone, recipients, or content first. If the user later says \"change X and send\", re-present the updated draft and confirm again.\n")
+    for (account in accounts) {
+        append("- **")
+        append(account.email)
+        append("**: ")
+        if (account.lastError != null) {
+            append("sync failing \u2014 ")
+            append(account.lastError)
+        } else {
+            append(account.unreadCount)
+            append(" unread")
+            if (account.lastSyncEpochMs > 0) {
+                append(" (last sync: ")
+                append(Instant.fromEpochMilliseconds(account.lastSyncEpochMs))
+                append(')')
+            }
+        }
+        append('\n')
+    }
+}
+
+private fun StringBuilder.appendScheduledTasksSection(pendingTasks: List<ScheduledTask>) {
+    append("\n\n## Scheduled Tasks\n")
+    for (t in pendingTasks) {
+        append("- **")
+        append(t.description)
+        append("** (id: ")
+        append(t.id)
+        append(", scheduled: ")
+        append(t.scheduledAt)
+        append(")")
+        if (t.cron != null) {
+            append(" [cron: ")
+            append(t.cron)
+            append("]")
+        }
+        append('\n')
+    }
+}
+
+private fun StringBuilder.appendHeartbeatAdditionsSection(additions: List<ScheduledTask>) {
+    append("\n\n## Heartbeat Additions\n")
+    append("Standing instructions the user has set to run on every heartbeat (trigger=HEARTBEAT). Don't duplicate these when the user asks for similar behaviour; cancel via `cancel_task` if they want one removed.\n")
+    for (t in additions) {
+        append("- **")
+        append(t.description)
+        append("** (id: ")
+        append(t.id)
+        append("): ")
+        append(t.prompt)
+        append('\n')
+    }
+}
+
 private fun StringBuilder.appendContextSection(runtime: ChatPromptRuntimeContext) {
     append("\n\n## Context\n")
     append("- Local time: ").append(runtime.nowLocalIsoWithOffset).append(" (").append(runtime.timeZoneId).append(")\n")
@@ -167,7 +307,7 @@ private fun StringBuilder.appendDynamicUiSection() {
     append(KAI_UI_COMPONENT_CATALOG)
     append("Layout tips:\n")
     append("- Put buttons INSIDE cards, directly below related content\n")
-    append("- Use rows for groups of buttons or chips — rows wrap automatically\n")
+    append("- Use rows for groups of buttons or chips \u2014 rows wrap automatically\n")
     append("- Keep button labels short (1-3 words)\n\n")
     append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Your name?\",\"style\":\"title\"},{\"type\":\"text_input\",\"id\":\"name\",\"placeholder\":\"Enter name\"},{\"type\":\"button\",\"label\":\"Submit\",\"action\":{\"type\":\"callback\",\"event\":\"submit\",\"collectFrom\":[\"name\"]}}]}\n```\n")
 }
@@ -181,7 +321,7 @@ private fun StringBuilder.appendInteractiveUiSection() {
     append("- Every screen MUST have at least one interactive element with a callback action.\n")
     append("- Use callbacks for collecting choices, submitting forms, navigating between steps.\n")
     append("- Do NOT include back buttons or navigation controls.\n")
-    append("- Never show loading/fetching states — present all content immediately.\n")
+    append("- Never show loading/fetching states \u2014 present all content immediately.\n")
     append("- Each screen is independent. No client-side state persistence.\n\n")
     append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Welcome\",\"style\":\"headline\"},{\"type\":\"card\",\"children\":[{\"type\":\"text\",\"value\":\"What would you like to do?\",\"style\":\"title\"},{\"type\":\"button\",\"label\":\"Get Started\",\"action\":{\"type\":\"callback\",\"event\":\"get_started\"}}]}]}\n```\n")
 }

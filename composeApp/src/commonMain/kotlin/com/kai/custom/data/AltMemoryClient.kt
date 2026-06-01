@@ -1,5 +1,6 @@
 package com.kai.custom.data
 
+import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.mcp.McpClient
 import com.kai.custom.runBlockingCompat
 import kotlinx.serialization.json.Json
@@ -12,12 +13,23 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlin.time.Clock
 
-import com.kai.custom.data.dimension.KGFact
-
 class AltMemoryClient(
     private val client: McpClient,
     private val appSettings: AppSettings,
 ) : MemoryStore {
+
+    override suspend fun setPersona(personaId: String) {
+        try {
+            client.callTool(
+                "set_persona",
+                buildJsonObject {
+                    put("persona", JsonPrimitive(personaId))
+                },
+            )
+        } catch (_: Exception) {
+            // alt-memory persona switch is best-effort
+        }
+    }
 
     override suspend fun store(
         key: String,
@@ -104,26 +116,23 @@ class AltMemoryClient(
         try {
             val existing = findEntryByKey(key)
             if (existing?.protected == true) return false
-            client.callTool("memory_forget", buildJsonObject {
-                put("key", JsonPrimitive(key))
-            })
+            client.callTool(
+                "memory_forget",
+                buildJsonObject {
+                    put("key", JsonPrimitive(key))
+                },
+            )
             return true
         } catch (_: Exception) {
             return false
         }
     }
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> {
-        return getAllMemories(max).filter { !it.protected }
-    }
+    override fun getUserMemories(max: Int): List<MemoryEntry> = getAllMemories(max).filter { !it.protected }
 
-    override fun getBehaviorMemories(): List<MemoryEntry> {
-        return getAllMemories().filter { it.protected }
-    }
+    override fun getBehaviorMemories(): List<MemoryEntry> = getAllMemories().filter { it.protected }
 
-    override fun getAllMemories(max: Int): List<MemoryEntry> {
-        return searchMemories("", max)
-    }
+    override fun getAllMemories(max: Int): List<MemoryEntry> = searchMemories("", max)
 
     override fun searchMemories(query: String, limit: Int): List<MemoryEntry> = try {
         val response = runBlockingCompat {
@@ -172,11 +181,14 @@ class AltMemoryClient(
 
     override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
         val now = Clock.System.now().toEpochMilliseconds()
-        val response = client.callTool("dimension_kg_add", buildJsonObject {
-            put("subject", JsonPrimitive(subject))
-            put("predicate", JsonPrimitive(predicate))
-            put("object", JsonPrimitive(`object`))
-        })
+        val response = client.callTool(
+            "dimension_kg_add",
+            buildJsonObject {
+                put("subject", JsonPrimitive(subject))
+                put("predicate", JsonPrimitive(predicate))
+                put("object", JsonPrimitive(`object`))
+            },
+        )
         return parseKGFact(response) ?: KGFact(
             id = "kg_${subject.hashCode().toUInt().toString(16)}_${predicate.hashCode().toUInt().toString(16)}_$now",
             subject = subject,
@@ -186,28 +198,32 @@ class AltMemoryClient(
         )
     }
 
-    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> {
-        return try {
-            val response = runBlocking {
-                client.callTool("dimension_kg_query", buildJsonObject {
+    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> = try {
+        val response = runBlockingCompat {
+            client.callTool(
+                "dimension_kg_query",
+                buildJsonObject {
                     entity?.let { put("entity", JsonPrimitive(it)) }
                     relation?.let { put("relation", JsonPrimitive(it)) }
                     put("limit", JsonPrimitive(limit.toString()))
-                })
-            }
-            parseKGFactList(response)
-        } catch (_: Exception) {
-            emptyList()
+                },
+            )
         }
+        parseKGFactList(response)
+    } catch (_: Exception) {
+        emptyList()
     }
 
     override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {
         try {
-            client.callTool("dimension_kg_invalidate", buildJsonObject {
-                put("subject", JsonPrimitive(subject))
-                put("predicate", JsonPrimitive(predicate))
-                put("object", JsonPrimitive(`object`))
-            })
+            client.callTool(
+                "dimension_kg_invalidate",
+                buildJsonObject {
+                    put("subject", JsonPrimitive(subject))
+                    put("predicate", JsonPrimitive(predicate))
+                    put("object", JsonPrimitive(`object`))
+                },
+            )
         } catch (_: Exception) {
         }
     }
@@ -215,25 +231,29 @@ class AltMemoryClient(
     // Diary
 
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
-        client.callTool("dimension_diary_write", buildJsonObject {
-            put("agent_name", JsonPrimitive(agentName))
-            put("content", JsonPrimitive(content))
-            put("topic", JsonPrimitive(topic))
-        })
+        client.callTool(
+            "dimension_diary_write",
+            buildJsonObject {
+                put("agent_name", JsonPrimitive(agentName))
+                put("content", JsonPrimitive(content))
+                put("topic", JsonPrimitive(topic))
+            },
+        )
     }
 
-    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
-        return try {
-            val response = runBlocking {
-                client.callTool("dimension_diary_read", buildJsonObject {
+    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> = try {
+        val response = runBlockingCompat {
+            client.callTool(
+                "dimension_diary_read",
+                buildJsonObject {
                     put("agent_name", JsonPrimitive(agentName))
                     put("last_n", JsonPrimitive(lastN.toString()))
-                })
-            }
-            parseDiaryEntryList(response)
-        } catch (_: Exception) {
-            emptyList()
+                },
+            )
         }
+        parseDiaryEntryList(response)
+    } catch (_: Exception) {
+        emptyList()
     }
 
     // KG parsing helpers

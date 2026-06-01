@@ -24,13 +24,11 @@ interface SyncSource {
 
 class DimensionSyncSource(private val store: DimensionStore) : SyncSource {
     override suspend fun exportAll(): ByteArray = store.getExportData()
-    override suspend fun importAll(data: ByteArray): Boolean {
-        return try {
-            store.importFromData(data)
-            true
-        } catch (_: Exception) {
-            false
-        }
+    override suspend fun importAll(data: ByteArray): Boolean = try {
+        store.importFromData(data)
+        true
+    } catch (_: Exception) {
+        false
     }
     override fun getName(): String = "local"
 }
@@ -40,15 +38,16 @@ class McpSyncSource(private val client: McpClient) : SyncSource {
         val jsonStr = client.callTool("dimension_export", buildJsonObject { })
         return jsonStr.encodeToByteArray()
     }
-    override suspend fun importAll(data: ByteArray): Boolean {
-        return try {
-            client.callTool("dimension_import", buildJsonObject {
+    override suspend fun importAll(data: ByteArray): Boolean = try {
+        client.callTool(
+            "dimension_import",
+            buildJsonObject {
                 put("data", JsonPrimitive(data.decodeToString()))
-            })
-            true
-        } catch (_: Exception) {
-            false
-        }
+            },
+        )
+        true
+    } catch (_: Exception) {
+        false
     }
     override fun getName(): String = "alt-memory"
 
@@ -62,7 +61,10 @@ class SyncEngine(
     private var lastSyncAt: Long = 0
     private val syncInterval = 5.minutes.inWholeMilliseconds
 
-    private val json = Json { ignoreUnknownKeys = true; prettyPrint = false }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        prettyPrint = false
+    }
 
     fun isSyncDue(): Boolean {
         val now = Clock.System.now().toEpochMilliseconds()
@@ -107,12 +109,10 @@ class SyncEngine(
         )
     }
 
-    private fun countEntities(data: ByteArray): Int {
-        return try {
-            val text = data.decodeToString()
-            json.parseToJsonElement(text).jsonObject["entities"]?.jsonArray?.size ?: 0
-        } catch (_: Exception) {
-            0
-        }
+    private fun countEntities(data: ByteArray): Int = try {
+        val text = data.decodeToString()
+        json.parseToJsonElement(text).jsonObject["entities"]?.jsonArray?.size ?: 0
+    } catch (_: Exception) {
+        0
     }
 }

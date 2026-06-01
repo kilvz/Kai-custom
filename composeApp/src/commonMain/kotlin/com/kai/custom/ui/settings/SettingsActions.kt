@@ -2,6 +2,9 @@ package com.kai.custom.ui.settings
 
 import androidx.compose.runtime.Immutable
 import com.kai.custom.data.ImportSection
+import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.PersonaHeartbeatStyle
+import com.kai.custom.data.PersonaPromptStyle
 import com.kai.custom.data.Service
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.inference.LocalModel
@@ -21,6 +24,10 @@ data class SettingsActions(
     val onToggleTool: (String, Boolean) -> Unit,
     val onSaveSoul: (String) -> Unit,
     val onChangePersonaName: (String) -> Unit,
+    val onSwitchPersona: (String) -> Unit,
+    val onSavePersona: (PersonaConfig) -> Unit,
+    val onDeletePersona: (String) -> Unit,
+    val onCreatePersona: (String, PersonaPromptStyle, PersonaHeartbeatStyle) -> Unit,
     val onToggleDynamicUi: (Boolean) -> Unit,
     val onChangeThemeMode: (ThemeMode) -> Unit,
     val onToggleMemory: (Boolean) -> Unit,
@@ -90,6 +97,10 @@ data class SettingsActions(
             onToggleTool = { _, _ -> },
             onSaveSoul = {},
             onChangePersonaName = {},
+            onSwitchPersona = {},
+            onSavePersona = {},
+            onDeletePersona = {},
+            onCreatePersona = { _, _, _ -> },
             onToggleDynamicUi = {},
             onChangeThemeMode = {},
             onToggleMemory = {},

@@ -81,7 +81,7 @@ Conversation:
 $recentHistory
 
 JSON:
-""".trimIndent()
+        """.trimIndent()
 
     private data class ExtractedItem(
         val key: String,
@@ -101,7 +101,11 @@ JSON:
                 val key = (obj["key"] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
                 val content = (obj["content"] as? JsonPrimitive)?.content?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
                 val catStr = (obj["category"] as? JsonPrimitive)?.content ?: "GENERAL"
-                val category = try { MemoryCategory.valueOf(catStr) } catch (_: Exception) { MemoryCategory.GENERAL }
+                val category = try {
+                    MemoryCategory.valueOf(catStr)
+                } catch (_: Exception) {
+                    MemoryCategory.GENERAL
+                }
                 ExtractedItem(key, content, category)
             }
         } catch (_: Exception) {
@@ -112,6 +116,7 @@ JSON:
     companion object {
         /** Extract every N exchanges (user message + AI response = 1 pair). */
         const val EXTRACTION_INTERVAL = 5
+
         /** Number of recent exchange pairs to include in the extraction prompt. */
         private const val PAIR_COUNT = 3
     }

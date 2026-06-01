@@ -128,7 +128,6 @@ import com.kai.custom.inference.estimateGpuMemoryMb
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.dtos.SponsorsResponseDto
 import com.kai.custom.network.tools.ToolInfo
-import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.saveFileToDevice
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.ui.KaiClearableTextField
@@ -500,6 +499,8 @@ fun SettingsScreenContent(
                                     actions = actions,
                                     soulText = filteredUiState.soulText,
                                     personaName = filteredUiState.personaName,
+                                    personas = filteredUiState.personas,
+                                    activePersonaId = filteredUiState.activePersonaId,
                                     memories = filteredUiState.memories,
                                     isMemoryEnabled = filteredUiState.isMemoryEnabled,
                                     scheduledTasks = filteredUiState.scheduledTasks,

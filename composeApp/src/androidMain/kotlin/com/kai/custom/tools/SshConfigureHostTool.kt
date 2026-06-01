@@ -19,36 +19,25 @@ object SshConfigureHostTool : Tool {
 
     override val schema: ToolSchema
         get() = ToolSchema(
-        name = "ssh_configure_host",
-        description = buildDescription(),
-        parameters = mapOf(
-            "alias" to ParameterSchema(
-                "string",
-                "Short name used to invoke this host (e.g. 'prod', 'my-vps'). Must contain no whitespace.",
-                true,
+            name = "ssh_configure_host",
+            description = buildDescription(),
+            parameters = mapOf(
+                "alias" to ParameterSchema(
+                    "string",
+                    "Short name used to invoke this host (e.g. 'prod', 'my-vps'). Must contain no whitespace.",
+                    true,
+                ),
             ),
         )
 
-    private fun buildDescription(): String = buildString {
-        appendLine("Register a named SSH host alias in the Linux sandbox so subsequent execute_shell_command calls can run `ssh <alias>` instead of repeating user/host/port/identity flags every time.")
-        appendLine()
-        appendLine("What this writes inside the sandbox:")
-        appendLine("- ~/.ssh/config: a Host block for the alias. Calling again with the same alias replaces the previous block (idempotent).")
-        appendLine("- Defaults block at the top of the config on first use: ServerAliveInterval + ServerAliveCountMax (keep idle TCP connections alive through NAT) and StrictHostKeyChecking=accept-new (auto-accept new host keys into ~/.ssh/known_hosts on first connect, but still reject changed keys — sane TOFU without an interactive prompt this shell can't answer).")
-        appendLine("- Optionally appends a line to ~/.ssh/known_hosts to skip the first-connect TOFU step entirely.")
-        appendLine()
-        appendLine("This tool does NOT create or upload private keys. To make a key usable, the user must place it under ~/.ssh in the sandbox separately. Be aware that any key text passed through chat (including via execute_shell_command's `cat > ~/.ssh/id_x <<EOF ...`) goes to the model provider in cleartext — ask the user before doing that.")
-        appendLine()
-        append("Password-only remotes: openssh inside this sandbox can't field interactive password prompts on its own (no PTY; ssh reads from /dev/tty, not stdin, so heredoc fallback does not work). Install sshpass once (`${installCmd()} sshpass` via execute_shell_command) and invoke as `sshpass -p '<password>' ssh <alias> '<remote-cmd>'`, or `sshpass -f <file> ssh <alias>` to keep the password out of the command line. sshpass fakes a PTY internally, which is the only path that actually delivers a password.")
-        appendLine()
-        appendLine("Connection persistence (\"held connections\") is NOT available — openssh's ControlMaster multiplexing requires the link() syscall to create its control socket, and Android blocks link() for app processes regardless of file ownership. Each ssh call does a full handshake. Don't fight this; don't try to seed your own ControlPath.")
-        appendLine()
-        appendLine("After configuring, drive ssh from execute_shell_command:")
-        appendLine("- `ssh myalias 'remote cmd'`")
-        appendLine("- `scp file myalias:`")
-        appendLine("- `sftp myalias`")
-        append("Auth, port, identity all come from the config block — no flags needed. ALWAYS invoke by the alias, never `user@hostname`; bypassing the alias bypasses every setting this tool just wrote.")
-    }
+    val toolInfo = ToolInfo(
+        id = "ssh_configure_host",
+        name = "Configure SSH Host",
+        description = "Register a named SSH host for the Linux sandbox",
+        nameRes = null,
+        descriptionRes = null,
+        isEnabled = false,
+    )
 
     private fun buildDescription(): String = buildString {
         appendLine("Register a named SSH host alias in the Linux sandbox so subsequent execute_shell_command calls can run `ssh <alias>` instead of repeating user/host/port/identity flags every time.")
@@ -104,13 +93,4 @@ object SshConfigureHostTool : Tool {
             mapOf("success" to false, "error" to "Failed to write ssh config: ${e.message}")
         }
     }
-
-    val toolInfo = ToolInfo(
-        id = "ssh_configure_host",
-        name = "Configure SSH Host",
-        description = "Register a named SSH host for the Linux sandbox",
-        nameRes = null,
-        descriptionRes = null,
-        isEnabled = false,
-    )
 }

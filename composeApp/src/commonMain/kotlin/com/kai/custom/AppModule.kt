@@ -28,8 +28,6 @@ import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
-import com.kai.custom.skills.SkillManager
-import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.splinterlands.SplinterlandsApi
 import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore

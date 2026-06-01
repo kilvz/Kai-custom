@@ -1,14 +1,9 @@
 @file:OptIn(kotlin.time.ExperimentalTime::class)
 
-// Pure builder for the heartbeat USER-message prompt. Like `buildChatSystemPrompt`,
-// every input is explicit so tests can call it directly with hand-crafted inputs.
-// The heartbeat prompt is a single shape — always sent as a user message.
-
 package com.kai.custom.data
 
 import kotlin.time.Instant
 
-/** A pending (polled-but-not-yet-heartbeat-picked-up) email rendered into the `## New Emails` section. */
 internal data class HeartbeatPendingEmail(
     val accountEmail: String,
     val from: String,
@@ -16,14 +11,12 @@ internal data class HeartbeatPendingEmail(
     val preview: String,
 )
 
-/** A pending (polled-but-not-yet-heartbeat-picked-up) SMS rendered into the `## New SMS` section. */
 internal data class HeartbeatPendingSms(
     val id: Long,
     val from: String,
     val preview: String,
 )
 
-/** A pending (captured-but-not-yet-heartbeat-picked-up) notification rendered into the `## New Notifications` section. */
 internal data class HeartbeatPendingNotification(
     val id: String,
     val appLabel: String,
@@ -31,7 +24,6 @@ internal data class HeartbeatPendingNotification(
     val preview: String,
 )
 
-/** Memory promotion candidate rendered into the `## Promotion Candidates` section. */
 internal data class HeartbeatPromotionCandidate(
     val key: String,
     val hitCount: Int,
@@ -39,20 +31,6 @@ internal data class HeartbeatPromotionCandidate(
     val content: String,
 )
 
-/**
- * Composes the heartbeat prompt.
- *
- * @param customOrDefaultPrompt leading free text — custom user prompt or [HeartbeatManager.DEFAULT_HEARTBEAT_PROMPT]
- * @param heartbeatAdditions tasks with trigger=HEARTBEAT; rendered as `## Heartbeat Additions` so their prompts run on every heartbeat. Empty list = section omitted
- * @param recentResponses last heartbeat responses to include for continuity; empty list = section omitted
- * @param pendingTasks time/cron tasks to include in the `## Pending Tasks` section (heartbeat tasks belong to [heartbeatAdditions] instead); empty list = section omitted
- * @param emailAccounts email account statuses; empty list = section omitted
- * @param pendingEmails new emails polled since the last heartbeat pickup; empty list = section omitted
- * @param pendingSms new SMS polled since the last heartbeat pickup; empty list = section omitted
- * @param pendingNotifications new notifications captured since the last heartbeat pickup; empty list = section omitted
- * @param promotionCandidates memory promotion candidates; empty list = section omitted
- * @param learnedPatterns behavior memories (protected); empty list = section omitted
- */
 internal fun buildHeartbeatPrompt(
     customOrDefaultPrompt: String,
     heartbeatAdditions: List<ScheduledTask>,
@@ -64,13 +42,18 @@ internal fun buildHeartbeatPrompt(
     pendingNotifications: List<HeartbeatPendingNotification>,
     promotionCandidates: List<HeartbeatPromotionCandidate>,
     learnedPatterns: List<MemoryEntry> = emptyList(),
+    heartbeatStyle: PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI,
 ): String = buildString {
     append(customOrDefaultPrompt)
     append("\n")
 
     if (heartbeatAdditions.isNotEmpty()) {
         append("\n## Heartbeat Additions\n")
-        append("Standing instructions the user asked to run on every heartbeat. Address each in your response alongside the main self-check — if all are satisfied and nothing else needs attention, respond with your acknowledgement rather than HEARTBEAT_OK (the additions are the attention).\n")
+        if (heartbeatStyle == PersonaHeartbeatStyle.KAI) {
+            append("Standing instructions the user asked to run on every heartbeat. Address each in your response alongside the main self-check \u2014 if all are satisfied and nothing else needs attention, respond with your acknowledgement rather than HEARTBEAT_OK (the additions are the attention).\n")
+        } else {
+            append("Standing instructions the user asked to run on every heartbeat. Address each in your response alongside the main self-check \u2014 if all are satisfied and nothing else needs attention, respond with your acknowledgement rather than HEARTBEAT_OK (the additions are the attention).\n")
+        }
         for (addition in heartbeatAdditions) {
             append("- **")
             append(addition.description)
@@ -134,7 +117,7 @@ internal fun buildHeartbeatPrompt(
         for (msg in pendingEmails) {
             append("- **")
             append(msg.subject.ifBlank { "(no subject)" })
-            append("** — ")
+            append("** \u2014 ")
             append(msg.from)
             append(" [")
             append(msg.accountEmail)
@@ -172,7 +155,7 @@ internal fun buildHeartbeatPrompt(
             append(notif.appLabel.ifBlank { "(unknown app)" })
             append("**")
             if (notif.title.isNotBlank()) {
-                append(" — ")
+                append(" \u2014 ")
                 append(notif.title)
             }
             append(" (id: ")
@@ -186,10 +169,11 @@ internal fun buildHeartbeatPrompt(
         }
     }
 
-    if (learnedPatterns.isNotEmpty()) {
+    // ALT heartbeat includes Learned Patterns section (behavior memories)
+    if (heartbeatStyle == PersonaHeartbeatStyle.ALT && learnedPatterns.isNotEmpty()) {
         append("\n## Learned Patterns\n")
         append("These are behavioral patterns and preferences I've observed about the user. ")
-        append("Review them — if any seem outdated or incorrect, update your understanding.\n")
+        append("Review them \u2014 if any seem outdated or incorrect, update your understanding.\n")
         for (entry in learnedPatterns) {
             append("- **")
             append(entry.key)
