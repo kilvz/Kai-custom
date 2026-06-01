@@ -509,6 +509,7 @@ fun SettingsScreenContent(
                                     memories = filteredUiState.memories,
                                     isMemoryEnabled = filteredUiState.isMemoryEnabled,
                                     isAltMemoryEnabled = filteredUiState.isAltMemoryEnabled,
+                                    sandboxReady = filteredUiState.sandboxReady,
                                     onToggleAltMemory = actions.onToggleAltMemory,
                                     scheduledTasks = filteredUiState.scheduledTasks,
                                     isSchedulingEnabled = filteredUiState.isSchedulingEnabled,
@@ -817,6 +818,7 @@ internal fun ToggleableHeadline(
     title: String,
     description: String,
     checked: Boolean,
+    enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -827,6 +829,7 @@ internal fun ToggleableHeadline(
             .clickable(
                 interactionSource = switchInteractionSource,
                 indication = null,
+                enabled = enabled,
             ) { onCheckedChange(!checked) }
             .handCursor(),
         verticalAlignment = Alignment.CenterVertically,
@@ -841,6 +844,7 @@ internal fun ToggleableHeadline(
         Switch(
             checked = checked,
             onCheckedChange = null,
+            enabled = enabled,
             interactionSource = switchInteractionSource,
         )
     }

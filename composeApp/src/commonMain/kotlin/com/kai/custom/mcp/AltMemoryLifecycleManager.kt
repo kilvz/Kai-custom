@@ -49,6 +49,19 @@ class AltMemoryLifecycleManager(
         }
     }
 
+    suspend fun stop() {
+        if (!started) return
+        started = false
+        try {
+            sandboxController.executeCommand(
+                command = "pkill -f 'alt-memory.*mcp' 2>/dev/null || true",
+                sessionId = SandboxSessions.SYSTEM,
+            )
+            mcpServerManager.removeServer(SERVER_ID)
+        } catch (_: Exception) {
+        }
+    }
+
     private suspend fun runMigration() {
         val client = mcpServerManager.getClient(SERVER_ID) ?: return
         if (!appSettings.isAltMemoryMigrationComplete()) {

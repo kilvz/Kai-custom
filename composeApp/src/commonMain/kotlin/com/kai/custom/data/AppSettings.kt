@@ -356,7 +356,7 @@ class AppSettings(internal val settings: Settings) {
     }
 
     // Alt-memory (auto-installed in sandbox, user-toggleable)
-    fun isAltMemoryEnabled(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_ENABLED, true)
+    fun isAltMemoryEnabled(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_ENABLED, false)
 
     fun setAltMemoryEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_ALT_MEMORY_ENABLED, enabled)

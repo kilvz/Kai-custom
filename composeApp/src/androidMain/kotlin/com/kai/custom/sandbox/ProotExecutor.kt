@@ -71,9 +71,10 @@ class ProotExecutor(
         val effectiveTimeout = timeoutSeconds.coerceIn(1, MAX_TIMEOUT_SECONDS)
 
         return try {
+            val envVars = buildEnvVars(extraEnv)
             val process = Runtime.getRuntime().exec(
-                buildCommandArray(command, workingDir),
-                buildEnvVars(extraEnv),
+                buildCommandArray(command, workingDir, envVars),
+                envVars,
                 File(rootfsPath).parentFile,
             )
 
@@ -120,9 +121,10 @@ class ProotExecutor(
         onStdout: (String) -> Unit,
         onStderr: (String) -> Unit,
     ): ProotHandle {
+        val envVars = buildEnvVars(extraEnv)
         val process = Runtime.getRuntime().exec(
-            buildCommandArray(command, workingDir),
-            buildEnvVars(extraEnv),
+            buildCommandArray(command, workingDir, envVars),
+            envVars,
             File(rootfsPath).parentFile,
         )
         val cancelled = AtomicBoolean(false)
@@ -144,7 +146,11 @@ class ProotExecutor(
         }
     }
 
-    private fun buildCommandArray(command: String, workingDir: String): Array<String> {
+    private fun buildCommandArray(
+        command: String,
+        workingDir: String,
+        envVars: Array<String> = emptyArray(),
+    ): Array<String> {
         val prootArgs = buildList {
             add(prootPath)
             add("--rootfs=$rootfsPath")
@@ -163,7 +169,10 @@ class ProotExecutor(
         }.toTypedArray()
 
         return if (sandboxRootEnabled) {
-            arrayOf("su", "-c") + prootArgs.joinToString(" ")
+            // `su` strips environment — prefix env vars using POSIX shell
+            // syntax so LD_LIBRARY_PATH, PROOT_LOADER etc reach proot.
+            val envPrefix = envVars.joinToString(" ") { "$it" }
+            arrayOf("su", "-c", "$envPrefix " + prootArgs.joinToString(" "))
         } else {
             prootArgs
         }

@@ -349,6 +349,14 @@ class AndroidSandboxController : SandboxController {
     // ── memory semantic search ─────────────────────────────────────────
     // Semantic search is now handled by alt-memory MCP tools when connected.
     // Falls through to FTS5 local search (interface default returns null).
+
+    override suspend fun startAltMemory() {
+        altMemoryLifecycle.setupAndStart()
+    }
+
+    override suspend fun stopAltMemory() {
+        altMemoryLifecycle.stop()
+    }
 }
 
 private fun File.toEntry(parent: String): SandboxFileEntry = SandboxFileEntry(

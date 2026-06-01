@@ -121,6 +121,7 @@ internal fun AgentContent(
     memories: ImmutableList<MemoryEntry>,
     isMemoryEnabled: Boolean,
     isAltMemoryEnabled: Boolean,
+    sandboxReady: Boolean,
     onToggleAltMemory: (Boolean) -> Unit,
     scheduledTasks: ImmutableList<ScheduledTask>,
     isSchedulingEnabled: Boolean,
@@ -176,6 +177,7 @@ internal fun AgentContent(
                             onUpdateMemory = actions.onUpdateMemory,
                             isMemoryEnabled = isMemoryEnabled,
                             isAltMemoryEnabled = isAltMemoryEnabled,
+                            sandboxReady = sandboxReady,
                             onToggleMemory = actions.onToggleMemory,
                             onToggleAltMemory = onToggleAltMemory,
                             onExportDimension = actions.onExportDimension,
@@ -297,6 +299,7 @@ internal fun AgentContent(
                         onUpdateMemory = actions.onUpdateMemory,
                         isMemoryEnabled = isMemoryEnabled,
                         isAltMemoryEnabled = isAltMemoryEnabled,
+                        sandboxReady = sandboxReady,
                         onToggleMemory = actions.onToggleMemory,
                         onToggleAltMemory = onToggleAltMemory,
                         onExportDimension = actions.onExportDimension,
@@ -652,6 +655,7 @@ private fun MemoryList(
     onUpdateMemory: (String, String) -> Unit,
     isMemoryEnabled: Boolean,
     isAltMemoryEnabled: Boolean,
+    sandboxReady: Boolean,
     onToggleMemory: (Boolean) -> Unit,
     onToggleAltMemory: (Boolean) -> Unit,
     onExportDimension: suspend () -> ByteArray,
@@ -693,8 +697,9 @@ private fun MemoryList(
         Spacer(Modifier.height(4.dp))
         ToggleableHeadline(
             title = "Alt-memory",
-            description = "Vector memory with semantic search (auto-installed in sandbox)",
+            description = if (sandboxReady) "Vector memory with semantic search (install on enable)" else "Requires sandbox to be installed first",
             checked = isAltMemoryEnabled,
+            enabled = sandboxReady,
             onCheckedChange = onToggleAltMemory,
         )
         Spacer(Modifier.height(12.dp))

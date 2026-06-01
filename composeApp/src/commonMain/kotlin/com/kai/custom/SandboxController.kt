@@ -106,6 +106,9 @@ interface SandboxController {
         limit: Int,
     ): List<MemoryEntry>? = null
     suspend fun renameEntry(path: String, newName: String): Result<String>
+
+    suspend fun startAltMemory() {}
+    suspend fun stopAltMemory() {}
 }
 
 expect fun createSandboxController(): SandboxController

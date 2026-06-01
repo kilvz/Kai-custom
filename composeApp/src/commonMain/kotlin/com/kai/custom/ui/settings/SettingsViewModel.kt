@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.DaemonController
 import com.kai.custom.DebugApiController
+import com.kai.custom.SandboxController
 import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
@@ -74,6 +75,7 @@ class SettingsViewModel(
     private val notificationPermissionController: NotificationPermissionController,
     private val taskScheduler: TaskScheduler,
     private val wakeWordController: WakeWordController,
+    private val sandboxController: SandboxController,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -273,6 +275,11 @@ class SettingsViewModel(
                         .filter { it.service.isOnDevice }
                         .forEach { checkConnection(it.instanceId, it.service) }
                 }
+            }
+        }
+        viewModelScope.launch {
+            sandboxController.status.collect { status ->
+                _state.update { it.copy(sandboxReady = status.ready) }
             }
         }
     }
@@ -551,10 +558,14 @@ class SettingsViewModel(
         _state.update { it.copy(isMemoryEnabled = enabled) }
     }
 
-    private fun onToggleAltMemory(enabled: Boolean) {
-        dataRepository.setAltMemoryEnabled(enabled)
-        _state.update { it.copy(isAltMemoryEnabled = enabled) }
+private fun onToggleAltMemory(enabled: Boolean) {
+    dataRepository.setAltMemoryEnabled(enabled)
+    _state.update { it.copy(isAltMemoryEnabled = enabled) }
+    viewModelScope.launch {
+        if (enabled) sandboxController.startAltMemory()
+        else sandboxController.stopAltMemory()
     }
+}
 
     private fun onDeleteMemory(key: String) {
         commitPendingDeletion()
