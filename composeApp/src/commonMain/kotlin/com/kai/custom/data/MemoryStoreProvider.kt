@@ -1,6 +1,7 @@
 package com.kai.custom.data
 
 import com.kai.custom.mcp.McpClient
+import kotlin.concurrent.Volatile
 
 class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemoryStore {
 

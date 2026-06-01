@@ -1,7 +1,7 @@
 package com.kai.custom.data
 
 import com.kai.custom.mcp.McpClient
-import kotlinx.coroutines.runBlocking
+import com.kai.custom.runBlockingCompat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -83,7 +83,7 @@ class AltMemoryClient(
 
     override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
         return try {
-            val response = runBlocking {
+            val response = runBlockingCompat {
                 client.callTool("memory_search", buildJsonObject {
                     put("query", JsonPrimitive(query))
                     put("n_results", JsonPrimitive(limit))
@@ -102,7 +102,7 @@ class AltMemoryClient(
 
     override fun exportDimension(): ByteArray {
         return try {
-            val json = runBlocking {
+            val json = runBlockingCompat {
                 client.callTool("dimension_export", buildJsonObject { })
             }
             json.encodeToByteArray()
@@ -113,7 +113,7 @@ class AltMemoryClient(
 
     override fun importDimension(data: ByteArray) {
         try {
-            runBlocking {
+            runBlockingCompat {
                 client.callTool("dimension_import", buildJsonObject {
                     put("data", JsonPrimitive(data.decodeToString()))
                 })
@@ -124,7 +124,7 @@ class AltMemoryClient(
 
     private fun findEntryByKey(key: String): MemoryEntry? {
         return try {
-            val response = runBlocking {
+            val response = runBlockingCompat {
                 client.callTool("memory_retrieve", buildJsonObject {
                     put("key", JsonPrimitive(key))
                 })
@@ -186,7 +186,7 @@ class AltMemoryClient(
         }
     }
 
-    private fun String.encodeToByteArray(): ByteArray = this.toByteArray(Charsets.UTF_8)
+
 
     companion object {
         private val jsonElementParser = Json { ignoreUnknownKeys = true; isLenient = true }

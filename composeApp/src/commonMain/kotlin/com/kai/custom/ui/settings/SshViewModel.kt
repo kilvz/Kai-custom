@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import com.kai.custom.runBlockingCompat
 
 data class SshUiState(
     val host: String = "",
@@ -179,7 +179,7 @@ class SshViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        runBlocking(Dispatchers.IO) { sshConnectionManager.disconnect() }
+        runBlockingCompat(Dispatchers.Default) { sshConnectionManager.disconnect() }
     }
 
     fun executeCommand(command: String) {

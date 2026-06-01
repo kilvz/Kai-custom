@@ -130,7 +130,7 @@ class ChatViewModel(
         viewModelScope.launch {
             var lastTriggerMs = 0L
             wakeWordController.wakeWordDetected.collect { phrase ->
-                val now = System.currentTimeMillis()
+                val now = kotlin.time.Clock.System.now().toEpochMilliseconds()
                 if (now - lastTriggerMs > 3000
                     && !_state.value.isVoiceInputActive
                     && !_state.value.isLoading
