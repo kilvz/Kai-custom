@@ -1,4 +1,4 @@
-# On-Device Inference (LiteRT)
+﻿# On-Device Inference (LiteRT)
 
 **Last verified:** 2026-05-14
 
@@ -12,29 +12,29 @@ Models are downloaded from HuggingFace's litert-community and stored locally on 
 
 | Model | Size | GPU Memory (Android) | Default Context | Max Context | Tool calling |
 |-------|------|---------------------|-----------------|-------------|--------------|
-| Gemma 4 E2B IT | 2.58 GB | 676 MB | 4K tokens | 32K tokens | ✅ reliable |
-| Gemma 4 E4B IT | 3.65 GB | 710 MB | 4K tokens | 32K tokens | ✅ reliable |
-| Qwen3 0.6B | 586 MB | 300 MB | 4K tokens | 32K tokens | ⚠️ chat-only in practice |
+| Gemma 4 E2B IT | 2.58 GB | 676 MB | 4K tokens | 32K tokens | âœ… reliable |
+| Gemma 4 E4B IT | 3.65 GB | 710 MB | 4K tokens | 32K tokens | âœ… reliable |
+| Qwen3 0.6B | 586 MB | 300 MB | 4K tokens | 32K tokens | âš ï¸ chat-only in practice |
 
 Models are `.litertlm` files from the [litert-community](https://huggingface.co/litert-community) organization on HuggingFace.
 
 ## Tool support
 
-The application uses **litert-lm's native function calling** (`automaticToolCalling = true` on `ConversationConfig`): each exposed Kai tool is wrapped in an `OpenApiTool` adapter, registered on the conversation, and the engine drives the tool loop internally. The model uses its trained tool format and `chat()` returns the final assistant text after all tool round-trips complete. Tools are available **at any context size** — there's no threshold gating.
+The application uses **litert-lm's native function calling** (`automaticToolCalling = true` on `ConversationConfig`): each exposed Kai tool is wrapped in an `OpenApiTool` adapter, registered on the conversation, and the engine drives the tool loop internally. The model uses its trained tool format and `chat()` returns the final assistant text after all tool round-trips complete. Tools are available **at any context size** â€” there's no threshold gating.
 
 Only a small **allowlist** of tools is exposed on-device, because small Gemma models (2-4B params) struggle to emit valid function-call syntax for tools with many parameters or complex value types, and litert-lm's strict ANTLR parser crashes the call when the syntax is malformed.
 
-The allowlist (in `RemoteDataRepository.LOCAL_TOOL_ALLOWLIST`) currently exposes: `get_local_time`, `get_location_from_ip`, `web_search`, `open_url`, `memory_store`, `memory_forget`, `memory_reinforce`, and `execute_shell_command` (when the user has enabled the shell tool in Settings). Email tools, task scheduling (`schedule_task` / `list_tasks` / `cancel_task`), MCP server tools, structured `memory_learn`, heartbeat-config tools, and `promote_learning` are excluded — they require a remote model.
+The allowlist (in `RemoteDataRepository.LOCAL_TOOL_ALLOWLIST`) currently exposes: `get_local_time`, `get_location_from_ip`, `web_search`, `open_url`, `memory_store`, `memory_forget`, `memory_reinforce`, and `execute_shell_command` (when the user has enabled the shell tool in Settings). Email tools, task scheduling (`schedule_task` / `list_tasks` / `cancel_task`), MCP server tools, structured `memory_learn`, heartbeat-config tools, and `promote_learning` are excluded â€” they require a remote model.
 
-**Qwen3 0.6B caveat:** the model is wired to the same allowlist but at 0.6 B params it rarely emits valid function-call syntax — it tends to hallucinate answers (e.g. a fictional time) instead of invoking `get_local_time`. Treat Qwen3 as a chat-only model in practice; pick Gemma 4 E2B/E4B for anything that relies on tools.
+**Qwen3 0.6B caveat:** the model is wired to the same allowlist but at 0.6 B params it rarely emits valid function-call syntax â€” it tends to hallucinate answers (e.g. a fictional time) instead of invoking `get_local_time`. Treat Qwen3 as a chat-only model in practice; pick Gemma 4 E2B/E4B for anything that relies on tools.
 
-The system prompt for on-device runs is built directly from the `CHAT_LOCAL` variant of `buildChatSystemPrompt` — it contains only the sections a small Gemma can handle (soul + basic memory guidance + runtime Context block). Memory categories, scheduled tasks, Structured Learning guidance, and kai-ui sections are never composed in.
+The system prompt for on-device runs is built directly from the `CHAT_LOCAL` variant of `buildChatSystemPrompt` â€” it contains only the sections a small Gemma can handle (soul + basic memory guidance + runtime Context block). Memory categories, scheduled tasks, Structured Learning guidance, and kai-ui sections are never composed in.
 
 Interactive UI mode is **not supported** on-device: the kai-ui component schema is too large and too structurally complex for 2-4B Gemma models to reliably produce valid kai-ui JSON. The "Start interactive mode" button in the chat empty-state is hidden when the primary service is on-device, and on-device services are also filtered out of the quick-switch service selector while Interactive Mode is active so a user already in Interactive Mode can't switch to them. Users who need interactive UI should switch to a remote service.
 
 See [system-prompts.md](system-prompts.md) and `ChatSystemPromptBuilderTest` for the full contract.
 
-If the engine throws (e.g. the model does emit malformed tool-call syntax that the ANTLR parser rejects), the application catches the `RuntimeException`, logs it, and retries the call **once** with no tools — the user gets a plain-chat answer instead of a hard error.
+If the engine throws (e.g. the model does emit malformed tool-call syntax that the ANTLR parser rejects), the application catches the `RuntimeException`, logs it, and retries the call **once** with no tools â€” the user gets a plain-chat answer instead of a hard error.
 
 ## Other limitations
 
@@ -53,7 +53,7 @@ Users manage models through the LiteRT service card in Settings:
 - **Delete** -- trash icon removes the downloaded model file
 - **Cancel** -- active downloads can be cancelled
 - **Error display** -- download failures (network, disk space, incomplete) are shown inline in the settings UI
-- **Context size slider** -- each model has a slider to adjust context size (4K–32K tokens in 1K steps); available before download so users can preview performance impact
+- **Context size slider** -- each model has a slider to adjust context size (4Kâ€“32K tokens in 1K steps); available before download so users can preview performance impact
 - **Performance indicator** -- each model shows a Good/OK/Poor label based on total device RAM vs estimated resident memory at the selected context size. The estimate sums the model file size (proxy for resident weights after mmap/PLE), a per-model baseline for GPU/KV working memory, and a per-token KV cache cost that scales with context. Thresholds: Good >= 2.5x, OK >= 1.85x, Poor < 1.85x of total device RAM -- the extra headroom over 1x accounts for OS reservation and GPU-driver overhead.
 - **Free space** -- available device storage is shown below the model list
 
@@ -76,7 +76,7 @@ When the last LiteRT service instance is removed, all downloaded models are auto
 | Aspect | Android | Desktop |
 |--------|---------|---------|
 | Model storage | `context.filesDir/litert_models` | `~/.kai/litert_models` |
-| Memory check | `ActivityManager.getMemoryInfo()` | Skipped — desktop OSes manage memory via swap and cache eviction |
+| Memory check | `ActivityManager.getMemoryInfo()` | Skipped â€” desktop OSes manage memory via swap and cache eviction |
 | Disk space | `StatFs.availableBytes` | `File.usableSpace` |
 | Download notification | Foreground service with notification | No notification (no OS restriction) |
 

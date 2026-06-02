@@ -1,4 +1,4 @@
-# System Prompts
+﻿# System Prompts
 
 **Last verified:** 2026-05-30
 
@@ -8,55 +8,55 @@ Kai has several distinct prompt-construction paths. Each one is built by a **pur
 
 | Path | Builder | Test | Used by |
 |---|---|---|---|
-| Chat (remote) | `buildChatSystemPrompt(variant = CHAT_REMOTE, …)` | `ChatSystemPromptBuilderTest` | Any remote service (OpenAI, Anthropic, Gemini, etc.) via `RemoteDataRepository.ask()` |
-| Chat (on-device) | `buildChatSystemPrompt(variant = CHAT_LOCAL, …)` | `ChatSystemPromptBuilderTest` | LiteRT via `RemoteDataRepository.askWithLocalEngine()` |
-| Heartbeat | `buildHeartbeatPrompt(…)` | `HeartbeatPromptBuilderTest` | `TaskScheduler` via `HeartbeatManager.buildHeartbeatPrompt()` — sent as a USER message, not a system prompt |
-| Splinterlands LLM picker | `buildLlmPrompt(…)` in `SplinterlandsTeamPicker.kt` | `SplinterlandsTeamPickerPromptTest` | `SplinterlandsBattleRunner` — fully isolated, does not use the chat prompt builder |
+| Chat (remote) | `buildChatSystemPrompt(variant = CHAT_REMOTE, â€¦)` | `ChatSystemPromptBuilderTest` | Any remote service (OpenAI, Anthropic, Gemini, etc.) via `RemoteDataRepository.ask()` |
+| Chat (on-device) | `buildChatSystemPrompt(variant = CHAT_LOCAL, â€¦)` | `ChatSystemPromptBuilderTest` | LiteRT via `RemoteDataRepository.askWithLocalEngine()` |
+| Heartbeat | `buildHeartbeatPrompt(â€¦)` | `HeartbeatPromptBuilderTest` | `TaskScheduler` via `HeartbeatManager.buildHeartbeatPrompt()` â€” sent as a USER message, not a system prompt |
+| Splinterlands LLM picker | `buildLlmPrompt(â€¦)` in `SplinterlandsTeamPicker.kt` | `SplinterlandsTeamPickerPromptTest` | `SplinterlandsBattleRunner` â€” fully isolated, does not use the chat prompt builder |
 
 The on-device tool allowlist (`LOCAL_TOOL_ALLOWLIST` in `RemoteDataRepository.kt`) is locked in by `LocalToolAllowlistTest`. Any rename or removal of a tool in that set fails the test loudly.
 
 ## Chat variants
 
-`SystemPromptVariant` in `ChatSystemPromptBuilder.kt` controls which sections are composed. Each `if (variant == …)` block in `buildChatSystemPrompt` is the single source of truth for where a section belongs — there is no post-hoc regex stripping.
+`SystemPromptVariant` in `ChatSystemPromptBuilder.kt` controls which sections are composed. Each `if (variant == â€¦)` block in `buildChatSystemPrompt` is the single source of truth for where a section belongs â€” there is no post-hoc regex stripping.
 
 | Section | `CHAT_REMOTE` | `CHAT_LOCAL` | Gating input |
 |---|:-:|:-:|---|
 | Soul | always | always | `soul` param (non-empty) |
-| Honesty rule | always | always | baked into `DEFAULT_HONESTY_RULE` constant — one inline sentence ("Do not fabricate tool outputs, file contents, citations, or completed work"). Guards observed regressions where models invented tool output and where kai-ui button labels implied operations the callback couldn't perform. No `##` header — one sentence doesn't earn a section |
-| `## Tool Use` | when tools available | when tools available | baked into `DEFAULT_TOOL_USE_SECTION` constant — tells the model to reach for tools to resolve ambiguity, check tool availability before declaring a capability unavailable, prefer self-lookup over asking the user, and extract signal from noisy output. Gated on `hasTools`: with every tool disabled (or a model that doesn't support tool calls) the section is dropped rather than telling the model to use tools it doesn't have. Soul customization still can't drop it while tools exist |
-| `## When to Act` | always | always | baked into `DEFAULT_ACTING_SECTION` constant — caps clarifying questions at one, only when genuinely blocked; demands recovery after a failed first attempt; mandates seeing work through to a usable result. Always rendered (both variants), same rationale as above |
+| Honesty rule | always | always | baked into `DEFAULT_HONESTY_RULE` constant â€” one inline sentence ("Do not fabricate tool outputs, file contents, citations, or completed work"). Guards observed regressions where models invented tool output and where kai-ui button labels implied operations the callback couldn't perform. No `##` header â€” one sentence doesn't earn a section |
+| `## Tool Use` | when tools available | when tools available | baked into `DEFAULT_TOOL_USE_SECTION` constant â€” tells the model to reach for tools to resolve ambiguity, check tool availability before declaring a capability unavailable, prefer self-lookup over asking the user, and extract signal from noisy output. Gated on `hasTools`: with every tool disabled (or a model that doesn't support tool calls) the section is dropped rather than telling the model to use tools it doesn't have. Soul customization still can't drop it while tools exist |
+| `## When to Act` | always | always | baked into `DEFAULT_ACTING_SECTION` constant â€” caps clarifying questions at one, only when genuinely blocked; demands recovery after a failed first attempt; mandates seeing work through to a usable result. Always rendered (both variants), same rationale as above |
 | Memory instructions (basic) | when provided | when provided | `memoryInstructions` param |
-| `## Structured Learning` | when memory enabled (remote-only) | never | baked into `DEFAULT_STRUCTURED_LEARNING_SECTION` constant. Gated on `memoryEnabled` — it references `memory_learn` / `memory_reinforce`, which are absent when memory is off |
+| `## Structured Learning` | when memory enabled (remote-only) | never | baked into `DEFAULT_STRUCTURED_LEARNING_SECTION` constant. Gated on `memoryEnabled` â€” it references `memory_learn` / `memory_reinforce`, which are absent when memory is off |
 | `## Your Memories` | when list non-empty | when list non-empty (budget-capped) | `generalMemories` |
 | `## User Preferences` | when list non-empty | when list non-empty (budget-capped) | `preferenceMemories` |
 | `## Learnings` | when list non-empty | when list non-empty (budget-capped) | `learningMemories` (reinforcement count rendered) |
 | `## Known Issues & Resolutions` | when list non-empty | when list non-empty (budget-capped) | `errorMemories` |
-| `## Automation` | when scheduling enabled (remote-only) | never | baked into `DEFAULT_AUTOMATION_SECTION` constant — teaches the AI that all future/recurring/heartbeat-standing behaviour goes through `schedule_task` with one of three triggers (`execute_at`, `cron`, `on_heartbeat`). Heartbeat schedule itself is user-controlled. Gated on `schedulingEnabled` — it references `schedule_task` / `list_tasks` / `cancel_task`, which are absent when scheduling is off |
-| `## Email Accounts` | when list non-empty (email enabled) | never | `emailAccounts` — connected address, unread count, last sync, or last sync error. The section also embeds a multi-sentence "Sending policy" rule instructing the model to draft a message and confirm with the user before invoking `compose_email` or `reply_email`, so the per-account summary is not the only payload |
+| `## Automation` | when scheduling enabled (remote-only) | never | baked into `DEFAULT_AUTOMATION_SECTION` constant â€” teaches the AI that all future/recurring/heartbeat-standing behaviour goes through `schedule_task` with one of three triggers (`execute_at`, `cron`, `on_heartbeat`). Heartbeat schedule itself is user-controlled. Gated on `schedulingEnabled` â€” it references `schedule_task` / `list_tasks` / `cancel_task`, which are absent when scheduling is off |
+| `## Email Accounts` | when list non-empty (email enabled) | never | `emailAccounts` â€” connected address, unread count, last sync, or last sync error. The section also embeds a multi-sentence "Sending policy" rule instructing the model to draft a message and confirm with the user before invoking `compose_email` or `reply_email`, so the per-account summary is not the only payload |
 | `## Scheduled Tasks` | when list non-empty | never | `pendingTasks` (time/cron only; heartbeat-trigger tasks live in the next section) |
-| `## Heartbeat Additions` | when list non-empty | never | `heartbeatAdditions` — standing `schedule_task(on_heartbeat=true)` entries the AI can see/reference/cancel |
-| `## Active skill: <name>` | when activated | when activated | `activeSkill` param — non-null only when the user prefixed the current turn's message with `/<skill-id>` matching an installed, enabled skill. Emits the skill's instruction body plus a list of any bundled files (available at `~/skills/<id>/` in the sandbox). Zero bytes on every other turn. See [skills.md](skills.md) |
+| `## Heartbeat Additions` | when list non-empty | never | `heartbeatAdditions` â€” standing `schedule_task(on_heartbeat=true)` entries the AI can see/reference/cancel |
+| `## Active skill: <name>` | when activated | when activated | `activeSkill` param â€” non-null only when the user prefixed the current turn's message with `/<skill-id>` matching an installed, enabled skill. Emits the skill's instruction body plus a list of any bundled files (available at `~/skills/<id>/` in the sandbox). Zero bytes on every other turn. See [skills.md](skills.md) |
 | `## Context` | always | always | `runtime` param (local time with offset + IANA zone, UTC, platform, model, provider). Local time leads so the model anchors on the user's wall clock when computing relative times |
 | `## Dynamic UI` | when `uiMode = DYNAMIC_UI` | never | `uiMode` param |
 | `## Interactive UI Mode` | when `uiMode = INTERACTIVE_UI` | never | `uiMode` param |
 
-**Memory budget for `CHAT_LOCAL`:** the four memory category sections share a combined char budget (`LOCAL_MEMORY_BUDGET_CHARS`, currently 2000 chars). Entries are appended in order (general → preferences → learnings → errors); the next entry that would push the combined size past the budget is dropped, and all subsequent entries are dropped too. Truncation happens at entry boundaries, never mid-entry. If no entries in a category fit, that category's header is not emitted either.
+**Memory budget for `CHAT_LOCAL`:** the four memory category sections share a combined char budget (`LOCAL_MEMORY_BUDGET_CHARS`, currently 2000 chars). Entries are appended in order (general â†’ preferences â†’ learnings â†’ errors); the next entry that would push the combined size past the budget is dropped, and all subsequent entries are dropped too. Truncation happens at entry boundaries, never mid-entry. If no entries in a category fit, that category's header is not emitted either.
 
 **Why two variants:**
 
-- `CHAT_REMOTE` — full chat prompt for remote services. No limits.
-- `CHAT_LOCAL` — trimmed chat prompt for on-device LiteRT. Small Gemma models (2-4B params) can't coherently attend to the full remote prompt, so Structured Learning, Automation, Email Accounts, Scheduled Tasks, Heartbeat Additions, and kai-ui sections are dropped, and memory sections are char-capped. The model still gets soul + basic memory guidance + memories (up to the cap) + runtime Context — memories matter because `memory_store` / `memory_forget` / `memory_reinforce` are all in the local tool allowlist, and a memory might have been learned via a remote model in an earlier turn.
+- `CHAT_REMOTE` â€” full chat prompt for remote services. No limits.
+- `CHAT_LOCAL` â€” trimmed chat prompt for on-device LiteRT. Small Gemma models (2-4B params) can't coherently attend to the full remote prompt, so Structured Learning, Automation, Email Accounts, Scheduled Tasks, Heartbeat Additions, and kai-ui sections are dropped, and memory sections are char-capped. The model still gets soul + basic memory guidance + memories (up to the cap) + runtime Context â€” memories matter because `memory_store` / `memory_forget` / `memory_reinforce` are all in the local tool allowlist, and a memory might have been learned via a remote model in an earlier turn.
 
-Interactive UI mode is **not** available on on-device services — the kai-ui component schema is too large for small Gemma models to coherently attend to, and in practice the model can't produce valid kai-ui JSON. The "Start interactive mode" button in the empty-state UI is hidden when the primary service is on-device (see `ChatScreen.kt`). If you have LiteRT selected and need interactive UI mode, switch to a remote service first.
+Interactive UI mode is **not** available on on-device services â€” the kai-ui component schema is too large for small Gemma models to coherently attend to, and in practice the model can't produce valid kai-ui JSON. The "Start interactive mode" button in the empty-state UI is hidden when the primary service is on-device (see `ChatScreen.kt`). If you have LiteRT selected and need interactive UI mode, switch to a remote service first.
 
 ## Heartbeat sections
 
-`buildHeartbeatPrompt` has no variant — it's a single shape sent as the user message.
+`buildHeartbeatPrompt` has no variant â€” it's a single shape sent as the user message.
 
 | Section | Gating input |
 |---|---|
 | Opening prompt | `customOrDefaultPrompt` (custom or `DEFAULT_HEARTBEAT_PROMPT`) |
-| `## Heartbeat Additions` | `heartbeatAdditions` non-empty — appended standing instructions from `schedule_task(on_heartbeat=true)` tasks |
+| `## Heartbeat Additions` | `heartbeatAdditions` non-empty â€” appended standing instructions from `schedule_task(on_heartbeat=true)` tasks |
 | `## Previous Heartbeat Results` | `recentResponses` non-empty |
 | `## Pending Tasks` (with optional cron annotation) | `pendingTasks` non-empty |
 | `## Email Status` (per-account unread count + last sync) | `emailAccounts` non-empty |
@@ -69,7 +69,7 @@ Interactive UI mode is **not** available on on-device services — the kai-ui co
 
 1. **Decide which variant(s) need the section.** For the chat builder, that's `CHAT_REMOTE`, `CHAT_LOCAL`, or both. For heartbeat, it's always "present iff gating input is non-empty".
 2. **Add the input parameter** to the builder's signature.
-3. **Add the `if (variant == …)` block** or conditional in the builder body — composition is explicit, not post-hoc.
+3. **Add the `if (variant == â€¦)` block** or conditional in the builder body â€” composition is explicit, not post-hoc.
 4. **Add a focused test** in the corresponding `*BuilderTest` class that verifies the section is present when gated on, absent otherwise.
 5. **Update this doc's table** with the new row.
 6. **Update the wrapper** (`RemoteDataRepository.getActiveSystemPrompt` or `HeartbeatManager.buildHeartbeatPrompt`) to thread the new input through from `AppSettings` / stores.

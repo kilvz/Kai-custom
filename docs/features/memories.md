@@ -1,4 +1,4 @@
-# Memories
+﻿# Memories
 
 **Last verified:** 2026-05-14
 
@@ -14,10 +14,10 @@ A persistent key-value entry containing a descriptive key, content, category, hi
 
 Each memory belongs to one of four categories:
 
-- **General** — user preferences, facts, and important information
-- **Learning** — successful approaches and patterns that worked well
-- **Error** — error resolutions and known issues
-- **Preference** — user corrections and explicit preferences
+- **General** â€” user preferences, facts, and important information
+- **Learning** â€” successful approaches and patterns that worked well
+- **Error** â€” error resolutions and known issues
+- **Preference** â€” user corrections and explicit preferences
 
 ### Reinforcement
 
@@ -67,12 +67,12 @@ Built-in memory instructions guide the AI to:
 
 The memories section in settings contains:
 
-- **Toggle** — enables or disables the memory feature with a switch
-- **Description** — explains that memories are included in every message for context
-- **Memory list** — the five most recently updated memories are shown inline; each entry displays the key (bold) and content (max 3 lines, truncated with ellipsis)
-- **Show all button** — appears when more than five memories exist; opens a modal bottom sheet listing every memory
-- **Edit memory** — tapping any memory row (inline or inside the bottom sheet) opens an edit bottom sheet that lets the user modify the memory content. The key is shown but not editable. Saving updates the memory's content and timestamp
-- **Delete button** — per-memory trash icon to remove individual memories; deletion is deferred with a snackbar "Undo" option (~4 seconds) before the memory is permanently removed
+- **Toggle** â€” enables or disables the memory feature with a switch
+- **Description** â€” explains that memories are included in every message for context
+- **Memory list** â€” the five most recently updated memories are shown inline; each entry displays the key (bold) and content (max 3 lines, truncated with ellipsis)
+- **Show all button** â€” appears when more than five memories exist; opens a modal bottom sheet listing every memory
+- **Edit memory** â€” tapping any memory row (inline or inside the bottom sheet) opens an edit bottom sheet that lets the user modify the memory content. The key is shown but not editable. Saving updates the memory's content and timestamp
+- **Delete button** â€” per-memory trash icon to remove individual memories; deletion is deferred with a snackbar "Undo" option (~4 seconds) before the memory is permanently removed
 
 ## AI Tools
 

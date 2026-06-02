@@ -53,21 +53,19 @@ class AppSettingsExportImportTest {
 
         val target = createAppSettings()
         target.importFromJson(json, toolIds)
-        assertEquals("You are a helpful pirate.", target.getSoulText())
+        assertEquals("You are a helpful pirate.", target.getSoulUser())
     }
 
     @Test
-    fun `export and import round-trips memory settings`() {
+    fun `export and import round-trips memory toggle`() {
         val appSettings = createAppSettings()
         appSettings.setMemoryEnabled(false)
-        appSettings.setMemoriesJson("""[{"key":"k1","value":"v1","category":"GENERAL"}]""")
 
         val json = appSettings.exportToJson(toolIds)
 
         val target = createAppSettings()
         target.importFromJson(json, toolIds)
         assertFalse(target.isMemoryEnabled())
-        assertTrue(target.getMemoriesJson().contains("k1"))
     }
 
     @Test
@@ -200,7 +198,7 @@ class AppSettingsExportImportTest {
         )
         val target = createAppSettings()
         target.importFromJson(json, toolIds)
-        assertEquals("hello", target.getSoulText())
+        assertEquals("hello", target.getSoulUser())
     }
 
     @Test
@@ -216,7 +214,7 @@ class AppSettingsExportImportTest {
         val errors = target.importFromJson(json, toolIds)
 
         assertEquals(0, errors)
-        assertEquals("", target.getSoulText())
+        assertEquals("", target.getSoulUser())
         assertTrue(target.isMemoryEnabled())
         assertEquals("", target.getMemoriesJson())
         assertEquals("", target.getMcpServersJson())
@@ -249,7 +247,7 @@ class AppSettingsExportImportTest {
         val target = createAppSettings()
         target.importFromJson(parsed, toolIds)
 
-        assertEquals("Test soul", target.getSoulText())
+        assertEquals("Test soul", target.getSoulUser())
         assertFalse(target.isMemoryEnabled())
     }
 
@@ -309,7 +307,7 @@ class AppSettingsExportImportTest {
         assertEquals("gem-key", target.getInstanceApiKey("gemini"))
 
         // Soul
-        assertEquals("Be helpful.", target.getSoulText())
+        assertEquals("Be helpful.", target.getSoulUser())
 
         // Memory
         assertTrue(target.isMemoryEnabled())
@@ -434,7 +432,7 @@ class AppSettingsExportImportTest {
         // Only import SOUL section, merge mode (leave others unchanged)
         target.importFromJson(json, toolIds, sections = setOf(ImportSection.SOUL), replace = false)
 
-        assertEquals("New soul", target.getSoulText())
+        assertEquals("New soul", target.getSoulUser())
         // Memory and MCP should be unchanged (merge mode)
         assertTrue(target.isMemoryEnabled())
         assertTrue(target.getMcpServersJson().contains("original"))
@@ -457,7 +455,7 @@ class AppSettingsExportImportTest {
         // Only import SOUL, replace mode — unselected sections reset to defaults
         target.importFromJson(json, toolIds, sections = setOf(ImportSection.SOUL), replace = true)
 
-        assertEquals("New soul", target.getSoulText())
+        assertEquals("New soul", target.getSoulUser())
         // Memory and MCP should be reset to defaults
         assertTrue(target.isMemoryEnabled()) // default is true
         assertEquals("", target.getMcpServersJson()) // default is empty
@@ -480,7 +478,7 @@ class AppSettingsExportImportTest {
         // Only import SOUL, merge mode — unselected sections stay unchanged
         target.importFromJson(json, toolIds, sections = setOf(ImportSection.SOUL), replace = false)
 
-        assertEquals("New soul", target.getSoulText())
+        assertEquals("New soul", target.getSoulUser())
         // Memory and MCP should be preserved
         assertFalse(target.isMemoryEnabled())
         assertTrue(target.getMcpServersJson().contains("srv1"))
@@ -509,7 +507,7 @@ class AppSettingsExportImportTest {
         // Check counts
         assertNull(sections[ImportSection.SOUL]) // soul has no count
         assertEquals("2", sections[ImportSection.MCP])
-        assertEquals("3", sections[ImportSection.MEMORY])
+        assertNull(sections[ImportSection.MEMORY])
     }
 
     @Test
@@ -817,8 +815,8 @@ class AppSettingsExportImportTest {
         val appSettings = createAppSettings()
         val json = appSettings.exportToJson(toolIds)
         val sections = detectExportableSections(json)
-        // Tools is the only section that always has data on a fresh install (default tool states).
-        assertEquals(setOf(ImportSection.TOOLS), sections.keys)
+        // Tools and Memory (toggle) are always present on a fresh install.
+        assertEquals(setOf(ImportSection.TOOLS, ImportSection.MEMORY), sections.keys)
     }
 
     @Test
@@ -876,22 +874,21 @@ class AppSettingsExportImportTest {
     }
 
     @Test
-    fun `detectExportableSections hides Memory and Scheduling when arrays are empty`() {
+    fun `detectExportableSections shows Memory toggle and hides Scheduling when empty`() {
         val appSettings = createAppSettings()
         appSettings.setMemoryEnabled(true)
         appSettings.setSchedulingEnabled(true)
         val json = appSettings.exportToJson(toolIds)
-        val sections = detectExportableSections(json)
-        assertFalse(ImportSection.MEMORY in sections)
-        assertFalse(ImportSection.SCHEDULING in sections)
+        assertTrue(ImportSection.MEMORY in detectExportableSections(json))
+        assertFalse(ImportSection.SCHEDULING in detectExportableSections(json))
     }
 
     @Test
-    fun `detectExportableSections shows Memory with count when memories exist`() {
+    fun `detectExportableSections shows Memory section`() {
         val appSettings = createAppSettings()
-        appSettings.setMemoriesJson("""[{"key":"k1","value":"v1","category":"GENERAL"}]""")
+        appSettings.setMemoryEnabled(false)
         val json = appSettings.exportToJson(toolIds)
-        val sections = detectExportableSections(json)
-        assertEquals("1", sections[ImportSection.MEMORY])
+        assertTrue(ImportSection.MEMORY in detectExportableSections(json))
+        assertNull(detectExportableSections(json)[ImportSection.MEMORY])
     }
 }

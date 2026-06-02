@@ -1,4 +1,4 @@
-# Upstream Diff — Kai-custom vs upstream/main
+﻿# Upstream Diff â€” Kai-custom vs upstream/main
 
 Merge base: `727d3dbbf94` | Upstream HEAD: `bc7d622` (v2.7.0) | Our HEAD: `9047a65`
 
@@ -24,72 +24,72 @@ Since merge base (727d3db), upstream has 12 new commits. We've cherry-picked 2 (
 ## 1. Files added upstream (not in our fork)
 
 ### Skills system (need to create with `com.kai.custom` package)
-All already created in Phase A — location `com/kai/custom/skills/`:
+All already created in Phase A â€” location `com/kai/custom/skills/`:
 
 | Upstream file | Our file | Status |
 |---------------|----------|--------|
-| `skills/SkillManifest.kt` | `skills/SkillManifest.kt` | ✅ |
-| `skills/SkillFrontmatterParser.kt` | `skills/SkillFrontmatterParser.kt` | ✅ |
-| `skills/SkillMarketplaces.kt` | `skills/SkillMarketplaces.kt` | ✅ |
-| `skills/SkillRegistry.kt` | `skills/SkillRegistry.kt` | ✅ |
-| `skills/SkillManager.kt` | `skills/SkillManager.kt` | ✅ |
-| `ui/SandboxUriHandler.kt` | `ui/SandboxUriHandler.kt` | ✅ |
-| `ui/chat/composables/SkillAutocomplete.kt` | `ui/chat/composables/SkillAutocomplete.kt` | ✅ |
-| `ui/settings/SkillsSection.kt` | `ui/settings/SkillsSection.kt` | ✅ |
-| `composeResources/files/skills/create-skill/SKILL.md` | `composeResources/files/skills/create-skill/SKILL.md` | ✅ |
+| `skills/SkillManifest.kt` | `skills/SkillManifest.kt` | âœ… |
+| `skills/SkillFrontmatterParser.kt` | `skills/SkillFrontmatterParser.kt` | âœ… |
+| `skills/SkillMarketplaces.kt` | `skills/SkillMarketplaces.kt` | âœ… |
+| `skills/SkillRegistry.kt` | `skills/SkillRegistry.kt` | âœ… |
+| `skills/SkillManager.kt` | `skills/SkillManager.kt` | âœ… |
+| `ui/SandboxUriHandler.kt` | `ui/SandboxUriHandler.kt` | âœ… |
+| `ui/chat/composables/SkillAutocomplete.kt` | `ui/chat/composables/SkillAutocomplete.kt` | âœ… |
+| `ui/settings/SkillsSection.kt` | `ui/settings/SkillsSection.kt` | âœ… |
+| `composeResources/files/skills/create-skill/SKILL.md` | `composeResources/files/skills/create-skill/SKILL.md` | âœ… |
 
-### Test files (NOT created — different architecture)
+### Test files (NOT created â€” different architecture)
 
 | Upstream test file | Our status |
 |--------------------|------------|
-| `ChatSystemPromptBuilderTest.kt` | ❌ Skipped — we inject active skill via History.SYSTEM message, not via builder |
-| `GitHubSkillUrlTest.kt` | ✅ Created |
-| `SkillFrontmatterParserTest.kt` | ✅ Created |
-| `SkillManagerTest.kt` | ✅ Created |
-| `SkillMarketplaceManifestTest.kt` | ✅ Created |
-| `FakeSandboxController.kt` | ✅ Created |
-| `SandboxUriHandlerTest.kt` | ✅ Created |
-| `ChatViewModelSkillTest.kt` | ❌ Skipped — our ChatViewModel doesn't parse `/cmd` internally; skill selected via UI then `ask()` separately |
-| `DetectSlashQueryTest.kt` | ❌ Skipped — `detectSlashQuery` is inlined in QuestionInput, not a standalone function |
+| `ChatSystemPromptBuilderTest.kt` | âŒ Skipped â€” we inject active skill via History.SYSTEM message, not via builder |
+| `GitHubSkillUrlTest.kt` | âœ… Created |
+| `SkillFrontmatterParserTest.kt` | âœ… Created |
+| `SkillManagerTest.kt` | âœ… Created |
+| `SkillMarketplaceManifestTest.kt` | âœ… Created |
+| `FakeSandboxController.kt` | âœ… Created |
+| `SandboxUriHandlerTest.kt` | âœ… Created |
+| `ChatViewModelSkillTest.kt` | âŒ Skipped â€” our ChatViewModel doesn't parse `/cmd` internally; skill selected via UI then `ask()` separately |
+| `DetectSlashQueryTest.kt` | âŒ Skipped â€” `detectSlashQuery` is inlined in QuestionInput, not a standalone function |
 
-### Docs (NOT created — updated)
+### Docs (NOT created â€” updated)
 | Upstream doc | Our status |
 |-------------|------------|
-| `docs/features/skills.md` | ✅ Created |
+| `docs/features/skills.md` | âœ… Created |
 
 ---
 
-## 2. Files that differ — must port
+## 2. Files that differ â€” must port
 
-### Core skills integration — 16 files
+### Core skills integration â€” 16 files
 
 | File | Key difference | Priority |
 |------|---------------|----------|
-| `DataRepository.kt` | +5 skill interface methods, `ask(activeSkillId)` | ✅ DONE |
-| `RemoteDataRepository.kt` | `ask()`→`askInternal()`, skill methods impl, activeSkill plumbing | ✅ DONE |
-| `AppModule.kt` | +`SkillManager` singleton wiring | ✅ DONE |
-| `App.kt` | +`SandboxAwareUriHandler`, `LocalUriHandler` provider | ✅ PORTED |
-| `ChatSystemPromptBuilder.kt` | +`activeSkill` param + `appendActiveSkillSection()` | ❌ NOT PORTED (cancelled — active skill injected as system message in ask()) |
-| `ChatUiState.kt` | +`installedSkills: ImmutableList<SkillManifest>` | ✅ DONE |
-| `ChatViewModel.kt` | +`parseSkillInvocation()`, installedSkills refresh | ✅ DONE |
-| `ChatScreen.kt` | +installedSkills to QuestionInput | ✅ DONE |
-| `QuestionInput.kt` | +slash autocomplete, `detectSlashQuery()` | ✅ DONE |
-| `SettingsActions.kt` | +4 skill actions | ✅ DONE |
-| `SettingsUiState.kt` | +6 skill state fields + `PendingDeletion.Skill` | ✅ DONE |
-| `SettingsViewModel.kt` | +skill management logic | ✅ DONE |
-| `SettingsScreen.kt` | +Skills section in Tools tab | ✅ DONE |
-| `ToolsSettings.kt` | +SkillsSection integration | ✅ DONE |
-| `FakeDataRepository.kt` | +skill stubs | ✅ DONE |
-| `strings.xml` | +22 skill strings | ✅ DONE |
+| `DataRepository.kt` | +5 skill interface methods, `ask(activeSkillId)` | âœ… DONE |
+| `RemoteDataRepository.kt` | `ask()`â†’`askInternal()`, skill methods impl, activeSkill plumbing | âœ… DONE |
+| `AppModule.kt` | +`SkillManager` singleton wiring | âœ… DONE |
+| `App.kt` | +`SandboxAwareUriHandler`, `LocalUriHandler` provider | âœ… PORTED |
+| `ChatSystemPromptBuilder.kt` | +`activeSkill` param + `appendActiveSkillSection()` | âŒ NOT PORTED (cancelled â€” active skill injected as system message in ask()) |
+| `ChatUiState.kt` | +`installedSkills: ImmutableList<SkillManifest>` | âœ… DONE |
+| `ChatViewModel.kt` | +`parseSkillInvocation()`, installedSkills refresh | âœ… DONE |
+| `ChatScreen.kt` | +installedSkills to QuestionInput | âœ… DONE |
+| `QuestionInput.kt` | +slash autocomplete, `detectSlashQuery()` | âœ… DONE |
+| `SettingsActions.kt` | +4 skill actions | âœ… DONE |
+| `SettingsUiState.kt` | +6 skill state fields + `PendingDeletion.Skill` | âœ… DONE |
+| `SettingsViewModel.kt` | +skill management logic | âœ… DONE |
+| `SettingsScreen.kt` | +Skills section in Tools tab | âœ… DONE |
+| `ToolsSettings.kt` | +SkillsSection integration | âœ… DONE |
+| `FakeDataRepository.kt` | +skill stubs | âœ… DONE |
+| `strings.xml` | +22 skill strings | âœ… DONE |
 
 ### Model scores update
 | File | Difference | Status |
 |------|-----------|--------|
-| `ModelCatalog.kt` | +`hunyuan-hy3-preview`, updated Elo scores 2026-05-31 | ✅ Partially (scores updated, `hunyuan-hy3-preview` not confirmed) |
+| `ModelCatalog.kt` | +`hunyuan-hy3-preview`, updated Elo scores 2026-05-31 | âœ… Partially (scores updated, `hunyuan-hy3-preview` not confirmed) |
 
 ---
 
-## 3. Files that differ — may port
+## 3. Files that differ â€” may port
 
 | File | Difference | Priority |
 |------|-----------|----------|
@@ -98,7 +98,7 @@ All already created in Phase A — location `com/kai/custom/skills/`:
 
 ---
 
-## 4. Files that differ — ignore
+## 4. Files that differ â€” ignore
 
 | File | Reason |
 |------|--------|
@@ -146,7 +146,7 @@ All already created in Phase A — location `com/kai/custom/skills/`:
 
 ### Other
 - `ChatActions.kt` (separate file, not inside ChatViewModel)
-- `ChatSystemPromptBuilder.kt` (trimmed version — removed 6 sections)
+- `ChatSystemPromptBuilder.kt` (trimmed version â€” removed 6 sections)
 - `Persona.kt` + `PersonaManager.kt`
 - `AutoMemoryLearner.kt`, `HeartbeatMemoryExtractor.kt`
 - `ToolsContent` (separate component, upstream keeps in SettingsScreen)
@@ -172,12 +172,12 @@ All already created in Phase A — location `com/kai/custom/skills/`:
 ## 7. Remaining work
 
 ### Before build verification
-- (none — all Phase B edits done)
+- (none â€” all Phase B edits done)
 
 ### All done
-1. ✅ **App.kt SandboxAwareUriHandler** — `LocalUriHandler` provided for `file://` links
-2. ✅ **Test files** — 6 created (GitHubSkillUrl, SkillFrontmatterParser, SkillManager, SkillMarketplaceManifest, SandboxUriHandler, FakeSandboxController); 3 skipped (ChatSystemPromptBuilderTest, ChatViewModelSkillTest, DetectSlashQueryTest — architecture diff)
-3. ✅ **skills.md doc** — created
-4. ✅ **hunyuan-hy3-preview** already in ModelCatalog (from earlier port)
-5. ✅ **Skill strings in all 56 locale files** — translated per locale (snackbar_skill_removed only)
-6. ✅ **SandboxUriHandler wired in App.kt**
+1. âœ… **App.kt SandboxAwareUriHandler** â€” `LocalUriHandler` provided for `file://` links
+2. âœ… **Test files** â€” 6 created (GitHubSkillUrl, SkillFrontmatterParser, SkillManager, SkillMarketplaceManifest, SandboxUriHandler, FakeSandboxController); 3 skipped (ChatSystemPromptBuilderTest, ChatViewModelSkillTest, DetectSlashQueryTest â€” architecture diff)
+3. âœ… **skills.md doc** â€” created
+4. âœ… **hunyuan-hy3-preview** already in ModelCatalog (from earlier port)
+5. âœ… **Skill strings in all 56 locale files** â€” translated per locale (snackbar_skill_removed only)
+6. âœ… **SandboxUriHandler wired in App.kt**

@@ -1,8 +1,8 @@
-# Kai-custom Memory System Architecture
+﻿# Kai-custom Memory System Architecture
 
 ## Overview
 
-The memory system is a **two-tier, dual-backend** persistent memory layer for AI chat. It stores user facts, behavioral patterns, knowledge graph triples, and diary entries — all of which are surfaced to the AI in system prompts or heartbeat prompts. The system supports seamless switching between a local SQLite backend and a remote Python `alt-memory` MCP server.
+The memory system is a **two-tier, dual-backend** persistent memory layer for AI chat. It stores user facts, behavioral patterns, knowledge graph triples, and diary entries â€” all of which are surfaced to the AI in system prompts or heartbeat prompts. The system supports seamless switching between a local SQLite backend and a remote Python `alt-memory` MCP server.
 
 ---
 
@@ -24,8 +24,8 @@ MemoryEntry(
 ```
 
 **Two tiers defined by `protected`:**
-- `protected=false` — **User-facing memories**: facts, preferences, general info. Created by AI tools, AutoMemoryLearner. Visible in Settings, deletable.
-- `protected=true` — **Behavior learnings**: patterns observed by heartbeat. Created by HeartbeatMemoryExtractor. Hidden from deletion UI, rejected by `forget()`.
+- `protected=false` â€” **User-facing memories**: facts, preferences, general info. Created by AI tools, AutoMemoryLearner. Visible in Settings, deletable.
+- `protected=true` â€” **Behavior learnings**: patterns observed by heartbeat. Created by HeartbeatMemoryExtractor. Hidden from deletion UI, rejected by `forget()`.
 
 ### EntityData (persistence layer)
 
@@ -74,25 +74,25 @@ DiaryEntry(
 
 ```
 MemoryStore (interface)
-├── store() / reinforceMemory() / updateContent() / forget()
-├── storeProtected() / getUserMemories() / getBehaviorMemories()
-├── getAllMemories() / searchMemories()
-├── addFact() / queryFacts() / invalidateFact()        ← KG operations
-├── diaryWrite() / diaryRead()                          ← Diary operations
-├── exportDimension() / importDimension()               ← Backup
-│
-├── SqliteMemoryStore (local, wraps DimensionStore)      ← Default
-└── AltMemoryClient (remote, wraps MCP Client)           ← After migration
-     │
-     └── MemoryStoreProvider (delegates to either)        ← Injected as MemoryStore
+â”œâ”€â”€ store() / reinforceMemory() / updateContent() / forget()
+â”œâ”€â”€ storeProtected() / getUserMemories() / getBehaviorMemories()
+â”œâ”€â”€ getAllMemories() / searchMemories()
+â”œâ”€â”€ addFact() / queryFacts() / invalidateFact()        â† KG operations
+â”œâ”€â”€ diaryWrite() / diaryRead()                          â† Diary operations
+â”œâ”€â”€ exportDimension() / importDimension()               â† Backup
+â”‚
+â”œâ”€â”€ SqliteMemoryStore (local, wraps DimensionStore)      â† Default
+â””â”€â”€ AltMemoryClient (remote, wraps MCP Client)           â† After migration
+     â”‚
+     â””â”€â”€ MemoryStoreProvider (delegates to either)        â† Injected as MemoryStore
 ```
 
 **Wiring (Koin):**
 ```
-single<DimensionStore> → SqliteDimensionStore
-single<SqliteMemoryStore> → wraps DimensionStore
-single<MemoryStoreProvider> → wraps SqliteMemoryStore (can switch)
-single<MemoryStore> → MemoryStoreProvider  ← public API
+single<DimensionStore> â†’ SqliteDimensionStore
+single<SqliteMemoryStore> â†’ wraps DimensionStore
+single<MemoryStoreProvider> â†’ wraps SqliteMemoryStore (can switch)
+single<MemoryStore> â†’ MemoryStoreProvider  â† public API
 ```
 
 ---
@@ -103,7 +103,7 @@ single<MemoryStore> → MemoryStoreProvider  ← public API
 
 ### Tables
 
-**`entities`** — stores memories, diary entries, and all dimension data:
+**`entities`** â€” stores memories, diary entries, and all dimension data:
 ```sql
 CREATE TABLE entities (
     id TEXT PRIMARY KEY,
@@ -120,7 +120,7 @@ CREATE TABLE entities (
 )
 ```
 
-**`kg_facts`** — knowledge graph triple store:
+**`kg_facts`** â€” knowledge graph triple store:
 ```sql
 CREATE TABLE kg_facts (
     id TEXT PRIMARY KEY,
@@ -134,19 +134,19 @@ CREATE TABLE kg_facts (
 )
 ```
 
-**`realms` / `domains`** — metadata tables for organizing entity hierarchy.
+**`realms` / `domains`** â€” metadata tables for organizing entity hierarchy.
 
 ### Default Hierarchy
 ```
 agent/
-├── memories/     (GENERAL category)
-├── learnings/    (LEARNING category)
-├── errors/       (ERROR category)
-└── diary/
+â”œâ”€â”€ memories/     (GENERAL category)
+â”œâ”€â”€ learnings/    (LEARNING category)
+â”œâ”€â”€ errors/       (ERROR category)
+â””â”€â”€ diary/
 
 user/
-├── memories/     (GENERAL category)
-└── preferences/  (PREFERENCE category)
+â”œâ”€â”€ memories/     (GENERAL category)
+â””â”€â”€ preferences/  (PREFERENCE category)
 
 project/memories/
 system/memories/
@@ -166,8 +166,8 @@ system/errors/
 | AutoMemoryLearner | Every 5 chat exchanges | `store(source="auto_learner")` |
 
 **Where they appear:**
-- Chat system prompt → `## What I Know About You` section (1024-char budget)
-- Settings → MemoryManagementSheet (deletable, editable)
+- Chat system prompt â†’ `## What I Know About You` section (1024-char budget)
+- Settings â†’ MemoryManagementSheet (deletable, editable)
 - Search results via `searchMemories(query)`
 
 ### Tier 2: Behavior Learnings (`protected=true`)
@@ -177,19 +177,19 @@ system/errors/
 | HeartbeatMemoryExtractor | Post-heartbeat | `storeProtected(source="heartbeat")` |
 
 **Where they appear:**
-- Heartbeat prompt → `## Learned Patterns` section (as `learnedPatterns`)
-- Condensed into `soul_auto` → `## Behavior Notes` in combined soul text
+- Heartbeat prompt â†’ `## Learned Patterns` section (as `learnedPatterns`)
+- Condensed into `soul_auto` â†’ `## Behavior Notes` in combined soul text
 - NOT in chat system prompt's `## What I Know About You`
 - NOT deletable from UI (hidden by default, toggle to show, no delete button)
 - `forget()` rejects them
 
-### Promotion (Tier 2 → Tier 1 exit)
+### Promotion (Tier 2 â†’ Tier 1 exit)
 
 The `promote_learning` tool (called by AI during heartbeat) removes a behavior memory and appends its content to `soul_auto`:
 ```
 promote_learning(key, soul_addition)
-  → appSettings.setSoulAuto(current + soul_addition)
-  → memoryStore.forget(key)  // removes from protected memories
+  â†’ appSettings.setSoulAuto(current + soul_addition)
+  â†’ memoryStore.forget(key)  // removes from protected memories
 ```
 
 ---
@@ -200,25 +200,25 @@ promote_learning(key, soul_addition)
 
 ```
 User: "My name is Alice and I prefer dark mode"
-  → AI calls memory_store(key="user_name", content="Alice")
-  → AI calls memory_learn(key="pref_theme", content="dark mode", category="PREFERENCE")
-    → CommonTools → MemoryStore.store()
-      → SqliteMemoryStore.store()
-        → dimension.putEntity(realm="agent"|"user", domain=basedOnCategory)
-          → INSERT INTO entities (protected=0)
+  â†’ AI calls memory_store(key="user_name", content="Alice")
+  â†’ AI calls memory_learn(key="pref_theme", content="dark mode", category="PREFERENCE")
+    â†’ CommonTools â†’ MemoryStore.store()
+      â†’ SqliteMemoryStore.store()
+        â†’ dimension.putEntity(realm="agent"|"user", domain=basedOnCategory)
+          â†’ INSERT INTO entities (protected=0)
 ```
 
 ### 5b. AutoMemoryLearner (batch inline extraction)
 
 ```
 After every 5th AI response (RemoteDataRepository.ask()):
-  → AutoMemoryLearner.onExchangeComplete()
-    → counter hits 5, resets
-    → getRecentExchanges(3)  → last 3 user+assistant pairs
-    → dataRepository.askSilently(extraction prompt)
-      → AI returns JSON: [{key, content, category}, ...]
-    → For each item:
-      → if key doesn't exist → memoryStore.store(key, content, category, "auto_learner")
+  â†’ AutoMemoryLearner.onExchangeComplete()
+    â†’ counter hits 5, resets
+    â†’ getRecentExchanges(3)  â†’ last 3 user+assistant pairs
+    â†’ dataRepository.askSilently(extraction prompt)
+      â†’ AI returns JSON: [{key, content, category}, ...]
+    â†’ For each item:
+      â†’ if key doesn't exist â†’ memoryStore.store(key, content, category, "auto_learner")
 ```
 
 **Extraction rules** (instructed in prompt):
@@ -229,18 +229,18 @@ After every 5th AI response (RemoteDataRepository.ask()):
 
 ```
 After each heartbeat AI response (TaskScheduler.runHeartbeat()):
-  → HeartbeatMemoryExtractor.extractFromHeartbeat(response)
-    → Skip if blank or "HEARTBEAT_OK"
-    → getRecentExchanges(3)
-    → dataRepository.askSilently(behavior pattern prompt)
-      → AI returns JSON: [{key, content}, ...]
-    → For each item:
-      → if key doesn't exist → memoryStore.storeProtected(key, content, "heartbeat")
-    → If new items:
-      → condenseToSoulAuto()
-        → getBehaviorMemories()
-        → askSilently("Condense to 2-3 sentences")
-        → dataRepository.setSoulAuto(summary)
+  â†’ HeartbeatMemoryExtractor.extractFromHeartbeat(response)
+    â†’ Skip if blank or "HEARTBEAT_OK"
+    â†’ getRecentExchanges(3)
+    â†’ dataRepository.askSilently(behavior pattern prompt)
+      â†’ AI returns JSON: [{key, content}, ...]
+    â†’ For each item:
+      â†’ if key doesn't exist â†’ memoryStore.storeProtected(key, content, "heartbeat")
+    â†’ If new items:
+      â†’ condenseToSoulAuto()
+        â†’ getBehaviorMemories()
+        â†’ askSilently("Condense to 2-3 sentences")
+        â†’ dataRepository.setSoulAuto(summary)
 ```
 
 ---
@@ -268,7 +268,7 @@ Known Issues & Resolutions:
 {error entries, truncated}
 ```
 
-**Protected entries are SKIPPED** — behavior learnings never appear here.
+**Protected entries are SKIPPED** â€” behavior learnings never appear here.
 
 ### 6b. Soul Text (always present in system prompt)
 
@@ -306,7 +306,7 @@ Also includes a Promotion Candidates section for memories with high hitCount.
 | `kg_query` | (entity?, relation?, limit) | SELECT where subject or object matches |
 | `kg_invalidate` | (subject, predicate, object) | SET valid_to = now (soft delete) |
 
-**No temporal query support** in the current implementation — facts are matched by string equality only.
+**No temporal query support** in the current implementation â€” facts are matched by string equality only.
 
 ---
 
@@ -329,7 +329,7 @@ Also includes a Promotion Candidates section for memories with high hitCount.
 **Setting:** `isMemoryEnabled()` (default: ON), stored in SharedPreferences as `memory_enabled`.
 
 **When OFF:**
-1. Chat system prompt gets `memories=emptyList()`, `relevantMemories=emptyList()` — no `## What I Know About You`
+1. Chat system prompt gets `memories=emptyList()`, `relevantMemories=emptyList()` â€” no `## What I Know About You`
 2. `getAvailableTools()` excludes all memory/KG/diary tools + `promote_learning`
 3. AutoMemoryLearner still runs but has no memories to extract into (store() goes to DB but nothing surfaces)
 4. HeartbeatMemoryExtractor still writes protected memories (used for behavior notes)
@@ -338,12 +338,12 @@ Also includes a Promotion Candidates section for memories with high hitCount.
 
 ## 10. Alt Memory Backend (Optional Remote)
 
-**File:** `AltMemoryClient.kt` — delegates all MemoryStore operations to MCP server running inside Linux sandbox.
+**File:** `AltMemoryClient.kt` â€” delegates all MemoryStore operations to MCP server running inside Linux sandbox.
 
 **Lifecycle manager:** `AltMemoryLifecycleManager.runMigration()`:
 1. `pip install alt-memory` if needed
 2. Start `alt-memory mcp --transport sse --port 8316` in sandbox
-3. Copy all existing entities from `SqliteMemoryStore` → alt-memory via MCP calls
+3. Copy all existing entities from `SqliteMemoryStore` â†’ alt-memory via MCP calls
 4. Switch `MemoryStoreProvider` to use `AltMemoryClient`
 
 **After migration:** All memory operations go through Python alt-memory server (vector search, persistent storage). A `switchToLocal()` method can revert.
@@ -352,20 +352,20 @@ Also includes a Promotion Candidates section for memories with high hitCount.
 
 ## 11. Memory Management UI
 
-### MemoryManagementSheet (Settings → Memories)
+### MemoryManagementSheet (Settings â†’ Memories)
 
 Three tabs:
-- **Stats** — total entity count from `countDimensionEntities()`
-- **Memories** — lists all non-protected memories by default
+- **Stats** â€” total entity count from `countDimensionEntities()`
+- **Memories** â€” lists all non-protected memories by default
   - "Show protected" toggle reveals protected entries
   - Protected entries: no delete button
   - Non-protected: delete with 4-second undo timeout, edit inline
-- **KG Facts** — lists all triples from `queryKgFacts()`
+- **KG Facts** â€” lists all triples from `queryKgFacts()`
 
 ### Memory back up
 
-- Export: `exportDimension()` → gzipped JSON → `.kai-dimension` file
-- Import: `.kai-dimension` file → `importDimension(data)` → restore
+- Export: `exportDimension()` â†’ gzipped JSON â†’ `.kai-dimension` file
+- Import: `.kai-dimension` file â†’ `importDimension(data)` â†’ restore
 
 ---
 
@@ -375,9 +375,9 @@ Three keys in SharedPreferences:
 
 | Key | Set by | Shown in | Exported |
 |-----|--------|----------|----------|
-| `soul_user` | User (Settings → Soul editor) | Chat system prompt | Yes |
+| `soul_user` | User (Settings â†’ Soul editor) | Chat system prompt | Yes |
 | `soul_auto` | HeartbeatMemoryExtractor (auto) | Chat system prompt as `## Behavior Notes` | No |
-| `current_persona` | User (Settings → Persona name field) | Prepended to combined soul | Partially |
+| `current_persona` | User (Settings â†’ Persona name field) | Prepended to combined soul | Partially |
 
 **Combined output** (`getSoulText()`):
 ```
@@ -397,16 +397,16 @@ You are {personaName}.
 
 ```
 SqliteDimensionStore (single, Android)
-  └── SqliteMemoryStore (single)
-        └── MemoryStoreProvider (single, injected as MemoryStore)
-              ├── AutoMemoryLearner (in RemoteDataRepository)
-              ├── HeartbeatManager (single)
-              │     └── HeartbeatPromptBuilder.buildHeartbeatPrompt()
-              ├── TaskScheduler → HeartbeatMemoryExtractor (lazy)
-              ├── CommonTools (AI-facing memory/KG/diary tools)
-              ├── HeartbeatTools (promote_learning tool)
-              ├── SettingsViewModel (UI management)
-              └── ChatSystemPromptBuilder (prompt construction)
+  â””â”€â”€ SqliteMemoryStore (single)
+        â””â”€â”€ MemoryStoreProvider (single, injected as MemoryStore)
+              â”œâ”€â”€ AutoMemoryLearner (in RemoteDataRepository)
+              â”œâ”€â”€ HeartbeatManager (single)
+              â”‚     â””â”€â”€ HeartbeatPromptBuilder.buildHeartbeatPrompt()
+              â”œâ”€â”€ TaskScheduler â†’ HeartbeatMemoryExtractor (lazy)
+              â”œâ”€â”€ CommonTools (AI-facing memory/KG/diary tools)
+              â”œâ”€â”€ HeartbeatTools (promote_learning tool)
+              â”œâ”€â”€ SettingsViewModel (UI management)
+              â””â”€â”€ ChatSystemPromptBuilder (prompt construction)
 ```
 
 ---
@@ -432,58 +432,58 @@ SqliteDimensionStore (single, Android)
 ### User Memory Lifecycle
 ```
 User says "I hate pineapple on pizza"
-  → AI calls memory_store(key="food_pineapple", content="hates pineapple on pizza")
-    → CommonTools → MemoryStore.store()
-      → SqliteMemoryStore → EntityData(realm="agent", domain="memories", protected=0)
-        → INSERT INTO entities
+  â†’ AI calls memory_store(key="food_pineapple", content="hates pineapple on pizza")
+    â†’ CommonTools â†’ MemoryStore.store()
+      â†’ SqliteMemoryStore â†’ EntityData(realm="agent", domain="memories", protected=0)
+        â†’ INSERT INTO entities
 
 Next chat:
-  → getActiveSystemPrompt()
-    → getUserMemories() → filters !protected
-    → ChatSystemPromptBuilder buildChatSystemPrompt(memories, budget=1024)
-      → "## What I Know About You\n- hates pineapple on pizza"
+  â†’ getActiveSystemPrompt()
+    â†’ getUserMemories() â†’ filters !protected
+    â†’ ChatSystemPromptBuilder buildChatSystemPrompt(memories, budget=1024)
+      â†’ "## What I Know About You\n- hates pineapple on pizza"
 
 Settings:
-  → User views → delete → MemoryStore.forget("food_pineapple")
-    → EntityData found by metadata key → DELETE
+  â†’ User views â†’ delete â†’ MemoryStore.forget("food_pineapple")
+    â†’ EntityData found by metadata key â†’ DELETE
 ```
 
 ### Behavior Memory Lifecycle
 ```
 Heartbeat fires (every N minutes):
-  → TaskScheduler.runHeartbeat()
-    → heartbeatManager.buildHeartbeatPrompt()
-      → getBehaviorMemories() → learnedPatterns section
-    → heartbeatMemoryExtractor.extractFromHeartbeat(response)
-      → askSilently() → parse JSON
-      → storeProtected(key="pattern_brevity", content="prefers brief replies")
-        → EntityData(protected=1) → INSERT INTO entities
-      → condenseToSoulAuto()
-        → setSoulAuto("User prefers concise responses...")
+  â†’ TaskScheduler.runHeartbeat()
+    â†’ heartbeatManager.buildHeartbeatPrompt()
+      â†’ getBehaviorMemories() â†’ learnedPatterns section
+    â†’ heartbeatMemoryExtractor.extractFromHeartbeat(response)
+      â†’ askSilently() â†’ parse JSON
+      â†’ storeProtected(key="pattern_brevity", content="prefers brief replies")
+        â†’ EntityData(protected=1) â†’ INSERT INTO entities
+      â†’ condenseToSoulAuto()
+        â†’ setSoulAuto("User prefers concise responses...")
 
 Next heartbeat:
-  → ## Learned Patterns: "prefers brief replies (reinforced 1x)"
+  â†’ ## Learned Patterns: "prefers brief replies (reinforced 1x)"
 
 AI promotes:
-  → promote_learning("pattern_brevity", "Values concise communication")
-    → soul_auto updated → memory forgotten
+  â†’ promote_learning("pattern_brevity", "Values concise communication")
+    â†’ soul_auto updated â†’ memory forgotten
 ```
 
 ### Memory Disabled Flow
 ```
 User toggles memory OFF:
-  → Platform.getAvailableTools() → memory/KG/diary tools removed
-  → getActiveSystemPrompt() → memories=[], relevantMemories=[]
-  → No "## What I Know About You" section
-  → Memory still persists in DB, just not surfaced
+  â†’ Platform.getAvailableTools() â†’ memory/KG/diary tools removed
+  â†’ getActiveSystemPrompt() â†’ memories=[], relevantMemories=[]
+  â†’ No "## What I Know About You" section
+  â†’ Memory still persists in DB, just not surfaced
 ```
 
 ---
 
 ## 16. Security & Isolation
 
-- **Protected memories** cannot be deleted via `forget()` — enforced at store level
-- **Protected memories** hidden from chat system prompt — never exposed to AI context (only in heartbeat prompt)
-- **Protected memories** hidden from UI by default — user must toggle "Show protected" to see them
-- **Tool gating** — all memory operations are behind `isMemoryEnabled()` toggle
+- **Protected memories** cannot be deleted via `forget()` â€” enforced at store level
+- **Protected memories** hidden from chat system prompt â€” never exposed to AI context (only in heartbeat prompt)
+- **Protected memories** hidden from UI by default â€” user must toggle "Show protected" to see them
+- **Tool gating** â€” all memory operations are behind `isMemoryEnabled()` toggle
 - **Export** only includes `soul_user`, not `soul_auto` (behavior summaries stay local)

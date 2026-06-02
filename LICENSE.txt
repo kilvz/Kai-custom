@@ -1,4 +1,4 @@
-
+﻿
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -188,7 +188,7 @@
       identification within third-party archives.
 
    Copyright 2025 Simon Schubert (original Kai)
-   Copyright 2026 kilvz (Kai 9001 / Kai Custom modifications)
+   Copyright 2026 kilvz (K.Ai / Kai Custom modifications)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -201,3 +201,5 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+

@@ -1,4 +1,4 @@
-# Notifications
+﻿# Notifications
 
 **Last verified:** 2026-05-27 (per-app filtering delegated to system Notification Access "Apps" picker)
 
@@ -13,25 +13,25 @@ There is no "send" counterpart in v1. Acting on a notification (replying via `Re
 - **Android**: fully available.
 - **iOS / desktop / web**: unsupported. iOS does not allow third-party apps to read system notifications at all; desktop and web have no equivalent surface. No-op stubs.
 
-The gate is manifest-based: `androidApp/src/foss/AndroidManifest.xml` declares the listener service with `BIND_NOTIFICATION_LISTENER_SERVICE`. At runtime the app queries `PackageManager.getPackageInfo(…, GET_SERVICES)` to decide whether to show the feature.
+The gate is manifest-based: `androidApp/src/foss/AndroidManifest.xml` declares the listener service with `BIND_NOTIFICATION_LISTENER_SERVICE`. At runtime the app queries `PackageManager.getPackageInfo(â€¦, GET_SERVICES)` to decide whether to show the feature.
 
 ## Scope
 
 - **Read**: list / read / search notifications posted to the system tray since the listener was bound.
-- **Per-app filtering is delegated to the OS.** System Notification Access already exposes an "Apps" picker per listener — if the user unchecks an app there, `onNotificationPosted` is never fired for that package. We don't duplicate that UI in Kai; the in-app toggle is just a master switch for the whole feature.
-- **Visible notifications only.** Ongoing/foreground-service notifications (media controls, downloads, navigation) are filtered out — they are sticky UI affordances, not events.
+- **Per-app filtering is delegated to the OS.** System Notification Access already exposes an "Apps" picker per listener â€” if the user unchecks an app there, `onNotificationPosted` is never fired for that package. We don't duplicate that UI in Kai; the in-app toggle is just a master switch for the whole feature.
+- **Visible notifications only.** Ongoing/foreground-service notifications (media controls, downloads, navigation) are filtered out â€” they are sticky UI affordances, not events.
 - **No reply, no dismiss, no action invocation in v1.** The listener is read-only.
 - **No content from secure / sensitive flag.** Notifications posted with `Notification.VISIBILITY_SECRET` are skipped. Posts marked sensitive by the system (lockscreen-redacted) are captured but flagged so the AI can choose to elide content.
 
 ## Opt-in flow
 
-Notification access is granted via system settings, not a runtime permission dialog — there is no `requestPermissions` path for `BIND_NOTIFICATION_LISTENER_SERVICE`.
+Notification access is granted via system settings, not a runtime permission dialog â€” there is no `requestPermissions` path for `BIND_NOTIFICATION_LISTENER_SERVICE`.
 
-1. In **Settings → Agent → Notifications → "Read notifications"**, the user flips the toggle on.
+1. In **Settings â†’ Agent â†’ Notifications â†’ "Read notifications"**, the user flips the toggle on.
 2. The app deep-links to **Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS** (or the per-component variant on API 30+) and instructs the user to enable Kai in the list.
-3. On return, the app polls `NotificationManager.isNotificationListenerAccessGranted(…)` (API 27+) or `Settings.Secure.getString("enabled_notification_listeners")`. If granted, the toggle stays on; if not, the toggle resets and an inline hint appears.
-4. Once granted, Android binds `KaiNotificationListenerService`. From then on every `onNotificationPosted` callback that passes the visibility filters writes a record into the pending queue. The user can refine *which* apps Kai sees from the same system Notification Access screen — the "Apps" picker per listener is the source of truth.
-5. On the next heartbeat, the queue snapshot is included in the prompt under `## New Notifications`. After the heartbeat run, exactly that snapshot is removed from the queue — notifications that arrived during the call survive to the next heartbeat.
+3. On return, the app polls `NotificationManager.isNotificationListenerAccessGranted(â€¦)` (API 27+) or `Settings.Secure.getString("enabled_notification_listeners")`. If granted, the toggle stays on; if not, the toggle resets and an inline hint appears.
+4. Once granted, Android binds `KaiNotificationListenerService`. From then on every `onNotificationPosted` callback that passes the visibility filters writes a record into the pending queue. The user can refine *which* apps Kai sees from the same system Notification Access screen â€” the "Apps" picker per listener is the source of truth.
+5. On the next heartbeat, the queue snapshot is included in the prompt under `## New Notifications`. After the heartbeat run, exactly that snapshot is removed from the queue â€” notifications that arrived during the call survive to the next heartbeat.
 
 If the user later revokes notification access from system settings, `onListenerDisconnected` fires, the support check flips to false, and the read tools stop appearing in the AI's available-tools list until access is re-granted.
 
@@ -39,13 +39,13 @@ If the user later revokes notification access from system settings, `onListenerD
 
 Per-app filtering is **the OS's job**. Android's system Notification Access screen, when opened on a specific listener, exposes an "Apps" picker that lets the user toggle which apps the listener can read. Kai's settings card includes a "Manage apps" button that deep-links straight there.
 
-This was a deliberate simplification — earlier iterations of this feature shipped a Kai-side "Ignored apps" list, but the OS-level picker covers the same ground without duplicating UI or maintaining a parallel allowlist. A small set of packages is still **hard-blocked** at the listener callback (Kai itself, system UI) to avoid feedback loops, but everything else flows through whatever the system has approved.
+This was a deliberate simplification â€” earlier iterations of this feature shipped a Kai-side "Ignored apps" list, but the OS-level picker covers the same ground without duplicating UI or maintaining a parallel allowlist. A small set of packages is still **hard-blocked** at the listener callback (Kai itself, system UI) to avoid feedback loops, but everything else flows through whatever the system has approved.
 
 ## No polling interval
 
 Unlike SMS and email, there is **no `pollIntervalMinutes`**. Notifications are push: the listener service receives `onNotificationPosted` callbacks the moment a notification fires, and writes synchronously to the store. The scheduler does not need a `checkNewNotifications` hook.
 
-The heartbeat still drives the AI summarisation cadence — the pending queue accumulates between heartbeats and gets flushed when the heartbeat runs.
+The heartbeat still drives the AI summarisation cadence â€” the pending queue accumulates between heartbeats and gets flushed when the heartbeat runs.
 
 ## Retention
 
@@ -93,8 +93,8 @@ The heartbeat prompt builder gains a `## New Notifications` section, formatted p
 ```
 ## New Notifications
 These notifications arrived since the last heartbeat. Summarise briefly; only flag items that genuinely need attention.
-- **WhatsApp** — Alice (id: 0|com.whatsapp|...): Hey, are we still on for tonight?
-- **Gmail** (id: 0|com.google.android.gm|...): New message from boss@…
+- **WhatsApp** â€” Alice (id: 0|com.whatsapp|...): Hey, are we still on for tonight?
+- **Gmail** (id: 0|com.google.android.gm|...): New message from boss@â€¦
 ```
 
 Same lifecycle as the SMS pending queue: the snapshot is taken before the heartbeat, only that snapshot is removed afterward, anything that arrived during the call survives.
@@ -105,15 +105,15 @@ No notifications-specific push notification. New notifications surface via the e
 
 ## Settings UI
 
-The Notifications section appears in **Settings → Agent** only when `isNotificationsSupported` is true. One card with:
+The Notifications section appears in **Settings â†’ Agent** only when `isNotificationsSupported` is true. One card with:
 
-- **Read notifications** toggle — enabling deep-links to system notification-access settings; the toggle stays off until access is confirmed on return.
-- **"Open notification access"** button — shown when the toggle is on but access has not been granted (or was revoked).
-- **Listener status** — "Listener active" / "Listener inactive — check notification access".
-- **"Manage apps"** button — deep-links to the same system Notification Access screen so the user can adjust which apps Kai can read.
-- **Queued count + Clear queue** — number of notifications sitting in the pending queue waiting for the next heartbeat, with a button to flush them on demand.
+- **Read notifications** toggle â€” enabling deep-links to system notification-access settings; the toggle stays off until access is confirmed on return.
+- **"Open notification access"** button â€” shown when the toggle is on but access has not been granted (or was revoked).
+- **Listener status** â€” "Listener active" / "Listener inactive â€” check notification access".
+- **"Manage apps"** button â€” deep-links to the same system Notification Access screen so the user can adjust which apps Kai can read.
+- **Queued count + Clear queue** â€” number of notifications sitting in the pending queue waiting for the next heartbeat, with a button to flush them on demand.
 
-There is **no poll interval slider** — the listener is push-driven.
+There is **no poll interval slider** â€” the listener is push-driven.
 
 ## Key Files
 
@@ -130,12 +130,12 @@ There is **no poll interval slider** — the listener is push-driven.
 | `composeApp/src/androidMain/.../tools/NotificationListenerController.android.kt` | `NotificationManager.isNotificationListenerAccessGranted` + `Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS` deep-link |
 | `composeApp/src/androidMain/.../Platform.android.kt` | `isNotificationsSupported` gate + conditional tool registration |
 | `composeApp/src/commonMain/.../data/HeartbeatPromptBuilder.kt` | `## New Notifications` section renderer |
-| `composeApp/src/commonMain/.../data/TaskScheduler.kt` | Heartbeat snapshot/remove lifecycle for the pending queue (no poll hook — listener is push) |
+| `composeApp/src/commonMain/.../data/TaskScheduler.kt` | Heartbeat snapshot/remove lifecycle for the pending queue (no poll hook â€” listener is push) |
 | `composeApp/src/commonMain/.../ui/settings/HeartbeatSection.kt` | `NotificationsSection` Compose UI with toggle + Manage apps deep-link |
 
 ## Future scope (not v1)
 
 - **`reply_notification` tool.** Inspect the captured `Notification.actions` for a `RemoteInput`-bearing reply action; if present, expose a draft tool that mirrors `reply_sms` (banner-gated send). Useful for messaging apps.
 - **`dismiss_notification` tool.** Call `NotificationListenerService.cancelNotification(key)`. Low-friction so could ship behind a separate "Allow dismissing" toggle.
-- **OTP redaction.** Auto-detect 4–8 digit OTP-style codes in capture and elide them from the heartbeat prompt by default; let the AI request the full body via `read_notification` only when it's clearly a non-sensitive context.
+- **OTP redaction.** Auto-detect 4â€“8 digit OTP-style codes in capture and elide them from the heartbeat prompt by default; let the AI request the full body via `read_notification` only when it's clearly a non-sensitive context.
 - **Per-channel filtering.** Within an allowed app, let the user pick which `NotificationChannel` IDs to capture (e.g. allow Slack mentions, drop Slack reactions).

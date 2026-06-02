@@ -1,5 +1,5 @@
-<resources>
-    <string name="welcome_message">Maligayang pagdating sa Kai 9001</string>
+﻿<resources>
+    <string name="welcome_message">Maligayang pagdating sa K.Ai</string>
     <string name="prompt_ask_question">Magtanong</string>
     <string name="error_invalid_api_key">Hindi wastong API Key. Suriin ang iyong mga setting.</string>
     <string name="error_rate_limit_exceeded">Nalampasan na ang limitasyon ng request. Subukan muli mamaya.</string>
@@ -74,11 +74,11 @@
     <string name="settings_soul">Kaluluwa</string>
     <string name="settings_soul_description">Tukuyin kung paano kumikilos ang AI gamit ang isang system prompt. Magkakaroon din ang AI ng access sa mga nakaimbak nitong alaala.</string>
     <string name="settings_soul_save">I-save</string>
-    <string name="default_soul">Hindi ka chatbot. Ikaw ay isang personal na katulong na lumalaki kasama ang iyong gumagamit.\n\n## Paano Maging\n\n**Maging tunay na makatutulong.** Iwasan ang "Magandang tanong!" at "Masaya akong tumulong!" — tumulong lang. Ang mga kilos ay nagsasalita nang mas malakas kaysa sa mga salitang panpalaman.\n\n**Magkaroon ng mga opinyon.** Pinapayagan kang hindi sumang-ayon, mas gusto ang mga bagay, o mahanap ang isang bagay na kawili-wili. Ang katulong na walang personalidad ay isang search engine lamang na may karagdagang hakbang.\n\n**Maging mapagkukunan.** Subukang alamin mula sa konteksto at sa iyong mga alaala bago magtanong. Bumalik na may mga sagot, hindi mga tanong.\n\n**Maging maigsi.** Maikli at malinaw bilang default. Pumunta nang mas malalim kapag kinakailangan ng paksa.\n\n## Mga Hangganan\n\n- Igalang ang privacy. Huwag ulitin ang sensitibong impormasyon nang walang dahilan.\n- Kapag nag-aalangan tungkol sa isang aksyon, magtanong muna.\n- Maging tapat kapag hindi mo alam ang isang bagay.</string>
+    <string name="default_soul">Hindi ka chatbot. Ikaw ay isang personal na katulong na lumalaki kasama ang iyong gumagamit.\n\n## Paano Maging\n\n**Maging tunay na makatutulong.** Iwasan ang "Magandang tanong!" at "Masaya akong tumulong!" â€” tumulong lang. Ang mga kilos ay nagsasalita nang mas malakas kaysa sa mga salitang panpalaman.\n\n**Magkaroon ng mga opinyon.** Pinapayagan kang hindi sumang-ayon, mas gusto ang mga bagay, o mahanap ang isang bagay na kawili-wili. Ang katulong na walang personalidad ay isang search engine lamang na may karagdagang hakbang.\n\n**Maging mapagkukunan.** Subukang alamin mula sa konteksto at sa iyong mga alaala bago magtanong. Bumalik na may mga sagot, hindi mga tanong.\n\n**Maging maigsi.** Maikli at malinaw bilang default. Pumunta nang mas malalim kapag kinakailangan ng paksa.\n\n## Mga Hangganan\n\n- Igalang ang privacy. Huwag ulitin ang sensitibong impormasyon nang walang dahilan.\n- Kapag nag-aalangan tungkol sa isang aksyon, magtanong muna.\n- Maging tapat kapag hindi mo alam ang isang bagay.</string>
     <string name="bot_message_regenerate_content_description">Muling buuin</string>
     <string name="error_empty_response">Walang natanggap na sagot. Subukang magsimula ng bagong chat o paikliin ang iyong mensahe.</string>
     <string name="settings_daemon_mode">Daemon Mode</string>
-    <string name="settings_daemon_mode_description">Panatilihing tumatakbo ang Kai 9001 sa background para maisagawa ang mga naka-schedule na gawain kahit wala sa harapan ang app.</string>
+    <string name="settings_daemon_mode_description">Panatilihing tumatakbo ang K.Ai sa background para maisagawa ang mga naka-schedule na gawain kahit wala sa harapan ang app.</string>
     <string name="settings_scheduled_tasks">Mga Naka-schedule na Gawain</string>
     <string name="settings_scheduled_tasks_description">Mga gawain na naka-schedule ng AI para sa hinaharap na pagsasagawa. Hilingin sa AI na ipaalala sa iyo o magpatakbo ng isang bagay sa ibang pagkakataon upang lumikha ng mga naka-schedule na gawain.</string>
     <string name="settings_scheduled_tasks_cancel">Kanselahin ang gawain</string>
@@ -143,14 +143,14 @@
     <string name="tab_settings">Mga Setting</string>
     <string name="fallback_answered_by">Sinagot ng %1$s (fallback)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Sinusubukan ang %1$s…</string>
+    <string name="fallback_trying_next">Sinusubukan ang %1$sâ€¦</string>
     <string name="error_all_services_failed">Nabigo ang lahat ng serbisyo.</string>
     <string name="settings_heartbeat_interval">Pagitan</string>
     <string name="settings_heartbeat_active_hours">Mga Aktibong Oras</string>
     <string name="settings_documentation">Dokumentasyon</string>
-    <string name="waiting_thinking">Nag-iisip…</string>
-    <string name="waiting_working">Nagtatrabaho…</string>
-    <string name="waiting_brewing">Naghahanda…</string>
+    <string name="waiting_thinking">Nag-iisipâ€¦</string>
+    <string name="waiting_working">Nagtatrabahoâ€¦</string>
+    <string name="waiting_brewing">Naghahandaâ€¦</string>
     <string name="settings_mcp_servers">Mga MCP Server</string>
     <string name="settings_mcp_servers_description">Kumonekta sa mga external na tool server gamit ang Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Magdagdag ng MCP Server</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Kanselahin</string>
     <string name="settings_mcp_remove">Alisin</string>
     <string name="settings_mcp_refresh">I-refresh</string>
-    <string name="settings_mcp_status_connecting">Kumokonekta…</string>
+    <string name="settings_mcp_status_connecting">Kumokonektaâ€¦</string>
     <string name="settings_mcp_status_connected">Konektado</string>
     <string name="settings_mcp_status_error">Nabigo ang koneksyon</string>
     <string name="settings_mcp_no_tools">Walang nahanap na tools</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Modelo</string>
     <string name="settings_heartbeat_model_default">Default</string>
     <string name="settings_import_partial">Na-import ang mga setting na may %1$d na seksyon na may mga error.</string>
-    <string name="settings_model_search">Maghanap ng mga modelo…</string>
+    <string name="settings_model_search">Maghanap ng mga modeloâ€¦</string>
     <string name="waiting_content_description">Naghihintay ng tugon</string>
     <string name="chat_history_content_description">Kasaysayan ng chat</string>
     <string name="chat_history_title">Kasaysayan ng Chat</string>
@@ -223,15 +223,15 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">Ginagamit ng AI ang environment na ito para mag-run ng mga command.\nMaaari ka ring mag-run ng mga command nang manu-mano sa ibaba.</string>
-    <string name="terminal_input_placeholder">ilagay ang utos…</string>
+    <string name="terminal_input_placeholder">ilagay ang utosâ€¦</string>
     <string name="terminal_run_content_description">Patakbuhin</string>
     <string name="terminal_stop_content_description">Itigil</string>
     <string name="interactive_welcome_title">Ganap akong gumagana.</string>
     <string name="interactive_welcome_subtitle">Sabihin mo sa akin kung ano ang gusto mong gawin.</string>
     <string name="interactive_back_content_description">Bumalik</string>
-    <string name="interactive_title">Kai 9001</string>
+    <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Lumabas sa interactive mode</string>
-    <string name="interactive_ui_parsing_failed">Nabigo ang pag-parse ng UI, sinusubukan muli…</string>
+    <string name="interactive_ui_parsing_failed">Nabigo ang pag-parse ng UI, sinusubukan muliâ€¦</string>
     <string name="settings_sponsors_monthly">Buwanang mga sponsor</string>
     <string name="settings_sponsors_past">Mga nakaraang sponsor</string>
     <string name="snackbar_undo">I-undo</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Para kay %1$s</string>
     <string name="sms_draft_banner_send">Ipadala</string>
     <string name="sms_draft_banner_discard">Itapon</string>
-    <string name="sms_draft_banner_sending">Ipinapadala…</string>
+    <string name="sms_draft_banner_sending">Ipinapadalaâ€¦</string>
     <string name="sms_draft_banner_sent">Naipadala</string>
     <string name="sms_draft_banner_failed">Nabigo: %1$s</string>
     <string name="sms_draft_banner_dismiss">I-dismiss</string>
@@ -353,7 +353,7 @@
     <string name="settings_notifications_access_button">Buksan ang notification access</string>
     <string name="settings_notifications_manage_apps">Pamahalaan ang mga app</string>
     <string name="settings_notifications_listener_bound">Aktibo ang listener</string>
-    <string name="settings_notifications_listener_disconnected">Hindi aktibo ang listener — suriin ang notification access</string>
+    <string name="settings_notifications_listener_disconnected">Hindi aktibo ang listener â€” suriin ang notification access</string>
     <string name="settings_notifications_queued">%1$d notification sa pila para sa susunod na heartbeat</string>
     <string name="settings_notifications_clear_queue">I-clear ang pila</string>
     <string name="settings_sandbox_subtab_terminal">Terminal</string>

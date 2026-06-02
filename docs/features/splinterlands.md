@@ -1,4 +1,4 @@
-# Splinterlands Auto-Battle
+﻿# Splinterlands Auto-Battle
 
 Last verified: 2026-05-14
 
@@ -42,7 +42,7 @@ The Start button is disabled when no services are configured.
 
 The battle loop runs in its own long-lived coroutine scope (tied to the Koin singleton lifetime, not the ViewModel). This means battles survive navigation away from the Settings screen and continue running in the background. On Android, starting a battle also activates the foreground service (via DaemonController) to keep the process alive.
 
-The Stop button behavior depends on the current phase. Before a match is committed (Idle, LoggingIn, CheckingEnergy, FindingMatch, WaitingForOpponent) pressing Stop cancels immediately and signs `sm_cancel_match` if needed. During mid-battle phases (FetchingCollection, PickingTeam, SubmittingTeam, WaitingForResult) pressing Stop sets a graceful stop flag — the current battle finishes normally, then the loop exits. The button shows "Stopping..." while waiting for the battle to complete. The battle loop also auto-stops after 5 consecutive errors or when energy reaches zero.
+The Stop button behavior depends on the current phase. Before a match is committed (Idle, LoggingIn, CheckingEnergy, FindingMatch, WaitingForOpponent) pressing Stop cancels immediately and signs `sm_cancel_match` if needed. During mid-battle phases (FetchingCollection, PickingTeam, SubmittingTeam, WaitingForResult) pressing Stop sets a graceful stop flag â€” the current battle finishes normally, then the loop exits. The button shows "Stopping..." while waiting for the battle to complete. The battle loop also auto-stops after 5 consecutive errors or when energy reaches zero.
 
 ## Team Picking
 

@@ -1,4 +1,4 @@
-# Tasks
+﻿# Tasks
 
 **Last verified:** 2026-05-14
 
@@ -14,9 +14,9 @@ A scheduled action containing an id (UUID), a human-readable description, a prom
 
 How a task is dispatched. Stored as an enum `TaskTrigger` on every task:
 
-- **TIME** — fires once at `scheduledAtEpochMs`, then transitions to COMPLETED.
-- **CRON** — recurs on a cron expression; `scheduledAtEpochMs` holds the next fire time. Stays PENDING; the scheduler advances it after each run.
-- **HEARTBEAT** — a standing addition to every heartbeat self-check. Not picked up by the time-based poll loop; instead the prompt is appended to the heartbeat message under `## Heartbeat Additions`. Stays PENDING until the user (or AI) cancels it. `scheduledAtEpochMs`/`cron` are ignored.
+- **TIME** â€” fires once at `scheduledAtEpochMs`, then transitions to COMPLETED.
+- **CRON** â€” recurs on a cron expression; `scheduledAtEpochMs` holds the next fire time. Stays PENDING; the scheduler advances it after each run.
+- **HEARTBEAT** â€” a standing addition to every heartbeat self-check. Not picked up by the time-based poll loop; instead the prompt is appended to the heartbeat message under `## Heartbeat Additions`. Stays PENDING until the user (or AI) cancels it. `scheduledAtEpochMs`/`cron` are ignored.
 
 Legacy tasks stored before the `trigger` field existed are migrated on load: if `cron != null` they become `CRON`, otherwise `TIME`.
 
@@ -61,23 +61,23 @@ A 5-field schedule format (`minute hour day-of-month month day-of-week`) used fo
 
 ### schedule_task Validation
 
-- **Exactly one** of `execute_at` (ISO 8601), `cron`, or `on_heartbeat: true` must be provided — they are mutually exclusive
+- **Exactly one** of `execute_at` (ISO 8601), `cron`, or `on_heartbeat: true` must be provided â€” they are mutually exclusive
 - `execute_at` accepts offset-qualified (`2026-04-22T22:32:39+02:00`, `...Z`) or naive (`2026-04-22T22:32:39`) values. Naive values are interpreted in the user's local timezone, which is surfaced to the AI via the `## Context` block's `Local time` line. Offset-qualified form is preferred to avoid UTC/local ambiguity
-- Past-dated `execute_at` values (more than a minute before now) are rejected at tool-call time with an error that points at the `Local time` context — most often this is a UTC/local sign flip that the model can correct on retry
+- Past-dated `execute_at` values (more than a minute before now) are rejected at tool-call time with an error that points at the `Local time` context â€” most often this is a UTC/local sign flip that the model can correct on retry
 - Returns the created task's id, description, trigger, scheduled time, and cron expression
 
 ### Heartbeat-triggered tasks
 
-Tasks created with `on_heartbeat: true` carry `trigger = HEARTBEAT`. Their prompts are appended to every heartbeat self-check under `## Heartbeat Additions`. They're the mechanism for standing heartbeat behaviour ("greet me on every heartbeat", "always summarise new emails") — the main heartbeat prompt stays untouched, and each addition is a cancellable first-class task visible via `list_tasks` and in the Scheduled Tasks UI. They stay PENDING until cancelled.
+Tasks created with `on_heartbeat: true` carry `trigger = HEARTBEAT`. Their prompts are appended to every heartbeat self-check under `## Heartbeat Additions`. They're the mechanism for standing heartbeat behaviour ("greet me on every heartbeat", "always summarise new emails") â€” the main heartbeat prompt stays untouched, and each addition is a cancellable first-class task visible via `list_tasks` and in the Scheduled Tasks UI. They stay PENDING until cancelled.
 
 ## Settings UI
 
 The scheduled tasks section in settings provides:
 
-- **Feature toggle** — enables or disables the scheduling feature globally; when disabled, no tasks execute and scheduling tools are unavailable to the AI
-- **Task list** — each task shows its description, status (PENDING or COMPLETED), and either a formatted execution time or a human-readable cron description
-- **Tap a task** — opens a details sheet with the schedule, status, consecutive failure count, and a recent-activity log showing the last few runs (timestamp + OK/FAIL + reason). For HEARTBEAT-trigger tasks the activity list is sourced from the heartbeat-wide log instead, since they don't fire on their own schedule
-- **Delete button** — available on all tasks to remove them; deletion is deferred with a snackbar "Undo" option (~4 seconds) before the task is permanently cancelled
+- **Feature toggle** â€” enables or disables the scheduling feature globally; when disabled, no tasks execute and scheduling tools are unavailable to the AI
+- **Task list** â€” each task shows its description, status (PENDING or COMPLETED), and either a formatted execution time or a human-readable cron description
+- **Tap a task** â€” opens a details sheet with the schedule, status, consecutive failure count, and a recent-activity log showing the last few runs (timestamp + OK/FAIL + reason). For HEARTBEAT-trigger tasks the activity list is sourced from the heartbeat-wide log instead, since they don't fire on their own schedule
+- **Delete button** â€” available on all tasks to remove them; deletion is deferred with a snackbar "Undo" option (~4 seconds) before the task is permanently cancelled
 
 ### Cron Description
 
@@ -96,19 +96,19 @@ Cron expressions are converted to readable descriptions in the UI:
 
 ## Scheduler Lifecycle
 
-The `TaskScheduler` owns a process-lifetime `CoroutineScope` (SupervisorJob on the background dispatcher) — it is **not** coupled to any caller's scope. Both the UI layer (`ChatViewModel.init`) and the Android foreground service (`DaemonService.onCreate`) call `TaskScheduler.start()`; the first call creates the loop, subsequent calls are idempotent no-ops. The loop only dies when the process dies.
+The `TaskScheduler` owns a process-lifetime `CoroutineScope` (SupervisorJob on the background dispatcher) â€” it is **not** coupled to any caller's scope. Both the UI layer (`ChatViewModel.init`) and the Android foreground service (`DaemonService.onCreate`) call `TaskScheduler.start()`; the first call creates the loop, subsequent calls are idempotent no-ops. The loop only dies when the process dies.
 
 Consequences:
 
 - When the Activity is destroyed (user backgrounds the app, MIUI reclaims memory, etc.), the scheduler **keeps running** as long as the process is alive.
-- On Android, the `DaemonService` foreground notification is what keeps the process alive. If the user disables the daemon, the process can be killed and the scheduler dies with it — tasks will resume firing the next time the app is opened (past-due tasks are picked up immediately since `getDueTasks` uses `scheduledAtEpochMs <= now`).
+- On Android, the `DaemonService` foreground notification is what keeps the process alive. If the user disables the daemon, the process can be killed and the scheduler dies with it â€” tasks will resume firing the next time the app is opened (past-due tasks are picked up immediately since `getDueTasks` uses `scheduledAtEpochMs <= now`).
 - Aggressive OEM battery managers (MIUI, EMUI/Huawei) sometimes kill the foreground service while the activity is still alive in the background. To recover sooner, `MainActivity.onStart` re-asserts the daemon on every foreground bring-up (idempotent when the service is already running), so the user only has to swipe back into the app rather than fully relaunch it.
 - Task execution is gated on an `isLoadingCheck` predicate supplied by the UI (so a foreground chat request doesn't race with a scheduled task). When the UI goes away, it resets the predicate back to `{ false }` so the daemon-only path keeps running unblocked.
-- Scheduled tasks fire independently of heartbeat state — heartbeat being off never prevents a scheduled task from running.
+- Scheduled tasks fire independently of heartbeat state â€” heartbeat being off never prevents a scheduled task from running.
 
 ## Daemon Mode
 
-When daemon mode is active (Android foreground service), the app process is kept alive, so the scheduler scope keeps polling — tasks execute on time without user interaction. When daemon mode is off, the scheduler still runs whenever the app is open; missed tasks fire on the next open.
+When daemon mode is active (Android foreground service), the app process is kept alive, so the scheduler scope keeps polling â€” tasks execute on time without user interaction. When daemon mode is off, the scheduler still runs whenever the app is open; missed tasks fire on the next open.
 
 ## Key Files
 

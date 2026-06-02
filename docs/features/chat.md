@@ -1,8 +1,8 @@
-# Chat & Conversations
+﻿# Chat & Conversations
 
 **Last verified:** 2026-05-14
 
-Kai's chat system manages the message history, conversation persistence, file attachments, and speech output. Conversations are service-independent — switching providers does not affect which conversation is loaded or restored. Multiple conversations are persisted and browsable via a history sheet.
+Kai's chat system manages the message history, conversation persistence, file attachments, and speech output. Conversations are service-independent â€” switching providers does not affect which conversation is loaded or restored. Multiple conversations are persisted and browsable via a history sheet.
 
 ## Concepts
 
@@ -22,12 +22,12 @@ Auto-derived from the first user message when a conversation is saved for the fi
 
 - The "current conversation" pointer is persisted across launches: opening the app restores whichever conversation was last active, including an empty new chat the user explicitly started
 - If the persisted pointer references a conversation that no longer exists (or is null because the user started a new chat), the app opens to an empty new chat
-- "New Chat" clears history, unsets the current conversation pointer, and persists the empty state — so an unused new chat survives an app restart
+- "New Chat" clears history, unsets the current conversation pointer, and persists the empty state â€” so an unused new chat survives an app restart
 - A new conversation ID (UUID) is generated on first successful save (after the first assistant response) and immediately becomes the persisted current pointer
 - Conversations are saved after each assistant response
 - Only the most recent 20 exchanges are persisted per chat conversation; heartbeat conversations have a separate, larger cap of 50 messages so longer automation runs are not truncated as aggressively
-- Multiple conversations are persisted — starting a new chat preserves previous conversations
-- Conversations are service-independent — switching services does not affect which conversation is loaded
+- Multiple conversations are persisted â€” starting a new chat preserves previous conversations
+- Conversations are service-independent â€” switching services does not affect which conversation is loaded
 - Interactive vs normal chat mode is persisted alongside the current pointer, so an empty interactive chat also survives a restart
 - On the first launch after upgrading from a build that did not persist the current-conversation pointer, a one-time migration pins the most recently updated conversation as the current pointer so the user resumes where they left off
 
@@ -67,7 +67,7 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 ### Images
 - Attach via file picker or drag-and-drop
 - Compressed to JPEG and Base64-encoded
-- Maximum raw input size: 50 MB; maximum size after compression: 15 MB — rejected with a size error if exceeded
+- Maximum raw input size: 50 MB; maximum size after compression: 15 MB â€” rejected with a size error if exceeded
 - Sent as `image_url` (OpenAI-compatible), `image` block (Anthropic), or `inline_data` (Gemini)
 - Shown as a preview thumbnail (max 200dp wide) inside the user message bubble
 - Clicking the thumbnail opens a full-screen viewer with pinch-to-zoom, double-tap to toggle zoom, pan when zoomed, and a close button in the top-right (also dismissable via the Android back button or by tapping the backdrop; desktop has no keyboard shortcut for dismissal)
@@ -81,7 +81,7 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 
 ### PDFs
 - Base64-encoded without compression
-- Maximum size: 20 MB — rejected with a size error if exceeded
+- Maximum size: 20 MB â€” rejected with a size error if exceeded
 - Sent as `document` block (Anthropic) or `inline_data` (Gemini); OpenAI-compatible providers have no native PDF support, so PDFs are not offered as an attachment type on those services
 - Shown as a filename chip in the user message bubble
 
@@ -102,7 +102,7 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 
 - Conversations are persisted through the platform's secure settings store (see [encryption.md](encryption.md))
 - The full conversation list is serialized as `ConversationsData` (versioned, currently v2)
-- Conversations are upserted — updating a conversation replaces the existing entry by ID, new conversations are appended
+- Conversations are upserted â€” updating a conversation replaces the existing entry by ID, new conversations are appended
 - Each conversation also retains a rolling tail of its sandbox shell transcript (last ~10,000 characters) so that follow-up commands in a resumed conversation see the prior shell context
 - Older builds stored conversations in an encrypted `conversations.enc` file (XOR with a 32-byte random key); on first load that file is decrypted and migrated into secure settings, then deleted
 
@@ -110,7 +110,7 @@ Multiple files can be attached to a single prompt. Each file is added one at a t
 
 - **Top bar**: New Chat, Chat History, a Sandbox toggle (Android only, shown between History and TTS when the sandbox feature is available on the device), TTS toggle, Settings (on mobile; on non-mobile, Settings is in the navigation tab bar)
 - **Scroll to bottom**: a small floating action button (down arrow) appears when the user has scrolled up past the latest messages; tapping it animates back to the bottom
-- **Messages**: user (right-aligned, with optional image preview), assistant (Markdown-rendered + action buttons), tool executing (spinner), loading indicator, error with retry. When the fallback chain answered with an alternate service rather than the user's selected one, a small "Answered by …" label is shown under the assistant message naming the service that produced the response
+- **Messages**: user (right-aligned, with optional image preview), assistant (Markdown-rendered + action buttons), tool executing (spinner), loading indicator, error with retry. When the fallback chain answered with an alternate service rather than the user's selected one, a small "Answered by â€¦" label is shown under the assistant message naming the service that produced the response
 - **Input**: text field, send/stop button, attachment button, file chip
 - **Empty state**: animated logo + welcome message
 - **Drag-and-drop**: supported for file attachments

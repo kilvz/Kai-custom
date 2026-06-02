@@ -1,23 +1,39 @@
-# Codebase Audit Report — Kai-custom
+﻿# Codebase Audit Report â€” Kai-custom
 
 **Date:** 2026-06-02  
-**Version:** v3.6.3 (versionCode 150)  
+**Last updated:** 2026-06-02 (v3.6.4)  
+**Version at audit:** v3.6.3 (versionCode 150)  
+**Current version:** v3.6.4 (versionCode 151) â€” items C2, H1-H3, H4-H6, M1-M2 fixed in v3.6.4  
 **Scope:** All Kotlin source in `composeApp/src/`, `androidApp/src/`, Koin DI, tool system, memory system, prompt pipeline, sandbox, heartbeat, wake word.
 
 ---
 
+## Fix Status (v3.6.4)
+
+Items resolved in v3.6.4 (commit `47985f64`):
+
+- **C2** â€” `SshConfigureHostTool` schema fixed: all 6 parameters declared
+- **H1** â€” `ChatSystemPromptBuilder.kt` deleted (202 lines); types moved to `TaskDomain.kt`; test uses `UnifiedPromptBuilder`
+- **H2** â€” `VectorIndex.kt` deleted (51 lines, orphaned)
+- **H3** â€” `SyncEngine.kt` deleted (118 lines, orphaned)
+- **H4** â€” `SandboxController.searchMemories()` removed from interface (no callers)
+- **H5** â€” `DataRepository.requestOpenHeartbeat()` â€” confirmed wired (MainActivityâ†’ChatViewModel), kept
+- **H6** â€” `DataRepository.sendTelegramMessage()` removed from interface + both impls
+- **M1** â€” `Long.toHumanReadableDate()` extension removed
+- **M2** â€” `MarkdownDocument.toPlainText()` + 3 helpers removed
+
 ## CRITICAL
 
-### C1. `DimensionStore` unresolvable on non-Android platforms (runtime crash)
+### C1. `DimensionStore` unresolvable on non-Android platforms (runtime crash) â€” **unresolved**
 
 **Where:** `SqliteMemoryStore` constructor requires `DimensionStore`, but `SqliteDimensionStore` (the only impl) and `dimensionModule` (its Koin registration) live only in `androidMain`. On iOS/Desktop/WasmJs, only `appModule` is loaded (not `dimensionModule`).
 
-**Impact:** `get<MemoryStore>()` → `get<MemoryStoreProvider>()` → `SqliteMemoryStore` → `get<DimensionStore>()` **throws** on first memory access. Affects `IosKoinHelper.memoryStore`, `WebKoinHelper.memoryStore`, `RemoteDataRepository`, `HeartbeatManager`, `TaskScheduler` — all on non-Android targets.
+**Impact:** `get<MemoryStore>()` â†’ `get<MemoryStoreProvider>()` â†’ `SqliteMemoryStore` â†’ `get<DimensionStore>()` **throws** on first memory access. Affects `IosKoinHelper.memoryStore`, `WebKoinHelper.memoryStore`, `RemoteDataRepository`, `HeartbeatManager`, `TaskScheduler` â€” all on non-Android targets.
 
 **Files:**  
-- `composeApp/src/androidMain/kotlin/com/kai/custom/data/dimension/DimensionModule.kt` (registers `DimensionStore` — Android only)  
-- `composeApp/src/commonMain/kotlin/com/kai/custom/AppModule.kt:79-87` (expects `DimensionStore` — always)  
-- `androidApp/src/main/kotlin/com/kai/custom/KaiApplication.kt:23` (loads `dimensionModule` — Android only)  
+- `composeApp/src/androidMain/kotlin/com/kai/custom/data/dimension/DimensionModule.kt` (registers `DimensionStore` â€” Android only)  
+- `composeApp/src/commonMain/kotlin/com/kai/custom/AppModule.kt:79-87` (expects `DimensionStore` â€” always)  
+- `androidApp/src/main/kotlin/com/kai/custom/KaiApplication.kt:23` (loads `dimensionModule` â€” Android only)  
 - `composeApp/src/commonMain/kotlin/com/kai/custom/data/dimension/DimensionStore.kt` (interface in common)  
 - `composeApp/src/androidMain/kotlin/com/kai/custom/data/dimension/SqliteDimensionStore.kt` (impl in android only)
 
@@ -27,7 +43,7 @@
 
 ### C2. `SshConfigureHostTool` schema/implementation param mismatch
 
-**Where:** Tool schema declares only `alias` (required string), but `execute()` reads 6 params: `alias`, `hostname`, `user`, `port`, `identity_file`, `known_host_line`. `hostname` is required — LLM will fail because schema doesn't tell it to send `hostname`.
+**Where:** Tool schema declares only `alias` (required string), but `execute()` reads 6 params: `alias`, `hostname`, `user`, `port`, `identity_file`, `known_host_line`. `hostname` is required â€” LLM will fail because schema doesn't tell it to send `hostname`.
 
 **Impact:** LLM-callable `ssh_configure_host` tool always errors when called by AI (LLM only knows about `alias` from the schema).
 
@@ -39,9 +55,9 @@
 
 ## HIGH
 
-### H1. `ChatSystemPromptBuilder.kt` — 202 lines of production dead code
+### H1. `ChatSystemPromptBuilder.kt` â€” 202 lines of production dead code
 
-**Where:** `buildChatSystemPrompt()` (line 32) plus 7 private helper functions and 3 supporting types/data classes — **zero callers in production**. Only called from `ChatSystemPromptBuilderTest.kt`. All actual production calls go directly to `UnifiedPromptBuilder.build()`.
+**Where:** `buildChatSystemPrompt()` (line 32) plus 7 private helper functions and 3 supporting types/data classes â€” **zero callers in production**. Only called from `ChatSystemPromptBuilderTest.kt`. All actual production calls go directly to `UnifiedPromptBuilder.build()`.
 
 **Dead functions:**
 - `appendMemoryCategorySection()` (line 82)
@@ -59,7 +75,7 @@
 
 ---
 
-### H2. `VectorIndex.kt` — orphaned file (51 lines)
+### H2. `VectorIndex.kt` â€” orphaned file (51 lines)
 
 **Where:** `VectorIndex` class implements in-memory embedding search (`upsert`, `remove`, `rebuild`, `search` with cosine similarity). Zero imports or references from any other file. Not wired into production code.
 
@@ -69,7 +85,7 @@
 
 ---
 
-### H3. `SyncEngine.kt` — orphaned file (118 lines)
+### H3. `SyncEngine.kt` â€” orphaned file (118 lines)
 
 **Where:** Full bidirectional sync engine across local and remote (MCP) dimension stores with `SyncSource` interface, push/pull logic, and conflict counting. Zero imports or references from any other file. Not registered in Koin. Not called from any repository.
 
@@ -81,7 +97,7 @@
 
 ---
 
-### H4. `SandboxController.searchMemories()` — never called
+### H4. `SandboxController.searchMemories()` â€” never called
 
 **Where:** Defined at `SandboxController.kt:105` with default returning null. Not overridden by `AndroidSandboxController`. Zero callers in production code. Comment says "Semantic search is now handled by alt-memory MCP tools."
 
@@ -91,7 +107,7 @@
 
 ---
 
-### H5. `DataRepository.requestOpenHeartbeat()` — no callers
+### H5. `DataRepository.requestOpenHeartbeat()` â€” no callers
 
 **Where:** Declared in interface at `DataRepository.kt:273`, implemented in both `RemoteDataRepository` and `FakeDataRepository`. Never called by any ViewModel, composable, or service. Only referenced in a comment in `HeartbeatNotifier.android.kt:19`.
 
@@ -99,7 +115,7 @@
 
 ---
 
-### H6. `DataRepository.sendTelegramMessage()` — no callers
+### H6. `DataRepository.sendTelegramMessage()` â€” no callers
 
 **Where:** Declared in `DataRepository.kt:314`, implemented in both `RemoteDataRepository.kt:2248` and `FakeDataRepository.kt:755`. Never called from any production code.
 
@@ -109,7 +125,7 @@
 
 ## MEDIUM
 
-### M1. `Long.toHumanReadableDate()` — unused extension (1 line + ~9 of format def)
+### M1. `Long.toHumanReadableDate()` â€” unused extension (1 line + ~9 of format def)
 
 **Where:** `ExtensionFunctions.kt:17`. Zero callers outside its own declaration. All sibling extensions (`toIsoDate`, `formatContextWindow`, `formatReleaseDate`, `formatFileSize`, `smartTruncate`) are used.
 
@@ -117,7 +133,7 @@
 
 ---
 
-### M2. `MarkdownDocument.toPlainText()` — unused extension + 3 private helpers (~38 lines)
+### M2. `MarkdownDocument.toPlainText()` â€” unused extension + 3 private helpers (~38 lines)
 
 **Where:** `MarkdownTextRenderer.kt:18`. Zero callers. Its documented purpose ("clipboard copy fallback") was never implemented. Private helpers `blockToPlain`, `itemToPlain`, `tableToPlain` are only called from `toPlainText`.
 
@@ -125,7 +141,7 @@
 
 ---
 
-### M3. `AnsiParser.kt` — test-only production code (223 lines)
+### M3. `AnsiParser.kt` â€” test-only production code (223 lines)
 
 **Where:** Full ANSI escape code parser that converts terminal-colored text to Compose `AnnotatedString`. Only referenced from `AnsiParserTest.kt`. Zero production callers.
 
@@ -148,7 +164,7 @@
 
 ---
 
-### M5. `AnsiParser.kt` — dead if not needed for future terminal display
+### M5. `AnsiParser.kt` â€” dead if not needed for future terminal display
 
 As above.
 
@@ -166,7 +182,7 @@ As above.
 
 ### L2. AGENTS.md claims about `FakeDataRepository` are outdated
 
-**Where:** AGENTS.md lines 45-47 claim `queryKgFacts`, `countDimensionEntities`, wake word methods, `getPreferredLanguage`/`setPreferredLanguage` are missing from `FakeDataRepository`. **All are now implemented.** The `installSkillFrom*` methods still throw though — that's a new gap not in AGENTS.md.
+**Where:** AGENTS.md lines 45-47 claim `queryKgFacts`, `countDimensionEntities`, wake word methods, `getPreferredLanguage`/`setPreferredLanguage` are missing from `FakeDataRepository`. **All are now implemented.** The `installSkillFrom*` methods still throw though â€” that's a new gap not in AGENTS.md.
 
 **File:** `F:\Kai\AGENTS.md`
 
@@ -174,7 +190,7 @@ As above.
 
 ### L3. `CuratedToolRegistry` not wired into production
 
-**Where:** `CuratedToolRegistry.kt` — thin wrapper that always registers memory/KG/diary tools. Only used from tests. Production `getAvailableTools()` calls `CommonTools.getMemoryTools()` etc. directly.
+**Where:** `CuratedToolRegistry.kt` â€” thin wrapper that always registers memory/KG/diary tools. Only used from tests. Production `getAvailableTools()` calls `CommonTools.getMemoryTools()` etc. directly.
 
 **File:** `composeApp/src/commonMain/kotlin/com/kai/custom/tools/CuratedToolRegistry.kt`
 
@@ -182,7 +198,7 @@ As above.
 
 ### L4. MCP tool name deduplication only on Android
 
-**Where:** Android `getAvailableTools()` (line 1281 of Platform.android.kt) calls `allTools.distinctBy { it.schema.name }`, allowing MCP tools to override built-ins. Desktop does NOT have this dedup — if an MCP server provides a tool with the same name as a built-in, both appear.
+**Where:** Android `getAvailableTools()` (line 1281 of Platform.android.kt) calls `allTools.distinctBy { it.schema.name }`, allowing MCP tools to override built-ins. Desktop does NOT have this dedup â€” if an MCP server provides a tool with the same name as a built-in, both appear.
 
 **Files:**
 - `composeApp/src/androidMain/kotlin/com/kai/custom/Platform.android.kt:1281` (has dedup)
@@ -208,7 +224,7 @@ As above.
 
 ### L7. iOS EventKit unimplemented (two TODOs)
 
-**Where:** `CalendarPermissionController.ios.kt:12,17` — `EKEventStore.authorizationStatus` and `requestAccess` calls are TODOs. iOS target not actively tested per AGENTS.md.
+**Where:** `CalendarPermissionController.ios.kt:12,17` â€” `EKEventStore.authorizationStatus` and `requestAccess` calls are TODOs. iOS target not actively tested per AGENTS.md.
 
 **File:** `composeApp/src/iosMain/kotlin/com/kai/custom/tools/CalendarPermissionController.ios.kt`
 
@@ -229,38 +245,39 @@ As above.
 
 | Category | Pass | Fail |
 |----------|------|------|
-| Koin DI — all bindings registered | 43/43 | 0 |
-| Koin DI — all bindings consumed | 43/43 | 0 |
+| Koin DI â€” all bindings registered | 43/43 | 0 |
+| Koin DI â€” all bindings consumed | 43/43 | 0 |
 | DataRepository interface methods implemented | 204/204 (both impls) | 0 |
-| FakeDataRepository throws | 2 methods (`installSkill*`) | — |
+| FakeDataRepository throws | 2 methods (`installSkill*`) | â€” |
 | Each `expect` has platform `actual` | All verified | 0 |
-| ToolExecutor — all tools registered | All verified | 0 |
-| ToolExecutor — caching stale | N/A (no cache) | — |
+| ToolExecutor â€” all tools registered | All verified | 0 |
+| ToolExecutor â€” caching stale | N/A (no cache) | â€” |
 | MemoryStore interface methods overridden | 22/22 (3 impls) | 0 |
 | Protected memory guards everywhere | 3 layers (store, VM, UI) | 0 |
 | Memory toggle gates all paths | 6 points verified | 0 |
 | Wake word lifecycle | 3 management points | 0 |
 | Heartbeat full chain intact | yes | 0 |
-| Dead code (lines) | ~440 (definite) | — |
-| Orphaned files | 3 (`VectorIndex.kt`, `SyncEngine.kt`, `ChatSystemPromptBuilder.kt`) | — |
+| Dead code (lines) | ~440 (definite) | â€” |
+| Orphaned files | 3 (`VectorIndex.kt`, `SyncEngine.kt`, `ChatSystemPromptBuilder.kt`) | â€” |
 
 ### Dead Code Summary
 
 | File | Lines | Status |
 |------|-------|--------|
-| `ChatSystemPromptBuilder.kt` | 202 | Production dead (test only) |
-| `SyncEngine.kt` | 118 | Orphaned |
-| `VectorIndex.kt` | 51 | Orphaned |
-| `AnsiParser.kt` | 223 | Production dead (test only) |
-| `toHumanReadableDate()` | ~10 | Unused extension |
-| `toPlainText()` + helpers | ~38 | Unused extension |
-| **Total** | **~642** | |
+| `ChatSystemPromptBuilder.kt` | 202 | **REMOVED in v3.6.4** |
+| `SyncEngine.kt` | 118 | **REMOVED in v3.6.4** |
+| `VectorIndex.kt` | 51 | **REMOVED in v3.6.4** |
+| `AnsiParser.kt` | 223 | Production dead (test only) â€” kept |
+| `toHumanReadableDate()` | ~10 | **REMOVED in v3.6.4** |
+| `toPlainText()` + helpers | ~38 | **REMOVED in v3.6.4** |
+| **Total removed** | **~419** | |
+| **Remaining** | **~223** (AnsiParser) | |
 
-### Actions Needed (by priority)
+### Actions Needed (by priority) â€” Updated for v3.6.4
 
 1. **C1**: Provide non-Android `DimensionStore` impl for iOS/Desktop/WasmJs (avoids deferred crash)
-2. **C2**: Fix `SshConfigureHostTool` schema to declare all params
-3. **H1-H3**: Remove 3 orphaned files (~371 lines)
-4. **H4-H5**: Clean up dead interface methods
-5. **M1-M2**: Remove unused extensions (~48 lines)
-6. **L2**: Update AGENTS.md to reflect current `FakeDataRepository` state
+2. **L2**: Update AGENTS.md to reflect current `FakeDataRepository` state (installSkill* methods still throw)
+3. **L3**: Wire `CuratedToolRegistry` into production or remove it
+4. **L4**: Add MCP tool name dedup to Desktop (like Android)
+5. **L5**: Add `learnedPatterns` param to `HeartbeatPromptBuilderTest`
+6. **L6**: Add `nameRes`/`descriptionRes` to `search_memories` ToolInfo

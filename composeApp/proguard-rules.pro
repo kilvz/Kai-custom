@@ -206,6 +206,12 @@
 -dontwarn com.google.gson.**
 -dontwarn sun.misc.Unsafe
 
+# JSch (SSH library) — 0.1.55 loads crypto implementation classes via
+# Class.forName("com.jcraft.jsch.jce.Random") and similar; ProGuard cannot
+# trace reflective lookups and strips the entire jce/jcraft sub-packages.
+-keep class com.jcraft.jsch.** { *; }
+-dontwarn com.jcraft.jsch.**
+
 # TFLite Task Text — USE Lite embedding model. AutoValue annotation is
 # only a compile-time dependency; the missing class at runtime is harmless.
 -dontwarn com.google.auto.value.**

@@ -834,11 +834,16 @@ class SettingsViewModel(
     }
 
     private fun onToggleRoot(enabled: Boolean) {
+        if (enabled && !isRootAvailable()) {
+            _state.update { it.copy(rootErrorMessage = "Root not available") }
+            return
+        }
         dataRepository.setRootEnabled(enabled)
         _state.update {
             it.copy(
                 isRootEnabled = enabled,
                 rootAvailable = isRootAvailable(),
+                rootErrorMessage = null,
             )
         }
     }

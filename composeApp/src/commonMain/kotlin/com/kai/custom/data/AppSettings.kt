@@ -54,13 +54,12 @@ fun detectExportableSections(json: JsonObject): Map<ImportSection, String?> {
         sections[ImportSection.SERVICES] = "${configured.size}"
     }
 
-    if (json["soul_text"] != null) {
+    if (json["soul_text"] != null || json["soul_auto"] != null || json["persona_list"] != null) {
         sections[ImportSection.SOUL] = null
     }
 
-    val memories = json["agent_memories"]?.jsonArray
-    if (memories != null && memories.isNotEmpty()) {
-        sections[ImportSection.MEMORY] = "${memories.size}"
+    if (json["memory_enabled"] != null) {
+        sections[ImportSection.MEMORY] = null
     }
 
     val tasks = json["scheduled_tasks"]?.jsonArray
@@ -121,12 +120,11 @@ fun detectImportSections(json: JsonObject): Map<ImportSection, String?> {
         val count = json["configured_services"]?.jsonArray?.size
         sections[ImportSection.SERVICES] = count?.let { "$it" }
     }
-    if (json["soul_text"] != null) {
+    if (json["soul_text"] != null || json["soul_auto"] != null || json["persona_list"] != null) {
         sections[ImportSection.SOUL] = null
     }
-    if (json["memory_enabled"] != null || json["agent_memories"] != null) {
-        val count = json["agent_memories"]?.jsonArray?.size
-        sections[ImportSection.MEMORY] = count?.let { "$it" }
+    if (json["memory_enabled"] != null) {
+        sections[ImportSection.MEMORY] = null
     }
     if (json["scheduling_enabled"] != null || json["scheduled_tasks"] != null) {
         val count = json["scheduled_tasks"]?.jsonArray?.size

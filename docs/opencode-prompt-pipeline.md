@@ -1,4 +1,4 @@
-# Opencode Prompt Pipeline — Comprehensive Analysis
+﻿# Opencode Prompt Pipeline â€” Comprehensive Analysis
 
 > Repo: https://github.com/anomalyco/opencode (branch: `dev`)
 > Time of analysis: June 2026
@@ -6,21 +6,21 @@
 
 ## Architectural Overview
 
-Opencode has a **modular, layered prompt pipeline** — fundamentally different from Kai's monolithic `ChatSystemPromptBuilder`. There is no single function that builds "the prompt". Instead, the prompt is assembled from independent pieces at request time:
+Opencode has a **modular, layered prompt pipeline** â€” fundamentally different from Kai's monolithic `ChatSystemPromptBuilder`. There is no single function that builds "the prompt". Instead, the prompt is assembled from independent pieces at request time:
 
 ```
 User types message
-  → App UI (SolidJS) captures prompt text + file context + agent mentions
-  → buildRequestParts() serializes into parts (text, file, agent, image)
-  → Session.prompt() stores user message + schedules LLM call
-  → Session.session-manager (opencode/src/session/) orchestrates:
+  â†’ App UI (SolidJS) captures prompt text + file context + agent mentions
+  â†’ buildRequestParts() serializes into parts (text, file, agent, image)
+  â†’ Session.prompt() stores user message + schedules LLM call
+  â†’ Session.session-manager (opencode/src/session/) orchestrates:
       - Gets agent system prompt
       - Gets conversation history (post-compaction)
       - Gets context attachments (files, references)
       - Builds LLMRequest
       - Sends via LLMClient (native route OR AI SDK)
-  → Protocol layer lowers LLMRequest to provider-native format
-  → Transport sends HTTP request → LLM provider
+  â†’ Protocol layer lowers LLMRequest to provider-native format
+  â†’ Transport sends HTTP request â†’ LLM provider
 ```
 
 ## Key Source Files
@@ -32,23 +32,23 @@ User types message
 | `packages/core/src/session/prompt.ts` | Prompt schema (text + file attachments + agent mentions + references) |
 | `packages/core/src/session/message.ts` | Message schema for conversation storage |
 | `packages/core/src/session/projector.ts` | Session event projector (reduces events to state) |
-| `packages/llm/src/llm.ts` | `LLM.request()`, `LLM.generate()`, `LLM.stream()` — entry points |
+| `packages/llm/src/llm.ts` | `LLM.request()`, `LLM.generate()`, `LLM.stream()` â€” entry points |
 | `packages/llm/src/schema/messages.ts` | `LLMRequest`, `Message`, `SystemPart`, `ToolDefinition`, `ToolChoice` |
 | `packages/llm/src/route/protocol.ts` | Protocol interface (body.from, body.schema, stream.step) |
-| `packages/llm/src/route/client.ts` | `LLMClient.stream/generate` — request execution |
+| `packages/llm/src/route/client.ts` | `LLMClient.stream/generate` â€” request execution |
 | `packages/llm/src/route/executor.ts` | Request executor (HTTP transport, error mapping) |
 | `packages/llm/src/tool-runtime.ts` | Tool execution runtime (schema validation, dispatch, streaming) |
 | `packages/opencode/src/session/llm.ts` | Session-owned LLM orchestration (AI SDK vs native routing) |
-| `packages/opencode/src/session/llm/native-request.ts` | Lowering adapter: session data → LLMRequest |
-| `packages/opencode/src/session/llm/native-runtime.ts` | Execution adapter: LLMClient.stream → opencode events |
+| `packages/opencode/src/session/llm/native-request.ts` | Lowering adapter: session data â†’ LLMRequest |
+| `packages/opencode/src/session/llm/native-runtime.ts` | Execution adapter: LLMClient.stream â†’ opencode events |
 | `packages/opencode/src/session/llm/ai-sdk.ts` | AI SDK compatibility bridge |
 | `packages/app/src/context/prompt.tsx` | App-side prompt state (text, file context, agent mentions) |
 | `packages/app/src/components/prompt-input/build-request-parts.ts` | Serializes prompt into request parts |
 | `packages/app/src/context/server-sdk.tsx` | Server SDK client (SSE event stream from server) |
 
-## Prompt Flow — Step by Step
+## Prompt Flow â€” Step by Step
 
-### 1. User Input Assembly (App Side — SolidJS)
+### 1. User Input Assembly (App Side â€” SolidJS)
 
 The user types text, attaches files, mentions agents. All managed in `prompt.tsx`:
 
@@ -82,23 +82,23 @@ This stores the user message and triggers the LLM orchestration.
 ### 3. LLM Orchestration (packages/opencode/src/session/llm.ts)
 
 The session manager:
-1. **Resolves the agent** → gets `AgentV2.Info` which has:
-   - `system: string` — the user-defined system prompt
-   - `description: string` — short description
+1. **Resolves the agent** â†’ gets `AgentV2.Info` which has:
+   - `system: string` â€” the user-defined system prompt
+   - `description: string` â€” short description
    - `permissions: PermissionSchema.Ruleset`
    - `model: ModelV2.Ref`
    - `options: ProviderV2.Options`
-2. **Gets conversation context** → `Session.context()` returns messages post-last-compaction
-3. **Gets prompt attachments** → files, agents, references
+2. **Gets conversation context** â†’ `Session.context()` returns messages post-last-compaction
+3. **Gets prompt attachments** â†’ files, agents, references
 4. **Builds `LLMRequest`** via `native-request.ts`:
-   - `system` — from agent's system prompt + instructions.md
-   - `messages` — conversation history + user message with file contents
-   - `tools` — available tools (shell, file operations, MCP servers, etc.)
-   - `toolChoice` — auto/none/required
-   - `model` — selected model config
+   - `system` â€” from agent's system prompt + instructions.md
+   - `messages` â€” conversation history + user message with file contents
+   - `tools` â€” available tools (shell, file operations, MCP servers, etc.)
+   - `toolChoice` â€” auto/none/required
+   - `model` â€” selected model config
 5. **Executes** via `LLMClient.stream()` (native route) or AI SDK fallback
 
-### 4. LLMRequest Construction (llm.ts → schema/messages.ts)
+### 4. LLMRequest Construction (llm.ts â†’ schema/messages.ts)
 
 `LLM.request()` creates a canonical `LLMRequest`:
 
@@ -106,11 +106,11 @@ The session manager:
 LLMRequest {
   id?: string
   model: ModelSchema
-  system: SystemPart[]          ← system prompt (array of { type: "text", text: "..." })
-  messages: Message[]            ← conversation history
-  tools: ToolDefinition[]        ← tool definitions
-  toolChoice?: ToolChoice         ← auto/none/required/tool
-  generation?: GenerationOptions  ← temperature, maxTokens, etc.
+  system: SystemPart[]          â† system prompt (array of { type: "text", text: "..." })
+  messages: Message[]            â† conversation history
+  tools: ToolDefinition[]        â† tool definitions
+  toolChoice?: ToolChoice         â† auto/none/required/tool
+  generation?: GenerationOptions  â† temperature, maxTokens, etc.
   providerOptions?: ProviderOptions
   http?: HttpOptions
   responseFormat?: ResponseFormat
@@ -132,16 +132,16 @@ LLMRequest {
 
 ### 5. Protocol Lowering (LLM Core)
 
-The `Protocol` interface (`route/protocol.ts`) converts `LLMRequest` → provider-native format:
+The `Protocol` interface (`route/protocol.ts`) converts `LLMRequest` â†’ provider-native format:
 
 ```
 Protocol {
   body: {
-    schema: Schema<Body>      — validates provider-native body
-    from: (LLMRequest) => Body — builds provider-native body
+    schema: Schema<Body>      â€” validates provider-native body
+    from: (LLMRequest) => Body â€” builds provider-native body
   }
   stream: {
-    event: Schema<Event, Frame> — streaming event decoder
+    event: Schema<Event, Frame> â€” streaming event decoder
     initial: (LLMRequest) => State
     step: (State, Event) => [State, LLMEvent[]]
     onHalt?: (State) => LLMEvent[]
@@ -156,10 +156,10 @@ A `Route` composes `Protocol + Endpoint + Auth + Framing`. Shared endpoints (Dee
 ### 6. Tool Execution Runtime
 
 The tool runtime (`tool-runtime.ts`) handles:
-- Schema-validated tool dispatch (`parameters` Schema → typed input → execute → encode result)
+- Schema-validated tool dispatch (`parameters` Schema â†’ typed input â†’ execute â†’ encode result)
 - Streaming tool call accumulation (`tool-input-delta` events)
 - Provider-defined tools (Anthropic `web_search`, OpenAI Responses `web_search_call`)
-- Error recovery via `ToolFailure` → `tool-error` event
+- Error recovery via `ToolFailure` â†’ `tool-error` event
 - Multi-step loops with `stopWhen` (e.g., `LLM.stepCountIs(10)`)
 
 ## Categories of Prompt Content
@@ -173,9 +173,9 @@ The tool runtime (`tool-runtime.ts`) handles:
 - No fixed sections like Kai's Soul/Honesty/Memory
 
 **Messages**:
-- Conversation history (user ↔ assistant exchanges)
+- Conversation history (user â†” assistant exchanges)
 - File contents embedded as `user` messages with file parts
-- Agent mentions → subagent routing
+- Agent mentions â†’ subagent routing
 - Tool calls + results interleaved
 
 **Tools**:
@@ -211,7 +211,7 @@ The tool runtime (`tool-runtime.ts`) handles:
 | **Tool definitions** | Embedded in system prompt text | OpenAPI-style `tools` array (JSON Schema) |
 | **Personas** | KAI/ALT/CUSTOM prompt styles | One style per agent (user-defined `system`) |
 | **Language** | Kotlin (Compose Multiplatform) | TypeScript (SolidJS frontend + Effect backend) |
-| **Architecture** | Single-process mobile app | Client-server (desktop app ↔ local server) |
+| **Architecture** | Single-process mobile app | Client-server (desktop app â†” local server) |
 | **Session storage** | In-memory (chat log only) | SQLite database with compaction |
 | **LLM core** | Custom OpenAI/Azure/Auth API calls | Effect Schema-based LLM core with Protocol/Route abstraction |
 | **Tool execution** | ToolExecutor (imperative) | Effect-based tool runtime with Schema validation |

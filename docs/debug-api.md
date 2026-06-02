@@ -1,11 +1,11 @@
-# Debug API
+﻿# Debug API
 
 HTTP server on the Android device (`127.0.0.1:18500`) for inspecting and controlling the Kai agent from a dev machine via ADB.
 
 ## Activation
 
 1. Start the daemon (Debug API requires daemon to bind the port)
-2. Settings → General → Advanced → enable "Debug API Server"
+2. Settings â†’ General â†’ Advanced â†’ enable "Debug API Server"
 3. Read the auth token from logcat:
    ```powershell
    adb logcat -s DebugServer:D
@@ -52,7 +52,7 @@ All endpoints (except `/health`) require `Authorization: Bearer <token>` header.
 
 ### `GET /prompt`
 
-Returns the **exact system prompt** currently fed to the AI — useful for debugging prompt injections or checking what the AI knows.
+Returns the **exact system prompt** currently fed to the AI â€” useful for debugging prompt injections or checking what the AI knows.
 
 **Response:** `text/plain`
 
@@ -167,7 +167,7 @@ Sends a message to the AI with **full tool-calling support**. The AI can use all
 This endpoint uses `askWithTools()` internally, which:
 1. Gets the active service (Free, OpenAI, Gemini, etc.)
 2. Passes all registered tool definitions to the AI
-3. Runs a tool loop (AI calls tools → results fed back → AI responds)
+3. Runs a tool loop (AI calls tools â†’ results fed back â†’ AI responds)
 4. Returns the final text response
 
 ### `POST /settings/{key}`
@@ -213,8 +213,8 @@ Runs a raw command inside the Linux sandbox and returns combined command output 
 **Request body:** plain text shell command.
 
 **Query parameters:**
-- `root=true|false` — whether to use the sandbox root path. Defaults to `false`.
-- `timeout=<seconds>` — command timeout. Defaults to `60`.
+- `root=true|false` â€” whether to use the sandbox root path. Defaults to `false`.
+- `timeout=<seconds>` â€” command timeout. Defaults to `60`.
 
 **Examples:**
 ```powershell
@@ -263,46 +263,46 @@ while ($true) { curl.exe -s http://localhost:18500/state -H "Authorization: Bear
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────┐
-│  Dev Machine (PC)                            │
-│  curl / opencode / custom script              │
-│       │                                       │
-│       │ HTTP :18500                           │
-└───────┼───────────────────────────────────────┘
-        │
-        │ adb forward tcp:18500 tcp:18500
-        │
-┌───────┼──────────────────────────────────────┐
-│  Android Device                              │
-│  ┌────┴─────────────────────────────────┐    │
-│  │ Ktor Server (CIO, 127.0.0.1:18500)   │    │
-│  │  ├─ /health    (no auth)             │    │
-│  │  ├─ /prompt                          │    │
-│  │  ├─ /history                         │    │
-│  │  ├─ /state                           │    │
-│  │  ├─ /tools                           │    │
-│  │  ├─ /memories                        │    │
-│  │  ├─ /settings                        │    │
-│  │  ├─ /chat      → askWithTools()      │    │
-│  │  ├─ /sandbox/exec → sandbox command  │    │
-│  │  ├─ /settings/{key}                  │    │
-│  │  └─ /reset                           │    │
-│  │                                       │    │
-│  │  injects: DataRepository              │    │
-│  │           MemoryStoreProvider          │    │
-│  │           AppSettings                  │    │
-│  └───────────────────────────────────────┘    │
-│                                               │
-│  ┌───────────────────────────────────────┐    │
-│  │ DaemonService (starts/stops server)   │    │
-│  └───────────────────────────────────────┘    │
-└───────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Dev Machine (PC)                            â”‚
+â”‚  curl / opencode / custom script              â”‚
+â”‚       â”‚                                       â”‚
+â”‚       â”‚ HTTP :18500                           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+        â”‚
+        â”‚ adb forward tcp:18500 tcp:18500
+        â”‚
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Android Device                              â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚
+â”‚  â”‚ Ktor Server (CIO, 127.0.0.1:18500)   â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /health    (no auth)             â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /prompt                          â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /history                         â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /state                           â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /tools                           â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /memories                        â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /settings                        â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /chat      â†’ askWithTools()      â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /sandbox/exec â†’ sandbox command  â”‚    â”‚
+â”‚  â”‚  â”œâ”€ /settings/{key}                  â”‚    â”‚
+â”‚  â”‚  â””â”€ /reset                           â”‚    â”‚
+â”‚  â”‚                                       â”‚    â”‚
+â”‚  â”‚  injects: DataRepository              â”‚    â”‚
+â”‚  â”‚           MemoryStoreProvider          â”‚    â”‚
+â”‚  â”‚           AppSettings                  â”‚    â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚
+â”‚                                               â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚
+â”‚  â”‚ DaemonService (starts/stops server)   â”‚    â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ## Configuration
 
 - **Port:** `18500` (hardcoded, localhost-only)
 - **Host:** `127.0.0.1` (only accessible via ADB or local apps)
-- **Lifecycle:** bound to daemon — starts when daemon starts, stops when daemon stops
+- **Lifecycle:** bound to daemon â€” starts when daemon starts, stops when daemon stops
 - **Build gate:** only runs in debug builds (`BuildConfig.DEBUG`)
 - **Auth token:** random 32-char hex, regenerated on every app launch, printed to logcat

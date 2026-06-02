@@ -60,6 +60,15 @@ import com.kai.custom.tools.NotificationResult
 import com.kai.custom.tools.NotificationTools
 import com.kai.custom.tools.OpenCodeTool
 import com.kai.custom.tools.OpenFileTool
+import com.kai.custom.tools.ReadFileTool
+import com.kai.custom.tools.WriteFileTool
+import com.kai.custom.tools.EditFileTool
+import com.kai.custom.tools.GlobTool
+import com.kai.custom.tools.GrepTool
+import com.kai.custom.tools.ApplyPatchTool
+import com.kai.custom.tools.TodoWriteTool
+import com.kai.custom.tools.WebFetchTool
+import com.kai.custom.tools.InternetSearchTool
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
 import com.kai.custom.tools.RootTool
@@ -242,6 +251,11 @@ actual fun createLegacySettings(): Settings? = try {
 actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnectionManager()
 
 actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
+    val context: Context by inject(Context::class.java)
+
+    fun hasPermission(permission: String): Boolean =
+        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+
     addAll(CommonTools.commonToolDefinitions)
     add(
         ToolInfo(
@@ -250,6 +264,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             description = "Send a push notification to the device",
             nameRes = Res.string.tool_send_notification_name,
             descriptionRes = Res.string.tool_send_notification_description,
+            isEnabled = NotificationPermissionController().hasPermission(),
         ),
     )
     add(
@@ -259,6 +274,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             description = "Create a calendar event on the user's device",
             nameRes = Res.string.tool_create_calendar_event_name,
             descriptionRes = Res.string.tool_create_calendar_event_description,
+            isEnabled = CalendarPermissionController().hasPermission(),
         ),
     )
     add(
@@ -279,6 +295,15 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             descriptionRes = Res.string.tool_open_file_description,
         ),
     )
+    add(ReadFileTool.toolInfo)
+    add(WriteFileTool.toolInfo)
+    add(EditFileTool.toolInfo)
+    add(GlobTool.toolInfo)
+    add(GrepTool.toolInfo)
+    add(ApplyPatchTool.toolInfo)
+    add(TodoWriteTool.toolInfo)
+    add(WebFetchTool.toolInfo)
+    add(InternetSearchTool.toolInfo)
     add(SshCommandTool.toolInfo)
     add(SshConfigureHostTool.toolInfo)
     add(SshConnectTool.toolInfo)
@@ -286,7 +311,25 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     // Telegram tools
     addAll(com.kai.custom.tools.telegramToolDefinitions)
     // Phone tools — full device access
-    addAll(PhoneTools.phoneToolDefinitions)
+    add(PhoneTools.gpsLocationToolInfo.copy(isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)))
+    add(PhoneTools.readContactsToolInfo.copy(isEnabled = hasPermission(Manifest.permission.READ_CONTACTS)))
+    add(PhoneTools.deviceInfoToolInfo)
+    add(PhoneTools.batteryInfoToolInfo)
+    add(PhoneTools.networkInfoToolInfo)
+    add(
+        PhoneTools.wifiInfoToolInfo.copy(
+            isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) ||
+                hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION),
+        ),
+    )
+    add(PhoneTools.clipboardToolInfo)
+    add(PhoneTools.installedAppsToolInfo)
+    add(PhoneTools.readCalendarToolInfo.copy(isEnabled = hasPermission(Manifest.permission.READ_CALENDAR)))
+    add(PhoneTools.writeContactToolInfo.copy(isEnabled = hasPermission(Manifest.permission.WRITE_CONTACTS)))
+    add(PhoneTools.getPhoneStateToolInfo.copy(isEnabled = hasPermission(Manifest.permission.READ_PHONE_STATE)))
+    add(PhoneTools.scanBluetoothToolInfo)
+    add(PhoneTools.listMediaToolInfo)
+    add(PhoneTools.readLogsToolInfo)
     // SMS tools are intentionally absent here: availability is driven by the Agent-tab
     // master toggles (isSmsEnabled / isSmsSendEnabled) plus the FOSS-only `isSmsSupported`
     // check in `getAvailableTools()`. Listing per-tool toggles in the Tools tab was dead
@@ -342,7 +385,7 @@ actual fun getAvailableTools(): List<Tool> {
                     )
 
                     override suspend fun execute(args: Map<String, Any>): Any {
-                        val title = args["title"] as? String ?: "Kai 9001"
+                        val title = args["title"] as? String ?: "K.Ai"
                         val message = args["message"] as? String
                             ?: return mapOf("success" to false, "error" to "Message is required")
 
@@ -503,6 +546,15 @@ actual fun getAvailableTools(): List<Tool> {
             add(ProcessManagerTool)
             add(SpeakTextTool)
             add(OpenCodeTool)
+            add(ReadFileTool)
+            add(WriteFileTool)
+            add(EditFileTool)
+            add(GlobTool)
+            add(GrepTool)
+            add(ApplyPatchTool)
+            add(TodoWriteTool)
+            add(WebFetchTool)
+            add(InternetSearchTool)
         }
 
         if (appSettings.isSshEnabled()) {

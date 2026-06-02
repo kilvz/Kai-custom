@@ -1,4 +1,4 @@
-# Rearchitecture Plan — Kai-custom Prompt Pipeline (Archived)
+﻿# Rearchitecture Plan â€” Kai-custom Prompt Pipeline (Archived)
 
 > **This plan was the original analysis. The active implementation plan is now `docs/plan-merge.md`.**
 > Based on analysis of Kai-custom pipeline (`docs/prompt-pipeline.md`) vs opencode pipeline (`docs/opencode-prompt-pipeline.md`)
@@ -6,11 +6,11 @@
 
 ## Guiding Principles
 
-1. **No functional regression** — every phase must produce the same (or strictly better) prompt output
-2. **Mobile-safe** — Android-first; no desktop-only patterns (open code's Effect/SQLite/SSE patterns don't apply)
-3. **Backward compatible** — existing `ChatSystemPromptBuilder` API surface preserved until phase 5
-4. **Pluggable over hardcoded** — reduce tight coupling in `ChatSystemPromptBuilder`
-5. **Tool definitions stay out of system prompt** — already partially done for OpenAI-compatible calls
+1. **No functional regression** â€” every phase must produce the same (or strictly better) prompt output
+2. **Mobile-safe** â€” Android-first; no desktop-only patterns (open code's Effect/SQLite/SSE patterns don't apply)
+3. **Backward compatible** â€” existing `ChatSystemPromptBuilder` API surface preserved until phase 5
+4. **Pluggable over hardcoded** â€” reduce tight coupling in `ChatSystemPromptBuilder`
+5. **Tool definitions stay out of system prompt** â€” already partially done for OpenAI-compatible calls
 
 ---
 
@@ -20,7 +20,7 @@
 |------|--------|-------------|
 | 0.1 | Count system prompt token cost per section (memory dumps, tool text, rules, soul) | Instrument `buildChatSystemPrompt()` with token counter |
 | 0.2 | Measure overhead: tool definitions in text vs tools array (duplication) | Compare `system` text size with/without tool definitions in text |
-| 0.3 | Audit all callers of `buildChatSystemPrompt()` — who consumes it? | Grep for references; document all callers |
+| 0.3 | Audit all callers of `buildChatSystemPrompt()` â€” who consumes it? | Grep for references; document all callers |
 | 0.4 | Measure memory dump size distribution (avg/max chars per category) | Log `getUserMemories()` sizes in production |
 | 0.5 | Identify which sections are always-present vs conditional | Table in `docs/prompt-pipeline.md` already has this |
 
@@ -70,20 +70,20 @@ data class PromptContext(
 ### Migration
 
 1. Extract each section of `buildChatSystemPrompt()` into a `PromptSection` implementation:
-   - `SoulSection` — soul text assembly
-   - `HonestySection` — honesty rule
-   - `ToolUseSection` — tool use instructions (KAI only)
-   - `ActingSection` — when to act (KAI only)
-   - `StructuredLearningSection` — memory learn instructions (KAI only)
-   - `MemoryDumpSection` — memory category dumps
-   - `MemorySearchGuidanceSection` — ALT memory search guidance
-   - `AltMemoryDisciplineSection` — ALT memory discipline
-   - `AutomationSection` — automation rules (KAI only)
-   - `EmailSection` — email accounts
-   - `TasksSection` — scheduled tasks
-   - `HeartbeatAdditionsSection` — heartbeat additions
-   - `ContextSection` — time/platform info
-   - `DynamicUISection` — kai-ui component catalog
+   - `SoulSection` â€” soul text assembly
+   - `HonestySection` â€” honesty rule
+   - `ToolUseSection` â€” tool use instructions (KAI only)
+   - `ActingSection` â€” when to act (KAI only)
+   - `StructuredLearningSection` â€” memory learn instructions (KAI only)
+   - `MemoryDumpSection` â€” memory category dumps
+   - `MemorySearchGuidanceSection` â€” ALT memory search guidance
+   - `AltMemoryDisciplineSection` â€” ALT memory discipline
+   - `AutomationSection` â€” automation rules (KAI only)
+   - `EmailSection` â€” email accounts
+   - `TasksSection` â€” scheduled tasks
+   - `HeartbeatAdditionsSection` â€” heartbeat additions
+   - `ContextSection` â€” time/platform info
+   - `DynamicUISection` â€” kai-ui component catalog
 
 2. Register sections in order in a `PromptSectionRegistry`:
 
@@ -117,7 +117,7 @@ class PromptSectionRegistry {
 ## Phase 2: Move Tool Definitions Out of System Prompt (Week 3-4)
 
 ### Problem
-Kai embeds tool definitions in system prompt text (e.g., `## Tool Use` section describes tools in prose). For OpenAI-compatible calls, tools are ALSO passed in the parallel `tools` array — meaning the model sees tool descriptions twice.
+Kai embeds tool definitions in system prompt text (e.g., `## Tool Use` section describes tools in prose). For OpenAI-compatible calls, tools are ALSO passed in the parallel `tools` array â€” meaning the model sees tool descriptions twice.
 
 ### Solution
 
@@ -129,7 +129,7 @@ Use tools to verify work and resolve ambiguity. Don't ask the user for lookups y
 Check available tools in the tools array before saying a capability is unavailable.
 ```
 
-2. Ensure the `tools` JSON array passed to `buildOpenAIMessages()` has comprehensive descriptions. Currently tool descriptions are in Kotlin data classes — audit and improve them:
+2. Ensure the `tools` JSON array passed to `buildOpenAIMessages()` has comprehensive descriptions. Currently tool descriptions are in Kotlin data classes â€” audit and improve them:
 
 ```kotlin
 // Before
@@ -148,7 +148,7 @@ ToolDefinition(
 )
 ```
 
-3. For CHAT_LOCAL (on-device models without parallel tools), keep brief tool descriptions in system prompt — but as a dedicated `PromptSection` registered only for CHAT_LOCAL mode.
+3. For CHAT_LOCAL (on-device models without parallel tools), keep brief tool descriptions in system prompt â€” but as a dedicated `PromptSection` registered only for CHAT_LOCAL mode.
 
 ### Token savings
 Removing tool descriptions from system prompt text saves ~500-1500 tokens depending on tool count.
@@ -162,7 +162,7 @@ Removing tool descriptions from system prompt text saves ~500-1500 tokens depend
 ## Phase 3: Separate File Context From System Prompt (Week 4-5)
 
 ### Problem
-When files are attached, `RemoteDataRepository` summarizes them into the system prompt. Opencode attaches full file content as separate `user` message parts — which is cleaner and allows the model to reference file contents directly.
+When files are attached, `RemoteDataRepository` summarizes them into the system prompt. Opencode attaches full file content as separate `user` message parts â€” which is cleaner and allows the model to reference file contents directly.
 
 ### Solution
 
@@ -291,21 +291,21 @@ data class LlmRequest(
 ```
 
 1. Implement protocols for each provider:
-   - `OpenAiChatProtocol` — OpenAI / Azure / DeepSeek / TogetherAI
-   - `AnthropicProtocol` — Anthropic Messages API
-   - `GeminiProtocol` — Gemini API
-   - `OllamaProtocol` — Ollama (OpenAI-compatible variant)
+   - `OpenAiChatProtocol` â€” OpenAI / Azure / DeepSeek / TogetherAI
+   - `AnthropicProtocol` â€” Anthropic Messages API
+   - `GeminiProtocol` â€” Gemini API
+   - `OllamaProtocol` â€” Ollama (OpenAI-compatible variant)
 
 2. Each protocol handles:
-   - **`body.from()`**: Convert `LlmRequest` → provider-native JSON body
-   - **`stream.step()`**: Parse SSE events → internal `StreamEvent` types
+   - **`body.from()`**: Convert `LlmRequest` â†’ provider-native JSON body
+   - **`stream.step()`**: Parse SSE events â†’ internal `StreamEvent` types
    - **`stream.initial()`**: Create initial state
    - **`stream.onHalt()`**: Handle stream termination (return final message)
 
 3. A `Route` composes `Protocol + Endpoint + Auth`, registered by provider name.
 
 ### Benefits
-- New providers added by implementing `LlmProtocol` — no `RemoteDataRepository` changes
+- New providers added by implementing `LlmProtocol` â€” no `RemoteDataRepository` changes
 - Streaming parsing is isolated per provider
 - Tool format differences handled in one place
 - Easier to add streaming middleware (token counting, logging, rate limiting)
@@ -402,7 +402,7 @@ class MemoryDumpSection(
    - Remote ALT: 1024 chars under `## What I Know About You`
    - Remote KAI: unlimited but capped at `memoryDumpMaxTokens` setting
 
-3. Add a `relevanceSort` option — only include memories relevant to the current conversation context (requires embedding similarity search). This is what upstream Kai does with `relevantPages` concept.
+3. Add a `relevanceSort` option â€” only include memories relevant to the current conversation context (requires embedding similarity search). This is what upstream Kai does with `relevantPages` concept.
 
 ### Verification
 - Same memories appear in prompt as before (when budget allows)
@@ -498,13 +498,13 @@ class ToolRegistry {
 Each phase is designed to be independently mergable and deployable:
 
 ```
-Phase 0 ─┬─→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 ──→ Phase 6 ...
-          │                               ↓
-          └─→ [target: main branch]        (all phases merge to main)
+Phase 0 â”€â”¬â”€â†’ Phase 1 â”€â”€â†’ Phase 2 â”€â”€â†’ Phase 3 â”€â”€â†’ Phase 4 â”€â”€â†’ Phase 5 â”€â”€â†’ Phase 6 ...
+          â”‚                               â†“
+          â””â”€â†’ [target: main branch]        (all phases merge to main)
 ```
 
-- **Dependencies**: Phase 1 → 4 (sections must be extractable before heartbeat can reuse them)  
-  Phase 5 → 6 (protocol abstraction enables schema validation)
+- **Dependencies**: Phase 1 â†’ 4 (sections must be extractable before heartbeat can reuse them)  
+  Phase 5 â†’ 6 (protocol abstraction enables schema validation)
 - **Parallelizable**: Phase 7 (memory budget) can be done independently after Phase 1  
   Phase 8 (dynamic ordering) depends on Phase 1  
   Phase 9 (tool registry) can be done independently
@@ -520,7 +520,7 @@ Phase 0 ─┬─→ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase
 | **Performance overhead** from section iteration | Sections are O(n) on <20 items; negligible |
 | **Tool call breakage** from removing tool text from prompt | Phase 2 tested with known tool-invoking queries |
 | **Memory budget changes** break user experience | Phase 7 preserves existing budgets by default |
-| **Android build size increase** from new abstractions | Minimal — interface definitions are zero-cost abstractions in Kotlin |
+| **Android build size increase** from new abstractions | Minimal â€” interface definitions are zero-cost abstractions in Kotlin |
 
 ---
 
@@ -530,18 +530,18 @@ After all phases:
 
 | Section | Current (est. tokens) | After (est. tokens) | Savings |
 |---------|---------------------|---------------------|---------|
-| Soul | 200-600 | 200-600 | — |
-| Honesty | 15 | 15 | — |
+| Soul | 200-600 | 200-600 | â€” |
+| Honesty | 15 | 15 | â€” |
 | Tool Use (prose) | 200-500 | ~30 | ~170-470 |
-| When to Act | 100 | 100 | — |
-| Structured Learning | 120 | 120 | — |
-| Memory dumps | 200-2000 | 200-2000 (budget+capped) | — |
-| Automation | 300 | 300 | — |
-| Email | 50-200 | 50-200 | — |
-| Tasks | 50-200 | 50-200 | — |
-| Heartbeat Additions | 50-300 | 50-300 | — |
-| Context | 50 | 50 | — |
-| Dynamic UI | 400-800 | 400-800 | — |
+| When to Act | 100 | 100 | â€” |
+| Structured Learning | 120 | 120 | â€” |
+| Memory dumps | 200-2000 | 200-2000 (budget+capped) | â€” |
+| Automation | 300 | 300 | â€” |
+| Email | 50-200 | 50-200 | â€” |
+| Tasks | 50-200 | 50-200 | â€” |
+| Heartbeat Additions | 50-300 | 50-300 | â€” |
+| Context | 50 | 50 | â€” |
+| Dynamic UI | 400-800 | 400-800 | â€” |
 | **Tool definitions (duplicate text)** | **500-1500** | **0** | **500-1500** |
 | **Total** | **~2200-6500** | **~1700-5000** | **~500-1500** |
 

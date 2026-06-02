@@ -1,4 +1,4 @@
-# Merge Plan — Unified Prompt Architecture
+﻿# Merge Plan â€” Unified Prompt Architecture
 
 > **Goal**: Replace KAI / ALT / CUSTOM three-style split with a single architecture:
 > **Persona (chooser) + Technical (auto) + Custom Soul (user-specific only)**
@@ -9,33 +9,33 @@
 
 ```
  SYSTEM PROMPT
-┌──────────────────────────────────────────────────────────┐
-│  LAYER 1: PERSONA (from chooser — who the AI IS)         │
-│  ───────────────────────────────────────────────────────  │
-│  • Name + defaultSoul  ← character definition             │
-│  • Language instruction  ← from LanguageStyle trait       │
-│  • Honesty rule                                          │
-│  → Selected from built-in catalog, updated when user      │
-│    switches persona. NOT user-editable as free text.      │
-├──────────────────────────────────────────────────────────┤
-│  LAYER 2: TECHNICAL (auto-generated — how the AI ACTS)   │
-│  ───────────────────────────────────────────────────────  │
-│  • Tool use instructions                                 │
-│  • Memory system rules                                    │
-│  • Automation & scheduling                                │
-│  • Email policy                                           │
-│  • Integration status (accounts, tasks)                   │
-│  • Context (time, platform, model)                        │
-│  • Dynamic UI catalog                                     │
-│  → Generated from capabilities. NOT user-editable.        │
-├──────────────────────────────────────────────────────────┤
-│  LAYER 3: CUSTOM SOUL (user + auto — what the AI KNOWS)  │
-│  ───────────────────────────────────────────────────────  │
-│  • soul_user  ← user-written preferences/behavior notes   │
-│  • soul_auto  ← auto-promoted learnings (heartbeat)      │
-│  → ONLY user-specific content. NOT character definition.  │
-│  → Strips anything covered by persona or technical layer. │
-└──────────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  LAYER 1: PERSONA (from chooser â€” who the AI IS)         â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚
+â”‚  â€¢ Name + defaultSoul  â† character definition             â”‚
+â”‚  â€¢ Language instruction  â† from LanguageStyle trait       â”‚
+â”‚  â€¢ Honesty rule                                          â”‚
+â”‚  â†’ Selected from built-in catalog, updated when user      â”‚
+â”‚    switches persona. NOT user-editable as free text.      â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  LAYER 2: TECHNICAL (auto-generated â€” how the AI ACTS)   â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚
+â”‚  â€¢ Tool use instructions                                 â”‚
+â”‚  â€¢ Memory system rules                                    â”‚
+â”‚  â€¢ Automation & scheduling                                â”‚
+â”‚  â€¢ Email policy                                           â”‚
+â”‚  â€¢ Integration status (accounts, tasks)                   â”‚
+â”‚  â€¢ Context (time, platform, model)                        â”‚
+â”‚  â€¢ Dynamic UI catalog                                     â”‚
+â”‚  â†’ Generated from capabilities. NOT user-editable.        â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚  LAYER 3: CUSTOM SOUL (user + auto â€” what the AI KNOWS)  â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚
+â”‚  â€¢ soul_user  â† user-written preferences/behavior notes   â”‚
+â”‚  â€¢ soul_auto  â† auto-promoted learnings (heartbeat)      â”‚
+â”‚  â†’ ONLY user-specific content. NOT character definition.  â”‚
+â”‚  â†’ Strips anything covered by persona or technical layer. â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ## Why This Architecture
@@ -45,7 +45,7 @@
 | `PromptStyle.KAI/ALT/CUSTOM` | 3 duplicated code paths | Single unified builder |
 | `soul_text` was everything (character + user prefs) | Couldn't tell what was persona vs learned | Split into persona (chooser) + custom soul (user prefs) |
 | User had to write entire soul text | High barrier, no guidance | Pick persona from catalog, write only preferences |
-| ALT defaultSoul had tool rules baked in | Duplicated with `## Tool Use` section | Tool rules → Technical layer only |
+| ALT defaultSoul had tool rules baked in | Duplicated with `## Tool Use` section | Tool rules â†’ Technical layer only |
 | `memoryInstructions` always null | Dead parameter | Removed |
 | KAI/ALT heartbeat styles | Duplicated logic | Single heartbeat builder |
 
@@ -81,51 +81,51 @@ data class PersonaConfig(
 | **Custom** | ~15 | Specialized, personality-driven | Storyteller, Companion, Critic, Poet, Muse, Advisor, Negotiator, Mediator, Explorer, Chef, Scientist, Detective, Reporter, Diplomat, Philosopher |
 
 Each persona provides:
-- A unique `defaultSoul` — character definition (tone, boundaries, personality)
-- `languageStyle` — how it communicates
-- `characterType` — archetype
-- `skills` — areas of specialization
+- A unique `defaultSoul` â€” character definition (tone, boundaries, personality)
+- `languageStyle` â€” how it communicates
+- `characterType` â€” archetype
+- `skills` â€” areas of specialization
 
 ### SoulEditor UI
 
 ```
-┌─────────────────────────────────────────┐
-│  Persona                                 │
-│  ┌─────┬──────┬──────┐                  │
-│  │Assis│Operat│Custom│  ← tabs          │
-│  ├─────┴──────┴──────┤                  │
-│  │ ┌────┐ ┌────┐    │  ← persona grid   │
-│  │ │Kai │ │Sage│    │    (cards)         │
-│  │ │Helper│ │Expert│  │                  │
-│  │ └────┘ └────┘    │                  │
-│  └──────────────────┘                   │
-│                                         │
-│  Character: Helper   Style: Casual    │  ← read-only traits
-│  Skills: Coding, Writing               │
-│                                         │
-│  ─────────────────────────────────────  │
-│                                         │
-│  Custom Soul (what I know about you)    │
-│  ┌─────────────────────────────────┐   │
-│  │ User writes preferences/behavior│   │
-│  │ notes here. NOT character def.  │   │
-│  │                                  │   │
-│  │ e.g. "User prefers concise      │   │
-│  │ responses under 3 paragraphs"   │   │
-│  └─────────────────────────────────┘   │
-│                                         │
-│  Behavior Notes (auto-generated)        │
-│  ┌─────────────────────────────────┐   │
-│  │ Promoted learnings from         │   │
-│  │ heartbeat/auto learning         │   │
-│  │ (read-only)                     │   │
-│  └─────────────────────────────────┘   │
-└─────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  Persona                                 â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”                  â”‚
+â”‚  â”‚Assisâ”‚Operatâ”‚Customâ”‚  â† tabs          â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”¤                  â”‚
+â”‚  â”‚ â”Œâ”€â”€â”€â”€â” â”Œâ”€â”€â”€â”€â”    â”‚  â† persona grid   â”‚
+â”‚  â”‚ â”‚Kai â”‚ â”‚Sageâ”‚    â”‚    (cards)         â”‚
+â”‚  â”‚ â”‚Helperâ”‚ â”‚Expertâ”‚  â”‚                  â”‚
+â”‚  â”‚ â””â”€â”€â”€â”€â”˜ â””â”€â”€â”€â”€â”˜    â”‚                  â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                   â”‚
+â”‚                                         â”‚
+â”‚  Character: Helper   Style: Casual    â”‚  â† read-only traits
+â”‚  Skills: Coding, Writing               â”‚
+â”‚                                         â”‚
+â”‚  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€  â”‚
+â”‚                                         â”‚
+â”‚  Custom Soul (what I know about you)    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚ User writes preferences/behaviorâ”‚   â”‚
+â”‚  â”‚ notes here. NOT character def.  â”‚   â”‚
+â”‚  â”‚                                  â”‚   â”‚
+â”‚  â”‚ e.g. "User prefers concise      â”‚   â”‚
+â”‚  â”‚ responses under 3 paragraphs"   â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â”‚                                         â”‚
+â”‚  Behavior Notes (auto-generated)        â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚ Promoted learnings from         â”‚   â”‚
+â”‚  â”‚ heartbeat/auto learning         â”‚   â”‚
+â”‚  â”‚ (read-only)                     â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### Key UI Rules
 
-1. **Persona tabs**: Assistant | Operator | Custom — shows persona cards grid
+1. **Persona tabs**: Assistant | Operator | Custom â€” shows persona cards grid
 2. **Persona card**: Name, description, character type icon, language style badge, skills chips
 3. **Persona selected**: Shows read-only traits preview, applies immediately
 4. **Custom Soul field**: Free text for user-specific preferences/behavior notes ONLY
@@ -215,7 +215,7 @@ fun getCustomSoul(personaId: String): String {
 | Context metadata | Technical layer |
 | Dynamic UI catalog | Technical layer |
 
-## UnifiedPromptBuilder — Implementation
+## UnifiedPromptBuilder â€” Implementation
 
 ```kotlin
 class UnifiedPromptBuilder(private val defaultSoul: String = "") {
@@ -263,64 +263,64 @@ class UnifiedPromptBuilder(private val defaultSoul: String = "") {
 }
 ```
 
-## SoulEditor — Redesigned
+## SoulEditor â€” Redesigned
 
 ### Data Flow
 
 ```
-┌─────────────┐    ┌──────────────────┐    ┌─────────────┐
-│ Persona     │───→│ AppSettings      │───→│ Prompt      │
-│ Chooser     │    │ persona_id       │    │ Builder     │
-│ (UI)        │    │ soul_user_{id}   │    │             │
-│             │    │ soul_auto_{id}   │    │             │
-│ Pick Kai →  │    │ → persona=kai    │    │ → Persona   │
-│ soul_user   │    │ → soul_user=...  │    │   + Custom  │
-│ "Prefers    │    │ → soul_auto=...  │    │   + Tech    │
-│  short reps"│    │                  │    │             │
-└─────────────┘    └──────────────────┘    └─────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚ Persona     â”‚â”€â”€â”€â†’â”‚ AppSettings      â”‚â”€â”€â”€â†’â”‚ Prompt      â”‚
+â”‚ Chooser     â”‚    â”‚ persona_id       â”‚    â”‚ Builder     â”‚
+â”‚ (UI)        â”‚    â”‚ soul_user_{id}   â”‚    â”‚             â”‚
+â”‚             â”‚    â”‚ soul_auto_{id}   â”‚    â”‚             â”‚
+â”‚ Pick Kai â†’  â”‚    â”‚ â†’ persona=kai    â”‚    â”‚ â†’ Persona   â”‚
+â”‚ soul_user   â”‚    â”‚ â†’ soul_user=...  â”‚    â”‚   + Custom  â”‚
+â”‚ "Prefers    â”‚    â”‚ â†’ soul_auto=...  â”‚    â”‚   + Tech    â”‚
+â”‚  short reps"â”‚    â”‚                  â”‚    â”‚             â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### UI Components
 
-1. **PersonaTabRow** — Assistant | Operator | Custom
-2. **PersonaGrid** — cards showing name, character type badge, language style badge, skills chips
-3. **PersonaPreview** — read-only traits of selected persona
-4. **CustomSoulEditor** — text field for user-written preferences (NOT character def)
-5. **BehaviorNotesDisplay** — read-only display of auto-promoted learnings
+1. **PersonaTabRow** â€” Assistant | Operator | Custom
+2. **PersonaGrid** â€” cards showing name, character type badge, language style badge, skills chips
+3. **PersonaPreview** â€” read-only traits of selected persona
+4. **CustomSoulEditor** â€” text field for user-written preferences (NOT character def)
+5. **BehaviorNotesDisplay** â€” read-only display of auto-promoted learnings
 
 ## Migration Path
 
-### Phase A — Data Model (Day 1) ✅
+### Phase A â€” Data Model (Day 1) âœ…
 - Add `BehaviorStyle`, `LanguageStyle`, `CharacterType` enums to `Persona.kt`
 - Add trait fields to `PersonaConfig` (with backward-compat defaults)
 - Create `PersonaCatalog.kt` with 46 default personas
 - PersonaManager stays the same, just `builtIns` comes from catalog
 
-### Phase B — Prompt Builder (Day 2) ✅
+### Phase B â€” Prompt Builder (Day 2) âœ…
 - Rewrite `UnifiedPromptBuilder.kt` with 3-layer split
-- `buildPersonaLayer()` — uses persona defaultSoul + honesty + language
-- `buildTechnicalLayer()` — auto-generated from capabilities
-- `buildCustomSoulLayer()` — soul_user + soul_auto only
+- `buildPersonaLayer()` â€” uses persona defaultSoul + honesty + language
+- `buildTechnicalLayer()` â€” auto-generated from capabilities
+- `buildCustomSoulLayer()` â€” soul_user + soul_auto only
 - `buildChatSystemPrompt()` becomes thin delegation wrapper
-- `HeartbeatPromptBuilder` — removed heartbeatStyle param, always includes Learned Patterns
+- `HeartbeatPromptBuilder` â€” removed heartbeatStyle param, always includes Learned Patterns
 
-### Phase C — SoulEditor UI (Day 3) ✅
+### Phase C â€” SoulEditor UI (Day 3) âœ…
 - Rewrite `SoulEditor` composable with persona chooser tabs
 - Add persona card grid with trait badges
 - Custom soul text field (user-specific only)
 - Behavior notes read-only section
 - Create Persona dialog with trait pickers
 
-### Phase D — Cleanup (Day 4) ✅
-- `PersonaPromptStyle` enum — kept for backward compat in `buildChatSystemPrompt()` (test-only code path)
-- `PersonaHeartbeatStyle` enum — removed ✅
-- `PersonaConfig.style` / `PersonaConfig.heartbeatStyle` deprecated fields — removed ✅
-- `DEFAULT_*` constants — moved to UnifiedPromptBuilder.kt ✅
-- Dead `memoryInstructions` parameter — removed from `buildChatSystemPrompt()` and test ✅
-- `getPersonaPromptStyle()` / `getPersonaHeartbeatStyle()` — removed from DataRepository interface + both implementations ✅
-- `AltMemoryClient` persona construction — no longer sets removed fields ✅
+### Phase D â€” Cleanup (Day 4) âœ…
+- `PersonaPromptStyle` enum â€” kept for backward compat in `buildChatSystemPrompt()` (test-only code path)
+- `PersonaHeartbeatStyle` enum â€” removed âœ…
+- `PersonaConfig.style` / `PersonaConfig.heartbeatStyle` deprecated fields â€” removed âœ…
+- `DEFAULT_*` constants â€” moved to UnifiedPromptBuilder.kt âœ…
+- Dead `memoryInstructions` parameter â€” removed from `buildChatSystemPrompt()` and test âœ…
+- `getPersonaPromptStyle()` / `getPersonaHeartbeatStyle()` â€” removed from DataRepository interface + both implementations âœ…
+- `AltMemoryClient` persona construction â€” no longer sets removed fields âœ…
 
-### Phase E — Build & Release ⬜
+### Phase E â€” Build & Release â¬œ
 - Compile check, lint, build APKs
 - Commit, tag, push, create release
 
@@ -338,7 +338,7 @@ When `renderMode = UPSTREAM_COMPAT` (Kai persona):
 |-------|-------------|-------------|----------------|
 | Persona | 200-600 | 400-800 | 200-800 |
 | Technical | 1500-4000 | 1000-3000 | 1000-3000 |
-| Custom Soul | — | — | 50-500 |
+| Custom Soul | â€” | â€” | 50-500 |
 | **Total** | **1700-4600** | **1400-3800** | **1250-4300** |
 
 Savings come from:

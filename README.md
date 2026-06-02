@@ -1,115 +1,290 @@
 # Kai-custom
 
-Kai-custom is a FOSS Android-first fork of [Kai](https://github.com/SimonSchubert/Kai): a personal AI assistant with persistent memory, tool use, Linux sandbox automation, local device integrations, and optional remote model providers.
+**Kai-custom** is a public FOSS Android-first fork of [Kai](https://github.com/SimonSchubert/Kai) — an open-source personal AI assistant with persistent memory, tool use, Linux sandbox automation, local device integrations, and optional remote model providers.
 
-This fork keeps the app fully open-source, removes proprietary telemetry dependencies, and focuses on Android as the primary supported target.
+This fork keeps the app fully open-source, removes proprietary telemetry dependencies, and adds significant new capabilities focused on **Android** as the primary supported target.
+
+Current version: **v3.6.4** (versionCode 151) — base on upstream v2.7.0.
+
+---
+
+## Table of Contents
+
+- [Highlights](#highlights)
+- [Platform Support](#platform-support)
+- [Core Features](#core-features)
+- [What's Different From Upstream](#whats-different-from-upstream)
+- [Custom Features Added in This Fork](#custom-features-added-in-this-fork)
+- [Build Requirements](#build-requirements)
+- [Common Commands](#common-commands)
+- [Versioning](#versioning)
+- [Release Flow](#release-flow)
+- [Repository Notes](#repository-notes)
+- [License](#license)
+
+---
 
 ## Highlights
 
-- Android assistant with chat, voice input, text-to-speech, tool use, scheduling, and heartbeat checks.
-- Multi-provider AI support with fallback ordering, local LiteRT models, OpenAI-compatible endpoints, and a free-provider path.
-- Two-tier memory with user-editable memories, protected behavior learnings, personas, import/export, and optional Alt-Memory backend.
-- Alpine Linux sandbox via proot for shell commands, Python/Node scripts, file work, package installs, and AI-driven coding tasks.
-- Device tools for notifications, contacts, SMS, calendar, location, battery, Wi-Fi/network info, clipboard, installed apps, logs, media, Bluetooth, Shizuku ADB, and root commands where enabled.
-- SSH tooling, MCP server support, scheduled tasks, heartbeat automation, dynamic UI generation, and debug API for development.
+- **Android-first assistant** with chat, voice input, TTS, tool use, scheduling, and heartbeat automation
+- **Multi-provider AI** with fallback ordering, 24+ providers, LiteRT on-device inference, and a free tier
+- **Two-tier memory** — user facts vs protected behavior learnings, with automatic extraction and reinforcement
+- **Personas** — named persona profiles with editable soul descriptions and auto-generated behavior notes
+- **Wake word** — "Hey Kai" voice activation (Android)
+- **Alpine Linux sandbox** via proot for shell commands, Python/Node scripts, package management, and AI-driven tasks
+- **Device integration** — 20+ tools: GPS, contacts, SMS, notifications, calendar, clipboard, Bluetooth, Wi-Fi, logs, media, installs, battery, phone state
+- **Privileged Android tools** — Shizuku-backed ADB commands and `su` root execution
+- **SSH tooling** — profile management, session lifecycle, command execution, and in-app terminal
+- **Scheduled tasks + heartbeat** — cron, one-shot, and heartbeat-triggered automation
+- **Alt-Memory MCP backend** — optional Python vector store replacing local SQLite
+- **Debug API** — 50+ HTTP endpoints for development via ADB port forwarding
+- **MCP server support** — Streamable HTTP protocol with built-in and custom endpoints
+- **Skills system** — installable skill packages from GitHub or the skill marketplace
+- **Interactive UI** — AI generates forms, dashboards, quizzes, and lists
+
+---
 
 ## Platform Support
 
 | Target | Status |
 | --- | --- |
-| Android | Primary target. Release APKs are built for `arm64-v8a`, `armeabi-v7a`, `x86`, and `x86_64`. |
-| Desktop JVM | Builds are best-effort on Windows, Linux, and macOS. |
-| WasmJs | Source target exists but is not actively tested. |
-| iOS | Source target exists but is not actively tested. |
+| Android | **Primary target.** Release APKs for `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` |
+| Desktop JVM | Best-effort builds on Windows, Linux, macOS |
+| WasmJs | Target exists, not actively tested |
+| iOS | Target exists, not actively tested |
+
+---
 
 ## Core Features
 
-### Chat And AI Providers
+### Chat & AI Providers
 
-- Chat UI with persistent history and tool-calling support.
-- Provider ordering and fallback across hosted services and compatible APIs.
-- LiteRT on-device inference support for downloaded local models.
-- Local-service fallback avoids selecting local inference when no local model is installed.
+- Chat UI with persistent history, encryption, tool calling, and image attachments
+- Provider ordering with automatic fallback across 24+ services
+- LiteRT on-device inference for downloaded local models
+- Local-service fallback (skips local inference when no model is installed)
+- Skills system — slash-triggered installable skill packages
 
-### Memory And Personas
+### Memory System
 
-- User memories store facts, preferences, and extracted conversation details.
-- Protected behavior memories store learned operating patterns and are hidden from normal deletion UI.
-- Memory can be disabled globally, which removes memory tools, prompt memory dumps, and extraction.
-- Persona support includes named persona profiles, editable persona details, and active persona switching.
-- Soul text is split into user-edited text and auto-generated behavior notes.
-- Memory export/import is supported from Settings.
+- **Two-tier memory**: user facts (`protected=false`) and behavior learnings (`protected=true`)
+- **Soul split**: `soul_user` (user-edited) + `soul_auto` (auto-generated by heartbeat)
+- **Personas**: named profiles with editable name/description, auto-prompted in system prompt
+- **AutoMemoryLearner**: batched inline extraction every 5 exchanges
+- **HeartbeatMemoryExtractor**: post-heartbeat behavior pattern learning
+- **Dimension store**: SQLite-backed vector search with embedding similarity
+- **Alt-Memory MCP backend**: optional Python server with vector search, KG, and diary
+- **Memory toggle**: global disable removes memory tools/dumps/extraction
+- **Protected filter**: behavior learnings hidden from deletion UI (toggle to reveal)
+- **Memory export/import**: JSON format from Settings
 
-### Alt-Memory Backend
+### Prompt Pipeline
 
-- Optional Alt-Memory MCP backend can be installed into the sandbox.
-- Settings redirects users to the Sandbox tab when Alt-Memory is requested before installation.
-- The Sandbox tab includes an `Alt-Memory` install action next to sandbox controls.
-- Installation runs as the app user inside proot, with `--break-system-packages`, `--no-cache-dir`, longer timeouts, and retry handling for large Python wheels.
-- Starting/stopping Alt-Memory registers or removes the built-in MCP server and migrates local memories when ready.
+- **UnifiedPromptBuilder** replaces legacy `ChatSystemPromptBuilder`
+- Trimmed system prompt — removed 6 upstream sections (Tool Use, When to Act, Memory System, Automation, Structured Learning, email policy)
+- Memory budget capped at 1024 chars total
+- Heartbeat prompt includes `## Learned Patterns` section from behavior memories
+- Active skills injected as `History.SYSTEM` messages
 
 ### Linux Sandbox
 
-- Alpine Linux rootfs via proot.
-- Basic package installer for `bash`, `curl`, `wget`, `git`, `jq`, `python3`, `pip`, `nodejs`, `openssh-client`, `lftp`, and `rsync`.
-- Terminal tab with persistent session handling and a separate temporary scratch session when chat sessions exist.
-- Files tab and package tooling for sandbox inspection and management.
-- Shell commands can run through persistent sessions or one-shot command execution.
-- Optional storage mount exposes device storage as `/sdcard`.
-- Optional root mode can wrap proot commands with `su -c` when root is enabled.
+- Alpine Linux rootfs (~3 MB download) via proot, no root required
+- Package installer: bash, curl, wget, git, jq, python3, pip, nodejs, openssh-client, lftp, rsync
+- Terminal tab with persistent session + separate scratch session for chat
+- Files tab and package tooling for inspection and management
+- Optional storage mount (`/sdcard`) and `su -c` root mode
 
-### Device Tools
+### Device Tools (Android)
 
-Kai-custom includes Android tools that are individually gated by settings and runtime permissions where applicable:
+Gated by settings and runtime permissions:
 
-- GPS location
+- GPS location (fine/coarse)
 - Contacts read/write
-- Device, battery, network, Wi-Fi, and phone-state info
+- SMS check/read/search/reply/send-draft (verification code flow)
+- Notifications check/read/search
+- Calendar events read
 - Clipboard read
 - Installed apps list
-- Calendar events
-- SMS check/read/search/reply/send draft flow
-- Notification check/read/search
-- Media listing
-- Bluetooth scan/list
+- Media listing (images, audio, video)
+- Bluetooth scan and device listing
+- Device, battery, network, Wi-Fi, phone-state info
 - Device logs
 - Shizuku-backed ADB commands
-- Root commands through `su` when enabled
+- Root shell commands via `su`
+- Microphone permission controller
 
 ### Automation
 
-- Heartbeat checks can run on a configurable interval during active hours.
-- Scheduled tasks support one-shot, cron, and heartbeat-triggered execution.
-- Email and SMS polling can surface pending items for the assistant.
-- Dynamic UI generation can create interactive screens such as forms, dashboards, quizzes, and lists.
+- Heartbeat checks on configurable interval during active hours (default 30 min, 8am–10pm)
+- Scheduled tasks: one-shot, cron, and heartbeat-triggered
+- Email and SMS polling to surface pending items
+- Dynamic UI generation (forms, dashboards, quizzes, lists)
 
-### SSH And MCP
+### SSH & MCP
 
-- SSH profile configuration and command execution tools.
-- Streamable HTTP MCP server support with built-in and custom endpoints.
-- Built-in Alt-Memory MCP integration when installed and enabled.
+- SSH profile configuration (alias, hostname, user, port, identity file, known_hosts)
+- Session connect/disconnect lifecycle management
+- Command execution over active SSH sessions
+- In-app terminal UI with SshViewModel state management
+- Streamable HTTP MCP server support with built-in and custom endpoints
+- Integrated Alt-Memory MCP server (when installed)
+- Curated MCP server list: Fetch, DeepWiki, Sequential Thinking, Context7, Globalping, CoinGecko, Manifold Markets, Find-A-Domain
+
+### Wake Word (Android)
+
+- "Hey Kai" keyword spotting using a TensorFlow Lite model
+- MFCC feature extraction pipeline
+- Wake word service lifecycle (start/stop)
+- Phrase interpreter for simple voice commands
+- WakeWordController manages model loading, inference, and event dispatch
 
 ### Debug API
 
-Debug builds can expose a localhost-only HTTP API on `127.0.0.1:18500` for development through ADB port forwarding.
+- Localhost HTTP server on `127.0.0.1:18500` (debug builds only)
+- 50+ endpoints across all features
+- ADB port forwarding for remote access
+- Endpoints include: health, prompt, history, state, tools, memories, settings, chat, sandbox setup/exec, reset, and more
+- See [docs/debug-api.md](docs/debug-api.md) for full reference
 
-Documented endpoints include:
+### Architecture
 
-- `GET /health`
-- `GET /prompt`
-- `GET /history`
-- `GET /state`
-- `GET /tools`
-- `GET /memories`
-- `GET /settings`
-- `POST /chat`
-- `POST /settings/{key}`
-- `POST /sandbox/setup`
-- `POST /sandbox/install-packages`
-- `POST /sandbox/exec`
-- `POST /reset`
+- **Koin DI**: 43 bindings, all registered and consumed
+- **Multiplatform platform layer**: `androidMain`, `commonMain`, `desktopMain`, `iosMain`, `wasmJsMain`
+- **MemoryStoreProvider** delegation pattern for seamless backend switching
+- **ToolExecutor** with caching for tool definitions and instances
+- **Dimension module** (Android-only): SQLite dimension store with vector search
+- **DataRepository interface**: ~200 methods covering all data access, fully implemented in both `RemoteDataRepository` and `FakeDataRepository`
 
-See [docs/debug-api.md](docs/debug-api.md) for authentication, examples, and the raw sandbox command endpoint.
+---
+
+## What's Different From Upstream
+
+Kai-custom is rebuilt from the upstream [SimonSchubert/Kai](https://github.com/SimonSchubert/Kai) (v2.7.0 base) with an independent version line and extensive Android-focused additions. The fork:
+
+| Aspect | Upstream | Kai-custom |
+|--------|----------|------------|
+| **Package** | `com.inspiredandroid.kai` | `com.kai.custom` |
+| **App name** | Kai 9000 | Kai-custom |
+| **Version** | v2.7.0 (107) | v3.6.4 (151) |
+| **Memory** | Single-tier SQLite | Two-tier (protected + unprotected), Alt-MCP, dimension store |
+| **Soul** | Single `soul_text` | Split `soul_user` + `soul_auto`, persona system |
+| **Wake word** | None | "Hey Kai" TFLite keyword spotting |
+| **Prompt builder** | ChatSystemPromptBuilder (12 sections) | UnifiedPromptBuilder (6 sections trimmed) |
+| **Sandbox distro** | Alpine only | Alpine + Ubuntu option |
+| **Tools** | Basic set | +SSH, Shizuku ADB, root, TTS speak, OpenCode, enhanced shell |
+| **SSH** | None | Profile management, session lifecycle, terminal UI |
+| **Debug API** | None | 50+ HTTP endpoints |
+| **Memory extraction** | Manual only (promote on 5+ hits) | AutoMemoryLearner (every 5 exchanges) + HeartbeatMemoryExtractor |
+| **Active skills** | Via ChatSystemPromptBuilder | Via History.SYSTEM message in ask() |
+| **Analytics** | Proprietary (Crashlytics etc.) | None (FOSS only) |
+| **Distribution** | Play Store, F-Droid, App Store, Homebrew, AUR, Winget | GitHub Releases only |
+| **Flavor** | Multiple (foss + non-foss) | FOSS only |
+
+---
+
+## Custom Features Added in This Fork
+
+### Memory & Learning
+
+| Feature | Description | Documentation |
+|---------|-------------|---------------|
+| Two-tier memory (`protected` field) | Behavior learnings hidden from deletion, `forget()` rejects protected entries | [Memory architecture](docs/memory-system-architecture.md) |
+| Soul split (`soul_user` + `soul_auto`) | User-edited soul text + auto-generated behavior notes from heartbeat | `AppSettings.getSoulUser()` / `getSoulAuto()` |
+| Persona system | Named profiles with editable name/description, prepended as "You are {name}." | `PersonaManager`, `Persona.kt` |
+| AutoMemoryLearner | Batched inline extraction every 5 exchanges, stores as unprotected memories | `AutoMemoryLearner.kt` |
+| HeartbeatMemoryExtractor | Post-heartbeat behavior pattern extraction, stores as protected memories | `HeartbeatMemoryExtractor.kt` |
+| Alt-Memory MCP backend | Optional Python server with vector search, KG, diary, installed in sandbox | [Memory architecture](docs/memory-system-architecture.md) |
+| Memory toggle | Global disable for memory/KG/diary tools and prompt dumps | `AppSettings.isMemoryEnabled()` |
+| Protected filter in UI | Toggle to reveal/hide behavior learnings in memory management | `MemoryManagementSheet.kt` |
+| Dimension store | SQLite-backed entity store with embedding similarity and FTS5 search | `SqliteDimensionStore.kt` |
+
+### Wake Word (Android)
+
+| Feature | Description | Files |
+|---------|-------------|-------|
+| "Hey Kai" KWS | TensorFlow Lite wake word model with MFCC preprocessing | `WakeWordInterpreter.kt`, `MfccProcessor.kt`, `hey_kai.tflite` |
+| Wake word service | Background service for continuous keyword spotting | `WakeWordService.kt` |
+| WakeWordController | Lifecycle management, model loading, inference dispatch | `WakeWordController.kt` |
+
+### SSH System
+
+| Feature | Description | Files |
+|---------|-------------|-------|
+| SSH profiles | Configure alias, hostname, user, port, identity file, known_hosts | `SshConfigureHostTool.kt` |
+| Session management | Connect/disconnect lifecycle with connection state | `SshConnectionManager.kt`, `SshConnectTool.kt`, `SshDisconnectTool.kt` |
+| Command execution | Run commands over active SSH sessions | `SshCommandTool.kt` |
+| Terminal UI | In-app SSH terminal with state management | `SshTerminalContent.kt`, `SshViewModel.kt`, `SshSettings.kt` |
+
+### Privileged Android Tools
+
+| Feature | Description | Files |
+|---------|-------------|-------|
+| Shizuku ADB | Execute ADB commands via Shizuku service | `ShizukuManager.kt`, `CommandService.kt`, `AdbTool.kt` |
+| Root shell | `su -c` command execution when root is enabled | `ShellCommandTool.kt` |
+| SMS verification flow | Send SMS via draft flow (verification codes) | `PhoneTools.kt` |
+| Phone state info | Device telephony information | `PhoneTools.kt` |
+| Microphone controller | Permission lifecycle for audio capture | `MicrophonePermissionController.android.kt` |
+
+### Additional AI Tools
+
+| Tool | Description | File |
+|------|-------------|------|
+| `tts_speak` | Text-to-speech output via Android TTS engine | `SpeakTextTool.kt` |
+| `shell_command` | Enhanced Android shell command execution | `ShellCommandTool.kt` |
+| `opencode` | OpenCode integration tool | `OpenCodeTool.kt` |
+| `adb` | Direct ADB command execution | `AdbTool.kt` |
+| `ssh_configure_host` | SSH profile creation/update | `SshConfigureHostTool.kt` |
+| `ssh_command` | SSH remote command execution | `SshCommandTool.kt` |
+| `ssh_connect` / `ssh_disconnect` | SSH session lifecycle | `SshConnectTool.kt`, `SshDisconnectTool.kt` |
+
+### Debug API
+
+| Feature | Description | Documentation |
+|---------|-------------|---------------|
+| HTTP debug server | 50+ localhost endpoints on port 18500 | [docs/debug-api.md](docs/debug-api.md) |
+| Endpoint categories | Health, prompt, history, state, tools, memories, settings, chat, sandbox | Same |
+| ADB forwarding | `adb forward tcp:18500 tcp:18500` for remote dev access | Same |
+
+### Architecture & Infrastructure
+
+| Feature | Description |
+|---------|-------------|
+| Koin DI | All 43 bindings registered and consumed, platform-conditional loading |
+| Platform layer | `androidMain` / `desktopMain` / `iosMain` / `wasmJsMain` with `expect`/`actual` |
+| ToolExecutor caching | `cachedTools`/`cachedToolDefs` with `invalidateCache()` |
+| ChatActions.kt | Separated action handlers from ChatViewModel |
+| ToolsContent.kt | Separate UI component for tools (upstream keeps in SettingsScreen) |
+| EditMessageDialog | Edit previously sent messages |
+| GeneralSettings.kt | Custom settings sections for fork-specific options |
+| AGENTS.md | Session continuity guides for AI agent workflow |
+
+### Removed vs Upstream
+
+| Removed | Reason |
+|---------|--------|
+| `ChatSystemPromptBuilder.kt` (202 lines) | Replaced by `UnifiedPromptBuilder` |
+| `VectorIndex.kt` (51 lines) | Orphaned — dimension search uses SQLite |
+| `SyncEngine.kt` (118 lines) | Orphaned — not wired into production |
+| `DataRepository.sendTelegramMessage()` | No callers — TelegramPoller called directly by tool |
+| `SandboxController.searchMemories()` | Replaced by alt-memory MCP tools |
+| `toHumanReadableDate()` extension | Unused |
+| `toPlainText()` + 3 helpers | Unused markdown rendering |
+| Proprietary analytics (Crashlytics, etc.) | FOSS-only policy |
+| Non-FOSS build flavors | FOSS-only |
+
+### Known Gaps (Upstream Features Not Ported)
+
+| Feature | Status |
+|---------|--------|
+| DimensionStore on non-Android | Not implemented — will crash on iOS/Desktop/WasmJs at runtime |
+| `installSkillFromGitHub` / `installSkillFromRegistryEntry` | FakeDataRepository throws `UnsupportedOperationException` |
+| `AnsiParser.kt` | Test-only (223 lines) — not wired into production |
+| iOS EventKit calendar permissions | Unimplemented TODOs |
+| Tool name deduplication | Desktop lacks MCP/built-in dedup (Android has it) |
+| `HeartbeatPromptBuilderTest` learned patterns | Not tested (no `learnedPatterns` param) |
+| `search_memories` ToolInfo resources | Missing `nameRes`/`descriptionRes` string references |
+
+---
 
 ## Build Requirements
 
@@ -155,18 +330,18 @@ androidApp\build\outputs\apk\foss\release\androidApp-foss-x86_64-release.apk
 
 ## Versioning
 
-The app version is stored in:
+App version stored in:
 
 - `VERSION`
 - `gradle/libs.versions.toml`
 
-Version format is `vMAJOR.MINOR.PATCH`. Android `versionCode` is bumped for every app change.
+Format: `vMAJOR.MINOR.PATCH`. Android `versionCode` bumped for every change.
 
 ## Release Flow
 
-Releases are tag-driven. Pushing a `v*` tag can trigger GitHub Actions builds. Manual releases can also attach locally built APKs.
+Releases are tag-driven. Pushing a `v*` tag triggers GitHub Actions builds. Manual releases can also attach locally built APKs.
 
-Typical manual release steps:
+Typical manual steps:
 
 ```powershell
 .\gradlew.bat :composeApp:compileAndroidMain
@@ -182,24 +357,7 @@ git push origin main vX.Y.Z
 - Build flavor: FOSS
 - Primary branch: `main`
 - License: Apache License 2.0
-
-## Difference From Upstream
-
-Kai-custom is a public FOSS fork with a custom version line and additional Android-focused capabilities.
-
-Notable additions include:
-
-- Two-tier memory and persona management
-- Alt-Memory MCP backend integration
-- Linux sandbox terminal/package/files UI
-- Shizuku/root tools
-- SSH tooling
-- SMS, notification, contact, calendar, device, and media tools
-- Debug API
-- Dynamic UI generation
-- Heartbeat and task automation changes
-
-Removed or de-emphasized items include proprietary analytics/crash reporting dependencies and upstream-specific publishing workflows that do not apply to this fork.
+- Upstream: [SimonSchubert/Kai](https://github.com/SimonSchubert/Kai) (v2.7.0 base)
 
 ## License
 

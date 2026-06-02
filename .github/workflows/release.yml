@@ -25,14 +25,29 @@ jobs:
           java-version: "21"
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-      - name: Install Android Build Tools
+      - name: Set up Android SDK
         run: |
-          sdkmanager "build-tools;36.0.0"
-          sdkmanager "build-tools;29.0.3"
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          ls -la $ANDROID_SDK_ROOT/ 2>/dev/null || true
+          ls -la $ANDROID_SDK_ROOT/cmdline-tools/ 2>/dev/null || true
+      - name: Install Android SDK components
+        run: |
+          SDKMANAGER=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager
+          if [ ! -f "$SDKMANAGER" ]; then
+            SDKMANAGER=$ANDROID_SDK_ROOT/tools/bin/sdkmanager
+          fi
+          if [ ! -f "$SDKMANAGER" ]; then
+            echo "sdkmanager not found at expected paths"
+            ls -la $ANDROID_SDK_ROOT/
+            exit 1
+          fi
+          yes | $SDKMANAGER "platforms;android-36" "build-tools;36.0.0" 2>&1 | tail -10
+          yes | $SDKMANAGER --licenses 2>&1 | tail -5 || true
+        env:
+          ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}
       - name: Build APK
-        run: bash ./gradlew :androidApp:assembleFossRelease --stacktrace
+        run: bash ./gradlew :androidApp:assembleFossRelease --stacktrace --no-daemon
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         with:
@@ -65,7 +80,7 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Build DMG
-        run: bash ./gradlew packageReleaseDmg --stacktrace
+        run: bash ./gradlew packageReleaseDmg --stacktrace --no-daemon
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -88,7 +103,7 @@ jobs:
           distribution: temurin
           java-version: "21"
       - name: Build MSI
-        run: ./gradlew packageReleaseMsi --stacktrace
+        run: ./gradlew packageReleaseMsi --stacktrace --no-daemon
       - name: Upload MSI Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -113,7 +128,7 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Build DEB
-        run: ./gradlew packageReleaseDeb --stacktrace
+        run: ./gradlew packageReleaseDeb --stacktrace --no-daemon
       - name: Upload DEB Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -140,7 +155,7 @@ jobs:
       - name: Install RPM build tools
         run: sudo apt-get update && sudo apt-get install -y rpm
       - name: Build RPM
-        run: ./gradlew packageReleaseRpm --stacktrace
+        run: ./gradlew packageReleaseRpm --stacktrace --no-daemon
       - name: Upload RPM Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -165,7 +180,7 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Build application distribution
-        run: ./gradlew createReleaseDistributable --stacktrace
+        run: ./gradlew createReleaseDistributable --stacktrace --no-daemon
       - name: Create tarball
         run: |
           cd composeApp/build/compose/binaries/main-release/app
@@ -200,7 +215,7 @@ jobs:
           wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
       - name: Build application distribution
-        run: ./gradlew createReleaseDistributable --stacktrace
+        run: ./gradlew createReleaseDistributable --stacktrace --no-daemon
       - name: Create AppDir structure
         run: |
           mkdir -p AppDir/usr/bin
@@ -208,14 +223,11 @@ jobs:
           mkdir -p AppDir/usr/share/applications
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
-          # Copy distributable contents
           cp -r composeApp/build/compose/binaries/main-release/app/Kai/* AppDir/usr/lib/
 
-          # Copy icon
           cp composeApp/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/kai.png
           cp composeApp/icon.png AppDir/kai.png
 
-          # Create desktop file
           cat > AppDir/kai.desktop << 'EOF'
           [Desktop Entry]
           Name=Kai
@@ -228,7 +240,6 @@ jobs:
           EOF
           cp AppDir/kai.desktop AppDir/usr/share/applications/
 
-          # Create AppRun
           cat > AppDir/AppRun << 'EOF'
           #!/bin/bash
           SELF=$(readlink -f "$0")
@@ -259,7 +270,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download APK Artifact
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v4
         with:
           name: signed-apk
 
@@ -277,7 +288,6 @@ jobs:
           if [ -f CHANGELOG.md ]; then
             sed -n "/^## v${VERSION}/,/^## v/{ /^## v${VERSION}/d; /^## v/d; p; }" CHANGELOG.md > changelog.txt
           fi
-          # Fallback if CHANGELOG.md missing or section empty
           if [ ! -s changelog.txt ]; then
             PREVIOUS_TAG=$(git tag --sort=-creatordate | grep -v "^${GITHUB_REF_NAME}$" | head -n1)
             if [ -z "$PREVIOUS_TAG" ]; then

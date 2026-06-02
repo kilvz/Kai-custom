@@ -1,12 +1,12 @@
-# Prompt Pipeline — Full System Prompt Before First User Message
+﻿# Prompt Pipeline â€” Full System Prompt Before First User Message
 
 ## Overview
 
 When a user first chats with the AI (empty conversation), each request sends:
 
-1. **System message** — the assembled `buildChatSystemPrompt()` output (up to ~6KB+)
-2. **User message** — the user's first question + any attachments
-3. **Tool definitions** — parallel JSON tool schema array (~45 tools)
+1. **System message** â€” the assembled `buildChatSystemPrompt()` output (up to ~6KB+)
+2. **User message** â€” the user's first question + any attachments
+3. **Tool definitions** â€” parallel JSON tool schema array (~45 tools)
 
 This document describes every section of the system message, categorized by persona style.
 
@@ -16,27 +16,27 @@ This document describes every section of the system message, categorized by pers
 
 ```
 RemoteDataRepository.ask(question, files)
-  ├── Process attachments (compress images, encode PDFs, write binaries to sandbox)
-  ├── Inject active skill body as SYSTEM message (if skill active)
-  ├── Append user question as USER message
-  ├── compactHistoryIfNeeded()
-  ├── getActiveSystemPrompt(searchQuery) → String?
-  │     ├── getSoulText(personaId)        ← soul_user + soul_auto + persona name + defaultSoul
-  │     ├── memoryStore.getUserMemories() ← non-protected memories
-  │     ├── taskStore.getPendingTasksPartitioned()
-  │     ├── emailStore.getAccounts()
-  │     ├── ChatPromptRuntimeContext      ← time, timezone, platform, model, provider
-  │     └── buildChatSystemPrompt(...)    ← the actual prompt assembly
-  │
-  ├── askWithService(service, messages=[system_prompt, skill, user_question], systemPrompt)
-  │     └── buildOpenAIMessages() → [{"role":"system","content":"..."}, {"role":"user","content":"..."}]
-  │
-  └── on success: store assistant response, autoMemoryLearner.onExchangeComplete()
+  â”œâ”€â”€ Process attachments (compress images, encode PDFs, write binaries to sandbox)
+  â”œâ”€â”€ Inject active skill body as SYSTEM message (if skill active)
+  â”œâ”€â”€ Append user question as USER message
+  â”œâ”€â”€ compactHistoryIfNeeded()
+  â”œâ”€â”€ getActiveSystemPrompt(searchQuery) â†’ String?
+  â”‚     â”œâ”€â”€ getSoulText(personaId)        â† soul_user + soul_auto + persona name + defaultSoul
+  â”‚     â”œâ”€â”€ memoryStore.getUserMemories() â† non-protected memories
+  â”‚     â”œâ”€â”€ taskStore.getPendingTasksPartitioned()
+  â”‚     â”œâ”€â”€ emailStore.getAccounts()
+  â”‚     â”œâ”€â”€ ChatPromptRuntimeContext      â† time, timezone, platform, model, provider
+  â”‚     â””â”€â”€ buildChatSystemPrompt(...)    â† the actual prompt assembly
+  â”‚
+  â”œâ”€â”€ askWithService(service, messages=[system_prompt, skill, user_question], systemPrompt)
+  â”‚     â””â”€â”€ buildOpenAIMessages() â†’ [{"role":"system","content":"..."}, {"role":"user","content":"..."}]
+  â”‚
+  â””â”€â”€ on success: store assistant response, autoMemoryLearner.onExchangeComplete()
 ```
 
 ---
 
-## 1. The Soul — Foundation of the Prompt
+## 1. The Soul â€” Foundation of the Prompt
 
 The soul is the first thing in the system prompt. It's assembled in `AppSettings.getSoulText()`:
 
@@ -55,7 +55,7 @@ You're not a chatbot. You're a personal assistant who grows with your user.
 
 ## How to Be
 
-**Be genuinely helpful.** Skip the "Great question!" and "I'd be happy to help!" — just help. Actions speak louder than filler words.
+**Be genuinely helpful.** Skip the "Great question!" and "I'd be happy to help!" â€” just help. Actions speak louder than filler words.
 
 **Have opinions.** You're allowed to disagree, prefer things, or find stuff interesting. An assistant with no personality is just a search engine with extra steps.
 
@@ -77,7 +77,7 @@ You are Alt.
 
 [defaultSoul from PersonaConfig]
 
-You are Alt — a pragmatic, direct, tool-using operator.
+You are Alt â€” a pragmatic, direct, tool-using operator.
 
 Core behavior:
 - Be useful first. No fluff, no filler, no performative politeness.
@@ -122,7 +122,7 @@ You are {personaName}.
 
 ---
 
-## 2. Full KAI Persona Prompt (Default — All Sections)
+## 2. Full KAI Persona Prompt (Default â€” All Sections)
 
 This is what the KAI persona produces. Sections are assembled in order by `buildChatSystemPrompt()` with `personaPromptStyle = KAI`:
 
@@ -141,7 +141,7 @@ Do not fabricate tool outputs, file contents, citations, or completed work.
 ```
 
 ## Tool Use
-Use tools to verify work and resolve ambiguity. Don't ask the user for lookups you can do yourself. Check for a tool before saying a capability is unavailable. Summarize noisy output and state any uncertainty — don't dump raw logs.
+Use tools to verify work and resolve ambiguity. Don't ask the user for lookups you can do yourself. Check for a tool before saying a capability is unavailable. Summarize noisy output and state any uncertainty â€” don't dump raw logs.
 ```
 
 #### 2d. When to Act (always appended)
@@ -151,7 +151,7 @@ Use tools to verify work and resolve ambiguity. Don't ask the user for lookups y
 Take the most reasonable interpretation and proceed. Ask at most one clarifying question, only when genuinely blocked. If a first attempt fails, try another approach or explain the blocker. See work through to a usable result.
 ```
 
-#### 2e. Memory Instructions (always null — `memoryInstructions` parameter is hardcoded to null by RemoteDataRepository)
+#### 2e. Memory Instructions (always null â€” `memoryInstructions` parameter is hardcoded to null by RemoteDataRepository)
 Skipped.
 
 #### 2f. Structured Learning (remote + memory enabled)
@@ -190,19 +190,19 @@ Protected memories (`.protected == true`) are filtered out.
 
 ## Automation
 Every form of "run something without the user typing it" goes through `schedule_task`. The tool has three mutually exclusive triggers:
-- `execute_at` — one-off at a specific datetime (reminders, "check back at 3pm").
-- `cron` — recurring on a schedule ("every morning at 8", "every 15 minutes").
-- `on_heartbeat: true` — appended to every heartbeat self-check. Use this when the user asks for *standing* heartbeat behaviour (e.g. "greet me on every heartbeat", "always summarize new emails", "flag overdue tasks each check"). These are `HEARTBEAT` trigger tasks and show up in `list_tasks` alongside time/cron tasks.
+- `execute_at` â€” one-off at a specific datetime (reminders, "check back at 3pm").
+- `cron` â€” recurring on a schedule ("every morning at 8", "every 15 minutes").
+- `on_heartbeat: true` â€” appended to every heartbeat self-check. Use this when the user asks for *standing* heartbeat behaviour (e.g. "greet me on every heartbeat", "always summarize new emails", "flag overdue tasks each check"). These are `HEARTBEAT` trigger tasks and show up in `list_tasks` alongside time/cron tasks.
 Each scheduled or heartbeat run starts fresh, so embed any context the prompt needs. Use `list_tasks` / `cancel_task` to inspect or remove.
-Heartbeat itself (on/off toggle, interval, active hours) is user-controlled in Settings → Agent → Heartbeat — you cannot enable, disable, or reschedule it. If the user asks for recurring updates and heartbeat seems off, either schedule a cron task or tell them to enable Heartbeat in settings — never claim to have "enabled" or "turned on" heartbeat.
+Heartbeat itself (on/off toggle, interval, active hours) is user-controlled in Settings â†’ Agent â†’ Heartbeat â€” you cannot enable, disable, or reschedule it. If the user asks for recurring updates and heartbeat seems off, either schedule a cron task or tell them to enable Heartbeat in settings â€” never claim to have "enabled" or "turned on" heartbeat.
 ```
 
 #### 2i. Email Accounts (remote + email enabled + accounts exist)
 ```
 
 ## Email Accounts
-The user has these email accounts connected. Use them via the existing email tools — do NOT suggest adding, re-authenticating, or connecting a new account unless the user explicitly asks.
-**Sending policy**: before calling `compose_email` or `reply_email`, present the full draft (to, subject, body) in chat and get explicit confirmation ("send it" / "looks good" / "yes"). Never call the send tools on the same turn you draft — the user must have a chance to correct tone, recipients, or content first. If the user later says "change X and send", re-present the updated draft and confirm again.
+The user has these email accounts connected. Use them via the existing email tools â€” do NOT suggest adding, re-authenticating, or connecting a new account unless the user explicitly asks.
+**Sending policy**: before calling `compose_email` or `reply_email`, present the full draft (to, subject, body) in chat and get explicit confirmation ("send it" / "looks good" / "yes"). Never call the send tools on the same turn you draft â€” the user must have a chance to correct tone, recipients, or content first. If the user later says "change X and send", re-present the updated draft and confirm again.
 - **user@email.com**: 5 unread (last sync: 2026-06-02T14:00:00Z)
 ```
 
@@ -251,9 +251,9 @@ The user ONLY sees rendered kai-ui components. Your ENTIRE response must be a si
 
 ---
 
-## 3. Full ALT Persona Prompt (Custom — All Sections)
+## 3. Full ALT Persona Prompt (Custom â€” All Sections)
 
-This is what the ALT persona produces (`personaPromptStyle = ALT`). It's significantly different — much leaner:
+This is what the ALT persona produces (`personaPromptStyle = ALT`). It's significantly different â€” much leaner:
 
 ### Section-by-Section
 
@@ -308,11 +308,11 @@ When you don't know something or need information, first search your memory with
 Use memory like working context, not decoration. Before re-solving recurring problems, search memory (use vector mode for semantic matching). Store durable corrections, user preferences, project facts, decisions, fixes that worked, and error resolutions. Use memory_learn for categorized learnings when available, and memory_reinforce when a stored learning helps. Do not store transient chatter, guesses, secrets, or one-off noise. If memory conflicts with current evidence or the user's correction, trust the current evidence/user and update memory.
 ```
 
-#### 3g. Email Accounts (same as KAI — see 2i)
-#### 3h. Scheduled Tasks (same as KAI — see 2j)
-#### 3i. Heartbeat Additions (same as KAI — see 2k)
-#### 3j. Context (same as KAI — see 2l)
-#### 3k. Dynamic UI / Interactive UI (same as KAI — see 2m)
+#### 3g. Email Accounts (same as KAI â€” see 2i)
+#### 3h. Scheduled Tasks (same as KAI â€” see 2j)
+#### 3i. Heartbeat Additions (same as KAI â€” see 2k)
+#### 3j. Context (same as KAI â€” see 2l)
+#### 3k. Dynamic UI / Interactive UI (same as KAI â€” see 2m)
 
 ---
 
@@ -332,7 +332,7 @@ Between the system message and the user's first message, if an active skill is s
 
 ## 5. Tool Definitions
 
-Alongside the messages, the API call includes tool definitions in the parallel `tools` array (~45 tools). These are NOT inline in the system prompt — they're passed as the OpenAI-compatible `tools` parameter. Tools include:
+Alongside the messages, the API call includes tool definitions in the parallel `tools` array (~45 tools). These are NOT inline in the system prompt â€” they're passed as the OpenAI-compatible `tools` parameter. Tools include:
 
 | Category | Tools |
 |----------|-------|
@@ -351,16 +351,16 @@ Alongside the messages, the API call includes tool definitions in the parallel `
 
 Heartbeats use a DIFFERENT prompt construction via `HeartbeatPromptBuilder.buildHeartbeatPrompt()`:
 
-1. System prompt (from `getActiveSystemPrompt()` — the full chat prompt)
-2. Heartbeat Additions — standing user instructions
-3. Previous Heartbeat Results — recent heartbeat responses
-4. Pending Tasks — scheduled tasks
-5. Email Status — account summaries
-6. New Emails — new since last heartbeat
-7. New SMS — new since last heartbeat
-8. New Notifications — new since last heartbeat
-9. Promotion Candidates — memories hit 5+ times (suggests promote_learning)
-10. Learned Patterns — ALT-only: behavior (protected) memories
+1. System prompt (from `getActiveSystemPrompt()` â€” the full chat prompt)
+2. Heartbeat Additions â€” standing user instructions
+3. Previous Heartbeat Results â€” recent heartbeat responses
+4. Pending Tasks â€” scheduled tasks
+5. Email Status â€” account summaries
+6. New Emails â€” new since last heartbeat
+7. New SMS â€” new since last heartbeat
+8. New Notifications â€” new since last heartbeat
+9. Promotion Candidates â€” memories hit 5+ times (suggests promote_learning)
+10. Learned Patterns â€” ALT-only: behavior (protected) memories
 
 The heartbeat prompt also includes tool definitions for the same ~45 tools plus `promote_learning`.
 
@@ -385,7 +385,7 @@ When using on-device LiteRT models, the prompt is trimmed:
 | Prompt style | Single KAI style only | KAI + ALT + CUSTOM choice |
 | Persona system | None (just single soul) | `PersonaManager` with `PersonaConfig` (id, name, style, heartbeatStyle, defaultSoul) |
 | default_soul | Same string resource | Same string resource |
-| Soul pipeline | `getSoulText()` → single string | `getSoulText()` → persona prefix + soul_user + soul_auto + defaultSoul fallback |
+| Soul pipeline | `getSoulText()` â†’ single string | `getSoulText()` â†’ persona prefix + soul_user + soul_auto + defaultSoul fallback |
 | `## Tool Use` section | Always present when tools available | Only in KAI style |
 | `## When to Act` section | Always present | Only in KAI style |
 | `## Structured Learning` | Always present when memory enabled | Only in KAI style |
@@ -409,7 +409,7 @@ This section compares the two architectures for reference during the rearchitect
 | Aspect | Kai-custom | Opencode |
 |--------|------------|----------|
 | **Language** | Kotlin (Compose Multiplatform, mobile-first) | TypeScript (SolidJS frontend + Effect backend, desktop-first) |
-| **Prompt assembly** | Monolithic `ChatSystemPromptBuilder` — everything baked into system message text | Modular `LLMRequest` — system, messages, tools as separate typed fields |
+| **Prompt assembly** | Monolithic `ChatSystemPromptBuilder` â€” everything baked into system message text | Modular `LLMRequest` â€” system, messages, tools as separate typed fields |
 | **System prompt sources** | Soul text (user/auto) + hardcoded sections per persona | Agent `system` field (user-written) + project `instructions.md` + skill instructions |
 | **Tool definitions** | Embedded as text in system prompt + parallel `tools` array | Always in typed `tools` array (JSON Schema via Effect Schema) |
 | **File context** | Baked into system prompt as summarized descriptions | Attached as separate `user` message file parts |
@@ -440,7 +440,7 @@ This section compares the two architectures for reference during the rearchitect
 
 1. **Where personality lives**: Kai stores it in `soul_user` + `soul_auto` (AppSettings). Opencode stores it per-agent in `AgentV2.Info.system` (user-configurable in opencode.json).
 
-2. **Where memory lives**: Kai has a full memory stack (SQLite + embedding + KG). Opencode has **no memory system** — each session is independent.
+2. **Where memory lives**: Kai has a full memory stack (SQLite + embedding + KG). Opencode has **no memory system** â€” each session is independent.
 
 3. **How tools are defined**: Kai defines tool schemas in Kotlin data classes and passes them as OpenAI-compatible JSON. Opencode defines tools via `tool()` helper with Effect Schema, which auto-derives JSON Schema for the provider.
 
@@ -456,13 +456,13 @@ Kai's `ChatSystemPromptBuilder` cannot be directly replaced by opencode's archit
 
 1. **Platform constraints**: Kai runs on Android (mobile) where opencode is a desktop IDE tool. Mobile imposes tighter memory, latency, and offline constraints.
 
-2. **Feature set mismatch**: Kai has memory, email, SMS, scheduled tasks, heartbeat — none of which exist in opencode. These need system prompt space.
+2. **Feature set mismatch**: Kai has memory, email, SMS, scheduled tasks, heartbeat â€” none of which exist in opencode. These need system prompt space.
 
 3. **Language barrier**: Kotlin vs TypeScript. The architectural patterns (Effect vs Coroutines, Schema vs data classes) differ even if the conceptual design translates.
 
 However, **structural improvements** can be borrowed:
 
-- Move tool definitions out of system prompt text into the proper `tools` array (already done for OpenAI-compatible calls — but Kai doubles them in text too)
+- Move tool definitions out of system prompt text into the proper `tools` array (already done for OpenAI-compatible calls â€” but Kai doubles them in text too)
 - Separate file context from system prompt (attach as message parts instead of embedding summaries)
 - Make prompt sections pluggable/registerable rather than hardcoded in `ChatSystemPromptBuilder`
 - Add a Protocol-style abstraction for provider-specific lowering

@@ -1,4 +1,4 @@
-# Dynamic UI (kai-ui)
+﻿# Dynamic UI (kai-ui)
 
 **Last verified:** 2026-05-14
 
@@ -12,7 +12,7 @@ A `kai-ui` code fence inside an assistant message contains a JSON object describ
 
 ### Component Types
 
-- **Layout**: column, row, card, box, divider (spacing between children is fixed by the renderer — the LLM does not control it)
+- **Layout**: column, row, card, box, divider (spacing between children is fixed by the renderer â€” the LLM does not control it)
 - **Content**: text (with headline/title/body/caption styles), image (optional aspect ratio to prevent distortion on wide screens), icon (curated material icon set or any emoji), code (syntax-highlighted block with a built-in copy-to-clipboard icon in the top-right corner)
 - **Interactive**: button (filled/outlined/text/tonal variants), text input, checkbox, switch, select dropdown, radio group, slider, chip group (single-select, multi-select, or display-only tags)
 - **Feedback**: progress (determinate/indeterminate), countdown (relative duration with optional expiry action), alert (info/success/warning/error)
@@ -24,16 +24,16 @@ A `kai-ui` code fence inside an assistant message contains a JSON object describ
 
 Buttons carry an action that fires on click (chip groups are form inputs, not action carriers):
 
-- **callback** — collects form data from specified input IDs and sends a structured message back to the AI via the normal chat flow (e.g. "Pressed: event_name" or "Responded with: key: value"). The AI then responds with text or more UI. The prompt explicitly tells the AI to only offer callback buttons for actions it can fulfill — callbacks do not trigger system operations like printing, file export, or downloads. Clipboard access is available via the dedicated copy action below.
-- **toggle** — shows/hides a target element locally without AI roundtrip
-- **open_url** — opens a link in the browser
-- **copy_to_clipboard** — writes a literal string to the system clipboard locally, no AI roundtrip. A button carrying this action always renders as a compact clipboard icon button regardless of its variant; the button's label is ignored. Intended for surfacing copyable values (snippets, commands, tokens) alongside the content they belong to.
+- **callback** â€” collects form data from specified input IDs and sends a structured message back to the AI via the normal chat flow (e.g. "Pressed: event_name" or "Responded with: key: value"). The AI then responds with text or more UI. The prompt explicitly tells the AI to only offer callback buttons for actions it can fulfill â€” callbacks do not trigger system operations like printing, file export, or downloads. Clipboard access is available via the dedicated copy action below.
+- **toggle** â€” shows/hides a target element locally without AI roundtrip
+- **open_url** â€” opens a link in the browser
+- **copy_to_clipboard** â€” writes a literal string to the system clipboard locally, no AI roundtrip. A button carrying this action always renders as a compact clipboard icon button regardless of its variant; the button's label is ignored. Intended for surfacing copyable values (snippets, commands, tokens) alongside the content they belong to.
 
 ### Interaction Flow
 
 When a callback fires, the renderer collects input values and formats them as a user message of the form `Pressed: <event>` or `Responded with: <key: value>` (no special prefix). The AI receives the event name and form data in conversation history and can respond with new UI, text, or tool calls. While the callback is in flight, the clicked button keeps its label visible and pulses (a subtle scale and alpha animation); other buttons in the same assistant message become non-interactive until the response arrives.
 
-The originating assistant's kai-ui card stays in place across the exchange. While the submission is in flight the pressed button pulses; once the reply arrives the card settles into a frozen snapshot (prior values seeded, pressed button highlighted) with an edit pencil in the top-right corner. The user's submission does not produce a separate text bubble — the filled-in form on the assistant card already shows exactly what was sent. Clicking the pencil re-enables the form seeded with the previous picks; pressing any button then triggers a resubmit that truncates from that point and re-asks the AI. The text form ("Responded with: key: value") is still what the AI receives; only the visual representation differs. Snapshots persist with the conversation, so reloading preserves them.
+The originating assistant's kai-ui card stays in place across the exchange. While the submission is in flight the pressed button pulses; once the reply arrives the card settles into a frozen snapshot (prior values seeded, pressed button highlighted) with an edit pencil in the top-right corner. The user's submission does not produce a separate text bubble â€” the filled-in form on the assistant card already shows exactly what was sent. Clicking the pencil re-enables the form seeded with the previous picks; pressing any button then triggers a resubmit that truncates from that point and re-asks the AI. The text form ("Responded with: key: value") is still what the AI receives; only the visual representation differs. Snapshots persist with the conversation, so reloading preserves them.
 
 ### Layout Lifecycle
 
@@ -41,7 +41,7 @@ Only the latest assistant message's layouts are interactive. Older layouts becom
 
 ### Error Handling
 
-Errors are absorbed as locally as possible so a single bad field never kills a whole block. The parser first repairs common JSON syntax mistakes (extra trailing braces/brackets via stack-based brace matching, truncated mid-stream responses, `"key="` typos, and missing closing braces between sibling objects in an array — e.g. when the LLM writes `,{` where a key was expected), then walks the resulting tree field-by-field. Each field reader tolerates the wrong value type (objects where a string was expected, bare strings where an object list was expected, string booleans, numeric strings) and falls back to the data-class default if nothing can be salvaged — the node still builds, the offending field is simply missing from the rendered UI. Unknown node types in `children` or `items` are silently dropped. Only JSON so malformed that the syntax repair can't produce a parseable tree falls back to rendering as a code block. Individual malformed lines in multi-line NDJSON are skipped while valid lines still render. TTS walks the kai-ui tree and reads out the human-readable labels it finds — text, button labels, alert messages, and similar — while skipping non-speakable elements like code blocks, icons, and dividers.
+Errors are absorbed as locally as possible so a single bad field never kills a whole block. The parser first repairs common JSON syntax mistakes (extra trailing braces/brackets via stack-based brace matching, truncated mid-stream responses, `"key="` typos, and missing closing braces between sibling objects in an array â€” e.g. when the LLM writes `,{` where a key was expected), then walks the resulting tree field-by-field. Each field reader tolerates the wrong value type (objects where a string was expected, bare strings where an object list was expected, string booleans, numeric strings) and falls back to the data-class default if nothing can be salvaged â€” the node still builds, the offending field is simply missing from the rendered UI. Unknown node types in `children` or `items` are silently dropped. Only JSON so malformed that the syntax repair can't produce a parseable tree falls back to rendering as a code block. Individual malformed lines in multi-line NDJSON are skipped while valid lines still render. TTS walks the kai-ui tree and reads out the human-readable labels it finds â€” text, button labels, alert messages, and similar â€” while skipping non-speakable elements like code blocks, icons, and dividers.
 
 ### Settings
 
@@ -49,7 +49,7 @@ The feature is controlled by the Dynamic UI toggle in Settings (General tab). Wh
 
 ## Interactive UI Mode
 
-A dedicated full-screen mode where the AI produces complete screen layouts via kai-ui. The user navigates between screens by clicking buttons — no chat scrolling, no markdown visible.
+A dedicated full-screen mode where the AI produces complete screen layouts via kai-ui. The user navigates between screens by clicking buttons â€” no chat scrolling, no markdown visible.
 
 ### Entering Interactive Mode
 
@@ -61,7 +61,7 @@ Each AI response replaces the previous screen entirely. Only the latest assistan
 
 ### Back Button
 
-The back button removes the last exchange (user message + assistant response) from conversation history, making the previous assistant response the active screen again. When only one exchange remains, pressing back clears the history and returns to the initial prompt input — interactive mode stays active. To leave interactive mode entirely, the user uses the exit button in the top bar.
+The back button removes the last exchange (user message + assistant response) from conversation history, making the previous assistant response the active screen again. When only one exchange remains, pressing back clears the history and returns to the initial prompt input â€” interactive mode stays active. To leave interactive mode entirely, the user uses the exit button in the top bar.
 
 ### Auto-Retry on Parse Failure
 
@@ -73,20 +73,20 @@ Interactive sessions are saved with type `interactive`. Loading an interactive c
 
 ### System Prompt
 
-In interactive mode, the system prompt instructs the AI to respond ONLY with a single kai-ui code fence — no markdown text outside the fence. The AI is told the user cannot see anything outside the rendered UI.
+In interactive mode, the system prompt instructs the AI to respond ONLY with a single kai-ui code fence â€” no markdown text outside the fence. The AI is told the user cannot see anything outside the rendered UI.
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `composeApp/.../ui/dynamicui/KaiUiNode.kt` | Serializable component tree model — 28 node types, all @Immutable |
+| `composeApp/.../ui/dynamicui/KaiUiNode.kt` | Serializable component tree model â€” 28 node types, all @Immutable |
 | `composeApp/.../ui/dynamicui/UiAction.kt` | Action types (callback, toggle, open_url) |
 | `composeApp/.../ui/dynamicui/KaiUiParser.kt` | Sanitizes malformed JSON and decodes kai-ui fence bodies via `parseUiBlockBody` |
 | `composeApp/.../ui/dynamicui/KaiUiNodeBuilders.kt` | Tolerant field-by-field construction of KaiUiNode instances from JsonElement |
 | `composeApp/.../ui/dynamicui/KaiUiRenderer.kt` | Recursive Compose renderer for the component tree, wrapInCard option |
 | `composeApp/.../ui/markdown/MarkdownParser.kt` | Unified markdown parser; emits `KaiUiBlock` AST nodes for kai-ui fences |
 | `composeApp/.../ui/markdown/MarkdownRenderer.kt` | Compose renderer that dispatches each block (including kai-ui) to its composable |
-| `composeApp/.../ui/chat/composables/BotMessage.kt` | Integration point — runs the parser, renders frozen/edit-enabled snapshots for paired user submissions, and renders past kai-ui read-only via `isInteractive = false` |
+| `composeApp/.../ui/chat/composables/BotMessage.kt` | Integration point â€” runs the parser, renders frozen/edit-enabled snapshots for paired user submissions, and renders past kai-ui read-only via `isInteractive = false` |
 | `composeApp/.../ui/chat/ChatScreen.kt` | Branches between chat mode and interactive mode |
 | `composeApp/.../ui/chat/composables/EmptyState.kt` | "Start Interactive UI" button |
 | `composeApp/.../ui/chat/ChatActions.kt` | submitUiCallback, enterInteractiveMode, exitInteractiveMode, goBackInteractiveMode |

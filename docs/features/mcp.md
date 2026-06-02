@@ -1,4 +1,4 @@
-# MCP Servers
+﻿# MCP Servers
 
 **Last verified:** 2026-05-14
 
@@ -67,7 +67,7 @@ Custom headers (e.g., `Authorization: Bearer <token>`) can be configured per ser
 
 ## Integration with Tools
 
-MCP tools are automatically available to the AI — no changes needed to the tool executor or request serialization. The platform layer's `getAvailableTools()` includes enabled MCP tools from the `McpServerManager`. MCP tools have a 60-second timeout (vs 30s default for native tools). MCP tools are only shown within their server's expanded card in settings, not in the native tools list.
+MCP tools are automatically available to the AI â€” no changes needed to the tool executor or request serialization. The platform layer's `getAvailableTools()` includes enabled MCP tools from the `McpServerManager`. MCP tools have a 60-second timeout (vs 30s default for native tools). MCP tools are only shown within their server's expanded card in settings, not in the native tools list.
 
 Tool calls to MCP servers go through the same execution pipeline as native tools: the tool executor finds the tool by name, the `McpTool` wrapper sends a `tools/call` JSON-RPC request to the server, and the result is returned to the AI.
 

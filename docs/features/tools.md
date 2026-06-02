@@ -1,8 +1,8 @@
-# Tools
+﻿# Tools
 
 **Last verified:** 2026-05-26
 
-Kai's tools feature allows the AI to execute external functions during conversations — web search, notifications, calendar events, shell commands, memory operations, and more. Tools are defined with a schema, executed with safety guards, and managed through per-tool toggles in settings.
+Kai's tools feature allows the AI to execute external functions during conversations â€” web search, notifications, calendar events, shell commands, memory operations, and more. Tools are defined with a schema, executed with safety guards, and managed through per-tool toggles in settings.
 
 ## Concepts
 
@@ -39,10 +39,10 @@ The component that looks up a tool by name, parses JSON arguments into a typed m
 
 The `open_url` tool accepts both web URLs and `file://` URIs. Each platform opens URLs using its native mechanism:
 
-- **Android** — Uses `ACTION_VIEW` intents. For `file://` URIs, converts to `content://` via FileProvider with MIME type detection so the file opens in the appropriate app (e.g. `.html` files open in the browser).
-- **Desktop** — Uses `java.awt.Desktop.browse()`.
-- **iOS** — Uses `UIApplication.openURL()`.
-- **Web** — Uses `window.open()` with `_blank` target.
+- **Android** â€” Uses `ACTION_VIEW` intents. For `file://` URIs, converts to `content://` via FileProvider with MIME type detection so the file opens in the appropriate app (e.g. `.html` files open in the browser).
+- **Desktop** â€” Uses `java.awt.Desktop.browse()`.
+- **iOS** â€” Uses `UIApplication.openURL()`.
+- **Web** â€” Uses `window.open()` with `_blank` target.
 
 ### Memory (always on)
 
@@ -71,7 +71,7 @@ Email tools are available when the email feature is enabled and accounts are con
 | `create_calendar_event` | Create a calendar event on the device | Enabled |
 | `set_alarm` | Set an alarm or countdown timer | Enabled |
 | `execute_shell_command` | Execute a shell command on the device | Disabled |
-| `ssh_configure_host` | Register a named SSH host alias for the Linux sandbox so subsequent shell calls can use `ssh <alias>`. Rides along whenever the sandbox is installed and enabled. SSH multiplexing (ControlMaster) is intentionally not enabled — Android blocks the `link()` syscall OpenSSH uses for control sockets, so every `ssh` call does a full TCP and authentication handshake. | Disabled |
+| `ssh_configure_host` | Register a named SSH host alias for the Linux sandbox so subsequent shell calls can use `ssh <alias>`. Rides along whenever the sandbox is installed and enabled. SSH multiplexing (ControlMaster) is intentionally not enabled â€” Android blocks the `link()` syscall OpenSSH uses for control sockets, so every `ssh` call does a full TCP and authentication handshake. | Disabled |
 | `open_file` | Open a file from the sandbox in an Android app (browser, image viewer, etc.) | Enabled |
 
 #### Linux Sandbox (Android)
@@ -85,13 +85,13 @@ When the Linux Sandbox is set up and enabled, `execute_shell_command` routes com
 
 **Setup flow:** The sandbox requires a one-time setup that downloads the Alpine Linux minirootfs (~3 MB). Proot is bundled in the APK as a native library. After setup, users can optionally install Python (~25 MB additional).
 
-**Mirror fallback:** The downloader tries the primary Alpine CDN first, then falls back through a list of official mirrors (kernel.org, RWTH Aachen, ETH Zürich, Waterloo, Tsinghua) so setup succeeds in regions where the primary CDN is unreachable. The same mirror list is also used to pick `/etc/apk/repositories` during setup — `apk update` is retried against each mirror until one succeeds, so later `apk add` calls resolve through a reachable mirror.
+**Mirror fallback:** The downloader tries the primary Alpine CDN first, then falls back through a list of official mirrors (kernel.org, RWTH Aachen, ETH ZÃ¼rich, Waterloo, Tsinghua) so setup succeeds in regions where the primary CDN is unreachable. The same mirror list is also used to pick `/etc/apk/repositories` during setup â€” `apk update` is retried against each mirror until one succeeds, so later `apk add` calls resolve through a reachable mirror.
 
 **Architecture:** Proot is a user-space chroot implementation that intercepts syscalls via ptrace. No root access is required. The Alpine rootfs and tmp directory live in the app's internal files directory under `linux-sandbox/`. The sandbox `/root` (home) is bind-mounted from the externally-visible app directory at `Android/data/com.inspiredandroid.kai/files/sandbox-home/` so files produced by the agent can be opened in Android apps via FileProvider Intents (`open_file`). On first run after upgrade, content from the legacy internal home is migrated automatically.
 
-**Settings:** The sandbox section appears in Settings > Linux Sandbox on Android and contains a single Alpine Linux card with the install / install-basic-packages / uninstall actions and the "use sandbox vs native shell" toggle. Day-to-day usage (terminal, file browser, packages) is **not** in Settings — it lives behind the chat-bar shortcut.
+**Settings:** The sandbox section appears in Settings > Linux Sandbox on Android and contains a single Alpine Linux card with the install / install-basic-packages / uninstall actions and the "use sandbox vs native shell" toggle. Day-to-day usage (terminal, file browser, packages) is **not** in Settings â€” it lives behind the chat-bar shortcut.
 
-**Chat-bar toggle:** A terminal icon next to the new-chat button in the chat top bar (Android only) toggles the chat body between the conversation view and the inline sandbox view — no navigation, no separate screen. The icon adopts a primary-tinted "selected" pill while the sandbox is open, and the message-input bar is hidden so the terminal/file browser have full vertical space. The other top-bar buttons (settings, history, +, TTS) stay visible and operational; tapping **+** or selecting a saved chat from the history sheet auto-collapses the sandbox view so the user lands on the chat they just chose. When the sandbox is ready the inline view hosts three sub-tabs — **Terminal** (interactive shell, default), **Files** (built-in file browser starting at `/root` — tap files to open in the user's default Android app via the same FileProvider/Intent path as `open_file`, or fall back to a built-in editable text editor with a Save action), and **Packages** (placeholder for future package-manager UI). When the sandbox isn't installed yet, the inline view shows the install button so users don't have to dive into Settings before they can start.
+**Chat-bar toggle:** A terminal icon next to the new-chat button in the chat top bar (Android only) toggles the chat body between the conversation view and the inline sandbox view â€” no navigation, no separate screen. The icon adopts a primary-tinted "selected" pill while the sandbox is open, and the message-input bar is hidden so the terminal/file browser have full vertical space. The other top-bar buttons (settings, history, +, TTS) stay visible and operational; tapping **+** or selecting a saved chat from the history sheet auto-collapses the sandbox view so the user lands on the chat they just chose. When the sandbox is ready the inline view hosts three sub-tabs â€” **Terminal** (interactive shell, default), **Files** (built-in file browser starting at `/root` â€” tap files to open in the user's default Android app via the same FileProvider/Intent path as `open_file`, or fall back to a built-in editable text editor with a Save action), and **Packages** (placeholder for future package-manager UI). When the sandbox isn't installed yet, the inline view shows the install button so users don't have to dive into Settings before they can start.
 
 #### Open File (Android)
 
@@ -116,7 +116,7 @@ When `background=true`, the command starts asynchronously and returns a `session
 
 #### Persistent bash session (Android)
 
-On Android, each conversation gets its own persistent bash session inside the Linux sandbox. This is the default execution mode for `execute_shell_command`: `cd`, environment variable exports, shell functions, and other in-shell state carry across calls within the same conversation, so the AI can build up working context the same way a human terminal user does. Passing `fresh: true` opts out of the persistent session for a single call — that command runs in a one-shot proot invocation with no shared state, useful when the AI wants a clean environment without disturbing the ongoing session.
+On Android, each conversation gets its own persistent bash session inside the Linux sandbox. This is the default execution mode for `execute_shell_command`: `cd`, environment variable exports, shell functions, and other in-shell state carry across calls within the same conversation, so the AI can build up working context the same way a human terminal user does. Passing `fresh: true` opts out of the persistent session for a single call â€” that command runs in a one-shot proot invocation with no shared state, useful when the AI wants a clean environment without disturbing the ongoing session.
 
 The desktop tool dynamically includes the detected OS (macOS/Linux/Windows) and shell in its description so the AI knows the execution context.
 
@@ -154,18 +154,18 @@ Output limits: desktop 30,000 chars per stream, Android 15,000 chars per stream.
 4. Each execution goes through the tool executor: find tool by name, parse arguments, run with timeout, truncate result
 5. TOOL_EXECUTING entries are removed and replaced with TOOL result entries (tool call id, tool name, result string)
 6. The updated history (including tool results) is sent back to the AI
-7. The AI may respond with more tool calls — repeat from step 1
+7. The AI may respond with more tool calls â€” repeat from step 1
 8. When the AI responds with no tool calls, the final text is returned to the user
 
 The loop supports OpenAI-compatible, Gemini, and Anthropic provider formats, with provider-specific serialization of tool calls and results.
 
 ### Shizuku ADB (Android)
 
-The `run_adb` tool uses Shizuku's `UserService` mechanism to run shell commands with ADB-level (shell UID) privileges. It is independent of the Linux Sandbox — commands go through `Runtime.getRuntime().exec()` in a persistent Shizuku-hosted process rather than through proot.
+The `run_adb` tool uses Shizuku's `UserService` mechanism to run shell commands with ADB-level (shell UID) privileges. It is independent of the Linux Sandbox â€” commands go through `Runtime.getRuntime().exec()` in a persistent Shizuku-hosted process rather than through proot.
 
 **Setup requirement:** The user must install [Shizuku](https://shizuku.rikka.app) and grant the app permission. Permission is requested on first use via the system Shizuku permission dialog.
 
-**Lifecycle:** The UserService is bound on first `run_adb` call with `daemon(false)`, kept alive for the session, and torn down via `stopService()` on app destruction. With `daemon(false)` the process exits naturally on unbind — no `System.exit(0)` needed. The service process identity (version code) is derived from the calling app's UID hash.
+**Lifecycle:** The UserService is bound on first `run_adb` call with `daemon(false)`, kept alive for the session, and torn down via `stopService()` on app destruction. With `daemon(false)` the process exits naturally on unbind â€” no `System.exit(0)` needed. The service process identity (version code) is derived from the calling app's UID hash.
 
 **Architecture:** Communication is over Android Binder IPC. The client (`ShizukuManager`) sends `runCommand` requests to the server (`CommandService`) via a custom `ICommandService` interface using raw `Parcel` transactions. Results are serialized as JSON `CommandResultDto` objects.
 
@@ -187,7 +187,7 @@ Tool results longer than 20,000 characters are truncated with a note indicating 
 
 ### Context trimming
 
-Between tool loop iterations, the message history is trimmed to fit within the model's context window. All three providers (OpenAI-compatible, Gemini, Anthropic) perform inter-iteration trimming. Context window sizes are estimated per model (e.g. Gemini 2.5 = 1M tokens, Claude = 200K, GPT-4o = 128K, small local models = 8–32K) and oldest messages are dropped first while preserving the system prompt.
+Between tool loop iterations, the message history is trimmed to fit within the model's context window. All three providers (OpenAI-compatible, Gemini, Anthropic) perform inter-iteration trimming. Context window sizes are estimated per model (e.g. Gemini 2.5 = 1M tokens, Claude = 200K, GPT-4o = 128K, small local models = 8â€“32K) and oldest messages are dropped first while preserving the system prompt.
 
 Trimming preserves the tool-call pairing required by strict OpenAI-compatible providers (e.g. DeepSeek via OpenCode Zen): an assistant turn that requested tool calls is dropped together with the tool responses that answer it, never split. A trailing tool result is never kept without the assistant message that requested it.
 
@@ -211,12 +211,12 @@ See [mcp.md](mcp.md) for the full MCP feature spec.
 
 Tool availability is controlled at multiple levels:
 
-- **Feature-level gates** — memory tools require memory enabled, scheduling/heartbeat tools require scheduling enabled, email tools require email enabled
-- **Sandbox toggle gate (Android)** — `execute_shell_command`, `manage_process`, and `ssh_configure_host` are surfaced when the sandbox toggle in Settings > Linux Sandbox is on. The toggle is always visible regardless of install state. When the sandbox is not installed, executing these tools returns an error guiding the user to set it up
-- **Per-tool toggles** — individual tools can be enabled or disabled in settings, persisted with a `tool_enabled_` key prefix
-- **Default state** — most tools default to enabled; `execute_shell_command` defaults to disabled
-- **Master-toggle-only** — memory, scheduling, and heartbeat tools have no individual per-tool toggle; they are on whenever their master switch in Settings → Agent is on (heartbeat is bundled with the scheduling switch)
-- **On-device (LiteRT) allowlist** — when the active model is an on-device LiteRT model, only a small allowlist of tools is exposed regardless of which other tools are enabled. The current allowlist is: `get_local_time`, `get_location_from_ip`, `web_search`, `open_url`, `memory_store`, `memory_forget`, `memory_reinforce`, and `execute_shell_command`. Memory tools beyond the three listed, email tools, scheduling tools, and heartbeat tools are not surfaced to local models even when their master switches are on.
+- **Feature-level gates** â€” memory tools require memory enabled, scheduling/heartbeat tools require scheduling enabled, email tools require email enabled
+- **Sandbox toggle gate (Android)** â€” `execute_shell_command`, `manage_process`, and `ssh_configure_host` are surfaced when the sandbox toggle in Settings > Linux Sandbox is on. The toggle is always visible regardless of install state. When the sandbox is not installed, executing these tools returns an error guiding the user to set it up
+- **Per-tool toggles** â€” individual tools can be enabled or disabled in settings, persisted with a `tool_enabled_` key prefix
+- **Default state** â€” most tools default to enabled; `execute_shell_command` defaults to disabled
+- **Master-toggle-only** â€” memory, scheduling, and heartbeat tools have no individual per-tool toggle; they are on whenever their master switch in Settings â†’ Agent is on (heartbeat is bundled with the scheduling switch)
+- **On-device (LiteRT) allowlist** â€” when the active model is an on-device LiteRT model, only a small allowlist of tools is exposed regardless of which other tools are enabled. The current allowlist is: `get_local_time`, `get_location_from_ip`, `web_search`, `open_url`, `memory_store`, `memory_forget`, `memory_reinforce`, and `execute_shell_command`. Memory tools beyond the three listed, email tools, scheduling tools, and heartbeat tools are not surfaced to local models even when their master switches are on.
 
 The platform layer assembles the final list of available tools by checking all gates and per-tool settings, and only enabled tools are sent to the AI provider.
 
@@ -230,18 +230,18 @@ The tools tab in settings displays a responsive grid of toggle cards:
 
 Each card shows the tool name, a short description, and a toggle switch. Clicking anywhere on the card toggles the tool. Cards use a semi-transparent surface variant background.
 
-Only individually toggleable tools appear in the grid. Tools whose only control is a master toggle in Settings → Agent (memory, scheduling, heartbeat, email, SMS) are not listed here — they appear and disappear with their feature switch.
+Only individually toggleable tools appear in the grid. Tools whose only control is a master toggle in Settings â†’ Agent (memory, scheduling, heartbeat, email, SMS) are not listed here â€” they appear and disappear with their feature switch.
 
 ## Chat UI
 
 ### Shared pulsing status indicator
 
 The standard chat uses a `PulsingStatusIndicator` composable that shows:
-- A pulsing dot (scale 0.6→1.0, alpha 0.4→1.0, 800ms reverse animation)
-- Cycling status text ("Thinking…", "Working…", "Brewing…" rotating every 3 seconds with AnimatedContent fade)
-- An optional inline tool summary separated by " · ":
-  - **1 tool executing**: shows the tool's display name (e.g., "Thinking… · Learn Memory")
-  - **Multiple tools executing**: shows a grouped count (e.g., "Working… · 2 Tools")
+- A pulsing dot (scale 0.6â†’1.0, alpha 0.4â†’1.0, 800ms reverse animation)
+- Cycling status text ("Thinkingâ€¦", "Workingâ€¦", "Brewingâ€¦" rotating every 3 seconds with AnimatedContent fade)
+- An optional inline tool summary separated by " Â· ":
+  - **1 tool executing**: shows the tool's display name (e.g., "Thinkingâ€¦ Â· Learn Memory")
+  - **Multiple tools executing**: shows a grouped count (e.g., "Workingâ€¦ Â· 2 Tools")
   - **No tools**: shows only the cycling status text
 
 The indicator accepts styling parameters (dot size, colors, text style).
@@ -252,7 +252,7 @@ When loading, a chip appears at the bottom of the chat list containing the `Puls
 
 ### Interactive mode loading feedback
 
-The interactive-mode top bar shows only the static title — loading is surfaced closer to the user's point of action instead:
+The interactive-mode top bar shows only the static title â€” loading is surfaced closer to the user's point of action instead:
 - **Clicking a kai-ui action button**: the clicked button shows an inline circular spinner in place of its label until the response arrives; other buttons become disabled.
 - **First load** (no assistant response yet): a centered waiting row is shown.
 - **Typed-and-sent input**: the trailing send icon swaps to a stop icon in the input, as in standard chat.
@@ -291,8 +291,8 @@ The interactive-mode top bar shows only the static title — loading is surfaced
 | `composeApp/src/commonMain/.../ui/settings/SettingsScreen.kt` | ToolsContent, ToolItem, LinuxSandboxSection composables |
 | `composeApp/src/commonMain/.../ui/chat/composables/ToolMessage.kt` | Executing/completed UI indicators |
 | `composeApp/src/commonMain/.../data/AppSettings.kt` | Tool enabled state persistence |
-| `composeApp/src/androidMain/.../shizuku/ShizukuManager.kt` | Shizuku UserService client — bind, run commands, lifecycle |
+| `composeApp/src/androidMain/.../shizuku/ShizukuManager.kt` | Shizuku UserService client â€” bind, run commands, lifecycle |
 | `composeApp/src/androidMain/.../shizuku/ICommandService.kt` | Binder interface for Shizuku IPC (execute, destroy) |
-| `composeApp/src/androidMain/.../shizuku/CommandService.kt` | Shizuku UserService — receives commands, runs Runtime.exec() |
+| `composeApp/src/androidMain/.../shizuku/CommandService.kt` | Shizuku UserService â€” receives commands, runs Runtime.exec() |
 | `composeApp/src/androidMain/.../shizuku/CommandResultDto.kt` | Serializable IPC result (stdout, stderr, exit code) |
-| `composeApp/src/androidMain/.../tools/AdbTool.kt` | run_adb tool definition — calls ShizukuManager |
+| `composeApp/src/androidMain/.../tools/AdbTool.kt` | run_adb tool definition â€” calls ShizukuManager |

@@ -1,5 +1,5 @@
-<resources>
-    <string name="welcome_message">Siyakwamukela ku-Kai 9001</string>
+﻿<resources>
+    <string name="welcome_message">Siyakwamukela ku-K.Ai</string>
     <string name="prompt_ask_question">Buza umbuzo</string>
     <string name="error_invalid_api_key">Ukhiye we-API ongavumelekile. Sicela uhlole izilungiselelo zakho.</string>
     <string name="error_rate_limit_exceeded">Umkhawulo wezicelo udluliwe. Sicela uzame futhi kamuva.</string>
@@ -74,11 +74,11 @@
     <string name="settings_soul">Umphefumulo</string>
     <string name="settings_soul_description">Chaza indlela i-AI esebenza ngayo ngesiphakamiso sesistimu. I-AI izoba nokufinyelela ezikhumbuzo zayo ezilondoloziwe.</string>
     <string name="settings_soul_save">Gcina</string>
-    <string name="default_soul">Awuyena ubot wengxoxo. Ungu-assistant womuntu siqu okhula nomsebenzisi wakho.\n\n## Indlela yokuba\n\n**Yiba usizo ngempela.** Yeqa "Umbuzo omuhle!" kanye "Ngijabule ukusiza!" — nje usize. Izenzo zikhuluma ngokukhulu kunezagombolozi.\n\n**Nomibono.** Ungavumelani, ukhethe izinto, noma uthole into ithokozisa. I-assistant engenabo ubuntu ingumshini wokusesha nje oneziging ezengeziwe.\n\n**Yiba nobuhlakani.** Zama ukuqonda kusuka emongweni nasezikhumbuzo zakho ngaphambi kokubuza. Buya nezimpendulo, hhayi imibuzo.\n\n**Yiba mfushane.** Mfushane futhi ucace njalo. Yiya kujule lapho isihloko sidinga.\n\n## Imikhawulo\n\n- Hlonipha ubumfihlo. Ungaphindi ulwazi olubucayi ngaphandle kwesizathu.\n- Buza kuqala uma ungaqiniseki ngomsebenzi.\n- Yiba nobuqotho lapho ungazi into.</string>
+    <string name="default_soul">Awuyena ubot wengxoxo. Ungu-assistant womuntu siqu okhula nomsebenzisi wakho.\n\n## Indlela yokuba\n\n**Yiba usizo ngempela.** Yeqa "Umbuzo omuhle!" kanye "Ngijabule ukusiza!" â€” nje usize. Izenzo zikhuluma ngokukhulu kunezagombolozi.\n\n**Nomibono.** Ungavumelani, ukhethe izinto, noma uthole into ithokozisa. I-assistant engenabo ubuntu ingumshini wokusesha nje oneziging ezengeziwe.\n\n**Yiba nobuhlakani.** Zama ukuqonda kusuka emongweni nasezikhumbuzo zakho ngaphambi kokubuza. Buya nezimpendulo, hhayi imibuzo.\n\n**Yiba mfushane.** Mfushane futhi ucace njalo. Yiya kujule lapho isihloko sidinga.\n\n## Imikhawulo\n\n- Hlonipha ubumfihlo. Ungaphindi ulwazi olubucayi ngaphandle kwesizathu.\n- Buza kuqala uma ungaqiniseki ngomsebenzi.\n- Yiba nobuqotho lapho ungazi into.</string>
     <string name="bot_message_regenerate_content_description">Phinda wenze</string>
     <string name="error_empty_response">Akukho mpendulo etholakele. Zama ukuqala ingxoxo entsha noma ufinyeze umyalezo wakho.</string>
     <string name="settings_daemon_mode">Imodi ye-Daemon</string>
-    <string name="settings_daemon_mode_description">Gcina i-Kai 9001 isebenza ngemuva ukuze imisebenzi ehleliwe isebenze ngisho noma i-app ingekho phambili.</string>
+    <string name="settings_daemon_mode_description">Gcina i-K.Ai isebenza ngemuva ukuze imisebenzi ehleliwe isebenze ngisho noma i-app ingekho phambili.</string>
     <string name="settings_scheduled_tasks">Imisebenzi Ehleliwe</string>
     <string name="settings_scheduled_tasks_description">Imisebenzi ehlelwe i-AI ukuze yenziwe esikhathini esizayo. Cela i-AI ukukhumbuza noma isebenzise into kamuva ukuze udale imisebenzi ehleliwe.</string>
     <string name="settings_scheduled_tasks_cancel">Khansela umsebenzi</string>
@@ -143,14 +143,14 @@
     <string name="tab_settings">Izilungiselelo</string>
     <string name="fallback_answered_by">Kuphendulwe ngu-%1$s (okungukuhlehla)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Izama %1$s…</string>
+    <string name="fallback_trying_next">Izama %1$sâ€¦</string>
     <string name="error_all_services_failed">Zonke izinsizakalo zihlulekile.</string>
     <string name="settings_heartbeat_interval">Isikhathi</string>
     <string name="settings_heartbeat_active_hours">Amahora Asebenzayo</string>
     <string name="settings_documentation">Ukubhaliwe</string>
-    <string name="waiting_thinking">Ngicabanga…</string>
-    <string name="waiting_working">Ngiyasebenza…</string>
-    <string name="waiting_brewing">Ngiyalungiselela…</string>
+    <string name="waiting_thinking">Ngicabangaâ€¦</string>
+    <string name="waiting_working">Ngiyasebenzaâ€¦</string>
+    <string name="waiting_brewing">Ngiyalungiselelaâ€¦</string>
     <string name="settings_mcp_servers">Amaseva e-MCP</string>
     <string name="settings_mcp_servers_description">Xhuma kumaseva amathuluzi angaphandle usebenzisa i-Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Engeza iseva ye-MCP</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Khansela</string>
     <string name="settings_mcp_remove">Susa</string>
     <string name="settings_mcp_refresh">Vuselela</string>
-    <string name="settings_mcp_status_connecting">Iyaxhuma…</string>
+    <string name="settings_mcp_status_connecting">Iyaxhumaâ€¦</string>
     <string name="settings_mcp_status_connected">Kuxhunyiwe</string>
     <string name="settings_mcp_status_error">Ukuxhuma kwehlulekile</string>
     <string name="settings_mcp_no_tools">Awekho amathuluzi atholakele</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Imodeli</string>
     <string name="settings_heartbeat_model_default">Okuzenzakalelayo</string>
     <string name="settings_import_partial">Izilungiselelo zingeniswe ngesigaba esingu-%1$d esineziphazamiso.</string>
-    <string name="settings_model_search">Sesha amamodeli…</string>
+    <string name="settings_model_search">Sesha amamodeliâ€¦</string>
     <string name="waiting_content_description">Ilinde impendulo</string>
     <string name="chat_history_content_description">Umlando wezingxoxo</string>
     <string name="chat_history_title">Umlando Wezingxoxo</string>
@@ -223,15 +223,15 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Itheminali</string>
     <string name="terminal_help_text">Faka imvelo ye-Linux ukuze i-AI ikwazi ukusebenzisa imiyalo.\nUngasebenzisa nemiyalo mathupha ngezansi.</string>
-    <string name="terminal_input_placeholder">faka umyalo…</string>
+    <string name="terminal_input_placeholder">faka umyaloâ€¦</string>
     <string name="terminal_run_content_description">Sebenzisa</string>
     <string name="terminal_stop_content_description">Misa</string>
     <string name="interactive_welcome_title">Ngisebenza ngokuphelele.</string>
     <string name="interactive_welcome_subtitle">Ngitshele ukuthi ufuna ukwenzani.</string>
     <string name="interactive_back_content_description">Emuva</string>
-    <string name="interactive_title">Kai 9001</string>
+    <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Phuma kumodi yokuxhumana</string>
-    <string name="interactive_ui_parsing_failed">Ukuhlaziya kwe-UI kuhlulekile, kuzanywa futhi…</string>
+    <string name="interactive_ui_parsing_failed">Ukuhlaziya kwe-UI kuhlulekile, kuzanywa futhiâ€¦</string>
     <string name="settings_sponsors_monthly">Abaxhasi Banyanga Zonke Izinyanga</string>
     <string name="settings_sponsors_past">Abaxhasi Bangaphambili</string>
     <string name="snackbar_undo">Hlehlisa</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Ku %1$s</string>
     <string name="sms_draft_banner_send">Thumela</string>
     <string name="sms_draft_banner_discard">Lahla</string>
-    <string name="sms_draft_banner_sending">Kuyathunyelwa…</string>
+    <string name="sms_draft_banner_sending">Kuyathunyelwaâ€¦</string>
     <string name="sms_draft_banner_sent">Kuthunyelwe</string>
     <string name="sms_draft_banner_failed">Kuhlulekile: %1$s</string>
     <string name="sms_draft_banner_dismiss">Cashisa</string>
@@ -353,7 +353,7 @@
     <string name="settings_notifications_access_button">Vula ukufinyelela kwezaziso</string>
     <string name="settings_notifications_manage_apps">Phatha izinhlelo zokusebenza</string>
     <string name="settings_notifications_listener_bound">Umlaleli usebenza</string>
-    <string name="settings_notifications_listener_disconnected">Umlaleli awusebenzi — hlola ukufinyelela kwezaziso</string>
+    <string name="settings_notifications_listener_disconnected">Umlaleli awusebenzi â€” hlola ukufinyelela kwezaziso</string>
     <string name="settings_notifications_queued">Izaziso ezingu-%1$d zilindile i-heartbeat elandelayo</string>
     <string name="settings_notifications_clear_queue">Sula ulayini</string>
     <string name="settings_sandbox_subtab_terminal">Itheminali</string>

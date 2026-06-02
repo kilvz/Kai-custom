@@ -1,4 +1,4 @@
-# Memory System Architecture (beta branch v3.1.0)
+﻿# Memory System Architecture (beta branch v3.1.0)
 
 ## Overview
 
@@ -6,7 +6,7 @@ Three-layer learning system with two-tier persistence, local-first storage with 
 
 ---
 
-## Layer 1 — AI Tools (on-demand)
+## Layer 1 â€” AI Tools (on-demand)
 
 The LLM can read/write memories on demand via MCP tools gated in `Platform.android.kt:293`:
 
@@ -23,7 +23,7 @@ When `isMemoryEnabled()` returns `false`, all memory/KG/diary tools are invisibl
 
 ---
 
-## Layer 2 — AutoMemoryLearner (inline batch extraction)
+## Layer 2 â€” AutoMemoryLearner (inline batch extraction)
 
 File: `AutoMemoryLearner.kt`
 
@@ -32,17 +32,17 @@ File: `AutoMemoryLearner.kt`
 **Interval**: Every 5 exchange pairs (`EXTRACTION_INTERVAL = 5`).
 
 **Process**:
-1. Gets last 3 exchange pairs via `dataRepository.getRecentExchanges(3)` — returns `"User: ...\nAssistant: ..."` formatted text.
+1. Gets last 3 exchange pairs via `dataRepository.getRecentExchanges(3)` â€” returns `"User: ...\nAssistant: ..."` formatted text.
 2. Calls `dataRepository.askSilently()` with a JSON-extraction prompt targeting: named entities, user preferences, facts, errors/resolutions.
-3. Parses JSON array response — skips transient topics, general knowledge, already-known info.
+3. Parses JSON array response â€” skips transient topics, general knowledge, already-known info.
 4. Dedup: checks `memoryStore.getAllMemories()` keys before storing.
-5. Stores via `memoryStore.store()` — **unprotected** (user-visible, deletable in UI).
+5. Stores via `memoryStore.store()` â€” **unprotected** (user-visible, deletable in UI).
 
 **Fails silently** on any error (best-effort only).
 
 ---
 
-## Layer 3 — HeartbeatMemoryExtractor (post-heartbeat behavioral extraction)
+## Layer 3 â€” HeartbeatMemoryExtractor (post-heartbeat behavioral extraction)
 
 File: `HeartbeatMemoryExtractor.kt`
 
@@ -54,9 +54,9 @@ File: `HeartbeatMemoryExtractor.kt`
 1. Gets last 3 exchange pairs via `dataRepository.getRecentExchanges(3)`.
 2. Builds extraction prompt targeting: repeated behavioral patterns, recurring themes, behavior adjustments.
 3. Calls `dataRepository.askSilently()` with prompt.
-4. Parses JSON array — same dedup pattern as AutoMemoryLearner.
-5. Stores via `memoryStore.storeProtected()` — **protected** (hidden from deletion UI, `memory_forget` rejects).
-6. Calls `condenseToSoulAuto()` — summarizes all behavior memories into a compact 2-3 sentence summary via `askSilently()`, writes result to `dataRepository.setSoulAuto()`.
+4. Parses JSON array â€” same dedup pattern as AutoMemoryLearner.
+5. Stores via `memoryStore.storeProtected()` â€” **protected** (hidden from deletion UI, `memory_forget` rejects).
+6. Calls `condenseToSoulAuto()` â€” summarizes all behavior memories into a compact 2-3 sentence summary via `askSilently()`, writes result to `dataRepository.setSoulAuto()`.
 
 ---
 
@@ -66,14 +66,14 @@ File: `HeartbeatMemoryExtractor.kt`
 
 | Tier | protected | Source | Visible in UI | Deletable | Used in prompt |
 |------|-----------|--------|---------------|-----------|----------------|
-| User facts | `false` | AI tools, AutoMemoryLearner | Yes (Memories tab) | Yes (`memory_forget`, UI delete) | Yes — `## What I Know About You` section |
+| User facts | `false` | AI tools, AutoMemoryLearner | Yes (Memories tab) | Yes (`memory_forget`, UI delete) | Yes â€” `## What I Know About You` section |
 | Behavior learnings | `true` | HeartbeatMemoryExtractor | Only when "Show protected" toggle ON | No | Heartbeat prompt `## Learned Patterns` section; condensed into `soul_auto` |
 
 ### Enforcement
 
 - **`MemoryStore.forget()`**: returns `false` if entry is protected (`SqliteMemoryStore.kt:150`, `AltMemoryClient.kt:118`).
-- **Prompt builder**: `buildChatSystemPrompt` → `appendMemoryCategorySection` skips `entry.protected` (line 220).
-- **MemoryManagementSheet**: default filter is `.filter { !it.protected }`; "Show protected" toggle (`showProtected` state at line 52) reveals protected entries but keeps delete button — the `onDeleteMemory` callback calls `dataRepository.forget()` which will fail silently for protected entries.
+- **Prompt builder**: `buildChatSystemPrompt` â†’ `appendMemoryCategorySection` skips `entry.protected` (line 220).
+- **MemoryManagementSheet**: default filter is `.filter { !it.protected }`; "Show protected" toggle (`showProtected` state at line 52) reveals protected entries but keeps delete button â€” the `onDeleteMemory` callback calls `dataRepository.forget()` which will fail silently for protected entries.
 
 ---
 
@@ -81,9 +81,9 @@ File: `HeartbeatMemoryExtractor.kt`
 
 ```
 MemoryStore (interface)
-├── SqliteMemoryStore (local, default)
-├── AltMemoryClient (MCP-backed, optional)
-└── MemoryStoreProvider (delegating proxy)
+â”œâ”€â”€ SqliteMemoryStore (local, default)
+â”œâ”€â”€ AltMemoryClient (MCP-backed, optional)
+â””â”€â”€ MemoryStoreProvider (delegating proxy)
 ```
 
 ### MemoryStoreProvider
@@ -110,7 +110,7 @@ File: `SqliteMemoryStore.kt`
 
 Backed by `DimensionStore` (SQLite with vector embeddings + FTS5).
 
-**Category → Realm/Domain mapping**:
+**Category â†’ Realm/Domain mapping**:
 
 | MemoryCategory | Realm | Domain |
 |---------------|-------|--------|
@@ -124,10 +124,10 @@ Backed by `DimensionStore` (SQLite with vector embeddings + FTS5).
 **Protected field**: read from `EntityData.protected` column (DB v4 migration added `protected INTEGER NOT NULL DEFAULT 0`).
 
 **Key operations**:
-- `store()` / `storeProtected()` — upsert by `memory_key` metadata field.
-- `forget()` — deletes entity by `memory_key` metadata lookup; returns `false` if protected.
-- `getUserMemories()` — `searchEntities("", MAX).filter { !it.protected }`.
-- `getBehaviorMemories()` — `allEntities.filter { it.protected }`.
+- `store()` / `storeProtected()` â€” upsert by `memory_key` metadata field.
+- `forget()` â€” deletes entity by `memory_key` metadata lookup; returns `false` if protected.
+- `getUserMemories()` â€” `searchEntities("", MAX).filter { !it.protected }`.
+- `getBehaviorMemories()` â€” `allEntities.filter { it.protected }`.
 
 ### AltMemoryClient
 
@@ -149,7 +149,7 @@ Thin MCP wrapper: each call dispatches to an external `alt-memory` MCP server vi
 
 | Key | Written by | Purpose |
 |-----|-----------|---------|
-| `soul_user` | User via Settings → Soul Editor | User-defined persona/instructions |
+| `soul_user` | User via Settings â†’ Soul Editor | User-defined persona/instructions |
 | `soul_auto` | HeartbeatMemoryExtractor.condenseToSoulAuto() | Auto-generated behavior summary |
 | `soul_text` (legacy) | Migrated to `soul_user` on first read | Pre-split combined soul |
 
@@ -167,15 +167,15 @@ File: `Persona.kt`
 
 | Concept | Storage |
 |---------|---------|
-| Persona list | `AppSettings` key `persona_list` — serialized JSON `List<PersonaConfig>` |
+| Persona list | `AppSettings` key `persona_list` â€” serialized JSON `List<PersonaConfig>` |
 | Active persona | `AppSettings` key `active_persona_id` |
 | Per-persona soul | `soul_user_{personaId}` / `soul_auto_{personaId}` keys |
 
 **Two built-in personas**:
-- `kai` — full upstream prompt (all behavioral sections, `PersonaPromptStyle.KAI`, `PersonaHeartbeatStyle.KAI`)
-- `alt` — streamlined prompt (trimmed sections, `PersonaPromptStyle.ALT`, `PersonaHeartbeatStyle.ALT`)
+- `kai` â€” full upstream prompt (all behavioral sections, `PersonaPromptStyle.KAI`, `PersonaHeartbeatStyle.KAI`)
+- `alt` â€” streamlined prompt (trimmed sections, `PersonaPromptStyle.ALT`, `PersonaHeartbeatStyle.ALT`)
 
-**Per-persona soul storage**: `PersonaManager.getSoulUserKey(id)` / `getSoulAutoKey(id)` return `"soul_user_$personaId"` / `"soul_auto_$personaId"` — each persona gets its own AppSettings keys, so switching persona switches soul context without data loss.
+**Per-persona soul storage**: `PersonaManager.getSoulUserKey(id)` / `getSoulAutoKey(id)` return `"soul_user_$personaId"` / `"soul_auto_$personaId"` â€” each persona gets its own AppSettings keys, so switching persona switches soul context without data loss.
 
 ---
 
@@ -186,11 +186,11 @@ File: `ChatSystemPromptBuilder.kt`
 Two prompt style paths controlled by `PersonaPromptStyle`:
 
 ### KAI style (upstream)
-Full behavioral sections: Honesty → Tool Use → Acting → Memory Instructions → Structured Learning → Memory dumps → Automation → Email → Scheduled Tasks → Heartbeat Additions → Context → kai-ui.
-Memory dump per category (GENERAL, PREFERENCE, LEARNING, ERROR) — no cap on remote, 1024-char cap on local.
+Full behavioral sections: Honesty â†’ Tool Use â†’ Acting â†’ Memory Instructions â†’ Structured Learning â†’ Memory dumps â†’ Automation â†’ Email â†’ Scheduled Tasks â†’ Heartbeat Additions â†’ Context â†’ kai-ui.
+Memory dump per category (GENERAL, PREFERENCE, LEARNING, ERROR) â€” no cap on remote, 1024-char cap on local.
 
 ### ALT style (custom)
-Trimmed: Soul → Language (2 lines) → Honesty → `## What I Know About You` (single section with all categories combined under 1024-char cap) → Email Accounts → Scheduled Tasks → Heartbeat Additions → Context → kai-ui.
+Trimmed: Soul â†’ Language (2 lines) â†’ Honesty â†’ `## What I Know About You` (single section with all categories combined under 1024-char cap) â†’ Email Accounts â†’ Scheduled Tasks â†’ Heartbeat Additions â†’ Context â†’ kai-ui.
 
 Removed sections (relative to KAI): Tool Use, When to Act, Automation, Structured Learning, Memory System, email sending policy.
 
@@ -200,7 +200,7 @@ Removed sections (relative to KAI): Tool Use, When to Act, Automation, Structure
 
 ---
 
-## HeartbeatPromptBuilder — Learned Patterns
+## HeartbeatPromptBuilder â€” Learned Patterns
 
 File: `HeartbeatPromptBuilder.kt`
 
@@ -208,7 +208,7 @@ File: `HeartbeatPromptBuilder.kt`
 
 ---
 
-## DataRepository — getRecentExchanges()
+## DataRepository â€” getRecentExchanges()
 
 Method: `getRecentExchanges(pairCount: Int = 3): String`
 
@@ -223,12 +223,12 @@ Used by both `AutoMemoryLearner` and `HeartbeatMemoryExtractor` as context for e
 
 ## Memory Toggle
 
-`AppSettings.isMemoryEnabled()` — defaults `true`.
+`AppSettings.isMemoryEnabled()` â€” defaults `true`.
 
 When disabled:
 - No memory/KG/diary tools in `getAvailableTools()` (Platform.android.kt:293)
 - No memory dump in `buildChatSystemPrompt` (no `## What I Know About You` section)
-- AutoMemoryLearner still instantiates but `onExchangeComplete()` is called regardless — however extraction calls `askSilently()` which has access to tools; since tools are gated, extraction prompts still fire but cannot store. This is a minor inconsistency.
+- AutoMemoryLearner still instantiates but `onExchangeComplete()` is called regardless â€” however extraction calls `askSilently()` which has access to tools; since tools are gated, extraction prompts still fire but cannot store. This is a minor inconsistency.
 
 ---
 
@@ -236,45 +236,45 @@ When disabled:
 
 ```
 AppModule.kt
-├── SqliteMemoryStore ← DimensionStore
-├── MemoryStoreProvider ← SqliteMemoryStore (default)
-│   └── MemoryStore ← MemoryStoreProvider
-├── RemoteDataRepository
-│   ├── memoryStore ← MemoryStore (injected)
-│   ├── autoMemoryLearner ← created inline with memoryStore + this (RemoteDataRepository)
-│   └── onExchangeComplete() called after each AI response
-├── TaskScheduler
-│   ├── memoryStore ← MemoryStore (injected)
-│   └── HeartbeatMemoryExtractor ← created lazily inside TaskScheduler
-└── Platform.androidkt.getAvailableTools()
-    └── memory tools gated: if (appSettings.isMemoryEnabled())
+â”œâ”€â”€ SqliteMemoryStore â† DimensionStore
+â”œâ”€â”€ MemoryStoreProvider â† SqliteMemoryStore (default)
+â”‚   â””â”€â”€ MemoryStore â† MemoryStoreProvider
+â”œâ”€â”€ RemoteDataRepository
+â”‚   â”œâ”€â”€ memoryStore â† MemoryStore (injected)
+â”‚   â”œâ”€â”€ autoMemoryLearner â† created inline with memoryStore + this (RemoteDataRepository)
+â”‚   â””â”€â”€ onExchangeComplete() called after each AI response
+â”œâ”€â”€ TaskScheduler
+â”‚   â”œâ”€â”€ memoryStore â† MemoryStore (injected)
+â”‚   â””â”€â”€ HeartbeatMemoryExtractor â† created lazily inside TaskScheduler
+â””â”€â”€ Platform.androidkt.getAvailableTools()
+    â””â”€â”€ memory tools gated: if (appSettings.isMemoryEnabled())
 ```
 
 ## Data Flow Diagram
 
 ```
-User Message → RemoteDataRepository.ask()
-  ├── ChatHistory: user message appended
-  ├── Tools: AI calls memory_store/memory_retrieve/memory_forget (on-demand, Layer 1)
-  ├── ChatHistory: AI response appended
-  └── autoMemoryLearner.onExchangeComplete()   ← every response
-       └── Counter reaches 5?
-            ├── getRecentExchanges(3)
-            ├── askSilently(extraction prompt)
-            ├── parse JSON
-            └── memoryStore.store(key, content, category, source="auto_learner")
+User Message â†’ RemoteDataRepository.ask()
+  â”œâ”€â”€ ChatHistory: user message appended
+  â”œâ”€â”€ Tools: AI calls memory_store/memory_retrieve/memory_forget (on-demand, Layer 1)
+  â”œâ”€â”€ ChatHistory: AI response appended
+  â””â”€â”€ autoMemoryLearner.onExchangeComplete()   â† every response
+       â””â”€â”€ Counter reaches 5?
+            â”œâ”€â”€ getRecentExchanges(3)
+            â”œâ”€â”€ askSilently(extraction prompt)
+            â”œâ”€â”€ parse JSON
+            â””â”€â”€ memoryStore.store(key, content, category, source="auto_learner")
 
-Heartbeat → TaskScheduler.runHeartbeat()
-  ├── buildHeartbeatPrompt(learnedPatterns=memoryStore.getBehaviorMemories())
-  ├── AI response
-  └── HeartbeatMemoryExtractor.extractFromHeartbeat(response)
-       ├── Guards: blank or "HEARTBEAT_OK"? → skip
-       ├── getRecentExchanges(3)
-       ├── askSilently(extraction prompt)
-       ├── parse JSON
-       ├── memoryStore.storeProtected(key, content, category, source="heartbeat")
-       └── condenseToSoulAuto()
-            ├── memoryStore.getBehaviorMemories()
-            ├── askSilently(condense prompt)
-            └── dataRepository.setSoulAuto(summary)
+Heartbeat â†’ TaskScheduler.runHeartbeat()
+  â”œâ”€â”€ buildHeartbeatPrompt(learnedPatterns=memoryStore.getBehaviorMemories())
+  â”œâ”€â”€ AI response
+  â””â”€â”€ HeartbeatMemoryExtractor.extractFromHeartbeat(response)
+       â”œâ”€â”€ Guards: blank or "HEARTBEAT_OK"? â†’ skip
+       â”œâ”€â”€ getRecentExchanges(3)
+       â”œâ”€â”€ askSilently(extraction prompt)
+       â”œâ”€â”€ parse JSON
+       â”œâ”€â”€ memoryStore.storeProtected(key, content, category, source="heartbeat")
+       â””â”€â”€ condenseToSoulAuto()
+            â”œâ”€â”€ memoryStore.getBehaviorMemories()
+            â”œâ”€â”€ askSilently(condense prompt)
+            â””â”€â”€ dataRepository.setSoulAuto(summary)
 ```

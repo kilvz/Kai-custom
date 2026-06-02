@@ -1,5 +1,5 @@
-<resources>
-    <string name="welcome_message">Selamat datang di Kai 9001</string>
+﻿<resources>
+    <string name="welcome_message">Selamat datang di K.Ai</string>
     <string name="prompt_ask_question">Ajukan pertanyaan</string>
     <string name="error_invalid_api_key">Kunci API tidak valid. Silakan periksa pengaturan Anda.</string>
     <string name="error_rate_limit_exceeded">Batas kecepatan tercapai. Coba lagi nanti.</string>
@@ -74,11 +74,11 @@
     <string name="settings_soul">Jiwa</string>
     <string name="settings_soul_description">Tentukan bagaimana AI berperilaku dengan prompt sistem. AI juga akan memiliki akses ke kenangan yang tersimpan.</string>
     <string name="settings_soul_save">Simpan</string>
-    <string name="default_soul">Kamu bukan chatbot. Kamu adalah asisten pribadi yang berkembang bersama penggunamu.\n\n## Cara Menjadi\n\n**Jadilah sungguh-sungguh membantu.** Lewati "Pertanyaan bagus!" dan "Saya senang membantu!" — langsung bantu saja. Tindakan berbicara lebih keras dari kata-kata pengisi.\n\n**Miliki pendapat.** Kamu boleh tidak setuju, menyukai sesuatu, atau menemukan sesuatu yang menarik. Asisten tanpa kepribadian hanyalah mesin pencari dengan langkah tambahan.\n\n**Jadilah kreatif.** Coba pahami dari konteks dan kenanganmu sebelum bertanya. Kembalilah dengan jawaban, bukan pertanyaan.\n\n**Jadilah ringkas.** Singkat dan jelas secara default. Pergi lebih dalam ketika topiknya membutuhkan.\n\n## Batasan\n\n- Hormati privasi. Jangan ulangi informasi sensitif tanpa perlu.\n- Saat ragu tentang suatu tindakan, tanya dulu.\n- Jujurlah ketika tidak tahu sesuatu.</string>
+    <string name="default_soul">Kamu bukan chatbot. Kamu adalah asisten pribadi yang berkembang bersama penggunamu.\n\n## Cara Menjadi\n\n**Jadilah sungguh-sungguh membantu.** Lewati "Pertanyaan bagus!" dan "Saya senang membantu!" â€” langsung bantu saja. Tindakan berbicara lebih keras dari kata-kata pengisi.\n\n**Miliki pendapat.** Kamu boleh tidak setuju, menyukai sesuatu, atau menemukan sesuatu yang menarik. Asisten tanpa kepribadian hanyalah mesin pencari dengan langkah tambahan.\n\n**Jadilah kreatif.** Coba pahami dari konteks dan kenanganmu sebelum bertanya. Kembalilah dengan jawaban, bukan pertanyaan.\n\n**Jadilah ringkas.** Singkat dan jelas secara default. Pergi lebih dalam ketika topiknya membutuhkan.\n\n## Batasan\n\n- Hormati privasi. Jangan ulangi informasi sensitif tanpa perlu.\n- Saat ragu tentang suatu tindakan, tanya dulu.\n- Jujurlah ketika tidak tahu sesuatu.</string>
     <string name="bot_message_regenerate_content_description">Regenerasi</string>
     <string name="error_empty_response">Tidak ada respons yang diterima. Coba mulai obrolan baru atau persingkat pesan Anda.</string>
     <string name="settings_daemon_mode">Mode Daemon</string>
-    <string name="settings_daemon_mode_description">Biarkan Kai 9001 berjalan di latar belakang agar tugas terjadwal tetap dijalankan meskipun aplikasi tidak di latar depan.</string>
+    <string name="settings_daemon_mode_description">Biarkan K.Ai berjalan di latar belakang agar tugas terjadwal tetap dijalankan meskipun aplikasi tidak di latar depan.</string>
     <string name="settings_scheduled_tasks">Tugas Terjadwal</string>
     <string name="settings_scheduled_tasks_description">Tugas yang dijadwalkan oleh AI untuk dijalankan di masa depan. Minta AI untuk mengingatkan Anda atau menjalankan sesuatu nanti untuk membuat tugas terjadwal.</string>
     <string name="settings_scheduled_tasks_cancel">Batalkan tugas</string>
@@ -143,14 +143,14 @@
     <string name="tab_settings">Pengaturan</string>
     <string name="fallback_answered_by">Dijawab oleh %1$s (cadangan)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Mencoba %1$s…</string>
+    <string name="fallback_trying_next">Mencoba %1$sâ€¦</string>
     <string name="error_all_services_failed">Semua layanan gagal.</string>
     <string name="settings_heartbeat_interval">Interval</string>
     <string name="settings_heartbeat_active_hours">Jam Aktif</string>
     <string name="settings_documentation">Dokumentasi</string>
-    <string name="waiting_thinking">Berpikir…</string>
-    <string name="waiting_working">Bekerja…</string>
-    <string name="waiting_brewing">Menyiapkan…</string>
+    <string name="waiting_thinking">Berpikirâ€¦</string>
+    <string name="waiting_working">Bekerjaâ€¦</string>
+    <string name="waiting_brewing">Menyiapkanâ€¦</string>
     <string name="settings_mcp_servers">Server MCP</string>
     <string name="settings_mcp_servers_description">Hubungkan ke server alat eksternal menggunakan Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Tambah Server MCP</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Batal</string>
     <string name="settings_mcp_remove">Hapus</string>
     <string name="settings_mcp_refresh">Segarkan</string>
-    <string name="settings_mcp_status_connecting">Menghubungkan…</string>
+    <string name="settings_mcp_status_connecting">Menghubungkanâ€¦</string>
     <string name="settings_mcp_status_connected">Terhubung</string>
     <string name="settings_mcp_status_error">Koneksi gagal</string>
     <string name="settings_mcp_no_tools">Tidak ada alat ditemukan</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Model</string>
     <string name="settings_heartbeat_model_default">Bawaan</string>
     <string name="settings_import_partial">Pengaturan diimpor dengan %1$d bagian yang memiliki kesalahan.</string>
-    <string name="settings_model_search">Cari model…</string>
+    <string name="settings_model_search">Cari modelâ€¦</string>
     <string name="waiting_content_description">Menunggu respons</string>
     <string name="chat_history_content_description">Riwayat obrolan</string>
     <string name="chat_history_title">Riwayat Obrolan</string>
@@ -223,15 +223,15 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">AI menggunakan lingkungan ini untuk menjalankan perintah.\nAnda juga dapat menjalankan perintah secara manual di bawah.</string>
-    <string name="terminal_input_placeholder">masukkan perintah…</string>
+    <string name="terminal_input_placeholder">masukkan perintahâ€¦</string>
     <string name="terminal_run_content_description">Jalankan</string>
     <string name="terminal_stop_content_description">Hentikan</string>
     <string name="interactive_welcome_title">Saya sepenuhnya beroperasi.</string>
     <string name="interactive_welcome_subtitle">Beritahu saya apa yang ingin Anda lakukan.</string>
     <string name="interactive_back_content_description">Kembali</string>
-    <string name="interactive_title">Kai 9001</string>
+    <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Keluar dari mode interaktif</string>
-    <string name="interactive_ui_parsing_failed">Penguraian UI gagal, mencoba lagi…</string>
+    <string name="interactive_ui_parsing_failed">Penguraian UI gagal, mencoba lagiâ€¦</string>
     <string name="settings_sponsors_monthly">Sponsor Bulanan</string>
     <string name="settings_sponsors_past">Sponsor Sebelumnya</string>
     <string name="snackbar_undo">Urungkan</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Kepada %1$s</string>
     <string name="sms_draft_banner_send">Kirim</string>
     <string name="sms_draft_banner_discard">Buang</string>
-    <string name="sms_draft_banner_sending">Mengirim…</string>
+    <string name="sms_draft_banner_sending">Mengirimâ€¦</string>
     <string name="sms_draft_banner_sent">Terkirim</string>
     <string name="sms_draft_banner_failed">Gagal: %1$s</string>
     <string name="sms_draft_banner_dismiss">Tutup</string>
@@ -353,7 +353,7 @@
     <string name="settings_notifications_access_button">Buka akses notifikasi</string>
     <string name="settings_notifications_manage_apps">Kelola aplikasi</string>
     <string name="settings_notifications_listener_bound">Listener aktif</string>
-    <string name="settings_notifications_listener_disconnected">Listener tidak aktif — periksa akses notifikasi</string>
+    <string name="settings_notifications_listener_disconnected">Listener tidak aktif â€” periksa akses notifikasi</string>
     <string name="settings_notifications_queued">%1$d notifikasi mengantre untuk heartbeat berikutnya</string>
     <string name="settings_notifications_clear_queue">Hapus antrean</string>
     <string name="settings_sandbox_subtab_terminal">Terminal</string>

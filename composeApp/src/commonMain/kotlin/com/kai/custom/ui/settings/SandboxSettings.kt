@@ -91,10 +91,12 @@ internal fun SandboxSettingsCard(
                     )
                 }
             }
-            Switch(
-                checked = sandboxState.isSandboxEnabled,
-                onCheckedChange = onToggleSandbox,
-            )
+            if (sandboxState.sandboxReady) {
+                Switch(
+                    checked = sandboxState.isSandboxEnabled,
+                    onCheckedChange = onToggleSandbox,
+                )
+            }
         }
 
         if (sandboxState.sandboxProgress != null) {
@@ -189,6 +191,15 @@ internal fun SandboxSettingsCard(
                 Switch(
                     checked = sandboxState.isSandboxRootEnabled,
                     onCheckedChange = onToggleSandboxRoot,
+                )
+            }
+
+            sandboxState.rootErrorMessage?.let { message ->
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
 

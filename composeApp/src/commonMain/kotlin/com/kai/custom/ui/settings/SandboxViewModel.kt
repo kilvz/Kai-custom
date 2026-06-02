@@ -7,6 +7,7 @@ import com.kai.custom.Platform
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxStatus
 import com.kai.custom.currentPlatform
+import com.kai.custom.isRootAvailable
 import com.kai.custom.data.DataRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,6 +29,7 @@ data class SandboxUiState(
     val sandboxDistro: String = "alpine",
     val isWorking: Boolean = false,
     val hasError: Boolean = false,
+    val rootErrorMessage: String? = null,
     val altMemoryInstalled: Boolean = false,
 )
 
@@ -88,8 +90,12 @@ class SandboxViewModel(
     }
 
     fun onToggleSandboxRoot(enabled: Boolean) {
+        if (enabled && !isRootAvailable()) {
+            _state.update { it.copy(rootErrorMessage = "Root not available") }
+            return
+        }
         dataRepository.setSandboxRootEnabled(enabled)
-        _state.update { it.copy(isSandboxRootEnabled = enabled) }
+        _state.update { it.copy(isSandboxRootEnabled = enabled, rootErrorMessage = null) }
     }
 
     fun onSetupSandbox() {

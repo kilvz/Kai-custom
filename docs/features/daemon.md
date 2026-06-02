@@ -1,4 +1,4 @@
-# Daemon Mode
+﻿# Daemon Mode
 
 **Last verified:** 2026-05-14
 
@@ -31,16 +31,16 @@ Every time the main activity is brought to the foreground, if daemon mode is ena
 
 The daemon's task scheduler polls every 60 seconds and handles four types of background work:
 
-- **Scheduled tasks** — executes due tasks by sending their prompts through the AI pipeline
-- **Heartbeat checks** — periodic self-checks during active hours (see heartbeat doc)
-- **Email polling** — fetches new emails from configured accounts on a configurable interval
-- **SMS polling** — checks for new incoming SMS messages on a configurable interval
+- **Scheduled tasks** â€” executes due tasks by sending their prompts through the AI pipeline
+- **Heartbeat checks** â€” periodic self-checks during active hours (see heartbeat doc)
+- **Email polling** â€” fetches new emails from configured accounts on a configurable interval
+- **SMS polling** â€” checks for new incoming SMS messages on a configurable interval
 
 
 
 ## Notification
 
-- **Channel**: "Kai 9001 Background Service" with low importance
+- **Channel**: "K.Ai Background Service" with low importance
 - **Content**: "Daemon is running" with a sync icon
 - **Tap action**: Opens the app's main screen
 - The notification is required by Android for foreground services and cannot be hidden
@@ -49,14 +49,14 @@ The daemon's task scheduler polls every 60 seconds and handles four types of bac
 
 The app declares two permissions in the Android manifest:
 
-- `FOREGROUND_SERVICE` — required for all foreground services
-- `FOREGROUND_SERVICE_DATA_SYNC` — required for the `dataSync` service type
+- `FOREGROUND_SERVICE` â€” required for all foreground services
+- `FOREGROUND_SERVICE_DATA_SYNC` â€” required for the `dataSync` service type
 
 No wake locks or battery optimization exemptions are requested. The service relies on Android's standard process management with `START_STICKY` for restart behavior.
 
 ## Settings UI
 
-A toggle labeled "Daemon Mode" appears in the General tab of settings, only on Android. The description reads: "Keep Kai 9001 running in the background so scheduled tasks execute even when the app is not in the foreground." Toggling it starts or stops the foreground service and persists the preference. On Android 13+, turning the toggle on also requests the notification permission, since the foreground service's persistent notification cannot be displayed without it.
+A toggle labeled "Daemon Mode" appears in the General tab of settings, only on Android. The description reads: "Keep K.Ai running in the background so scheduled tasks execute even when the app is not in the foreground." Toggling it starts or stops the foreground service and persists the preference. On Android 13+, turning the toggle on also requests the notification permission, since the foreground service's persistent notification cannot be displayed without it.
 
 ## Key Files
 

@@ -56,6 +56,7 @@ internal fun ToolsContent(
     showRootSection: Boolean = false,
     isRootEnabled: Boolean = false,
     rootAvailable: Boolean = false,
+    rootErrorMessage: String? = null,
     onToggleRoot: (Boolean) -> Unit = {},
     skills: ImmutableList<SkillManifest> = persistentListOf(),
     activeSkill: SkillManifest? = null,
@@ -75,6 +76,7 @@ internal fun ToolsContent(
             RootSection(
                 isRootEnabled = isRootEnabled,
                 rootAvailable = rootAvailable,
+                rootErrorMessage = rootErrorMessage,
                 onToggleRoot = onToggleRoot,
             )
             Spacer(Modifier.height(24.dp))
@@ -190,6 +192,7 @@ internal fun RootSection(
     isRootEnabled: Boolean,
     rootAvailable: Boolean,
     onToggleRoot: (Boolean) -> Unit,
+    rootErrorMessage: String? = null,
 ) {
     Column {
         ToggleableHeadline(
@@ -198,6 +201,15 @@ internal fun RootSection(
             checked = isRootEnabled,
             onCheckedChange = onToggleRoot,
         )
+
+        if (rootErrorMessage != null) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = rootErrorMessage,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
 
         if (isRootEnabled) {
             Spacer(Modifier.height(12.dp))

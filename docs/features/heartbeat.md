@@ -1,8 +1,8 @@
-# Heartbeat
+﻿# Heartbeat
 
 **Last verified:** 2026-05-14
 
-> Heartbeat is user-controlled (on/off toggle, interval, active hours live in the settings UI). The AI cannot enable, disable, or reschedule it. To customise *what happens on each heartbeat*, the AI creates heartbeat-triggered scheduled tasks via `schedule_task` with `on_heartbeat: true` — these are `HEARTBEAT`-trigger tasks (see [tasks.md](tasks.md)) and their prompts are appended to every heartbeat run under `## Heartbeat Additions`. Each addition is a first-class task the user can see, edit, and cancel.
+> Heartbeat is user-controlled (on/off toggle, interval, active hours live in the settings UI). The AI cannot enable, disable, or reschedule it. To customise *what happens on each heartbeat*, the AI creates heartbeat-triggered scheduled tasks via `schedule_task` with `on_heartbeat: true` â€” these are `HEARTBEAT`-trigger tasks (see [tasks.md](tasks.md)) and their prompts are appended to every heartbeat run under `## Heartbeat Additions`. Each addition is a first-class task the user can see, edit, and cancel.
 
 Kai's heartbeat feature enables periodic automatic self-checks. The AI reviews pending tasks, email status, newly arrived emails, and learned memories on a configurable interval, surfacing anything that needs attention without requiring user interaction.
 
@@ -14,7 +14,7 @@ A silent, scheduled prompt sent to the AI during active hours. If nothing needs 
 
 ### Active Hours
 
-A configurable time window (default 8:00–22:00) during which heartbeats are allowed to fire. Outside this window, heartbeats are skipped regardless of interval.
+A configurable time window (default 8:00â€“22:00) during which heartbeats are allowed to fire. Outside this window, heartbeats are skipped regardless of interval.
 
 ### Promotion
 
@@ -22,18 +22,18 @@ A mechanism for graduating well-established memories into the permanent soul/sys
 
 ## Configuration
 
-Heartbeat configuration is stored as a serialized JSON object in app settings. Values are only editable from the settings UI — there is no AI tool that can flip them:
+Heartbeat configuration is stored as a serialized JSON object in app settings. Values are only editable from the settings UI â€” there is no AI tool that can flip them:
 
 - **Enabled**: true
 - **Interval**: 30 minutes between heartbeats (UI slider offers 5m, 10m, 15m, 30m, 45m, 1h, 2h, 4h)
-- **Active hours start**: 8 (hour, 24h format; UI range slider covers 0–23)
-- **Active hours end**: 22 (hour, 24h format; UI range slider covers 0–23)
+- **Active hours start**: 8 (hour, 24h format; UI range slider covers 0â€“23)
+- **Active hours end**: 22 (hour, 24h format; UI range slider covers 0â€“23)
 - **Model**: optional override for which service+model to use for heartbeats. When not set, the first configured service is used (default behavior). Useful for selecting a cheaper or faster model for background checks
 
 UI validation rules:
 
 - Interval must be at least 5 minutes
-- Active hours must be in the range 0–23
+- Active hours must be in the range 0â€“23
 
 ## Execution Flow
 
@@ -60,14 +60,14 @@ When the overall scheduling-enabled toggle is off, heartbeats do not run regardl
 
 The heartbeat prompt is assembled by the pure function `buildHeartbeatPrompt` (in `HeartbeatPromptBuilder.kt`). Each conditional section is covered by `HeartbeatPromptBuilderTest`. Sources:
 
-1. **Custom prompt** — user-defined text from settings, or the default prompt if empty. The default instructs the AI to review memories and tasks, respond "HEARTBEAT_OK" if nothing needs attention, or address anything that does
-2. **Previous heartbeat results** — the last 3 responses from the heartbeat conversation, so the AI can track trends, avoid repeating notifications, and detect persistent issues (e.g. "email still unread since last check")
-3. **Pending tasks** — all tasks with status PENDING are listed with their description, id, scheduled time, and cron expression (if recurring)
-4. **Email status** — if email is enabled and accounts exist, each account's email address, unread count, and last sync time are included
-5. **New emails** — headers (subject, from, preview) for emails polled since the last heartbeat pickup. Emails are fetched in the background by the email poll loop and buffered in a pending queue (capped at 100, FIFO). The heartbeat consumes the queue: everything the heartbeat saw is removed from the queue after a successful run, while emails that arrive during the heartbeat call remain for the next run. After consumption the heartbeat also advances each account's delivery watermark, so a follow-up `check_email` call from the user won't re-surface the same messages — Kai tracks read/unread internally and ignores the provider's `\Seen` flag
-6. **New SMS** — SMS messages received since the last heartbeat. Consumed analogously to emails: buffered as they arrive, surfaced once under `## New SMS`, and cleared from the pending queue after a successful run so the next heartbeat only sees newer arrivals
-7. **New notifications** — Android notifications captured since the last heartbeat, capped at 20 newest-first. Consumed analogously to emails: buffered as they arrive, surfaced once under `## New Notifications`, and cleared from the pending queue after a successful run so the next heartbeat only sees newer arrivals
-8. **Promotion candidates** — memories with 5 or more hits are listed with their key, hit count, category, and content, along with a suggestion to use the `promote_learning` tool
+1. **Custom prompt** â€” user-defined text from settings, or the default prompt if empty. The default instructs the AI to review memories and tasks, respond "HEARTBEAT_OK" if nothing needs attention, or address anything that does
+2. **Previous heartbeat results** â€” the last 3 responses from the heartbeat conversation, so the AI can track trends, avoid repeating notifications, and detect persistent issues (e.g. "email still unread since last check")
+3. **Pending tasks** â€” all tasks with status PENDING are listed with their description, id, scheduled time, and cron expression (if recurring)
+4. **Email status** â€” if email is enabled and accounts exist, each account's email address, unread count, and last sync time are included
+5. **New emails** â€” headers (subject, from, preview) for emails polled since the last heartbeat pickup. Emails are fetched in the background by the email poll loop and buffered in a pending queue (capped at 100, FIFO). The heartbeat consumes the queue: everything the heartbeat saw is removed from the queue after a successful run, while emails that arrive during the heartbeat call remain for the next run. After consumption the heartbeat also advances each account's delivery watermark, so a follow-up `check_email` call from the user won't re-surface the same messages â€” Kai tracks read/unread internally and ignores the provider's `\Seen` flag
+6. **New SMS** â€” SMS messages received since the last heartbeat. Consumed analogously to emails: buffered as they arrive, surfaced once under `## New SMS`, and cleared from the pending queue after a successful run so the next heartbeat only sees newer arrivals
+7. **New notifications** â€” Android notifications captured since the last heartbeat, capped at 20 newest-first. Consumed analogously to emails: buffered as they arrive, surfaced once under `## New Notifications`, and cleared from the pending queue after a successful run so the next heartbeat only sees newer arrivals
+8. **Promotion candidates** â€” memories with 5 or more hits are listed with their key, hit count, category, and content, along with a suggestion to use the `promote_learning` tool
 
 For the full contract of every prompt variation in Kai (chat remote/local, heartbeat, Splinterlands) see [system-prompts.md](system-prompts.md).
 
@@ -94,15 +94,15 @@ This allows well-established patterns to graduate from ephemeral memory into per
 
 The heartbeat section in settings contains:
 
-- **Toggle** — enables or disables heartbeat with a switch
-- **Interval display** — shows the current interval in minutes in the section description
-- **Interval slider** — a snap-to-preset slider with positions for 5m, 10m, 15m, 30m, 45m, 1h, 2h, 4h. Displays the formatted value (e.g. "15m", "2h") next to the label
-- **Active hours range slider** — a dual-thumb range slider spanning 0–23 (24-hour clock). Displays "H:00 – H:00" next to the label (unpadded hours)
-- **Model picker** — a dropdown button showing the selected service+model, or "Default" when no override is set. Opens a dropdown menu listing all configured services with their icons and model IDs. Selecting "Default" clears the override and uses the first configured service. If the previously selected service is removed, heartbeat falls back to the default automatically
-- **Custom prompt editor** — a text field (max 4000 characters) for editing the heartbeat prompt, with a save button that appears when changes are detected. Shows the default prompt text when no custom prompt is set. A character counter (X/4000) is displayed in the editor as the user types
-- **Reset to default** — when a custom heartbeat prompt is set, a reset button appears in the custom-prompt section header. Tapping it opens a confirmation dialog; confirming clears the custom prompt and restores the default
-- **Log display** — when log entries exist, shows a "Recent" label followed by each entry with an OK/FAIL indicator and timestamp
-- **Manual refresh** — a refresh icon next to the "Recent" label runs a heartbeat immediately, bypassing the active-hours window and the interval-due check. Only fires while heartbeat is enabled and scheduling is on; the icon shows a progress spinner during the call
+- **Toggle** â€” enables or disables heartbeat with a switch
+- **Interval display** â€” shows the current interval in minutes in the section description
+- **Interval slider** â€” a snap-to-preset slider with positions for 5m, 10m, 15m, 30m, 45m, 1h, 2h, 4h. Displays the formatted value (e.g. "15m", "2h") next to the label
+- **Active hours range slider** â€” a dual-thumb range slider spanning 0â€“23 (24-hour clock). Displays "H:00 â€“ H:00" next to the label (unpadded hours)
+- **Model picker** â€” a dropdown button showing the selected service+model, or "Default" when no override is set. Opens a dropdown menu listing all configured services with their icons and model IDs. Selecting "Default" clears the override and uses the first configured service. If the previously selected service is removed, heartbeat falls back to the default automatically
+- **Custom prompt editor** â€” a text field (max 4000 characters) for editing the heartbeat prompt, with a save button that appears when changes are detected. Shows the default prompt text when no custom prompt is set. A character counter (X/4000) is displayed in the editor as the user types
+- **Reset to default** â€” when a custom heartbeat prompt is set, a reset button appears in the custom-prompt section header. Tapping it opens a confirmation dialog; confirming clears the custom prompt and restores the default
+- **Log display** â€” when log entries exist, shows a "Recent" label followed by each entry with an OK/FAIL indicator and timestamp
+- **Manual refresh** â€” a refresh icon next to the "Recent" label runs a heartbeat immediately, bypassing the active-hours window and the interval-due check. Only fires while heartbeat is enabled and scheduling is on; the icon shows a progress spinner during the call
 
 ## AI Tools
 
@@ -110,7 +110,7 @@ The heartbeat section in settings contains:
 |---|---|
 | `promote_learning` | Promote a reinforced memory into the soul/system prompt |
 
-Standing additions to heartbeat behaviour are created with `schedule_task(on_heartbeat=true)` — see [tasks.md](tasks.md#heartbeat-triggered-tasks). Those prompts are appended to the main heartbeat self-check, not replaced.
+Standing additions to heartbeat behaviour are created with `schedule_task(on_heartbeat=true)` â€” see [tasks.md](tasks.md#heartbeat-triggered-tasks). Those prompts are appended to the main heartbeat self-check, not replaced.
 
 ## Key Files
 
@@ -123,6 +123,6 @@ Standing additions to heartbeat behaviour are created with `schedule_task(on_hea
 | `composeApp/src/commonMain/.../data/RemoteDataRepository.kt` | Heartbeat conversation creation, unread flag management |
 | `composeApp/src/commonMain/.../ui/chat/composables/HeartbeatBanner.kt` | Dismissable notification banner UI |
 | `composeApp/src/commonMain/.../ui/settings/SettingsScreen.kt` | Heartbeat settings UI section |
-| `composeApp/src/commonMain/.../Platform.kt` | `expect fun sendHeartbeatNotification` — push notification for background heartbeat reports |
+| `composeApp/src/commonMain/.../Platform.kt` | `expect fun sendHeartbeatNotification` â€” push notification for background heartbeat reports |
 | `composeApp/src/androidMain/.../HeartbeatNotifier.android.kt` | Android actual + `EXTRA_OPEN_HEARTBEAT` deep-link constant |
 | `androidApp/src/main/kotlin/.../MainActivity.kt` | Reads `EXTRA_OPEN_HEARTBEAT` in `onCreate`/`onNewIntent` and calls `DataRepository.requestOpenHeartbeat` |

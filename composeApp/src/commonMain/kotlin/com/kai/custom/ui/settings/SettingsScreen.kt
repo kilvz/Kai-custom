@@ -612,6 +612,7 @@ fun SettingsScreenContent(
                                     showRootSection = filteredUiState.showRootSection,
                                     isRootEnabled = filteredUiState.isRootEnabled,
                                     rootAvailable = filteredUiState.rootAvailable,
+                                    rootErrorMessage = filteredUiState.rootErrorMessage,
                                     onToggleRoot = actions.onToggleRoot,
                                     skills = filteredUiState.installedSkills,
                                     activeSkill = filteredUiState.activeSkill,
@@ -845,9 +846,9 @@ internal fun ToggleableHeadline(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f),
         )
         actions()
+        Spacer(Modifier.weight(1f))
         Switch(
             checked = checked,
             onCheckedChange = null,

@@ -56,14 +56,20 @@ fun AppSettings.exportToJson(
     if (ImportSection.SOUL in sections) {
         val soul = getSoulUser()
         if (soul.isNotBlank()) map["soul_text"] = JsonPrimitive(soul)
+        val soulAuto = getSoulAuto()
+        if (soulAuto.isNotBlank()) map["soul_auto"] = JsonPrimitive(soulAuto)
+        map["active_persona_id"] = JsonPrimitive(getActivePersonaId())
+        val personaManager = PersonaManager(this)
+        val allPersonas = personaManager.getAllPersonas()
+        if (allPersonas.isNotEmpty()) {
+            map["persona_list"] = Json.parseToJsonElement(
+                SharedJson.encodeToString(allPersonas),
+            )
+        }
     }
 
     if (ImportSection.MEMORY in sections) {
         map["memory_enabled"] = JsonPrimitive(isMemoryEnabled())
-        val memoriesJson = getMemoriesJson()
-        if (memoriesJson.isNotBlank() && memoriesJson != "[]") {
-            map["agent_memories"] = Json.parseToJsonElement(memoriesJson)
-        }
     }
 
     if (ImportSection.SCHEDULING in sections) {
@@ -217,19 +223,43 @@ fun AppSettings.importFromJson(
 
     if (ImportSection.SOUL in sections) {
         try {
+            val personaListElement = json["persona_list"]
+            if (personaListElement != null) {
+                try {
+                    val personas = SharedJson.decodeFromString<List<PersonaConfig>>(personaListElement.toString())
+                    val pm = PersonaManager(this)
+                    for (persona in personas) {
+                        pm.savePersona(persona)
+                    }
+                } catch (_: Exception) {
+                    errors++
+                }
+            }
+            val activeId = json["active_persona_id"]?.jsonPrimitive?.content
+            if (activeId != null) {
+                PersonaManager(this).setActivePersonaId(activeId)
+            }
             setSoulText(json["soul_text"]?.jsonPrimitive?.content ?: "")
+            val auto = json["soul_auto"]?.jsonPrimitive?.content
+            if (auto != null) setSoulAuto(auto)
         } catch (_: Exception) {
             errors++
         }
     } else if (replace) {
         setSoulText("")
+        setSoulAuto("")
     }
 
     if (ImportSection.MEMORY in sections) {
         try {
             setMemoryEnabled(json["memory_enabled"]?.jsonPrimitive?.content?.toBoolean() ?: true)
+            // backward compat: import legacy agent_memories from old exports
             val memoriesElement = json["agent_memories"]
-            setMemoriesJson(if (memoriesElement != null) sanitizeMemories(memoriesElement) else "")
+            if (memoriesElement != null) {
+                setMemoriesJson(sanitizeMemories(memoriesElement))
+            } else {
+                setMemoriesJson("")
+            }
         } catch (_: Exception) {
             errors++
         }
@@ -419,6 +449,7 @@ private fun sanitizeMemories(element: JsonElement): String {
                     } ?: MemoryCategory.GENERAL,
                     hitCount = obj["hitCount"]?.jsonPrimitive?.content?.toIntOrNull() ?: 1,
                     source = obj["source"]?.jsonPrimitive?.content,
+                    protected = obj["protected"]?.jsonPrimitive?.content?.toBoolean() ?: false,
                 )
             } catch (_: Exception) {
                 null

@@ -1,4 +1,18 @@
-## v3.2.4 — 2026-06-01
+## v3.7.0 — 2026-06-02
+
+### Features
+- **9 new sandbox tools**: read_file, write_file, edit_file, glob, grep, apply_patch, todowrite, webfetch, internet_search — opencode-style AI-callable tools in the Linux sandbox
+- **Sandbox master toggle hidden until sandbox installed**: never shown as placeholder
+- **Sandbox root / Root Shell toggles guarded**: require `su` availability before enabling
+- **Permission-gated phone tools default to disabled when permission missing** (GPS, Contacts, WiFi, Phone State, Calendar, Notifications)
+- **Rebranded "Kai 9001" → "K.Ai"** across all locale strings, code, and docs
+
+### Fixes
+- Fix SSH `ClassNotFoundException` crash: ProGuard keep rule for `com.jcraft.jsch.**` (reflective class loading)
+- Fix "Experimental" badge placement in toggle headers: sits after title text, toggle stays right-aligned
+
+### Infrastructure
+- Harden CI release workflow: direct SDK management, license acceptance, `--no-daemon` to avoid OOM on GitHub runners
 
 ### Fixes
 - Fix Telegram toggle not responding: `isEnabled` now backed by local `MutableState` so switch recomposes on toggle

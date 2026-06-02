@@ -69,6 +69,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
             },
             createdAt = entry.createdAt,
             updatedAt = entry.updatedAt,
+            protected = entry.protected,
         )
     }
 

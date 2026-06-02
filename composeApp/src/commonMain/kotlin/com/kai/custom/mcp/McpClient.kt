@@ -95,7 +95,7 @@ class McpClient(
             put(
                 "clientInfo",
                 buildJsonObject {
-                    put("name", JsonPrimitive("Kai 9001"))
+                    put("name", JsonPrimitive("K.Ai"))
                     put("version", JsonPrimitive("1.0"))
                 },
             )

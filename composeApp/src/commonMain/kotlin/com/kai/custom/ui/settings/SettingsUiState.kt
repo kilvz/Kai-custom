@@ -117,6 +117,7 @@ data class SettingsUiState(
     val showRootSection: Boolean = false,
     val isRootEnabled: Boolean = false,
     val rootAvailable: Boolean = false,
+    val rootErrorMessage: String? = null,
     val showDebugApiSection: Boolean = false,
     val isDebugApiEnabled: Boolean = false,
     val debugApiRunning: Boolean = false,

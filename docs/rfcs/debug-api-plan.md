@@ -1,4 +1,4 @@
-# Debug API Server — Plan
+﻿# Debug API Server â€” Plan
 
 ## Goal
 Allow opencode (PC) to inspect and interact with the Kai agent running on a phone via HTTP, for debugging purposes.
@@ -27,7 +27,7 @@ Ktor HTTP server on the Android device (`localhost:18500`), accessible from PC v
 | `POST` | `/reset` | Reset conversation |
 
 ## UI
-- General tab → "Advanced" section (collapsible, no "Experimental" badge)
+- General tab â†’ "Advanced" section (collapsible, no "Experimental" badge)
 - Toggle: "Debug API Server"
 - Warning Surface (orange): "Opens an HTTP API on localhost:18500 accessible via ADB. Only enable while debugging."
 - Requires daemon to be running (toggle disabled when daemon is off)
@@ -36,22 +36,22 @@ Ktor HTTP server on the Android device (`localhost:18500`), accessible from PC v
 ## Files
 
 ### New
-- `docs/rfcs/debug-api-plan.md` — this plan
-- `composeApp/src/commonMain/.../data/DebugApiModels.kt` — DTOs
-- `composeApp/src/androidMain/.../debug/DebugServer.kt` — Ktor server + routes
+- `docs/rfcs/debug-api-plan.md` â€” this plan
+- `composeApp/src/commonMain/.../data/DebugApiModels.kt` â€” DTOs
+- `composeApp/src/androidMain/.../debug/DebugServer.kt` â€” Ktor server + routes
 
 ### Modified
-- `AppSettings.kt` — add `debug_api_enabled` key
-- `DataRepository.kt` — add `isDebugApiEnabled()`/`setDebugApiEnabled()`
-- `RemoteDataRepository.kt` — delegate to AppSettings
-- `FakeDataRepository.kt` — stub via private var
-- `SettingsUiState.kt` — add `isDebugApiEnabled`, `showDebugApiSection`
-- `SettingsActions.kt` — add `onToggleDebugApi`
-- `GeneralSettings.kt` — add `AdvancedSection` composable
-- `SettingsViewModel.kt` — wire state + action
-- `SettingsScreen.kt` — pass new params to `GeneralContent`
-- `AppModule.kt` — register DebugServer singleton
-- `DaemonService.kt` — start/stop DebugServer with daemon
+- `AppSettings.kt` â€” add `debug_api_enabled` key
+- `DataRepository.kt` â€” add `isDebugApiEnabled()`/`setDebugApiEnabled()`
+- `RemoteDataRepository.kt` â€” delegate to AppSettings
+- `FakeDataRepository.kt` â€” stub via private var
+- `SettingsUiState.kt` â€” add `isDebugApiEnabled`, `showDebugApiSection`
+- `SettingsActions.kt` â€” add `onToggleDebugApi`
+- `GeneralSettings.kt` â€” add `AdvancedSection` composable
+- `SettingsViewModel.kt` â€” wire state + action
+- `SettingsScreen.kt` â€” pass new params to `GeneralContent`
+- `AppModule.kt` â€” register DebugServer singleton
+- `DaemonService.kt` â€” start/stop DebugServer with daemon
 
 ## Usage
 ```powershell

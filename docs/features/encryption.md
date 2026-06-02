@@ -1,4 +1,4 @@
-# Encryption & Secure Storage
+﻿# Encryption & Secure Storage
 
 **Last verified:** 2026-05-14
 
@@ -30,7 +30,7 @@ The following data is stored in secure settings:
 - **Service identifier:** `com.inspiredandroid.kai`
 
 ### Desktop (macOS, Windows, Linux)
-- **Mechanism:** `EncryptedFileSettings` — custom file-backed `Settings` implementation
+- **Mechanism:** `EncryptedFileSettings` â€” custom file-backed `Settings` implementation
 - **Encryption:** AES-256-GCM via `javax.crypto`
 - **Key management:** 256-bit random key generated via `SecureRandom`, stored at `~/.kai/settings.key`
 - **IV:** 12-byte random IV per write, prepended to ciphertext

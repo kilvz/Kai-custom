@@ -1,4 +1,4 @@
-# Settings Export / Import
+﻿# Settings Export / Import
 
 **Last verified:** 2026-05-14
 
@@ -9,15 +9,15 @@ Users can backup and restore all Kai settings via a human-readable JSON file. Th
 ### Export
 - Tapping **Export** opens an **Export Preview Dialog** that lists each settings section currently holding real user data, with item counts where applicable (e.g. "Services (2)", "Memory (5)"). All sections are checked by default; the user can untick any section to leave it out of the file.
 - A section is only listed when it actually has data. Pure feature-toggle flags (e.g. SMS turned off, Splinterlands without a configured account, an empty MCP server list) do not appear in the dialog. Specifically:
-  - SERVICES — only if at least one service is configured
-  - SOUL — only if soul text is non-empty
-  - MEMORY / SCHEDULING / CONVERSATIONS — only if at least one entry exists
-  - HEARTBEAT — only if a custom prompt, config, or log entries exist
-  - EMAIL — only if at least one account is configured
-  - SMS — only if SMS receive or send is enabled
-  - SPLINTERLANDS — only if an account is configured
-  - MCP — only if at least one server is configured
-  - TOOLS — only if at least one tool override is recorded
+  - SERVICES â€” only if at least one service is configured
+  - SOUL â€” only if soul text is non-empty
+  - MEMORY / SCHEDULING / CONVERSATIONS â€” only if at least one entry exists
+  - HEARTBEAT â€” only if a custom prompt, config, or log entries exist
+  - EMAIL â€” only if at least one account is configured
+  - SMS â€” only if SMS receive or send is enabled
+  - SPLINTERLANDS â€” only if an account is configured
+  - MCP â€” only if at least one server is configured
+  - TOOLS â€” only if at least one tool override is recorded
 - Confirming the dialog opens a native file-save dialog and writes `kai-settings.json` containing only the selected sections (plus a `"version": 1` field for forward-compatibility).
 - Cancelling the dialog discards the export without writing a file.
 - Sections listed under **Excluded** below are never exported.

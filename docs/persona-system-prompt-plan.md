@@ -1,4 +1,4 @@
-# Persona System Prompt Plan
+﻿# Persona System Prompt Plan
 
 ## Overview
 Three persona types with independent system prompt behavior, heartbeat behavior, and memory realms.
@@ -40,9 +40,9 @@ data class PersonaConfig(
 ## Implementation Steps
 
 ### 1. PersonaManager + PersonaConfig
-- `Persona.kt` → `PersonaConfig` data class, `PersonaPromptStyle` enum, `PersonaHeartbeatStyle` enum
-- `PersonaManager.kt` → CRUD for persona list, active persona management, soul key routing
-- `AppSettings.kt` → per-persona soul keys, persona list storage, migration from legacy
+- `Persona.kt` â†’ `PersonaConfig` data class, `PersonaPromptStyle` enum, `PersonaHeartbeatStyle` enum
+- `PersonaManager.kt` â†’ CRUD for persona list, active persona management, soul key routing
+- `AppSettings.kt` â†’ per-persona soul keys, persona list storage, migration from legacy
 
 ### 2. ChatSystemPromptBuilder Dual-Mode
 - Accept `PersonaPromptStyle` parameter
@@ -66,27 +66,27 @@ data class PersonaConfig(
 - `HeartbeatMemoryExtractor` behavior unchanged (persona-agnostic)
 
 ### 6. Alt-Memory Persona Scoping
-- On persona switch: `AltMemoryClient.setPersona(personaId)` → calls alt-memory `set_persona`
+- On persona switch: `AltMemoryClient.setPersona(personaId)` â†’ calls alt-memory `set_persona`
 - Memory operations scoped to `persona_{id}` realm
 - SqliteMemoryStore: no change (no persona isolation in local DB)
 
 ---
 
 ## Key Files Changed
-- `Persona.kt` — replace with PersonaConfig + enums
-- `PersonaManager.kt` — full CRUD, JSON serialization
-- `AppSettings.kt` — per-persona keys, migration
-- `DataRepository.kt` — persona CRUD, style getters
-- `RemoteDataRepository.kt` — persona switch hook, prompt routing
-- `ChatSystemPromptBuilder.kt` — dual-mode sections
-- `HeartbeatPromptBuilder.kt` — dual-mode heartbeat
-- `AltMemoryClient.kt` — setPersona()
-- `MemoryStore.kt` — setPersona() interface
-- `MemoryStoreProvider.kt` — delegate setPersona()
-- `AgentSettings.kt` — persona dropdown, custom editor
-- `SettingsViewModel.kt` — persona switch handlers
-- `HeartbeatManager.kt` — route heartbeat prompt by style
-- `TaskScheduler.kt` — route heartbeat by style
+- `Persona.kt` â€” replace with PersonaConfig + enums
+- `PersonaManager.kt` â€” full CRUD, JSON serialization
+- `AppSettings.kt` â€” per-persona keys, migration
+- `DataRepository.kt` â€” persona CRUD, style getters
+- `RemoteDataRepository.kt` â€” persona switch hook, prompt routing
+- `ChatSystemPromptBuilder.kt` â€” dual-mode sections
+- `HeartbeatPromptBuilder.kt` â€” dual-mode heartbeat
+- `AltMemoryClient.kt` â€” setPersona()
+- `MemoryStore.kt` â€” setPersona() interface
+- `MemoryStoreProvider.kt` â€” delegate setPersona()
+- `AgentSettings.kt` â€” persona dropdown, custom editor
+- `SettingsViewModel.kt` â€” persona switch handlers
+- `HeartbeatManager.kt` â€” route heartbeat prompt by style
+- `TaskScheduler.kt` â€” route heartbeat by style
 
 ## Non-Goals
 - No new compilation targets
