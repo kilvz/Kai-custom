@@ -306,7 +306,7 @@ actual fun getAvailableTools(): List<Tool> {
 
     val allTools = buildList {
         if (appSettings.isMemoryEnabled()) {
-            addAll(CommonTools.getMemoryTools(memoryStore, sandboxController))
+            addAll(CommonTools.getMemoryTools(memoryStore))
             addAll(CommonTools.getKgTools(memoryStore))
             addAll(CommonTools.getDiaryTools(memoryStore))
             addAll(listOf(HeartbeatTools.getPromoteLearningTool(memoryStore, appSettings)))

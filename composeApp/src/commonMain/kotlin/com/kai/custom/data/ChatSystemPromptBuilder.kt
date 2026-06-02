@@ -160,10 +160,10 @@ internal fun buildChatSystemPrompt(
             remaining = appendMemoryCategorySection("Learnings", learningMemories, withHitCount = true, remaining)
             appendMemoryCategorySection("Known Issues & Resolutions", errorMemories, withHitCount = false, remaining)
         }
-        if (memoryEnabled && isNotEmpty()) append("\n\nWhen you don't know something or need information, first search your memory with search_memories. If not found, search the internet with web_search. Save what you learn with memory_store.")
+        if (memoryEnabled && isNotEmpty()) append("\n\nWhen you don't know something or need information, first search your memory with search_memories (supports vector/semantic and keyword matching). If not found, search the internet with web_search. Save what you learn with memory_store.")
         if (memoryEnabled && variant == SystemPromptVariant.CHAT_REMOTE) {
             append("\n\n## Alt Memory Discipline\n")
-            append("Use memory like working context, not decoration. Before re-solving recurring problems, search memory. Store durable corrections, user preferences, project facts, decisions, fixes that worked, and error resolutions. Use memory_learn for categorized learnings when available, and memory_reinforce when a stored learning helps. Do not store transient chatter, guesses, secrets, or one-off noise. If memory conflicts with current evidence or the user's correction, trust the current evidence/user and update memory.")
+            append("Use memory like working context, not decoration. Before re-solving recurring problems, search memory (use vector mode for semantic matching). Store durable corrections, user preferences, project facts, decisions, fixes that worked, and error resolutions. Use memory_learn for categorized learnings when available, and memory_reinforce when a stored learning helps. Do not store transient chatter, guesses, secrets, or one-off noise. If memory conflicts with current evidence or the user's correction, trust the current evidence/user and update memory.")
         }
 
         if (variant == SystemPromptVariant.CHAT_REMOTE) {

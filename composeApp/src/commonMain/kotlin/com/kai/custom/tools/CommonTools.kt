@@ -1,6 +1,5 @@
 package com.kai.custom.tools
 
-import com.kai.custom.SandboxController
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.MemoryCategory
 import com.kai.custom.data.MemoryEntry
@@ -210,7 +209,7 @@ object CommonTools {
     val searchMemoriesToolInfo = ToolInfo(
         id = "search_memories",
         name = "Search Memories",
-        description = "Search stored memories by keyword (matches key and content)",
+        description = "Search stored memories using semantic (vector), keyword (FTS5), or hybrid mode",
     )
 
     val openUrlTool = object : Tool {
@@ -408,48 +407,27 @@ object CommonTools {
 
     fun searchMemoriesTool(
         memoryStore: MemoryStore,
-        sandboxController: SandboxController? = null,
     ) = object : Tool {
         override val schema = ToolSchema(
             name = "search_memories",
-            description = "Search your stored memories by keyword (matches both key and content). To find a memory by its key, search the key value. To list everything, search a single letter.",
+            description = "Search your stored memories using semantic (vector) matching, keyword (FTS5) matching, or hybrid (both). Semantic search finds conceptually related memories even without exact keyword overlap. Default is hybrid.",
             parameters = mapOf(
                 "query" to ParameterSchema(type = "string", description = "The search query to find matching memories", required = true),
                 "limit" to ParameterSchema(type = "integer", description = "Maximum number of results (default 10)", required = false),
+                "mode" to ParameterSchema(type = "string", description = "Search mode: 'hybrid' (semantic+keyword, default), 'vector' (pure semantic), or 'keyword' (exact match)", required = false),
             ),
         )
 
         override suspend fun execute(args: Map<String, Any>): Any {
             val query = args["query"]?.toString() ?: return mapOf("success" to false, "error" to "Missing query")
             val limit = (args["limit"] as? Number)?.toInt() ?: 10
+            val mode = args["mode"]?.toString() ?: "hybrid"
 
-            // Try sandbox semantic search (alt-memory) first
-            if (sandboxController != null) {
-                val allMemories = memoryStore.getAllMemories()
-                val sandboxResults = sandboxController.searchMemories(allMemories, query, limit)
-                if (sandboxResults != null) {
-                    return mapOf(
-                        "success" to true,
-                        "query" to query,
-                        "count" to sandboxResults.size,
-                        "results" to sandboxResults.map { entry ->
-                            mapOf(
-                                "key" to entry.key,
-                                "content" to entry.content,
-                                "category" to entry.category.name,
-                                "hit_count" to entry.hitCount,
-                                "source" to (entry.source ?: ""),
-                            )
-                        },
-                    )
-                }
-            }
-
-            // Fall back to FTS5
-            val results = memoryStore.searchMemories(query, limit)
+            val results = memoryStore.searchMemories(query, limit, mode)
             return mapOf(
                 "success" to true,
                 "query" to query,
+                "mode" to mode,
                 "count" to results.size,
                 "results" to results.map { entry ->
                     mapOf(
@@ -466,13 +444,12 @@ object CommonTools {
 
     fun getMemoryTools(
         memoryStore: MemoryStore,
-        sandboxController: SandboxController? = null,
     ): List<Tool> = listOf(
         memoryStoreTool(memoryStore),
         memoryForgetTool(memoryStore),
         memoryLearnTool(memoryStore),
         memoryReinforceTool(memoryStore),
-        searchMemoriesTool(memoryStore, sandboxController),
+        searchMemoriesTool(memoryStore),
     )
 
     // Knowledge graph tools

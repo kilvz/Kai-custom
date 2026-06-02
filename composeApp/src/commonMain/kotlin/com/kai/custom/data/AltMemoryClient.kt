@@ -228,7 +228,7 @@ class AltMemoryClient(
         emptyList()
     }
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
+    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> {
         if (query.isBlank()) return emptyList()
         return try {
             val response = runBlockingCompat {
@@ -237,7 +237,7 @@ class AltMemoryClient(
                     buildJsonObject {
                         put("query", JsonPrimitive(query))
                         put("n_results", JsonPrimitive(limit))
-                        put("mode", JsonPrimitive("hybrid"))
+                        put("mode", JsonPrimitive(mode))
                     },
                 )
             }

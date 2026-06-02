@@ -83,13 +83,13 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         }
     }
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
-        if (!isUsingAltMemory) return sqliteStore.searchMemories(query, limit)
+    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.searchMemories(query, limit, mode)
         return try {
-            val alt = delegate.searchMemories(query, limit)
-            if (alt.isNotEmpty()) alt else sqliteStore.searchMemories(query, limit)
+            val alt = delegate.searchMemories(query, limit, mode)
+            if (alt.isNotEmpty()) alt else sqliteStore.searchMemories(query, limit, mode)
         } catch (_: Exception) {
-            sqliteStore.searchMemories(query, limit)
+            sqliteStore.searchMemories(query, limit, mode)
         }
     }
 

@@ -161,7 +161,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override fun getAllMemories(max: Int): List<MemoryEntry> = allEntities(max).mapNotNull { entityToEntry(it) }
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
+    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> {
         if (query.isBlank()) return emptyList()
         return dimension.searchEntities(query, limit).mapNotNull { entityToEntry(it.entity) }
     }

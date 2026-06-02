@@ -73,7 +73,7 @@ interface MemoryStore {
 
     fun getAllMemories(max: Int = 1000): List<MemoryEntry>
 
-    fun searchMemories(query: String, limit: Int = 10): List<MemoryEntry>
+    fun searchMemories(query: String, limit: Int = 10, mode: String = "hybrid"): List<MemoryEntry>
 
     fun getPromotionCandidates(minHits: Int = 5, max: Int = 500): List<MemoryEntry>
 
