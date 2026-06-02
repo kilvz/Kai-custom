@@ -304,7 +304,7 @@ actual fun getAvailableTools(): List<Tool> {
     val calendarRepository = CalendarRepository(context, calendarPermissionController)
     val emailStore: EmailStore by inject(EmailStore::class.java)
 
-    return buildList {
+    val allTools = buildList {
         if (appSettings.isMemoryEnabled()) {
             addAll(CommonTools.getMemoryTools(memoryStore, sandboxController))
             addAll(CommonTools.getKgTools(memoryStore))
@@ -1275,6 +1275,10 @@ actual fun getAvailableTools(): List<Tool> {
 
         addAll(mcpServerManager.getEnabledMcpTools())
     }
+
+    // Deduplicate by name — MCP servers may expose tools with the same
+    // names as built-in tools (e.g. memory_store, search_memories).
+    return allTools.distinctBy { it.schema.name }
 }
 
 actual fun openUrl(url: String): Boolean = try {
