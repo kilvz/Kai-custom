@@ -21,7 +21,9 @@ class AltMemoryClient(
     private val appSettings: AppSettings,
 ) : MemoryStore {
 
-    // Realm/domain mapping mirrors SqliteMemoryStore.DimensionConfig constants
+    @kotlin.concurrent.Volatile
+    private var activePersonaId: String = ""
+
     private fun realmForCategory(category: MemoryCategory): String = when (category) {
         MemoryCategory.GENERAL,
         MemoryCategory.LEARNING,
@@ -30,6 +32,11 @@ class AltMemoryClient(
 
         MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
     }
+
+    private fun personaRealm(): String = "persona_$activePersonaId"
+
+    private fun realmForProtected(): String =
+        if (activePersonaId.isNotBlank()) personaRealm() else DimensionConfig.REALM_AGENT
 
     private fun domainForCategory(category: MemoryCategory): String = when (category) {
         MemoryCategory.GENERAL -> DimensionConfig.DOMAIN_MEMORIES
@@ -54,6 +61,7 @@ class AltMemoryClient(
     }
 
     override suspend fun setPersona(personaId: String) {
+        activePersonaId = personaId
         try {
             client.callTool(
                 "set_persona",
@@ -74,8 +82,6 @@ class AltMemoryClient(
                 id = name,
                 name = name,
                 description = desc,
-                style = PersonaPromptStyle.ALT,
-                heartbeatStyle = PersonaHeartbeatStyle.ALT,
                 isBuiltIn = false,
             )
         }
@@ -90,9 +96,29 @@ class AltMemoryClient(
                 buildJsonObject {
                     put("name", JsonPrimitive(config.id))
                     put("description", JsonPrimitive(config.description))
+                    put("system_prompt", JsonPrimitive(buildPersonaSystemPrompt(config)))
                 },
             )
         } catch (_: Exception) { }
+    }
+
+    private fun buildPersonaSystemPrompt(config: PersonaConfig): String = buildString {
+        appendLine("You are ${config.name}, a ${config.behaviorStyle.displayName.lowercase()} persona.")
+        appendLine()
+        appendLine("## Character")
+        appendLine("- Role: ${config.behaviorStyle.displayName}")
+        appendLine("- Style: ${config.languageStyle.displayName}")
+        appendLine("- Type: ${config.characterType.displayName}")
+        if (config.description.isNotBlank()) {
+            appendLine()
+            appendLine("## Description")
+            appendLine(config.description)
+        }
+        if (config.skills.isNotEmpty()) {
+            appendLine()
+            appendLine("## Skills")
+            config.skills.forEach { appendLine("- $it") }
+        }
     }
 
     override suspend fun deleteRemotePersona(id: String) {
@@ -184,7 +210,7 @@ class AltMemoryClient(
         val now = Clock.System.now().toEpochMilliseconds()
         val args = buildJsonObject {
             put("entity_id", JsonPrimitive(key))
-            put("realm", JsonPrimitive(realmForCategory(category)))
+            put("realm", JsonPrimitive(realmForProtected()))
             put("domain", JsonPrimitive(domainForCategory(category)))
             put("content", JsonPrimitive(content))
             put("metadata", buildMetadata(key, category, source, protected = true))
@@ -217,7 +243,16 @@ class AltMemoryClient(
 
     override fun getUserMemories(max: Int): List<MemoryEntry> = getAllMemories(max).filter { !it.protected }
 
-    override fun getBehaviorMemories(): List<MemoryEntry> = getAllMemories().filter { it.protected }
+    override fun getBehaviorMemories(): List<MemoryEntry> = try {
+        val response = runBlockingCompat {
+            client.callTool("export_collection", buildJsonObject {
+                put("realm", JsonPrimitive(realmForProtected()))
+            })
+        }
+        parseEntityList(response).mapNotNull { altEntityToEntry(it) }.filter { it.protected }
+    } catch (_: Exception) {
+        emptyList()
+    }
 
     override fun getAllMemories(max: Int): List<MemoryEntry> = try {
         val response = runBlockingCompat {

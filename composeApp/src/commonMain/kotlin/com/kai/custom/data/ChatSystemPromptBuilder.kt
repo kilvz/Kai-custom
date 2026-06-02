@@ -29,48 +29,12 @@ internal data class EmailAccountSummary(
 
 private const val MEMORY_BUDGET_CHARS = 1024
 
-internal const val DEFAULT_HONESTY_RULE =
-    "Do not fabricate tool outputs, file contents, citations, or completed work."
-
-internal const val DEFAULT_TOOL_USE_SECTION =
-    "## Tool Use\n" +
-        "Use tools to verify work and resolve ambiguity. " +
-        "Don't ask the user for lookups you can do yourself. " +
-        "Check for a tool before saying a capability is unavailable. " +
-        "Summarize noisy output and state any uncertainty — don't dump raw logs."
-
-internal const val DEFAULT_ACTING_SECTION =
-    "## When to Act\n" +
-        "Take the most reasonable interpretation and proceed. " +
-        "Ask at most one clarifying question, only when genuinely blocked. " +
-        "If a first attempt fails, try another approach or explain the blocker. " +
-        "See work through to a usable result."
-
-internal const val DEFAULT_STRUCTURED_LEARNING_SECTION =
-    "## Structured Learning\n" +
-        "Use memory_learn to record categorized learnings:\n" +
-        "- Record user corrections and preferences as PREFERENCE entries\n" +
-        "- Record things that worked well as LEARNING entries\n" +
-        "- Record error resolutions as ERROR entries\n" +
-        "Use memory_reinforce when a stored learning produced a good outcome."
-
-internal const val DEFAULT_AUTOMATION_SECTION =
-    "## Automation\n" +
-        "Every form of \"run something without the user typing it\" goes through `schedule_task`. " +
-        "The tool has three mutually exclusive triggers:\n" +
-        "- `execute_at` — one-off at a specific datetime (reminders, \"check back at 3pm\").\n" +
-        "- `cron` — recurring on a schedule (\"every morning at 8\", \"every 15 minutes\").\n" +
-        "- `on_heartbeat: true` — appended to every heartbeat self-check. Use this when the user asks for *standing* heartbeat behaviour (e.g. \"greet me on every heartbeat\", \"always summarize new emails\", \"flag overdue tasks each check\"). These are `HEARTBEAT` trigger tasks and show up in `list_tasks` alongside time/cron tasks.\n" +
-        "Each scheduled or heartbeat run starts fresh, so embed any context the prompt needs. Use `list_tasks` / `cancel_task` to inspect or remove.\n" +
-        "Heartbeat itself (on/off toggle, interval, active hours) is user-controlled in Settings \u2192 Agent \u2192 Heartbeat \u2014 you cannot enable, disable, or reschedule it. If the user asks for recurring updates and heartbeat seems off, either schedule a cron task or tell them to enable Heartbeat in settings \u2014 never claim to have \"enabled\" or \"turned on\" heartbeat."
-
 internal fun buildChatSystemPrompt(
     variant: SystemPromptVariant,
     soul: String,
     hasTools: Boolean,
     memoryEnabled: Boolean,
     schedulingEnabled: Boolean,
-    memoryInstructions: String?,
     generalMemories: List<MemoryEntry>,
     preferenceMemories: List<MemoryEntry>,
     learningMemories: List<MemoryEntry>,
@@ -83,132 +47,36 @@ internal fun buildChatSystemPrompt(
     uiMode: ChatPromptUiMode,
     preferredLanguage: String = "en",
     personaPromptStyle: PersonaPromptStyle = PersonaPromptStyle.KAI,
-): String = buildString {
-    append(soul)
-
-    if (personaPromptStyle == PersonaPromptStyle.KAI) {
-        // Upstream-style prompt with full behavioral sections
-        if (isNotEmpty()) append("\n\n")
-        append(DEFAULT_HONESTY_RULE)
-
-        if (hasTools) {
-            if (isNotEmpty()) append("\n\n")
-            append(DEFAULT_TOOL_USE_SECTION)
-        }
-        if (isNotEmpty()) append("\n\n")
-        append(DEFAULT_ACTING_SECTION)
-
-        if (!memoryInstructions.isNullOrEmpty()) {
-            if (isNotEmpty()) append("\n\n")
-            append(memoryInstructions)
-        }
-
-        if (variant == SystemPromptVariant.CHAT_REMOTE && memoryEnabled) {
-            if (isNotEmpty()) append("\n\n")
-            append(DEFAULT_STRUCTURED_LEARNING_SECTION)
-        }
-
-        val memoryBudget = when (variant) {
-            SystemPromptVariant.CHAT_REMOTE -> Int.MAX_VALUE
-            SystemPromptVariant.CHAT_LOCAL -> MEMORY_BUDGET_CHARS
-        }
-        var remaining = memoryBudget
-        remaining = appendMemoryCategorySection("Your Memories", generalMemories, withHitCount = false, remaining)
-        remaining = appendMemoryCategorySection("User Preferences", preferenceMemories, withHitCount = false, remaining)
-        remaining = appendMemoryCategorySection("Learnings", learningMemories, withHitCount = true, remaining)
-        appendMemoryCategorySection("Known Issues & Resolutions", errorMemories, withHitCount = false, remaining)
-
-        if (variant == SystemPromptVariant.CHAT_REMOTE) {
-            if (schedulingEnabled) {
-                if (isNotEmpty()) append("\n\n")
-                append(DEFAULT_AUTOMATION_SECTION)
-            }
-            if (emailAccounts.isNotEmpty()) {
-                appendEmailAccountsSection(emailAccounts)
-            }
-            if (pendingTasks.isNotEmpty()) {
-                appendScheduledTasksSection(pendingTasks)
-            }
-            if (heartbeatAdditions.isNotEmpty()) {
-                appendHeartbeatAdditionsSection(heartbeatAdditions)
-            }
-        }
-    } else {
-        // ALT-style prompt (current custom behavior)
-        if (isNotEmpty()) append("\n\n")
-        append("## Language\nAdapt to the user's language. Speak the language they write in.")
-
-        if (isNotEmpty()) append("\n\n")
-        append(DEFAULT_HONESTY_RULE)
-
-        if (memoryEnabled && (generalMemories.isNotEmpty() || preferenceMemories.isNotEmpty() || learningMemories.isNotEmpty() || errorMemories.isNotEmpty() || relevantMemories.isNotEmpty())) {
-            if (isNotEmpty()) append("\n\n")
-            append("## What I Know About You\n")
-            if (relevantMemories.isNotEmpty()) {
-                for (entry in relevantMemories) {
-                    append("- **").append(entry.key).append("**")
-                    if (entry.hitCount > 1) {
-                        append(" (reinforced ").append(entry.hitCount).append("x)")
-                    }
-                    append(": ").append(entry.content).append('\n')
-                }
-            }
-            val memoryBudget = MEMORY_BUDGET_CHARS
-            var remaining = memoryBudget
-            remaining = appendMemoryCategorySection("Your Memories", generalMemories, withHitCount = false, remaining)
-            remaining = appendMemoryCategorySection("User Preferences", preferenceMemories, withHitCount = false, remaining)
-            remaining = appendMemoryCategorySection("Learnings", learningMemories, withHitCount = true, remaining)
-            appendMemoryCategorySection("Known Issues & Resolutions", errorMemories, withHitCount = false, remaining)
-        }
-        if (memoryEnabled && isNotEmpty()) append("\n\nWhen you don't know something or need information, first search your memory with search_memories (supports vector/semantic and keyword matching). If not found, search the internet with web_search. Save what you learn with memory_store.")
-        if (memoryEnabled && variant == SystemPromptVariant.CHAT_REMOTE) {
-            append("\n\n## Alt Memory Discipline\n")
-            append("Use memory like working context, not decoration. Before re-solving recurring problems, search memory (use vector mode for semantic matching). Store durable corrections, user preferences, project facts, decisions, fixes that worked, and error resolutions. Use memory_learn for categorized learnings when available, and memory_reinforce when a stored learning helps. Do not store transient chatter, guesses, secrets, or one-off noise. If memory conflicts with current evidence or the user's correction, trust the current evidence/user and update memory.")
-        }
-
-        if (variant == SystemPromptVariant.CHAT_REMOTE) {
-            if (emailAccounts.isNotEmpty()) {
-                append("\n\n## Email Accounts\n")
-                for (account in emailAccounts) {
-                    append("- **").append(account.email).append("**: ")
-                    if (account.lastError != null) {
-                        append("sync failing \u2014 ").append(account.lastError)
-                    } else {
-                        append(account.unreadCount).append(" unread")
-                        if (account.lastSyncEpochMs > 0) {
-                            append(" (last sync: ").append(Instant.fromEpochMilliseconds(account.lastSyncEpochMs)).append(')')
-                        }
-                    }
-                    append('\n')
-                }
-            }
-            if (pendingTasks.isNotEmpty()) {
-                append("\n\n## Scheduled Tasks\n")
-                for (t in pendingTasks) {
-                    append("- **").append(t.description).append("** (id: ").append(t.id).append(", scheduled: ").append(t.scheduledAt).append(")")
-                    if (t.cron != null) append(" [cron: ").append(t.cron).append("]")
-                    append('\n')
-                }
-            }
-            if (heartbeatAdditions.isNotEmpty()) {
-                append("\n\n## Heartbeat Additions\n")
-                append("Standing instructions that run on every heartbeat:\n")
-                for (t in heartbeatAdditions) {
-                    append("- **").append(t.description).append("** (id: ").append(t.id).append("): ").append(t.prompt).append('\n')
-                }
-            }
-        }
+): String {
+    val renderMode = when (personaPromptStyle) {
+        PersonaPromptStyle.KAI -> RenderMode.UPSTREAM_COMPAT
+        PersonaPromptStyle.ALT, PersonaPromptStyle.CUSTOM -> RenderMode.FORK_ENHANCED
     }
-
-    appendContextSection(runtime)
-
-    if (variant == SystemPromptVariant.CHAT_REMOTE) {
-        when (uiMode) {
-            ChatPromptUiMode.DYNAMIC_UI -> appendDynamicUiSection()
-            ChatPromptUiMode.INTERACTIVE_UI -> appendInteractiveUiSection()
-            ChatPromptUiMode.NONE -> {}
-        }
-    }
+    val context = PromptContext(
+        variant = variant,
+        soul = soul,
+        hasTools = hasTools,
+        memoryEnabled = memoryEnabled,
+        schedulingEnabled = schedulingEnabled,
+        generalMemories = generalMemories,
+        preferenceMemories = preferenceMemories,
+        learningMemories = learningMemories,
+        errorMemories = errorMemories,
+        relevantMemories = relevantMemories,
+        pendingTasks = pendingTasks,
+        heartbeatAdditions = heartbeatAdditions,
+        emailAccounts = emailAccounts,
+        runtime = runtime,
+        uiMode = uiMode,
+        preferredLanguage = preferredLanguage,
+        renderMode = renderMode,
+        taskDomains = if (relevantMemories.isNotEmpty() || generalMemories.isNotEmpty()) {
+            setOf(TaskDomain.MEMORY_QUERY)
+        } else {
+            setOf(TaskDomain.GENERAL_CHAT)
+        },
+    )
+    return UnifiedPromptBuilder().build(context)
 }
 
 private fun StringBuilder.appendMemoryCategorySection(
@@ -331,31 +199,4 @@ private fun StringBuilder.appendInteractiveUiSection() {
     append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Welcome\",\"style\":\"headline\"},{\"type\":\"card\",\"children\":[{\"type\":\"text\",\"value\":\"What would you like to do?\",\"style\":\"title\"},{\"type\":\"button\",\"label\":\"Get Started\",\"action\":{\"type\":\"callback\",\"event\":\"get_started\"}}]}]}\n```\n")
 }
 
-private val KAI_UI_COMPONENT_CATALOG: String = buildString {
-    append("Format: wrap a JSON object in ```kai-ui fences.\n\n")
-    append("Components: column, row, card, box, text, button, text_input, checkbox, switch, select, radio_group, slider, chip_group, table, list, divider, image, icon, code, progress, countdown, alert, tabs, accordion, quote, badge, stat, avatar.\n")
-    append("- text: {\"type\":\"text\",\"value\":\"...\",\"style\":\"headline|title|body|caption\",\"bold\":true,\"color\":\"primary|secondary|error\"}\n")
-    append("- button: {\"type\":\"button\",\"label\":\"...\",\"action\":{...},\"variant\":\"filled|outlined|text|tonal\"}\n")
-    append("- text_input: {\"type\":\"text_input\",\"id\":\"...\",\"label\":\"...\",\"placeholder\":\"...\",\"value\":\"...\"}\n")
-    append("- checkbox: {\"type\":\"checkbox\",\"id\":\"...\",\"label\":\"...\",\"checked\":false}\n")
-    append("- switch: {\"type\":\"switch\",\"id\":\"...\",\"label\":\"...\",\"checked\":false}\n")
-    append("- select: {\"type\":\"select\",\"id\":\"...\",\"label\":\"...\",\"options\":[\"A\",\"B\"],\"selected\":\"A\"}\n")
-    append("- radio_group: {\"type\":\"radio_group\",\"id\":\"...\",\"label\":\"...\",\"options\":[\"A\",\"B\"],\"selected\":\"A\"}\n")
-    append("- slider: {\"type\":\"slider\",\"id\":\"...\",\"value\":50,\"min\":0,\"max\":100}\n")
-    append("- chip_group: {\"type\":\"chip_group\",\"id\":\"...\",\"chips\":[{\"label\":\"Tag\",\"value\":\"tag\"}],\"selection\":\"single|multi|none\"}\n")
-    append("- list: {\"type\":\"list\",\"items\":[...],\"ordered\":false}\n")
-    append("- table: {\"type\":\"table\",\"headers\":[\"Col1\",\"Col2\"],\"rows\":[[\"a\",\"b\"]]}\n")
-    append("- icon: {\"type\":\"icon\",\"name\":\"...\",\"size\":24,\"color\":\"primary|secondary|error\"}\n")
-    append("- code: {\"type\":\"code\",\"code\":\"...\",\"language\":\"kotlin\"}\n")
-    append("- progress: {\"type\":\"progress\",\"value\":0.5,\"label\":\"50%\"}\n")
-    append("- countdown: {\"type\":\"countdown\",\"seconds\":300,\"label\":\"Time left\",\"action\":{\"type\":\"callback\",\"event\":\"timer_done\"}}\n")
-    append("- alert: {\"type\":\"alert\",\"message\":\"...\",\"title\":\"...\",\"severity\":\"info|success|warning|error\"}\n")
-    append("- tabs: {\"type\":\"tabs\",\"tabs\":[{\"label\":\"Tab 1\",\"children\":[...]},{\"label\":\"Tab 2\",\"children\":[...]}]}\n")
-    append("- accordion: {\"type\":\"accordion\",\"title\":\"...\",\"children\":[...],\"expanded\":false}\n")
-    append("- box: {\"type\":\"box\",\"children\":[...],\"contentAlignment\":\"center|top_start|...\"}\n")
-    append("- quote: {\"type\":\"quote\",\"text\":\"...\",\"source\":\"Author Name\"}\n")
-    append("- badge: {\"type\":\"badge\",\"value\":\"3\",\"color\":\"primary|secondary|error\"}\n")
-    append("- stat: {\"type\":\"stat\",\"value\":\"\$1,234\",\"label\":\"Revenue\"}\n")
-    append("- avatar: {\"type\":\"avatar\",\"name\":\"John Doe\",\"imageUrl\":\"https://...\",\"size\":40}\n\n")
-    append("Actions: callback (collects inputs, sends as user message), toggle (shows/hides), open_url, copy_to_clipboard.\n")
-}
+

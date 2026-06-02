@@ -1,5 +1,6 @@
-# Rearchitecture Plan — Kai-custom Prompt Pipeline
+# Rearchitecture Plan — Kai-custom Prompt Pipeline (Archived)
 
+> **This plan was the original analysis. The active implementation plan is now `docs/plan-merge.md`.**
 > Based on analysis of Kai-custom pipeline (`docs/prompt-pipeline.md`) vs opencode pipeline (`docs/opencode-prompt-pipeline.md`)
 > Target: Incremental refactoring, no rewrite. Every phase is safe to deploy independently.
 

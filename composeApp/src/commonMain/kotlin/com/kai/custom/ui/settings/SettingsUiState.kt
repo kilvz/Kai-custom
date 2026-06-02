@@ -65,6 +65,7 @@ data class SettingsUiState(
     val availableServicesToAdd: ImmutableList<Service> = persistentListOf(),
     val tools: ImmutableList<ToolInfo> = persistentListOf(),
     val soulText: String = "",
+    val soulAuto: String = "",
     val personaName: String = "Kai",
     val personas: ImmutableList<PersonaConfig> = persistentListOf(),
     val activePersonaId: String = "kai",

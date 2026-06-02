@@ -1803,7 +1803,14 @@ class RemoteDataRepository(
         personaManager.savePersona(active.copy(name = name))
     }
 
-    override fun getAllPersonas(): List<PersonaConfig> = personaManager.getAllPersonas()
+    override fun getAllPersonas(): List<PersonaConfig> {
+        val all = personaManager.getAllPersonas()
+        return if (appSettings.isAltMemoryEnabled()) {
+            all
+        } else {
+            all.filter { it.id == "kai" || it.id == "alt" }
+        }
+    }
 
     override fun getActivePersona(): PersonaConfig = personaManager.getActivePersona()
 
@@ -1817,12 +1824,12 @@ class RemoteDataRepository(
         runBlockingCompat { memoryStore.deleteRemotePersona(id) }
     }
 
-    override fun getPersonaPromptStyle(): PersonaPromptStyle = personaManager.getActivePersona().style
-
-    override fun getPersonaHeartbeatStyle(): PersonaHeartbeatStyle = personaManager.getActivePersona().heartbeatStyle
-
     override suspend fun switchPersona(personaId: String) {
         personaManager.setActivePersonaId(personaId)
+        val config = personaManager.getPersona(personaId)
+        if (config != null) {
+            memoryStore.syncPersonaToRemote(config)
+        }
         memoryStore.setPersona(personaId)
     }
 
@@ -1895,13 +1902,14 @@ class RemoteDataRepository(
             SystemPromptVariant.CHAT_LOCAL -> getLocalSafeTools().isNotEmpty()
         }
 
-        return buildChatSystemPrompt(
+        val soulUserText = appSettings.getSoulUser(activePersona.id)
+        val soulAutoText = appSettings.getSoulAuto(activePersona.id)
+        val pc = PromptContext(
             variant = variant,
             soul = soul,
             hasTools = hasTools,
             memoryEnabled = memoryEnabled,
             schedulingEnabled = schedulingEnabled,
-            memoryInstructions = null,
             generalMemories = byCategory[MemoryCategory.GENERAL].orEmpty(),
             preferenceMemories = byCategory[MemoryCategory.PREFERENCE].orEmpty(),
             learningMemories = byCategory[MemoryCategory.LEARNING].orEmpty(),
@@ -1913,8 +1921,11 @@ class RemoteDataRepository(
             runtime = runtime,
             uiMode = uiMode,
             preferredLanguage = appSettings.getPreferredLanguage(),
-            personaPromptStyle = getPersonaPromptStyle(),
-        ).ifEmpty { null }
+            renderMode = activePersona.renderMode,
+            soulUserText = soulUserText,
+            soulAutoText = soulAutoText,
+        )
+        return UnifiedPromptBuilder().build(pc).ifEmpty { null }
     }
 
     override fun isDynamicUiEnabled(): Boolean = appSettings.isDynamicUiEnabled()

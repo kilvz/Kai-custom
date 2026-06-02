@@ -164,12 +164,7 @@ class TaskScheduler(
                 ?.messages?.takeLast(HEARTBEAT_CONTEXT_COUNT)
                 ?.map { it.content }
                 ?: emptyList()
-            val heartbeatStyle = try {
-                dataRepository.getPersonaHeartbeatStyle()
-            } catch (_: Exception) {
-                PersonaHeartbeatStyle.KAI
-            }
-            val heartbeatPrompt = manager.buildHeartbeatPrompt(recentResponses, pendingEmails, pendingSms, pendingNotifications, heartbeatStyle)
+            val heartbeatPrompt = manager.buildHeartbeatPrompt(recentResponses, pendingEmails, pendingSms, pendingNotifications)
             val response = dataRepository.askWithTools(heartbeatPrompt, manager.getConfig().heartbeatInstanceId)
             heartbeatMemoryExtractor?.extractFromHeartbeat(response)
             manager.markHeartbeatExecuted()

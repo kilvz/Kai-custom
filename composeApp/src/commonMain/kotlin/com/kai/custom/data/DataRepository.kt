@@ -101,8 +101,6 @@ interface DataRepository {
     fun getActivePersona(): PersonaConfig
     fun savePersona(config: PersonaConfig)
     fun deletePersona(id: String)
-    fun getPersonaPromptStyle(): PersonaPromptStyle
-    fun getPersonaHeartbeatStyle(): PersonaHeartbeatStyle
     suspend fun switchPersona(personaId: String)
     suspend fun getActiveSystemPrompt(variant: SystemPromptVariant = SystemPromptVariant.CHAT_REMOTE, searchQuery: String? = null): String?
 

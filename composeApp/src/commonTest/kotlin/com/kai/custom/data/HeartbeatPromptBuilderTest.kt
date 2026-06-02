@@ -37,6 +37,7 @@ class HeartbeatPromptBuilderTest {
         pendingSms: List<HeartbeatPendingSms> = emptyList(),
         pendingNotifications: List<HeartbeatPendingNotification> = emptyList(),
         promotionCandidates: List<HeartbeatPromotionCandidate> = emptyList(),
+        personaTraitBlock: String? = null,
     ) = buildHeartbeatPrompt(
         customOrDefaultPrompt = customOrDefaultPrompt,
         heartbeatAdditions = heartbeatAdditions,
@@ -47,6 +48,7 @@ class HeartbeatPromptBuilderTest {
         pendingSms = pendingSms,
         pendingNotifications = pendingNotifications,
         promotionCandidates = promotionCandidates,
+        personaTraitBlock = personaTraitBlock,
     )
 
     @Test
@@ -240,6 +242,22 @@ class HeartbeatPromptBuilderTest {
     }
 
     @Test
+    fun `includes persona trait block when provided`() {
+        val block = "- Language: Casual\n- Role: Assistant\n- Character: Helper"
+        val out = build(personaTraitBlock = block)
+        assertTrue("## Behavior" in out)
+        assertTrue("- Language: Casual" in out)
+        assertTrue("- Role: Assistant" in out)
+        assertTrue("- Character: Helper" in out)
+    }
+
+    @Test
+    fun `omits persona trait block when null`() {
+        val out = build(personaTraitBlock = null)
+        assertFalse("## Behavior" in out)
+    }
+
+    @Test
     fun `golden full heartbeat prompt with every section`() {
         val out = build(
             customOrDefaultPrompt = "[HEARTBEAT] check",
@@ -267,10 +285,13 @@ class HeartbeatPromptBuilderTest {
                     content = "concise",
                 ),
             ),
+            personaTraitBlock = "- Language: Casual\n- Role: Assistant\n- Character: Helper",
         )
         // Section headers in the exact order they must appear.
         val order = listOf(
             "[HEARTBEAT] check",
+            "## Behavior",
+            "- Language: Casual",
             "## Previous Heartbeat Results",
             "1. HEARTBEAT_OK",
             "## Pending Tasks",

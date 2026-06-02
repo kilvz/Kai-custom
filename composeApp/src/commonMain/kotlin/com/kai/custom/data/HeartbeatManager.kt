@@ -36,6 +36,8 @@ class HeartbeatManager(
 
     private val json = SharedJson
 
+    private val personaManager: PersonaManager by lazy { PersonaManager(appSettings) }
+
     fun getConfig(): HeartbeatConfig {
         val raw = appSettings.getHeartbeatConfigJson()
         if (raw.isEmpty()) return HeartbeatConfig()
@@ -72,7 +74,6 @@ class HeartbeatManager(
         pendingEmails: List<EmailMessage> = emptyList(),
         pendingSms: List<SmsMessage> = emptyList(),
         pendingNotifications: List<NotificationRecord> = emptyList(),
-        heartbeatStyle: PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI,
     ): String {
         val customPrompt = appSettings.getHeartbeatPrompt()
         val tasksSplit = taskStore.getPendingTasksPartitioned()
@@ -142,8 +143,26 @@ class HeartbeatManager(
                 content = entry.content,
             )
         }
+        val activePersona = personaManager.getActivePersona()
+        val soulUserText = appSettings.getSoulUser(activePersona.id)
+        val soulAutoText = appSettings.getSoulAuto(activePersona.id)
+        val traitBlock = buildString {
+            append("## Behavior\n")
+            append(activePersona.toBehaviorTraitBlock())
+            if (soulAutoText.isNotBlank()) {
+                append("\n\n## Behavior Notes\n")
+                append(soulAutoText)
+            }
+        }
+        val heartbeatLead = buildString {
+            if (soulUserText.isNotBlank()) {
+                append(soulUserText)
+                append("\n\n")
+            }
+            append(if (customPrompt.isNotBlank()) customPrompt else DEFAULT_HEARTBEAT_PROMPT)
+        }
         return buildHeartbeatPrompt(
-            customOrDefaultPrompt = customPrompt.ifEmpty { DEFAULT_HEARTBEAT_PROMPT },
+            customOrDefaultPrompt = heartbeatLead,
             heartbeatAdditions = heartbeatAdditions,
             recentResponses = recentResponses,
             pendingTasks = pendingTasks,
@@ -153,7 +172,7 @@ class HeartbeatManager(
             pendingNotifications = heartbeatNotifications,
             promotionCandidates = promotionCandidates,
             learnedPatterns = learnedPatterns,
-            heartbeatStyle = heartbeatStyle,
+            personaTraitBlock = traitBlock,
         )
     }
 

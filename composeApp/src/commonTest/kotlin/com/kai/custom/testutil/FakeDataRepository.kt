@@ -12,8 +12,7 @@ import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.ImportSection
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.PersonaConfig
-import com.kai.custom.data.PersonaHeartbeatStyle
-import com.kai.custom.data.PersonaPromptStyle
+
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
@@ -397,15 +396,11 @@ class FakeDataRepository : DataRepository {
 
     override fun getAllPersonas(): List<PersonaConfig> = emptyList()
 
-    override fun getActivePersona(): PersonaConfig = PersonaConfig(id = "kai", name = personaName, style = PersonaPromptStyle.KAI, heartbeatStyle = PersonaHeartbeatStyle.KAI, isBuiltIn = true)
+    override fun getActivePersona(): PersonaConfig = PersonaConfig(id = "kai", name = personaName, isBuiltIn = true)
 
     override fun savePersona(config: PersonaConfig) {}
 
     override fun deletePersona(id: String) {}
-
-    override fun getPersonaPromptStyle(): PersonaPromptStyle = PersonaPromptStyle.KAI
-
-    override fun getPersonaHeartbeatStyle(): PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI
 
     override suspend fun switchPersona(personaId: String) {}
 

@@ -273,21 +273,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putString("soul_auto_$personaId", text)
     }
 
-    /** Combined soul for system prompt: persona prefix + user text + auto behavior summary. */
+    /** Returns persona identity: name prefix + default soul (character definition). */
     fun getSoulText(personaId: String = getActivePersonaId()): String {
         val persona = getPersonaName(personaId)
         val prefix = "You are $persona."
-        val user = getSoulUser(personaId)
-        val auto = getSoulAuto(personaId)
-        val combined = if (auto.isNotEmpty()) {
-            if (user.isNotEmpty()) "$user\n\n## Behavior Notes\n$auto" else "## Behavior Notes\n$auto"
-        } else {
-            user
-        }
-        if (combined.isNotEmpty()) return "$prefix\n\n$combined"
         val config = personaManagerSafe?.getPersona(personaId)
         val defaultSoul = config?.defaultSoul
-        if (!defaultSoul.isNullOrEmpty()) return "$prefix\n\n$defaultSoul"
+        if (!defaultSoul.isNullOrBlank()) return "$prefix\n\n$defaultSoul"
         return prefix
     }
 

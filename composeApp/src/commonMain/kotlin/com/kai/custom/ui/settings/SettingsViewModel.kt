@@ -9,9 +9,8 @@ import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.ImportSection
+import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.PersonaConfig
-import com.kai.custom.data.PersonaHeartbeatStyle
-import com.kai.custom.data.PersonaPromptStyle
 import com.kai.custom.data.Service
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.ThemeMode
@@ -90,6 +89,7 @@ class SettingsViewModel(
         availableServicesToAdd = computeAvailableServices().toImmutableList(),
         tools = dataRepository.getToolDefinitions().toImmutableList(),
         soulText = dataRepository.getSoulUser(),
+        soulAuto = dataRepository.getSoulAuto(),
         personaName = dataRepository.getPersonaName(),
         personas = dataRepository.getAllPersonas().toImmutableList(),
         activePersonaId = dataRepository.getActivePersona().id,
@@ -504,6 +504,7 @@ class SettingsViewModel(
                 activePersonaId = personaId,
                 personaName = config.name,
                 soulText = dataRepository.getSoulUser(),
+                soulAuto = dataRepository.getSoulAuto(),
             )
         }
         viewModelScope.launch {
@@ -530,18 +531,18 @@ class SettingsViewModel(
                 activePersonaId = active.id,
                 personaName = active.name,
                 soulText = dataRepository.getSoulUser(),
+                soulAuto = dataRepository.getSoulAuto(),
             )
         }
     }
 
-    private fun onCreatePersona(name: String, style: PersonaPromptStyle, heartbeatStyle: PersonaHeartbeatStyle) {
+    private fun onCreatePersona(name: String, behaviorStyle: BehaviorStyle) {
         val id = "custom_${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}"
         val config = PersonaConfig(
             id = id,
             name = name,
             description = "Custom persona",
-            style = style,
-            heartbeatStyle = heartbeatStyle,
+            behaviorStyle = behaviorStyle,
             isBuiltIn = false,
         )
         dataRepository.savePersona(config)
@@ -551,6 +552,7 @@ class SettingsViewModel(
                 activePersonaId = id,
                 personaName = name,
                 soulText = dataRepository.getSoulUser(),
+                soulAuto = dataRepository.getSoulAuto(),
             )
         }
         viewModelScope.launch {

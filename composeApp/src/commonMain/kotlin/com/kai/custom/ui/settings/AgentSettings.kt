@@ -3,7 +3,6 @@
 package com.kai.custom.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,19 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -43,13 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
 import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.PersonaConfig
-import com.kai.custom.data.PersonaHeartbeatStyle
-import com.kai.custom.data.PersonaPromptStyle
+import com.kai.custom.data.RenderMode
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.SmsSyncState
@@ -58,12 +51,10 @@ import com.kai.custom.saveFileToDevice
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.SettingsListItem
 import com.kai.custom.ui.handCursor
-import com.kai.custom.ui.icons.Replay
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
 import kai.composeapp.generated.resources.Res
-import kai.composeapp.generated.resources.default_soul
 import kai.composeapp.generated.resources.settings_heartbeat_recent
 import kai.composeapp.generated.resources.settings_memories
 import kai.composeapp.generated.resources.settings_memories_all_title
@@ -82,12 +73,6 @@ import kai.composeapp.generated.resources.settings_memories_show_all
 import kai.composeapp.generated.resources.settings_scheduled_tasks
 import kai.composeapp.generated.resources.settings_scheduled_tasks_cancel
 import kai.composeapp.generated.resources.settings_scheduled_tasks_description
-import kai.composeapp.generated.resources.settings_soul
-import kai.composeapp.generated.resources.settings_soul_description
-import kai.composeapp.generated.resources.settings_soul_reset
-import kai.composeapp.generated.resources.settings_soul_reset_cancel
-import kai.composeapp.generated.resources.settings_soul_reset_confirm
-import kai.composeapp.generated.resources.settings_soul_save
 import kai.composeapp.generated.resources.settings_task_details_consecutive_failures
 import kai.composeapp.generated.resources.settings_task_details_created
 import kai.composeapp.generated.resources.settings_task_details_last_result
@@ -115,6 +100,7 @@ import kotlin.time.Instant
 internal fun AgentContent(
     actions: SettingsActions,
     soulText: String,
+    soulAuto: String = "",
     personaName: String,
     personas: ImmutableList<PersonaConfig>,
     activePersonaId: String,
@@ -285,6 +271,7 @@ internal fun AgentContent(
                 SettingsCard {
                     SoulEditor(
                         soulText = soulText,
+                        soulAuto = soulAuto,
                         personaName = personaName,
                         onSaveSoul = actions.onSaveSoul,
                         onChangePersonaName = actions.onChangePersonaName,
@@ -396,6 +383,7 @@ internal fun AgentContent(
 @Composable
 private fun SoulEditor(
     soulText: String,
+    soulAuto: String = "",
     personaName: String,
     onSaveSoul: (String) -> Unit,
     onChangePersonaName: (String) -> Unit,
@@ -404,195 +392,316 @@ private fun SoulEditor(
     onSwitchPersona: (String) -> Unit = {},
     onSavePersona: (PersonaConfig) -> Unit = {},
     onDeletePersona: (String) -> Unit = {},
-    onCreatePersona: (String, PersonaPromptStyle, PersonaHeartbeatStyle) -> Unit = { _, _, _ -> },
+    onCreatePersona: (String, BehaviorStyle) -> Unit = { _, _ -> },
 ) {
-    val localizedDefault = stringResource(Res.string.default_soul)
-    val displayText = soulText.ifEmpty { localizedDefault }
-    var editedText by remember(displayText) { mutableStateOf(displayText) }
-    val hasChanges = editedText != displayText
+    var editedSoul by remember(soulText) { mutableStateOf(soulText) }
+    val hasChanges = editedSoul != soulText
     val maxChars = 4000
-
     var showResetDialog by remember { mutableStateOf(false) }
-    var showCreatePersonaDialog by remember { mutableStateOf(false) }
+    var showPersonaSelector by remember { mutableStateOf(false) }
+
+    val activePersona = personas.find { it.id == activePersonaId }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(Res.string.settings_soul),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.weight(1f),
-            )
-            if (soulText.isNotEmpty()) {
-                IconButton(
-                    onClick = { showResetDialog = true },
-                    modifier = Modifier.handCursor(),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Replay,
-                        contentDescription = stringResource(Res.string.settings_soul_reset),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-        Text(
-            text = stringResource(Res.string.settings_soul_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(12.dp))
-
-        // Persona selector dropdown
-        var personaDropdownExpanded by remember { mutableStateOf(false) }
-        val activePersona = personas.find { it.id == activePersonaId }
-
+        // ── Active Persona ──
         Text(
             text = "Persona",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(8.dp))
+
+        // Active persona card — tappable to open selector
+        OutlinedButton(
+            onClick = { showPersonaSelector = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .handCursor(),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = activePersona?.name.orEmpty(),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                if (activePersona?.description?.isNotEmpty() == true) {
+                    Text(
+                        text = activePersona.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                if (activePersona != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        TraitBadge(activePersona.languageStyle.displayName)
+                        TraitBadge(activePersona.characterType.displayName)
+                        if (activePersona.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
+                    }
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Change",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(12.dp))
+
+        // ── Custom Soul (Layer 3 — user-specific) ──
+        Text(
+            text = "Custom Soul",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = "Your preferences, dislikes, and personal notes. Not character definition or behavior rules.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(4.dp))
-        Box {
-            OutlinedButton(
-                onClick = { personaDropdownExpanded = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = activePersona?.name ?: personaName,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(" \u25BE")
-            }
-            DropdownMenu(
-                expanded = personaDropdownExpanded,
-                onDismissRequest = { personaDropdownExpanded = false },
-            ) {
-                personas.forEach { p ->
-                    DropdownMenuItem(
-                        onClick = {
-                            personaDropdownExpanded = false
-                            if (p.id != activePersonaId) onSwitchPersona(p.id)
-                        },
-                        text = {
-                            Column {
-                                Text(p.name, fontWeight = if (p.id == activePersonaId) FontWeight.Bold else FontWeight.Normal)
-                                if (p.description.isNotEmpty()) {
-                                    Text(
-                                        p.description,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        },
-                    )
-                }
-                HorizontalDivider()
-                DropdownMenuItem(
-                    onClick = {
-                        personaDropdownExpanded = false
-                        showCreatePersonaDialog = true
-                    },
-                    text = { Text("+ Create custom persona") },
-                )
-            }
-        }
-
-        if (activePersona?.isBuiltIn == false) {
-            Spacer(Modifier.height(4.dp))
-            OutlinedButton(
-                onClick = { onDeletePersona(activePersonaId) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Delete persona")
-            }
-        }
         Spacer(Modifier.height(8.dp))
-
         KaiOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = editedText,
-            onValueChange = { if (it.length <= maxChars) editedText = it },
-            minLines = 8,
+            value = editedSoul,
+            onValueChange = { if (it.length <= maxChars) editedSoul = it },
+            minLines = 6,
             maxLines = 8,
-            label = {
-                Text(
-                    stringResource(Res.string.settings_soul),
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            },
+            label = { Text("Custom Soul") },
         )
-
         Text(
-            text = "${editedText.length}/$maxChars",
+            text = "${editedSoul.length}/$maxChars",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.End,
         )
-
         if (hasChanges) {
             Spacer(Modifier.height(8.dp))
             Button(
-                onClick = { onSaveSoul(editedText.trim()) },
+                onClick = { onSaveSoul(editedSoul.trim()) },
                 modifier = Modifier.align(CenterHorizontally).handCursor(),
-            ) {
-                Text(stringResource(Res.string.settings_soul_save))
-            }
+            ) { Text("Save Custom Soul") }
+        }
+        if (soulText.isNotEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            TextButton(
+                onClick = { showResetDialog = true },
+                modifier = Modifier.handCursor(),
+            ) { Text("Reset to empty") }
+        }
+
+        // ── Behavior Notes (Layer 3 — auto-generated, read-only) ──
+        if (soulAuto.isNotBlank()) {
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Behavior Notes",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = "Auto-generated behavior patterns (read-only). Updated by the system over time.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = soulAuto,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text(stringResource(Res.string.settings_soul_reset)) },
-            text = { Text(stringResource(Res.string.settings_soul_reset_confirm)) },
+            title = { Text("Reset Custom Soul") },
+            text = { Text("Clear your custom soul text? This cannot be undone.") },
             confirmButton = {
                 TextButton(
                     onClick = {
                         showResetDialog = false
                         onSaveSoul("")
-                        editedText = localizedDefault
+                        editedSoul = ""
                     },
                     modifier = Modifier.handCursor(),
-                ) {
-                    Text(stringResource(Res.string.settings_soul_reset))
-                }
+                ) { Text("Reset") }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showResetDialog = false },
                     modifier = Modifier.handCursor(),
-                ) {
-                    Text(stringResource(Res.string.settings_soul_reset_cancel))
-                }
+                ) { Text("Cancel") }
             },
         )
     }
 
-    if (showCreatePersonaDialog) {
+    if (showPersonaSelector) {
+        PersonaSelectorDialog(
+            personas = personas,
+            activePersonaId = activePersonaId,
+            onSwitchPersona = onSwitchPersona,
+            onCreatePersona = onCreatePersona,
+            onDeletePersona = onDeletePersona,
+            onDismiss = { showPersonaSelector = false },
+        )
+    }
+}
+
+@Composable
+private fun PersonaSelectorDialog(
+    personas: ImmutableList<PersonaConfig>,
+    activePersonaId: String,
+    onSwitchPersona: (String) -> Unit,
+    onCreatePersona: (String, BehaviorStyle) -> Unit,
+    onDeletePersona: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val categories = listOf(
+        BehaviorStyle.ASSISTANT to "Assistant",
+        BehaviorStyle.OPERATOR to "Operator",
+        BehaviorStyle.CUSTOM to "Custom",
+    )
+    var selectedCategory by remember { mutableStateOf<BehaviorStyle>(BehaviorStyle.ASSISTANT) }
+    var showCreateDialog by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Persona") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(scrollState),
+            ) {
+                // Category tabs
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    categories.forEach { (style, label) ->
+                        val isSelected = selectedCategory == style
+                        TextButton(
+                            onClick = { selectedCategory = style },
+                            modifier = Modifier.handCursor(),
+                        ) {
+                            Text(
+                                text = label,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+
+                // Persona cards
+                val filtered = personas.filter { it.behaviorStyle == selectedCategory }
+                filtered.forEach { p ->
+                    val isActive = p.id == activePersonaId
+                    OutlinedButton(
+                        onClick = {
+                            if (!isActive) {
+                                onSwitchPersona(p.id)
+                                onDismiss()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
+                            .handCursor(),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = p.name,
+                                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                            )
+                            if (p.description.isNotEmpty()) {
+                                Text(
+                                    text = p.description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TraitBadge(p.languageStyle.displayName)
+                                TraitBadge(p.characterType.displayName)
+                                if (p.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        if (isActive) {
+                            Text(
+                                text = "ACTIVE",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { showCreateDialog = true },
+                        modifier = Modifier.handCursor(),
+                    ) { Text("+ Custom") }
+                    val activePersona = personas.find { it.id == activePersonaId }
+                    if (activePersona?.isBuiltIn == false) {
+                        OutlinedButton(
+                            onClick = {
+                                onDeletePersona(activePersonaId)
+                                onDismiss()
+                            },
+                            modifier = Modifier.handCursor(),
+                        ) { Text("Delete") }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.handCursor(),
+            ) { Text("Done") }
+        },
+    )
+
+    if (showCreateDialog) {
         CreatePersonaDialog(
-            onDismiss = { showCreatePersonaDialog = false },
-            onCreate = { name, style, hbStyle ->
-                showCreatePersonaDialog = false
-                onCreatePersona(name, style, hbStyle)
+            onDismiss = { showCreateDialog = false },
+            onCreate = { name, style ->
+                showCreateDialog = false
+                onCreatePersona(name, style)
             },
         )
     }
 }
 
 @Composable
+private fun TraitBadge(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 4.dp),
+    )
+}
+
+@Composable
 private fun CreatePersonaDialog(
     onDismiss: () -> Unit,
-    onCreate: (name: String, style: PersonaPromptStyle, heartbeatStyle: PersonaHeartbeatStyle) -> Unit,
+    onCreate: (name: String, behaviorStyle: BehaviorStyle) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
-    var selectedStyle by remember { mutableStateOf(PersonaPromptStyle.ALT) }
-    var selectedHeartbeatStyle by remember { mutableStateOf(PersonaHeartbeatStyle.ALT) }
+    var selectedStyle by remember { mutableStateOf(BehaviorStyle.ASSISTANT) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -606,26 +715,15 @@ private fun CreatePersonaDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Text("Prompt Style", style = MaterialTheme.typography.bodySmall)
-                PersonaPromptStyle.entries.forEach { style ->
+                Text("Category", style = MaterialTheme.typography.bodySmall)
+                BehaviorStyle.entries.forEach { style ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         androidx.compose.material3.RadioButton(
                             selected = selectedStyle == style,
                             onClick = { selectedStyle = style },
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text(style.name, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-                Text("Heartbeat Style", style = MaterialTheme.typography.bodySmall)
-                PersonaHeartbeatStyle.entries.forEach { style ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        androidx.compose.material3.RadioButton(
-                            selected = selectedHeartbeatStyle == style,
-                            onClick = { selectedHeartbeatStyle = style },
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(style.name, style = MaterialTheme.typography.bodyMedium)
+                        Text(style.displayName, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -633,23 +731,17 @@ private fun CreatePersonaDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (name.isNotBlank()) {
-                        onCreate(name.trim(), selectedStyle, selectedHeartbeatStyle)
-                    }
+                    if (name.isNotBlank()) onCreate(name.trim(), selectedStyle)
                 },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.handCursor(),
-            ) {
-                Text("Create")
-            }
+            ) { Text("Create") }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.handCursor(),
-            ) {
-                Text("Cancel")
-            }
+            ) { Text("Cancel") }
         },
     )
 }

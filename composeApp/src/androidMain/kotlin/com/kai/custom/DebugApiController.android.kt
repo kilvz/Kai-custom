@@ -30,7 +30,7 @@ class AndroidDebugApiController : DebugApiController {
     override fun start() {
         synchronized(transitionLock) {
             if (transitioning) return
-            if (!appSettings.isDebugApiEnabled()) return
+            if (!isDebugBuild && !appSettings.isDebugApiEnabled()) return
             server?.let { if (it.isRunning) return }
             transitioning = true
         }

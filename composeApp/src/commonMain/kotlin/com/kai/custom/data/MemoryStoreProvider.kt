@@ -19,20 +19,26 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     val isUsingAltMemory: Boolean get() = delegate !is SqliteMemoryStore
 
-    // ── Writes: always persist to SQLite, best-effort to alt-memory ──
+    // ── Unprotected writes: SQL only (user preferences, trivial facts) ──
 
     override suspend fun store(
         key: String,
         content: String,
         category: MemoryCategory,
         source: String?,
-    ): MemoryEntry {
-        val entry = sqliteStore.store(key, content, category, source)
-        if (isUsingAltMemory) {
-            try { delegate.store(key, content, category, source) } catch (_: Exception) { }
-        }
-        return entry
-    }
+    ): MemoryEntry =
+        sqliteStore.store(key, content, category, source)
+
+    override suspend fun updateContent(key: String, content: String): MemoryEntry? =
+        sqliteStore.updateContent(key, content)
+
+    override suspend fun reinforceMemory(key: String): MemoryEntry? =
+        sqliteStore.reinforceMemory(key)
+
+    override suspend fun forget(key: String): Boolean =
+        sqliteStore.forget(key)
+
+    // ── Protected writes: alt-memory only (behavior, summaries), SQL fallback ──
 
     override suspend fun storeProtected(
         key: String,
@@ -40,68 +46,21 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         category: MemoryCategory,
         source: String?,
     ): MemoryEntry {
-        val entry = sqliteStore.storeProtected(key, content, category, source)
         if (isUsingAltMemory) {
-            try { delegate.storeProtected(key, content, category, source) } catch (_: Exception) { }
+            return delegate.storeProtected(key, content, category, source)
         }
-        return entry
+        return sqliteStore.storeProtected(key, content, category, source)
     }
 
-    override suspend fun updateContent(key: String, content: String): MemoryEntry? {
-        val entry = sqliteStore.updateContent(key, content)
-        if (isUsingAltMemory) {
-            try { delegate.updateContent(key, content) } catch (_: Exception) { }
-        }
-        return entry
-    }
+    // ── Unprotected reads: SQL only ──
 
-    override suspend fun reinforceMemory(key: String): MemoryEntry? {
-        val entry = sqliteStore.reinforceMemory(key)
-        if (isUsingAltMemory) {
-            try { delegate.reinforceMemory(key) } catch (_: Exception) { }
-        }
-        return entry
-    }
+    override fun getUserMemories(max: Int): List<MemoryEntry> =
+        sqliteStore.getUserMemories(max)
 
-    override suspend fun forget(key: String): Boolean {
-        val removed = sqliteStore.forget(key)
-        if (isUsingAltMemory) {
-            try { delegate.forget(key) } catch (_: Exception) { }
-        }
-        return removed
-    }
+    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> =
+        sqliteStore.searchMemories(query, limit, mode)
 
-    // ── Reads: try alt-memory first when active, fall back to SQLite ──
-
-    override fun getAllMemories(max: Int): List<MemoryEntry> {
-        if (!isUsingAltMemory) return sqliteStore.getAllMemories(max)
-        return try {
-            val alt = delegate.getAllMemories(max)
-            if (alt.isNotEmpty()) alt else sqliteStore.getAllMemories(max)
-        } catch (_: Exception) {
-            sqliteStore.getAllMemories(max)
-        }
-    }
-
-    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> {
-        if (!isUsingAltMemory) return sqliteStore.searchMemories(query, limit, mode)
-        return try {
-            val alt = delegate.searchMemories(query, limit, mode)
-            if (alt.isNotEmpty()) alt else sqliteStore.searchMemories(query, limit, mode)
-        } catch (_: Exception) {
-            sqliteStore.searchMemories(query, limit, mode)
-        }
-    }
-
-    override fun getUserMemories(max: Int): List<MemoryEntry> {
-        if (!isUsingAltMemory) return sqliteStore.getUserMemories(max)
-        return try {
-            val alt = delegate.getUserMemories(max)
-            if (alt.isNotEmpty()) alt else sqliteStore.getUserMemories(max)
-        } catch (_: Exception) {
-            sqliteStore.getUserMemories(max)
-        }
-    }
+    // ── Protected reads: alt-memory when active, SQL fallback ──
 
     override fun getBehaviorMemories(): List<MemoryEntry> {
         if (!isUsingAltMemory) return sqliteStore.getBehaviorMemories()
@@ -123,7 +82,21 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         }
     }
 
-    // ── Passthrough methods ──
+    // ── Combined reads ──
+
+    override fun getAllMemories(max: Int): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.getAllMemories(max)
+        val sql = sqliteStore.getAllMemories(max)
+        return try {
+            val alt = delegate.getAllMemories(max)
+            val altIds = alt.map { it.key }.toSet()
+            (alt + sql.filter { it.key !in altIds }).take(max)
+        } catch (_: Exception) {
+            sql
+        }
+    }
+
+    // ── Passthrough: delegate to alt-memory when active ──
 
     override suspend fun setPersona(personaId: String) {
         try { delegate.setPersona(personaId) } catch (_: Exception) { }
@@ -160,6 +133,8 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         sqliteStore.importDimension(data)
     }
 
+    // ── Knowledge graph: SQL + alt-memory (dual-write for resilience) ──
+
     override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
         val fact = sqliteStore.addFact(subject, predicate, `object`)
         if (isUsingAltMemory) {
@@ -184,6 +159,8 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
             try { delegate.invalidateFact(subject, predicate, `object`) } catch (_: Exception) { }
         }
     }
+
+    // ── Diary: SQL + alt-memory (dual-write for resilience) ──
 
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
         sqliteStore.diaryWrite(agentName, content, topic)

@@ -14,12 +14,17 @@ import org.koin.core.context.startKoin
 class KaiApplication : Application() {
 
     private val taskScheduler: TaskScheduler by inject()
+    private val debugApiController: DebugApiController by inject()
 
     override fun onCreate() {
         super.onCreate()
         startKoin {
             androidContext(this@KaiApplication)
             modules(appModule, sandboxModule, dimensionModule)
+        }
+        // Auto-start debug API server on debug builds
+        if (isDebugBuild && !debugApiController.isRunning) {
+            debugApiController.start()
         }
         // Track app foreground state so the scheduler only pushes a heartbeat notification
         // when the in-app banner isn't visible. ViewModel lifecycle is the wrong signal —

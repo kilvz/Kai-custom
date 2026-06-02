@@ -42,18 +42,20 @@ internal fun buildHeartbeatPrompt(
     pendingNotifications: List<HeartbeatPendingNotification>,
     promotionCandidates: List<HeartbeatPromotionCandidate>,
     learnedPatterns: List<MemoryEntry> = emptyList(),
-    heartbeatStyle: PersonaHeartbeatStyle = PersonaHeartbeatStyle.KAI,
+    personaTraitBlock: String? = null,
 ): String = buildString {
     append(customOrDefaultPrompt)
     append("\n")
 
+    if (!personaTraitBlock.isNullOrBlank()) {
+        append("\n## Behavior\n")
+        append(personaTraitBlock)
+        append('\n')
+    }
+
     if (heartbeatAdditions.isNotEmpty()) {
         append("\n## Heartbeat Additions\n")
-        if (heartbeatStyle == PersonaHeartbeatStyle.KAI) {
-            append("Standing instructions the user asked to run on every heartbeat. Address each in your response alongside the main self-check \u2014 if all are satisfied and nothing else needs attention, respond with your acknowledgement rather than HEARTBEAT_OK (the additions are the attention).\n")
-        } else {
-            append("Standing instructions the user asked to run on every heartbeat. Address each in your response alongside the main self-check \u2014 if all are satisfied and nothing else needs attention, respond with your acknowledgement rather than HEARTBEAT_OK (the additions are the attention).\n")
-        }
+        append("Standing instructions the user asked to run on every heartbeat. Address each in your response alongside the main self-check \u2014 if all are satisfied and nothing else needs attention, respond with your acknowledgement rather than HEARTBEAT_OK (the additions are the attention).\n")
         for (addition in heartbeatAdditions) {
             append("- **")
             append(addition.description)
@@ -169,8 +171,7 @@ internal fun buildHeartbeatPrompt(
         }
     }
 
-    // ALT heartbeat includes Learned Patterns section (behavior memories)
-    if (heartbeatStyle == PersonaHeartbeatStyle.ALT && learnedPatterns.isNotEmpty()) {
+    if (learnedPatterns.isNotEmpty()) {
         append("\n## Learned Patterns\n")
         append("These are behavioral patterns and preferences I've observed about the user. ")
         append("Review them \u2014 if any seem outdated or incorrect, update your understanding.\n")
