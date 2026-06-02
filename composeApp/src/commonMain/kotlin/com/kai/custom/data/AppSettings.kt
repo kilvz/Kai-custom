@@ -777,9 +777,14 @@ class AppSettings(internal val settings: Settings) {
 
     // Debug API server (Android-only debug builds only; feature gate is Platform.isDebugBuild)
     fun isDebugApiEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_API_ENABLED, false)
-
     fun setDebugApiEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_DEBUG_API_ENABLED, enabled)
+    }
+
+    // Debug endpoint (opencode.ai/zen, debug builds only)
+    fun isDebugEndpointEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_ENDPOINT_ENABLED, false)
+    fun setDebugEndpointEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_DEBUG_ENDPOINT_ENABLED, enabled)
     }
 
     // Notifications (FOSS-only, Android-only — settings layer is platform-agnostic, feature
@@ -910,6 +915,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_ROOT_ENABLED = "root_enabled"
         const val KEY_SANDBOX_ROOT_ENABLED = "sandbox_root_enabled"
         const val KEY_DEBUG_API_ENABLED = "debug_api_enabled"
+        const val KEY_DEBUG_ENDPOINT_ENABLED = "debug_endpoint_enabled"
 
         const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val KEY_NOTIFICATIONS_PENDING = "notifications_pending"

@@ -184,7 +184,7 @@ val appModule = module {
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }

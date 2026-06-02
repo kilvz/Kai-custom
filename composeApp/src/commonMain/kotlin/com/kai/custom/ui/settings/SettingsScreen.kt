@@ -498,6 +498,8 @@ fun SettingsScreenContent(
                                     showDebugApiSection = filteredUiState.showDebugApiSection,
                                     isDebugApiEnabled = filteredUiState.isDebugApiEnabled,
                                     debugApiRunning = filteredUiState.debugApiRunning,
+                                    debugApiTransitioning = filteredUiState.debugApiTransitioning,
+                                    isDebugEndpointEnabled = filteredUiState.isDebugEndpointEnabled,
                                 )
                             }
 
@@ -512,6 +514,7 @@ fun SettingsScreenContent(
                                     isMemoryEnabled = filteredUiState.isMemoryEnabled,
                                     isAltMemoryEnabled = filteredUiState.isAltMemoryEnabled,
                                     altMemoryInstalled = filteredUiState.altMemoryInstalled,
+                                    altMemoryConnected = filteredUiState.altMemoryConnected,
                                     sandboxReady = filteredUiState.sandboxReady,
                                     onToggleAltMemory = actions.onToggleAltMemory,
                                     scheduledTasks = filteredUiState.scheduledTasks,

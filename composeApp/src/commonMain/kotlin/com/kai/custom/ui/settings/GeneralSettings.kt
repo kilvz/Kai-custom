@@ -77,6 +77,8 @@ internal fun GeneralContent(
     showDebugApiSection: Boolean = false,
     isDebugApiEnabled: Boolean = false,
     debugApiRunning: Boolean = false,
+    debugApiTransitioning: Boolean = false,
+    isDebugEndpointEnabled: Boolean = false,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
@@ -157,7 +159,10 @@ internal fun GeneralContent(
                             DebugApiSection(
                                 isDebugApiEnabled = isDebugApiEnabled,
                                 debugApiRunning = debugApiRunning,
+                                debugApiTransitioning = debugApiTransitioning,
                                 onToggleDebugApi = actions.onToggleDebugApi,
+                                isDebugEndpointEnabled = isDebugEndpointEnabled,
+                                onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
                             )
                         }
                     }
@@ -228,7 +233,10 @@ internal fun GeneralContent(
                         DebugApiSection(
                             isDebugApiEnabled = isDebugApiEnabled,
                             debugApiRunning = debugApiRunning,
+                            debugApiTransitioning = debugApiTransitioning,
                             onToggleDebugApi = actions.onToggleDebugApi,
+                            isDebugEndpointEnabled = isDebugEndpointEnabled,
+                            onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
                         )
                     }
                 }
@@ -669,7 +677,10 @@ private fun UiScaleSection(
 private fun DebugApiSection(
     isDebugApiEnabled: Boolean,
     debugApiRunning: Boolean,
+    debugApiTransitioning: Boolean = false,
     onToggleDebugApi: (Boolean) -> Unit,
+    isDebugEndpointEnabled: Boolean = false,
+    onToggleDebugEndpoint: ((Boolean) -> Unit)? = null,
 ) {
     val showAdvanced = remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -696,8 +707,9 @@ private fun DebugApiSection(
             Column(modifier = Modifier.fillMaxWidth()) {
                 ToggleableHeadline(
                     title = "Debug API Server",
-                    description = if (debugApiRunning) "Running on 127.0.0.1:18500" else "HTTP server for debugging. Requires daemon. See logcat for auth token.",
+                    description = if (debugApiRunning) "Running on 127.0.0.1:18500" else if (debugApiTransitioning) "Restarting..." else "HTTP server for debugging. Requires daemon. See logcat for auth token.",
                     checked = isDebugApiEnabled,
+                    enabled = !debugApiTransitioning,
                     onCheckedChange = onToggleDebugApi,
                 )
                 if (isDebugBuild.not()) {
@@ -706,6 +718,14 @@ private fun DebugApiSection(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp),
+                    )
+                }
+                if (isDebugBuild && onToggleDebugEndpoint != null) {
+                    ToggleableHeadline(
+                        title = "Debug Endpoint",
+                        description = if (isDebugEndpointEnabled) "Enabled" else "Debug-only endpoint",
+                        checked = isDebugEndpointEnabled,
+                        onCheckedChange = onToggleDebugEndpoint,
                     )
                 }
             }

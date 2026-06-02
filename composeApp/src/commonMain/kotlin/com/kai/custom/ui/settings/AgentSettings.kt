@@ -122,6 +122,7 @@ internal fun AgentContent(
     isMemoryEnabled: Boolean,
     isAltMemoryEnabled: Boolean,
     altMemoryInstalled: Boolean,
+    altMemoryConnected: Boolean,
     sandboxReady: Boolean,
     onToggleAltMemory: (Boolean) -> Unit,
     scheduledTasks: ImmutableList<ScheduledTask>,
@@ -179,6 +180,7 @@ internal fun AgentContent(
                         isMemoryEnabled = isMemoryEnabled,
                         isAltMemoryEnabled = isAltMemoryEnabled,
                         altMemoryInstalled = altMemoryInstalled,
+                        altMemoryConnected = altMemoryConnected,
                         sandboxReady = sandboxReady,
                         onToggleMemory = actions.onToggleMemory,
                         onToggleAltMemory = onToggleAltMemory,
@@ -302,6 +304,7 @@ internal fun AgentContent(
                         isMemoryEnabled = isMemoryEnabled,
                         isAltMemoryEnabled = isAltMemoryEnabled,
                         altMemoryInstalled = altMemoryInstalled,
+                        altMemoryConnected = altMemoryConnected,
                         sandboxReady = sandboxReady,
                         onToggleMemory = actions.onToggleMemory,
                         onToggleAltMemory = onToggleAltMemory,
@@ -659,6 +662,7 @@ private fun MemoryList(
     isMemoryEnabled: Boolean,
     isAltMemoryEnabled: Boolean,
     altMemoryInstalled: Boolean,
+    altMemoryConnected: Boolean,
     sandboxReady: Boolean,
     onToggleMemory: (Boolean) -> Unit,
     onToggleAltMemory: (Boolean) -> Unit,
@@ -704,6 +708,8 @@ private fun MemoryList(
             description = when {
                 !sandboxReady -> "Requires sandbox to be installed first"
                 !altMemoryInstalled -> "Not installed — tap to install"
+                isAltMemoryEnabled && altMemoryConnected -> "Connected"
+                isAltMemoryEnabled -> "Connecting..."
                 else -> "Vector memory with semantic search"
             },
             checked = isAltMemoryEnabled,

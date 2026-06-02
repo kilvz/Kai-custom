@@ -47,3 +47,39 @@ data class SettingUpdateRequest(
 data class ErrorResponse(
     val error: String,
 )
+
+@Serializable
+data class MemoryRequest(
+    val key: String,
+    val content: String,
+    val category: String? = null,
+)
+
+@Serializable
+data class SearchRequest(
+    val query: String,
+    val limit: Int? = null,
+)
+
+@Serializable
+data class ToolCallRequest(
+    val arguments: Map<String, String> = emptyMap(),
+)
+
+@Serializable
+data class ToolCallResponse(
+    val success: Boolean,
+    val name: String,
+    val result: String = "",
+    val error: String? = null,
+)
+
+@Serializable
+data class AltMemoryStatusResponse(
+    val enabled: Boolean,
+    val installed: Boolean,
+    val connected: Boolean,
+    val localMemoryCount: Int,
+    val behaviorMemoryCount: Int,
+    val migrationComplete: Boolean,
+)

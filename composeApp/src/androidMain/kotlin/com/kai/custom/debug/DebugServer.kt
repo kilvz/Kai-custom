@@ -1,29 +1,38 @@
 package com.kai.custom.debug
 
 import com.kai.custom.SandboxController
+import com.kai.custom.data.AltMemoryStatusResponse
 import com.kai.custom.data.AppSettings
+import com.kai.custom.data.AskWithToolsResult
 import com.kai.custom.data.ChatRequest
 import com.kai.custom.data.ChatResponse
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.ErrorResponse
 import com.kai.custom.data.HealthResponse
+import com.kai.custom.data.MemoryCategory
+import com.kai.custom.data.MemoryRequest
 import com.kai.custom.data.MemoryStore
+import com.kai.custom.data.SearchRequest
 import com.kai.custom.data.SettingUpdateRequest
 import com.kai.custom.data.StateResponse
+import com.kai.custom.data.ToolCallResponse
 import com.kai.custom.data.ToolExecutor
 import com.kai.custom.getAvailableTools
 import com.kai.custom.isDebugBuild
+import com.kai.custom.mcp.McpServerManager
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
+import io.ktor.server.engine.EmbeddedServer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
 import io.ktor.server.response.respondText
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -38,9 +47,11 @@ class DebugServer(
     private val memoryStore: MemoryStore,
     private val appSettings: AppSettings,
     private val toolExecutor: ToolExecutor,
-    private val sandboxController: SandboxController? = null,
+    private val mcpServerManager: McpServerManager,
+    private val sandboxController: SandboxController,
 ) {
     private var running = false
+    private var serverJob: EmbeddedServer<*, *>? = null
     private var token: String = ""
 
     private val json = Json { prettyPrint = true }
@@ -55,7 +66,7 @@ class DebugServer(
         token = UUID.randomUUID().toString().replace("-", "").take(32)
         running = true
 
-        embeddedServer(CIO, port = 18500, host = "127.0.0.1") {
+        val s = embeddedServer(CIO, port = 18500, host = "127.0.0.1") {
             install(ContentNegotiation) {
                 json(
                     Json {
@@ -104,14 +115,118 @@ class DebugServer(
 
                 get("/tools") {
                     val err = auth(call) ?: return@get
-                    val tools = getAvailableTools().map { mapOf("name" to it.schema.name, "description" to it.schema.description) }
+                    val tools = getAvailableTools().map { tool ->
+                        mapOf(
+                            "name" to tool.schema.name,
+                            "description" to tool.schema.description,
+                            "timeout_seconds" to tool.timeout.inWholeSeconds,
+                            "parameters" to tool.schema.parameters.mapValues { (_, p) ->
+                                mapOf(
+                                    "type" to p.type,
+                                    "description" to p.description,
+                                    "required" to p.required,
+                                )
+                            },
+                        )
+                    }
                     call.respondText(json.encodeToString(tools), ContentType.Application.Json)
+                }
+
+                get("/tools/definitions") {
+                    val err = auth(call) ?: return@get
+                    val all = dataRepository.getToolDefinitions().map { info ->
+                        mapOf(
+                            "id" to info.id,
+                            "name" to info.name,
+                            "description" to info.description,
+                            "enabled" to info.isEnabled.toString(),
+                        )
+                    }
+                    call.respondText(json.encodeToString(all), ContentType.Application.Json)
+                }
+
+                post("/tools/{name}") {
+                    val err = auth(call) ?: return@post
+                    val name = call.parameters["name"] ?: run {
+                        call.respondText(json.encodeToString(ToolCallResponse(success = false, name = "", error = "Missing tool name")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val body = try { call.receiveText() } catch (_: Exception) { "{}" }
+                    val result = try {
+                        toolExecutor.executeTool(name, body.ifBlank { "{}" })
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ToolCallResponse(success = false, name = name, error = e.message ?: "Unknown error")), ContentType.Application.Json)
+                        return@post
+                    }
+                    call.respondText(json.encodeToString(ToolCallResponse(success = true, name = name, result = result)), ContentType.Application.Json)
                 }
 
                 get("/memories") {
                     val err = auth(call) ?: return@get
                     val memories = memoryStore.getAllMemories().map { mapOf("key" to it.key, "content" to it.content, "category" to it.category.name, "protected" to it.protected.toString()) }
                     call.respondText(json.encodeToString(memories), ContentType.Application.Json)
+                }
+
+                get("/memory/{key}") {
+                    val err = auth(call) ?: return@get
+                    val key = call.parameters["key"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@get
+                    }
+                    val entry = memoryStore.getAllMemories().find { it.key == key }
+                    if (entry == null) {
+                        call.respondText(json.encodeToString(ErrorResponse("Not found")), ContentType.Application.Json, HttpStatusCode.NotFound)
+                        return@get
+                    }
+                    call.respondText(json.encodeToString(mapOf("key" to entry.key, "content" to entry.content, "category" to entry.category.name, "protected" to entry.protected.toString())), ContentType.Application.Json)
+                }
+
+                post("/memory") {
+                    val err = auth(call) ?: return@post
+                    val body = try { call.receive<MemoryRequest>() } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body. Expected: {\"key\":\"...\",\"content\":\"...\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    }
+                    if (body.key.isBlank()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    }
+                    val category = try { MemoryCategory.valueOf(body.category?.uppercase() ?: "GENERAL") } catch (_: Exception) { MemoryCategory.GENERAL }
+                    val entry = memoryStore.store(body.key, body.content, category)
+                    call.respondText(json.encodeToString(mapOf("success" to true, "key" to entry.key, "content" to entry.content, "category" to entry.category.name)), ContentType.Application.Json)
+                }
+
+                delete("/memory/{key}") {
+                    val err = auth(call) ?: return@delete
+                    val key = call.parameters["key"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@delete
+                    }
+                    val deleted = memoryStore.forget(key)
+                    if (!deleted) {
+                        call.respondText(json.encodeToString(ErrorResponse("Not found or protected")), ContentType.Application.Json, HttpStatusCode.NotFound); return@delete
+                    }
+                    call.respondText(json.encodeToString(mapOf("success" to true, "key" to key)), ContentType.Application.Json)
+                }
+
+                post("/memory/search") {
+                    val err = auth(call) ?: return@post
+                    val body = try { call.receive<SearchRequest>() } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body. Expected: {\"query\":\"...\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    }
+                    val results = memoryStore.searchMemories(body.query, body.limit ?: 10)
+                    call.respondText(json.encodeToString(results.map { mapOf("key" to it.key, "content" to it.content, "category" to it.category.name, "hit_count" to it.hitCount) }), ContentType.Application.Json)
+                }
+
+                get("/alt-memory") {
+                    val err = auth(call) ?: return@get
+                    val allMemories = memoryStore.getAllMemories()
+                    val status = AltMemoryStatusResponse(
+                        enabled = appSettings.isAltMemoryEnabled(),
+                        installed = appSettings.isAltMemoryInstalled(),
+                        connected = mcpServerManager.isConnected("alt_memory"),
+                        localMemoryCount = allMemories.size,
+                        behaviorMemoryCount = allMemories.count { it.protected },
+                        migrationComplete = appSettings.isAltMemoryMigrationComplete(),
+                    )
+                    call.respondText(json.encodeToString(status), ContentType.Application.Json)
                 }
 
                 get("/settings") {
@@ -140,7 +255,9 @@ class DebugServer(
                                 "wake_word_enabled" to dataRepository.isWakeWordEnabled().toString(),
                                 "preferred_language" to dataRepository.getPreferredLanguage(),
                                 "debug_api_enabled" to dataRepository.isDebugApiEnabled().toString(),
+                                "debug_endpoint_enabled" to dataRepository.isDebugEndpointEnabled().toString(),
                                 "alt_memory_enabled" to dataRepository.isAltMemoryEnabled().toString(),
+                                "alt_memory_installed" to appSettings.isAltMemoryInstalled().toString(),
                                 "sandbox_distro" to appSettings.getSandboxDistro(),
                             ),
                         ),
@@ -156,42 +273,30 @@ class DebugServer(
                         call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                         return@post
                     }
-                    val response = withContext(Dispatchers.Default) {
+                    val result = withContext(Dispatchers.Default) {
                         try {
-                            dataRepository.askWithTools(chatRequest.message)
-                        } catch (_: Exception) {
-                            "Error processing request"
+                            dataRepository.askWithToolsVerbose(chatRequest.message)
+                        } catch (e: Exception) {
+                            AskWithToolsResult("Error: ${e.message}")
                         }
                     }
-                    call.respondText(json.encodeToString(ChatResponse(response = response)), ContentType.Application.Json)
+                    call.respondText(json.encodeToString(ChatResponse(response = result.response, toolCalls = result.toolCalls)), ContentType.Application.Json)
                 }
 
                 post("/sandbox/setup") {
                     val err = auth(call) ?: return@post
-                    if (sandboxController == null) {
-                        call.respondText(json.encodeToString(ErrorResponse("SandboxController not available")), ContentType.Application.Json, HttpStatusCode.ServiceUnavailable)
-                        return@post
-                    }
                     sandboxController.setup()
                     call.respondText("Sandbox setup started", ContentType.Text.Plain)
                 }
 
                 post("/sandbox/install-packages") {
                     val err = auth(call) ?: return@post
-                    if (sandboxController == null) {
-                        call.respondText(json.encodeToString(ErrorResponse("SandboxController not available")), ContentType.Application.Json, HttpStatusCode.ServiceUnavailable)
-                        return@post
-                    }
                     sandboxController.installPackages()
                     call.respondText("Sandbox package install started", ContentType.Text.Plain)
                 }
 
                 post("/sandbox/exec") {
                     val err = auth(call) ?: return@post
-                    if (sandboxController == null) {
-                        call.respondText(json.encodeToString(ErrorResponse("SandboxController not available")), ContentType.Application.Json, HttpStatusCode.ServiceUnavailable)
-                        return@post
-                    }
                     val command = call.receiveText().trim()
                     if (command.isBlank()) {
                         call.respondText(json.encodeToString(ErrorResponse("Missing command body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
@@ -266,6 +371,8 @@ class DebugServer(
 
                             "debug_api_enabled" -> dataRepository.setDebugApiEnabled(v.toBoolean())
 
+                            "debug_endpoint_enabled" -> dataRepository.setDebugEndpointEnabled(v.toBoolean())
+
                             "alt_memory_enabled" -> dataRepository.setAltMemoryEnabled(v.toBoolean())
 
                             "sandbox_distro" -> appSettings.setSandboxDistro(v)
@@ -281,12 +388,16 @@ class DebugServer(
                     }
                 }
             }
-        }.start(wait = false)
+        }
+        s.start(wait = false)
+        serverJob = s
         android.util.Log.d("DebugServer", "Started on 127.0.0.1:18500, token=$token")
     }
 
     fun stop() {
         running = false
+        serverJob?.stop(1000, 2000)
+        serverJob = null
         android.util.Log.d("DebugServer", "Stopped")
     }
 

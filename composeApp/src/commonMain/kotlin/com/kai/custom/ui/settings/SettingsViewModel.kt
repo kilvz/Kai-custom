@@ -26,6 +26,7 @@ import com.kai.custom.isRootSupported
 import com.kai.custom.isShizukuPermissionGranted
 import com.kai.custom.isShizukuSupported
 import com.kai.custom.isSmsSupported
+import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.network.AnthropicInsufficientCreditsException
 import com.kai.custom.network.AnthropicInvalidApiKeyException
@@ -76,6 +77,7 @@ class SettingsViewModel(
     private val taskScheduler: TaskScheduler,
     private val wakeWordController: WakeWordController,
     private val sandboxController: SandboxController,
+    private val mcpServerManager: McpServerManager,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -96,6 +98,7 @@ class SettingsViewModel(
         isMemoryEnabled = dataRepository.isMemoryEnabled(),
         isAltMemoryEnabled = dataRepository.isAltMemoryEnabled(),
         altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
+        altMemoryConnected = mcpServerManager.isConnected("alt_memory"),
         memories = dataRepository.getMemories().filter { !it.protected }.toImmutableList(),
         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
         scheduledTasks = dataRepository.getScheduledTasks().toImmutableList(),
@@ -144,6 +147,8 @@ class SettingsViewModel(
         showDebugApiSection = currentPlatform is Platform.Mobile.Android,
         isDebugApiEnabled = dataRepository.isDebugApiEnabled(),
         debugApiRunning = debugApiController.isRunning,
+        debugApiTransitioning = debugApiController.isTransitioning,
+        isDebugEndpointEnabled = dataRepository.isDebugEndpointEnabled(),
         isFreeFallbackEnabled = dataRepository.isFreeFallbackEnabled(),
         isWakeWordEnabled = dataRepository.isWakeWordEnabled(),
         wakeWordPhrase = dataRepository.getWakeWordPhrase(),
@@ -214,6 +219,7 @@ class SettingsViewModel(
         onOpenShizukuPermission = ::onOpenShizukuPermission,
         onToggleRoot = ::onToggleRoot,
         onToggleDebugApi = ::onToggleDebugApi,
+        onToggleDebugEndpoint = ::onToggleDebugEndpoint,
         onToggleFreeFallback = ::onToggleFreeFallback,
         onToggleWakeWord = ::onToggleWakeWord,
         onChangeWakeWordPhrase = ::onChangeWakeWordPhrase,
@@ -280,7 +286,15 @@ class SettingsViewModel(
         }
         viewModelScope.launch {
             sandboxController.status.collect { status ->
-                _state.update { it.copy(sandboxReady = status.ready) }
+                _state.update { it.copy(sandboxReady = status.ready, altMemoryConnected = mcpServerManager.isConnected("alt_memory")) }
+            }
+        }
+        viewModelScope.launch {
+            while (true) {
+                delay(5_000)
+                if (_state.value.isAltMemoryEnabled && _state.value.altMemoryConnected != mcpServerManager.isConnected("alt_memory")) {
+                    _state.update { it.copy(altMemoryConnected = mcpServerManager.isConnected("alt_memory")) }
+                }
             }
         }
     }
@@ -565,10 +579,15 @@ class SettingsViewModel(
             return
         }
         dataRepository.setAltMemoryEnabled(enabled)
-        _state.update { it.copy(isAltMemoryEnabled = enabled) }
+        _state.update { it.copy(isAltMemoryEnabled = enabled, altMemoryConnected = false) }
         viewModelScope.launch {
-            if (enabled) sandboxController.startAltMemory()
-            else sandboxController.stopAltMemory()
+            if (enabled) {
+                sandboxController.startAltMemory()
+                _state.update { it.copy(altMemoryConnected = mcpServerManager.isConnected("alt_memory")) }
+            } else {
+                sandboxController.stopAltMemory()
+                _state.update { it.copy(altMemoryConnected = false) }
+            }
         }
     }
 
@@ -614,13 +633,28 @@ class SettingsViewModel(
     }
 
     private fun onToggleDebugApi(enabled: Boolean) {
+        _state.update { it.copy(debugApiTransitioning = true) }
         dataRepository.setDebugApiEnabled(enabled)
         if (enabled) {
             debugApiController.start()
         } else {
             debugApiController.stop()
         }
-        _state.update { it.copy(isDebugApiEnabled = enabled, debugApiRunning = debugApiController.isRunning) }
+        viewModelScope.launch {
+            while (debugApiController.isTransitioning) {
+                delay(100)
+            }
+            _state.update { it.copy(
+                isDebugApiEnabled = enabled,
+                debugApiRunning = debugApiController.isRunning,
+                debugApiTransitioning = false
+            )}
+        }
+    }
+
+    private fun onToggleDebugEndpoint(enabled: Boolean) {
+        dataRepository.setDebugEndpointEnabled(enabled)
+        _state.update { it.copy(isDebugEndpointEnabled = enabled) }
     }
 
     private fun onToggleHeartbeat(enabled: Boolean) {
@@ -955,13 +989,13 @@ class SettingsViewModel(
             current.copy(
                 mcpServers = buildMcpServerEntries().map { entry ->
                     val preservedStatus = existingStatuses[entry.id]
-                    // Only preserve transient statuses (Connecting/Error) — derive Connected/Unknown from actual state
                     if (preservedStatus == McpConnectionStatus.Connecting || preservedStatus == McpConnectionStatus.Error) {
                         entry.copy(connectionStatus = preservedStatus)
                     } else {
                         entry
                     }
                 }.toImmutableList(),
+                altMemoryConnected = mcpServerManager.isConnected("alt_memory"),
             )
         }
     }

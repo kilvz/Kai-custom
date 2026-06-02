@@ -19,59 +19,186 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     val isUsingAltMemory: Boolean get() = delegate !is SqliteMemoryStore
 
-    override suspend fun setPersona(personaId: String) {
-        delegate.setPersona(personaId)
-    }
-
-    override suspend fun fetchRemotePersonas(): List<PersonaConfig> = delegate.fetchRemotePersonas()
-
-    override suspend fun syncPersonaToRemote(config: PersonaConfig) = delegate.syncPersonaToRemote(config)
-
-    override suspend fun deleteRemotePersona(id: String) = delegate.deleteRemotePersona(id)
+    // ── Writes: always persist to SQLite, best-effort to alt-memory ──
 
     override suspend fun store(
         key: String,
         content: String,
         category: MemoryCategory,
         source: String?,
-    ): MemoryEntry = delegate.store(key, content, category, source)
-
-    override suspend fun updateContent(key: String, content: String): MemoryEntry? = delegate.updateContent(key, content)
-
-    override suspend fun reinforceMemory(key: String): MemoryEntry? = delegate.reinforceMemory(key)
-
-    override suspend fun forget(key: String): Boolean = delegate.forget(key)
+    ): MemoryEntry {
+        val entry = sqliteStore.store(key, content, category, source)
+        if (isUsingAltMemory) {
+            try { delegate.store(key, content, category, source) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
     override suspend fun storeProtected(
         key: String,
         content: String,
         category: MemoryCategory,
         source: String?,
-    ): MemoryEntry = delegate.storeProtected(key, content, category, source)
+    ): MemoryEntry {
+        val entry = sqliteStore.storeProtected(key, content, category, source)
+        if (isUsingAltMemory) {
+            try { delegate.storeProtected(key, content, category, source) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> = delegate.getUserMemories(max)
+    override suspend fun updateContent(key: String, content: String): MemoryEntry? {
+        val entry = sqliteStore.updateContent(key, content)
+        if (isUsingAltMemory) {
+            try { delegate.updateContent(key, content) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
-    override fun getBehaviorMemories(): List<MemoryEntry> = delegate.getBehaviorMemories()
+    override suspend fun reinforceMemory(key: String): MemoryEntry? {
+        val entry = sqliteStore.reinforceMemory(key)
+        if (isUsingAltMemory) {
+            try { delegate.reinforceMemory(key) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
-    override fun getAllMemories(max: Int): List<MemoryEntry> = delegate.getAllMemories(max)
+    override suspend fun forget(key: String): Boolean {
+        val removed = sqliteStore.forget(key)
+        if (isUsingAltMemory) {
+            try { delegate.forget(key) } catch (_: Exception) { }
+        }
+        return removed
+    }
 
-    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> = delegate.searchMemories(query, limit)
+    // ── Reads: try alt-memory first when active, fall back to SQLite ──
 
-    override fun schemaResetMessage(): String? = delegate.schemaResetMessage()
+    override fun getAllMemories(max: Int): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.getAllMemories(max)
+        return try {
+            val alt = delegate.getAllMemories(max)
+            if (alt.isNotEmpty()) alt else sqliteStore.getAllMemories(max)
+        } catch (_: Exception) {
+            sqliteStore.getAllMemories(max)
+        }
+    }
 
-    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> = delegate.getPromotionCandidates(minHits, max)
+    override fun searchMemories(query: String, limit: Int): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.searchMemories(query, limit)
+        return try {
+            val alt = delegate.searchMemories(query, limit)
+            if (alt.isNotEmpty()) alt else sqliteStore.searchMemories(query, limit)
+        } catch (_: Exception) {
+            sqliteStore.searchMemories(query, limit)
+        }
+    }
 
-    override fun exportDimension(): ByteArray = delegate.exportDimension()
+    override fun getUserMemories(max: Int): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.getUserMemories(max)
+        return try {
+            val alt = delegate.getUserMemories(max)
+            if (alt.isNotEmpty()) alt else sqliteStore.getUserMemories(max)
+        } catch (_: Exception) {
+            sqliteStore.getUserMemories(max)
+        }
+    }
 
-    override fun importDimension(data: ByteArray) = delegate.importDimension(data)
+    override fun getBehaviorMemories(): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.getBehaviorMemories()
+        return try {
+            val alt = delegate.getBehaviorMemories()
+            if (alt.isNotEmpty()) alt else sqliteStore.getBehaviorMemories()
+        } catch (_: Exception) {
+            sqliteStore.getBehaviorMemories()
+        }
+    }
 
-    override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact = delegate.addFact(subject, predicate, `object`)
+    override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.getPromotionCandidates(minHits, max)
+        return try {
+            val alt = delegate.getPromotionCandidates(minHits, max)
+            if (alt.isNotEmpty()) alt else sqliteStore.getPromotionCandidates(minHits, max)
+        } catch (_: Exception) {
+            sqliteStore.getPromotionCandidates(minHits, max)
+        }
+    }
 
-    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> = delegate.queryFacts(entity, relation, limit)
+    // ── Passthrough methods ──
 
-    override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) = delegate.invalidateFact(subject, predicate, `object`)
+    override suspend fun setPersona(personaId: String) {
+        try { delegate.setPersona(personaId) } catch (_: Exception) { }
+    }
 
-    override suspend fun diaryWrite(agentName: String, content: String, topic: String) = delegate.diaryWrite(agentName, content, topic)
+    override suspend fun fetchRemotePersonas(): List<PersonaConfig> = try {
+        delegate.fetchRemotePersonas()
+    } catch (_: Exception) {
+        emptyList()
+    }
 
-    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> = delegate.diaryRead(agentName, lastN)
+    override suspend fun syncPersonaToRemote(config: PersonaConfig) {
+        try { delegate.syncPersonaToRemote(config) } catch (_: Exception) { }
+    }
+
+    override suspend fun deleteRemotePersona(id: String) {
+        try { delegate.deleteRemotePersona(id) } catch (_: Exception) { }
+    }
+
+    override fun schemaResetMessage(): String? = try {
+        delegate.schemaResetMessage()
+    } catch (_: Exception) {
+        sqliteStore.schemaResetMessage()
+    }
+
+    override fun exportDimension(): ByteArray = try {
+        delegate.exportDimension()
+    } catch (_: Exception) {
+        sqliteStore.exportDimension()
+    }
+
+    override fun importDimension(data: ByteArray) {
+        try { delegate.importDimension(data) } catch (_: Exception) { }
+        sqliteStore.importDimension(data)
+    }
+
+    override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
+        val fact = sqliteStore.addFact(subject, predicate, `object`)
+        if (isUsingAltMemory) {
+            try { delegate.addFact(subject, predicate, `object`) } catch (_: Exception) { }
+        }
+        return fact
+    }
+
+    override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> {
+        if (!isUsingAltMemory) return sqliteStore.queryFacts(entity, relation, limit)
+        return try {
+            val alt = delegate.queryFacts(entity, relation, limit)
+            if (alt.isNotEmpty()) alt else sqliteStore.queryFacts(entity, relation, limit)
+        } catch (_: Exception) {
+            sqliteStore.queryFacts(entity, relation, limit)
+        }
+    }
+
+    override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {
+        sqliteStore.invalidateFact(subject, predicate, `object`)
+        if (isUsingAltMemory) {
+            try { delegate.invalidateFact(subject, predicate, `object`) } catch (_: Exception) { }
+        }
+    }
+
+    override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
+        sqliteStore.diaryWrite(agentName, content, topic)
+        if (isUsingAltMemory) {
+            try { delegate.diaryWrite(agentName, content, topic) } catch (_: Exception) { }
+        }
+    }
+
+    override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
+        if (!isUsingAltMemory) return sqliteStore.diaryRead(agentName, lastN)
+        return try {
+            val alt = delegate.diaryRead(agentName, lastN)
+            if (alt.isNotEmpty()) alt else sqliteStore.diaryRead(agentName, lastN)
+        } catch (_: Exception) {
+            sqliteStore.diaryRead(agentName, lastN)
+        }
+    }
 }

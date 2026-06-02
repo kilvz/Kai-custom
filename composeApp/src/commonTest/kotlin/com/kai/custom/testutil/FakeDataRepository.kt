@@ -1,6 +1,7 @@
 package com.kai.custom.testutil
 
 import com.kai.custom.data.Conversation
+import com.kai.custom.data.AskWithToolsResult
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
@@ -535,6 +536,7 @@ class FakeDataRepository : DataRepository {
     override fun setHeartbeatInstanceId(instanceId: String?) {}
 
     override suspend fun askWithTools(prompt: String, instanceId: String?): String = ""
+    override suspend fun askWithToolsVerbose(prompt: String, instanceId: String?): AskWithToolsResult = AskWithToolsResult("")
     override suspend fun askSilently(question: String): String = ""
     override suspend fun askSilentlyWithInstance(instanceId: String, prompt: String, timeoutMs: Long): String = ""
     override suspend fun addAssistantMessage(content: String) {}
@@ -650,6 +652,12 @@ class FakeDataRepository : DataRepository {
     override fun isDebugApiEnabled(): Boolean = debugApiEnabled
     override fun setDebugApiEnabled(enabled: Boolean) {
         debugApiEnabled = enabled
+    }
+
+    var debugEndpointEnabled = false
+    override fun isDebugEndpointEnabled(): Boolean = debugEndpointEnabled
+    override fun setDebugEndpointEnabled(enabled: Boolean) {
+        debugEndpointEnabled = enabled
     }
 
     override fun isNotificationsEnabled(): Boolean = notificationsEnabled

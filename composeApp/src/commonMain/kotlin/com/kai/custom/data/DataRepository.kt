@@ -1,6 +1,7 @@
 package com.kai.custom.data
 
 import com.kai.custom.data.dimension.KGFact
+import com.kai.custom.data.ToolCallInfo
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -220,6 +221,8 @@ interface DataRepository {
     // Debug API server (Android-only debug builds only).
     fun isDebugApiEnabled(): Boolean
     fun setDebugApiEnabled(enabled: Boolean)
+    fun isDebugEndpointEnabled(): Boolean
+    fun setDebugEndpointEnabled(enabled: Boolean)
 
     // Notifications (FOSS-only on Android; other platforms return stub values).
     // Per-app filtering is delegated to the system Notification Access "Apps" picker.
@@ -251,6 +254,7 @@ interface DataRepository {
 
     // Background ask with tools (no chat history update, supports tool-calling loop)
     suspend fun askWithTools(prompt: String, instanceId: String? = null): String
+    suspend fun askWithToolsVerbose(prompt: String, instanceId: String? = null): AskWithToolsResult
 
     // Silent ask (no tools, no chat history update)
     suspend fun askSilently(question: String): String
@@ -311,3 +315,8 @@ interface DataRepository {
     suspend fun pollTelegram()
     suspend fun sendTelegramMessage(chatId: Long, text: String)
 }
+
+data class AskWithToolsResult(
+    val response: String,
+    val toolCalls: List<ToolCallInfo> = emptyList(),
+)

@@ -12,6 +12,7 @@ import com.kai.custom.email.EmailPoller
 import com.kai.custom.formatFileSize
 import com.kai.custom.getAvailableTools
 import com.kai.custom.getPlatformToolDefinitions
+import com.kai.custom.isDebugBuild
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -683,7 +684,8 @@ class RemoteDataRepository(
             .filter { it.service != Service.Free }
             .filter { !it.service.isOnDevice || hasLocalModels }
         val freeEntry = FallbackEntry(instanceId = "free", service = Service.Free)
-        return if (entries.isEmpty()) {
+        val debugFreeEntry = FallbackEntry(instanceId = "debug_api", service = Service.OpenCode)
+        val base = if (entries.isEmpty()) {
             listOf(freeEntry)
         } else if (appSettings.isFreeServicePrimary()) {
             listOf(freeEntry) + entries
@@ -692,6 +694,8 @@ class RemoteDataRepository(
         } else {
             entries
         }
+        val debugEnabled = isDebugBuild && appSettings.isDebugEndpointEnabled()
+        return if (debugEnabled) base + debugFreeEntry else base
     }
 
     override suspend fun ask(question: String?, files: List<PlatformFile>, uiSubmission: UiSubmission?) {
@@ -2177,6 +2181,12 @@ class RemoteDataRepository(
         appSettings.setDebugApiEnabled(enabled)
     }
 
+    override fun isDebugEndpointEnabled(): Boolean = appSettings.isDebugEndpointEnabled()
+
+    override fun setDebugEndpointEnabled(enabled: Boolean) {
+        appSettings.setDebugEndpointEnabled(enabled)
+    }
+
     override fun isNotificationsEnabled(): Boolean = appSettings.isNotificationsEnabled()
 
     override fun setNotificationsEnabled(enabled: Boolean) {
@@ -2257,8 +2267,6 @@ class RemoteDataRepository(
     override fun importDimension(data: ByteArray) = memoryStore.importDimension(data)
 
     override suspend fun askWithTools(prompt: String, instanceId: String?): String {
-        // Selection: explicit instance > first fallback entry. Use getOrderedFallbackEntries()
-        // so Service.Free (free_service_primary) is included alongside configured instances.
         val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
         if (fallbackEntries.isEmpty()) return ""
 
@@ -2267,9 +2275,33 @@ class RemoteDataRepository(
         val service = entry.service
         val messages = listOf(History(role = History.Role.USER, content = prompt))
         val systemPrompt = getActiveSystemPrompt()
-        // Use a local history to avoid polluting the current conversation's chatHistory
         val localHistory = MutableStateFlow(messages)
         return askWithService(service, messages, systemPrompt, entry.instanceId, localHistory).content
+    }
+
+    override suspend fun askWithToolsVerbose(prompt: String, instanceId: String?): AskWithToolsResult {
+        val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
+        if (fallbackEntries.isEmpty()) return AskWithToolsResult("")
+
+        val entry = instanceId?.let { id -> fallbackEntries.find { it.instanceId == id } }
+            ?: fallbackEntries.first()
+        val service = entry.service
+        val messages = listOf(History(role = History.Role.USER, content = prompt))
+        val systemPrompt = getActiveSystemPrompt()
+        val localHistory = MutableStateFlow(messages)
+        val result = askWithService(service, messages, systemPrompt, entry.instanceId, localHistory)
+
+        val toolCalls = localHistory.value.flatMap { msg ->
+            msg.toolCalls?.flatMap { tc ->
+                val toolResult = localHistory.value.find { it.role == History.Role.TOOL && it.toolCallId == tc.id }
+                listOf(com.kai.custom.data.ToolCallInfo(
+                    name = tc.name,
+                    arguments = tc.arguments,
+                    result = toolResult?.content,
+                ))
+            } ?: emptyList()
+        }
+        return AskWithToolsResult(response = result.content, toolCalls = toolCalls)
     }
 
     override suspend fun askSilently(question: String): String {
