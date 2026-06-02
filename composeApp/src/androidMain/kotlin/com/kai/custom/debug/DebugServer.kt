@@ -195,7 +195,7 @@ class DebugServer(
                         put("debug_endpoint_enabled", JsonPrimitive(dataRepository.isDebugEndpointEnabled()))
                         put("telegram_enabled", JsonPrimitive(dataRepository.isTelegramEnabled()))
                         put("ssh_enabled", JsonPrimitive(appSettings.isSshEnabled()))
-                        put("preferred_language", JsonPrimitive(dataRepository.getPreferredLanguage() ?: ""))
+                        put("preferred_language", JsonPrimitive(dataRepository.getPreferredLanguage()))
                         put("ui_scale", JsonPrimitive(dataRepository.getUiScale()))
                         put("splinterlands_enabled", JsonPrimitive(appSettings.isSplinterlandsEnabled()))
                         put("active_skill_id", JsonPrimitive(dataRepository.getActiveSkill()?.id ?: ""))

@@ -2245,10 +2245,6 @@ class RemoteDataRepository(
         telegramPoller?.poll()
     }
 
-    override suspend fun sendTelegramMessage(chatId: Long, text: String) {
-        telegramPoller?.sendProactiveMessage(chatId, text)
-    }
-
     override fun getUiScale(): Float = appSettings.getUiScale()
 
     override fun setUiScale(scale: Float) {

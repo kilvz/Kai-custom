@@ -752,5 +752,3 @@ class FakeDataRepository : DataRepository {
     override fun getTelegramSyncState(): TelegramSyncState = TelegramSyncState()
     override fun getPendingTelegramCount(): Int = 0
     override suspend fun pollTelegram() {}
-    override suspend fun sendTelegramMessage(chatId: Long, text: String) {}
-}

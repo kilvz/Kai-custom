@@ -311,7 +311,6 @@ interface DataRepository {
     fun getTelegramSyncState(): TelegramSyncState
     fun getPendingTelegramCount(): Int
     suspend fun pollTelegram()
-    suspend fun sendTelegramMessage(chatId: Long, text: String)
 }
 
 data class AskWithToolsResult(

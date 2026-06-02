@@ -60,23 +60,31 @@ class ChatSystemPromptBuilderTest {
         emailAccounts: List<EmailAccountSummary> = emptyList(),
         uiMode: ChatPromptUiMode = ChatPromptUiMode.NONE,
         activeSkill: com.inspiredandroid.kai.skills.SkillManifest? = null,
-    ) = buildChatSystemPrompt(
-        variant = variant,
-        soul = soul,
-        hasTools = hasTools,
-        memoryEnabled = memoryEnabled,
-        schedulingEnabled = schedulingEnabled,
-        relevantMemories = relevantMemories,
-        generalMemories = generalMemories,
-        preferenceMemories = preferenceMemories,
-        learningMemories = learningMemories,
-        errorMemories = errorMemories,
-        pendingTasks = pendingTasks,
-        heartbeatAdditions = heartbeatAdditions,
-        emailAccounts = emailAccounts,
-        runtime = runtime,
-        uiMode = uiMode,
-        activeSkill = activeSkill,
+    ) = UnifiedPromptBuilder().build(
+        PromptContext(
+            variant = variant,
+            soul = soul,
+            hasTools = hasTools,
+            memoryEnabled = memoryEnabled,
+            schedulingEnabled = schedulingEnabled,
+            generalMemories = generalMemories,
+            preferenceMemories = preferenceMemories,
+            learningMemories = learningMemories,
+            errorMemories = errorMemories,
+            relevantMemories = relevantMemories,
+            pendingTasks = pendingTasks,
+            heartbeatAdditions = heartbeatAdditions,
+            emailAccounts = emailAccounts,
+            runtime = runtime,
+            uiMode = uiMode,
+            preferredLanguage = "en",
+            renderMode = RenderMode.FORK_ENHANCED,
+            taskDomains = if (relevantMemories.isNotEmpty() || generalMemories.isNotEmpty()) {
+                setOf(TaskDomain.MEMORY_QUERY)
+            } else {
+                setOf(TaskDomain.GENERAL_CHAT)
+            },
+        ),
     )
 
     private val languageLine = "## Language"
@@ -297,7 +305,6 @@ class ChatSystemPromptBuilderTest {
             generalMemories = listOf(memory("user_name", "Alice")),
             relevantMemories = relevant,
         )
-        // Relevant memories go in ## What I Know About You section
         assertTrue("## What I Know About You" in out)
         assertTrue("**fav_lang** (reinforced 3x): Kotlin" in out)
     }

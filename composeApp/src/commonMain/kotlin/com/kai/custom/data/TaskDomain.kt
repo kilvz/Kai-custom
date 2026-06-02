@@ -73,6 +73,29 @@ object TaskClassifier {
     }
 }
 
+enum class SystemPromptVariant {
+    CHAT_REMOTE,
+    CHAT_LOCAL,
+}
+
+internal data class ChatPromptRuntimeContext(
+    val nowLocalIsoWithOffset: String,
+    val timeZoneId: String,
+    val nowUtcIsoString: String,
+    val platform: String,
+    val modelId: String,
+    val providerName: String,
+)
+
+internal enum class ChatPromptUiMode { NONE, DYNAMIC_UI, INTERACTIVE_UI }
+
+internal data class EmailAccountSummary(
+    val email: String,
+    val unreadCount: Int,
+    val lastSyncEpochMs: Long,
+    val lastError: String? = null,
+)
+
 internal data class PromptContext(
     val variant: SystemPromptVariant,
     val soul: String,

@@ -27,6 +27,31 @@ object SshConfigureHostTool : Tool {
                     "Short name used to invoke this host (e.g. 'prod', 'my-vps'). Must contain no whitespace.",
                     true,
                 ),
+                "hostname" to ParameterSchema(
+                    "string",
+                    "Hostname or IP address of the remote server (e.g. '192.168.1.100' or 'myserver.example.com').",
+                    true,
+                ),
+                "user" to ParameterSchema(
+                    "string",
+                    "SSH login username. Defaults to the sandbox user if omitted.",
+                    false,
+                ),
+                "port" to ParameterSchema(
+                    "number",
+                    "SSH port. Defaults to 22 if omitted.",
+                    false,
+                ),
+                "identity_file" to ParameterSchema(
+                    "string",
+                    "Path to the private key file inside the sandbox (e.g. '/home/user/.ssh/id_ed25519').",
+                    false,
+                ),
+                "known_host_line" to ParameterSchema(
+                    "string",
+                    "A line to append to ~/.ssh/known_hosts to pre-accept the host key (TOFU skip). Format: 'hostname key-type base64-key'.",
+                    false,
+                ),
             ),
         )
 
