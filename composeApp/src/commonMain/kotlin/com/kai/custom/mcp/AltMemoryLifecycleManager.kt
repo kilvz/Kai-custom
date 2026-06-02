@@ -208,17 +208,8 @@ class AltMemoryLifecycleManager(
     }
 
     private suspend fun startMcpServer() {
-        val checkCmd = sandboxController.executeCommand(
-            command = "pgrep -f 'alt-memory.*mcp' || true",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-        )
-        if (checkCmd.trim().isNotEmpty()) return
-
-        // Use setsid to fully detach the server from proot's process tree.
-        // Short timeout: proot blocks even with &, so we let the timeout kill
-        // proot while the orphaned alt-memory process continues (reparented to
-        // init). The retry loop in setupAndStart picks it up.
+        // Short timeout: proot blocks even with &, so killing proot leaves the
+        // orphaned alt-memory process running (reparented to init).
         sandboxController.executeCommand(
             command = "setsid nohup alt-memory mcp --transport sse --port 8316 > /tmp/alt-memory.log 2>&1 &",
             sessionId = SandboxSessions.SYSTEM,

@@ -40,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
 
 class DebugServer(
@@ -116,18 +118,20 @@ class DebugServer(
                 get("/tools") {
                     val err = auth(call) ?: return@get
                     val tools = getAvailableTools().map { tool ->
-                        mapOf(
-                            "name" to tool.schema.name,
-                            "description" to tool.schema.description,
-                            "timeout_seconds" to tool.timeout.inWholeSeconds,
-                            "parameters" to tool.schema.parameters.mapValues { (_, p) ->
-                                mapOf(
-                                    "type" to p.type,
-                                    "description" to p.description,
-                                    "required" to p.required,
-                                )
-                            },
-                        )
+                        buildJsonObject {
+                            put("name", JsonPrimitive(tool.schema.name))
+                            put("description", JsonPrimitive(tool.schema.description))
+                            put("timeout_seconds", JsonPrimitive(tool.timeout.inWholeSeconds))
+                            put("parameters", buildJsonObject {
+                                tool.schema.parameters.forEach { (key, p) ->
+                                    put(key, buildJsonObject {
+                                        put("type", JsonPrimitive(p.type))
+                                        put("description", JsonPrimitive(p.description))
+                                        put("required", JsonPrimitive(p.required))
+                                    })
+                                }
+                            })
+                        }
                     }
                     call.respondText(json.encodeToString(tools), ContentType.Application.Json)
                 }
@@ -183,15 +187,16 @@ class DebugServer(
 
                 post("/memory") {
                     val err = auth(call) ?: return@post
-                    val body = try { call.receive<MemoryRequest>() } catch (_: Exception) {
-                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body. Expected: {\"key\":\"...\",\"content\":\"...\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
+                    val body = try { json.decodeFromString<MemoryRequest>(raw) } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
                     }
                     if (body.key.isBlank()) {
                         call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
                     }
                     val category = try { MemoryCategory.valueOf(body.category?.uppercase() ?: "GENERAL") } catch (_: Exception) { MemoryCategory.GENERAL }
                     val entry = memoryStore.store(body.key, body.content, category)
-                    call.respondText(json.encodeToString(mapOf("success" to true, "key" to entry.key, "content" to entry.content, "category" to entry.category.name)), ContentType.Application.Json)
+                    call.respondText(json.encodeToString(mapOf("success" to "true", "key" to entry.key, "content" to entry.content, "category" to entry.category.name)), ContentType.Application.Json)
                 }
 
                 delete("/memory/{key}") {
@@ -203,16 +208,17 @@ class DebugServer(
                     if (!deleted) {
                         call.respondText(json.encodeToString(ErrorResponse("Not found or protected")), ContentType.Application.Json, HttpStatusCode.NotFound); return@delete
                     }
-                    call.respondText(json.encodeToString(mapOf("success" to true, "key" to key)), ContentType.Application.Json)
+                    call.respondText(json.encodeToString(mapOf("success" to "true", "key" to key)), ContentType.Application.Json)
                 }
 
                 post("/memory/search") {
                     val err = auth(call) ?: return@post
-                    val body = try { call.receive<SearchRequest>() } catch (_: Exception) {
+                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
+                    val body = try { json.decodeFromString<SearchRequest>(raw) } catch (_: Exception) {
                         call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body. Expected: {\"query\":\"...\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
                     }
                     val results = memoryStore.searchMemories(body.query, body.limit ?: 10)
-                    call.respondText(json.encodeToString(results.map { mapOf("key" to it.key, "content" to it.content, "category" to it.category.name, "hit_count" to it.hitCount) }), ContentType.Application.Json)
+                    call.respondText(json.encodeToString(results.map { mapOf("key" to it.key, "content" to it.content, "category" to it.category.name, "hit_count" to it.hitCount.toString()) }), ContentType.Application.Json)
                 }
 
                 get("/alt-memory") {
@@ -267,8 +273,9 @@ class DebugServer(
 
                 post("/chat") {
                     val err = auth(call) ?: return@post
+                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
                     val chatRequest = try {
-                        call.receive<ChatRequest>()
+                        json.decodeFromString<ChatRequest>(raw)
                     } catch (_: Exception) {
                         call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                         return@post
@@ -320,8 +327,9 @@ class DebugServer(
                         call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                         return@post
                     }
+                    val rawBody = try { call.receiveText() } catch (_: Exception) { "" }
                     val updateRequest = try {
-                        call.receive<SettingUpdateRequest>()
+                        json.decodeFromString<SettingUpdateRequest>(rawBody)
                     } catch (_: Exception) {
                         call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                         return@post

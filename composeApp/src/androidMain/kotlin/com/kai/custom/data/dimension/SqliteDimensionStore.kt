@@ -52,6 +52,7 @@ private const val SQL_CREATE_ENTITIES = """
         content_hash TEXT NOT NULL DEFAULT '',
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
+        protected INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (realm) REFERENCES realms(id)
     )
 """
@@ -114,6 +115,12 @@ class SqliteDimensionStore(context: Context) : DimensionStore {
             db.execSQL(SQL_CREATE_DOMAINS)
             db.execSQL(SQL_CREATE_ENTITIES)
             db.execSQL(SQL_CREATE_KG_FACTS)
+
+            // Ensure the protected column exists (may be missing on databases
+            // created before the column was added to SQL_CREATE_ENTITIES).
+            try {
+                db.execSQL("ALTER TABLE entities ADD COLUMN protected INTEGER NOT NULL DEFAULT 0")
+            } catch (_: Exception) { }
 
             for (realm in DimensionConfig.defaultRealms) {
                 ensureRealm(Realm(realm.id, realm.name, realm.description, System.currentTimeMillis()))
