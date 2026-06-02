@@ -1,3 +1,7 @@
+## v3.7.1 — 2026-06-03
+- Fix CI release workflow: desktop `NoOpSandboxController` executeCommand signature mismatch
+- Fix CI release workflow: `r0adkll/sign-android-release@v1` now uses `BUILD_TOOLS_VERSION=36.0.0`
+
 ## v3.7.0 — 2026-06-02
 
 ### Features
