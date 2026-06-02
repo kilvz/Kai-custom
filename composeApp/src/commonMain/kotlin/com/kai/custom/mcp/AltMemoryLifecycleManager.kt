@@ -52,18 +52,25 @@ class AltMemoryLifecycleManager(
         if (!appSettings.isAltMemoryInstalled()) return
         started = true
 
-        // Fire-and-forget the server start inside proot — the process may be
-        // orphaned when proot is killed after executeCommand's timeout, but
-        // will continue running (reparented to init). The retry loop below
-        // will pick it up once the server starts listening.
-        startMcpServer()
+        // Register the built-in server config once (idempotent).
+        // connectAndDiscoverTools needs the config to be registered first.
+        mcpServerManager.registerBuiltInServer(
+            id = SERVER_ID,
+            name = "Alt Memory",
+            url = ALT_MEMORY_URL,
+        )
 
-        // If we happen to connect immediately, great.
-        // Otherwise the background retry loop handles it.
+        // Fire-and-forget: launch the MCP server process so the retry loop
+        // below starts immediately. Proot blocks even with & — the short
+        // timeout kills proot while the orphaned alt-memory continues.
+        CoroutineScope(Dispatchers.Default).launch {
+            startMcpServer()
+        }
+
+        // Try to connect immediately (server may already be running).
         if (tryConnect()) return
 
         // Background retry: every 10s, try to connect until success.
-        // Launched lazily — no scope was injected, so use the fallback.
         retryJob = CoroutineScope(Dispatchers.Default).launch {
             while (true) {
                 delay(RETRY_INTERVAL_MS)
@@ -73,31 +80,13 @@ class AltMemoryLifecycleManager(
         }
     }
 
-    /** One-shot connection attempt. Returns true if fully connected. */
+    /** One-shot connection attempt via the standard MCP flow. */
     private suspend fun tryConnect(): Boolean {
         if (connected) return true
-        try {
-            val client = McpClient(ALT_MEMORY_URL, emptyMap())
-            client.initialize()
-            client.close()
-        } catch (_: Exception) {
-            return false
-        }
-        // Connected! Register and migrate.
-        try {
-            mcpServerManager.registerBuiltInServer(
-                id = SERVER_ID,
-                name = "Alt Memory",
-                url = ALT_MEMORY_URL,
-            )
-            mcpServerManager.connectAndDiscoverTools(SERVER_ID)
-            runMigration()
-            connected = true
-        } catch (_: Exception) {
-            // Registration/migration failed — server is up but something
-            // went wrong locally. Try again later.
-            return false
-        }
+        val result = mcpServerManager.connectAndDiscoverTools(SERVER_ID)
+        if (result.isFailure) return false
+        runMigration()
+        connected = true
         return true
     }
 
@@ -226,12 +215,15 @@ class AltMemoryLifecycleManager(
         )
         if (checkCmd.trim().isNotEmpty()) return
 
-        // Use setsid to fully detach the server from proot's process tree,
-        // so executeCommand returns immediately instead of blocking 30s.
+        // Use setsid to fully detach the server from proot's process tree.
+        // Short timeout: proot blocks even with &, so we let the timeout kill
+        // proot while the orphaned alt-memory process continues (reparented to
+        // init). The retry loop in setupAndStart picks it up.
         sandboxController.executeCommand(
             command = "setsid nohup alt-memory mcp --transport sse --port 8316 > /tmp/alt-memory.log 2>&1 &",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
+            timeoutSeconds = 5,
         )
     }
 
