@@ -281,6 +281,19 @@ class RootfsDownloader(private val httpClient: HttpClient) {
         )
     }
 
+    fun fixAptDirectories(rootfsDir: File) {
+        val partialDirs = listOf(
+            File(rootfsDir, "var/lib/apt/lists/partial"),
+            File(rootfsDir, "var/cache/apt/archives/partial"),
+        )
+        for (dir in partialDirs) {
+            dir.mkdirs()
+            dir.setReadable(true, false)
+            dir.setWritable(true, false)
+            dir.setExecutable(true, false)
+        }
+    }
+
     fun writeRepositories(rootfsDir: File, mirrorBase: String, distro: String = "alpine") {
         when (distro) {
             "ubuntu" -> {

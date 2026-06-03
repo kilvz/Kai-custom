@@ -74,7 +74,7 @@ internal fun SandboxSettingsCard(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
-                if (sandboxState.sandboxReady) {
+                if (sandboxState.sandboxReady || sandboxState.sandboxInstalled) {
                     if (sandboxState.sandboxDiskUsageMB > 0) {
                         Text(
                             text = stringResource(Res.string.settings_sandbox_disk_usage, sandboxState.sandboxDiskUsageMB),
@@ -91,7 +91,7 @@ internal fun SandboxSettingsCard(
                     )
                 }
             }
-            if (sandboxState.sandboxReady) {
+            if (sandboxState.sandboxReady || sandboxState.sandboxInstalled) {
                 Switch(
                     checked = sandboxState.isSandboxEnabled,
                     onCheckedChange = onToggleSandbox,
@@ -112,7 +112,7 @@ internal fun SandboxSettingsCard(
             )
         }
 
-        if (!sandboxState.sandboxReady && !sandboxState.isWorking) {
+        if (!sandboxState.sandboxInstalled && !sandboxState.isWorking) {
             Spacer(Modifier.height(8.dp))
             DistroSelector(
                 distro = sandboxState.sandboxDistro,
@@ -123,7 +123,7 @@ internal fun SandboxSettingsCard(
         if (!sandboxState.isWorking) {
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (!sandboxState.sandboxReady) {
+                if (!sandboxState.sandboxInstalled) {
                     Button(onClick = onSetupSandbox, modifier = Modifier.handCursor()) {
                         Text(stringResource(Res.string.settings_sandbox_install))
                     }
@@ -145,7 +145,7 @@ internal fun SandboxSettingsCard(
             }
         }
 
-        if (sandboxState.sandboxReady) {
+        if (sandboxState.sandboxReady || sandboxState.sandboxInstalled) {
             Spacer(Modifier.height(4.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),

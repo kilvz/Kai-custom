@@ -127,10 +127,17 @@ class AndroidSandboxController : SandboxController {
             )
         }
 
-        is SandboxState.Error -> SandboxStatus(
-            error = true,
-            statusText = "Error: ${state.message}",
-        )
+        is SandboxState.Error -> {
+            val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
+            SandboxStatus(
+                installed = rootfsExists,
+                ready = rootfsExists,
+                error = true,
+                statusText = "Error: ${state.message}",
+                diskUsageMB = cachedDiskUsageMB,
+                packagesInstalled = sandboxManager.arePackagesInstalled(),
+            )
+        }
     }
 
     override fun setup() {

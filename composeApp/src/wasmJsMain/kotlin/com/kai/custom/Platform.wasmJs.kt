@@ -68,6 +68,8 @@ actual fun isShizukuPermissionGranted(): Boolean = false
 
 actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {}
 
+actual fun getToolPermissionMap(): Map<String, List<String>> = emptyMap()
+
 actual suspend fun compressImageBytes(bytes: ByteArray, mimeType: String): ByteArray = bytes
 
 actual fun getAppFilesDirectory(): String {

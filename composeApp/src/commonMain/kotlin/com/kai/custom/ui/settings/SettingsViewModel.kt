@@ -16,6 +16,7 @@ import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.supportsAgenticFlows
 import com.kai.custom.getBackgroundDispatcher
+import com.kai.custom.getToolPermissionMap
 import com.kai.custom.httpClient
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.isEmailSupported
@@ -44,6 +45,7 @@ import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.skills.parseGitHubSkillUrl
 import com.kai.custom.tools.NotificationPermissionController
+import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.wakeword.WakeWordController
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -77,6 +79,7 @@ class SettingsViewModel(
     private val wakeWordController: WakeWordController,
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
+    private val toolPermissionBridge: ToolPermissionBridge,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -813,17 +816,25 @@ class SettingsViewModel(
     }
 
     private fun onToggleShizuku(enabled: Boolean) {
-        dataRepository.setShizukuEnabled(enabled)
-        _state.update {
-            it.copy(
-                isShizukuEnabled = enabled,
-                shizukuPermissionGranted = isShizukuPermissionGranted(),
-            )
-        }
-        if (enabled && !isShizukuPermissionGranted()) {
-            requestShizukuPermission(onGranted = {
-                _state.update { it.copy(shizukuPermissionGranted = true) }
-            })
+        if (enabled) {
+            if (!isShizukuPermissionGranted()) {
+                requestShizukuPermission(onGranted = {
+                    dataRepository.setShizukuEnabled(true)
+                    _state.update {
+                        it.copy(isShizukuEnabled = true, shizukuPermissionGranted = true)
+                    }
+                })
+            } else {
+                dataRepository.setShizukuEnabled(true)
+                _state.update {
+                    it.copy(isShizukuEnabled = true, shizukuPermissionGranted = true)
+                }
+            }
+        } else {
+            dataRepository.setShizukuEnabled(false)
+            _state.update {
+                it.copy(isShizukuEnabled = false, shizukuPermissionGranted = isShizukuPermissionGranted())
+            }
         }
     }
 
@@ -957,7 +968,24 @@ class SettingsViewModel(
     }
 
     private fun onToggleTool(toolId: String, enabled: Boolean) {
+        if (enabled) {
+            val permissions = getToolPermissionMap()[toolId]
+            if (permissions != null && permissions.isNotEmpty()) {
+                viewModelScope.launch(backgroundDispatcher) {
+                    val granted = toolPermissionBridge.requestPermission(*permissions.toTypedArray())
+                    if (granted) {
+                        dataRepository.setToolEnabled(toolId, true)
+                        updateToolEnabledInState(toolId, true)
+                    }
+                }
+                return
+            }
+        }
         dataRepository.setToolEnabled(toolId, enabled)
+        updateToolEnabledInState(toolId, enabled)
+    }
+
+    private fun updateToolEnabledInState(toolId: String, enabled: Boolean) {
         _state.update { state ->
             state.copy(
                 tools = state.tools.map { tool ->

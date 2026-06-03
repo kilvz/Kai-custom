@@ -115,6 +115,8 @@ actual fun isShizukuPermissionGranted(): Boolean = false
 
 actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {}
 
+actual fun getToolPermissionMap(): Map<String, List<String>> = emptyMap()
+
 actual suspend fun compressImageBytes(bytes: ByteArray, mimeType: String): ByteArray {
     if (!mimeType.startsWith("image/")) return bytes
     return try {

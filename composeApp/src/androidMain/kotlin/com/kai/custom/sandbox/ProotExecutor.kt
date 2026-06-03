@@ -163,7 +163,9 @@ class ProotExecutor(
             "--bind=/sys",
             "--bind=$homePath:/root",
             "--bind=$tmpPath:/tmp",
-        ) + listOfNotNull(storageBind()) + listOf(
+        ) + listOfNotNull(storageBind()) + listOfNotNull(
+            "--sysvipc",
+        ) + listOf(
             "-0",
             "-w",
             workingDir,

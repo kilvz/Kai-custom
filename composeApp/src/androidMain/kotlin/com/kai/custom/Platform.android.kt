@@ -185,6 +185,17 @@ actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {
     )
 }
 
+actual fun getToolPermissionMap(): Map<String, List<String>> = mapOf(
+    "get_gps_location" to listOf(Manifest.permission.ACCESS_FINE_LOCATION),
+    "read_contacts" to listOf(Manifest.permission.READ_CONTACTS),
+    "get_wifi_info" to listOf(Manifest.permission.ACCESS_FINE_LOCATION),
+    "read_calendar_events" to listOf(Manifest.permission.READ_CALENDAR),
+    "write_contact" to listOf(Manifest.permission.WRITE_CONTACTS),
+    "get_phone_state" to listOf(Manifest.permission.READ_PHONE_STATE),
+    "send_notification" to listOf(Manifest.permission.POST_NOTIFICATIONS),
+    "create_calendar_event" to listOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR),
+)
+
 actual suspend fun compressImageBytes(bytes: ByteArray, mimeType: String): ByteArray {
     if (!mimeType.startsWith("image/")) return bytes
     return try {

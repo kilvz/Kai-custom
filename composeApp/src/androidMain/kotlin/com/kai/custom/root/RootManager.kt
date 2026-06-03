@@ -11,19 +11,32 @@ object RootManager {
     private const val MAX_OUTPUT_LENGTH = 15_000
 
     private var _isAvailable: Boolean? = null
+    private var _lastCheckMs: Long = 0L
 
     val isAvailable: Boolean
         get() {
-            if (_isAvailable == null) {
+            val now = System.currentTimeMillis()
+            if (_isAvailable == null && now - _lastCheckMs > 10_000L) {
+                _lastCheckMs = now
                 _isAvailable = try {
-                    val process = ProcessBuilder("which", "su").start()
-                    val exitCode = process.waitFor()
-                    exitCode == 0
+                    val process = ProcessBuilder("su", "-c", "id").start()
+                    val exited = process.waitFor(3L, java.util.concurrent.TimeUnit.SECONDS)
+                    if (!exited) {
+                        process.destroy()
+                        null
+                    } else {
+                        val output = process.inputStream.bufferedReader().readText().trim()
+                        if (process.exitValue() == 0 && output.contains("uid=0")) {
+                            true
+                        } else {
+                            null
+                        }
+                    }
                 } catch (_: Throwable) {
-                    false
+                    null
                 }
             }
-            return _isAvailable!!
+            return _isAvailable ?: false
         }
 
     suspend fun runCommand(

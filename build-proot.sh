@@ -107,7 +107,7 @@ if [[ -f "$NDK_PROPS" ]]; then
 fi
 
 HOST_TAG=""
-for tag in "$(uname -s | tr 'A-Z' 'a-z')-$(uname -m)" "darwin-x86_64" "linux-x86_64"; do
+for tag in "$(uname -s | tr 'A-Z' 'a-z')-$(uname -m)" "darwin-x86_64" "linux-x86_64" "windows-x86_64"; do
     if [[ -d "$NDK/toolchains/llvm/prebuilt/$tag" ]]; then
         HOST_TAG="$tag"; break
     fi
@@ -121,12 +121,12 @@ echo "Host: $HOST_TAG, parallel jobs: $JOBS"
 # ── Download sources ───────────────────────────────────────────────────────────
 mkdir -p "$BUILD_DIR"
 
-if [[ ! -d "$BUILD_DIR/proot" ]]; then
+if [[ ! -d "$BUILD_DIR/proot-patched" ]]; then
     echo "Cloning proot..."
-    git clone --quiet "$PROOT_REPO" "$BUILD_DIR/proot"
+    git clone --quiet "$PROOT_REPO" "$BUILD_DIR/proot-patched"
 fi
 echo "Checking out proot at $PROOT_COMMIT..."
-git -C "$BUILD_DIR/proot" checkout -q "$PROOT_COMMIT"
+git -C "$BUILD_DIR/proot-patched" checkout -q "$PROOT_COMMIT"
 
 if [[ ! -d "$BUILD_DIR/talloc-${TALLOC_VERSION}" ]]; then
     echo "Downloading talloc ${TALLOC_VERSION}..."
@@ -215,7 +215,7 @@ build_proot() {
 
     echo "[proot/$abi] building..."
     rm -rf "$build_dir"
-    cp -r "$BUILD_DIR/proot" "$build_dir"
+    cp -r "$BUILD_DIR/proot-patched" "$build_dir"
 
     # Remove HAS_LOADER_32BIT from arch.h — we build the 32-bit loader
     # separately with the correct 32-bit NDK toolchain (NDK clang doesn't

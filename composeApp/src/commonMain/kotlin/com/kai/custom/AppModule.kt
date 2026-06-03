@@ -39,6 +39,7 @@ import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
+import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.ui.chat.ChatViewModel
 import com.kai.custom.ui.sandbox.SandboxFileBrowserViewModel
 import com.kai.custom.ui.sandbox.SandboxPackagesViewModel
@@ -58,6 +59,7 @@ val appModule = module {
     single<SmsPermissionController> { SmsPermissionController() }
     single<SmsSendPermissionController> { SmsSendPermissionController() }
     single<MicrophonePermissionController> { MicrophonePermissionController() }
+    single<ToolPermissionBridge> { ToolPermissionBridge() }
     single<SmsReader> { SmsReader() }
     single<SmsSender> { SmsSender() }
     single<NotificationListenerController> { NotificationListenerController() }
@@ -184,7 +186,7 @@ val appModule = module {
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }

@@ -62,6 +62,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
@@ -749,7 +750,14 @@ class DebugServer(
                 // ======================= SANDBOX =======================
                 get("/sandbox/status") {
                     val err = auth(call) ?: return@get
+                    val s = sandboxController.status.value
                     call.respondText(json.encodeToString(buildJsonObject {
+                        put("installed", JsonPrimitive(s.installed))
+                        put("ready", JsonPrimitive(s.ready))
+                        put("working", JsonPrimitive(s.working))
+                        put("progress", s.progress?.let { JsonPrimitive(it) } ?: JsonNull)
+                        put("statusText", JsonPrimitive(s.statusText))
+                        put("error", JsonPrimitive(s.error))
                         put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
                         put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
                         put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))

@@ -173,6 +173,7 @@ class LinuxSandboxManager(
         _state.value = SandboxState.Installing("Configuring...")
         downloader.makeWritable(rootfsDir)
         downloader.writeResolvConf(rootfsDir)
+        downloader.fixAptDirectories(rootfsDir)
 
         // Skip apk update/apt-get update if packages are already installed
         val pythonBinary = if (distro == "ubuntu") "usr/bin/python3" else "usr/bin/python3"
@@ -298,8 +299,8 @@ class LinuxSandboxManager(
         val distro = appSettings.getSandboxDistro()
         val packages = if (distro == "ubuntu") {
             listOf(
-                "bash", "curl", "wget", "git", "jq", "python3", "python3-pip", "nodejs",
-                "openssh-client", "lftp", "rsync", "apt-utils",
+                "bash", "apt-utils", "curl", "wget", "git", "jq", "python3", "python3-pip", "nodejs",
+                "openssh-client", "lftp", "rsync",
             )
         } else {
             listOf(
@@ -314,13 +315,14 @@ class LinuxSandboxManager(
             try {
                 val rootfsDir = File(sandboxDir, "rootfs")
                 val executor = createProotExecutor()
+                downloader.fixAptDirectories(rootfsDir)
 
                 _state.value = SandboxState.Installing("Updating package lists...")
 
                 var updated = false
                 for (mirror in downloader.getMirrors(distro)) {
                     downloader.writeRepositories(rootfsDir, mirror, distro)
-                    val result = executor.execute(updateCmd, timeoutSeconds = 180)
+                    val result = executor.execute(updateCmd, timeoutSeconds = 120)
                     if (result["success"] as? Boolean == true) {
                         updated = true
                         break
@@ -338,15 +340,14 @@ class LinuxSandboxManager(
                     }
                 }
                 if (!updated) {
-                    android.util.Log.e("LinuxSandbox", "$updateCmd failed on all mirrors")
-                    _state.value = SandboxState.Error("$updateCmd failed — check device network connectivity")
-                    return@launch
+                    android.util.Log.w("LinuxSandbox", "$updateCmd timed out or failed — proceeding with cached package lists")
                 }
 
                 for (pkg in packages) {
                     ensureActive()
                     _state.value = SandboxState.Installing("Installing $pkg...")
                     val result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
+                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 30) }
                     ensureActive()
                     val success = result["success"] as? Boolean ?: false
                     if (!success) {
@@ -355,7 +356,11 @@ class LinuxSandboxManager(
                         val error = result["error"] as? String ?: ""
                         val timedOut = result["timed_out"] as? Boolean ?: false
                         val exitCode = result["exit_code"] as? Int ?: -1
-                        android.util.Log.e("LinuxSandbox", "Failed to install $pkg: exit=$exitCode timedOut=$timedOut error=$error stdout=$stdout stderr=$stderr")
+                        android.util.Log.w("LinuxSandbox", "Failed to install $pkg: exit=$exitCode timedOut=$timedOut error=$error stdout=$stdout stderr=$stderr")
+                        if (pkg == "apt-utils") {
+                            android.util.Log.w("LinuxSandbox", "apt-utils failure is non-fatal (debconf circular dep) — continuing")
+                            continue
+                        }
                         _state.value = SandboxState.Error("Failed to install $pkg: ${stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)}")
                         return@launch
                     }
