@@ -499,6 +499,15 @@ class AppSettings(internal val settings: Settings) {
     fun isWhatsAppReadOnly(): Boolean = settings.getBoolean(KEY_WHATSAPP_READ_ONLY, true)
     fun setWhatsAppReadOnly(readOnly: Boolean) { settings.putBoolean(KEY_WHATSAPP_READ_ONLY, readOnly) }
 
+    fun getWhatsAppReplyMode(): String = settings.getString(KEY_WHATSAPP_REPLY_MODE, "all")
+    fun setWhatsAppReplyMode(mode: String) { settings.putString(KEY_WHATSAPP_REPLY_MODE, mode) }
+
+    fun getWhatsAppAllowedContacts(): String = settings.getString(KEY_WHATSAPP_ALLOWED_CONTACTS, "")
+    fun setWhatsAppAllowedContacts(contacts: String) { settings.putString(KEY_WHATSAPP_ALLOWED_CONTACTS, contacts) }
+
+    fun isWhatsAppReadReceipt(): Boolean = settings.getBoolean(KEY_WHATSAPP_READ_RECEIPT, false)
+    fun setWhatsAppReadReceipt(enabled: Boolean) { settings.putBoolean(KEY_WHATSAPP_READ_RECEIPT, enabled) }
+
     // Baileys connection config
     fun getBaileysBrowserName(): String = settings.getString(KEY_BAILEYS_BROWSER_NAME, "Kai-custom")
     fun setBaileysBrowserName(v: String) { settings.putString(KEY_BAILEYS_BROWSER_NAME, v) }
@@ -998,6 +1007,9 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_WHATSAPP_QR_CODE = "whatsapp_qr_code"
         const val KEY_WHATSAPP_PENDING = "whatsapp_pending"
         const val KEY_WHATSAPP_READ_ONLY = "whatsapp_read_only"
+        const val KEY_WHATSAPP_REPLY_MODE = "whatsapp_reply_mode"
+        const val KEY_WHATSAPP_ALLOWED_CONTACTS = "whatsapp_allowed_contacts"
+        const val KEY_WHATSAPP_READ_RECEIPT = "whatsapp_read_receipt"
         const val KEY_BAILEYS_BROWSER_NAME = "baileys_browser_name"
         const val KEY_BAILEYS_BROWSER_VERSION = "baileys_browser_version"
         const val KEY_BAILEYS_MARK_ONLINE = "baileys_mark_online"

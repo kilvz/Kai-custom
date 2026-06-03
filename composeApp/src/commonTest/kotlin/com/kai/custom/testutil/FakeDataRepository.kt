@@ -458,6 +458,18 @@ class FakeDataRepository : DataRepository {
 
     override fun setWhatsAppReadOnly(readOnly: Boolean) {}
 
+    override fun getWhatsAppReplyMode(): String = "all"
+
+    override fun setWhatsAppReplyMode(mode: String) {}
+
+    override fun getWhatsAppAllowedContacts(): String = ""
+
+    override fun setWhatsAppAllowedContacts(contacts: String) {}
+
+    override fun isWhatsAppReadReceipt(): Boolean = false
+
+    override fun setWhatsAppReadReceipt(enabled: Boolean) {}
+
     override fun isWhatsAppEnabled(): Boolean = false
 
     override fun setWhatsAppEnabled(enabled: Boolean) {}

@@ -53,19 +53,36 @@ class WhatsAppPoller(
                 handleMessage(msg)
             }
 
-            client.callTool("clear_unread_messages", buildJsonObject { })
+            val markRead = whatsAppStore.isWhatsAppReadReceipt()
+            client.callTool("clear_unread_messages", buildJsonObject { put("markRead", JsonPrimitive(markRead)) })
         } catch (_: Exception) {
         }
     }
 
     private suspend fun handleMessage(msg: WhatsAppPendingMessage) {
         if (whatsAppStore.isWhatsAppReadOnly()) return
+        if (!shouldReply(msg)) return
         try {
             val response = dataRepository.value.askSilently(msg.text)
             if (response.isNotBlank()) {
                 sendMessage(msg.chatId, response)
             }
         } catch (_: Exception) {
+        }
+    }
+
+    private fun shouldReply(msg: WhatsAppPendingMessage): Boolean {
+        return when (whatsAppStore.getWhatsAppReplyMode()) {
+            "self" -> msg.fromMe
+            "selected" -> {
+                val contacts = whatsAppStore.getWhatsAppAllowedContacts()
+                    .split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+                if (contacts.isEmpty()) return false
+                contacts.any { msg.chatId.contains(it) || msg.fromName.contains(it) }
+            }
+            else -> !msg.fromMe
         }
     }
 

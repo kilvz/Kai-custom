@@ -1,5 +1,29 @@
 # Changelog
 
+## v3.9.0
+
+### WhatsApp — Reply Mode & Read Receipts
+- feat: reply mode selector — "Reply to all", "Reply to my messages only", "Reply to selected contacts"
+- feat: "my messages only" mode — AI only responds to messages you send from your phone (not AI-sent messages, avoids reply loops)
+- feat: "selected contacts" mode — enter comma-separated phone numbers to restrict replies
+- feat: read receipts toggle — control whether messages are marked as read (blue ticks) when polled
+- feat: "Experimental" label on WhatsApp toggle with warning banner (same style as Telegram)
+- fix: bridge.js now tracks AI-sent message IDs to prevent self-reply loops
+- fix: bridge.js includes `fromMe` field in pending messages for reply mode filtering
+- fix: `clear_unread_messages` tool accepts `markRead` parameter
+
+### Settings UI
+- feat: reply mode dropdown (all / my messages / selected contacts) shown when read-only is off
+- feat: allowed contacts text field shown when "selected contacts" mode is active
+- feat: read receipt toggle in WhatsApp section
+- fix: reorganized WhatsApp section layout
+
+### Debug API
+- feat: `whatsapp_reply_mode`, `whatsapp_allowed_contacts`, `whatsapp_read_receipt` settings exposed via GET/POST /settings/{key}
+
+### Infrastructure
+- feat: bridge.js base64 updated to v5 with sent-message tracking and read receipt support
+
 ## v3.8.0
 
 ### WhatsApp Integration

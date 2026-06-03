@@ -8,6 +8,7 @@ data class WhatsAppPendingMessage(
     val messageId: String,
     val text: String,
     val fromName: String,
+    val fromMe: Boolean = false,
     val timestamp: Long = 0,
 )
 
@@ -27,6 +28,15 @@ class WhatsAppStore(private val appSettings: AppSettings) {
 
     fun isWhatsAppReadOnly(): Boolean = appSettings.isWhatsAppReadOnly()
     fun setWhatsAppReadOnly(readOnly: Boolean) = appSettings.setWhatsAppReadOnly(readOnly)
+
+    fun getWhatsAppReplyMode(): String = appSettings.getWhatsAppReplyMode()
+    fun setWhatsAppReplyMode(mode: String) = appSettings.setWhatsAppReplyMode(mode)
+
+    fun getWhatsAppAllowedContacts(): String = appSettings.getWhatsAppAllowedContacts()
+    fun setWhatsAppAllowedContacts(contacts: String) = appSettings.setWhatsAppAllowedContacts(contacts)
+
+    fun isWhatsAppReadReceipt(): Boolean = appSettings.isWhatsAppReadReceipt()
+    fun setWhatsAppReadReceipt(enabled: Boolean) = appSettings.setWhatsAppReadReceipt(enabled)
 
     private val json = SharedJson
 

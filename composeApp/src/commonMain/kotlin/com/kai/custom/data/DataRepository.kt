@@ -117,6 +117,12 @@ interface DataRepository {
     fun setWhatsAppEnabled(enabled: Boolean)
     fun isWhatsAppReadOnly(): Boolean
     fun setWhatsAppReadOnly(readOnly: Boolean)
+    fun getWhatsAppReplyMode(): String
+    fun setWhatsAppReplyMode(mode: String)
+    fun getWhatsAppAllowedContacts(): String
+    fun setWhatsAppAllowedContacts(contacts: String)
+    fun isWhatsAppReadReceipt(): Boolean
+    fun setWhatsAppReadReceipt(enabled: Boolean)
     fun isWhatsAppAuthenticated(): Boolean
     fun setWhatsAppAuthenticated(auth: Boolean)
     fun getWhatsAppQrCode(): String

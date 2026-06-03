@@ -1,9 +1,11 @@
 package com.kai.custom.ui.settings
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,10 +16,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -155,10 +161,47 @@ private fun WhatsAppSection(
                     }
                 }
             },
+            actions = {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                ) {
+                    Text(
+                        text = "Experimental",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    )
+                }
+            },
         )
 
         if (isEnabled) {
             Spacer(Modifier.height(8.dp))
+
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "This feature is experimental and may not work reliably.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
 
             if (!sandboxStatus.ready) {
                 Surface(
@@ -186,27 +229,7 @@ private fun WhatsAppSection(
                 return@Column
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "Read only (AI reads but does not reply)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-                Switch(
-                    checked = isReadOnly,
-                    onCheckedChange = {
-                        isReadOnly = it
-                        dataRepository.setWhatsAppReadOnly(it)
-                    },
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
+            // Install / QR / Connected
             if (!dataRepository.isWhatsAppInstalled()) {
                 Button(
                     onClick = {
@@ -280,6 +303,120 @@ private fun WhatsAppSection(
                         text = "Connected",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Read receipt toggle
+            var readReceipt by remember { mutableStateOf(dataRepository.isWhatsAppReadReceipt()) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Send read receipts (blue ticks)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Switch(
+                    checked = readReceipt,
+                    onCheckedChange = {
+                        readReceipt = it
+                        dataRepository.setWhatsAppReadReceipt(it)
+                    },
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Read only toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Read only (AI reads but does not reply)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Switch(
+                    checked = isReadOnly,
+                    onCheckedChange = {
+                        isReadOnly = it
+                        dataRepository.setWhatsAppReadOnly(it)
+                    },
+                )
+            }
+
+            if (!isReadOnly) {
+                Spacer(Modifier.height(8.dp))
+
+                // Reply mode selector
+                val replyModes = listOf("all" to "Reply to all", "self" to "Reply to my messages only", "selected" to "Reply to selected contacts")
+                var replyMode by remember { mutableStateOf(dataRepository.getWhatsAppReplyMode()) }
+                var expanded by remember { mutableStateOf(false) }
+
+                Text(
+                    text = "Reply mode",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.height(4.dp))
+                Box {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.fillMaxWidth().handCursor().clickable { expanded = true },
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = replyModes.find { it.first == replyMode }?.second ?: replyMode,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Icon(
+                                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        replyModes.forEach { (value, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label) },
+                                onClick = {
+                                    replyMode = value
+                                    dataRepository.setWhatsAppReplyMode(value)
+                                    expanded = false
+                                },
+                            )
+                        }
+                    }
+                }
+
+                // Allowed contacts (only in "selected" mode)
+                if (replyMode == "selected") {
+                    Spacer(Modifier.height(8.dp))
+                    var contacts by remember { mutableStateOf(dataRepository.getWhatsAppAllowedContacts()) }
+                    OutlinedTextField(
+                        value = contacts,
+                        onValueChange = {
+                            contacts = it
+                            dataRepository.setWhatsAppAllowedContacts(it)
+                        },
+                        label = { Text("Allowed contacts (comma-separated phone numbers)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
                     )
                 }
             }

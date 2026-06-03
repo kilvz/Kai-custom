@@ -1976,6 +1976,24 @@ class RemoteDataRepository(
         appSettings.setWhatsAppReadOnly(readOnly)
     }
 
+    override fun getWhatsAppReplyMode(): String = appSettings.getWhatsAppReplyMode()
+
+    override fun setWhatsAppReplyMode(mode: String) {
+        appSettings.setWhatsAppReplyMode(mode)
+    }
+
+    override fun getWhatsAppAllowedContacts(): String = appSettings.getWhatsAppAllowedContacts()
+
+    override fun setWhatsAppAllowedContacts(contacts: String) {
+        appSettings.setWhatsAppAllowedContacts(contacts)
+    }
+
+    override fun isWhatsAppReadReceipt(): Boolean = appSettings.isWhatsAppReadReceipt()
+
+    override fun setWhatsAppReadReceipt(enabled: Boolean) {
+        appSettings.setWhatsAppReadReceipt(enabled)
+    }
+
     override fun isWhatsAppEnabled(): Boolean = appSettings.isWhatsAppEnabled()
 
     override fun setWhatsAppEnabled(enabled: Boolean) {
