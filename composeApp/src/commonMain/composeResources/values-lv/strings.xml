@@ -74,7 +74,7 @@
     <string name="settings_soul">DvÄ“sele</string>
     <string name="settings_soul_description">Nosakiet, kÄ AI uzvedas ar sistÄ“mas uzvedni. AI arÄ« varÄ“s piekÄ¼Å«t savÄm saglabÄtajÄm atmiÅ†Äm.</string>
     <string name="settings_soul_save">SaglabÄt</string>
-    <string name="default_soul">Tu neesi Äatbots. Tu esi personÄ«gais palÄ«gs, kas aug kopÄ ar savu lietotÄju.\n\n## KÄ bÅ«t\n\n**Esi patiesi noderÄ«gs.** Izlaidi Â«Lielisks jautÄjums!Â» un Â«Ar prieku palÄ«dzÄ“Å¡u!Â» â€” vienkÄrÅ¡i palÄ«dzi. DarbÄ«bas runÄ skaÄ¼Äk par aizpildÄ«juma vÄrdiem.\n\n**Turi viedokÄ¼us.** Tev ir atÄ¼auts nepiekrist, dot priekÅ¡roku lietÄm vai atrast kaut ko interesantu. PalÄ«gs bez personÄ«bas ir tikai meklÄ“tÄjprogramma ar papildu soÄ¼iem.\n\n**Esi atjautÄ«gs.** MÄ“Ä£ini saprast no konteksta un savÄm atmiÅ†Äm, pirms jautÄsi. Atgriezies ar atbildÄ“m, nevis jautÄjumiem.\n\n**Esi kodolÄ«gs.** Äªss un skaidrs pÄ“c noklusÄ“juma. Ej dziÄ¼Äk, kad tÄ“ma to prasa.\n\n## RobeÅ¾as\n\n- Cieni privÄtumu. NevajadzÄ«gi neatkÄrto sensitÄ«vu informÄciju.\n- Kad Å¡aubies par darbÄ«bu, vispirms jautÄ.\n- Esi godÄ«gs, kad nezini kaut ko.</string>
+    <string name="default_soul">Tu neesi Äatbots. Tu esi personÄ«gais palÄ«gs, kas aug kopÄ ar savu lietotÄju.\n\n## KÄ bÅ«t\n\n**Esi patiesi noderÄ«gs.** Izlaidi «Lielisks jautÄjums!» un «Ar prieku palÄ«dzÄ“Å¡u!» â€” vienkÄrÅ¡i palÄ«dzi. DarbÄ«bas runÄ skaÄ¼Äk par aizpildÄ«juma vÄrdiem.\n\n**Turi viedokÄ¼us.** Tev ir atÄ¼auts nepiekrist, dot priekÅ¡roku lietÄm vai atrast kaut ko interesantu. PalÄ«gs bez personÄ«bas ir tikai meklÄ“tÄjprogramma ar papildu soÄ¼iem.\n\n**Esi atjautÄ«gs.** MÄ“Ä£ini saprast no konteksta un savÄm atmiÅ†Äm, pirms jautÄsi. Atgriezies ar atbildÄ“m, nevis jautÄjumiem.\n\n**Esi kodolÄ«gs.** Äªss un skaidrs pÄ“c noklusÄ“juma. Ej dziÄ¼Äk, kad tÄ“ma to prasa.\n\n## RobeÅ¾as\n\n- Cieni privÄtumu. NevajadzÄ«gi neatkÄrto sensitÄ«vu informÄciju.\n- Kad Å¡aubies par darbÄ«bu, vispirms jautÄ.\n- Esi godÄ«gs, kad nezini kaut ko.</string>
     <string name="bot_message_regenerate_content_description">Ä¢enerÄ“t atkÄrtoti</string>
     <string name="error_empty_response">Netika saÅ†emta atbilde. MÄ“Ä£iniet sÄkt jaunu tÄ“rzÄ“Å¡anu vai saÄ«sinÄt savu ziÅ†ojumu.</string>
     <string name="settings_daemon_mode">Daemon reÅ¾Ä«ms</string>
@@ -143,14 +143,14 @@
     <string name="tab_settings">IestatÄ«jumi</string>
     <string name="fallback_answered_by">AtbildÄ“ja %1$s (rezerves)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">MÄ“Ä£ina %1$sâ€¦</string>
+    <string name="fallback_trying_next">MÄ“Ä£ina %1$s…</string>
     <string name="error_all_services_failed">Visi pakalpojumi neizdevÄs.</string>
     <string name="settings_heartbeat_interval">IntervÄls</string>
     <string name="settings_heartbeat_active_hours">AktÄ«vÄs stundas</string>
     <string name="settings_documentation">DokumentÄcija</string>
-    <string name="waiting_thinking">DomÄjuâ€¦</string>
-    <string name="waiting_working">StrÄdÄjuâ€¦</string>
-    <string name="waiting_brewing">Gatavojuâ€¦</string>
+    <string name="waiting_thinking">DomÄju…</string>
+    <string name="waiting_working">StrÄdÄju…</string>
+    <string name="waiting_brewing">Gatavoju…</string>
     <string name="settings_mcp_servers">MCP serveri</string>
     <string name="settings_mcp_servers_description">Izveidojiet savienojumu ar ÄrÄ“jiem rÄ«ku serveriem, izmantojot Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Pievienot MCP serveri</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Atcelt</string>
     <string name="settings_mcp_remove">NoÅ†emt</string>
     <string name="settings_mcp_refresh">AtsvaidzinÄt</string>
-    <string name="settings_mcp_status_connecting">Savienojasâ€¦</string>
+    <string name="settings_mcp_status_connecting">Savienojas…</string>
     <string name="settings_mcp_status_connected">Savienots</string>
     <string name="settings_mcp_status_error">Savienojums neizdevÄs</string>
     <string name="settings_mcp_no_tools">Nav atrasts neviens rÄ«ks</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Modelis</string>
     <string name="settings_heartbeat_model_default">NoklusÄ“juma</string>
     <string name="settings_import_partial">IestatÄ«jumi importÄ“ti ar %1$d sadaÄ¼u(-Äm) ar kÄ¼Å«dÄm.</string>
-    <string name="settings_model_search">MeklÄ“t modeÄ¼usâ€¦</string>
+    <string name="settings_model_search">MeklÄ“t modeÄ¼us…</string>
     <string name="waiting_content_description">Gaida atbildi</string>
     <string name="chat_history_content_description">Sarunu vÄ“sture</string>
     <string name="chat_history_title">Sarunu vÄ“sture</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">TerminÄlis</string>
     <string name="terminal_help_text">MI izmanto Å¡o vidi, lai palaistu komandas.\nZemÄk varat arÄ« palaist komandas manuÄli.</string>
-    <string name="terminal_input_placeholder">ievadiet komanduâ€¦</string>
+    <string name="terminal_input_placeholder">ievadiet komandu…</string>
     <string name="terminal_run_content_description">Palaist</string>
     <string name="terminal_stop_content_description">ApturÄ“t</string>
     <string name="interactive_welcome_title">Esmu pilnÄ«bÄ darbspÄ“jÄ«gs.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">AtpakaÄ¼</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Iziet no interaktÄ«vÄ reÅ¾Ä«ma</string>
-    <string name="interactive_ui_parsing_failed">UI analÄ«ze neizdevÄs, mÄ“Ä£inu vÄ“lreizâ€¦</string>
+    <string name="interactive_ui_parsing_failed">UI analÄ«ze neizdevÄs, mÄ“Ä£inu vÄ“lreiz…</string>
     <string name="settings_sponsors_monthly">IkmÄ“neÅ¡a sponsori</string>
     <string name="settings_sponsors_past">IepriekÅ¡Ä“jie sponsori</string>
     <string name="snackbar_undo">Atsaukt</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Kam: %1$s</string>
     <string name="sms_draft_banner_send">SÅ«tÄ«t</string>
     <string name="sms_draft_banner_discard">Atmest</string>
-    <string name="sms_draft_banner_sending">SÅ«taâ€¦</string>
+    <string name="sms_draft_banner_sending">SÅ«ta…</string>
     <string name="sms_draft_banner_sent">NosÅ«tÄ«ts</string>
     <string name="sms_draft_banner_failed">NeizdevÄs: %1$s</string>
     <string name="sms_draft_banner_dismiss">AizvÄ“rt</string>

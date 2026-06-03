@@ -499,7 +499,7 @@ class FakeDataRepository : DataRepository {
     override fun setSandboxEnabled(enabled: Boolean) {
     }
 
-    override fun isSandboxStorageMountEnabled(): Boolean = true
+    override fun isSandboxStorageMountEnabled(): Boolean = false
 
     override fun setSandboxStorageMountEnabled(enabled: Boolean) {
     }

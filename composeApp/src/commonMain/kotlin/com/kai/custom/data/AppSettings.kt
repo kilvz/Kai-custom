@@ -416,7 +416,7 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SANDBOX_ENABLED, enabled)
     }
 
-    fun isSandboxStorageMountEnabled(): Boolean = settings.getBoolean(KEY_SANDBOX_STORAGE_MOUNT, true)
+    fun isSandboxStorageMountEnabled(): Boolean = settings.getBoolean(KEY_SANDBOX_STORAGE_MOUNT, false)
 
     fun setSandboxStorageMountEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_SANDBOX_STORAGE_MOUNT, enabled)

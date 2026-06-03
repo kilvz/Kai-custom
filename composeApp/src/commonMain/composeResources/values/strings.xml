@@ -12,7 +12,7 @@
     <string name="settings_api_key_optional_label">API Key (optional)</string>
     <string name="settings_sign_in_copy_api_key_from">Sign in and copy your API key from</string>
     <string name="settings_model_label">Model</string>
-    <string name="settings_model_search">Search modelsâ€¦</string>
+    <string name="settings_model_search">Search models…</string>
     <string name="toggle_speech_output_content_description">Toggle speech output</string>
     <string name="settings_content_description">Settings</string>
     <string name="bot_message_speech_content_description">Speech</string>
@@ -58,9 +58,9 @@
     <string name="settings_tab_integrations">Integrations</string>
     <string name="settings_tab_ssh">SSH</string>
     <string name="tools_count">%1$d Tools</string>
-    <string name="waiting_thinking">Thinkingâ€¦</string>
-    <string name="waiting_working">Workingâ€¦</string>
-    <string name="waiting_brewing">Brewingâ€¦</string>
+    <string name="waiting_thinking">Thinking…</string>
+    <string name="waiting_working">Working…</string>
+    <string name="waiting_brewing">Brewing…</string>
     <string name="waiting_content_description">Waiting for response</string>
     <string name="privacy_agree_prefix">By using the service, you agree to the </string>
     <string name="privacy_policy">Privacy Policy</string>
@@ -218,7 +218,7 @@
     <string name="sms_draft_banner_to">To %1$s</string>
     <string name="sms_draft_banner_send">Send</string>
     <string name="sms_draft_banner_discard">Discard</string>
-    <string name="sms_draft_banner_sending">Sendingâ€¦</string>
+    <string name="sms_draft_banner_sending">Sending…</string>
     <string name="sms_draft_banner_sent">Sent</string>
     <string name="sms_draft_banner_failed">Failed: %1$s</string>
     <string name="sms_draft_banner_dismiss">Dismiss</string>
@@ -267,7 +267,7 @@
     <string name="settings_mcp_cancel">Cancel</string>
     <string name="settings_mcp_remove">Remove</string>
     <string name="settings_mcp_refresh">Refresh</string>
-    <string name="settings_mcp_status_connecting">Connectingâ€¦</string>
+    <string name="settings_mcp_status_connecting">Connecting…</string>
     <string name="settings_mcp_status_connected">Connected</string>
     <string name="settings_mcp_status_error">Connection failed</string>
     <string name="settings_mcp_no_tools">No tools discovered</string>
@@ -276,7 +276,7 @@
     <string name="tab_settings">Settings</string>
     <string name="fallback_answered_by">Answered by %1$s (fallback)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Trying %1$sâ€¦</string>
+    <string name="fallback_trying_next">Trying %1$s…</string>
     <string name="error_all_services_failed">All services failed.</string>
     <string name="settings_soul">Soul</string>
     <string name="settings_soul_description">Define how the AI behaves with a system prompt. The AI will also have access to its stored memories.</string>
@@ -318,7 +318,7 @@
     <string name="interactive_back_content_description">Back</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Exit interactive mode</string>
-    <string name="interactive_ui_parsing_failed">UI parsing failed, trying againâ€¦</string>
+    <string name="interactive_ui_parsing_failed">UI parsing failed, trying again…</string>
     <string name="conversation_untitled">Untitled</string>
     <string name="error_unsupported_file_type">This file type is not supported. You can attach images, text files, and PDFs.</string>
     <string name="error_file_too_large">File is too large. Text files must be under 100 KB.</string>
@@ -441,12 +441,12 @@
     <string name="settings_skills_add_github">Add from GitHub</string>
     <string name="settings_skills_github_url">GitHub URL</string>
     <string name="settings_skills_github_hint">Owner/repo/path or full URL</string>
-    <string name="settings_skills_installing">Installingâ€¦</string>
+    <string name="settings_skills_installing">Installing…</string>
     <string name="settings_skills_cancel">Cancel</string>
     <string name="settings_skills_install">Install</string>
     <string name="settings_skills_browse">Browse marketplaces</string>
-    <string name="settings_skills_browse_loading">Loadingâ€¦</string>
+    <string name="settings_skills_browse_loading">Loading…</string>
     <string name="settings_skills_browse_failed">Failed to load marketplaces</string>
-    <string name="settings_skills_search">Search skillsâ€¦</string>
+    <string name="settings_skills_search">Search skills…</string>
     <string name="settings_skills_search_empty">No skills found matching your search</string>
 </resources>

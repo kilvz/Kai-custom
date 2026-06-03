@@ -144,14 +144,14 @@
     <string name="tab_settings">ì„¤ì •</string>
     <string name="fallback_answered_by">%1$sì´(ê°€) ì‘ë‹µí•¨ (ëŒ€ì²´)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">%1$s ì‹œë„ ì¤‘â€¦</string>
+    <string name="fallback_trying_next">%1$s ì‹œë„ ì¤‘…</string>
     <string name="error_all_services_failed">ëª¨ë“  ì„œë¹„ìŠ¤ê°€ ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.</string>
     <string name="settings_heartbeat_interval">ê°„ê²©</string>
     <string name="settings_heartbeat_active_hours">í™œì„± ì‹œê°„</string>
     <string name="settings_documentation">ë¬¸ì„œ</string>
-    <string name="waiting_thinking">ìƒê° ì¤‘â€¦</string>
-    <string name="waiting_working">ìž‘ì—… ì¤‘â€¦</string>
-    <string name="waiting_brewing">ì¤€ë¹„ ì¤‘â€¦</string>
+    <string name="waiting_thinking">ìƒê° ì¤‘…</string>
+    <string name="waiting_working">ìž‘ì—… ì¤‘…</string>
+    <string name="waiting_brewing">ì¤€ë¹„ ì¤‘…</string>
     <string name="settings_mcp_servers">MCP ì„œë²„</string>
     <string name="settings_mcp_servers_description">Model Context Protocolì„ ì‚¬ìš©í•˜ì—¬ ì™¸ë¶€ ë„êµ¬ ì„œë²„ì— ì—°ê²°í•©ë‹ˆë‹¤.</string>
     <string name="settings_mcp_add_server">MCP ì„œë²„ ì¶”ê°€</string>
@@ -164,7 +164,7 @@
     <string name="settings_mcp_cancel">ì·¨ì†Œ</string>
     <string name="settings_mcp_remove">ì œê±°</string>
     <string name="settings_mcp_refresh">ìƒˆë¡œê³ ì¹¨</string>
-    <string name="settings_mcp_status_connecting">ì—°ê²° ì¤‘â€¦</string>
+    <string name="settings_mcp_status_connecting">ì—°ê²° ì¤‘…</string>
     <string name="settings_mcp_status_connected">ì—°ê²°ë¨</string>
     <string name="settings_mcp_status_error">ì—°ê²° ì‹¤íŒ¨</string>
     <string name="settings_mcp_no_tools">ë„êµ¬ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ</string>
@@ -192,7 +192,7 @@
     <string name="settings_heartbeat_model">ëª¨ë¸</string>
     <string name="settings_heartbeat_model_default">ê¸°ë³¸ê°’</string>
     <string name="settings_import_partial">%1$dê°œ ì„¹ì…˜ì— ì˜¤ë¥˜ê°€ ìžˆëŠ” ìƒíƒœë¡œ ì„¤ì •ì„ ê°€ì ¸ì™”ìŠµë‹ˆë‹¤.</string>
-    <string name="settings_model_search">ëª¨ë¸ ê²€ìƒ‰â€¦</string>
+    <string name="settings_model_search">ëª¨ë¸ ê²€ìƒ‰…</string>
     <string name="waiting_content_description">ì‘ë‹µ ëŒ€ê¸° ì¤‘</string>
     <string name="chat_history_content_description">ëŒ€í™” ê¸°ë¡</string>
     <string name="chat_history_title">ëŒ€í™” ê¸°ë¡</string>
@@ -224,7 +224,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">í„°ë¯¸ë„</string>
     <string name="terminal_help_text">AIëŠ” ì´ í™˜ê²½ì„ ì‚¬ìš©í•˜ì—¬ ëª…ë ¹ì„ ì‹¤í–‰í•©ë‹ˆë‹¤.\nì•„ëž˜ì—ì„œ ìˆ˜ë™ìœ¼ë¡œ ëª…ë ¹ì„ ì‹¤í–‰í•  ìˆ˜ë„ ìžˆìŠµë‹ˆë‹¤.</string>
-    <string name="terminal_input_placeholder">ëª…ë ¹ì–´ ìž…ë ¥â€¦</string>
+    <string name="terminal_input_placeholder">ëª…ë ¹ì–´ ìž…ë ¥…</string>
     <string name="terminal_run_content_description">ì‹¤í–‰</string>
     <string name="terminal_stop_content_description">ì¤‘ì§€</string>
     <string name="interactive_welcome_title">ì™„ì „ížˆ ìž‘ë™ ì¤‘ìž…ë‹ˆë‹¤.</string>
@@ -232,7 +232,7 @@
     <string name="interactive_back_content_description">ë’¤ë¡œ</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">ì¸í„°ëž™í‹°ë¸Œ ëª¨ë“œ ì¢…ë£Œ</string>
-    <string name="interactive_ui_parsing_failed">UI íŒŒì‹± ì‹¤íŒ¨, ë‹¤ì‹œ ì‹œë„ ì¤‘â€¦</string>
+    <string name="interactive_ui_parsing_failed">UI íŒŒì‹± ì‹¤íŒ¨, ë‹¤ì‹œ ì‹œë„ ì¤‘…</string>
     <string name="settings_sponsors_monthly">ì›”ê°„ í›„ì›ìž</string>
     <string name="settings_sponsors_past">ì´ì „ í›„ì›ìž</string>
     <string name="snackbar_undo">ì‹¤í–‰ ì·¨ì†Œ</string>
@@ -288,7 +288,7 @@
     <string name="sms_draft_banner_to">ë°›ëŠ” ì‚¬ëžŒ: %1$s</string>
     <string name="sms_draft_banner_send">ë³´ë‚´ê¸°</string>
     <string name="sms_draft_banner_discard">ì‚­ì œ</string>
-    <string name="sms_draft_banner_sending">ë³´ë‚´ëŠ” ì¤‘â€¦</string>
+    <string name="sms_draft_banner_sending">ë³´ë‚´ëŠ” ì¤‘…</string>
     <string name="sms_draft_banner_sent">ë³´ëƒ„</string>
     <string name="sms_draft_banner_failed">ì‹¤íŒ¨: %1$s</string>
     <string name="sms_draft_banner_dismiss">ë‹«ê¸°</string>

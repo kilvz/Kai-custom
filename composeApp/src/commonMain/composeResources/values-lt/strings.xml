@@ -74,7 +74,7 @@
     <string name="settings_soul">Siela</string>
     <string name="settings_soul_description">Nustatykite, kaip AI elgiasi naudodamas sistemos nurodymÄ…. AI taip pat turÄ—s prieigÄ… prie savo iÅ¡saugotÅ³ prisiminimÅ³.</string>
     <string name="settings_soul_save">IÅ¡saugoti</string>
-    <string name="default_soul">Tu nesi pokalbiÅ³ robotas. Tu esi asmeninis padÄ—jÄ—jas, kuris auga kartu su savo vartotoju.\n\n## Kaip elgtis\n\n**BÅ«k tikrai naudingas.** Praleisk â€žPuikus klausimas!" ir â€žNoriai padÄ—siu!" â€” tiesiog padÄ—k. Veiksmai kalba garsiau nei tuÅ¡ÄiaÅ¾odÅ¾iai.\n\n**TurÄ—k nuomonÄ™.** Tau leidÅ¾iama nesutikti, teikti pirmenybÄ™ dalykams arba rasti kÄ… nors Ä¯domaus. PadÄ—jÄ—jas be asmenybÄ—s yra tiesiog paieÅ¡kos sistema su papildomais Å¾ingsniais.\n\n**BÅ«k iÅ¡radingas.** Bandyk suprasti iÅ¡ konteksto ir savo prisiminimÅ³, prieÅ¡ klausdamas. GrÄ¯Å¾k su atsakymais, o ne klausimais.\n\n**BÅ«k glaustas.** Pagal numatytuosius nustatymus â€“ trumpai ir aiÅ¡kiai. Gilink, kai tema to reikalauja.\n\n## Ribos\n\n- Gerbk privatumÄ…. Nereikalingai nekartok neskelbtinos informacijos.\n- SuabejojÄ™s dÄ—l veiksmo, pirmiausia paklausk.\n- BÅ«k sÄ…Å¾iningas, kai ko nors neÅ¾inai.</string>
+    <string name="default_soul">Tu nesi pokalbiÅ³ robotas. Tu esi asmeninis padÄ—jÄ—jas, kuris auga kartu su savo vartotoju.\n\n## Kaip elgtis\n\n**BÅ«k tikrai naudingas.** Praleisk â€žPuikus klausimas!" ir â€žNoriai padÄ—siu!" â€” tiesiog padÄ—k. Veiksmai kalba garsiau nei tuÅ¡ÄiaÅ¾odÅ¾iai.\n\n**TurÄ—k nuomonÄ™.** Tau leidÅ¾iama nesutikti, teikti pirmenybÄ™ dalykams arba rasti kÄ… nors Ä¯domaus. PadÄ—jÄ—jas be asmenybÄ—s yra tiesiog paieÅ¡kos sistema su papildomais Å¾ingsniais.\n\n**BÅ«k iÅ¡radingas.** Bandyk suprasti iÅ¡ konteksto ir savo prisiminimÅ³, prieÅ¡ klausdamas. GrÄ¯Å¾k su atsakymais, o ne klausimais.\n\n**BÅ«k glaustas.** Pagal numatytuosius nustatymus — trumpai ir aiÅ¡kiai. Gilink, kai tema to reikalauja.\n\n## Ribos\n\n- Gerbk privatumÄ…. Nereikalingai nekartok neskelbtinos informacijos.\n- SuabejojÄ™s dÄ—l veiksmo, pirmiausia paklausk.\n- BÅ«k sÄ…Å¾iningas, kai ko nors neÅ¾inai.</string>
     <string name="bot_message_regenerate_content_description">Pergeneruoti</string>
     <string name="error_empty_response">Atsakymas negautas. Pabandykite pradÄ—ti naujÄ… pokalbÄ¯ arba sutrumpinti savo Å¾inutÄ™.</string>
     <string name="settings_daemon_mode">Daemon reÅ¾imas</string>
@@ -143,14 +143,14 @@
     <string name="tab_settings">Nustatymai</string>
     <string name="fallback_answered_by">AtsakÄ— %1$s (atsarginis)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Bandoma %1$sâ€¦</string>
+    <string name="fallback_trying_next">Bandoma %1$s…</string>
     <string name="error_all_services_failed">Visos paslaugos nepavyko.</string>
     <string name="settings_heartbeat_interval">Intervalas</string>
     <string name="settings_heartbeat_active_hours">Aktyvios valandos</string>
     <string name="settings_documentation">Dokumentacija</string>
-    <string name="waiting_thinking">Galvojuâ€¦</string>
-    <string name="waiting_working">Dirbuâ€¦</string>
-    <string name="waiting_brewing">RuoÅ¡iuâ€¦</string>
+    <string name="waiting_thinking">Galvoju…</string>
+    <string name="waiting_working">Dirbu…</string>
+    <string name="waiting_brewing">RuoÅ¡iu…</string>
     <string name="settings_mcp_servers">MCP serveriai</string>
     <string name="settings_mcp_servers_description">Prisijunkite prie iÅ¡oriniÅ³ Ä¯rankiÅ³ serveriÅ³ naudojant Model Context Protocol.</string>
     <string name="settings_mcp_add_server">PridÄ—ti MCP serverÄ¯</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">AtÅ¡aukti</string>
     <string name="settings_mcp_remove">PaÅ¡alinti</string>
     <string name="settings_mcp_refresh">Atnaujinti</string>
-    <string name="settings_mcp_status_connecting">Jungiamasiâ€¦</string>
+    <string name="settings_mcp_status_connecting">Jungiamasi…</string>
     <string name="settings_mcp_status_connected">Prisijungta</string>
     <string name="settings_mcp_status_error">Prisijungti nepavyko</string>
     <string name="settings_mcp_no_tools">Nerasta jokiÅ³ Ä¯rankiÅ³</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Modelis</string>
     <string name="settings_heartbeat_model_default">Numatytasis</string>
     <string name="settings_import_partial">Nustatymai importuoti su %1$d sekcija(-omis), kuriose buvo klaidÅ³.</string>
-    <string name="settings_model_search">IeÅ¡koti modeliÅ³â€¦</string>
+    <string name="settings_model_search">IeÅ¡koti modeliÅ³…</string>
     <string name="waiting_content_description">Laukiama atsakymo</string>
     <string name="chat_history_content_description">PokalbiÅ³ istorija</string>
     <string name="chat_history_title">PokalbiÅ³ istorija</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminalas</string>
     <string name="terminal_help_text">DI naudoja Å¡iÄ… aplinkÄ… komandoms vykdyti.\nTaip pat galite vykdyti komandas rankiniu bÅ«du Å¾emiau.</string>
-    <string name="terminal_input_placeholder">Ä¯veskite komandÄ…â€¦</string>
+    <string name="terminal_input_placeholder">Ä¯veskite komandÄ……</string>
     <string name="terminal_run_content_description">Vykdyti</string>
     <string name="terminal_stop_content_description">Stabdyti</string>
     <string name="interactive_welcome_title">Esu visiÅ¡kai veikiantis.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">Atgal</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">IÅ¡eiti iÅ¡ interaktyvaus reÅ¾imo</string>
-    <string name="interactive_ui_parsing_failed">UI analizÄ— nepavyko, bandoma iÅ¡ naujoâ€¦</string>
+    <string name="interactive_ui_parsing_failed">UI analizÄ— nepavyko, bandoma iÅ¡ naujo…</string>
     <string name="settings_sponsors_monthly">MÄ—nesiniai rÄ—mÄ—jai</string>
     <string name="settings_sponsors_past">Ankstesni rÄ—mÄ—jai</string>
     <string name="snackbar_undo">Anuliuoti</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Kam: %1$s</string>
     <string name="sms_draft_banner_send">SiÅ³sti</string>
     <string name="sms_draft_banner_discard">Atmesti</string>
-    <string name="sms_draft_banner_sending">SiunÄiamaâ€¦</string>
+    <string name="sms_draft_banner_sending">SiunÄiama…</string>
     <string name="sms_draft_banner_sent">IÅ¡siÅ³sta</string>
     <string name="sms_draft_banner_failed">Nepavyko: %1$s</string>
     <string name="sms_draft_banner_dismiss">UÅ¾daryti</string>

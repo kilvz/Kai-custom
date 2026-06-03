@@ -144,14 +144,14 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="tab_settings">Ustawienia</string>
     <string name="fallback_answered_by">Odpowiedziano przez %1$s (zapasowy)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">PrÃ³ba %1$sâ€¦</string>
+    <string name="fallback_trying_next">PrÃ³ba %1$s…</string>
     <string name="error_all_services_failed">Wszystkie usÅ‚ugi zawiodÅ‚y.</string>
     <string name="settings_heartbeat_interval">InterwaÅ‚</string>
     <string name="settings_heartbeat_active_hours">Aktywne godziny</string>
     <string name="settings_documentation">Dokumentacja</string>
-    <string name="waiting_thinking">MyÅ›lÄ™â€¦</string>
-    <string name="waiting_working">PracujÄ™â€¦</string>
-    <string name="waiting_brewing">PrzygotowujÄ™â€¦</string>
+    <string name="waiting_thinking">MyÅ›lÄ™…</string>
+    <string name="waiting_working">PracujÄ™…</string>
+    <string name="waiting_brewing">PrzygotowujÄ™…</string>
     <string name="settings_mcp_servers">Serwery MCP</string>
     <string name="settings_mcp_servers_description">PoÅ‚Ä…cz siÄ™ z zewnÄ™trznymi serwerami narzÄ™dzi za pomocÄ… Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Dodaj serwer MCP</string>
@@ -164,7 +164,7 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="settings_mcp_cancel">Anuluj</string>
     <string name="settings_mcp_remove">UsuÅ„</string>
     <string name="settings_mcp_refresh">OdÅ›wieÅ¼</string>
-    <string name="settings_mcp_status_connecting">ÅÄ…czenieâ€¦</string>
+    <string name="settings_mcp_status_connecting">ÅÄ…czenie…</string>
     <string name="settings_mcp_status_connected">PoÅ‚Ä…czono</string>
     <string name="settings_mcp_status_error">PoÅ‚Ä…czenie nie powiodÅ‚o siÄ™</string>
     <string name="settings_mcp_no_tools">Nie znaleziono narzÄ™dzi</string>
@@ -192,7 +192,7 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="settings_heartbeat_model">Model</string>
     <string name="settings_heartbeat_model_default">DomyÅ›lny</string>
     <string name="settings_import_partial">Ustawienia zaimportowane z %1$d sekcjÄ…(-ami) zawierajÄ…cÄ…(-ymi) bÅ‚Ä™dy.</string>
-    <string name="settings_model_search">Szukaj modeliâ€¦</string>
+    <string name="settings_model_search">Szukaj modeli…</string>
     <string name="waiting_content_description">Oczekiwanie na odpowiedÅº</string>
     <string name="chat_history_content_description">Historia czatÃ³w</string>
     <string name="chat_history_title">Historia czatÃ³w</string>
@@ -224,7 +224,7 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">AI uÅ¼ywa tego Å›rodowiska do uruchamiania poleceÅ„.\nMoÅ¼esz rÃ³wnieÅ¼ uruchamiaÄ‡ polecenia rÄ™cznie poniÅ¼ej.</string>
-    <string name="terminal_input_placeholder">wpisz polecenieâ€¦</string>
+    <string name="terminal_input_placeholder">wpisz polecenie…</string>
     <string name="terminal_run_content_description">Uruchom</string>
     <string name="terminal_stop_content_description">Zatrzymaj</string>
     <string name="interactive_welcome_title">Jestem w peÅ‚ni sprawny.</string>
@@ -232,7 +232,7 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="interactive_back_content_description">Wstecz</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">WyjdÅº z trybu interaktywnego</string>
-    <string name="interactive_ui_parsing_failed">Analiza UI nie powiodÅ‚a siÄ™, ponawiam prÃ³bÄ™â€¦</string>
+    <string name="interactive_ui_parsing_failed">Analiza UI nie powiodÅ‚a siÄ™, ponawiam prÃ³bÄ™…</string>
     <string name="settings_sponsors_monthly">MiesiÄ™czni sponsorzy</string>
     <string name="settings_sponsors_past">Poprzedni sponsorzy</string>
     <string name="snackbar_undo">Cofnij</string>
@@ -288,7 +288,7 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="sms_draft_banner_to">Do %1$s</string>
     <string name="sms_draft_banner_send">WyÅ›lij</string>
     <string name="sms_draft_banner_discard">OdrzuÄ‡</string>
-    <string name="sms_draft_banner_sending">WysyÅ‚anieâ€¦</string>
+    <string name="sms_draft_banner_sending">WysyÅ‚anie…</string>
     <string name="sms_draft_banner_sent">WysÅ‚ano</string>
     <string name="sms_draft_banner_failed">Nie udaÅ‚o siÄ™: %1$s</string>
     <string name="sms_draft_banner_dismiss">Zamknij</string>

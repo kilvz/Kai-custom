@@ -105,7 +105,7 @@
     <string name="tool_search_email_description">IÅ¡Äi e-poÅ¡tna sporoÄila po poÅ¡iljatelju, zadevi ali datumu</string>
     <string name="settings_email">E-poÅ¡ta</string>
     <string name="settings_email_description">PoveÅ¾ite e-poÅ¡tne raÄune za branje in odgovarjanje. V klepetu recite â€žpoveÅ¾i moj e-mail". E-poÅ¡ta se preverja v ozadju in jo prevzame heartbeat.</string>
-    <string name="settings_email_empty">Ni povezanih e-poÅ¡tnih raÄunov. V klepetu recite Â»poveÅ¾i mojo e-poÅ¡toÂ« za zaÄetek.</string>
+    <string name="settings_email_empty">Ni povezanih e-poÅ¡tnih raÄunov. V klepetu recite »poveÅ¾i mojo e-poÅ¡to« za zaÄetek.</string>
     <string name="settings_email_remove">Odstrani raÄun</string>
     <string name="settings_email_poll_interval">Preverjanje vsakih %1$d minut</string>
     <string name="settings_email_poll_never">Nikoli</string>
@@ -143,14 +143,14 @@
     <string name="tab_settings">Nastavitve</string>
     <string name="fallback_answered_by">Odgovoril %1$s (nadomestni)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">PoskuÅ¡am %1$sâ€¦</string>
+    <string name="fallback_trying_next">PoskuÅ¡am %1$s…</string>
     <string name="error_all_services_failed">Vse storitve niso uspele.</string>
     <string name="settings_heartbeat_interval">Interval</string>
     <string name="settings_heartbeat_active_hours">Aktivne ure</string>
     <string name="settings_documentation">Dokumentacija</string>
-    <string name="waiting_thinking">RazmiÅ¡ljamâ€¦</string>
-    <string name="waiting_working">Delamâ€¦</string>
-    <string name="waiting_brewing">Pripravljamâ€¦</string>
+    <string name="waiting_thinking">RazmiÅ¡ljam…</string>
+    <string name="waiting_working">Delam…</string>
+    <string name="waiting_brewing">Pripravljam…</string>
     <string name="settings_mcp_servers">MCP streÅ¾niki</string>
     <string name="settings_mcp_servers_description">PoveÅ¾ite se z zunanjimi streÅ¾niki orodij z uporabo Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Dodaj MCP streÅ¾nik</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">PrekliÄi</string>
     <string name="settings_mcp_remove">Odstrani</string>
     <string name="settings_mcp_refresh">OsveÅ¾i</string>
-    <string name="settings_mcp_status_connecting">Povezovanjeâ€¦</string>
+    <string name="settings_mcp_status_connecting">Povezovanje…</string>
     <string name="settings_mcp_status_connected">Povezano</string>
     <string name="settings_mcp_status_error">Povezava ni uspela</string>
     <string name="settings_mcp_no_tools">Ni najdenih orodij</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Model</string>
     <string name="settings_heartbeat_model_default">Privzeto</string>
     <string name="settings_import_partial">Nastavitve uvoÅ¾ene z %1$d razdelkom(-ki) z napakami.</string>
-    <string name="settings_model_search">Iskanje modelovâ€¦</string>
+    <string name="settings_model_search">Iskanje modelov…</string>
     <string name="waiting_content_description">ÄŒakanje na odgovor</string>
     <string name="chat_history_content_description">Zgodovina klepetov</string>
     <string name="chat_history_title">Zgodovina klepetov</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">UI uporablja to okolje za izvajanje ukazov.\nSpodaj lahko tudi roÄno izvajate ukaze.</string>
-    <string name="terminal_input_placeholder">vnesite ukazâ€¦</string>
+    <string name="terminal_input_placeholder">vnesite ukaz…</string>
     <string name="terminal_run_content_description">ZaÅ¾eni</string>
     <string name="terminal_stop_content_description">Ustavi</string>
     <string name="interactive_welcome_title">Popolnoma sem operativen.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">Nazaj</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Zapusti interaktivni naÄin</string>
-    <string name="interactive_ui_parsing_failed">RazÄlenjevanje UI ni uspelo, poskuÅ¡am znovaâ€¦</string>
+    <string name="interactive_ui_parsing_failed">RazÄlenjevanje UI ni uspelo, poskuÅ¡am znova…</string>
     <string name="settings_sponsors_monthly">MeseÄni sponzorji</string>
     <string name="settings_sponsors_past">PrejÅ¡nji sponzorji</string>
     <string name="snackbar_undo">Razveljavi</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Za %1$s</string>
     <string name="sms_draft_banner_send">PoÅ¡lji</string>
     <string name="sms_draft_banner_discard">Zavrzi</string>
-    <string name="sms_draft_banner_sending">PoÅ¡iljamâ€¦</string>
+    <string name="sms_draft_banner_sending">PoÅ¡iljam…</string>
     <string name="sms_draft_banner_sent">Poslano</string>
     <string name="sms_draft_banner_failed">NeuspeÅ¡no: %1$s</string>
     <string name="sms_draft_banner_dismiss">Opusti</string>

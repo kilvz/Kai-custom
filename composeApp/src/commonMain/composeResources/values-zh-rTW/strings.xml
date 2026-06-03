@@ -144,14 +144,14 @@
     <string name="tab_settings">è¨­å®š</string>
     <string name="fallback_answered_by">ç”± %1$s å›žç­”ï¼ˆå‚™ç”¨ï¼‰</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">æ­£åœ¨å˜—è©¦ %1$sâ€¦</string>
+    <string name="fallback_trying_next">æ­£åœ¨å˜—è©¦ %1$s…</string>
     <string name="error_all_services_failed">æ‰€æœ‰æœå‹™çš†å¤±æ•—ã€‚</string>
     <string name="settings_heartbeat_interval">é–“éš”</string>
     <string name="settings_heartbeat_active_hours">æ´»èºæ™‚æ®µ</string>
     <string name="settings_documentation">æ–‡ä»¶</string>
-    <string name="waiting_thinking">æ€è€ƒä¸­â€¦</string>
-    <string name="waiting_working">è™•ç†ä¸­â€¦</string>
-    <string name="waiting_brewing">æº–å‚™ä¸­â€¦</string>
+    <string name="waiting_thinking">æ€è€ƒä¸­…</string>
+    <string name="waiting_working">è™•ç†ä¸­…</string>
+    <string name="waiting_brewing">æº–å‚™ä¸­…</string>
     <string name="settings_mcp_servers">MCP ä¼ºæœå™¨</string>
     <string name="settings_mcp_servers_description">é€éŽ Model Context Protocol é€£æŽ¥åˆ°å¤–éƒ¨å·¥å…·ä¼ºæœå™¨ã€‚</string>
     <string name="settings_mcp_add_server">æ–°å¢ž MCP ä¼ºæœå™¨</string>
@@ -164,7 +164,7 @@
     <string name="settings_mcp_cancel">å–æ¶ˆ</string>
     <string name="settings_mcp_remove">ç§»é™¤</string>
     <string name="settings_mcp_refresh">é‡æ–°æ•´ç†</string>
-    <string name="settings_mcp_status_connecting">é€£ç·šä¸­â€¦</string>
+    <string name="settings_mcp_status_connecting">é€£ç·šä¸­…</string>
     <string name="settings_mcp_status_connected">å·²é€£ç·š</string>
     <string name="settings_mcp_status_error">é€£ç·šå¤±æ•—</string>
     <string name="settings_mcp_no_tools">æœªç™¼ç¾å·¥å…·</string>
@@ -192,7 +192,7 @@
     <string name="settings_heartbeat_model">æ¨¡åž‹</string>
     <string name="settings_heartbeat_model_default">é è¨­</string>
     <string name="settings_import_partial">è¨­å®šå·²åŒ¯å…¥ï¼Œå…¶ä¸­ %1$d å€‹éƒ¨åˆ†å­˜åœ¨éŒ¯èª¤ã€‚</string>
-    <string name="settings_model_search">æœå°‹æ¨¡åž‹â€¦</string>
+    <string name="settings_model_search">æœå°‹æ¨¡åž‹…</string>
     <string name="waiting_content_description">ç­‰å¾…å›žæ‡‰</string>
     <string name="chat_history_content_description">èŠå¤©è¨˜éŒ„</string>
     <string name="chat_history_title">èŠå¤©è¨˜éŒ„</string>
@@ -224,7 +224,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">çµ‚ç«¯æ©Ÿ</string>
     <string name="terminal_help_text">å®‰è£ Linux ç’°å¢ƒï¼Œè®“ AI å¯ä»¥ä»£æ‚¨åŸ·è¡ŒæŒ‡ä»¤ã€‚\næ‚¨ä¹Ÿå¯ä»¥åœ¨ä¸‹æ–¹æ‰‹å‹•åŸ·è¡ŒæŒ‡ä»¤ã€‚</string>
-    <string name="terminal_input_placeholder">è¼¸å…¥æŒ‡ä»¤â€¦</string>
+    <string name="terminal_input_placeholder">è¼¸å…¥æŒ‡ä»¤…</string>
     <string name="terminal_run_content_description">åŸ·è¡Œ</string>
     <string name="terminal_stop_content_description">åœæ­¢</string>
     <string name="interactive_welcome_title">æˆ‘å·²å®Œå…¨å°±ç·’ã€‚</string>
@@ -232,7 +232,7 @@
     <string name="interactive_back_content_description">è¿”å›ž</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">é€€å‡ºäº’å‹•æ¨¡å¼</string>
-    <string name="interactive_ui_parsing_failed">UI è§£æžå¤±æ•—ï¼Œæ­£åœ¨é‡è©¦â€¦</string>
+    <string name="interactive_ui_parsing_failed">UI è§£æžå¤±æ•—ï¼Œæ­£åœ¨é‡è©¦…</string>
     <string name="settings_sponsors_monthly">æ¯æœˆè´ŠåŠ©è€…</string>
     <string name="settings_sponsors_past">å…ˆå‰è´ŠåŠ©è€…</string>
     <string name="snackbar_undo">å¾©åŽŸ</string>
@@ -288,7 +288,7 @@
     <string name="sms_draft_banner_to">å‚³çµ¦ %1$s</string>
     <string name="sms_draft_banner_send">å‚³é€</string>
     <string name="sms_draft_banner_discard">æ¨æ£„</string>
-    <string name="sms_draft_banner_sending">å‚³é€ä¸­â€¦</string>
+    <string name="sms_draft_banner_sending">å‚³é€ä¸­…</string>
     <string name="sms_draft_banner_sent">å·²å‚³é€</string>
     <string name="sms_draft_banner_failed">å¤±æ•—ï¼š%1$s</string>
     <string name="sms_draft_banner_dismiss">é—œé–‰</string>

@@ -143,14 +143,14 @@
     <string name="tab_settings">Mipangilio</string>
     <string name="fallback_answered_by">Imejibiwa na %1$s (mbadala)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Inajaribu %1$sâ€¦</string>
+    <string name="fallback_trying_next">Inajaribu %1$s…</string>
     <string name="error_all_services_failed">Huduma zote zimeshindwa.</string>
     <string name="settings_heartbeat_interval">Muda</string>
     <string name="settings_heartbeat_active_hours">Masaa ya Shughuli</string>
     <string name="settings_documentation">Nyaraka</string>
-    <string name="waiting_thinking">Nafikiriâ€¦</string>
-    <string name="waiting_working">Nafanya kaziâ€¦</string>
-    <string name="waiting_brewing">Naandaaâ€¦</string>
+    <string name="waiting_thinking">Nafikiri…</string>
+    <string name="waiting_working">Nafanya kazi…</string>
+    <string name="waiting_brewing">Naandaa…</string>
     <string name="settings_mcp_servers">Seva za MCP</string>
     <string name="settings_mcp_servers_description">Unganisha na seva za zana za nje kwa kutumia Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Ongeza seva ya MCP</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Ghairi</string>
     <string name="settings_mcp_remove">Ondoa</string>
     <string name="settings_mcp_refresh">Onyesha upya</string>
-    <string name="settings_mcp_status_connecting">Inaunganishaâ€¦</string>
+    <string name="settings_mcp_status_connecting">Inaunganisha…</string>
     <string name="settings_mcp_status_connected">Imeunganishwa</string>
     <string name="settings_mcp_status_error">Muunganisho umeshindwa</string>
     <string name="settings_mcp_no_tools">Hakuna zana zilizogunduliwa</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Modeli</string>
     <string name="settings_heartbeat_model_default">Chaguo-msingi</string>
     <string name="settings_import_partial">Mipangilio imeagizwa na sehemu %1$d zenye makosa.</string>
-    <string name="settings_model_search">Tafuta miundoâ€¦</string>
+    <string name="settings_model_search">Tafuta miundo…</string>
     <string name="waiting_content_description">Inasubiri jibu</string>
     <string name="chat_history_content_description">Historia ya mazungumzo</string>
     <string name="chat_history_title">Historia ya Mazungumzo</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminali</string>
     <string name="terminal_help_text">AI hutumia mazingira haya kuendesha amri.\nUnaweza pia kuendesha amri wewe mwenyewe hapa chini.</string>
-    <string name="terminal_input_placeholder">ingiza amriâ€¦</string>
+    <string name="terminal_input_placeholder">ingiza amri…</string>
     <string name="terminal_run_content_description">Endesha</string>
     <string name="terminal_stop_content_description">Simamisha</string>
     <string name="interactive_welcome_title">Niko tayari kabisa kufanya kazi.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">Rudi</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Ondoka hali ya mwingiliano</string>
-    <string name="interactive_ui_parsing_failed">Uchambuzi wa UI umeshindwa, inajaribu tenaâ€¦</string>
+    <string name="interactive_ui_parsing_failed">Uchambuzi wa UI umeshindwa, inajaribu tena…</string>
     <string name="settings_sponsors_monthly">Wadhamini wa kila mwezi</string>
     <string name="settings_sponsors_past">Wadhamini wa awali</string>
     <string name="snackbar_undo">Tendua</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Kwa %1$s</string>
     <string name="sms_draft_banner_send">Tuma</string>
     <string name="sms_draft_banner_discard">Tupa</string>
-    <string name="sms_draft_banner_sending">Inatumaâ€¦</string>
+    <string name="sms_draft_banner_sending">Inatuma…</string>
     <string name="sms_draft_banner_sent">Imetumwa</string>
     <string name="sms_draft_banner_failed">Imeshindwa: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ondoa</string>

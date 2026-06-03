@@ -73,8 +73,15 @@ class AndroidSandboxController : SandboxController {
                 try {
                     val oldReady = previousState is SandboxState.Ready
                     _status.value = mapState(state)
-                    if (!oldReady && state is SandboxState.Ready && appSettings.isAltMemoryEnabled()) {
-                        scope.launch { altMemoryLifecycle.setupAndStart() }
+                    if (!oldReady && state is SandboxState.Ready) {
+                        scope.launch {
+                            altMemoryLifecycle.verifyInstalled()
+                            if (appSettings.isAltMemoryEnabled()) {
+                                altMemoryLifecycle.setupAndStart()
+                            }
+                            // If verifyInstalled reset the flag, re-emit so the UI picks it up.
+                            _status.value = mapState(state)
+                        }
                     }
                 } catch (e: Throwable) {
                     android.util.Log.e("SandboxController", "mapState failed for $state", e)
@@ -135,7 +142,9 @@ class AndroidSandboxController : SandboxController {
                 error = true,
                 statusText = "Error: ${state.message}",
                 diskUsageMB = cachedDiskUsageMB,
-                packagesInstalled = sandboxManager.arePackagesInstalled(),
+                // Force packagesInstalled=false so the Install Packages button
+                // reappears and the user can retry after a failed install.
+                packagesInstalled = false,
             )
         }
     }
@@ -433,7 +442,7 @@ class AndroidSandboxController : SandboxController {
             updateStatus(working = true, statusText = "Installing Alt-Memory (pip)…")
 
             val install = executor.execute(
-                "pip install --no-cache-dir --break-system-packages --root-user-action=ignore --retries 10 --timeout 30 alt-memory 2>&1",
+                "pip install --no-cache-dir --break-system-packages --retries 10 --timeout 30 alt-memory 2>&1",
                 timeoutSeconds = 600,
             )
             if (install["success"] as? Boolean != true) {

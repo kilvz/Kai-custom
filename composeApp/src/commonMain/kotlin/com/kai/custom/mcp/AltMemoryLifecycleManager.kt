@@ -37,6 +37,24 @@ class AltMemoryLifecycleManager(
     private var retryJob: Job? = null
 
     /**
+     * Check if the alt-memory package is actually importable in the current
+     * rootfs. If the app setting says installed but the package isn't there
+     * (e.g. after switching distros), reset the flag so the install button
+     * becomes available again.
+     */
+    suspend fun verifyInstalled() {
+        if (!appSettings.isAltMemoryInstalled()) return
+        val check = sandboxController.executeCommand(
+            command = "python3 -c 'import alt_memory; print(1)' 2>/dev/null",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+        )
+        if (check.trim() != "1") {
+            appSettings.setAltMemoryInstalled(false)
+        }
+    }
+
+    /**
      * Ensure alt-memory Python package is installed. Returns true when
      * installation succeeded (or was already installed). Idempotent.
      */
@@ -49,7 +67,19 @@ class AltMemoryLifecycleManager(
 
     suspend fun setupAndStart() {
         if (started) return
-        if (!appSettings.isAltMemoryInstalled()) return
+        if (appSettings.isAltMemoryInstalled()) {
+            val ok = sandboxController.executeCommand(
+                command = "python3 -c 'import alt_memory; print(1)' 2>/dev/null",
+                sessionId = SandboxSessions.SYSTEM,
+                useRoot = false,
+            )
+            if (ok.trim() != "1") {
+                appSettings.setAltMemoryInstalled(false)
+                return
+            }
+        } else {
+            return
+        }
         started = true
 
         // Register the built-in server config once (idempotent).

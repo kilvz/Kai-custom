@@ -143,14 +143,14 @@
     <string name="tab_settings">à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤œ</string>
     <string name="fallback_answered_by">%1$s à¤¨à¥‡ à¤‰à¤¤à¥à¤¤à¤° à¤¦à¤¿à¤²à¥‡ (à¤«à¥‰à¤²à¤¬à¥…à¤•)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">%1$s à¤ªà¥à¤°à¤¯à¤¤à¥à¤¨ à¤•à¤°à¤¤ à¤†à¤¹à¥‡â€¦</string>
+    <string name="fallback_trying_next">%1$s à¤ªà¥à¤°à¤¯à¤¤à¥à¤¨ à¤•à¤°à¤¤ à¤†à¤¹à¥‡…</string>
     <string name="error_all_services_failed">à¤¸à¤°à¥à¤µ à¤¸à¥‡à¤µà¤¾ à¤…à¤¯à¤¶à¤¸à¥à¤µà¥€ à¤à¤¾à¤²à¥à¤¯à¤¾.</string>
     <string name="settings_heartbeat_interval">à¤®à¤§à¥à¤¯à¤¾à¤‚à¤¤à¤°</string>
     <string name="settings_heartbeat_active_hours">à¤¸à¤•à¥à¤°à¤¿à¤¯ à¤¤à¤¾à¤¸</string>
     <string name="settings_documentation">à¤¦à¤¸à¥à¤¤à¤à¤µà¤œà¥€à¤•à¤°à¤£</string>
-    <string name="waiting_thinking">à¤µà¤¿à¤šà¤¾à¤° à¤•à¤°à¤¤ à¤†à¤¹à¥‡â€¦</string>
-    <string name="waiting_working">à¤•à¤¾à¤® à¤•à¤°à¤¤ à¤†à¤¹à¥‡â€¦</string>
-    <string name="waiting_brewing">à¤¤à¤¯à¤¾à¤° à¤•à¤°à¤¤ à¤†à¤¹à¥‡â€¦</string>
+    <string name="waiting_thinking">à¤µà¤¿à¤šà¤¾à¤° à¤•à¤°à¤¤ à¤†à¤¹à¥‡…</string>
+    <string name="waiting_working">à¤•à¤¾à¤® à¤•à¤°à¤¤ à¤†à¤¹à¥‡…</string>
+    <string name="waiting_brewing">à¤¤à¤¯à¤¾à¤° à¤•à¤°à¤¤ à¤†à¤¹à¥‡…</string>
     <string name="settings_mcp_servers">MCP à¤¸à¤°à¥à¤µà¥à¤¹à¤°à¥à¤¸</string>
     <string name="settings_mcp_servers_description">Model Context Protocol à¤µà¤¾à¤ªà¤°à¥‚à¤¨ à¤¬à¤¾à¤¹à¥à¤¯ à¤Ÿà¥‚à¤² à¤¸à¤°à¥à¤µà¥à¤¹à¤°à¥à¤¸à¤¶à¥€ à¤•à¤¨à¥‡à¤•à¥à¤Ÿ à¤•à¤°à¤¾.</string>
     <string name="settings_mcp_add_server">MCP à¤¸à¤°à¥à¤µà¥à¤¹à¤° à¤œà¥‹à¤¡à¤¾</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">à¤°à¤¦à¥à¤¦ à¤•à¤°à¤¾</string>
     <string name="settings_mcp_remove">à¤•à¤¾à¤¢à¤¾</string>
     <string name="settings_mcp_refresh">à¤°à¤¿à¤«à¥à¤°à¥‡à¤¶ à¤•à¤°à¤¾</string>
-    <string name="settings_mcp_status_connecting">à¤•à¤¨à¥‡à¤•à¥à¤Ÿ à¤¹à¥‹à¤¤ à¤†à¤¹à¥‡â€¦</string>
+    <string name="settings_mcp_status_connecting">à¤•à¤¨à¥‡à¤•à¥à¤Ÿ à¤¹à¥‹à¤¤ à¤†à¤¹à¥‡…</string>
     <string name="settings_mcp_status_connected">à¤•à¤¨à¥‡à¤•à¥à¤Ÿ à¤à¤¾à¤²à¥‡</string>
     <string name="settings_mcp_status_error">à¤•à¤¨à¥‡à¤•à¥à¤¶à¤¨ à¤…à¤¯à¤¶à¤¸à¥à¤µà¥€</string>
     <string name="settings_mcp_no_tools">à¤•à¥‹à¤£à¤¤à¥€à¤¹à¥€ à¤¸à¤¾à¤§à¤¨à¥‡ à¤¸à¤¾à¤ªà¤¡à¤²à¥€ à¤¨à¤¾à¤¹à¥€à¤¤</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">à¤®à¥‰à¤¡à¥‡à¤²</string>
     <string name="settings_heartbeat_model_default">à¤¡à¥€à¤«à¥‰à¤²à¥à¤Ÿ</string>
     <string name="settings_import_partial">%1$d à¤µà¤¿à¤­à¤¾à¤—(à¤¾à¤‚à¤®à¤§à¥à¤¯à¥‡) à¤¤à¥à¤°à¥à¤Ÿà¥€à¤‚à¤¸à¤¹ à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤œ à¤†à¤¯à¤¾à¤¤ à¤•à¥‡à¤²à¥à¤¯à¤¾.</string>
-    <string name="settings_model_search">à¤®à¥‰à¤¡à¥‡à¤² à¤¶à¥‹à¤§à¤¾â€¦</string>
+    <string name="settings_model_search">à¤®à¥‰à¤¡à¥‡à¤² à¤¶à¥‹à¤§à¤¾…</string>
     <string name="waiting_content_description">à¤ªà¥à¤°à¤¤à¤¿à¤¸à¤¾à¤¦à¤¾à¤šà¥€ à¤ªà¥à¤°à¤¤à¥€à¤•à¥à¤·à¤¾ à¤•à¤°à¤¤ à¤†à¤¹à¥‡</string>
     <string name="chat_history_content_description">à¤šà¥…à¤Ÿ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸</string>
     <string name="chat_history_title">à¤šà¥…à¤Ÿ à¤‡à¤¤à¤¿à¤¹à¤¾à¤¸</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">à¤Ÿà¤°à¥à¤®à¤¿à¤¨à¤²</string>
     <string name="terminal_help_text">AI à¤•à¤®à¤¾à¤‚à¤¡ à¤šà¤¾à¤²à¤µà¤£à¥à¤¯à¤¾à¤¸à¤¾à¤ à¥€ à¤¹à¥‡ à¤µà¤¾à¤¤à¤¾à¤µà¤°à¤£ à¤µà¤¾à¤ªà¤°à¤¤à¥‡.\nà¤¤à¥à¤®à¥à¤¹à¥€ à¤–à¤¾à¤²à¥€ à¤®à¥…à¤¨à¥à¤¯à¥à¤…à¤²à¥€ à¤¦à¥‡à¤–à¥€à¤² à¤•à¤®à¤¾à¤‚à¤¡ à¤šà¤¾à¤²à¤µà¥‚ à¤¶à¤•à¤¤à¤¾.</string>
-    <string name="terminal_input_placeholder">à¤•à¤®à¤¾à¤‚à¤¡ à¤ªà¥à¤°à¤µà¤¿à¤·à¥à¤Ÿ à¤•à¤°à¤¾â€¦</string>
+    <string name="terminal_input_placeholder">à¤•à¤®à¤¾à¤‚à¤¡ à¤ªà¥à¤°à¤µà¤¿à¤·à¥à¤Ÿ à¤•à¤°à¤¾…</string>
     <string name="terminal_run_content_description">à¤šà¤¾à¤²à¤µà¤¾</string>
     <string name="terminal_stop_content_description">à¤¥à¤¾à¤‚à¤¬à¤µà¤¾</string>
     <string name="interactive_welcome_title">à¤®à¥€ à¤ªà¥‚à¤°à¥à¤£à¤ªà¤£à¥‡ à¤•à¤¾à¤°à¥à¤¯à¤•à¥à¤·à¤® à¤†à¤¹à¥‡.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">à¤®à¤¾à¤—à¥‡</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">à¤‡à¤‚à¤Ÿà¤°à¥…à¤•à¥à¤Ÿà¤¿à¤µà¥à¤¹ à¤®à¥‹à¤¡à¤®à¤§à¥‚à¤¨ à¤¬à¤¾à¤¹à¥‡à¤° à¤ªà¤¡à¤¾</string>
-    <string name="interactive_ui_parsing_failed">UI à¤ªà¤¾à¤°à¥à¤¸à¤¿à¤‚à¤— à¤…à¤¯à¤¶à¤¸à¥à¤µà¥€, à¤ªà¥à¤¨à¥à¤¹à¤¾ à¤ªà¥à¤°à¤¯à¤¤à¥à¤¨ à¤•à¤°à¤¤ à¤†à¤¹à¥‡â€¦</string>
+    <string name="interactive_ui_parsing_failed">UI à¤ªà¤¾à¤°à¥à¤¸à¤¿à¤‚à¤— à¤…à¤¯à¤¶à¤¸à¥à¤µà¥€, à¤ªà¥à¤¨à¥à¤¹à¤¾ à¤ªà¥à¤°à¤¯à¤¤à¥à¤¨ à¤•à¤°à¤¤ à¤†à¤¹à¥‡…</string>
     <string name="settings_sponsors_monthly">à¤®à¤¾à¤¸à¤¿à¤• à¤ªà¥à¤°à¤¾à¤¯à¥‹à¤œà¤•</string>
     <string name="settings_sponsors_past">à¤®à¤¾à¤—à¥€à¤² à¤ªà¥à¤°à¤¾à¤¯à¥‹à¤œà¤•</string>
     <string name="snackbar_undo">à¤ªà¥‚à¤°à¥à¤µà¤µà¤¤ à¤•à¤°à¤¾</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">%1$s à¤²à¤¾</string>
     <string name="sms_draft_banner_send">à¤ªà¤¾à¤ à¤µà¤¾</string>
     <string name="sms_draft_banner_discard">à¤Ÿà¤¾à¤•à¥‚à¤¨ à¤¦à¥à¤¯à¤¾</string>
-    <string name="sms_draft_banner_sending">à¤ªà¤¾à¤ à¤µà¤¤ à¤†à¤¹à¥‡â€¦</string>
+    <string name="sms_draft_banner_sending">à¤ªà¤¾à¤ à¤µà¤¤ à¤†à¤¹à¥‡…</string>
     <string name="sms_draft_banner_sent">à¤ªà¤¾à¤ à¤µà¤²à¥‡</string>
     <string name="sms_draft_banner_failed">à¤…à¤¯à¤¶à¤¸à¥à¤µà¥€: %1$s</string>
     <string name="sms_draft_banner_dismiss">à¤°à¤¦à¥à¤¦ à¤•à¤°à¤¾</string>

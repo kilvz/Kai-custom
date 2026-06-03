@@ -143,14 +143,14 @@
     <string name="tab_settings">SetÄƒri</string>
     <string name="fallback_answered_by">RÄƒspuns de %1$s (rezervÄƒ)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Se Ã®ncearcÄƒ %1$sâ€¦</string>
+    <string name="fallback_trying_next">Se Ã®ncearcÄƒ %1$s…</string>
     <string name="error_all_services_failed">Toate serviciile au eÈ™uat.</string>
     <string name="settings_heartbeat_interval">Interval</string>
     <string name="settings_heartbeat_active_hours">Ore active</string>
     <string name="settings_documentation">DocumentaÈ›ie</string>
-    <string name="waiting_thinking">GÃ¢ndescâ€¦</string>
-    <string name="waiting_working">Lucrezâ€¦</string>
-    <string name="waiting_brewing">PregÄƒtescâ€¦</string>
+    <string name="waiting_thinking">GÃ¢ndesc…</string>
+    <string name="waiting_working">Lucrez…</string>
+    <string name="waiting_brewing">PregÄƒtesc…</string>
     <string name="settings_mcp_servers">Servere MCP</string>
     <string name="settings_mcp_servers_description">ConectaÈ›i-vÄƒ la servere de instrumente externe folosind Model Context Protocol.</string>
     <string name="settings_mcp_add_server">AdÄƒugare server MCP</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Anulare</string>
     <string name="settings_mcp_remove">Eliminare</string>
     <string name="settings_mcp_refresh">ReÃ®mprospÄƒtare</string>
-    <string name="settings_mcp_status_connecting">Se conecteazÄƒâ€¦</string>
+    <string name="settings_mcp_status_connecting">Se conecteazÄƒ…</string>
     <string name="settings_mcp_status_connected">Conectat</string>
     <string name="settings_mcp_status_error">Conexiune eÈ™uatÄƒ</string>
     <string name="settings_mcp_no_tools">Niciun instrument descoperit</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Model</string>
     <string name="settings_heartbeat_model_default">Implicit</string>
     <string name="settings_import_partial">SetÄƒri importate cu %1$d secÈ›iune(i) cu erori.</string>
-    <string name="settings_model_search">CÄƒutare modeleâ€¦</string>
+    <string name="settings_model_search">CÄƒutare modele…</string>
     <string name="waiting_content_description">Se aÈ™teaptÄƒ rÄƒspunsul</string>
     <string name="chat_history_content_description">Istoricul conversaÈ›iilor</string>
     <string name="chat_history_title">Istoricul conversaÈ›iilor</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">AI-ul foloseÈ™te acest mediu pentru a rula comenzi.\nPoÈ›i rula È™i comenzi manual mai jos.</string>
-    <string name="terminal_input_placeholder">introduceÈ›i comandaâ€¦</string>
+    <string name="terminal_input_placeholder">introduceÈ›i comanda…</string>
     <string name="terminal_run_content_description">Rulare</string>
     <string name="terminal_stop_content_description">OpreÈ™te</string>
     <string name="interactive_welcome_title">Sunt complet operaÈ›ional.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">ÃŽnapoi</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">IeÈ™ire din modul interactiv</string>
-    <string name="interactive_ui_parsing_failed">Analiza UI a eÈ™uat, se Ã®ncearcÄƒ din nouâ€¦</string>
+    <string name="interactive_ui_parsing_failed">Analiza UI a eÈ™uat, se Ã®ncearcÄƒ din nou…</string>
     <string name="settings_sponsors_monthly">Sponsori lunari</string>
     <string name="settings_sponsors_past">Sponsori anteriori</string>
     <string name="snackbar_undo">Anulare</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">CÄƒtre %1$s</string>
     <string name="sms_draft_banner_send">Trimite</string>
     <string name="sms_draft_banner_discard">RenunÈ›Äƒ</string>
-    <string name="sms_draft_banner_sending">Se trimiteâ€¦</string>
+    <string name="sms_draft_banner_sending">Se trimite…</string>
     <string name="sms_draft_banner_sent">Trimis</string>
     <string name="sms_draft_banner_failed">EÈ™uat: %1$s</string>
     <string name="sms_draft_banner_dismiss">ÃŽnchide</string>

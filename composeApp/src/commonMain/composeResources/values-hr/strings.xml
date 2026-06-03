@@ -143,14 +143,14 @@
     <string name="tab_settings">Postavke</string>
     <string name="fallback_answered_by">Odgovorio %1$s (zamjena)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">PokuÅ¡avam %1$sâ€¦</string>
+    <string name="fallback_trying_next">PokuÅ¡avam %1$s…</string>
     <string name="error_all_services_failed">Sve usluge nisu uspjele.</string>
     <string name="settings_heartbeat_interval">Interval</string>
     <string name="settings_heartbeat_active_hours">Aktivni sati</string>
     <string name="settings_documentation">Dokumentacija</string>
-    <string name="waiting_thinking">RazmiÅ¡ljamâ€¦</string>
-    <string name="waiting_working">Radimâ€¦</string>
-    <string name="waiting_brewing">Pripremamâ€¦</string>
+    <string name="waiting_thinking">RazmiÅ¡ljam…</string>
+    <string name="waiting_working">Radim…</string>
+    <string name="waiting_brewing">Pripremam…</string>
     <string name="settings_mcp_servers">MCP posluÅ¾itelji</string>
     <string name="settings_mcp_servers_description">PoveÅ¾ite se s vanjskim posluÅ¾iteljima alata putem Model Context Protocola.</string>
     <string name="settings_mcp_add_server">Dodaj MCP posluÅ¾itelj</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Odustani</string>
     <string name="settings_mcp_remove">Ukloni</string>
     <string name="settings_mcp_refresh">OsvjeÅ¾i</string>
-    <string name="settings_mcp_status_connecting">Povezivanjeâ€¦</string>
+    <string name="settings_mcp_status_connecting">Povezivanje…</string>
     <string name="settings_mcp_status_connected">Povezano</string>
     <string name="settings_mcp_status_error">Povezivanje nije uspjelo</string>
     <string name="settings_mcp_no_tools">Nisu pronaÄ‘eni alati</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Model</string>
     <string name="settings_heartbeat_model_default">Zadano</string>
     <string name="settings_import_partial">Postavke uvezene s %1$d odjeljkom/odjeljcima s pogreÅ¡kama.</string>
-    <string name="settings_model_search">PretraÅ¾i modeleâ€¦</string>
+    <string name="settings_model_search">PretraÅ¾i modele…</string>
     <string name="waiting_content_description">ÄŒekanje odgovora</string>
     <string name="chat_history_content_description">Povijest razgovora</string>
     <string name="chat_history_title">Povijest razgovora</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">AI koristi ovo okruÅ¾enje za pokretanje naredbi.\nTakoÄ‘er moÅ¾ete ruÄno pokretati naredbe u nastavku.</string>
-    <string name="terminal_input_placeholder">unesite naredbuâ€¦</string>
+    <string name="terminal_input_placeholder">unesite naredbu…</string>
     <string name="terminal_run_content_description">Pokreni</string>
     <string name="terminal_stop_content_description">Zaustavi</string>
     <string name="interactive_welcome_title">Potpuno sam operativan.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">Natrag</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">IzaÄ‘i iz interaktivnog naÄina</string>
-    <string name="interactive_ui_parsing_failed">RaÅ¡Älamba korisniÄkog suÄelja nije uspjela, pokuÅ¡avam ponovoâ€¦</string>
+    <string name="interactive_ui_parsing_failed">RaÅ¡Älamba korisniÄkog suÄelja nije uspjela, pokuÅ¡avam ponovo…</string>
     <string name="settings_sponsors_monthly">MjeseÄni sponzori</string>
     <string name="settings_sponsors_past">Prethodni sponzori</string>
     <string name="snackbar_undo">PoniÅ¡ti</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Za %1$s</string>
     <string name="sms_draft_banner_send">PoÅ¡alji</string>
     <string name="sms_draft_banner_discard">Odbaci</string>
-    <string name="sms_draft_banner_sending">Slanjeâ€¦</string>
+    <string name="sms_draft_banner_sending">Slanje…</string>
     <string name="sms_draft_banner_sent">Poslano</string>
     <string name="sms_draft_banner_failed">Neuspjelo: %1$s</string>
     <string name="sms_draft_banner_dismiss">Zatvori</string>

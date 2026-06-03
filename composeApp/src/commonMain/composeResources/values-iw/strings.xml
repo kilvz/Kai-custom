@@ -143,14 +143,14 @@
     <string name="tab_settings">×”×’×“×¨×•×ª</string>
     <string name="fallback_answered_by">× ×¢× ×” ×¢×œ ×™×“×™ %1$s (×—×œ×•×¤×™)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">×ž× ×¡×” ××ª %1$sâ€¦</string>
+    <string name="fallback_trying_next">×ž× ×¡×” ××ª %1$s…</string>
     <string name="error_all_services_failed">×›×œ ×”×©×™×¨×•×ª×™× × ×›×©×œ×•.</string>
     <string name="settings_heartbeat_interval">×ž×¨×•×•×—</string>
     <string name="settings_heartbeat_active_hours">×©×¢×•×ª ×¤×¢×™×œ×•×ª</string>
     <string name="settings_documentation">×ª×™×¢×•×“</string>
-    <string name="waiting_thinking">×—×•×©×‘â€¦</string>
-    <string name="waiting_working">×¢×•×‘×“â€¦</string>
-    <string name="waiting_brewing">×ž×›×™×Ÿâ€¦</string>
+    <string name="waiting_thinking">×—×•×©×‘…</string>
+    <string name="waiting_working">×¢×•×‘×“…</string>
+    <string name="waiting_brewing">×ž×›×™×Ÿ…</string>
     <string name="settings_mcp_servers">×©×¨×ª×™ MCP</string>
     <string name="settings_mcp_servers_description">×”×ª×—×‘×¨ ×œ×©×¨×ª×™ ×›×œ×™× ×—×™×¦×•× ×™×™× ×‘××ž×¦×¢×•×ª Model Context Protocol.</string>
     <string name="settings_mcp_add_server">×”×•×¡×£ ×©×¨×ª MCP</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">×‘×™×˜×•×œ</string>
     <string name="settings_mcp_remove">×”×¡×¨</string>
     <string name="settings_mcp_refresh">×¨×¢× ×Ÿ</string>
-    <string name="settings_mcp_status_connecting">×ž×ª×—×‘×¨â€¦</string>
+    <string name="settings_mcp_status_connecting">×ž×ª×—×‘×¨…</string>
     <string name="settings_mcp_status_connected">×ž×—×•×‘×¨</string>
     <string name="settings_mcp_status_error">×”×—×™×‘×•×¨ × ×›×©×œ</string>
     <string name="settings_mcp_no_tools">×œ× × ×ž×¦××• ×›×œ×™×</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">×ž×•×“×œ</string>
     <string name="settings_heartbeat_model_default">×‘×¨×™×¨×ª ×ž×—×“×œ</string>
     <string name="settings_import_partial">×”×”×’×“×¨×•×ª ×™×•×‘××• ×¢× %1$d ×§×˜×¢(×™×) ×©×”×›×™×œ×• ×©×’×™××•×ª.</string>
-    <string name="settings_model_search">×—×™×¤×•×© ×ž×•×“×œ×™×â€¦</string>
+    <string name="settings_model_search">×—×™×¤×•×© ×ž×•×“×œ×™×…</string>
     <string name="waiting_content_description">×ž×ž×ª×™×Ÿ ×œ×ª×’×•×‘×”</string>
     <string name="chat_history_content_description">×”×™×¡×˜×•×¨×™×™×ª ×¦×³××˜</string>
     <string name="chat_history_title">×”×™×¡×˜×•×¨×™×™×ª ×¦×³××˜</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d ×ž"×‘</string>
     <string name="terminal_title">×ž×¡×•×£</string>
     <string name="terminal_help_text">×”-AI ×ž×©×ª×ž×© ×‘×¡×‘×™×‘×” ×–×• ×›×“×™ ×œ×”×¨×™×¥ ×¤×§×•×“×•×ª.\n××ª×” ×™×›×•×œ ×’× ×œ×”×¨×™×¥ ×¤×§×•×“×•×ª ×™×“× ×™×ª ×œ×ž×˜×”.</string>
-    <string name="terminal_input_placeholder">×”×–×™× ×• ×¤×§×•×“×”â€¦</string>
+    <string name="terminal_input_placeholder">×”×–×™× ×• ×¤×§×•×“×”…</string>
     <string name="terminal_run_content_description">×”×¤×¢×œ×”</string>
     <string name="terminal_stop_content_description">×¢×¦×•×¨</string>
     <string name="interactive_welcome_title">×× ×™ ×¤×¢×™×œ ×œ×—×œ×•×˜×™×Ÿ.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">×—×–×¨×”</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">×™×¦×™××” ×ž×ž×¦×‘ ××™× ×˜×¨××§×˜×™×‘×™</string>
-    <string name="interactive_ui_parsing_failed">× ×™×ª×•×— ×ž×ž×©×§ ×”×ž×©×ª×ž×© × ×›×©×œ, ×ž× ×¡×” ×©×•×‘â€¦</string>
+    <string name="interactive_ui_parsing_failed">× ×™×ª×•×— ×ž×ž×©×§ ×”×ž×©×ª×ž×© × ×›×©×œ, ×ž× ×¡×” ×©×•×‘…</string>
     <string name="settings_sponsors_monthly">× ×•×ª× ×™ ×—×¡×•×ª ×—×•×“×©×™×™×</string>
     <string name="settings_sponsors_past">× ×•×ª× ×™ ×—×¡×•×ª ×§×•×“×ž×™×</string>
     <string name="snackbar_undo">×‘×˜×œ</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">××œ %1$s</string>
     <string name="sms_draft_banner_send">×©×œ×—</string>
     <string name="sms_draft_banner_discard">×‘×˜×œ</string>
-    <string name="sms_draft_banner_sending">×©×•×œ×—â€¦</string>
+    <string name="sms_draft_banner_sending">×©×•×œ×—…</string>
     <string name="sms_draft_banner_sent">× ×©×œ×—</string>
     <string name="sms_draft_banner_failed">× ×›×©×œ: %1$s</string>
     <string name="sms_draft_banner_dismiss">×¡×’×•×¨</string>

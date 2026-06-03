@@ -143,14 +143,14 @@
     <string name="tab_settings">Pengaturan</string>
     <string name="fallback_answered_by">Dijawab oleh %1$s (cadangan)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Mencoba %1$sâ€¦</string>
+    <string name="fallback_trying_next">Mencoba %1$s…</string>
     <string name="error_all_services_failed">Semua layanan gagal.</string>
     <string name="settings_heartbeat_interval">Interval</string>
     <string name="settings_heartbeat_active_hours">Jam Aktif</string>
     <string name="settings_documentation">Dokumentasi</string>
-    <string name="waiting_thinking">Berpikirâ€¦</string>
-    <string name="waiting_working">Bekerjaâ€¦</string>
-    <string name="waiting_brewing">Menyiapkanâ€¦</string>
+    <string name="waiting_thinking">Berpikir…</string>
+    <string name="waiting_working">Bekerja…</string>
+    <string name="waiting_brewing">Menyiapkan…</string>
     <string name="settings_mcp_servers">Server MCP</string>
     <string name="settings_mcp_servers_description">Hubungkan ke server alat eksternal menggunakan Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Tambah Server MCP</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Batal</string>
     <string name="settings_mcp_remove">Hapus</string>
     <string name="settings_mcp_refresh">Segarkan</string>
-    <string name="settings_mcp_status_connecting">Menghubungkanâ€¦</string>
+    <string name="settings_mcp_status_connecting">Menghubungkan…</string>
     <string name="settings_mcp_status_connected">Terhubung</string>
     <string name="settings_mcp_status_error">Koneksi gagal</string>
     <string name="settings_mcp_no_tools">Tidak ada alat ditemukan</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Model</string>
     <string name="settings_heartbeat_model_default">Bawaan</string>
     <string name="settings_import_partial">Pengaturan diimpor dengan %1$d bagian yang memiliki kesalahan.</string>
-    <string name="settings_model_search">Cari modelâ€¦</string>
+    <string name="settings_model_search">Cari model…</string>
     <string name="waiting_content_description">Menunggu respons</string>
     <string name="chat_history_content_description">Riwayat obrolan</string>
     <string name="chat_history_title">Riwayat Obrolan</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">AI menggunakan lingkungan ini untuk menjalankan perintah.\nAnda juga dapat menjalankan perintah secara manual di bawah.</string>
-    <string name="terminal_input_placeholder">masukkan perintahâ€¦</string>
+    <string name="terminal_input_placeholder">masukkan perintah…</string>
     <string name="terminal_run_content_description">Jalankan</string>
     <string name="terminal_stop_content_description">Hentikan</string>
     <string name="interactive_welcome_title">Saya sepenuhnya beroperasi.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">Kembali</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Keluar dari mode interaktif</string>
-    <string name="interactive_ui_parsing_failed">Penguraian UI gagal, mencoba lagiâ€¦</string>
+    <string name="interactive_ui_parsing_failed">Penguraian UI gagal, mencoba lagi…</string>
     <string name="settings_sponsors_monthly">Sponsor Bulanan</string>
     <string name="settings_sponsors_past">Sponsor Sebelumnya</string>
     <string name="snackbar_undo">Urungkan</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Kepada %1$s</string>
     <string name="sms_draft_banner_send">Kirim</string>
     <string name="sms_draft_banner_discard">Buang</string>
-    <string name="sms_draft_banner_sending">Mengirimâ€¦</string>
+    <string name="sms_draft_banner_sending">Mengirim…</string>
     <string name="sms_draft_banner_sent">Terkirim</string>
     <string name="sms_draft_banner_failed">Gagal: %1$s</string>
     <string name="sms_draft_banner_dismiss">Tutup</string>

@@ -143,14 +143,14 @@
     <string name="tab_settings">Mga Setting</string>
     <string name="fallback_answered_by">Sinagot ng %1$s (fallback)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Sinusubukan ang %1$sâ€¦</string>
+    <string name="fallback_trying_next">Sinusubukan ang %1$s…</string>
     <string name="error_all_services_failed">Nabigo ang lahat ng serbisyo.</string>
     <string name="settings_heartbeat_interval">Pagitan</string>
     <string name="settings_heartbeat_active_hours">Mga Aktibong Oras</string>
     <string name="settings_documentation">Dokumentasyon</string>
-    <string name="waiting_thinking">Nag-iisipâ€¦</string>
-    <string name="waiting_working">Nagtatrabahoâ€¦</string>
-    <string name="waiting_brewing">Naghahandaâ€¦</string>
+    <string name="waiting_thinking">Nag-iisip…</string>
+    <string name="waiting_working">Nagtatrabaho…</string>
+    <string name="waiting_brewing">Naghahanda…</string>
     <string name="settings_mcp_servers">Mga MCP Server</string>
     <string name="settings_mcp_servers_description">Kumonekta sa mga external na tool server gamit ang Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Magdagdag ng MCP Server</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">Kanselahin</string>
     <string name="settings_mcp_remove">Alisin</string>
     <string name="settings_mcp_refresh">I-refresh</string>
-    <string name="settings_mcp_status_connecting">Kumokonektaâ€¦</string>
+    <string name="settings_mcp_status_connecting">Kumokonekta…</string>
     <string name="settings_mcp_status_connected">Konektado</string>
     <string name="settings_mcp_status_error">Nabigo ang koneksyon</string>
     <string name="settings_mcp_no_tools">Walang nahanap na tools</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">Modelo</string>
     <string name="settings_heartbeat_model_default">Default</string>
     <string name="settings_import_partial">Na-import ang mga setting na may %1$d na seksyon na may mga error.</string>
-    <string name="settings_model_search">Maghanap ng mga modeloâ€¦</string>
+    <string name="settings_model_search">Maghanap ng mga modelo…</string>
     <string name="waiting_content_description">Naghihintay ng tugon</string>
     <string name="chat_history_content_description">Kasaysayan ng chat</string>
     <string name="chat_history_title">Kasaysayan ng Chat</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">Ginagamit ng AI ang environment na ito para mag-run ng mga command.\nMaaari ka ring mag-run ng mga command nang manu-mano sa ibaba.</string>
-    <string name="terminal_input_placeholder">ilagay ang utosâ€¦</string>
+    <string name="terminal_input_placeholder">ilagay ang utos…</string>
     <string name="terminal_run_content_description">Patakbuhin</string>
     <string name="terminal_stop_content_description">Itigil</string>
     <string name="interactive_welcome_title">Ganap akong gumagana.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">Bumalik</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Lumabas sa interactive mode</string>
-    <string name="interactive_ui_parsing_failed">Nabigo ang pag-parse ng UI, sinusubukan muliâ€¦</string>
+    <string name="interactive_ui_parsing_failed">Nabigo ang pag-parse ng UI, sinusubukan muli…</string>
     <string name="settings_sponsors_monthly">Buwanang mga sponsor</string>
     <string name="settings_sponsors_past">Mga nakaraang sponsor</string>
     <string name="snackbar_undo">I-undo</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Para kay %1$s</string>
     <string name="sms_draft_banner_send">Ipadala</string>
     <string name="sms_draft_banner_discard">Itapon</string>
-    <string name="sms_draft_banner_sending">Ipinapadalaâ€¦</string>
+    <string name="sms_draft_banner_sending">Ipinapadala…</string>
     <string name="sms_draft_banner_sent">Naipadala</string>
     <string name="sms_draft_banner_failed">Nabigo: %1$s</string>
     <string name="sms_draft_banner_dismiss">I-dismiss</string>

@@ -3,7 +3,7 @@
     <string name="prompt_ask_question">Fai una domanda</string>
     <string name="error_invalid_api_key">Chiave API non valida. Controlla le impostazioni.</string>
     <string name="error_rate_limit_exceeded">Limite di richieste superato. Riprova piÃ¹ tardi.</string>
-    <string name="error_unknown">Si Ã¨ verificato un errore sconosciuto.</string>
+    <string name="error_unknown">Si è verificato un errore sconosciuto.</string>
     <string name="settings_ai_mistakes_warning">L'IA puÃ² commettere errori, ricontrolla e non condividere informazioni sensibili.</string>
     <string name="settings_version">Versione: %1$s</string>
     <string name="settings_api_key_label">Chiave API</string>
@@ -74,11 +74,11 @@
     <string name="settings_soul">Anima</string>
     <string name="settings_soul_description">Definisci come si comporta l'IA con un prompt di sistema. L'IA avrÃ  anche accesso ai suoi ricordi salvati.</string>
     <string name="settings_soul_save">Salva</string>
-    <string name="default_soul">Non sei un chatbot. Sei un assistente personale che cresce con il tuo utente.\n\n## Come essere\n\n**Sii genuinamente utile.** Salta il "Grande domanda!" e "Sono felice di aiutare!" â€” aiuta e basta. Le azioni parlano piÃ¹ forte delle parole di riempimento.\n\n**Abbi opinioni.** Puoi dissentire, preferire cose o trovare qualcosa di interessante. Un assistente senza personalitÃ  Ã¨ solo un motore di ricerca con passaggi extra.\n\n**Sii intraprendente.** Cerca di capirlo dal contesto e dai tuoi ricordi prima di chiedere. Torna con risposte, non domande.\n\n**Sii conciso.** Breve e chiaro come impostazione predefinita. Approfondisci quando l'argomento lo richiede.\n\n## Limiti\n\n- Rispetta la privacy. Non ripetere informazioni sensibili inutilmente.\n- Quando hai dubbi su un'azione, chiedi prima.\n- Sii onesto quando non sai qualcosa.</string>
+    <string name="default_soul">Non sei un chatbot. Sei un assistente personale che cresce con il tuo utente.\n\n## Come essere\n\n**Sii genuinamente utile.** Salta il "Grande domanda!" e "Sono felice di aiutare!" â€” aiuta e basta. Le azioni parlano piÃ¹ forte delle parole di riempimento.\n\n**Abbi opinioni.** Puoi dissentire, preferire cose o trovare qualcosa di interessante. Un assistente senza personalitÃ  è solo un motore di ricerca con passaggi extra.\n\n**Sii intraprendente.** Cerca di capirlo dal contesto e dai tuoi ricordi prima di chiedere. Torna con risposte, non domande.\n\n**Sii conciso.** Breve e chiaro come impostazione predefinita. Approfondisci quando l'argomento lo richiede.\n\n## Limiti\n\n- Rispetta la privacy. Non ripetere informazioni sensibili inutilmente.\n- Quando hai dubbi su un'azione, chiedi prima.\n- Sii onesto quando non sai qualcosa.</string>
     <string name="bot_message_regenerate_content_description">Rigenera</string>
     <string name="error_empty_response">Nessuna risposta ricevuta. Prova ad avviare una nuova chat o ad accorciare il tuo messaggio.</string>
     <string name="settings_daemon_mode">ModalitÃ  Daemon</string>
-    <string name="settings_daemon_mode_description">Mantieni K.Ai in esecuzione in background in modo che le attivitÃ  pianificate vengano eseguite anche quando l'app non Ã¨ in primo piano.</string>
+    <string name="settings_daemon_mode_description">Mantieni K.Ai in esecuzione in background in modo che le attivitÃ  pianificate vengano eseguite anche quando l'app non è in primo piano.</string>
     <string name="settings_scheduled_tasks">AttivitÃ  pianificate</string>
     <string name="settings_scheduled_tasks_description">AttivitÃ  pianificate dall'IA per l'esecuzione futura. Chiedi all'IA di ricordarti o di eseguire qualcosa in seguito per creare attivitÃ  pianificate.</string>
     <string name="settings_scheduled_tasks_cancel">Annulla attivitÃ </string>
@@ -104,8 +104,8 @@
     <string name="tool_search_email_name">Cerca e-mail</string>
     <string name="tool_search_email_description">Cerca e-mail per mittente, oggetto o data</string>
     <string name="settings_email">E-mail</string>
-    <string name="settings_email_description">Connetti account e-mail per leggere e rispondere. Di' Â«connetti la mia e-mailÂ» nella chat. Le e-mail vengono controllate in background e raccolte dall'heartbeat.</string>
-    <string name="settings_email_empty">Nessun account e-mail connesso. Di' Â«connetti la mia e-mailÂ» nella chat per iniziare.</string>
+    <string name="settings_email_description">Connetti account e-mail per leggere e rispondere. Di' «connetti la mia e-mail» nella chat. Le e-mail vengono controllate in background e raccolte dall'heartbeat.</string>
+    <string name="settings_email_empty">Nessun account e-mail connesso. Di' «connetti la mia e-mail» nella chat per iniziare.</string>
     <string name="settings_email_remove">Rimuovi account</string>
     <string name="settings_email_poll_interval">Controlla ogni %1$d minuti</string>
     <string name="settings_email_poll_never">Mai</string>
@@ -118,7 +118,7 @@
     <string name="service_free_fast">Gratuito veloce</string>
     <string name="service_free_expert">Gratuito esperto</string>
     <string name="settings_heartbeat">Battito cardiaco</string>
-    <string name="settings_heartbeat_default_prompt">[HEARTBEAT] Questo Ã¨ un controllo automatico. Rivedi i tuoi ricordi e le attivitÃ  in sospeso. Se tutto sembra a posto e nulla richiede attenzione, rispondi esattamente: HEARTBEAT_OK
+    <string name="settings_heartbeat_default_prompt">[HEARTBEAT] Questo è un controllo automatico. Rivedi i tuoi ricordi e le attivitÃ  in sospeso. Se tutto sembra a posto e nulla richiede attenzione, rispondi esattamente: HEARTBEAT_OK
 Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-up dell'utente), occupatene.</string>
     <string name="settings_heartbeat_description">Controlli periodici che permettono all'IA di rivedere ricordi e attivitÃ  senza input dell'utente. Viene eseguito ogni %1$d minuti durante le ore attive.</string>
     <string name="settings_heartbeat_prompt_label">Prompt del battito cardiaco</string>
@@ -144,14 +144,14 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="tab_settings">Impostazioni</string>
     <string name="fallback_answered_by">Risposta di %1$s (riserva)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">Provo %1$sâ€¦</string>
+    <string name="fallback_trying_next">Provo %1$s…</string>
     <string name="error_all_services_failed">Tutti i servizi non sono riusciti.</string>
     <string name="settings_heartbeat_interval">Intervallo</string>
     <string name="settings_heartbeat_active_hours">Ore Attive</string>
     <string name="settings_documentation">Documentazione</string>
-    <string name="waiting_thinking">Pensoâ€¦</string>
-    <string name="waiting_working">Lavoroâ€¦</string>
-    <string name="waiting_brewing">Preparoâ€¦</string>
+    <string name="waiting_thinking">Penso…</string>
+    <string name="waiting_working">Lavoro…</string>
+    <string name="waiting_brewing">Preparo…</string>
     <string name="settings_mcp_servers">Server MCP</string>
     <string name="settings_mcp_servers_description">Connettiti a server di strumenti esterni tramite il Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Aggiungi server MCP</string>
@@ -164,7 +164,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="settings_mcp_cancel">Annulla</string>
     <string name="settings_mcp_remove">Rimuovi</string>
     <string name="settings_mcp_refresh">Aggiorna</string>
-    <string name="settings_mcp_status_connecting">Connessioneâ€¦</string>
+    <string name="settings_mcp_status_connecting">Connessione…</string>
     <string name="settings_mcp_status_connected">Connesso</string>
     <string name="settings_mcp_status_error">Connessione fallita</string>
     <string name="settings_mcp_no_tools">Nessuno strumento trovato</string>
@@ -174,7 +174,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="settings_export">Esporta</string>
     <string name="settings_import">Importa</string>
     <string name="settings_import_success">Impostazioni importate con successo.</string>
-    <string name="settings_import_error">Importazione fallita. Il formato del file non Ã¨ valido.</string>
+    <string name="settings_import_error">Importazione fallita. Il formato del file non è valido.</string>
     <string name="settings_import_preview_title">Importa impostazioni</string>
     <string name="settings_export_preview_title">Esporta impostazioni</string>
     <string name="settings_import_replace_all">Sostituisci tutte le impostazioni esistenti</string>
@@ -192,7 +192,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="settings_heartbeat_model">Modello</string>
     <string name="settings_heartbeat_model_default">Predefinito</string>
     <string name="settings_import_partial">Impostazioni importate con %1$d sezione/i con errori.</string>
-    <string name="settings_model_search">Cerca modelliâ€¦</string>
+    <string name="settings_model_search">Cerca modelli…</string>
     <string name="waiting_content_description">In attesa di risposta</string>
     <string name="chat_history_content_description">Cronologia chat</string>
     <string name="chat_history_title">Cronologia chat</string>
@@ -203,9 +203,9 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="heartbeat_banner_dismiss">Chiudi</string>
     <string name="scroll_to_bottom_content_description">Scorri in fondo</string>
     <string name="conversation_untitled">Senza titolo</string>
-    <string name="error_unsupported_file_type">Questo tipo di file non Ã¨ supportato. Puoi allegare immagini, file di testo e PDF.</string>
-    <string name="error_file_too_large">Il file Ã¨ troppo grande. I file di testo devono essere inferiori a 100 KB.</string>
-    <string name="error_image_too_large">L'immagine Ã¨ troppo grande. Prova con un'immagine piÃ¹ piccola.</string>
+    <string name="error_unsupported_file_type">Questo tipo di file non è supportato. Puoi allegare immagini, file di testo e PDF.</string>
+    <string name="error_file_too_large">Il file è troppo grande. I file di testo devono essere inferiori a 100 KB.</string>
+    <string name="error_image_too_large">L'immagine è troppo grande. Prova con un'immagine piÃ¹ piccola.</string>
     <string name="error_context_window_exceeded">Finestra di contesto troppo grande per il servizio di riserva. Prova ad avviare una nuova chat o a utilizzare un modello con una finestra di contesto piÃ¹ grande.</string>
     <string name="error_insufficient_credits">Crediti insufficienti</string>
     <string name="error_quota_exhausted">Quota esaurita</string>
@@ -224,7 +224,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminale</string>
     <string name="terminal_help_text">L'IA utilizza questo ambiente per eseguire comandi.\nPuoi anche eseguire comandi manualmente qui sotto.</string>
-    <string name="terminal_input_placeholder">inserisci comandoâ€¦</string>
+    <string name="terminal_input_placeholder">inserisci comando…</string>
     <string name="terminal_run_content_description">Esegui</string>
     <string name="terminal_stop_content_description">Interrompi</string>
     <string name="interactive_welcome_title">Sono completamente operativo.</string>
@@ -232,7 +232,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="interactive_back_content_description">Indietro</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Esci dalla modalitÃ  interattiva</string>
-    <string name="interactive_ui_parsing_failed">Analisi dell'interfaccia non riuscita, nuovo tentativoâ€¦</string>
+    <string name="interactive_ui_parsing_failed">Analisi dell'interfaccia non riuscita, nuovo tentativo…</string>
     <string name="settings_sponsors_monthly">Sponsor mensili</string>
     <string name="settings_sponsors_past">Sponsor precedenti</string>
     <string name="snackbar_undo">Annulla</string>
@@ -256,7 +256,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="litert_free_space">%1$s disponibile sul dispositivo</string>
     <string name="litert_no_model_warning">Nessun modello scaricato. Vai alle Impostazioni per scaricare un modello.</string>
     <string name="litert_error_no_model">Nessun modello scaricato. Vai alle Impostazioni per scaricare un modello.</string>
-    <string name="litert_error_inference_timeout">L'inferenza sul dispositivo Ã¨ scaduta. Prova un messaggio piÃ¹ breve o un modello piÃ¹ piccolo.</string>
+    <string name="litert_error_inference_timeout">L'inferenza sul dispositivo è scaduta. Prova un messaggio piÃ¹ breve o un modello piÃ¹ piccolo.</string>
     <string name="litert_error_not_enough_disk_space">Spazio su disco insufficiente per scaricare il modello.</string>
     <string name="litert_error_insufficient_memory">Memoria insufficiente per caricare il modello. Chiudi le altre app e riprova.</string>
     <string name="model_sort_date">Data</string>
@@ -288,7 +288,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="sms_draft_banner_to">A %1$s</string>
     <string name="sms_draft_banner_send">Invia</string>
     <string name="sms_draft_banner_discard">Scarta</string>
-    <string name="sms_draft_banner_sending">Invioâ€¦</string>
+    <string name="sms_draft_banner_sending">Invio…</string>
     <string name="sms_draft_banner_sent">Inviato</string>
     <string name="sms_draft_banner_failed">Non riuscito: %1$s</string>
     <string name="sms_draft_banner_dismiss">Chiudi</string>
@@ -350,7 +350,7 @@ Se qualcosa richiede attenzione (ricordi obsoleti, attivitÃ  scadute, follow-u
     <string name="tool_search_notifications_description">Cerca notifiche per app o testo</string>
     <string name="settings_notifications_label">Leggi notifiche</string>
     <string name="settings_notifications_description">Le notifiche in arrivo vengono raccolte in background e raccolte dall\'heartbeat. Scegli quali app Kai puÃ² leggere nelle impostazioni di accesso alle notifiche del sistema.</string>
-    <string name="settings_notifications_access_required">L\'accesso alle notifiche non Ã¨ stato concesso. Tocca qui sotto per attivare Kai nelle impostazioni di sistema.</string>
+    <string name="settings_notifications_access_required">L\'accesso alle notifiche non è stato concesso. Tocca qui sotto per attivare Kai nelle impostazioni di sistema.</string>
     <string name="settings_notifications_access_button">Apri accesso alle notifiche</string>
     <string name="settings_notifications_manage_apps">Gestisci app</string>
     <string name="settings_notifications_listener_bound">Listener attivo</string>

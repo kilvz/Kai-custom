@@ -24,7 +24,7 @@ data class SandboxUiState(
     val sandboxDiskUsageMB: Long = 0,
     val sandboxPackagesInstalled: Boolean = false,
     val isSandboxEnabled: Boolean = true,
-    val isSandboxStorageMountEnabled: Boolean = true,
+    val isSandboxStorageMountEnabled: Boolean = false,
     val isSandboxRootEnabled: Boolean = false,
     val sandboxDistro: String = "alpine",
     val isWorking: Boolean = false,
@@ -87,6 +87,8 @@ class SandboxViewModel(
     fun onToggleStorageMount(enabled: Boolean) {
         dataRepository.setSandboxStorageMountEnabled(enabled)
         _state.update { it.copy(isSandboxStorageMountEnabled = enabled) }
+        sandboxController.closeSession(com.kai.custom.SandboxSessions.DEFAULT)
+        sandboxController.closeSession(com.kai.custom.SandboxSessions.TERMINAL)
     }
 
     fun onToggleSandboxRoot(enabled: Boolean) {

@@ -143,14 +143,14 @@
     <string name="tab_settings">à®…à®®à¯ˆà®ªà¯à®ªà¯à®•à®³à¯</string>
     <string name="fallback_answered_by">%1$s à®®à¯‚à®²à®®à¯ à®ªà®¤à®¿à®²à®³à®¿à®•à¯à®•à®ªà¯à®ªà®Ÿà¯à®Ÿà®¤à¯ (à®®à®¾à®±à¯à®±à¯)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">%1$s à®®à¯à®¯à®±à¯à®šà®¿à®•à¯à®•à®ªà¯à®ªà®Ÿà¯à®•à®¿à®±à®¤à¯â€¦</string>
+    <string name="fallback_trying_next">%1$s à®®à¯à®¯à®±à¯à®šà®¿à®•à¯à®•à®ªà¯à®ªà®Ÿà¯à®•à®¿à®±à®¤à¯…</string>
     <string name="error_all_services_failed">à®…à®©à¯ˆà®¤à¯à®¤à¯ à®šà¯‡à®µà¯ˆà®•à®³à¯à®®à¯ à®¤à¯‹à®²à¯à®µà®¿à®¯à®Ÿà¯ˆà®¨à¯à®¤à®©.</string>
     <string name="settings_heartbeat_interval">à®‡à®Ÿà¯ˆà®µà¯†à®³à®¿</string>
     <string name="settings_heartbeat_active_hours">à®šà¯†à®¯à®²à®¿à®²à¯ à®‰à®³à¯à®³ à®¨à¯‡à®°à®®à¯</string>
     <string name="settings_documentation">à®†à®µà®£à®®à®¾à®•à¯à®•à®®à¯</string>
-    <string name="waiting_thinking">à®¯à¯‹à®šà®¿à®•à¯à®•à®¿à®±à®¤à¯â€¦</string>
-    <string name="waiting_working">à®µà¯‡à®²à¯ˆ à®šà¯†à®¯à¯à®•à®¿à®±à®¤à¯â€¦</string>
-    <string name="waiting_brewing">à®¤à®¯à®¾à®°à®¿à®•à¯à®•à®¿à®±à®¤à¯â€¦</string>
+    <string name="waiting_thinking">à®¯à¯‹à®šà®¿à®•à¯à®•à®¿à®±à®¤à¯…</string>
+    <string name="waiting_working">à®µà¯‡à®²à¯ˆ à®šà¯†à®¯à¯à®•à®¿à®±à®¤à¯…</string>
+    <string name="waiting_brewing">à®¤à®¯à®¾à®°à®¿à®•à¯à®•à®¿à®±à®¤à¯…</string>
     <string name="settings_mcp_servers">MCP à®šà¯‡à®µà¯ˆà®¯à®•à®™à¯à®•à®³à¯</string>
     <string name="settings_mcp_servers_description">Model Context Protocol à®ªà®¯à®©à¯à®ªà®Ÿà¯à®¤à¯à®¤à®¿ à®µà¯†à®³à®¿à®ªà¯à®ªà¯à®± à®•à®°à¯à®µà®¿ à®šà¯‡à®µà¯ˆà®¯à®•à®™à¯à®•à®³à¯à®Ÿà®©à¯ à®‡à®£à¯ˆà®¯à¯à®™à¯à®•à®³à¯.</string>
     <string name="settings_mcp_add_server">MCP à®šà¯‡à®µà¯ˆà®¯à®•à®®à¯ à®šà¯‡à®°à¯</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">à®°à®¤à¯à®¤à¯à®šà¯†à®¯à¯</string>
     <string name="settings_mcp_remove">à®…à®•à®±à¯à®±à¯</string>
     <string name="settings_mcp_refresh">à®ªà¯à®¤à¯à®ªà¯à®ªà®¿</string>
-    <string name="settings_mcp_status_connecting">à®‡à®£à¯ˆà®•à¯à®•à®¿à®±à®¤à¯â€¦</string>
+    <string name="settings_mcp_status_connecting">à®‡à®£à¯ˆà®•à¯à®•à®¿à®±à®¤à¯…</string>
     <string name="settings_mcp_status_connected">à®‡à®£à¯ˆà®•à¯à®•à®ªà¯à®ªà®Ÿà¯à®Ÿà®¤à¯</string>
     <string name="settings_mcp_status_error">à®‡à®£à¯ˆà®ªà¯à®ªà¯ à®¤à¯‹à®²à¯à®µà®¿</string>
     <string name="settings_mcp_no_tools">à®•à®°à¯à®µà®¿à®•à®³à¯ à®•à®£à¯à®Ÿà®±à®¿à®¯à®ªà¯à®ªà®Ÿà®µà®¿à®²à¯à®²à¯ˆ</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">à®®à®¾à®Ÿà®²à¯</string>
     <string name="settings_heartbeat_model_default">à®‡à®¯à®²à¯à®ªà¯à®¨à®¿à®²à¯ˆ</string>
     <string name="settings_import_partial">%1$d à®ªà®¿à®°à®¿à®µà¯(à®•à®³à¯) à®ªà®¿à®´à¯ˆà®•à®³à¯à®Ÿà®©à¯ à®…à®®à¯ˆà®ªà¯à®ªà¯à®•à®³à¯ à®‡à®±à®•à¯à®•à¯à®®à®¤à®¿ à®šà¯†à®¯à¯à®¯à®ªà¯à®ªà®Ÿà¯à®Ÿà®©.</string>
-    <string name="settings_model_search">à®®à®¾à®Ÿà®²à¯à®•à®³à¯ˆà®¤à¯ à®¤à¯‡à®Ÿà¯â€¦</string>
+    <string name="settings_model_search">à®®à®¾à®Ÿà®²à¯à®•à®³à¯ˆà®¤à¯ à®¤à¯‡à®Ÿà¯…</string>
     <string name="waiting_content_description">à®ªà®¤à®¿à®²à¯à®•à¯à®•à®¾à®•à®•à¯ à®•à®¾à®¤à¯à®¤à®¿à®°à¯à®•à¯à®•à®¿à®±à®¤à¯</string>
     <string name="chat_history_content_description">à®…à®°à®Ÿà¯à®Ÿà¯ˆ à®µà®°à®²à®¾à®±à¯</string>
     <string name="chat_history_title">à®…à®°à®Ÿà¯à®Ÿà¯ˆ à®µà®°à®²à®¾à®±à¯</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">à®®à¯à®©à¯ˆà®¯à®®à¯</string>
     <string name="terminal_help_text">AI à®•à®Ÿà¯à®Ÿà®³à¯ˆà®•à®³à¯ˆ à®‡à®¯à®•à¯à®• à®‡à®¨à¯à®¤à®šà¯ à®šà¯‚à®´à®²à¯ˆà®ªà¯ à®ªà®¯à®©à¯à®ªà®Ÿà¯à®¤à¯à®¤à¯à®•à®¿à®±à®¤à¯.\nà®•à¯€à®´à¯‡ à®¨à¯€à®™à¯à®•à®³à¯à®®à¯ à®•à®Ÿà¯à®Ÿà®³à¯ˆà®•à®³à¯ˆ à®•à¯ˆà®®à¯à®±à¯ˆà®¯à®¾à®• à®‡à®¯à®•à¯à®•à®²à®¾à®®à¯.</string>
-    <string name="terminal_input_placeholder">à®•à®Ÿà¯à®Ÿà®³à¯ˆà®¯à¯ˆ à®‰à®³à¯à®³à®¿à®Ÿà®µà¯à®®à¯â€¦</string>
+    <string name="terminal_input_placeholder">à®•à®Ÿà¯à®Ÿà®³à¯ˆà®¯à¯ˆ à®‰à®³à¯à®³à®¿à®Ÿà®µà¯à®®à¯…</string>
     <string name="terminal_run_content_description">à®‡à®¯à®•à¯à®•à¯</string>
     <string name="terminal_stop_content_description">à®¨à®¿à®±à¯à®¤à¯à®¤à¯</string>
     <string name="interactive_welcome_title">à®¨à®¾à®©à¯ à®®à¯à®´à¯à®®à¯ˆà®¯à®¾à®• à®šà¯†à®¯à®²à¯à®ªà®Ÿà¯à®•à®¿à®±à¯‡à®©à¯.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">à®ªà®¿à®©à¯à®šà¯†à®²à¯</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">à®Šà®Ÿà®¾à®Ÿà¯à®®à¯ à®ªà®¯à®©à¯à®®à¯à®±à¯ˆà®¯à®¿à®²à®¿à®°à¯à®¨à¯à®¤à¯ à®µà¯†à®³à®¿à®¯à¯‡à®±à¯</string>
-    <string name="interactive_ui_parsing_failed">UI à®ªà®•à¯à®ªà¯à®ªà®¾à®¯à¯à®µà¯ à®¤à¯‹à®²à¯à®µà®¿, à®®à¯€à®£à¯à®Ÿà¯à®®à¯ à®®à¯à®¯à®±à¯à®šà®¿à®•à¯à®•à®¿à®±à®¤à¯â€¦</string>
+    <string name="interactive_ui_parsing_failed">UI à®ªà®•à¯à®ªà¯à®ªà®¾à®¯à¯à®µà¯ à®¤à¯‹à®²à¯à®µà®¿, à®®à¯€à®£à¯à®Ÿà¯à®®à¯ à®®à¯à®¯à®±à¯à®šà®¿à®•à¯à®•à®¿à®±à®¤à¯…</string>
     <string name="settings_sponsors_monthly">à®®à®¾à®¤à®¾à®¨à¯à®¤à®¿à®° à®¨à®¿à®¤à®¿à®¯à¯à®¤à®µà®¿à®¯à®¾à®³à®°à¯à®•à®³à¯</string>
     <string name="settings_sponsors_past">à®®à¯à®¨à¯à®¤à¯ˆà®¯ à®¨à®¿à®¤à®¿à®¯à¯à®¤à®µà®¿à®¯à®¾à®³à®°à¯à®•à®³à¯</string>
     <string name="snackbar_undo">à®šà¯†à®¯à®²à¯à®¤à®µà®¿à®°à¯</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">à®ªà¯†à®±à¯à®¨à®°à¯: %1$s</string>
     <string name="sms_draft_banner_send">à®…à®©à¯à®ªà¯à®ªà¯</string>
     <string name="sms_draft_banner_discard">à®¨à®¿à®°à®¾à®•à®°à®¿</string>
-    <string name="sms_draft_banner_sending">à®…à®©à¯à®ªà¯à®ªà¯à®•à®¿à®±à®¤à¯â€¦</string>
+    <string name="sms_draft_banner_sending">à®…à®©à¯à®ªà¯à®ªà¯à®•à®¿à®±à®¤à¯…</string>
     <string name="sms_draft_banner_sent">à®…à®©à¯à®ªà¯à®ªà®ªà¯à®ªà®Ÿà¯à®Ÿà®¤à¯</string>
     <string name="sms_draft_banner_failed">à®¤à¯‹à®²à¯à®µà®¿: %1$s</string>
     <string name="sms_draft_banner_dismiss">à®µà®¿à®²à®•à¯à®•à¯</string>

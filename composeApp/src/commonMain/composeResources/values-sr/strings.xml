@@ -143,14 +143,14 @@
     <string name="tab_settings">ÐŸÐ¾Ð´ÐµÑˆÐ°Ð²Ð°ÑšÐ°</string>
     <string name="fallback_answered_by">ÐžÐ´Ð³Ð¾Ð²Ð¾Ñ€Ð¸Ð¾ %1$s (Ñ€ÐµÐ·ÐµÑ€Ð²Ð½Ð¸)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">ÐŸÐ¾ÐºÑƒÑˆÐ°Ð²Ð°Ð¼ %1$sâ€¦</string>
+    <string name="fallback_trying_next">ÐŸÐ¾ÐºÑƒÑˆÐ°Ð²Ð°Ð¼ %1$s…</string>
     <string name="error_all_services_failed">Ð¡Ð²Ðµ ÑƒÑÐ»ÑƒÐ³Ðµ Ð½Ð¸ÑÑƒ ÑƒÑÐ¿ÐµÐ»Ðµ.</string>
     <string name="settings_heartbeat_interval">Ð˜Ð½Ñ‚ÐµÑ€Ð²Ð°Ð»</string>
     <string name="settings_heartbeat_active_hours">ÐÐºÑ‚Ð¸Ð²Ð½Ð¸ ÑÐ°Ñ‚Ð¸</string>
     <string name="settings_documentation">Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ð°Ñ†Ð¸Ñ˜Ð°</string>
-    <string name="waiting_thinking">Ð Ð°Ð·Ð¼Ð¸ÑˆÑ™Ð°Ð¼â€¦</string>
-    <string name="waiting_working">Ð Ð°Ð´Ð¸Ð¼â€¦</string>
-    <string name="waiting_brewing">ÐŸÑ€Ð¸Ð¿Ñ€ÐµÐ¼Ð°Ð¼â€¦</string>
+    <string name="waiting_thinking">Ð Ð°Ð·Ð¼Ð¸ÑˆÑ™Ð°Ð¼…</string>
+    <string name="waiting_working">Ð Ð°Ð´Ð¸Ð¼…</string>
+    <string name="waiting_brewing">ÐŸÑ€Ð¸Ð¿Ñ€ÐµÐ¼Ð°Ð¼…</string>
     <string name="settings_mcp_servers">MCP ÑÐµÑ€Ð²ÐµÑ€Ð¸</string>
     <string name="settings_mcp_servers_description">ÐŸÐ¾Ð²ÐµÐ¶Ð¸Ñ‚Ðµ ÑÐµ ÑÐ° ÑÐ¿Ð¾Ñ™Ð½Ð¸Ð¼ ÑÐµÑ€Ð²ÐµÑ€Ð¸Ð¼Ð° Ð°Ð»Ð°Ñ‚Ð° ÐºÐ¾Ñ€Ð¸ÑÑ‚ÐµÑ›Ð¸ Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Ð”Ð¾Ð´Ð°Ñ˜ MCP ÑÐµÑ€Ð²ÐµÑ€</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">ÐžÑ‚ÐºÐ°Ð¶Ð¸</string>
     <string name="settings_mcp_remove">Ð£ÐºÐ»Ð¾Ð½Ð¸</string>
     <string name="settings_mcp_refresh">ÐžÑÐ²ÐµÐ¶Ð¸</string>
-    <string name="settings_mcp_status_connecting">ÐŸÐ¾Ð²ÐµÐ·Ð¸Ð²Ð°ÑšÐµâ€¦</string>
+    <string name="settings_mcp_status_connecting">ÐŸÐ¾Ð²ÐµÐ·Ð¸Ð²Ð°ÑšÐµ…</string>
     <string name="settings_mcp_status_connected">ÐŸÐ¾Ð²ÐµÐ·Ð°Ð½Ð¾</string>
     <string name="settings_mcp_status_error">ÐŸÐ¾Ð²ÐµÐ·Ð¸Ð²Ð°ÑšÐµ Ð½Ð¸Ñ˜Ðµ ÑƒÑÐ¿ÐµÐ»Ð¾</string>
     <string name="settings_mcp_no_tools">ÐÐ¸ÑÑƒ Ð¿Ñ€Ð¾Ð½Ð°Ñ’ÐµÐ½Ð¸ Ð°Ð»Ð°Ñ‚Ð¸</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">ÐœÐ¾Ð´ÐµÐ»</string>
     <string name="settings_heartbeat_model_default">ÐŸÐ¾Ð´Ñ€Ð°Ð·ÑƒÐ¼ÐµÐ²Ð°Ð½Ð¾</string>
     <string name="settings_import_partial">ÐŸÐ¾Ð´ÐµÑˆÐ°Ð²Ð°ÑšÐ° ÑƒÐ²ÐµÐ·ÐµÐ½Ð° ÑÐ° %1$d Ð¾Ð´ÐµÑ™ÐºÐ¾Ð¼/Ð¾Ð´ÐµÑ™Ñ†Ð¸Ð¼Ð° ÑÐ° Ð³Ñ€ÐµÑˆÐºÐ°Ð¼Ð°.</string>
-    <string name="settings_model_search">ÐŸÑ€ÐµÑ‚Ñ€Ð°Ð¶Ð¸ Ð¼Ð¾Ð´ÐµÐ»Ðµâ€¦</string>
+    <string name="settings_model_search">ÐŸÑ€ÐµÑ‚Ñ€Ð°Ð¶Ð¸ Ð¼Ð¾Ð´ÐµÐ»Ðµ…</string>
     <string name="waiting_content_description">Ð§ÐµÐºÐ°ÑšÐµ Ð¾Ð´Ð³Ð¾Ð²Ð¾Ñ€Ð°</string>
     <string name="chat_history_content_description">Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ˜Ð° Ñ›Ð°ÑÐºÐ°ÑšÐ°</string>
     <string name="chat_history_title">Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ˜Ð° Ñ›Ð°ÑÐºÐ°ÑšÐ°</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Ð¢ÐµÑ€Ð¼Ð¸Ð½Ð°Ð»</string>
     <string name="terminal_help_text">ÐÐ˜ ÐºÐ¾Ñ€Ð¸ÑÑ‚Ð¸ Ð¾Ð²Ð¾ Ð¾ÐºÑ€ÑƒÐ¶ÐµÑšÐµ Ð·Ð° Ð¿Ð¾ÐºÑ€ÐµÑ‚Ð°ÑšÐµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð¸.\nÐ¢Ð°ÐºÐ¾Ñ’Ðµ Ð¼Ð¾Ð¶ÐµÑ‚Ðµ Ñ€ÑƒÑ‡Ð½Ð¾ Ð¿Ð¾ÐºÑ€ÐµÑ‚Ð°Ñ‚Ð¸ ÐºÐ¾Ð¼Ð°Ð½Ð´Ðµ Ð¸ÑÐ¿Ð¾Ð´.</string>
-    <string name="terminal_input_placeholder">ÑƒÐ½ÐµÑÐ¸Ñ‚Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒâ€¦</string>
+    <string name="terminal_input_placeholder">ÑƒÐ½ÐµÑÐ¸Ñ‚Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒ…</string>
     <string name="terminal_run_content_description">ÐŸÐ¾ÐºÑ€ÐµÐ½Ð¸</string>
     <string name="terminal_stop_content_description">Ð—Ð°ÑƒÑÑ‚Ð°Ð²Ð¸</string>
     <string name="interactive_welcome_title">ÐŸÐ¾Ñ‚Ð¿ÑƒÐ½Ð¾ ÑÐ°Ð¼ Ð¾Ð¿ÐµÑ€Ð°Ñ‚Ð¸Ð²Ð°Ð½.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">ÐÐ°Ð·Ð°Ð´</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Ð˜Ð·Ð°Ñ’Ð¸ Ð¸Ð· Ð¸Ð½Ñ‚ÐµÑ€Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¾Ð³ Ñ€ÐµÐ¶Ð¸Ð¼Ð°</string>
-    <string name="interactive_ui_parsing_failed">Ð Ð°ÑˆÑ‡Ð»Ð°ÑšÐ¸Ð²Ð°ÑšÐµ ÐºÐ¾Ñ€Ð¸ÑÐ½Ð¸Ñ‡ÐºÐ¾Ð³ Ð¸Ð½Ñ‚ÐµÑ€Ñ„ÐµÑ˜ÑÐ° Ð½Ð¸Ñ˜Ðµ ÑƒÑÐ¿ÐµÐ»Ð¾, Ð¿Ð¾ÐºÑƒÑˆÐ°Ð²Ð°Ð¼ Ð¿Ð¾Ð½Ð¾Ð²Ð¾â€¦</string>
+    <string name="interactive_ui_parsing_failed">Ð Ð°ÑˆÑ‡Ð»Ð°ÑšÐ¸Ð²Ð°ÑšÐµ ÐºÐ¾Ñ€Ð¸ÑÐ½Ð¸Ñ‡ÐºÐ¾Ð³ Ð¸Ð½Ñ‚ÐµÑ€Ñ„ÐµÑ˜ÑÐ° Ð½Ð¸Ñ˜Ðµ ÑƒÑÐ¿ÐµÐ»Ð¾, Ð¿Ð¾ÐºÑƒÑˆÐ°Ð²Ð°Ð¼ Ð¿Ð¾Ð½Ð¾Ð²Ð¾…</string>
     <string name="settings_sponsors_monthly">ÐœÐµÑÐµÑ‡Ð½Ð¸ ÑÐ¿Ð¾Ð½Ð·Ð¾Ñ€Ð¸</string>
     <string name="settings_sponsors_past">ÐŸÑ€ÐµÑ‚Ñ…Ð¾Ð´Ð½Ð¸ ÑÐ¿Ð¾Ð½Ð·Ð¾Ñ€Ð¸</string>
     <string name="snackbar_undo">ÐžÐ¿Ð¾Ð·Ð¾Ð²Ð¸</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">Ð—Ð° %1$s</string>
     <string name="sms_draft_banner_send">ÐŸÐ¾ÑˆÐ°Ñ™Ð¸</string>
     <string name="sms_draft_banner_discard">ÐžÐ´Ð±Ð°Ñ†Ð¸</string>
-    <string name="sms_draft_banner_sending">Ð¡Ð»Ð°ÑšÐµâ€¦</string>
+    <string name="sms_draft_banner_sending">Ð¡Ð»Ð°ÑšÐµ…</string>
     <string name="sms_draft_banner_sent">ÐŸÐ¾ÑÐ»Ð°Ñ‚Ð¾</string>
     <string name="sms_draft_banner_failed">ÐÐµÑƒÑÐ¿ÐµÐ»Ð¾: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ð—Ð°Ñ‚Ð²Ð¾Ñ€Ð¸</string>

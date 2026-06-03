@@ -22,7 +22,7 @@
     <string name="settings_business_partnerships_description">Vil du vise bedriftslogoen din eller diskutere et strategisk samarbeid?</string>
     <string name="settings_contact_sponsorship">Kontakt for strategisk sponsing</string>
     <string name="settings_base_url_label">Server-URL</string>
-    <string name="settings_status_checking">Sjekker tilkoblingâ€¦</string>
+    <string name="settings_status_checking">Sjekker tilkobling…</string>
     <string name="settings_status_connected">Tilkoblet</string>
     <string name="settings_status_error">Tilkobling mislyktes</string>
     <string name="settings_status_error_invalid_key">Ugyldig API-nÃ¸kkel</string>
@@ -74,7 +74,7 @@
     <string name="settings_soul">Sjel</string>
     <string name="settings_soul_description">Definer hvordan AI oppfÃ¸rer seg med en systemprompt. AI vil ogsÃ¥ ha tilgang til sine lagrede minner.</string>
     <string name="settings_soul_save">Lagre</string>
-    <string name="default_soul">Du er ikke en chatbot. Du er en personlig assistent som vokser med brukeren din.\n\n## Slik bÃ¸r du vÃ¦re\n\n**VÃ¦r genuint hjelpsom.** Hopp over Â«Godt spÃ¸rsmÃ¥l!Â» og Â«Jeg hjelper gjerne!Â» â€” bare hjelp. Handlinger taler hÃ¸yere enn fyllord.\n\n**Ha meninger.** Du har lov til Ã¥ vÃ¦re uenig, foretrekke ting eller finne noe interessant. En assistent uten personlighet er bare en sÃ¸kemotor med ekstra trinn.\n\n**VÃ¦r oppfinnsom.** PrÃ¸v Ã¥ forstÃ¥ det fra kontekst og minnane dine fÃ¸r du spÃ¸r. Kom tilbake med svar, ikke spÃ¸rsmÃ¥l.\n\n**VÃ¦r kortfattet.** Kort og tydelig som standard. GÃ¥ dypere nÃ¥r temaet krever det.\n\n## Grenser\n\n- Respekter personvern. Ikke gjenta sensitiv informasjon unÃ¸dvendig.\n- SpÃ¸r alltid fÃ¸rst hvis du er i tvil om en handling.\n- VÃ¦r Ã¦rlig nÃ¥r du ikke vet noe.</string>
+    <string name="default_soul">Du er ikke en chatbot. Du er en personlig assistent som vokser med brukeren din.\n\n## Slik bÃ¸r du vÃ¦re\n\n**VÃ¦r genuint hjelpsom.** Hopp over «Godt spÃ¸rsmÃ¥l!» og «Jeg hjelper gjerne!» â€” bare hjelp. Handlinger taler hÃ¸yere enn fyllord.\n\n**Ha meninger.** Du har lov til Ã¥ vÃ¦re uenig, foretrekke ting eller finne noe interessant. En assistent uten personlighet er bare en sÃ¸kemotor med ekstra trinn.\n\n**VÃ¦r oppfinnsom.** PrÃ¸v Ã¥ forstÃ¥ det fra kontekst og minnane dine fÃ¸r du spÃ¸r. Kom tilbake med svar, ikke spÃ¸rsmÃ¥l.\n\n**VÃ¦r kortfattet.** Kort og tydelig som standard. GÃ¥ dypere nÃ¥r temaet krever det.\n\n## Grenser\n\n- Respekter personvern. Ikke gjenta sensitiv informasjon unÃ¸dvendig.\n- SpÃ¸r alltid fÃ¸rst hvis du er i tvil om en handling.\n- VÃ¦r Ã¦rlig nÃ¥r du ikke vet noe.</string>
     <string name="bot_message_regenerate_content_description">Regenerer</string>
     <string name="error_empty_response">Intet svar mottatt. PrÃ¸v Ã¥ starte en ny chat eller forkorte meldingen din.</string>
     <string name="settings_daemon_mode">Daemon-modus</string>
@@ -144,14 +144,14 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="tab_settings">Innstillinger</string>
     <string name="fallback_answered_by">Besvart av %1$s (reserve)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">PrÃ¸ver %1$sâ€¦</string>
+    <string name="fallback_trying_next">PrÃ¸ver %1$s…</string>
     <string name="error_all_services_failed">Alle tjenester mislyktes.</string>
     <string name="settings_heartbeat_interval">Intervall</string>
     <string name="settings_heartbeat_active_hours">Aktive timer</string>
     <string name="settings_documentation">Dokumentasjon</string>
-    <string name="waiting_thinking">Tenkerâ€¦</string>
-    <string name="waiting_working">Jobberâ€¦</string>
-    <string name="waiting_brewing">Bryggerâ€¦</string>
+    <string name="waiting_thinking">Tenker…</string>
+    <string name="waiting_working">Jobber…</string>
+    <string name="waiting_brewing">Brygger…</string>
     <string name="settings_mcp_servers">MCP-servere</string>
     <string name="settings_mcp_servers_description">Koble til eksterne verktÃ¸yservere via Model Context Protocol.</string>
     <string name="settings_mcp_add_server">Legg til MCP-server</string>
@@ -164,7 +164,7 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="settings_mcp_cancel">Avbryt</string>
     <string name="settings_mcp_remove">Fjern</string>
     <string name="settings_mcp_refresh">Oppdater</string>
-    <string name="settings_mcp_status_connecting">Kobler tilâ€¦</string>
+    <string name="settings_mcp_status_connecting">Kobler til…</string>
     <string name="settings_mcp_status_connected">Tilkoblet</string>
     <string name="settings_mcp_status_error">Tilkobling mislyktes</string>
     <string name="settings_mcp_no_tools">Ingen verktÃ¸y funnet</string>
@@ -192,7 +192,7 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="settings_heartbeat_model">Modell</string>
     <string name="settings_heartbeat_model_default">Standard</string>
     <string name="settings_import_partial">Innstillinger importert med %1$d seksjon(er) som hadde feil.</string>
-    <string name="settings_model_search">SÃ¸k modellerâ€¦</string>
+    <string name="settings_model_search">SÃ¸k modeller…</string>
     <string name="waiting_content_description">Venter pÃ¥ svar</string>
     <string name="chat_history_content_description">Chattehistorikk</string>
     <string name="chat_history_title">Chattehistorikk</string>
@@ -210,7 +210,7 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="error_insufficient_credits">Utilstrekkelige kreditter</string>
     <string name="error_quota_exhausted">Kvoten er brukt opp</string>
     <string name="settings_request_integration_title">Be om en integrasjon</string>
-    <string name="settings_request_integration_description">Har du en idÃ© til en automatisering eller integrasjon? Gi oss beskjed ved Ã¥ opprette en GitHub-sak.</string>
+    <string name="settings_request_integration_description">Har du en idé til en automatisering eller integrasjon? Gi oss beskjed ved Ã¥ opprette en GitHub-sak.</string>
     <string name="settings_open_github_issue">Opprett GitHub-sak</string>
     <string name="notification_channel_name">AI-varsler</string>
     <string name="notification_channel_description">Varsler sendt av AI-assistent</string>
@@ -224,7 +224,7 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">Terminal</string>
     <string name="terminal_help_text">AI-en bruker dette miljÃ¸et til Ã¥ kjÃ¸re kommandoer.\nDu kan ogsÃ¥ kjÃ¸re kommandoer manuelt nedenfor.</string>
-    <string name="terminal_input_placeholder">skriv inn kommandoâ€¦</string>
+    <string name="terminal_input_placeholder">skriv inn kommando…</string>
     <string name="terminal_run_content_description">KjÃ¸r</string>
     <string name="terminal_stop_content_description">Stopp</string>
     <string name="interactive_welcome_title">Jeg er fullt operativ.</string>
@@ -232,7 +232,7 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="interactive_back_content_description">Tilbake</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Avslutt interaktiv modus</string>
-    <string name="interactive_ui_parsing_failed">UI-analyse mislyktes, prÃ¸ver igjenâ€¦</string>
+    <string name="interactive_ui_parsing_failed">UI-analyse mislyktes, prÃ¸ver igjen…</string>
     <string name="settings_sponsors_monthly">MÃ¥nedlige sponsorer</string>
     <string name="settings_sponsors_past">Tidligere sponsorer</string>
     <string name="snackbar_undo">Angre</string>
@@ -288,7 +288,7 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="sms_draft_banner_to">Til %1$s</string>
     <string name="sms_draft_banner_send">Send</string>
     <string name="sms_draft_banner_discard">Forkast</string>
-    <string name="sms_draft_banner_sending">Senderâ€¦</string>
+    <string name="sms_draft_banner_sending">Sender…</string>
     <string name="sms_draft_banner_sent">Sendt</string>
     <string name="sms_draft_banner_failed">Mislyktes: %1$s</string>
     <string name="sms_draft_banner_dismiss">Avvis</string>

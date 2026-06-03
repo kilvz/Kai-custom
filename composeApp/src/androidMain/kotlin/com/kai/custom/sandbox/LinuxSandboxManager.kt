@@ -347,11 +347,22 @@ class LinuxSandboxManager(
                 for (pkg in packages) {
                     ensureActive()
                     _state.value = SandboxState.Installing("Installing $pkg...")
-                    val result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
-                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 30) }
+                    var result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
+                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
                     ensureActive()
-                    val success = result["success"] as? Boolean ?: false
-                    if (!success) {
+                    if (result["success"] as? Boolean != true) {
+                        val stderr = result["stderr"] as? String ?: ""
+                        // If dpkg error on Ubuntu, try fixing and retry once
+                        if (distro == "ubuntu" && (stderr.contains("dpkg") || stderr.contains("sub-process"))) {
+                            android.util.Log.w("LinuxSandbox", "dpkg error for $pkg — running dpkg --configure -a and retrying")
+                            executor.execute("dpkg --configure -a", timeoutSeconds = 60)
+                            ensureActive()
+                            result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
+                            runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
+                            ensureActive()
+                        }
+                    }
+                    if (result["success"] as? Boolean != true) {
                         val stderr = result["stderr"] as? String ?: ""
                         val stdout = result["stdout"] as? String ?: ""
                         val error = result["error"] as? String ?: ""

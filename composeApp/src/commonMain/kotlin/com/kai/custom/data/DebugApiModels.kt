@@ -109,7 +109,7 @@ data class FullSettingsResponse(
     val wakeWordMode: String = "GENERAL",
     val wakeWordTemplate: String = "",
     val sandboxEnabled: Boolean = true,
-    val sandboxStorageMount: Boolean = true,
+    val sandboxStorageMount: Boolean = false,
     val sandboxDistro: String = "alpine",
     val sandboxRootEnabled: Boolean = false,
     val heartbeatEnabled: Boolean = true,

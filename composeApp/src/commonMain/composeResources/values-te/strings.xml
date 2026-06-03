@@ -143,14 +143,14 @@
     <string name="tab_settings">à°¸à±†à°Ÿà±à°Ÿà°¿à°‚à°—à±â€Œà°²à±</string>
     <string name="fallback_answered_by">%1$s à°¦à±à°µà°¾à°°à°¾ à°¸à°®à°¾à°§à°¾à°¨à°‚ à°‡à°µà±à°µà°¬à°¡à°¿à°‚à°¦à°¿ (à°«à°¾à°²à±â€Œà°¬à±à°¯à°¾à°•à±)</string>
     <string name="fallback_service_failed">%1$s: %2$s</string>
-    <string name="fallback_trying_next">%1$s à°ªà±à°°à°¯à°¤à±à°¨à°¿à°¸à±à°¤à±‹à°‚à°¦à°¿â€¦</string>
+    <string name="fallback_trying_next">%1$s à°ªà±à°°à°¯à°¤à±à°¨à°¿à°¸à±à°¤à±‹à°‚à°¦à°¿…</string>
     <string name="error_all_services_failed">à°…à°¨à±à°¨à°¿ à°¸à±‡à°µà°²à± à°µà°¿à°«à°²à°®à°¯à±à°¯à°¾à°¯à°¿.</string>
     <string name="settings_heartbeat_interval">à°µà°¿à°°à°¾à°®à°‚</string>
     <string name="settings_heartbeat_active_hours">à°•à±à°°à°¿à°¯à°¾à°¶à±€à°² à°—à°‚à°Ÿà°²à±</string>
     <string name="settings_documentation">à°¡à°¾à°•à±à°¯à±à°®à±†à°‚à°Ÿà±‡à°·à°¨à±</string>
-    <string name="waiting_thinking">à°†à°²à±‹à°šà°¿à°¸à±à°¤à±‹à°‚à°¦à°¿â€¦</string>
-    <string name="waiting_working">à°ªà°¨à°¿ à°šà±‡à°¸à±à°¤à±‹à°‚à°¦à°¿â€¦</string>
-    <string name="waiting_brewing">à°¤à°¯à°¾à°°à± à°šà±‡à°¸à±à°¤à±‹à°‚à°¦à°¿â€¦</string>
+    <string name="waiting_thinking">à°†à°²à±‹à°šà°¿à°¸à±à°¤à±‹à°‚à°¦à°¿…</string>
+    <string name="waiting_working">à°ªà°¨à°¿ à°šà±‡à°¸à±à°¤à±‹à°‚à°¦à°¿…</string>
+    <string name="waiting_brewing">à°¤à°¯à°¾à°°à± à°šà±‡à°¸à±à°¤à±‹à°‚à°¦à°¿…</string>
     <string name="settings_mcp_servers">MCP à°¸à°°à±à°µà°°à±â€Œà°²à±</string>
     <string name="settings_mcp_servers_description">Model Context Protocol à°‰à°ªà°¯à±‹à°—à°¿à°‚à°šà°¿ à°¬à°¾à°¹à±à°¯ à°Ÿà±‚à°²à± à°¸à°°à±à°µà°°à±â€Œà°²à°•à± à°•à°¨à±†à°•à±à°Ÿà± à°…à°µà±à°µà°‚à°¡à°¿.</string>
     <string name="settings_mcp_add_server">MCP à°¸à°°à±à°µà°°à± à°œà±‹à°¡à°¿à°‚à°šà±</string>
@@ -163,7 +163,7 @@
     <string name="settings_mcp_cancel">à°°à°¦à±à°¦à± à°šà±‡à°¯à°¿</string>
     <string name="settings_mcp_remove">à°¤à±Šà°²à°—à°¿à°‚à°šà±</string>
     <string name="settings_mcp_refresh">à°°à°¿à°«à±à°°à±†à°·à± à°šà±‡à°¯à°¿</string>
-    <string name="settings_mcp_status_connecting">à°•à°¨à±†à°•à±à°Ÿà± à°…à°µà±à°¤à±‹à°‚à°¦à°¿â€¦</string>
+    <string name="settings_mcp_status_connecting">à°•à°¨à±†à°•à±à°Ÿà± à°…à°µà±à°¤à±‹à°‚à°¦à°¿…</string>
     <string name="settings_mcp_status_connected">à°•à°¨à±†à°•à±à°Ÿà± à°…à°¯à°¿à°‚à°¦à°¿</string>
     <string name="settings_mcp_status_error">à°•à°¨à±†à°•à±à°·à°¨à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿</string>
     <string name="settings_mcp_no_tools">à°Ÿà±‚à°²à±à°¸à± à°•à°¨à±à°—à±Šà°¨à°¬à°¡à°²à±‡à°¦à±</string>
@@ -191,7 +191,7 @@
     <string name="settings_heartbeat_model">à°®à±‹à°¡à°²à±</string>
     <string name="settings_heartbeat_model_default">à°¡à°¿à°«à°¾à°²à±à°Ÿà±</string>
     <string name="settings_import_partial">%1$d à°µà°¿à°­à°¾à°—à°‚(à°²à±) à°²à±‹à°ªà°¾à°²à°¤à±‹ à°¸à±†à°Ÿà±à°Ÿà°¿à°‚à°—à±â€Œà°²à± à°¦à°¿à°—à±à°®à°¤à°¿ à°šà±‡à°¯à°¬à°¡à±à°¡à°¾à°¯à°¿.</string>
-    <string name="settings_model_search">à°®à±‹à°¡à°²à±â€Œà°²à°¨à± à°¶à±‹à°§à°¿à°‚à°šà°‚à°¡à°¿â€¦</string>
+    <string name="settings_model_search">à°®à±‹à°¡à°²à±â€Œà°²à°¨à± à°¶à±‹à°§à°¿à°‚à°šà°‚à°¡à°¿…</string>
     <string name="waiting_content_description">à°¸à±à°ªà°‚à°¦à°¨ à°•à±‹à°¸à°‚ à°µà±‡à°šà°¿ à°‰à°‚à°¦à°¿</string>
     <string name="chat_history_content_description">à°šà°¾à°Ÿà± à°šà°°à°¿à°¤à±à°°</string>
     <string name="chat_history_title">à°šà°¾à°Ÿà± à°šà°°à°¿à°¤à±à°°</string>
@@ -223,7 +223,7 @@
     <string name="settings_sandbox_disk_usage">%1$d MB</string>
     <string name="terminal_title">à°Ÿà±†à°°à±à°®à°¿à°¨à°²à±</string>
     <string name="terminal_help_text">AI à°•à°®à°¾à°‚à°¡à±â€Œà°²à°¨à± à°…à°®à°²à± à°šà±‡à°¯à°¡à°¾à°¨à°¿à°•à°¿ à°ˆ à°µà°¾à°¤à°¾à°µà°°à°£à°¾à°¨à±à°¨à°¿ à°‰à°ªà°¯à±‹à°—à°¿à°¸à±à°¤à±à°‚à°¦à°¿.\nà°®à±€à°°à± à°•à°¿à°‚à°¦ à°®à°¾à°¨à±à°¯à±à°µà°²à±â€Œà°—à°¾ à°•à±‚à°¡à°¾ à°•à°®à°¾à°‚à°¡à±â€Œà°²à°¨à± à°…à°®à°²à± à°šà±‡à°¯à°µà°šà±à°šà±.</string>
-    <string name="terminal_input_placeholder">à°†à°¦à±‡à°¶à°¾à°¨à±à°¨à°¿ à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿â€¦</string>
+    <string name="terminal_input_placeholder">à°†à°¦à±‡à°¶à°¾à°¨à±à°¨à°¿ à°¨à°®à±‹à°¦à± à°šà±‡à°¯à°‚à°¡à°¿…</string>
     <string name="terminal_run_content_description">à°…à°®à°²à± à°šà±‡à°¯à°‚à°¡à°¿</string>
     <string name="terminal_stop_content_description">à°†à°ªà±</string>
     <string name="interactive_welcome_title">à°¨à±‡à°¨à± à°ªà±‚à°°à±à°¤à°¿à°—à°¾ à°ªà°¨à°¿à°šà±‡à°¸à±à°¤à±à°¨à±à°¨à°¾à°¨à±.</string>
@@ -231,7 +231,7 @@
     <string name="interactive_back_content_description">à°µà±†à°¨à±à°•à°•à±</string>
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">à°‡à°‚à°Ÿà°°à°¾à°•à±à°Ÿà°¿à°µà± à°®à±‹à°¡à± à°¨à±à°‚à°¡à°¿ à°¨à°¿à°·à±à°•à±à°°à°®à°¿à°‚à°šà±</string>
-    <string name="interactive_ui_parsing_failed">UI à°ªà°¾à°°à±à°¸à°¿à°‚à°—à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿, à°®à°³à±à°³à±€ à°ªà±à°°à°¯à°¤à±à°¨à°¿à°¸à±à°¤à±‹à°‚à°¦à°¿â€¦</string>
+    <string name="interactive_ui_parsing_failed">UI à°ªà°¾à°°à±à°¸à°¿à°‚à°—à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿, à°®à°³à±à°³à±€ à°ªà±à°°à°¯à°¤à±à°¨à°¿à°¸à±à°¤à±‹à°‚à°¦à°¿…</string>
     <string name="settings_sponsors_monthly">à°¨à±†à°²à°µà°¾à°°à±€ à°¸à±à°ªà°¾à°¨à±à°¸à°°à±à°²à±</string>
     <string name="settings_sponsors_past">à°®à±à°¨à±à°ªà°Ÿà°¿ à°¸à±à°ªà°¾à°¨à±à°¸à°°à±à°²à±</string>
     <string name="snackbar_undo">à°°à°¦à±à°¦à± à°šà±‡à°¯à°¿</string>
@@ -287,7 +287,7 @@
     <string name="sms_draft_banner_to">à°µà±€à°°à°¿à°•à°¿ %1$s</string>
     <string name="sms_draft_banner_send">à°ªà°‚à°ªà±</string>
     <string name="sms_draft_banner_discard">à°µà°¿à°¸à±à°®à°°à°¿à°‚à°šà±</string>
-    <string name="sms_draft_banner_sending">à°ªà°‚à°ªà±à°¤à±‹à°‚à°¦à°¿â€¦</string>
+    <string name="sms_draft_banner_sending">à°ªà°‚à°ªà±à°¤à±‹à°‚à°¦à°¿…</string>
     <string name="sms_draft_banner_sent">à°ªà°‚à°ªà°¬à°¡à°¿à°‚à°¦à°¿</string>
     <string name="sms_draft_banner_failed">à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿: %1$s</string>
     <string name="sms_draft_banner_dismiss">à°®à±‚à°¸à°¿à°µà±‡à°¯à°¿</string>
