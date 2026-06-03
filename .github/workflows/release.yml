@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: signed-apk
-          path: androidApp/build/outputs/apk/foss/release/androidApp-foss-release-signed.apk
+          path: androidApp/build/outputs/apk/foss/release/*-signed.apk
 
   dmg:
     name: Generate DMG
@@ -282,7 +282,11 @@ jobs:
       - name: Rename assets
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          mv androidApp-foss-release-signed.apk "Kai-${VERSION}-android.apk"
+          for f in androidApp-foss-*-release-signed.apk; do
+            [ -f "$f" ] || continue
+            abi=$(echo "$f" | sed 's/androidApp-foss-\(.*\)-release-signed\.apk/\1/')
+            mv "$f" "Kai-${VERSION}-android-${abi}.apk"
+          done
 
       - name: Extract changelog
         run: |

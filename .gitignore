@@ -29,3 +29,5 @@ tools/speech_commands/
 *.tflite
 /playstore/
 AGENTS.md
+*.jks
+*.b64
