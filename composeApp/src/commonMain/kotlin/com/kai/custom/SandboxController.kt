@@ -101,6 +101,7 @@ interface SandboxController {
     suspend fun startAltMemory() {}
     suspend fun stopAltMemory() {}
     suspend fun installAltMemoryPackage(): Boolean = false
+    suspend fun updateAltMemoryPackage(): Boolean = false
 }
 
 expect fun createSandboxController(): SandboxController

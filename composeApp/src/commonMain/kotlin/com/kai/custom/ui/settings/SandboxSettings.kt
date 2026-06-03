@@ -59,6 +59,7 @@ internal fun SandboxSettingsCard(
     onResetSandbox: () -> Unit,
     onInstallPackages: () -> Unit,
     onInstallAltMemory: () -> Unit = {},
+    onUpdateAltMemory: () -> Unit = {},
     onDistroChanged: (String) -> Unit = {},
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
@@ -140,6 +141,10 @@ internal fun SandboxSettingsCard(
                     if (!sandboxState.altMemoryInstalled) {
                         OutlinedButton(onClick = onInstallAltMemory, modifier = Modifier.handCursor()) {
                             Text("Alt-Memory")
+                        }
+                    } else {
+                        OutlinedButton(onClick = onUpdateAltMemory, modifier = Modifier.handCursor()) {
+                            Text("Update Alt-Memory")
                         }
                     }
                     OutlinedButton(onClick = { showResetDialog = true }, modifier = Modifier.handCursor()) {

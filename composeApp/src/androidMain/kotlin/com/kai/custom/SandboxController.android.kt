@@ -410,9 +410,18 @@ class AndroidSandboxController : SandboxController {
 
     override suspend fun installAltMemoryPackage(): Boolean {
         android.util.Log.i("SandboxController", "installAltMemoryPackage called")
+        return altMemoryPipeline(force = false)
+    }
+
+    override suspend fun updateAltMemoryPackage(): Boolean {
+        android.util.Log.i("SandboxController", "updateAltMemoryPackage called")
+        return altMemoryPipeline(force = true)
+    }
+
+    private suspend fun altMemoryPipeline(force: Boolean): Boolean {
         val current = sandboxManager.state.value
         if (current !is SandboxState.Ready) {
-            android.util.Log.w("SandboxController", "installAltMemoryPackage: sandbox not ready, state=$current")
+            android.util.Log.w("SandboxController", "altMemoryPipeline: sandbox not ready, state=$current")
             return false
         }
 
@@ -431,19 +440,21 @@ class AndroidSandboxController : SandboxController {
         }
 
         return withContext(Dispatchers.IO) {
-            updateStatus(working = true, statusText = "Checking Alt-Memory…")
-
             val executor = sandboxManager.createProotExecutor()
 
-            val check = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
-            if (check["success"] as? Boolean == true && (check["stdout"] as? String)?.trim() == "1") {
-                appSettings.setAltMemoryInstalled(true)
-                updateStatus()
-                android.util.Log.i("SandboxController", "Alt-Memory already installed")
-                return@withContext true
+            if (!force) {
+                updateStatus(working = true, statusText = "Checking Alt-Memory…")
+                val check = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
+                if (check["success"] as? Boolean == true && (check["stdout"] as? String)?.trim() == "1") {
+                    appSettings.setAltMemoryInstalled(true)
+                    updateStatus()
+                    android.util.Log.i("SandboxController", "Alt-Memory already installed")
+                    return@withContext true
+                }
             }
 
             // Phase 1 — download-only: safe, never touches site-packages
+            val actionLabel = if (force) "Updating" else "Installing"
             updateStatus(working = true, statusText = "Downloading Alt-Memory packages…")
             executor.execute("mkdir -p /tmp/pip-download", timeoutSeconds = 5)
             val download = executor.execute(
@@ -451,7 +462,6 @@ class AndroidSandboxController : SandboxController {
                 timeoutSeconds = 600,
             )
             if (download["success"] as? Boolean != true) {
-                // If download failed, don't proceed to install — safe exit, nothing touched
                 val stderr = download["stderr"] as? String ?: ""
                 val stdout = download["stdout"] as? String ?: ""
                 val error = download["error"] as? String ?: ""
@@ -462,7 +472,7 @@ class AndroidSandboxController : SandboxController {
             }
 
             // Phase 2 — install from local cache: fast, no network
-            updateStatus(working = true, statusText = "Installing Alt-Memory (pip)…")
+            updateStatus(working = true, statusText = "$actionLabel Alt-Memory (pip)…")
             val install = executor.execute(
                 "pip install --no-cache-dir --break-system-packages --no-index --find-links /tmp/pip-download alt-memory 2>&1",
                 timeoutSeconds = 300,
@@ -474,7 +484,7 @@ class AndroidSandboxController : SandboxController {
                 val error = install["error"] as? String ?: ""
                 val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
                 android.util.Log.e("SandboxController", "pip install failed: $msg")
-                updateStatus(error = true, statusText = "Alt-Memory install failed: $msg")
+                updateStatus(error = true, statusText = "Alt-Memory $actionLabel failed: $msg")
                 return@withContext false
             }
 
@@ -483,13 +493,13 @@ class AndroidSandboxController : SandboxController {
             val verify = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
             val ok = verify["success"] as? Boolean == true && (verify["stdout"] as? String)?.trim() == "1"
             if (!ok) {
-                updateStatus(error = true, statusText = "Alt-Memory install: import check failed")
+                updateStatus(error = true, statusText = "Alt-Memory $actionLabel: import check failed")
                 return@withContext false
             }
 
             appSettings.setAltMemoryInstalled(true)
             updateStatus()
-            android.util.Log.i("SandboxController", "Alt-Memory installed successfully")
+            android.util.Log.i("SandboxController", "Alt-Memory ${actionLabel.lowercase()}d successfully")
             true
         }
     }
