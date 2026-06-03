@@ -766,13 +766,13 @@ class AppSettings(internal val settings: Settings) {
     }
 
     // Debug API server (Android-only debug builds only; feature gate is Platform.isDebugBuild)
-    fun isDebugApiEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_API_ENABLED, false)
+    fun isDebugApiEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_API_ENABLED, true)
     fun setDebugApiEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_DEBUG_API_ENABLED, enabled)
     }
 
     // Debug endpoint (opencode.ai/zen, debug builds only)
-    fun isDebugEndpointEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_ENDPOINT_ENABLED, false)
+    fun isDebugEndpointEnabled(): Boolean = settings.getBoolean(KEY_DEBUG_ENDPOINT_ENABLED, true)
     fun setDebugEndpointEnabled(enabled: Boolean) {
         settings.putBoolean(KEY_DEBUG_ENDPOINT_ENABLED, enabled)
     }

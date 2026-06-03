@@ -184,7 +184,7 @@ class LinuxSandboxManager(
             val executor = createProotExecutor()
             val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
             var updated = false
-            for (mirror in downloader.getMirrors(distro)) {
+            for (mirror in downloader.getMirrors(distro, arch)) {
                 downloader.writeRepositories(rootfsDir, mirror, distro)
                 val result = executor.execute(updateCmd, timeoutSeconds = 180)
                 if (result["success"] as? Boolean == true) {
@@ -207,6 +207,21 @@ class LinuxSandboxManager(
         val source = File(nativeLibDir, "libtalloc.so")
         if (source.exists()) {
             source.copyTo(tallocTarget, overwrite = true)
+        }
+    }
+
+    private fun copyLinkWrapper(rootfsDir: File) {
+        val target = File(rootfsDir, "usr/lib/link-wrapper.so")
+        if (target.exists()) return
+
+        val source = File(nativeLibDir, "liblink-wrapper.so")
+        if (source.exists()) {
+            source.copyTo(target, overwrite = true)
+            target.setReadable(true, false)
+            target.setExecutable(true, false)
+            android.util.Log.i("LinuxSandbox", "Copied link-wrapper.so to rootfs")
+        } else {
+            android.util.Log.w("LinuxSandbox", "link-wrapper.so not found in native lib dir")
         }
     }
 
@@ -313,6 +328,7 @@ class LinuxSandboxManager(
 
         currentJob = scope.launch {
             try {
+                val arch = getLinuxArch()
                 val rootfsDir = File(sandboxDir, "rootfs")
                 val executor = createProotExecutor()
                 downloader.fixAptDirectories(rootfsDir)
@@ -320,7 +336,7 @@ class LinuxSandboxManager(
                 _state.value = SandboxState.Installing("Updating package lists...")
 
                 var updated = false
-                for (mirror in downloader.getMirrors(distro)) {
+                for (mirror in downloader.getMirrors(distro, arch)) {
                     downloader.writeRepositories(rootfsDir, mirror, distro)
                     val result = executor.execute(updateCmd, timeoutSeconds = 120)
                     if (result["success"] as? Boolean == true) {
@@ -329,7 +345,7 @@ class LinuxSandboxManager(
                     }
                 }
                 if (!updated && distro != "ubuntu") {
-                    for (mirror in downloader.getMirrors(distro)) {
+                    for (mirror in downloader.getMirrors(distro, arch)) {
                         val httpMirror = mirror.replace("https://", "http://")
                         downloader.writeRepositories(rootfsDir, httpMirror, distro)
                         val result = executor.execute(updateCmd, timeoutSeconds = 180)

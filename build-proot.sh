@@ -128,6 +128,18 @@ fi
 echo "Checking out proot at $PROOT_COMMIT..."
 git -C "$BUILD_DIR/proot-patched" checkout -q "$PROOT_COMMIT"
 
+# Apply link-emulation patch for protected_hardlinks (Android 14+)
+if [[ -f "$SCRIPT_DIR/patches/exit.c" ]]; then
+    echo "Applying link-emulation patch (exit.c)..."
+    cp "$SCRIPT_DIR/patches/exit.c" "$BUILD_DIR/proot-patched/src/syscall/exit.c"
+    echo "Patch applied."
+fi
+
+# Apply seccomp patch: add FILTER_SYSEXIT to PR_link/PR_linkat so the
+# exit handler is called (needed for EPERM/EACCES copy-fallback).
+sed -i 's/{ PR_link,\t\t0 },/{ PR_link,		FILTER_SYSEXIT },/' "$BUILD_DIR/proot-patched/src/syscall/seccomp.c"
+sed -i 's/{ PR_linkat,\t\t0 },/{ PR_linkat,		FILTER_SYSEXIT },/' "$BUILD_DIR/proot-patched/src/syscall/seccomp.c"
+
 if [[ ! -d "$BUILD_DIR/talloc-${TALLOC_VERSION}" ]]; then
     echo "Downloading talloc ${TALLOC_VERSION}..."
     curl -sL "$TALLOC_URL" -o "$BUILD_DIR/talloc.tar.gz"
@@ -213,6 +225,30 @@ build_proot() {
     local build_dir="$BUILD_DIR/build-proot-$abi"
     local out_dir="$OUTPUT_DIR/$abi"
 
+    # Convert paths for compiler flags: NDK clang is a Windows binary and
+    # cannot use Linux paths (e.g. /mnt/f/...) when running under WSL.
+    local cc_sysroot="$sysroot"
+    local cc_script_dir="."
+    if command -v wslpath &>/dev/null; then
+        cc_sysroot=$(wslpath -m "$sysroot")
+        cc_script_dir=$(wslpath -m "$SCRIPT_DIR")
+        # Resolve any symlinks in the library directory — Windows binaries
+        # (clang/lld) cannot follow Linux-style symlinks on DrvFs filesystems.
+        echo "[proot/$abi] resolving symlinks in ${sysroot}/lib/..."
+        local libdir="$sysroot/lib"
+        for f in "$libdir"/*.so "$libdir"/*.so.*; do
+            [[ -L "$f" ]] || continue
+            local target
+            target=$(readlink "$f")
+            # If target is relative, resolve it relative to libdir
+            if [[ "$target" != /* ]]; then
+                target="$libdir/$target"
+            fi
+            rm -f "$f"
+            cp -a "$target" "$f"
+        done
+    fi
+
     echo "[proot/$abi] building..."
     rm -rf "$build_dir"
     cp -r "$BUILD_DIR/proot-patched" "$build_dir"
@@ -236,11 +272,20 @@ build_proot() {
         # defaults (-I., -DPROOT_UNBUNDLE_LOADER, -ltalloc, etc.)
         export CC="$cc"
         export LD="$cc"
-        export STRIP="${TOOLCHAIN}/llvm-strip"
-        export OBJCOPY="${TOOLCHAIN}/llvm-objcopy"
+        # Add .exe suffix to strip/objcopy when running from WSL (Windows NDK binaries)
+        local llvm_strip_bin="${TOOLCHAIN}/llvm-strip"
+        local llvm_objcopy_bin="${TOOLCHAIN}/llvm-objcopy"
+        if ! command -v "$llvm_strip_bin" &>/dev/null && [ -f "${llvm_strip_bin}.exe" ]; then
+            llvm_strip_bin="${llvm_strip_bin}.exe"
+        fi
+        if ! command -v "$llvm_objcopy_bin" &>/dev/null && [ -f "${llvm_objcopy_bin}.exe" ]; then
+            llvm_objcopy_bin="${llvm_objcopy_bin}.exe"
+        fi
+        export STRIP="$llvm_strip_bin"
+        export OBJCOPY="$llvm_objcopy_bin"
         export OBJDUMP="${TOOLCHAIN}/llvm-objdump"
-        export CFLAGS="-DARG_MAX=131072 -ffile-prefix-map=${SCRIPT_DIR}=. -I${sysroot}/include -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
-        export LDFLAGS="-L${sysroot}/lib"
+        export CFLAGS="-DARG_MAX=131072 -ffile-prefix-map=${cc_script_dir}=. -I${cc_sysroot}/include -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
+        export LDFLAGS="-L${cc_sysroot}/lib"
         export PATH="$tmp_bin:$PATH"
         # Use a relative path for PROOT_UNBUNDLE_LOADER to avoid embedding
         # absolute build paths in the binary. The app sets PROOT_LOADER at
@@ -256,11 +301,24 @@ build_proot() {
     # Copy outputs (named lib*.so so Android extracts them from the APK)
     cp "$build_dir/src/proot" "$out_dir/libproot.so"
     cp "$build_dir/src/loader/loader" "$out_dir/libproot-loader.so"
+    # talloc's SONAME is libtalloc.so.2 — Android linker expects the exact SONAME
+    # when resolving NEEDED entries, so provide both names.
     cp "$sysroot/lib/libtalloc.so" "$out_dir/libtalloc.so"
+    cp "$sysroot/lib/libtalloc.so" "$out_dir/libtalloc.so.2"
 
-    "${TOOLCHAIN}/llvm-strip" "$out_dir/libproot.so"
-    "${TOOLCHAIN}/llvm-strip" "$out_dir/libproot-loader.so"
-    "${TOOLCHAIN}/llvm-strip" "$out_dir/libtalloc.so"
+    # llvm-strip / llvm-objcopy are Windows NDK binaries that cannot read WSL
+    # Linux paths (/mnt/f/...). When running under WSL, convert paths.
+    local llvm_strip="${TOOLCHAIN}/llvm-strip"
+    if ! command -v "$llvm_strip" &>/dev/null && [ -f "${llvm_strip}.exe" ]; then
+        llvm_strip="${llvm_strip}.exe"
+    fi
+    local strip_out_dir="$out_dir"
+    if command -v wslpath &>/dev/null; then
+        strip_out_dir=$(wslpath -m "$out_dir")
+    fi
+    "$llvm_strip" "$strip_out_dir/libproot.so"
+    "$llvm_strip" "$strip_out_dir/libproot-loader.so"
+    "$llvm_strip" "$strip_out_dir/libtalloc.so"
 
     echo "[proot/$abi] done -> $out_dir"
 }
@@ -316,7 +374,15 @@ build_loader32() {
         "$BUILD_DIR/loader32-$abi.o" \
         "$BUILD_DIR/assembly32-$abi.o"
 
-    "${TOOLCHAIN}/llvm-strip" "$out_dir/libproot-loader32.so"
+    local llvm_strip_bin="${TOOLCHAIN}/llvm-strip"
+    if ! command -v "$llvm_strip_bin" &>/dev/null && [ -f "${llvm_strip_bin}.exe" ]; then
+        llvm_strip_bin="${llvm_strip_bin}.exe"
+    fi
+    local strip_out_dir="$out_dir"
+    if command -v wslpath &>/dev/null; then
+        strip_out_dir=$(wslpath -m "$out_dir")
+    fi
+    "$llvm_strip_bin" "$strip_out_dir/libproot-loader32.so"
     echo "[loader32/$abi] done -> $out_dir/libproot-loader32.so"
 }
 
@@ -334,8 +400,18 @@ for abi in $ABIS; do
     # Remove .comment sections for F-Droid reproducible builds (issue #91).
     # The .comment section embeds the NDK clang version string, which differs
     # between macOS and Linux build environments.
+    local objcopy_bin="${TOOLCHAIN}/llvm-objcopy"
+    if ! command -v "$objcopy_bin" &>/dev/null && [ -f "${objcopy_bin}.exe" ]; then
+        objcopy_bin="${objcopy_bin}.exe"
+    fi
     for lib in "$OUTPUT_DIR/$abi"/lib*.so; do
-        "${TOOLCHAIN}/llvm-objcopy" --remove-section .comment "$lib" 2>/dev/null || true
+        if command -v wslpath &>/dev/null; then
+            local lib_win
+            lib_win=$(wslpath -m "$lib")
+            "$objcopy_bin" --remove-section .comment "$lib_win" 2>/dev/null || true
+        else
+            "$objcopy_bin" --remove-section .comment "$lib" 2>/dev/null || true
+        fi
     done
 
     echo ""

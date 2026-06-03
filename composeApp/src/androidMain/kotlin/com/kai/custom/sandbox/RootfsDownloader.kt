@@ -43,8 +43,14 @@ private const val TAR_PREFIX_OFFSET = 345
 
 class RootfsDownloader(private val httpClient: HttpClient) {
 
-    fun getMirrors(distro: String): List<String> = when (distro) {
-        "ubuntu" -> UBUNTU_APT_MIRRORS
+    fun getMirrors(distro: String, arch: String = "aarch64"): List<String> = when (distro) {
+        "ubuntu" -> {
+            val ubuntuArch = toUbuntuArch(arch)
+            // Non-x86 architectures must use ports.ubuntu.com — archive.ubuntu.com
+            // only serves amd64/i386. Place the correct mirror first.
+            if (ubuntuArch == "amd64" || ubuntuArch == "i386") UBUNTU_APT_MIRRORS
+            else UBUNTU_APT_MIRRORS.reversed()
+        }
         else -> ALPINE_MIRRORS
     }
 
@@ -268,7 +274,9 @@ class RootfsDownloader(private val httpClient: HttpClient) {
     fun makeWritable(rootfsDir: File) {
         rootfsDir.walkTopDown().forEach { file ->
             if (file.isDirectory && !file.canWrite()) {
-                file.setWritable(true, true)
+                file.setReadable(true, false)
+                file.setWritable(true, false)
+                file.setExecutable(true, false)
             }
         }
     }
@@ -282,15 +290,28 @@ class RootfsDownloader(private val httpClient: HttpClient) {
     }
 
     fun fixAptDirectories(rootfsDir: File) {
-        val partialDirs = listOf(
+        val dirs = listOf(
             File(rootfsDir, "var/lib/apt/lists/partial"),
             File(rootfsDir, "var/cache/apt/archives/partial"),
         )
-        for (dir in partialDirs) {
+        for (dir in dirs) {
             dir.mkdirs()
             dir.setReadable(true, false)
             dir.setWritable(true, false)
             dir.setExecutable(true, false)
+        }
+        // dpkg needs to write status-old, available-old, and lock files
+        // proot fakes access() checks but kernel enforces real perms for rename/open
+        val dpkgDir = File(rootfsDir, "var/lib/dpkg")
+        dpkgDir.mkdirs()
+        dpkgDir.setReadable(true, false)
+        dpkgDir.setWritable(true, false)
+        dpkgDir.setExecutable(true, false)
+        for (name in listOf("status-old", "available-old", "lock", "lock-frontend")) {
+            val f = File(rootfsDir, "var/lib/dpkg/$name")
+            if (!f.exists()) f.createNewFile()
+            f.setReadable(true, false)
+            f.setWritable(true, false)
         }
     }
 

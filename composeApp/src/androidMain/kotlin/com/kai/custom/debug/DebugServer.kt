@@ -777,6 +777,12 @@ class DebugServer(
                     call.respondText("Sandbox package install started", ContentType.Text.Plain)
                 }
 
+                post("/sandbox/reset") {
+                    val err = auth(call) ?: return@post
+                    withContext(Dispatchers.Default) { sandboxController.reset() }
+                    call.respondText("Sandbox reset and rootfs deleted", ContentType.Text.Plain)
+                }
+
                 post("/sandbox/exec") {
                     val err = auth(call) ?: return@post
                     val command = call.receiveText().trim()
