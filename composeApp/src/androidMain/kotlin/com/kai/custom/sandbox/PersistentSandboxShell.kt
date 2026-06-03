@@ -203,25 +203,20 @@ class PersistentSandboxShell(
         }
     }
 
-    private fun dispatchStdout(line: String) {
-        val sink = currentSink.get() ?: return
-        appendBounded(sink.stdoutBuf, line)
-        sink.onStdout?.invoke(line)
-    }
-
-    private fun dispatchStderr(line: String) {
-        // Suppress blank stderr lines. Sentinel emission prepends \n to flush
-        // any partial line ahead of it, which produces a stray empty line when
-        // there's nothing to flush. Legitimate blank stderr is rare; dropping
-        // it is a worthwhile tradeoff for clean output.
-        if (line.isEmpty()) return
+    /**
+     * Try to parse a sentinel or pid-probe control line. Returns true if the
+     * line was consumed (no further processing needed), false if it should be
+     * treated as normal output.
+     */
+    private fun tryParseControlLine(line: String, sink: CommandSink?): Boolean {
+        if (line.isEmpty()) return true
         // Startup pid probe — handled regardless of whether a sink is active.
         if (line.startsWith(PID_PROBE_PREFIX) && line.endsWith(RS)) {
             val pidText = line.substring(PID_PROBE_PREFIX.length, line.length - 1)
             pidText.toIntOrNull()?.let { bashPid = it }
-            return
+            return true
         }
-        val sink = currentSink.get() ?: return
+        if (sink == null) return false
         // Sentinel format: \x1e<nonce>\x1f<exit>\x1f<pid>\x1f<pwd>\x1e
         if (line.length >= 2 && line.startsWith(RS) && line.endsWith(RS)) {
             val payload = line.substring(1, line.length - 1)
@@ -231,9 +226,24 @@ class PersistentSandboxShell(
                 val pid = parts[2].toIntOrNull() ?: 0
                 val cwd = parts[3]
                 sink.done.complete(Result(exitCode = exit, cwd = cwd, bashPid = pid))
-                return
+                return true
             }
         }
+        return false
+    }
+
+    private fun dispatchStdout(line: String) {
+        val sink = currentSink.get()
+        if (tryParseControlLine(line, sink)) return
+        if (sink == null) return
+        appendBounded(sink.stdoutBuf, line)
+        sink.onStdout?.invoke(line)
+    }
+
+    private fun dispatchStderr(line: String) {
+        val sink = currentSink.get()
+        if (tryParseControlLine(line, sink)) return
+        if (sink == null) return
         appendBounded(sink.stderrBuf, line)
         sink.onStderr?.invoke(line)
     }
