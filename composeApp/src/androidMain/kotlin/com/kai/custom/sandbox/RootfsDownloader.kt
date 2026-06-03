@@ -300,19 +300,15 @@ class RootfsDownloader(private val httpClient: HttpClient) {
             dir.setWritable(true, false)
             dir.setExecutable(true, false)
         }
-        // dpkg needs to write status-old, available-old, and lock files
-        // proot fakes access() checks but kernel enforces real perms for rename/open
+        // dpkg needs to write status-old, available-old
+        // proot fakes access() checks but kernel enforces real perms for rename/open.
+        // lock/lock-frontend are NOT pre-created — dpkg creates them dynamically
+        // via flock(), and pre-existing files can interfere with that.
         val dpkgDir = File(rootfsDir, "var/lib/dpkg")
         dpkgDir.mkdirs()
         dpkgDir.setReadable(true, false)
         dpkgDir.setWritable(true, false)
         dpkgDir.setExecutable(true, false)
-        for (name in listOf("status-old", "available-old", "lock", "lock-frontend")) {
-            val f = File(rootfsDir, "var/lib/dpkg/$name")
-            if (!f.exists()) f.createNewFile()
-            f.setReadable(true, false)
-            f.setWritable(true, false)
-        }
     }
 
     fun writeRepositories(rootfsDir: File, mirrorBase: String, distro: String = "alpine") {

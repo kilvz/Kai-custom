@@ -210,21 +210,6 @@ class LinuxSandboxManager(
         }
     }
 
-    private fun copyLinkWrapper(rootfsDir: File) {
-        val target = File(rootfsDir, "usr/lib/link-wrapper.so")
-        if (target.exists()) return
-
-        val source = File(nativeLibDir, "liblink-wrapper.so")
-        if (source.exists()) {
-            source.copyTo(target, overwrite = true)
-            target.setReadable(true, false)
-            target.setExecutable(true, false)
-            android.util.Log.i("LinuxSandbox", "Copied link-wrapper.so to rootfs")
-        } else {
-            android.util.Log.w("LinuxSandbox", "link-wrapper.so not found in native lib dir")
-        }
-    }
-
     fun createProotExecutor(): ProotExecutor = ProotExecutor(
         prootPath = prootPath,
         libDir = sandboxDir.absolutePath,
@@ -344,7 +329,7 @@ class LinuxSandboxManager(
                         break
                     }
                 }
-                if (!updated && distro != "ubuntu") {
+                if (!updated) {
                     for (mirror in downloader.getMirrors(distro, arch)) {
                         val httpMirror = mirror.replace("https://", "http://")
                         downloader.writeRepositories(rootfsDir, httpMirror, distro)
