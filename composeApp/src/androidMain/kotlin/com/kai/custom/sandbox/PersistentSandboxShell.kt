@@ -32,6 +32,7 @@ private const val PID_PROBE_PREFIX = "${RS}KAIBASHPID$US"
 class PersistentSandboxShell(
     private val executor: ProotExecutor,
     private val tmpPath: String,
+    private val usePty: Boolean = false,
 ) {
     private val mutex = Mutex()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -169,8 +170,13 @@ class PersistentSandboxShell(
         // them in-process (so cd/export/. preserve state), and inherits its
         // stdin to any foreground child (so ssh can read passwords typed via
         // writeInput).
+        val bashCmd = if (usePty) {
+            "exec script -q -c 'exec bash --noprofile --norc' /dev/null"
+        } else {
+            "exec bash --noprofile --norc"
+        }
         val h = executor.executeStreaming(
-            command = "exec bash --noprofile --norc",
+            command = bashCmd,
             onStdout = { line -> dispatchStdout(line) },
             onStderr = { line -> dispatchStderr(line) },
         )
@@ -180,7 +186,11 @@ class PersistentSandboxShell(
         // the very first command has something to signal. Leading \n matches
         // the sentinel pattern below — flushes any partial line first.
         h.writeInput("printf '\\n\\036KAIBASHPID\\037%d\\036\\n' \"\$\$\" >&2")
-        h.writeInput("apt-get() { command apt-get -y \"\$@\"; }")
+        // Non-PTY sessions still get the -y apt-get wrapper since programs
+        // can't field interactive prompts without a real TTY.
+        if (!usePty) {
+            h.writeInput("apt-get() { command apt-get -y \"\$@\"; }")
+        }
         watchdog = scope.launch {
             h.awaitExit()
             // Shell died. Wake up any in-flight command with a shellDied result
