@@ -458,7 +458,7 @@ class AndroidSandboxController : SandboxController {
             updateStatus(working = true, statusText = "Downloading Alt-Memory packages…")
             executor.execute("mkdir -p /tmp/pip-download", timeoutSeconds = 5)
             val download = executor.execute(
-                "pip download --no-cache-dir --break-system-packages --retries 10 --timeout 30 --dest /tmp/pip-download alt-memory 2>&1",
+                "pip download --no-cache-dir --retries 10 --timeout 60 --dest /tmp/pip-download alt-memory 2>&1",
                 timeoutSeconds = 600,
             )
             if (download["success"] as? Boolean != true) {

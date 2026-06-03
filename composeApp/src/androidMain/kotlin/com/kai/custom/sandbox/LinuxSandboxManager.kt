@@ -326,10 +326,35 @@ class LinuxSandboxManager(
                         "  kill -9 \$(echo \"\$pid\" | cut -d/ -f3) 2>/dev/null || true; " +
                         "done; " +
                         "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                        "/var/lib/apt/lists/lock /var/cache/apt/archives/lock; " +
+                        "/var/lib/apt/lists/lock /var/cache/apt/archives/lock " +
+                        "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                        "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*; " +
                         "dpkg --configure -a 2>/dev/null",
                         timeoutSeconds = 30,
                     )
+                }
+
+                // Pre-create common system groups that packages create during
+                // postinst via groupadd. Under proot + SELinux on Android, linkat()
+                // returns EPERM, and our copy fallback creates files with nlink=1,
+                // which shadow-utils interprets as "lock already used". Pre-creating
+                // the groups avoids the groupadd call entirely.
+                if (distro == "ubuntu") {
+                    val groupsExtra = listOf(
+                        "_ssh" to 101,
+                        "sshd" to 102,
+                    )
+                    for ((name, gid) in groupsExtra) {
+                        val groupLine = "$name:x:$gid:\n"
+                        val groupFile = java.io.File(rootfsDir, "etc/group")
+                        if (!groupFile.readText().contains("$name:x:$gid:")) {
+                            groupFile.appendText(groupLine)
+                            val gshadowFile = java.io.File(rootfsDir, "etc/gshadow")
+                            if (gshadowFile.exists()) {
+                                gshadowFile.appendText("$name:*::\n")
+                            }
+                        }
+                    }
                 }
 
                 _state.value = SandboxState.Installing("Updating package lists...")
@@ -402,20 +427,47 @@ class LinuxSandboxManager(
                         "$installCmdPrefix --no-install-recommends ${packages.joinToString(" ")}",
                         timeoutSeconds = 120,
                     )
-                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 30) }
+                    runCatching {
+                        executor.execute(
+                            "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                            "/var/cache/apt/archives/lock " +
+                            "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                            "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                            timeoutSeconds = 5,
+                        )
+                    }
+                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 120) }
                     ensureActive()
 
                     if (installResult["success"] as? Boolean != true) {
                         // Phase 3 — dpkg recovery + retry
                         android.util.Log.w("LinuxSandbox", "Cache install failed — running dpkg recovery and retrying")
-                        runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
+                        runCatching {
+                            executor.execute(
+                                "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                                "/var/cache/apt/archives/lock " +
+                                "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                timeoutSeconds = 5,
+                            )
+                        }
+                        runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 120) }
                         runCatching { executor.execute("apt-get install -yf", timeoutSeconds = 60) }
                         ensureActive()
                         installResult = executor.execute(
                             "$installCmdPrefix --no-install-recommends ${packages.joinToString(" ")}",
                             timeoutSeconds = 120,
                         )
-                        runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 30) }
+                        runCatching {
+                            executor.execute(
+                                "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                                "/var/cache/apt/archives/lock " +
+                                "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                timeoutSeconds = 5,
+                            )
+                        }
+                        runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 120) }
                         ensureActive()
                     }
 
@@ -425,6 +477,15 @@ class LinuxSandboxManager(
                         for (pkg in packages) {
                             ensureActive()
                             _state.value = SandboxState.Installing("Installing $pkg...")
+                            runCatching {
+                                executor.execute(
+                                    "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                                    "/var/cache/apt/archives/lock " +
+                                    "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                    "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                    timeoutSeconds = 5,
+                                )
+                            }
                             val pkgResult = executor.execute(
                                 "$installCmdPrefix --no-install-recommends $pkg",
                                 timeoutSeconds = 60,
@@ -456,6 +517,19 @@ class LinuxSandboxManager(
                             return@launch
                         }
                     }
+                }
+                // Final recovery pass: reconfigure any half-installed packages
+                if (distro == "ubuntu") {
+                    runCatching {
+                        executor.execute(
+                            "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                            "/var/cache/apt/archives/lock " +
+                            "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                            "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                            timeoutSeconds = 5,
+                        )
+                    }
+                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 120) }
                 }
                 runCatching { SshConfigManager(java.io.File(homePath)).ensureDefaults() }
                     .onFailure { android.util.Log.w("LinuxSandbox", "ssh defaults seed failed: ${it.message}") }
