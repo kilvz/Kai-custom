@@ -359,39 +359,81 @@ class LinuxSandboxManager(
                     android.util.Log.w("LinuxSandbox", "$updateCmd timed out or failed — proceeding with cached package lists")
                 }
 
-                // Ubuntu: install all packages in one apt command (faster dep-resolve, single trigger run).
+                // Ubuntu: download-only first (safe, no dpkg touch), then install from cache.
                 // Alpine: install sequentially (apk is fast, better error isolation).
                 if (distro == "ubuntu") {
+                    val downloadTimeout = 180L
+
+                    // Phase 1 — download-only: safe, retriable, never touches dpkg
                     ensureActive()
-                    _state.value = SandboxState.Installing("Installing packages (Ubuntu): ${packages.joinToString(", ")}")
-                    var result = executor.execute(
-                        "$installCmdPrefix ${packages.joinToString(" ")}",
-                        timeoutSeconds = 300,
-                    )
-                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
-                    ensureActive()
-                    if (result["success"] as? Boolean != true) {
-                        val stderr = result["stderr"] as? String ?: ""
-                        if (stderr.contains("dpkg") || stderr.contains("sub-process")) {
-                            android.util.Log.w("LinuxSandbox", "dpkg error on Ubuntu bulk install — running dpkg --configure -a and retrying")
-                            executor.execute("dpkg --configure -a", timeoutSeconds = 60)
-                            ensureActive()
-                            result = executor.execute(
-                                "$installCmdPrefix ${packages.joinToString(" ")}",
-                                timeoutSeconds = 300,
+                    _state.value = SandboxState.Installing("Downloading ${packages.size} packages...")
+                    var downloaded = false
+                    for (attempt in 1..2) {
+                        val mirrors = if (attempt == 1) downloader.getMirrors(distro, arch)
+                        else downloader.getMirrors(distro, arch).map { it.replace("https://", "http://") }
+                        for (mirror in mirrors) {
+                            downloader.writeRepositories(rootfsDir, mirror, distro)
+                            executor.execute("apt-get clean", timeoutSeconds = 10)
+                            val dlResult = executor.execute(
+                                "$installCmdPrefix -d --no-install-recommends ${packages.joinToString(" ")}",
+                                timeoutSeconds = downloadTimeout,
                             )
-                            runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
-                            ensureActive()
+                            if (dlResult["success"] as? Boolean == true) {
+                                downloaded = true
+                                break
+                            }
                         }
+                        if (downloaded) break
                     }
-                    if (result["success"] as? Boolean != true) {
-                        val stderr = result["stderr"] as? String ?: ""
-                        val stdout = result["stdout"] as? String ?: ""
-                        val error = result["error"] as? String ?: ""
-                        val exitCode = result["exit_code"] as? Int ?: -1
-                        android.util.Log.w("LinuxSandbox", "Ubuntu bulk install failed: exit=$exitCode error=$error stdout=$stdout stderr=$stderr")
-                        _state.value = SandboxState.Error("Failed to install packages: ${stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)}")
-                        return@launch
+                    ensureActive()
+                    if (!downloaded) {
+                        android.util.Log.w("LinuxSandbox", "Download phase failed — proceeding with install from partial cache")
+                    }
+
+                    // Phase 2 — install from cache: fast, no network dependency
+                    _state.value = SandboxState.Installing("Installing packages from cache...")
+                    var installResult = executor.execute(
+                        "$installCmdPrefix --no-install-recommends ${packages.joinToString(" ")}",
+                        timeoutSeconds = 120,
+                    )
+                    runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 30) }
+                    ensureActive()
+
+                    if (installResult["success"] as? Boolean != true) {
+                        // Phase 3 — dpkg recovery + retry
+                        android.util.Log.w("LinuxSandbox", "Cache install failed — running dpkg recovery and retrying")
+                        runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
+                        runCatching { executor.execute("apt-get install -yf", timeoutSeconds = 60) }
+                        ensureActive()
+                        installResult = executor.execute(
+                            "$installCmdPrefix --no-install-recommends ${packages.joinToString(" ")}",
+                            timeoutSeconds = 120,
+                        )
+                        runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 30) }
+                        ensureActive()
+                    }
+
+                    if (installResult["success"] as? Boolean != true) {
+                        // Phase 4 — per-package fallback: one bad package doesn't block others
+                        val failed = mutableListOf<String>()
+                        for (pkg in packages) {
+                            ensureActive()
+                            _state.value = SandboxState.Installing("Installing $pkg...")
+                            val pkgResult = executor.execute(
+                                "$installCmdPrefix --no-install-recommends $pkg",
+                                timeoutSeconds = 60,
+                            )
+                            if (pkgResult["success"] as? Boolean != true) {
+                                failed.add(pkg)
+                            }
+                        }
+                        if (failed.isNotEmpty()) {
+                            val stderr = installResult["stderr"] as? String ?: ""
+                            val error = installResult["error"] as? String ?: ""
+                            android.util.Log.w("LinuxSandbox", "Per-package install failed for: ${failed.joinToString(", ")}")
+                            _state.value = SandboxState.Error("Failed to install: ${failed.joinToString(", ")}")
+                            return@launch
+                        }
                     }
                 } else {
                     for (pkg in packages) {

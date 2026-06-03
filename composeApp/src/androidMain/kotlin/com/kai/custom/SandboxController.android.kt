@@ -443,12 +443,31 @@ class AndroidSandboxController : SandboxController {
                 return@withContext true
             }
 
-            updateStatus(working = true, statusText = "Installing Alt-Memory (pip)…")
-
-            val install = executor.execute(
-                "pip install --no-cache-dir --break-system-packages --retries 10 --timeout 30 alt-memory 2>&1",
+            // Phase 1 — download-only: safe, never touches site-packages
+            updateStatus(working = true, statusText = "Downloading Alt-Memory packages…")
+            executor.execute("mkdir -p /tmp/pip-download", timeoutSeconds = 5)
+            val download = executor.execute(
+                "pip download --no-cache-dir --break-system-packages --retries 10 --timeout 30 --dest /tmp/pip-download alt-memory 2>&1",
                 timeoutSeconds = 600,
             )
+            if (download["success"] as? Boolean != true) {
+                // If download failed, don't proceed to install — safe exit, nothing touched
+                val stderr = download["stderr"] as? String ?: ""
+                val stdout = download["stdout"] as? String ?: ""
+                val error = download["error"] as? String ?: ""
+                val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
+                android.util.Log.e("SandboxController", "pip download failed: $msg")
+                updateStatus(error = true, statusText = "Alt-Memory download failed: $msg")
+                return@withContext false
+            }
+
+            // Phase 2 — install from local cache: fast, no network
+            updateStatus(working = true, statusText = "Installing Alt-Memory (pip)…")
+            val install = executor.execute(
+                "pip install --no-cache-dir --break-system-packages --no-index --find-links /tmp/pip-download alt-memory 2>&1",
+                timeoutSeconds = 300,
+            )
+            executor.execute("rm -rf /tmp/pip-download", timeoutSeconds = 5)
             if (install["success"] as? Boolean != true) {
                 val stderr = install["stderr"] as? String ?: ""
                 val stdout = install["stdout"] as? String ?: ""
