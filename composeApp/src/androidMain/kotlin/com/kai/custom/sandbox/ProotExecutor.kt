@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 private const val MAX_OUTPUT_LENGTH = 15_000
 private const val DEFAULT_TIMEOUT_SECONDS = 30L
 private const val MAX_TIMEOUT_SECONDS = 600L
-private const val STREAM_BUF_SIZE = 4096
 
 class ProotHandle internal constructor(
     private val process: Process,
@@ -198,7 +197,6 @@ class ProotExecutor(
             "LD_LIBRARY_PATH=$libDir",
             "PROOT_TMP_DIR=$tmpPath",
             "PROOT_LOADER=$loaderPath",
-            "DEBIAN_FRONTEND=noninteractive",
         )
         return baseEnv + extraEnv.map { (k, v) -> "$k=$v" }.toTypedArray()
     }
@@ -227,38 +225,15 @@ class ProotExecutor(
         cancelled: AtomicBoolean,
         onLine: (String) -> Unit,
     ) {
-        val buf = CharArray(STREAM_BUF_SIZE)
-        val lineBuf = StringBuilder()
         try {
             while (!cancelled.get()) {
-                val read = try {
-                    reader.read(buf)
+                val line = try {
+                    reader.readLine()
                 } catch (e: IOException) {
                     if (cancelled.get()) break
                     throw e
-                }
-                if (read == -1) break
-                for (i in 0 until read) {
-                    val c = buf[i]
-                    if (c == '\n') {
-                        if (lineBuf.isNotEmpty()) {
-                            onLine(lineBuf.toString())
-                            lineBuf.clear()
-                        }
-                    } else {
-                        lineBuf.append(c)
-                    }
-                }
-                // Flush partial line immediately so prompts without trailing
-                // newline (e.g. apt-get "[Y/n]") show in real time.
-                if (lineBuf.isNotEmpty()) {
-                    onLine(lineBuf.toString())
-                    lineBuf.clear()
-                }
-            }
-            // Flush remaining partial line on stream end.
-            if (lineBuf.isNotEmpty()) {
-                onLine(lineBuf.toString())
+                } ?: break
+                onLine(line)
             }
         } finally {
             runCatching { reader.close() }

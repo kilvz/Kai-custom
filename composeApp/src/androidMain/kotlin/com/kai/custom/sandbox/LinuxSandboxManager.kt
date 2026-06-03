@@ -236,8 +236,7 @@ class LinuxSandboxManager(
 
     fun shellFor(sessionId: String): SessionShell = synchronized(shells) {
         shells[sessionId]?.let { return it }
-        val usePty = sessionId == SandboxSessions.TERMINAL
-        val inner = PersistentSandboxShell(createProotExecutor(), tmpPath, usePty)
+        val inner = PersistentSandboxShell(createProotExecutor(), tmpPath)
         val persistable = SandboxSessions.isPersistable(sessionId)
         val initialLines = if (persistable) {
             conversationStorage.conversations.value

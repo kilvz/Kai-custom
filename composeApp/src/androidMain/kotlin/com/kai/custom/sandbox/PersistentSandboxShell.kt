@@ -32,7 +32,6 @@ private const val PID_PROBE_PREFIX = "${RS}KAIBASHPID$US"
 class PersistentSandboxShell(
     private val executor: ProotExecutor,
     private val tmpPath: String,
-    private val usePty: Boolean = false,
 ) {
     private val mutex = Mutex()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -170,13 +169,8 @@ class PersistentSandboxShell(
         // them in-process (so cd/export/. preserve state), and inherits its
         // stdin to any foreground child (so ssh can read passwords typed via
         // writeInput).
-        val bashCmd = if (usePty) {
-            "exec script -q -c 'exec bash --noprofile --norc' /dev/null"
-        } else {
-            "exec bash --noprofile --norc"
-        }
         val h = executor.executeStreaming(
-            command = bashCmd,
+            command = "exec bash --noprofile --norc",
             onStdout = { line -> dispatchStdout(line) },
             onStderr = { line -> dispatchStderr(line) },
         )
@@ -186,11 +180,6 @@ class PersistentSandboxShell(
         // the very first command has something to signal. Leading \n matches
         // the sentinel pattern below — flushes any partial line first.
         h.writeInput("printf '\\n\\036KAIBASHPID\\037%d\\036\\n' \"\$\$\" >&2")
-        // Non-PTY sessions still get the -y apt-get wrapper since programs
-        // can't field interactive prompts without a real TTY.
-        if (!usePty) {
-            h.writeInput("apt-get() { command apt-get -y \"\$@\"; }")
-        }
         watchdog = scope.launch {
             h.awaitExit()
             // Shell died. Wake up any in-flight command with a shellDied result
@@ -203,20 +192,25 @@ class PersistentSandboxShell(
         }
     }
 
-    /**
-     * Try to parse a sentinel or pid-probe control line. Returns true if the
-     * line was consumed (no further processing needed), false if it should be
-     * treated as normal output.
-     */
-    private fun tryParseControlLine(line: String, sink: CommandSink?): Boolean {
-        if (line.isEmpty()) return true
+    private fun dispatchStdout(line: String) {
+        val sink = currentSink.get() ?: return
+        appendBounded(sink.stdoutBuf, line)
+        sink.onStdout?.invoke(line)
+    }
+
+    private fun dispatchStderr(line: String) {
+        // Suppress blank stderr lines. Sentinel emission prepends \n to flush
+        // any partial line ahead of it, which produces a stray empty line when
+        // there's nothing to flush. Legitimate blank stderr is rare; dropping
+        // it is a worthwhile tradeoff for clean output.
+        if (line.isEmpty()) return
         // Startup pid probe — handled regardless of whether a sink is active.
         if (line.startsWith(PID_PROBE_PREFIX) && line.endsWith(RS)) {
             val pidText = line.substring(PID_PROBE_PREFIX.length, line.length - 1)
             pidText.toIntOrNull()?.let { bashPid = it }
-            return true
+            return
         }
-        if (sink == null) return false
+        val sink = currentSink.get() ?: return
         // Sentinel format: \x1e<nonce>\x1f<exit>\x1f<pid>\x1f<pwd>\x1e
         if (line.length >= 2 && line.startsWith(RS) && line.endsWith(RS)) {
             val payload = line.substring(1, line.length - 1)
@@ -226,24 +220,9 @@ class PersistentSandboxShell(
                 val pid = parts[2].toIntOrNull() ?: 0
                 val cwd = parts[3]
                 sink.done.complete(Result(exitCode = exit, cwd = cwd, bashPid = pid))
-                return true
+                return
             }
         }
-        return false
-    }
-
-    private fun dispatchStdout(line: String) {
-        val sink = currentSink.get()
-        if (tryParseControlLine(line, sink)) return
-        if (sink == null) return
-        appendBounded(sink.stdoutBuf, line)
-        sink.onStdout?.invoke(line)
-    }
-
-    private fun dispatchStderr(line: String) {
-        val sink = currentSink.get()
-        if (tryParseControlLine(line, sink)) return
-        if (sink == null) return
         appendBounded(sink.stderrBuf, line)
         sink.onStderr?.invoke(line)
     }
