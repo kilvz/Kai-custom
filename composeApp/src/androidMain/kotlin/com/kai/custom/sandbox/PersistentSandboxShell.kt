@@ -180,6 +180,7 @@ class PersistentSandboxShell(
         // the very first command has something to signal. Leading \n matches
         // the sentinel pattern below — flushes any partial line first.
         h.writeInput("printf '\\n\\036KAIBASHPID\\037%d\\036\\n' \"\$\$\" >&2")
+
         watchdog = scope.launch {
             h.awaitExit()
             // Shell died. Wake up any in-flight command with a shellDied result
