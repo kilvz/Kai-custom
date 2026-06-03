@@ -517,6 +517,8 @@ fun SettingsScreenContent(
                                     isAltMemoryEnabled = filteredUiState.isAltMemoryEnabled,
                                     altMemoryInstalled = filteredUiState.altMemoryInstalled,
                                     altMemoryConnected = filteredUiState.altMemoryConnected,
+                                    altMemoryBackend = filteredUiState.altMemoryBackend,
+                                    altMemoryEmbedder = filteredUiState.altMemoryEmbedder,
                                     sandboxReady = filteredUiState.sandboxReady,
                                     onToggleAltMemory = actions.onToggleAltMemory,
                                     scheduledTasks = filteredUiState.scheduledTasks,

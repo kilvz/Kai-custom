@@ -40,6 +40,7 @@ import com.kai.custom.data.ToolCallResponse
 import com.kai.custom.data.ToolExecutor
 import com.kai.custom.data.WakeWordSettings
 import com.kai.custom.getAvailableTools
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import com.kai.custom.isDebugBuild
 import com.kai.custom.mcp.McpServerManager
 import io.ktor.http.ContentType
@@ -74,6 +75,7 @@ class DebugServer(
     private val toolExecutor: ToolExecutor,
     private val mcpServerManager: McpServerManager,
     private val sandboxController: SandboxController,
+    private val whatsAppLifecycleManager: WhatsAppLifecycleManager,
 ) {
     private var running = false
     private var serverJob: EmbeddedServer<*, *>? = null
@@ -126,6 +128,8 @@ class DebugServer(
                         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
                         isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
                         currentServiceId = dataRepository.currentService().id,
+                        sandboxInstalled = sandboxController.status.value.installed,
+                        sandboxReady = sandboxController.status.value.ready,
                     )), ContentType.Application.Json)
                 }
 
@@ -201,6 +205,15 @@ class DebugServer(
                         put("splinterlands_enabled", JsonPrimitive(appSettings.isSplinterlandsEnabled()))
                         put("active_skill_id", JsonPrimitive(dataRepository.getActiveSkill()?.id ?: ""))
                         put("alt_memory_migration_complete", JsonPrimitive(appSettings.isAltMemoryMigrationComplete()))
+                        put("whatsapp_enabled", JsonPrimitive(appSettings.isWhatsAppEnabled()))
+                        put("whatsapp_read_only", JsonPrimitive(appSettings.isWhatsAppReadOnly()))
+                        put("whatsapp_installed", JsonPrimitive(appSettings.isWhatsAppInstalled()))
+                        put("whatsapp_authenticated", JsonPrimitive(appSettings.isWhatsAppAuthenticated()))
+                        put("baileys_browser_name", JsonPrimitive(appSettings.getBaileysBrowserName()))
+                        put("baileys_browser_version", JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+                        put("baileys_mark_online", JsonPrimitive(appSettings.getBaileysMarkOnline()))
+                        put("baileys_sync_history", JsonPrimitive(appSettings.getBaileysSyncHistory()))
+                        put("baileys_link_previews", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
                     }), ContentType.Application.Json)
                 }
 
@@ -225,6 +238,7 @@ class DebugServer(
                             "memory_enabled" -> dataRepository.setMemoryEnabled(v.toBoolean())
                             "alt_memory_enabled" -> dataRepository.setAltMemoryEnabled(v.toBoolean())
                             "alt_memory_installed" -> appSettings.setAltMemoryInstalled(v.toBoolean())
+                            "alt_memory_migration_complete" -> appSettings.setAltMemoryMigrationComplete(v.toBoolean())
                             "scheduling_enabled" -> dataRepository.setSchedulingEnabled(v.toBoolean())
                             "dynamic_ui_enabled" -> dataRepository.setDynamicUiEnabled(v.toBoolean())
                             "theme_mode" -> { val mode = ThemeMode.entries.find { it.name.equals(v, ignoreCase = true) }; if (mode != null) dataRepository.setThemeMode(mode) }
@@ -263,6 +277,13 @@ class DebugServer(
                             "email_poll_interval_minutes" -> dataRepository.setEmailPollIntervalMinutes(v.toInt())
                             "sms_poll_interval_minutes" -> dataRepository.setSmsPollIntervalMinutes(v.toInt())
                             "soul_user" -> dataRepository.setSoulUser(v)
+                            "whatsapp_enabled" -> appSettings.setWhatsAppEnabled(v.toBoolean())
+                            "whatsapp_read_only" -> appSettings.setWhatsAppReadOnly(v.toBoolean())
+                            "baileys_browser_name" -> appSettings.setBaileysBrowserName(v)
+                            "baileys_browser_version" -> appSettings.setBaileysBrowserVersion(v)
+                            "baileys_mark_online" -> appSettings.setBaileysMarkOnline(v.toBoolean())
+                            "baileys_sync_history" -> appSettings.setBaileysSyncHistory(v.toBoolean())
+                            "baileys_link_previews" -> appSettings.setBaileysLinkPreviews(v.toBoolean())
                             else -> {
                                 call.respondText(json.encodeToString(ErrorResponse("Unknown setting: $key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                                 return@post
@@ -714,6 +735,70 @@ class DebugServer(
                     )), ContentType.Application.Json)
                 }
 
+                // ======================= WHATSAPP =======================
+                get("/whatsapp") {
+                    val err = auth(call) ?: return@get
+                    call.respondText(json.encodeToString(com.kai.custom.data.WhatsAppStatusResponse(
+                        enabled = appSettings.isWhatsAppEnabled(),
+                        readOnly = appSettings.isWhatsAppReadOnly(),
+                        installed = appSettings.isWhatsAppInstalled(),
+                        authenticated = appSettings.isWhatsAppAuthenticated(),
+                        qrCode = appSettings.getWhatsAppQrCode(),
+                        pendingCount = com.kai.custom.data.WhatsAppStore(appSettings).getPending().size,
+                    )), ContentType.Application.Json)
+                }
+
+                post("/whatsapp/install") {
+                    val err = auth(call) ?: return@post
+                    try {
+                        val ok = withContext(Dispatchers.Default) {
+                            whatsAppLifecycleManager.ensureInstalled()
+                        }
+                        if (ok) {
+                            call.respondText(json.encodeToString(mapOf("success" to true)), ContentType.Application.Json)
+                        } else {
+                            call.respondText(json.encodeToString(ErrorResponse("Install failed")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                        }
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Install error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
+                post("/whatsapp/refresh-qr") {
+                    val err = auth(call) ?: return@post
+                    try {
+                        withContext(Dispatchers.Default) {
+                            whatsAppLifecycleManager.refreshQrCode()
+                        }
+                        call.respondText(json.encodeToString(mapOf("success" to true, "qrCode" to appSettings.getWhatsAppQrCode())), ContentType.Application.Json)
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Refresh error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
+                post("/whatsapp/restart") {
+                    val err = auth(call) ?: return@post
+                    try {
+                        withContext(Dispatchers.Default) {
+                            whatsAppLifecycleManager.restart()
+                        }
+                        call.respondText(json.encodeToString(mapOf("success" to true)), ContentType.Application.Json)
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Restart error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
+                get("/whatsapp/settings") {
+                    val err = auth(call) ?: return@get
+                    call.respondText(buildJsonObject {
+                        put("browser_name", JsonPrimitive(appSettings.getBaileysBrowserName()))
+                        put("browser_version", JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+                        put("mark_online_on_connect", JsonPrimitive(appSettings.getBaileysMarkOnline()))
+                        put("sync_full_history", JsonPrimitive(appSettings.getBaileysSyncHistory()))
+                        put("generate_high_quality_link_preview", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
+                    }.toString(), ContentType.Application.Json)
+                }
+
                 // ======================= SPLINTERLANDS =======================
                 get("/splinterlands") {
                     val err = auth(call) ?: return@get
@@ -791,6 +876,29 @@ class DebugServer(
                     val timeout = call.request.queryParameters["timeout"]?.toLongOrNull() ?: 60L
                     val output = withContext(Dispatchers.Default) { sandboxController.executeCommand(command, useRoot = useRoot, timeoutSeconds = timeout) }
                     call.respondText(output, ContentType.Text.Plain)
+                }
+
+                post("/alt-memory/install") {
+                    val err = auth(call) ?: return@post
+                    val ok = withContext(Dispatchers.Default) { sandboxController.installAltMemoryPackage() }
+                    if (ok) {
+                        call.respondText(json.encodeToString(mapOf("success" to true)), ContentType.Application.Json)
+                    } else {
+                        call.respondText(json.encodeToString(ErrorResponse("Install failed")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
+                post("/alt-memory/restart") {
+                    val err = auth(call) ?: return@post
+                    try {
+                        withContext(Dispatchers.Default) {
+                            sandboxController.stopAltMemory()
+                            sandboxController.startAltMemory()
+                        }
+                        call.respondText(json.encodeToString(mapOf("success" to true)), ContentType.Application.Json)
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Restart error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
                 }
 
                 // ======================= RESET =======================

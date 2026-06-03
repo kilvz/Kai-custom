@@ -5,7 +5,7 @@ HTTP server on the Android device (`127.0.0.1:18500`) for inspecting and control
 ## Activation
 
 1. Start the daemon (Debug API requires daemon to bind the port)
-2. Settings â†’ General â†’ Advanced â†’ enable "Debug API Server"
+2. Settings → General → Advanced → enable "Debug API Server"
 3. Read the auth token from logcat:
    ```powershell
    adb logcat -s DebugServer:D
@@ -17,292 +17,270 @@ HTTP server on the Android device (`127.0.0.1:18500`) for inspecting and control
 
 ## Authentication
 
-All endpoints (except `/health`) require `Authorization: Bearer <token>` header. Token is a random 32-char hex regenerated on every app launch. Unauthenticated requests return `401`:
+All endpoints except `/health` require `Authorization: Bearer <token>` header. Token is a random 32-char hex regenerated on every app launch. Unauthenticated requests return `401`:
 ```json
 {"error": "Invalid or missing token"}
 ```
 
-## Endpoints
+## Endpoints (77 total)
+
+### Health & State
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `GET` | `/health` | No | Server alive + current auth token |
-| `GET` | `/prompt` | Yes | Full system prompt the AI sees |
-| `GET` | `/history?n=10` | Yes | Last N chat exchanges (plain text) |
-| `GET` | `/state` | Yes | Agent state: history/memory/tool counts, toggles |
-| `GET` | `/tools` | Yes | All registered tool definitions (name + description) |
-| `GET` | `/memories` | Yes | All stored memories |
-| `GET` | `/settings` | Yes | All settings as flat JSON |
-| `POST` | `/chat` | Yes | Send message to AI with **full tool-calling** |
-| `POST` | `/sandbox/setup` | Yes | Start Linux sandbox setup |
-| `POST` | `/sandbox/install-packages` | Yes | Start basic sandbox package install |
-| `POST` | `/sandbox/exec` | Yes | Run a raw Linux sandbox command and return output |
-| `POST` | `/settings/{key}` | Yes | Update a single setting |
+| `GET` | `/state` | Yes | App state dump (history/memory/tool counts, daemon/memory/scheduling/heartbeat/sandbox toggles) |
 | `POST` | `/reset` | Yes | Clear conversation history |
 
-### `GET /health`
+### System Prompt & Chat
 
-**Response:**
-```json
-{
-    "status": "ok",
-    "token": "1a7db4dc742343d2a499b03c01c0267f"
-}
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/prompt` | Yes | Full system prompt the AI sees (plain text) |
+| `GET` | `/history?n=10` | Yes | Last N chat exchanges (plain text) |
+| `POST` | `/chat` | Yes | Send message to AI with full tool-calling |
+| `POST` | `/chat/silent` | Yes | Send message silently (no history, no UI) → returns plain text response |
+| `POST` | `/regenerate` | Yes | Trigger AI response regeneration |
 
-### `GET /prompt`
+### Settings
 
-Returns the **exact system prompt** currently fed to the AI â€” useful for debugging prompt injections or checking what the AI knows.
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/settings` | Yes | All settings as flat JSON (60+ keys) |
+| `POST` | `/settings/{key}` | Yes | Update a single setting |
+| `POST` | `/interactive` | Yes | Toggle interactive mode on/off |
+| `POST` | `/soul/user` | Yes | Set user-edited soul text (raw body) |
+| `POST` | `/soul/auto` | Yes | Set auto-generated behavior soul text (raw body) |
 
-**Response:** `text/plain`
+### Export / Import
 
-### `GET /history?n=10`
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/export/preview` | Yes | Preview export sections with item counts |
+| `POST` | `/export` | Yes | Export all data as JSON |
+| `POST` | `/import` | Yes | Import settings from JSON |
 
-Returns the last N user+assistant exchange pairs.
+### Personas
 
-**Response:** `text/plain`
-```
-User: Hello
-Assistant: Hi! How can I help you?
-User: What time is it?
-Assistant: ...
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/personas` | Yes | List all personas |
+| `POST` | `/persona/save` | Yes | Save/create a persona |
+| `POST` | `/persona/switch/{id}` | Yes | Switch active persona |
+| `DELETE` | `/persona/{id}` | Yes | Delete a persona |
 
-### `GET /state`
+### Conversations
 
-**Response:**
-```json
-{
-    "historyCount": 5,
-    "memoryCount": 12,
-    "toolCount": 45,
-    "isDaemonEnabled": true,
-    "isMemoryEnabled": true,
-    "isSchedulingEnabled": true,
-    "isHeartbeatEnabled": true,
-    "currentServiceId": "free"
-}
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/conversations` | Yes | List saved conversations |
+| `POST` | `/conversation/load/{id}` | Yes | Load a saved conversation |
+| `POST` | `/conversation/new` | Yes | Start a new conversation |
+| `DELETE` | `/conversation/delete/{id}` | Yes | Delete a conversation |
 
-### `GET /tools`
+### Services
 
-Returns all tools the AI can call. Currently ~45 tools (varies by platform).
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/services` | Yes | List all available services |
+| `POST` | `/service/add/{serviceId}` | Yes | Add a configured service instance |
+| `POST` | `/service/remove` | Yes | Remove a configured service |
+| `POST` | `/service/api-key` | Yes | Update API key for a service |
+| `POST` | `/service/base-url` | Yes | Update base URL for a service |
+| `POST` | `/service/model` | Yes | Select a model for a service |
 
-**Response:**
-```json
-[
-    {
-        "name": "memory_store",
-        "description": "Store or update a memory with a descriptive key..."
-    },
-    {
-        "name": "web_search",
-        "description": "Search the internet..."
-    }
-]
-```
+### Tools
 
-### `GET /memories`
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/tools` | Yes | All registered tool definitions (name + description) |
+| `GET` | `/tools/definitions` | Yes | Tool definitions with id, name, desc, enabled |
+| `GET` | `/tools/enabled` | Yes | Tool enabled/disabled map |
+| `POST` | `/tools/enabled/{toolId}` | Yes | Enable/disable a tool |
+| `POST` | `/tools/{name}` | Yes | Execute a tool by name (raw body = JSON args) |
 
-**Response:**
-```json
-[
-    {
-        "key": "preferred_name",
-        "content": "User prefers to be called Alex",
-        "category": "PREFERENCE",
-        "protected": "false"
-    }
-]
-```
+### Memory
 
-### `GET /settings`
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/memories` | Yes | List all memories |
+| `GET` | `/memory/{key}` | Yes | Get a single memory by key |
+| `POST` | `/memory` | Yes | Store a new memory |
+| `DELETE` | `/memory/{key}` | Yes | Delete/forget a memory |
+| `POST` | `/memory/search` | Yes | Search memories by query |
 
-All settings as key-value string pairs. Boolean values are `"true"` / `"false"`.
+### Alt-Memory (Vector DB)
 
-**Response:**
-```json
-{
-    "soul_text": "You are Kai...",
-    "persona_name": "Alt",
-    "free_service_primary": "true",
-    "memory_enabled": "true",
-    "alt_memory_enabled": "true",
-    "scheduling_enabled": "true",
-    "daemon_enabled": "true",
-    "heartbeat_enabled": "true",
-    "sandbox_enabled": "false",
-    "sandbox_root_enabled": "false",
-    "root_enabled": "false",
-    "shizuku_enabled": "false",
-    "debug_api_enabled": "true",
-    "preferred_language": "en",
-    "notifications_enabled": "false",
-    "dynamic_ui_enabled": "true",
-    "email_enabled": "true",
-    "sms_enabled": "false",
-    "telegram_enabled": "false",
-    "wake_word_enabled": "false"
-}
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/alt-memory` | Yes | Alt-memory status (enabled, installed, connected, counts) |
+| `POST` | `/alt-memory/install` | Yes | Install alt-memory package in sandbox (calls `installAltMemoryPackage()`) |
 
-### `POST /chat`
+### MCP Servers
 
-Sends a message to the AI with **full tool-calling support**. The AI can use all ~45 registered tools (memory, web search, sandbox, root, etc.) in a tool loop and will return the final text response.
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/mcp/servers` | Yes | List MCP server configs |
+| `POST` | `/mcp/add` | Yes | Add an MCP server |
+| `DELETE` | `/mcp/{serverId}` | Yes | Remove an MCP server |
+| `POST` | `/mcp/connect/{serverId}` | Yes | Connect to an MCP server (fetches tools) |
 
-**Request:**
-```json
-{
-    "message": "Store a memory with key 'test' and content 'hello world'"
-}
-```
+### Skills
 
-**Response:**
-```json
-{
-    "response": "Memory stored successfully with key 'test'..."
-}
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/skills` | Yes | List installed skills |
+| `POST` | `/skill/install` | Yes | Install a skill from GitHub |
+| `POST` | `/skill/uninstall/{id}` | Yes | Uninstall a skill |
+| `POST` | `/skill/activate` | Yes | Activate/deactivate a skill |
 
-This endpoint uses `askWithTools()` internally, which:
-1. Gets the active service (Free, OpenAI, Gemini, etc.)
-2. Passes all registered tool definitions to the AI
-3. Runs a tool loop (AI calls tools â†’ results fed back â†’ AI responds)
-4. Returns the final text response
+### Heartbeat
 
-### `POST /settings/{key}`
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/heartbeat` | Yes | Get heartbeat config + log |
+| `POST` | `/heartbeat` | Yes | Update heartbeat configuration |
 
-Update any writable setting.
+### Email
 
-**Request:**
-```json
-{
-    "value": "false"
-}
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/email` | Yes | List email accounts |
+| `POST` | `/email/add` | Yes | Add an email account |
+| `DELETE` | `/email/{accountId}` | Yes | Remove an email account |
+| `POST` | `/email/poll/{accountId}` | Yes | Poll a specific email account |
 
-**URL example:** `POST /settings/memory_enabled`
+### SMS
 
-**Supported keys:**
-`soul_text`, `persona_name`, `preferred_language`, `free_service_primary`,
-`memory_enabled`, `alt_memory_enabled`, `scheduling_enabled`, `daemon_enabled`,
-`heartbeat_enabled`, `sandbox_enabled`, `sandbox_storage_mount_enabled`,
-`sandbox_root_enabled`, `root_enabled`, `shizuku_enabled`,
-`notifications_enabled`, `dynamic_ui_enabled`, `email_enabled`, `sms_enabled`,
-`telegram_enabled`, `wake_word_enabled`, `debug_api_enabled`
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/sms/drafts` | Yes | List SMS drafts |
+| `POST` | `/sms/send/{draftId}` | Yes | Send an SMS draft |
+| `POST` | `/sms/discard/{draftId}` | Yes | Discard an SMS draft |
 
-**Response (success):** `text/plain`: `Updated memory_enabled`
+### Sandbox (Linux)
 
-**Response (error):**
-```json
-{"error": "Unknown setting: foo"}
-```
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/sandbox/status` | Yes | Sandbox status (installed, ready, working, progress, error, distro settings) |
+| `POST` | `/sandbox/setup` | Yes | Start sandbox rootfs setup (download + extract) |
+| `POST` | `/sandbox/install-packages` | Yes | Install sandbox packages (bash, curl, git, python3, nodejs, etc.) |
+| `POST` | `/sandbox/exec` | Yes | Run raw command in sandbox (`?root=`, `?timeout=` params) |
+| `POST` | `/sandbox/reset` | Yes | Delete rootfs and reset sandbox to NotInstalled state |
 
-### `POST /sandbox/setup`
+### WhatsApp (Baileys Bridge)
 
-Starts Linux sandbox setup. Returns immediately with `text/plain`: `Sandbox setup started`.
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/whatsapp` | Yes | WhatsApp integration status |
+| `POST` | `/whatsapp/install` | Yes | Install WhatsApp bridge (Node.js + baileys + npm) |
+| `POST` | `/whatsapp/refresh-qr` | Yes | Refresh QR code for WhatsApp auth |
+| `POST` | `/whatsapp/restart` | Yes | Restart WhatsApp bridge service |
+| `GET` | `/whatsapp/settings` | Yes | Get Baileys socket settings |
 
-### `POST /sandbox/install-packages`
+### Other Integrations
 
-Starts installation of the standard sandbox package set. Returns immediately with `text/plain`: `Sandbox package install started`.
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/local/models` | Yes | List local inference models |
+| `POST` | `/local/download` | Yes | Start downloading a local model |
+| `POST` | `/local/cancel` | Yes | Cancel local model download |
+| `DELETE` | `/local/{modelId}` | Yes | Delete a downloaded local model |
+| `GET` | `/wake-word` | Yes | Get wake-word settings |
+| `POST` | `/wake-word` | Yes | Toggle wake-word on/off |
+| `GET` | `/telegram` | Yes | Telegram integration status |
+| `GET` | `/splinterlands` | Yes | Splinterlands integration status |
 
-### `POST /sandbox/exec`
+### Usage Scenarios
 
-Runs a raw command inside the Linux sandbox and returns combined command output as `text/plain`.
-
-**Request body:** plain text shell command.
-
-**Query parameters:**
-- `root=true|false` â€” whether to use the sandbox root path. Defaults to `false`.
-- `timeout=<seconds>` â€” command timeout. Defaults to `60`.
-
-**Examples:**
-```powershell
-$token = (curl.exe -s http://localhost:18500/health | python -c "import sys,json; print(json.load(sys.stdin)['token'])")
-curl.exe -s -X POST "http://localhost:18500/sandbox/exec?timeout=60&root=false" -H "Authorization: Bearer $token" -H "Content-Type: text/plain" --data-binary "python3 -m pip --version"
-curl.exe -s -X POST "http://localhost:18500/sandbox/exec?timeout=600&root=false" -H "Authorization: Bearer $token" -H "Content-Type: text/plain" --data-binary "python3 -m pip install --no-cache-dir --break-system-packages six"
-```
-
-Use this endpoint for diagnostics where `/chat` would be too indirect. It executes through `SandboxController.executeCommand()` and does not involve the model/tool loop.
-
-### `POST /reset`
-
-Clears the current conversation history. Returns `text/plain`: `Conversation reset`
-
-## Usage Scenarios
-
-### Inspect the AI's system prompt
+#### Inspect the AI's system prompt
 ```powershell
 $token = (curl.exe -s http://localhost:18500/health | python -c "import sys,json; print(json.load(sys.stdin)['token'])")
 curl.exe -s http://localhost:18500/prompt -H "Authorization: Bearer $token"
 ```
 
-### Test the AI with tool calling
+#### Test the AI with tool calling
 ```powershell
 $body = '{"message":"Search the web for latest AI news and store the result as a memory"}'
-curl.exe -s -X POST http://localhost:18500/chat -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d $body
+$f = [System.IO.Path]::GetTempFileName(); [System.IO.File]::WriteAllText($f, $body)
+curl.exe -s -X POST http://localhost:18500/chat -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "@$f"
+Remove-Item $f -EA 0
 ```
 
-### Enable/disable features remotely
+#### Full sandbox setup flow
 ```powershell
-curl.exe -s -X POST http://localhost:18500/settings/root_enabled -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d '{"value":"true"}'
-curl.exe -s -X POST http://localhost:18500/settings/alt_memory_enabled -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d '{"value":"false"}'
+# 1. Setup rootfs (download + extract ~2min)
+curl.exe -s -X POST http://localhost:18500/sandbox/setup -H "Authorization: Bearer $token"
+
+# 2. Wait for sandbox to be ready...
+# 3. Install packages (curl, git, python3, nodejs, etc.)
+curl.exe -s -X POST http://localhost:18500/sandbox/install-packages -H "Authorization: Bearer $token"
+
+# 4. Verify with a command
+curl.exe -s -X POST "http://localhost:18500/sandbox/exec?timeout=10" -H "Authorization: Bearer $token" -d "uname -a"
 ```
 
-### Dump full state
+#### WhatsApp bridge install flow
+```powershell
+# After sandbox is ready + packages installed:
+# 1. Install WhatsApp bridge (Node.js v22 + baileys + MCP SDK)
+curl.exe -s -X POST http://localhost:18500/whatsapp/install?timeout=300 -H "Authorization: Bearer $token"
+
+# 2. Check status
+curl.exe -s http://localhost:18500/whatsapp -H "Authorization: Bearer $token"
+
+# 3. Refresh QR code for scanning
+curl.exe -s -X POST http://localhost:18500/whatsapp/refresh-qr -H "Authorization: Bearer $token"
+```
+
+#### Enable/disable features remotely
+```powershell
+$body = '{"value":"true"}'
+$f = [System.IO.Path]::GetTempFileName(); [System.IO.File]::WriteAllText($f, $body)
+curl.exe -s -X POST http://localhost:18500/settings/root_enabled -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "@$f"
+Remove-Item $f -EA 0
+```
+
+#### Alt-memory install (requires sandbox with python3)
+```powershell
+curl.exe -s -X POST http://localhost:18500/alt-memory/install -H "Authorization: Bearer $token"
+```
+
+#### Dump full state
 ```powershell
 curl.exe -s http://localhost:18500/state -H "Authorization: Bearer $token" | python -m json.tool
 ```
 
-### Monitor changes
-```powershell
-# Watch memory count over time
-while ($true) { curl.exe -s http://localhost:18500/state -H "Authorization: Bearer $token" | python -c "import sys,json; d=json.load(sys.stdin); print(f'Memories: {d[\"memoryCount\"]}'); Start-Sleep 2" }
-```
-
-## Architecture
+### Architecture
 
 ```
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Dev Machine (PC)                            â”‚
-â”‚  curl / opencode / custom script              â”‚
-â”‚       â”‚                                       â”‚
-â”‚       â”‚ HTTP :18500                           â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-        â”‚
-        â”‚ adb forward tcp:18500 tcp:18500
-        â”‚
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚  Android Device                              â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚
-â”‚  â”‚ Ktor Server (CIO, 127.0.0.1:18500)   â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /health    (no auth)             â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /prompt                          â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /history                         â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /state                           â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /tools                           â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /memories                        â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /settings                        â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /chat      â†’ askWithTools()      â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /sandbox/exec â†’ sandbox command  â”‚    â”‚
-â”‚  â”‚  â”œâ”€ /settings/{key}                  â”‚    â”‚
-â”‚  â”‚  â””â”€ /reset                           â”‚    â”‚
-â”‚  â”‚                                       â”‚    â”‚
-â”‚  â”‚  injects: DataRepository              â”‚    â”‚
-â”‚  â”‚           MemoryStoreProvider          â”‚    â”‚
-â”‚  â”‚           AppSettings                  â”‚    â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚
-â”‚                                               â”‚
-â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”    â”‚
-â”‚  â”‚ DaemonService (starts/stops server)   â”‚    â”‚
-â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜    â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+┌──────────────────────────────────────────────┐
+│  Dev Machine (PC)                            │
+│  curl / opencode / custom script             │
+│       │                                       │
+│       │ HTTP :18500                           │
+└───────┬──────────────────────────────────────┘
+        │
+        │ adb forward tcp:18500 tcp:18500
+        │
+┌───────┬──────────────────────────────────────┐
+│  Android Device                              │
+│  ┌──────────────────────────────────────┐    │
+│  │ Ktor Server (CIO, 127.0.0.1:18500)   │    │
+│  │  77 endpoints across all features     │    │
+│  │  auth: Bearer token (32-char hex)     │    │
+│  └──────────────────────────────────────┘    │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │ DaemonService (starts/stops server)   │    │
+│  └──────────────────────────────────────┘    │
+└──────────────────────────────────────────────┘
 ```
 
-## Configuration
+### Configuration
 
 - **Port:** `18500` (hardcoded, localhost-only)
 - **Host:** `127.0.0.1` (only accessible via ADB or local apps)
-- **Lifecycle:** bound to daemon â€” starts when daemon starts, stops when daemon stops
+- **Lifecycle:** bound to daemon — starts when daemon starts, stops when daemon stops
 - **Build gate:** only runs in debug builds (`BuildConfig.DEBUG`)
 - **Auth token:** random 32-char hex, regenerated on every app launch, printed to logcat

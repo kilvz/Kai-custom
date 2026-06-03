@@ -36,6 +36,8 @@ data class StateResponse(
     val isSchedulingEnabled: Boolean,
     val isHeartbeatEnabled: Boolean,
     val currentServiceId: String,
+    val sandboxInstalled: Boolean,
+    val sandboxReady: Boolean,
 )
 
 @Serializable
@@ -231,6 +233,16 @@ data class TelegramStatusResponse(
 data class SplinterlandsStatusResponse(
     val enabled: Boolean,
     val accountPresent: Boolean,
+)
+
+@Serializable
+data class WhatsAppStatusResponse(
+    val enabled: Boolean,
+    val readOnly: Boolean,
+    val installed: Boolean,
+    val authenticated: Boolean,
+    val qrCode: String,
+    val pendingCount: Int,
 )
 
 @Serializable

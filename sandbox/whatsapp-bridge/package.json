@@ -1,0 +1,15 @@
+{
+  "name": "whatsapp-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Baileys WhatsApp MCP bridge for Kai-custom",
+  "main": "bridge.js",
+  "type": "module",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.16",
+    "@modelcontextprotocol/sdk": "^1.9.0",
+    "express": "^4.21.0",
+    "qrcode": "^1.5.4",
+    "pino": "^9.6.0"
+  }
+}

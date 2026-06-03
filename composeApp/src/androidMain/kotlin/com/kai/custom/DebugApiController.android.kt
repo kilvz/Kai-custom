@@ -6,6 +6,7 @@ import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.ToolExecutor
 import com.kai.custom.debug.DebugServer
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,6 +22,7 @@ class AndroidDebugApiController : DebugApiController {
     private val appSettings: AppSettings by inject(AppSettings::class.java)
     private val toolExecutor: ToolExecutor by inject(ToolExecutor::class.java)
     private val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
+    private val whatsAppLifecycleManager: WhatsAppLifecycleManager by inject(WhatsAppLifecycleManager::class.java)
 
     private var server: DebugServer? = null
     private var transitioning = false
@@ -41,7 +43,7 @@ class AndroidDebugApiController : DebugApiController {
                 } catch (_: Exception) {
                     return@launch
                 }
-                val s = DebugServer(dataRepository, memoryStore, appSettings, toolExecutor, mcpServerManager, sandboxController)
+                val s = DebugServer(dataRepository, memoryStore, appSettings, toolExecutor, mcpServerManager, sandboxController, whatsAppLifecycleManager)
                 s.start()
                 server = s
             } finally {

@@ -480,6 +480,41 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_TELEGRAM_AUTHORIZED_CHAT_IDS, ids.joinToString(","))
     }
 
+    // WhatsApp Bridge (Baileys MCP via proot sandbox)
+    fun isWhatsAppEnabled(): Boolean = settings.getBoolean(KEY_WHATSAPP_ENABLED, false)
+    fun setWhatsAppEnabled(enabled: Boolean) { settings.putBoolean(KEY_WHATSAPP_ENABLED, enabled) }
+
+    fun isWhatsAppInstalled(): Boolean = settings.getBoolean(KEY_WHATSAPP_INSTALLED, false)
+    fun setWhatsAppInstalled(installed: Boolean) { settings.putBoolean(KEY_WHATSAPP_INSTALLED, installed) }
+
+    fun isWhatsAppAuthenticated(): Boolean = settings.getBoolean(KEY_WHATSAPP_AUTHENTICATED, false)
+    fun setWhatsAppAuthenticated(auth: Boolean) { settings.putBoolean(KEY_WHATSAPP_AUTHENTICATED, auth) }
+
+    fun getWhatsAppQrCode(): String = settings.getString(KEY_WHATSAPP_QR_CODE, "")
+    fun setWhatsAppQrCode(qr: String) { settings.putString(KEY_WHATSAPP_QR_CODE, qr) }
+
+    fun getWhatsAppPendingJson(): String = settings.getString(KEY_WHATSAPP_PENDING, "")
+    fun setWhatsAppPendingJson(json: String) { settings.putString(KEY_WHATSAPP_PENDING, json) }
+
+    fun isWhatsAppReadOnly(): Boolean = settings.getBoolean(KEY_WHATSAPP_READ_ONLY, true)
+    fun setWhatsAppReadOnly(readOnly: Boolean) { settings.putBoolean(KEY_WHATSAPP_READ_ONLY, readOnly) }
+
+    // Baileys connection config
+    fun getBaileysBrowserName(): String = settings.getString(KEY_BAILEYS_BROWSER_NAME, "Kai-custom")
+    fun setBaileysBrowserName(v: String) { settings.putString(KEY_BAILEYS_BROWSER_NAME, v) }
+
+    fun getBaileysBrowserVersion(): String = settings.getString(KEY_BAILEYS_BROWSER_VERSION, "3.8.0")
+    fun setBaileysBrowserVersion(v: String) { settings.putString(KEY_BAILEYS_BROWSER_VERSION, v) }
+
+    fun getBaileysMarkOnline(): Boolean = settings.getBoolean(KEY_BAILEYS_MARK_ONLINE, true)
+    fun setBaileysMarkOnline(v: Boolean) { settings.putBoolean(KEY_BAILEYS_MARK_ONLINE, v) }
+
+    fun getBaileysSyncHistory(): Boolean = settings.getBoolean(KEY_BAILEYS_SYNC_HISTORY, false)
+    fun setBaileysSyncHistory(v: Boolean) { settings.putBoolean(KEY_BAILEYS_SYNC_HISTORY, v) }
+
+    fun getBaileysLinkPreviews(): Boolean = settings.getBoolean(KEY_BAILEYS_LINK_PREVIEWS, true)
+    fun setBaileysLinkPreviews(v: Boolean) { settings.putBoolean(KEY_BAILEYS_LINK_PREVIEWS, v) }
+
     // SSH connection
     fun isSshEnabled(): Boolean = settings.getBoolean(KEY_SSH_ENABLED, true)
 
@@ -957,5 +992,16 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_TELEGRAM_AUTHORIZED_CHAT_IDS = "telegram_authorized_chat_ids"
         const val KEY_SSH_ACTIVE_PROFILE = "ssh_active_profile"
         const val KEY_ALT_MEMORY_MIGRATION_COMPLETE = "alt_memory_migration_complete"
+        const val KEY_WHATSAPP_ENABLED = "whatsapp_enabled"
+        const val KEY_WHATSAPP_INSTALLED = "whatsapp_installed"
+        const val KEY_WHATSAPP_AUTHENTICATED = "whatsapp_authenticated"
+        const val KEY_WHATSAPP_QR_CODE = "whatsapp_qr_code"
+        const val KEY_WHATSAPP_PENDING = "whatsapp_pending"
+        const val KEY_WHATSAPP_READ_ONLY = "whatsapp_read_only"
+        const val KEY_BAILEYS_BROWSER_NAME = "baileys_browser_name"
+        const val KEY_BAILEYS_BROWSER_VERSION = "baileys_browser_version"
+        const val KEY_BAILEYS_MARK_ONLINE = "baileys_mark_online"
+        const val KEY_BAILEYS_SYNC_HISTORY = "baileys_sync_history"
+        const val KEY_BAILEYS_LINK_PREVIEWS = "baileys_link_previews"
     }
 }

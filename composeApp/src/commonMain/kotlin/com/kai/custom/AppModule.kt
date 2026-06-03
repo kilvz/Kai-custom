@@ -17,6 +17,7 @@ import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.TaskStore
 import com.kai.custom.data.TelegramStore
 import com.kai.custom.data.ToolExecutor
+import com.kai.custom.data.WhatsAppStore
 import com.kai.custom.data.dimension.DimensionStore
 import com.kai.custom.data.runMigrations
 import com.kai.custom.email.EmailPoller
@@ -34,6 +35,8 @@ import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
 import com.kai.custom.telegram.TelegramPoller
 import com.kai.custom.tools.CalendarPermissionController
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
+import com.kai.custom.whatsapp.WhatsAppPoller
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.tools.NotificationPermissionController
@@ -114,6 +117,15 @@ val appModule = module {
     single<TelegramPoller> {
         TelegramPoller(get<TelegramStore>(), lazy { get<DataRepository>() })
     }
+    single<WhatsAppStore> {
+        WhatsAppStore(get())
+    }
+    single<WhatsAppPoller> {
+        WhatsAppPoller(get<WhatsAppStore>(), lazy { get<DataRepository>() }, get<McpServerManager>(), get<MemoryStore>())
+    }
+    single<WhatsAppLifecycleManager> {
+        WhatsAppLifecycleManager(get<SandboxController>(), get<McpServerManager>(), get(), get<WhatsAppStore>())
+    }
     single<SplinterlandsStore> {
         SplinterlandsStore(get())
     }
@@ -178,6 +190,8 @@ val appModule = module {
             get<MemoryStore>(),
             telegramStore = get(),
             telegramPoller = get(),
+            whatsAppStore = get(),
+            whatsAppPoller = get(),
         )
     }
     single<DaemonController> { createDaemonController() }

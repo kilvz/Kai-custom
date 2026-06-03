@@ -7,6 +7,8 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.mcp.AltMemoryLifecycleManager
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.whatsapp.BRIDGE_JS_BASE64
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.ProotExecutor
 import com.kai.custom.sandbox.SandboxState
@@ -39,6 +41,7 @@ class AndroidSandboxController : SandboxController {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val altMemoryLifecycle by lazy { AltMemoryLifecycleManager(this, mcpServerManager, appSettings, memoryStore, dataRepository) }
+    private val whatsAppLifecycle by lazy { WhatsAppLifecycleManager(this, mcpServerManager, appSettings, com.kai.custom.data.WhatsAppStore(appSettings)) }
 
     private var cachedDiskUsageMB = 0L
     private var previousState: SandboxState? = null
@@ -78,6 +81,9 @@ class AndroidSandboxController : SandboxController {
                             altMemoryLifecycle.verifyInstalled()
                             if (appSettings.isAltMemoryEnabled()) {
                                 altMemoryLifecycle.setupAndStart()
+                            }
+                            if (appSettings.isWhatsAppEnabled() && appSettings.isWhatsAppInstalled()) {
+                                whatsAppLifecycle.setupAndStart()
                             }
                             // If verifyInstalled reset the flag, re-emit so the UI picks it up.
                             _status.value = mapState(state)
@@ -507,6 +513,136 @@ class AndroidSandboxController : SandboxController {
     override suspend fun stopAltMemory() {
         android.util.Log.i("SandboxController", "stopAltMemory called")
         altMemoryLifecycle.stop()
+    }
+
+    override suspend fun startWhatsApp() {
+        android.util.Log.i("SandboxController", "startWhatsApp called, sandboxReady=${_status.value.ready}")
+        whatsAppLifecycle.setupAndStart()
+    }
+
+    override suspend fun installWhatsAppBridge(): Boolean {
+        android.util.Log.i("SandboxController", "installWhatsAppBridge called")
+        return whatsAppPipeline(label = "Installing")
+    }
+
+    override suspend fun updateWhatsAppBridge(): Boolean {
+        android.util.Log.i("SandboxController", "updateWhatsAppBridge called")
+        return whatsAppPipeline(label = "Updating")
+    }
+
+    private suspend fun whatsAppPipeline(label: String): Boolean {
+        val current = sandboxManager.state.value
+        if (current !is SandboxState.Ready) {
+            android.util.Log.w("SandboxController", "whatsAppPipeline: sandbox not ready, state=$current")
+            return false
+        }
+
+        fun updateStatus(
+            working: Boolean = false,
+            error: Boolean = false,
+            statusText: String = "",
+        ) {
+            _status.value = _status.value.copy(
+                working = working,
+                error = error,
+                statusText = statusText,
+            )
+        }
+
+        return withContext(Dispatchers.IO) {
+            val executor = sandboxManager.createProotExecutor()
+
+            updateStatus(working = true, statusText = "$label WhatsApp bridge (deploying)…")
+
+            val mkdir = executor.execute("mkdir -p /root/whatsapp-bridge", timeoutSeconds = 10)
+            if (mkdir["success"] as? Boolean != true) {
+                android.util.Log.e("SandboxController", "mkdir failed: ${mkdir["stderr"]}")
+                updateStatus(error = true, statusText = "WhatsApp $label: mkdir failed")
+                return@withContext false
+            }
+
+            val bridgeWrite = executor.execute(
+                "cat > /root/whatsapp-bridge/bridge.js.b64 << 'ENDB64'\n$BRIDGE_JS_BASE64\nENDB64",
+                timeoutSeconds = 30,
+            )
+            if (bridgeWrite["success"] as? Boolean != true) {
+                android.util.Log.e("SandboxController", "bridge.js.b64 write failed: ${bridgeWrite["stderr"]}")
+                updateStatus(error = true, statusText = "WhatsApp $label: bridge.js write failed")
+                return@withContext false
+            }
+
+            val bridgeDecode = executor.execute(
+                "base64 -d /root/whatsapp-bridge/bridge.js.b64 > /root/whatsapp-bridge/bridge.js && rm /root/whatsapp-bridge/bridge.js.b64",
+                timeoutSeconds = 30,
+            )
+            if (bridgeDecode["success"] as? Boolean != true) {
+                android.util.Log.e("SandboxController", "bridge.js decode failed: ${bridgeDecode["stderr"]}")
+                updateStatus(error = true, statusText = "WhatsApp $label: bridge.js decode failed")
+                return@withContext false
+            }
+
+            val nodeInstallCmd = buildString {
+                append("NODE_VER=v22.14.0; ")
+                append("ARCH=\$(uname -m); ")
+                append("case \"\$ARCH\" in aarch64) NA=arm64 ;; x86_64) NA=x64 ;; armv7l) NA=armv7l ;; *) echo \"unsupported arch \$ARCH\"; exit 1 ;; esac; ")
+                append("if ! command -v node >/dev/null 2>&1 || [ \"\$(node --version 2>/dev/null | cut -d. -f1 | tr -d v)\" -lt 20 ]; then ")
+                append("  mkdir -p /usr/local/node22 && ")
+                append("  curl -sL \"https://nodejs.org/dist/\${NODE_VER}/node-\${NODE_VER}-linux-\${NA}.tar.xz\" | tar -xJ -C /usr/local/node22 --strip-components=1 2>&1 && ")
+                append("  ln -sf /usr/local/node22/bin/node /usr/local/bin/node && ")
+                append("  ln -sf /usr/local/node22/bin/npm /usr/local/bin/npm && ")
+                append("  ln -sf /usr/local/node22/bin/npx /usr/local/bin/npx; ")
+                append("fi; ")
+                append("echo NODE_OK")
+            }
+            val nodeDl = executor.execute(
+                nodeInstallCmd,
+                timeoutSeconds = 120,
+            )
+            if (nodeDl["success"] as? Boolean != true) {
+                android.util.Log.e("SandboxController", "node download failed: ${nodeDl["stderr"]}")
+                updateStatus(error = true, statusText = "WhatsApp $label: node install failed")
+                return@withContext false
+            }
+
+            updateStatus(working = true, statusText = "$label WhatsApp bridge (npm)…")
+
+            val install = executor.execute(
+                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
+                timeoutSeconds = 300,
+            )
+
+            if (install["success"] as? Boolean != true) {
+                val stderr = install["stderr"] as? String ?: ""
+                val stdout = install["stdout"] as? String ?: ""
+                val error = install["error"] as? String ?: ""
+                val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
+                android.util.Log.e("SandboxController", "npm install failed: $msg")
+                updateStatus(error = true, statusText = "WhatsApp $label failed: $msg")
+                return@withContext false
+            }
+
+            updateStatus(working = true, statusText = "Verifying WhatsApp bridge…")
+
+            val verify = executor.execute(
+                "node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
+                timeoutSeconds = 30,
+            )
+            val ok = verify["success"] as? Boolean == true && (verify["stdout"] as? String)?.trim() == "1"
+            if (!ok) {
+                updateStatus(error = true, statusText = "WhatsApp $label: require check failed")
+                return@withContext false
+            }
+
+            appSettings.setWhatsAppInstalled(true)
+            updateStatus()
+            android.util.Log.i("SandboxController", "WhatsApp ${label.lowercase()}d successfully")
+            true
+        }
+    }
+
+    override suspend fun stopWhatsApp() {
+        android.util.Log.i("SandboxController", "stopWhatsApp called")
+        whatsAppLifecycle.stop()
     }
 }
 

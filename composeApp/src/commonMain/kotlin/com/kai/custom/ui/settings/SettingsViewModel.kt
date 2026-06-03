@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -289,14 +290,18 @@ class SettingsViewModel(
         }
         viewModelScope.launch {
             sandboxController.status.collect { status ->
-                _state.update { it.copy(sandboxReady = status.ready, altMemoryConnected = mcpServerManager.isConnected("alt_memory")) }
+                val connected = mcpServerManager.isConnected("alt_memory")
+                _state.update { it.copy(sandboxReady = status.ready, altMemoryConnected = connected, altMemoryBackend = if (connected) it.altMemoryBackend else null, altMemoryEmbedder = if (connected) it.altMemoryEmbedder else null) }
+                if (connected) refreshAltMemoryInfo()
             }
         }
         viewModelScope.launch {
             while (true) {
                 delay(5_000)
                 if (_state.value.isAltMemoryEnabled && _state.value.altMemoryConnected != mcpServerManager.isConnected("alt_memory")) {
-                    _state.update { it.copy(altMemoryConnected = mcpServerManager.isConnected("alt_memory")) }
+                    val connected = mcpServerManager.isConnected("alt_memory")
+                    _state.update { it.copy(altMemoryConnected = connected, altMemoryBackend = if (connected) it.altMemoryBackend else null, altMemoryEmbedder = if (connected) it.altMemoryEmbedder else null) }
+                    if (connected) refreshAltMemoryInfo()
                 }
             }
         }
@@ -590,11 +595,22 @@ class SettingsViewModel(
             if (enabled) {
                 sandboxController.startAltMemory()
                 _state.update { it.copy(altMemoryConnected = mcpServerManager.isConnected("alt_memory")) }
+                refreshAltMemoryInfo()
             } else {
                 sandboxController.stopAltMemory()
-                _state.update { it.copy(altMemoryConnected = false) }
+                _state.update { it.copy(altMemoryConnected = false, altMemoryBackend = null, altMemoryEmbedder = null) }
             }
         }
+    }
+
+    private suspend fun refreshAltMemoryInfo() {
+        if (!mcpServerManager.isConnected("alt_memory")) return
+        try {
+            val client = mcpServerManager.getClient("alt_memory") ?: return
+            val backend = client.callTool("get_backend", buildJsonObject { })
+            val embedder = client.callTool("get_default_embedder", buildJsonObject { })
+            _state.update { it.copy(altMemoryBackend = backend, altMemoryEmbedder = embedder) }
+        } catch (_: Exception) { }
     }
 
     private fun onDeleteMemory(key: String) {

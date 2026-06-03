@@ -111,6 +111,26 @@ interface DataRepository {
     fun setAltMemoryEnabled(enabled: Boolean)
     fun isAltMemoryInstalled(): Boolean
     fun setAltMemoryInstalled(installed: Boolean)
+    fun isWhatsAppInstalled(): Boolean
+    fun setWhatsAppInstalled(installed: Boolean)
+    fun isWhatsAppEnabled(): Boolean
+    fun setWhatsAppEnabled(enabled: Boolean)
+    fun isWhatsAppReadOnly(): Boolean
+    fun setWhatsAppReadOnly(readOnly: Boolean)
+    fun isWhatsAppAuthenticated(): Boolean
+    fun setWhatsAppAuthenticated(auth: Boolean)
+    fun getWhatsAppQrCode(): String
+    fun getBaileysBrowserName(): String
+    fun setBaileysBrowserName(v: String)
+    fun getBaileysBrowserVersion(): String
+    fun setBaileysBrowserVersion(v: String)
+    fun getBaileysMarkOnline(): Boolean
+    fun setBaileysMarkOnline(v: Boolean)
+    fun getBaileysSyncHistory(): Boolean
+    fun setBaileysSyncHistory(v: Boolean)
+    fun getBaileysLinkPreviews(): Boolean
+    fun setBaileysLinkPreviews(v: Boolean)
+    fun getBaileysConfigJson(): String
     fun getMemories(): List<MemoryEntry>
     fun getSchemaResetMessage(): String?
     suspend fun deleteMemory(key: String)

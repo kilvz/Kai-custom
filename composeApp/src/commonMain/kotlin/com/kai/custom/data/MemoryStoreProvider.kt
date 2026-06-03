@@ -19,24 +19,44 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     val isUsingAltMemory: Boolean get() = delegate !is SqliteMemoryStore
 
-    // ── Unprotected writes: SQL only (user preferences, trivial facts) ──
+    // ── Unprotected writes: SQL + alt-memory dual-write when connected ──
 
     override suspend fun store(
         key: String,
         content: String,
         category: MemoryCategory,
         source: String?,
-    ): MemoryEntry =
-        sqliteStore.store(key, content, category, source)
+    ): MemoryEntry {
+        val entry = sqliteStore.store(key, content, category, source)
+        if (isUsingAltMemory) {
+            try { delegate.store(key, content, category, source) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
-    override suspend fun updateContent(key: String, content: String): MemoryEntry? =
-        sqliteStore.updateContent(key, content)
+    override suspend fun updateContent(key: String, content: String): MemoryEntry? {
+        val entry = sqliteStore.updateContent(key, content)
+        if (isUsingAltMemory && entry != null) {
+            try { delegate.updateContent(key, content) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
-    override suspend fun reinforceMemory(key: String): MemoryEntry? =
-        sqliteStore.reinforceMemory(key)
+    override suspend fun reinforceMemory(key: String): MemoryEntry? {
+        val entry = sqliteStore.reinforceMemory(key)
+        if (isUsingAltMemory && entry != null) {
+            try { delegate.reinforceMemory(key) } catch (_: Exception) { }
+        }
+        return entry
+    }
 
-    override suspend fun forget(key: String): Boolean =
-        sqliteStore.forget(key)
+    override suspend fun forget(key: String): Boolean {
+        val ok = sqliteStore.forget(key)
+        if (isUsingAltMemory) {
+            try { delegate.forget(key) } catch (_: Exception) { }
+        }
+        return ok
+    }
 
     // ── Protected writes: alt-memory only (behavior, summaries), SQL fallback ──
 

@@ -450,6 +450,36 @@ class FakeDataRepository : DataRepository {
 
     override fun setAltMemoryInstalled(installed: Boolean) {}
 
+    override fun isWhatsAppInstalled(): Boolean = false
+
+    override fun setWhatsAppInstalled(installed: Boolean) {}
+
+    override fun isWhatsAppReadOnly(): Boolean = true
+
+    override fun setWhatsAppReadOnly(readOnly: Boolean) {}
+
+    override fun isWhatsAppEnabled(): Boolean = false
+
+    override fun setWhatsAppEnabled(enabled: Boolean) {}
+
+    override fun isWhatsAppAuthenticated(): Boolean = false
+
+    override fun setWhatsAppAuthenticated(auth: Boolean) {}
+
+    override fun getWhatsAppQrCode(): String = ""
+
+    override fun getBaileysBrowserName(): String = "Kai-custom"
+    override fun setBaileysBrowserName(v: String) {}
+    override fun getBaileysBrowserVersion(): String = "3.8.0"
+    override fun setBaileysBrowserVersion(v: String) {}
+    override fun getBaileysMarkOnline(): Boolean = true
+    override fun setBaileysMarkOnline(v: Boolean) {}
+    override fun getBaileysSyncHistory(): Boolean = false
+    override fun setBaileysSyncHistory(v: Boolean) {}
+    override fun getBaileysLinkPreviews(): Boolean = true
+    override fun setBaileysLinkPreviews(v: Boolean) {}
+    override fun getBaileysConfigJson(): String = "{}"
+
     override fun setMemoryEnabled(enabled: Boolean) {
         memoryEnabled = enabled
     }

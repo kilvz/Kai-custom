@@ -75,6 +75,8 @@ data class SettingsUiState(
     val isAltMemoryEnabled: Boolean = false,
     val altMemoryInstalled: Boolean = false,
     val altMemoryConnected: Boolean = false,
+    val altMemoryBackend: String? = null,
+    val altMemoryEmbedder: String? = null,
     val sandboxReady: Boolean = false,
     val memories: ImmutableList<MemoryEntry> = persistentListOf(),
     val isSchedulingEnabled: Boolean = true,

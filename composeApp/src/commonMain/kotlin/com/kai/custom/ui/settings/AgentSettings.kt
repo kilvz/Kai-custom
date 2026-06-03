@@ -109,6 +109,8 @@ internal fun AgentContent(
     isAltMemoryEnabled: Boolean,
     altMemoryInstalled: Boolean,
     altMemoryConnected: Boolean,
+    altMemoryBackend: String?,
+    altMemoryEmbedder: String?,
     sandboxReady: Boolean,
     onToggleAltMemory: (Boolean) -> Unit,
     scheduledTasks: ImmutableList<ScheduledTask>,
@@ -167,6 +169,8 @@ internal fun AgentContent(
                         isAltMemoryEnabled = isAltMemoryEnabled,
                         altMemoryInstalled = altMemoryInstalled,
                         altMemoryConnected = altMemoryConnected,
+                        altMemoryBackend = altMemoryBackend,
+                        altMemoryEmbedder = altMemoryEmbedder,
                         sandboxReady = sandboxReady,
                         onToggleMemory = actions.onToggleMemory,
                         onToggleAltMemory = onToggleAltMemory,
@@ -292,6 +296,8 @@ internal fun AgentContent(
                         isAltMemoryEnabled = isAltMemoryEnabled,
                         altMemoryInstalled = altMemoryInstalled,
                         altMemoryConnected = altMemoryConnected,
+                        altMemoryBackend = altMemoryBackend,
+                        altMemoryEmbedder = altMemoryEmbedder,
                         sandboxReady = sandboxReady,
                         onToggleMemory = actions.onToggleMemory,
                         onToggleAltMemory = onToggleAltMemory,
@@ -755,6 +761,8 @@ private fun MemoryList(
     isAltMemoryEnabled: Boolean,
     altMemoryInstalled: Boolean,
     altMemoryConnected: Boolean,
+    altMemoryBackend: String?,
+    altMemoryEmbedder: String?,
     sandboxReady: Boolean,
     onToggleMemory: (Boolean) -> Unit,
     onToggleAltMemory: (Boolean) -> Unit,
@@ -808,6 +816,18 @@ private fun MemoryList(
             enabled = sandboxReady,
             onCheckedChange = onToggleAltMemory,
         )
+        if (altMemoryConnected && (altMemoryBackend != null || altMemoryEmbedder != null)) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = buildList {
+                    altMemoryBackend?.let { add("Backend: $it") }
+                    altMemoryEmbedder?.let { add("Embedder: $it") }
+                }.joinToString(" · "),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp),
+            )
+        }
         Spacer(Modifier.height(12.dp))
 
         if (isMemoryEnabled) {

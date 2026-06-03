@@ -113,6 +113,8 @@ class AltMemoryLifecycleManager(
     /** One-shot connection attempt via the standard MCP flow. */
     private suspend fun tryConnect(): Boolean {
         if (connected) return true
+        // Ensure the server process is running before trying to connect
+        startMcpServer()
         val result = mcpServerManager.connectAndDiscoverTools(SERVER_ID)
         if (result.isFailure) return false
         runMigration()

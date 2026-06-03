@@ -165,6 +165,8 @@ actual val isNotificationsSupported: Boolean by lazy {
 
 actual val isTelegramSupported: Boolean = true
 
+actual val isWhatsAppSupported: Boolean = true
+
 actual val isSplinterlandsSupported: Boolean = true
 
 actual val isShizukuSupported: Boolean = true
@@ -636,6 +638,15 @@ actual fun getAvailableTools(): List<Tool> {
             val telegramPoller: com.kai.custom.telegram.TelegramPoller by inject(com.kai.custom.telegram.TelegramPoller::class.java)
             if (telegramStore.isTelegramEnabled() && telegramStore.getBotToken().isNotBlank()) {
                 addAll(com.kai.custom.tools.getTelegramTools(telegramStore, telegramPoller))
+            }
+        }
+
+        // WhatsApp tools
+        if (isWhatsAppSupported) {
+            val whatsAppStore: com.kai.custom.data.WhatsAppStore by inject(com.kai.custom.data.WhatsAppStore::class.java)
+            val whatsAppPoller: com.kai.custom.whatsapp.WhatsAppPoller by inject(com.kai.custom.whatsapp.WhatsAppPoller::class.java)
+            if (whatsAppStore.isWhatsAppEnabled() && whatsAppStore.isWhatsAppInstalled() && whatsAppStore.isWhatsAppAuthenticated()) {
+                addAll(com.kai.custom.tools.getWhatsAppTools(whatsAppStore, whatsAppPoller))
             }
         }
 

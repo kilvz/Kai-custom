@@ -300,7 +300,7 @@ class LinuxSandboxManager(
         val packages = if (distro == "ubuntu") {
             listOf(
                 "bash", "apt-utils", "curl", "wget", "git", "jq", "python3", "python3-pip", "nodejs",
-                "openssh-client", "lftp", "rsync", "ca-certificates",
+                "openssh-client", "lftp", "rsync", "ca-certificates", "xz-utils",
             )
         } else {
             listOf(

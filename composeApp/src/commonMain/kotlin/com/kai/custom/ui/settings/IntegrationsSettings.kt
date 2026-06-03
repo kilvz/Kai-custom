@@ -1,5 +1,6 @@
 package com.kai.custom.ui.settings
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,12 +14,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +34,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,8 +43,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kai.custom.SandboxController
 import com.kai.custom.data.DataRepository
+import com.kai.custom.decodeToImageBitmap
+import kotlin.io.encoding.Base64
 import com.kai.custom.ui.handCursor
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.settings_open_github_issue
 import kai.composeapp.generated.resources.settings_request_integration_description
@@ -51,6 +62,8 @@ import org.koin.compose.viewmodel.koinViewModel
 internal fun IntegrationsContent(
     splinterlandsViewModel: SplinterlandsViewModel = koinViewModel(),
     dataRepository: DataRepository = koinInject(),
+    sandboxController: SandboxController = koinInject(),
+    whatsAppLifecycleManager: WhatsAppLifecycleManager = koinInject(),
 ) {
     val splinterlandsState by splinterlandsViewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { splinterlandsViewModel.onScreenVisible() }
@@ -84,6 +97,10 @@ internal fun IntegrationsContent(
         }
 
         SettingsCard {
+            WhatsAppSection(dataRepository, sandboxController, whatsAppLifecycleManager)
+        }
+
+        SettingsCard {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(Res.string.settings_request_integration_title),
@@ -103,6 +120,177 @@ internal fun IntegrationsContent(
                 ) {
                     Text(stringResource(Res.string.settings_open_github_issue))
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WhatsAppSection(
+    dataRepository: DataRepository,
+    sandboxController: SandboxController,
+    whatsAppLifecycleManager: WhatsAppLifecycleManager,
+) {
+    val scope = rememberCoroutineScope()
+    var isEnabled by remember { mutableStateOf(dataRepository.isWhatsAppEnabled()) }
+    var isReadOnly by remember { mutableStateOf(dataRepository.isWhatsAppReadOnly()) }
+    val sandboxStatus by sandboxController.status.collectAsStateWithLifecycle()
+    var statusMessage by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ToggleableHeadline(
+            title = "WhatsApp",
+            description = "Talk to the AI via WhatsApp",
+            checked = isEnabled,
+            onCheckedChange = {
+                isEnabled = it
+                dataRepository.setWhatsAppEnabled(it)
+                if (it) {
+                    scope.launch {
+                        whatsAppLifecycleManager.setupAndStart()
+                    }
+                } else {
+                    scope.launch {
+                        whatsAppLifecycleManager.stop()
+                    }
+                }
+            },
+        )
+
+        if (isEnabled) {
+            Spacer(Modifier.height(8.dp))
+
+            if (!sandboxStatus.ready) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Requires sandbox — enable the sandbox first in System Settings.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+                return@Column
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Read only (AI reads but does not reply)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Switch(
+                    checked = isReadOnly,
+                    onCheckedChange = {
+                        isReadOnly = it
+                        dataRepository.setWhatsAppReadOnly(it)
+                    },
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            if (!dataRepository.isWhatsAppInstalled()) {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            statusMessage = "Installing..."
+                            val installed = sandboxController.installWhatsAppBridge()
+                            if (installed) {
+                                dataRepository.setWhatsAppInstalled(true)
+                                statusMessage = "Installed"
+                                whatsAppLifecycleManager.setupAndStart()
+                            } else {
+                                statusMessage = "Install failed"
+                            }
+                        }
+                    },
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text("Install")
+                }
+            } else if (!dataRepository.isWhatsAppAuthenticated()) {
+                val qrCode = dataRepository.getWhatsAppQrCode()
+                if (qrCode.isNotBlank()) {
+                    Text(
+                        text = "Scan this QR code with WhatsApp on your phone:",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    val qrBitmap = remember(qrCode) {
+                        try {
+                            decodeToImageBitmap(Base64.decode(qrCode))
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                    if (qrBitmap != null) {
+                        Image(
+                            bitmap = qrBitmap,
+                            contentDescription = "WhatsApp QR code",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(280.dp)
+                                .padding(12.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        scope.launch {
+                            whatsAppLifecycleManager.refreshQrCode()
+                            statusMessage = "QR refreshed"
+                        }
+                    },
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text("Refresh QR")
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "Connected",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+
+            if (statusMessage.isNotEmpty()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = statusMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }

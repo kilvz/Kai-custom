@@ -37,6 +37,8 @@ class TaskScheduler(
     private val memoryStore: MemoryStore? = null,
     private val telegramStore: TelegramStore? = null,
     private val telegramPoller: com.kai.custom.telegram.TelegramPoller? = null,
+    private val whatsAppStore: WhatsAppStore? = null,
+    private val whatsAppPoller: com.kai.custom.whatsapp.WhatsAppPoller? = null,
     private val enabled: Boolean = true,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) {
@@ -143,6 +145,11 @@ class TaskScheduler(
                 // Telegram polling
                 if (!isLoadingCheck() && telegramStore?.isTelegramEnabled() == true && telegramPoller != null) {
                     telegramPoller.poll()
+                }
+
+                // WhatsApp polling
+                if (!isLoadingCheck() && whatsAppStore?.isWhatsAppEnabled() == true && whatsAppPoller != null) {
+                    whatsAppPoller.poll()
                 }
             }
         }

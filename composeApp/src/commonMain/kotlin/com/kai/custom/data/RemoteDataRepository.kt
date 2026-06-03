@@ -87,6 +87,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
@@ -1962,6 +1963,54 @@ class RemoteDataRepository(
     override fun setAltMemoryInstalled(installed: Boolean) {
         appSettings.setAltMemoryInstalled(installed)
     }
+
+    override fun isWhatsAppInstalled(): Boolean = appSettings.isWhatsAppInstalled()
+
+    override fun setWhatsAppInstalled(installed: Boolean) {
+        appSettings.setWhatsAppInstalled(installed)
+    }
+
+    override fun isWhatsAppReadOnly(): Boolean = appSettings.isWhatsAppReadOnly()
+
+    override fun setWhatsAppReadOnly(readOnly: Boolean) {
+        appSettings.setWhatsAppReadOnly(readOnly)
+    }
+
+    override fun isWhatsAppEnabled(): Boolean = appSettings.isWhatsAppEnabled()
+
+    override fun setWhatsAppEnabled(enabled: Boolean) {
+        appSettings.setWhatsAppEnabled(enabled)
+    }
+
+    override fun isWhatsAppAuthenticated(): Boolean = appSettings.isWhatsAppAuthenticated()
+
+    override fun setWhatsAppAuthenticated(auth: Boolean) {
+        appSettings.setWhatsAppAuthenticated(auth)
+    }
+
+    override fun getWhatsAppQrCode(): String = appSettings.getWhatsAppQrCode()
+
+    override fun getBaileysBrowserName(): String = appSettings.getBaileysBrowserName()
+    override fun setBaileysBrowserName(v: String) { appSettings.setBaileysBrowserName(v) }
+    override fun getBaileysBrowserVersion(): String = appSettings.getBaileysBrowserVersion()
+    override fun setBaileysBrowserVersion(v: String) { appSettings.setBaileysBrowserVersion(v) }
+    override fun getBaileysMarkOnline(): Boolean = appSettings.getBaileysMarkOnline()
+    override fun setBaileysMarkOnline(v: Boolean) { appSettings.setBaileysMarkOnline(v) }
+    override fun getBaileysSyncHistory(): Boolean = appSettings.getBaileysSyncHistory()
+    override fun setBaileysSyncHistory(v: Boolean) { appSettings.setBaileysSyncHistory(v) }
+    override fun getBaileysLinkPreviews(): Boolean = appSettings.getBaileysLinkPreviews()
+    override fun setBaileysLinkPreviews(v: Boolean) { appSettings.setBaileysLinkPreviews(v) }
+    override fun getBaileysConfigJson(): String = buildJsonObject {
+        put("browser", buildJsonArray {
+            add(JsonPrimitive(appSettings.getBaileysBrowserName()))
+            add(JsonPrimitive("Chrome"))
+            add(JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+        })
+        put("markOnlineOnConnect", JsonPrimitive(appSettings.getBaileysMarkOnline()))
+        put("syncFullHistory", JsonPrimitive(appSettings.getBaileysSyncHistory()))
+        put("generateHighQualityLinkPreview", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
+        put("shouldSyncHistoryMsg", JsonPrimitive(appSettings.getBaileysSyncHistory()))
+    }.toString()
 
     override fun setMemoryEnabled(enabled: Boolean) {
         appSettings.setMemoryEnabled(enabled)

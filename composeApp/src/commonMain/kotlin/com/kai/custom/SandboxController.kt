@@ -102,6 +102,11 @@ interface SandboxController {
     suspend fun stopAltMemory() {}
     suspend fun installAltMemoryPackage(): Boolean = false
     suspend fun updateAltMemoryPackage(): Boolean = false
+
+    suspend fun startWhatsApp() {}
+    suspend fun stopWhatsApp() {}
+    suspend fun installWhatsAppBridge(): Boolean = false
+    suspend fun updateWhatsAppBridge(): Boolean = false
 }
 
 expect fun createSandboxController(): SandboxController
