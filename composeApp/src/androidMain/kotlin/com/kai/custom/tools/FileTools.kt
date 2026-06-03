@@ -18,11 +18,11 @@ private fun sandboxReady(): Boolean = try {
 object ReadFileTool : Tool {
     override val schema = ToolSchema(
         name = "read_file",
-        description = "Read a text file from the sandbox filesystem. Path is relative to /root (e.g. myfile.txt or data/config.json). Returns file contents as a string, or an error if the file is too large or doesn't exist.",
+        description = "Read a text file from the sandbox filesystem. Path is relative to /root (e.g. myfile.txt or data/config.json). Phone storage is at /sdcard (e.g. /sdcard/Download/file.txt). Returns file contents as a string, or an error if the file is too large or doesn't exist.",
         parameters = mapOf(
             "path" to ParameterSchema(
                 type = "string",
-                description = "Path relative to /root, e.g. site/index.html or docs/notes.md",
+                description = "Path relative to /root (e.g. myfile.txt or data/config.json), or absolute under /sdcard for phone storage (e.g. /sdcard/Download/file.txt)",
                 required = true,
             ),
             "max_bytes" to ParameterSchema(
@@ -69,11 +69,11 @@ object ReadFileTool : Tool {
 object WriteFileTool : Tool {
     override val schema = ToolSchema(
         name = "write_file",
-        description = "Write content to a text file in the sandbox filesystem. Creates parent directories automatically. Path is relative to /root. Overwrites existing files. Use this to create or modify code files, config files, scripts, etc.",
+        description = "Write content to a text file in the sandbox filesystem. Creates parent directories automatically. Path is relative to /root. Phone storage is at /sdcard (e.g. /sdcard/Download/file.txt). Overwrites existing files. Use this to create or modify code files, config files, scripts, etc.",
         parameters = mapOf(
             "path" to ParameterSchema(
                 type = "string",
-                description = "Path relative to /root, e.g. myapp/main.py or config.json",
+                description = "Path relative to /root (e.g. myapp/main.py or config.json), or absolute under /sdcard for phone storage (e.g. /sdcard/Download/output.txt)",
                 required = true,
             ),
             "content" to ParameterSchema(
@@ -121,11 +121,11 @@ object WriteFileTool : Tool {
 object EditFileTool : Tool {
     override val schema = ToolSchema(
         name = "edit_file",
-        description = "Edit a text file by replacing existing text with new text. If old_string is omitted, content is appended to the file. If old_string appears multiple times, only the first occurrence is replaced. Path is relative to /root. Use this for surgical edits without rewriting the entire file.",
+        description = "Edit a text file by replacing existing text with new text. If old_string is omitted, content is appended to the file. If old_string appears multiple times, only the first occurrence is replaced. Path is relative to /root. Phone storage is at /sdcard (e.g. /sdcard/Download/file.txt). Use this for surgical edits without rewriting the entire file.",
         parameters = mapOf(
             "path" to ParameterSchema(
                 type = "string",
-                description = "Path relative to /root, e.g. myapp/main.py",
+                description = "Path relative to /root (e.g. myapp/main.py), or absolute under /sdcard for phone storage (e.g. /sdcard/Download/file.txt)",
                 required = true,
             ),
             "old_string" to ParameterSchema(
@@ -201,7 +201,7 @@ object EditFileTool : Tool {
 object GlobTool : Tool {
     override val schema = ToolSchema(
         name = "glob",
-        description = "List files and directories matching a glob pattern in the sandbox. Uses the shell 'find' command internally. Patterns: use * for single-level matching, ** for recursive matching, e.g. *.kt, src/**/*.js, data/*.json. Results are capped at 200 entries.",
+        description = "List files and directories matching a glob pattern in the sandbox. Uses the shell 'find' command internally. Patterns: use * for single-level matching, ** for recursive matching, e.g. *.kt, src/**/*.js, data/*.json. Phone storage is at /sdcard (e.g. /sdcard/Download). Results are capped at 200 entries.",
         parameters = mapOf(
             "pattern" to ParameterSchema(
                 type = "string",
@@ -210,7 +210,7 @@ object GlobTool : Tool {
             ),
             "directory" to ParameterSchema(
                 type = "string",
-                description = "Directory to search in (default: /root)",
+                description = "Directory to search in (default: /root, use /sdcard for phone storage)",
                 required = false,
             ),
         ),
@@ -260,7 +260,7 @@ object GlobTool : Tool {
 object GrepTool : Tool {
     override val schema = ToolSchema(
         name = "grep",
-        description = "Search for a text pattern in files within the sandbox. Uses the shell 'grep' command with recursive search. Returns matching lines with file paths and line numbers. Results capped at 200 matches. Use for searching code, configs, logs, etc.",
+        description = "Search for a text pattern in files within the sandbox. Uses the shell 'grep' command with recursive search. Returns matching lines with file paths and line numbers. Results capped at 200 matches. Use for searching code, configs, logs, etc. Phone storage is at /sdcard.",
         parameters = mapOf(
             "pattern" to ParameterSchema(
                 type = "string",
@@ -269,7 +269,7 @@ object GrepTool : Tool {
             ),
             "path" to ParameterSchema(
                 type = "string",
-                description = "File path or directory to search in (e.g. /root/myfile.txt or /root/src)",
+                description = "File path or directory to search in (e.g. /root/myfile.txt, /root/src, or /sdcard/Download)",
                 required = true,
             ),
             "include" to ParameterSchema(
@@ -353,7 +353,11 @@ object GrepTool : Tool {
 
 private fun resolvePath(path: String): String {
     val clean = path.trimStart('/')
-    return if (clean.startsWith("root/")) clean else "root/$clean"
+    return when {
+        clean.startsWith("sdcard/") || clean == "sdcard" -> clean
+        clean.startsWith("root/") -> clean
+        else -> "root/$clean"
+    }
 }
 
 private suspend fun ensureParentDir(filePath: String) {

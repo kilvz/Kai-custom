@@ -31,6 +31,7 @@ data class SandboxUiState(
     val hasError: Boolean = false,
     val rootErrorMessage: String? = null,
     val altMemoryInstalled: Boolean = false,
+    val needsReset: Boolean = false,
 )
 
 class SandboxViewModel(
@@ -77,6 +78,7 @@ class SandboxViewModel(
         hasError = status.error,
         sandboxDistro = dataRepository.getSandboxDistro(),
         altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
+        needsReset = status.needsReset,
     )
 
     fun onToggleSandbox(enabled: Boolean) {

@@ -394,6 +394,7 @@ class SettingsViewModel(
 
     private fun onSelectTab(tab: SettingsTab) {
         _state.update { it.copy(currentTab = tab) }
+        if (tab == SettingsTab.Agent) refreshMcpServers()
     }
 
     private fun onAddService(service: Service) {
@@ -1031,6 +1032,7 @@ class SettingsViewModel(
                     }
                 }.toImmutableList(),
                 altMemoryConnected = mcpServerManager.isConnected("alt_memory"),
+                altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
             )
         }
     }

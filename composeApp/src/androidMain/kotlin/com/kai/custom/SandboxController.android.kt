@@ -136,15 +136,17 @@ class AndroidSandboxController : SandboxController {
 
         is SandboxState.Error -> {
             val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
+            val msg = state.message
             SandboxStatus(
                 installed = rootfsExists,
                 ready = rootfsExists,
                 error = true,
-                statusText = "Error: ${state.message}",
+                statusText = "Error: $msg",
                 diskUsageMB = cachedDiskUsageMB,
                 // Force packagesInstalled=false so the Install Packages button
                 // reappears and the user can retry after a failed install.
                 packagesInstalled = false,
+                needsReset = msg.contains("dpkg", ignoreCase = true) || msg.contains("sub-process", ignoreCase = true),
             )
         }
     }
@@ -177,7 +179,8 @@ class AndroidSandboxController : SandboxController {
 
     override suspend fun executeCommand(command: String, sessionId: String, useRoot: Boolean, timeoutSeconds: Long): String = withContext(Dispatchers.IO) {
         val state = sandboxManager.state.value
-        if (state !is SandboxState.Ready) return@withContext SANDBOX_NOT_READY
+        val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
+        if (state !is SandboxState.Ready && !(state is SandboxState.Error && rootfsExists)) return@withContext SANDBOX_NOT_READY
 
         if (!useRoot) {
             val executor = ProotExecutor(
@@ -241,7 +244,8 @@ class AndroidSandboxController : SandboxController {
         sessionId: String,
     ): CommandHandle {
         val state = sandboxManager.state.value
-        if (state !is SandboxState.Ready) {
+        val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
+        if (state !is SandboxState.Ready && !(state is SandboxState.Error && rootfsExists)) {
             onStderr(SANDBOX_NOT_READY)
             return NoOpCommandHandle
         }

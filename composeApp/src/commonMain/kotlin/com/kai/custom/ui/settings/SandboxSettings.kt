@@ -128,7 +128,11 @@ internal fun SandboxSettingsCard(
                         Text(stringResource(Res.string.settings_sandbox_install))
                     }
                 } else {
-                    if (!sandboxState.sandboxPackagesInstalled) {
+                    if (sandboxState.needsReset) {
+                        Button(onClick = { showResetDialog = true }, modifier = Modifier.handCursor()) {
+                            Text("Reset — dpkg broken")
+                        }
+                    } else if (!sandboxState.sandboxPackagesInstalled) {
                         OutlinedButton(onClick = onInstallPackages, modifier = Modifier.handCursor()) {
                             Text(stringResource(Res.string.settings_sandbox_install_packages))
                         }

@@ -39,7 +39,7 @@ class LinuxSandboxManager(
 
     val rootfsPath: String get() = File(sandboxDir, "rootfs").absolutePath
 
-    // Sandbox /root is bind-mounted from externally-visible app storage so files
+    // Sandbox /sdcard is bind-mounted from externally-visible app storage so files
     // produced by the agent can be opened via FileProvider Intents. Computed
     // lazily on first access; mkdirs and the one-time legacy-home migration run
     // once per process, then the cached path is reused for every shell call.
@@ -300,12 +300,12 @@ class LinuxSandboxManager(
         val packages = if (distro == "ubuntu") {
             listOf(
                 "bash", "apt-utils", "curl", "wget", "git", "jq", "python3", "python3-pip", "nodejs",
-                "openssh-client", "lftp", "rsync",
+                "openssh-client", "lftp", "rsync", "ca-certificates",
             )
         } else {
             listOf(
                 "bash", "curl", "wget", "git", "jq", "python3", "py3-pip", "nodejs",
-                "openssh-client", "lftp", "rsync",
+                "openssh-client", "lftp", "rsync", "ca-certificates",
             )
         }
         val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
@@ -318,12 +318,27 @@ class LinuxSandboxManager(
                 val executor = createProotExecutor()
                 downloader.fixAptDirectories(rootfsDir)
 
+                // Kill stale dpkg processes and remove lock files from interrupted installs
+                if (distro == "ubuntu") {
+                    executor.execute(
+                        "for pid in /proc/[0-9]*/cmdline; do " +
+                        "  grep -q dpkg \"\$pid\" 2>/dev/null && " +
+                        "  kill -9 \$(echo \"\$pid\" | cut -d/ -f3) 2>/dev/null || true; " +
+                        "done; " +
+                        "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                        "/var/lib/apt/lists/lock /var/cache/apt/archives/lock; " +
+                        "dpkg --configure -a 2>/dev/null",
+                        timeoutSeconds = 30,
+                    )
+                }
+
                 _state.value = SandboxState.Installing("Updating package lists...")
 
+                val updateTimeout = if (distro == "ubuntu") 180L else 120L
                 var updated = false
                 for (mirror in downloader.getMirrors(distro, arch)) {
                     downloader.writeRepositories(rootfsDir, mirror, distro)
-                    val result = executor.execute(updateCmd, timeoutSeconds = 120)
+                    val result = executor.execute(updateCmd, timeoutSeconds = updateTimeout)
                     if (result["success"] as? Boolean == true) {
                         updated = true
                         break
@@ -333,7 +348,7 @@ class LinuxSandboxManager(
                     for (mirror in downloader.getMirrors(distro, arch)) {
                         val httpMirror = mirror.replace("https://", "http://")
                         downloader.writeRepositories(rootfsDir, httpMirror, distro)
-                        val result = executor.execute(updateCmd, timeoutSeconds = 180)
+                        val result = executor.execute(updateCmd, timeoutSeconds = updateTimeout + 60)
                         if (result["success"] as? Boolean == true) {
                             updated = true
                             break
@@ -344,20 +359,27 @@ class LinuxSandboxManager(
                     android.util.Log.w("LinuxSandbox", "$updateCmd timed out or failed — proceeding with cached package lists")
                 }
 
-                for (pkg in packages) {
+                // Ubuntu: install all packages in one apt command (faster dep-resolve, single trigger run).
+                // Alpine: install sequentially (apk is fast, better error isolation).
+                if (distro == "ubuntu") {
                     ensureActive()
-                    _state.value = SandboxState.Installing("Installing $pkg...")
-                    var result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
+                    _state.value = SandboxState.Installing("Installing packages (Ubuntu): ${packages.joinToString(", ")}")
+                    var result = executor.execute(
+                        "$installCmdPrefix ${packages.joinToString(" ")}",
+                        timeoutSeconds = 300,
+                    )
                     runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
                     ensureActive()
                     if (result["success"] as? Boolean != true) {
                         val stderr = result["stderr"] as? String ?: ""
-                        // If dpkg error on Ubuntu, try fixing and retry once
-                        if (distro == "ubuntu" && (stderr.contains("dpkg") || stderr.contains("sub-process"))) {
-                            android.util.Log.w("LinuxSandbox", "dpkg error for $pkg — running dpkg --configure -a and retrying")
+                        if (stderr.contains("dpkg") || stderr.contains("sub-process")) {
+                            android.util.Log.w("LinuxSandbox", "dpkg error on Ubuntu bulk install — running dpkg --configure -a and retrying")
                             executor.execute("dpkg --configure -a", timeoutSeconds = 60)
                             ensureActive()
-                            result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
+                            result = executor.execute(
+                                "$installCmdPrefix ${packages.joinToString(" ")}",
+                                timeoutSeconds = 300,
+                            )
                             runCatching { executor.execute("dpkg --configure -a", timeoutSeconds = 60) }
                             ensureActive()
                         }
@@ -366,15 +388,27 @@ class LinuxSandboxManager(
                         val stderr = result["stderr"] as? String ?: ""
                         val stdout = result["stdout"] as? String ?: ""
                         val error = result["error"] as? String ?: ""
-                        val timedOut = result["timed_out"] as? Boolean ?: false
                         val exitCode = result["exit_code"] as? Int ?: -1
-                        android.util.Log.w("LinuxSandbox", "Failed to install $pkg: exit=$exitCode timedOut=$timedOut error=$error stdout=$stdout stderr=$stderr")
-                        if (pkg == "apt-utils") {
-                            android.util.Log.w("LinuxSandbox", "apt-utils failure is non-fatal (debconf circular dep) — continuing")
-                            continue
-                        }
-                        _state.value = SandboxState.Error("Failed to install $pkg: ${stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)}")
+                        android.util.Log.w("LinuxSandbox", "Ubuntu bulk install failed: exit=$exitCode error=$error stdout=$stdout stderr=$stderr")
+                        _state.value = SandboxState.Error("Failed to install packages: ${stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)}")
                         return@launch
+                    }
+                } else {
+                    for (pkg in packages) {
+                        ensureActive()
+                        _state.value = SandboxState.Installing("Installing $pkg...")
+                        val result = executor.execute("$installCmdPrefix $pkg", timeoutSeconds = 120)
+                        ensureActive()
+                        if (result["success"] as? Boolean != true) {
+                            val stderr = result["stderr"] as? String ?: ""
+                            val stdout = result["stdout"] as? String ?: ""
+                            val error = result["error"] as? String ?: ""
+                            val timedOut = result["timed_out"] as? Boolean ?: false
+                            val exitCode = result["exit_code"] as? Int ?: -1
+                            android.util.Log.w("LinuxSandbox", "Failed to install $pkg: exit=$exitCode timedOut=$timedOut error=$error stdout=$stdout stderr=$stderr")
+                            _state.value = SandboxState.Error("Failed to install $pkg: ${stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)}")
+                            return@launch
+                        }
                     }
                 }
                 runCatching { SshConfigManager(java.io.File(homePath)).ensureDefaults() }
@@ -430,6 +464,14 @@ class LinuxSandboxManager(
         return total / (1024 * 1024)
     }
 
-    fun arePackagesInstalled(): Boolean = File(rootfsPath, "usr/bin/python3").exists() &&
-        File(rootfsPath, "usr/bin/ssh").exists()
+    fun arePackagesInstalled(): Boolean {
+        val bins = listOf(
+            "usr/bin/bash", "usr/bin/curl", "usr/bin/wget", "usr/bin/git",
+            "usr/bin/jq", "usr/bin/python3", "usr/bin/pip3", "usr/bin/node",
+            "usr/bin/ssh", "usr/bin/lftp", "usr/bin/rsync",
+        )
+        val allBins = bins.all { File(rootfsPath, it).exists() }
+        val caCerts = File(rootfsPath, "etc/ssl/certs/ca-certificates.crt").exists()
+        return allBins && caCerts
+    }
 }

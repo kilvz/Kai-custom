@@ -143,8 +143,8 @@ class ProotExecutor(
     private fun storageBind(): String? {
         if (!sandboxStorageMountEnabled) return null
         return when {
-            File("/storage/emulated/0").exists() -> "--bind=/storage/emulated/0:/root"
-            File("/storage/self/primary").exists() -> "--bind=/storage/self/primary:/root"
+            File("/storage/emulated/0").exists() -> "--bind=/storage/emulated/0:/sdcard"
+            File("/storage/self/primary").exists() -> "--bind=/storage/self/primary:/sdcard"
             else -> null
         }
     }

@@ -13,6 +13,7 @@ data class SandboxStatus(
     val diskUsageMB: Long = 0,
     val packagesInstalled: Boolean = false,
     val error: Boolean = false,
+    val needsReset: Boolean = false,
 )
 
 interface CommandHandle {
