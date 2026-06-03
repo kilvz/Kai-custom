@@ -197,6 +197,7 @@ class ProotExecutor(
             "LD_LIBRARY_PATH=$libDir",
             "PROOT_TMP_DIR=$tmpPath",
             "PROOT_LOADER=$loaderPath",
+            "DEBIAN_FRONTEND=noninteractive",
         )
         return baseEnv + extraEnv.map { (k, v) -> "$k=$v" }.toTypedArray()
     }
