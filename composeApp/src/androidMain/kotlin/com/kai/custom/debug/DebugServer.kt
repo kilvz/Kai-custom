@@ -54,7 +54,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
+import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
+import io.ktor.server.response.header
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -882,6 +884,37 @@ class DebugServer(
                     val timeout = call.request.queryParameters["timeout"]?.toLongOrNull() ?: 60L
                     val output = withContext(Dispatchers.Default) { sandboxController.executeCommand(command, useRoot = useRoot, timeoutSeconds = timeout) }
                     call.respondText(output, ContentType.Text.Plain)
+                }
+
+                post("/sandbox/backup") {
+                    val err = auth(call) ?: return@post
+                    val result = withContext(Dispatchers.Default) { sandboxController.backupSandbox() }
+                    result.onSuccess { path ->
+                        call.respondText(json.encodeToString(buildJsonObject {
+                            put("success", JsonPrimitive(true))
+                            put("path", JsonPrimitive(path))
+                        }), ContentType.Application.Json)
+                    }.onFailure { e ->
+                        call.respondText(json.encodeToString(ErrorResponse("Backup failed: ${e.message}")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
+                post("/sandbox/import") {
+                    val err = auth(call) ?: return@post
+                    val bytes = try { call.receive<ByteArray>() } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing or invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    if (bytes.isEmpty()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Empty body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val result = withContext(Dispatchers.Default) { sandboxController.importSandbox(bytes) }
+                    result.onSuccess {
+                        call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
+                    }.onFailure { e ->
+                        call.respondText(json.encodeToString(ErrorResponse("Import failed: ${e.message}")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
                 }
 
                 post("/alt-memory/install") {

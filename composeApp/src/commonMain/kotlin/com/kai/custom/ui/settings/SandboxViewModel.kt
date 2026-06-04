@@ -138,4 +138,28 @@ class SandboxViewModel(
         dataRepository.setSandboxDistro(distro)
         _state.update { it.copy(sandboxDistro = distro) }
     }
+
+    fun onBackupSandbox() {
+        viewModelScope.launch {
+            _state.update { it.copy(isWorking = true, sandboxStatusText = "Backing up sandbox...") }
+            val result = sandboxController.backupSandbox()
+            result.onSuccess { path ->
+                _state.update { it.copy(isWorking = false, sandboxStatusText = "Backup saved to $path") }
+            }.onFailure { e ->
+                _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusText = "Backup failed: ${e.message}") }
+            }
+        }
+    }
+
+    fun onImportSandbox(data: ByteArray) {
+        viewModelScope.launch {
+            _state.update { it.copy(isWorking = true, sandboxStatusText = "Importing sandbox...") }
+            val result = sandboxController.importSandbox(data)
+            result.onSuccess {
+                _state.update { it.copy(isWorking = false, sandboxStatusText = "Sandbox restored") }
+            }.onFailure { e ->
+                _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusText = "Import failed: ${e.message}") }
+            }
+        }
+    }
 }

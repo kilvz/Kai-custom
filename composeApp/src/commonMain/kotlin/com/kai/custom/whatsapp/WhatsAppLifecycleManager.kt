@@ -45,6 +45,7 @@ class WhatsAppLifecycleManager(
 
     suspend fun setupAndStart() {
         if (started) return
+        writeBridgeJs()
         if (appSettings.isWhatsAppInstalled()) {
             val check = sandboxController.executeCommand(
                 command = "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
@@ -143,34 +144,42 @@ class WhatsAppLifecycleManager(
         }
     }
 
-    private suspend fun installIfNeeded(): Boolean {
-        val check = sandboxController.executeCommand(
-            command = "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-        )
-        if (check.trim() == "1") return true
+    private suspend fun writeBridgeJs() {
+        val bridgeDir = "/root/whatsapp-bridge"
 
         sandboxController.executeCommand(
-            command = "mkdir -p /root/whatsapp-bridge",
+            command = "mkdir -p $bridgeDir",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 5,
         )
 
         sandboxController.executeCommand(
-            command = "cat > /root/whatsapp-bridge/bridge.js.b64 << 'ENDB64'\n${BRIDGE_JS_BASE64}\nENDB64",
+            command = "cat > $bridgeDir/bridge.js.b64 << 'ENDB64'\n${BRIDGE_JS_BASE64}\nENDB64",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 30,
         )
 
         sandboxController.executeCommand(
-            command = "base64 -d /root/whatsapp-bridge/bridge.js.b64 > /root/whatsapp-bridge/bridge.js && rm /root/whatsapp-bridge/bridge.js.b64",
+            command = "base64 -d $bridgeDir/bridge.js.b64 > $bridgeDir/bridge.js && rm $bridgeDir/bridge.js.b64",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 30,
         )
+    }
+
+    private suspend fun installIfNeeded(): Boolean {
+        val bridgeDir = "/root/whatsapp-bridge"
+
+        writeBridgeJs()
+
+        val npmOk = sandboxController.executeCommand(
+            command = "cd $bridgeDir && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+        )
+        if (npmOk.trim() == "1") return true
 
         val nodeInstallCmd = buildString {
             append("NODE_VER=v22.14.0; ")
@@ -193,14 +202,14 @@ class WhatsAppLifecycleManager(
         )
 
         sandboxController.executeCommand(
-            command = "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
+            command = "cd $bridgeDir && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 180,
         )
 
         val verify = sandboxController.executeCommand(
-            command = "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
+            command = "cd $bridgeDir && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
         )

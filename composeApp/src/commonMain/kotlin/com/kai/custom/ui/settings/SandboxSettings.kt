@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -37,6 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.sandbox.SandboxProgressRow
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.launch
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.settings_sandbox_cancel
 import kai.composeapp.generated.resources.settings_sandbox_description
@@ -58,11 +63,24 @@ internal fun SandboxSettingsCard(
     onCancelSandbox: () -> Unit,
     onResetSandbox: () -> Unit,
     onInstallPackages: () -> Unit,
-    onInstallAltMemory: () -> Unit = {},
+                onInstallAltMemory: () -> Unit = {},
     onUpdateAltMemory: () -> Unit = {},
+    onBackupSandbox: () -> Unit = {},
+    onImportSandbox: (ByteArray) -> Unit = {},
     onDistroChanged: (String) -> Unit = {},
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val importFilePicker = rememberFilePickerLauncher(
+        type = FileKitType.File(extensions = listOf("tar.gz", "tgz", "tar")),
+    ) { file ->
+        if (file != null) {
+            scope.launch {
+                val bytes = file.readBytes()
+                onImportSandbox(bytes)
+            }
+        }
+    }
     SettingsCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -143,7 +161,7 @@ internal fun SandboxSettingsCard(
                             Text("Alt-Memory")
                         }
                     } else {
-                        OutlinedButton(onClick = onUpdateAltMemory, modifier = Modifier.handCursor()) {
+                    OutlinedButton(onClick = onUpdateAltMemory, modifier = Modifier.handCursor()) {
                             Text("Update Alt-Memory")
                         }
                     }
@@ -235,6 +253,16 @@ internal fun SandboxSettingsCard(
                             color = Color(0xFF424242),
                         )
                     }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onBackupSandbox, modifier = Modifier.handCursor()) {
+                    Text("Export")
+                }
+                OutlinedButton(onClick = { importFilePicker.launch() }, modifier = Modifier.handCursor()) {
+                    Text("Import")
                 }
             }
         }

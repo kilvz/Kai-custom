@@ -644,6 +644,70 @@ class AndroidSandboxController : SandboxController {
         android.util.Log.i("SandboxController", "stopWhatsApp called")
         whatsAppLifecycle.stop()
     }
+
+    override suspend fun backupSandbox(outputPath: String?): Result<String> = withContext(Dispatchers.IO) {
+        val rootfs = File(sandboxManager.rootfsPath)
+        if (!rootfs.isDirectory) {
+            return@withContext Result.failure(IllegalStateException("Sandbox rootfs not found at ${rootfs.path}"))
+        }
+        val dest = outputPath?.let { File(it) }
+            ?: File(context.getExternalFilesDir(null), "sandbox-backup")
+        dest.mkdirs()
+        val tarFile = File(dest, "sandbox-rootfs-${System.currentTimeMillis()}.tar.gz")
+        try {
+            val process = ProcessBuilder(
+                "tar", "-czf", tarFile.absolutePath,
+                "-C", rootfs.parentFile.absolutePath,
+                rootfs.name,
+            ).redirectErrorStream(true).start()
+            val exitCode = process.waitFor()
+            if (exitCode != 0) {
+                val err = process.inputStream.bufferedReader().readText()
+                return@withContext Result.failure(IOException("tar failed (exit=$exitCode): $err"))
+            }
+            android.util.Log.i("SandboxController", "Sandbox backed up to ${tarFile.absolutePath} (${tarFile.length()} bytes)")
+            Result.success(tarFile.absolutePath)
+        } catch (e: Exception) {
+            android.util.Log.e("SandboxController", "Backup failed", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun importSandbox(data: ByteArray): Result<Unit> = withContext(Dispatchers.IO) {
+        val tmpDir = File(sandboxManager.rootfsPath).parentFile ?: return@withContext Result.failure(IllegalStateException("Cannot resolve rootfs parent"))
+        tmpDir.mkdirs()
+        val tmpFile = File(tmpDir, "import_${System.currentTimeMillis()}.tar.gz")
+        try {
+            tmpFile.writeBytes(data)
+            val rootfs = File(sandboxManager.rootfsPath)
+            val rootfsParent = rootfs.parentFile ?: return@withContext Result.failure(IllegalStateException("Cannot resolve rootfs parent"))
+            if (rootfs.exists()) {
+                android.util.Log.i("SandboxController", "Removing existing rootfs at ${rootfs.path}")
+                rootfs.deleteRecursively()
+            }
+            rootfsParent.mkdirs()
+            val process = ProcessBuilder(
+                "tar", "-xzf", tmpFile.absolutePath,
+                "-C", rootfsParent.absolutePath,
+            ).redirectErrorStream(true).start()
+            val exitCode = process.waitFor()
+            if (exitCode != 0) {
+                val err = process.inputStream.bufferedReader().readText()
+                return@withContext Result.failure(IOException("tar extract failed (exit=$exitCode): $err"))
+            }
+            if (!rootfs.isDirectory) {
+                return@withContext Result.failure(IOException("Extracted rootfs not found at ${rootfs.path}"))
+            }
+            android.util.Log.i("SandboxController", "Sandbox restored from ${tmpFile.name}")
+            sandboxManager.onRootfsRestored()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("SandboxController", "Import failed", e)
+            Result.failure(e)
+        } finally {
+            tmpFile.delete()
+        }
+    }
 }
 
 private fun File.toEntry(parent: String): SandboxFileEntry = SandboxFileEntry(

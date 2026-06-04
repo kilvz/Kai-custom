@@ -1,5 +1,30 @@
 # Changelog
 
+## v3.10.0
+
+### WhatsApp — Persistent History & Alt-Memory Direct Store
+- feat: `get_message_history` tool — persistent message history file (`/tmp/whatsapp-history.json`, max 200 entries), survives `clear_unread_messages`
+- feat: bridge.js stores new messages directly to alt-memory via `add_entity` MCP call (cross-persona access)
+- feat: `sender` field (phone number) in all message entries so AI knows who sent each message
+- feat: bridge.js always deployed on every app start (not just fresh install) — APK updates immediately get the latest bridge.js
+- feat: `sender` field added to `WhatsAppPendingMessage` and `storeMessageAsMemory()` content
+
+### Alt-Memory — Backend & Embedder Display Fix
+- fix: `refreshAltMemoryInfo()` now parses JSON response from `get_backend`/`get_default_embedder` MCP tools, displays clean values ("faiss", model name) instead of raw JSON strings
+- feat: backend and embedder tools confirmed to exist in alt-memory MCP server (were incorrectly assumed missing)
+
+### Sandbox — Backup & Import
+- feat: Export/Import buttons in sandbox settings, placed below "Run sandbox as root" toggle
+- feat: `POST /sandbox/backup` Debug API endpoint — triggers backup on device, returns path
+- feat: `POST /sandbox/import` Debug API endpoint — accepts raw tar.gz body, restores rootfs
+- feat: file picker integration for Import (tar.gz/tgz/tar via FileKit)
+- fix: `backupSandbox()` directory creation — `dest.mkdirs()` instead of `dest.parentFile?.mkdirs()`
+- change: `importSandbox()` interface changed from file path to `ByteArray`, Android impl writes temp file
+
+### Infrastructure
+- feat: `writeBridgeJs()` extracted as separate function, called from both `installIfNeeded()` and `setupAndStart()`
+- fix: AGENTS.md verify command corrected, assemble tasks documented
+
 ## v3.9.0
 
 ### WhatsApp — Reply Mode & Read Receipts

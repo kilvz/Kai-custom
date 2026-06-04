@@ -93,6 +93,12 @@ class LinuxSandboxManager(
         }
     }
 
+    /** Called after a rootfs tarball import — re-validates and transitions to Ready. */
+    fun onRootfsRestored() {
+        checkExistingInstallation()
+        closeAllShells()
+    }
+
     private fun getLinuxArch(): String {
         val abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "arm64-v8a"
         return when {

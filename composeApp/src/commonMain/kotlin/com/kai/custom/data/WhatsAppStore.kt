@@ -8,6 +8,7 @@ data class WhatsAppPendingMessage(
     val messageId: String,
     val text: String,
     val fromName: String,
+    val sender: String = "",
     val fromMe: Boolean = false,
     val timestamp: Long = 0,
 )

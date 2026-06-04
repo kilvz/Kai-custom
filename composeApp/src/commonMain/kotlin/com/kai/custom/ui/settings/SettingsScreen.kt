@@ -356,6 +356,8 @@ fun SettingsScreen(
         onInstallAltMemory = sandboxViewModel::onInstallAltMemory,
         onUpdateAltMemory = sandboxViewModel::onUpdateAltMemory,
         onDistroChanged = sandboxViewModel::onDistroChanged,
+        onBackupSandbox = sandboxViewModel::onBackupSandbox,
+        onImportSandbox = sandboxViewModel::onImportSandbox,
         sshState = sshState,
         sshViewModel = sshViewModel,
         onNavigateBack = onNavigateBack,
@@ -378,6 +380,8 @@ fun SettingsScreenContent(
     onInstallAltMemory: () -> Unit = {},
     onUpdateAltMemory: () -> Unit = {},
     onDistroChanged: (String) -> Unit = {},
+    onBackupSandbox: () -> Unit = {},
+    onImportSandbox: (ByteArray) -> Unit = {},
     sshState: SshUiState = SshUiState(),
     sshViewModel: SshViewModel? = null,
     onNavigateBack: () -> Unit = {},
@@ -645,6 +649,8 @@ fun SettingsScreenContent(
                                     onInstallAltMemory = onInstallAltMemory,
                                     onUpdateAltMemory = onUpdateAltMemory,
                                     onDistroChanged = onDistroChanged,
+                                    onBackupSandbox = onBackupSandbox,
+                                    onImportSandbox = onImportSandbox,
                                 )
                             }
                         }

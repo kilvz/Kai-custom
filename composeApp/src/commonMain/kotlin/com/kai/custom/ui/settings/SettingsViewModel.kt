@@ -67,6 +67,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -607,8 +609,10 @@ class SettingsViewModel(
         if (!mcpServerManager.isConnected("alt_memory")) return
         try {
             val client = mcpServerManager.getClient("alt_memory") ?: return
-            val backend = client.callTool("get_backend", buildJsonObject { })
-            val embedder = client.callTool("get_default_embedder", buildJsonObject { })
+            val backendRaw = client.callTool("get_backend", buildJsonObject { })
+            val embedderRaw = client.callTool("get_default_embedder", buildJsonObject { })
+            val backend = try { Json.parseToJsonElement(backendRaw).jsonObject["backend"]?.jsonPrimitive?.content } catch (_: Exception) { backendRaw }
+            val embedder = try { Json.parseToJsonElement(embedderRaw).jsonObject["default_embedder"]?.jsonPrimitive?.content } catch (_: Exception) { embedderRaw }
             _state.update { it.copy(altMemoryBackend = backend, altMemoryEmbedder = embedder) }
         } catch (_: Exception) { }
     }

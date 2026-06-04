@@ -106,9 +106,10 @@ class WhatsAppPoller(
 
     private suspend fun storeMessageAsMemory(msg: WhatsAppPendingMessage) {
         try {
+            val phone = msg.sender.ifBlank { msg.chatId.split("@")[0] }
             memoryStore.store(
                 key = "whatsapp_msg_${msg.chatId}_${msg.messageId}",
-                content = "WhatsApp message from ${msg.fromName} (${msg.chatId}): ${msg.text}",
+                content = "WhatsApp message from ${msg.fromName} (phone: $phone): ${msg.text}",
                 category = MemoryCategory.GENERAL,
                 source = "whatsapp",
             )

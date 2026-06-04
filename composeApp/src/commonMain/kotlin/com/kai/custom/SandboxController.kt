@@ -107,6 +107,12 @@ interface SandboxController {
     suspend fun stopWhatsApp() {}
     suspend fun installWhatsAppBridge(): Boolean = false
     suspend fun updateWhatsAppBridge(): Boolean = false
+
+    /** Create a gzipped tarball of the rootfs at [outputPath], returns the path on success. */
+    suspend fun backupSandbox(outputPath: String? = null): Result<String> = Result.failure(NotImplementedError())
+
+    /** Restore rootfs from a gzipped tarball [data]. Deletes current rootfs first. */
+    suspend fun importSandbox(data: ByteArray): Result<Unit> = Result.failure(NotImplementedError())
 }
 
 expect fun createSandboxController(): SandboxController
