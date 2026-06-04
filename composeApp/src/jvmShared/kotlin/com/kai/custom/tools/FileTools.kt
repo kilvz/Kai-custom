@@ -354,9 +354,9 @@ object GrepTool : Tool {
 private fun resolvePath(path: String): String {
     val clean = path.trimStart('/')
     return when {
-        clean.startsWith("sdcard/") || clean == "sdcard" -> clean
-        clean.startsWith("root/") -> clean
-        else -> "root/$clean"
+        clean.startsWith("sdcard/") || clean == "sdcard" -> "/$clean"
+        clean.startsWith("root/") -> "/$clean"
+        else -> "/root/$clean"
     }
 }
 

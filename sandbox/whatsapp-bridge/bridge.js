@@ -1,4 +1,4 @@
-import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, makeInMemoryStore } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } from '@whiskeysockets/baileys';
 import express from 'express';
 import pino from 'pino';
 import QRCode from 'qrcode';
@@ -48,10 +48,8 @@ function clearUnread() {
 async function initBaileys() {
   const { version } = await fetchLatestBaileysVersion();
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-  store = makeInMemoryStore({ logger });
-
   const cfg = loadConfig();
-  const browser = cfg.browser || ['Kai-custom', 'Chrome', '3.8.0'];
+  const browser = cfg.browser || ['Windows', 'Chrome', '130.0.0.0'];
   const markOnline = cfg.markOnlineOnConnect !== undefined ? cfg.markOnlineOnConnect : true;
   const syncHistory = cfg.syncFullHistory !== undefined ? cfg.syncFullHistory : false;
   const linkPreviews = cfg.generateHighQualityLinkPreview !== undefined ? cfg.generateHighQualityLinkPreview : true;
@@ -69,7 +67,6 @@ async function initBaileys() {
     shouldSyncHistoryMsg: () => shouldSync,
   });
 
-  store.bind(sock.ev);
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('connection.update', async (update) => {
@@ -155,6 +152,22 @@ app.post('/mcp', async (req, res) => {
   const body = req.body;
   const { id, method, params } = body;
 
+  if (method === 'initialize') {
+    return res.json({
+      jsonrpc: '2.0',
+      id,
+      result: {
+        protocolVersion: '2024-11-05',
+        capabilities: { tools: {} },
+        serverInfo: { name: 'whatsapp-bridge', version: '1.0.0' },
+      },
+    });
+  }
+
+  if (method === 'notifications/initialized') {
+    return res.status(200).end();
+  }
+
   if (method === 'tools/list') {
     return res.json({
       jsonrpc: '2.0',
@@ -201,6 +214,17 @@ app.post('/mcp', async (req, res) => {
                 limit: { type: 'number', description: 'Max messages to return (default 30)' },
               },
               required: ['chat_id'],
+            },
+          },
+          {
+            name: 'request_pairing_code',
+            description: 'Request a pairing code for phone-number-based WhatsApp authentication (alternative to QR code)',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                phone: { type: 'string', description: 'Phone number with country code, no + or spaces (e.g. 628123456789)' },
+              },
+              required: ['phone'],
             },
           },
           {
@@ -279,6 +303,20 @@ app.post('/mcp', async (req, res) => {
             id: m.key.id,
           }));
           content = [{ type: 'text', text: JSON.stringify(sorted) }];
+          break;
+        }
+
+        case 'request_pairing_code': {
+          if (connected) {
+            return res.json({ jsonrpc: '2.0', id, error: { code: -32000, message: 'Already authenticated. Use restart first.' } });
+          }
+          const phone = args.phone || '';
+          if (!phone) {
+            return res.json({ jsonrpc: '2.0', id, error: { code: -32000, message: 'Phone number required' } });
+          }
+          const code = await sock.requestPairingCode(phone);
+          const formatted = code.match(/.{1,4}/g)?.join('-') || code;
+          content = [{ type: 'text', text: JSON.stringify({ code, formatted }) }];
           break;
         }
 

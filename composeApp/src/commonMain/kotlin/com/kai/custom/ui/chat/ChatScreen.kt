@@ -134,6 +134,10 @@ import nl.marc_apps.tts.errors.TextToSpeechSynthesisInterruptedError
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.compose.koinInject
+import com.kai.custom.data.AppSettings
+import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.PersonaManager
 
 @Composable
 fun ChatScreen(
@@ -146,6 +150,14 @@ fun ChatScreen(
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
+    val appSettings: AppSettings = koinInject()
+    val personaManager = remember { PersonaManager(appSettings) }
+    val activePersona = remember { personaManager.getActivePersona() }
+    val isAssistantOrOperator = activePersona.behaviorStyle == BehaviorStyle.ASSISTANT ||
+        activePersona.behaviorStyle == BehaviorStyle.OPERATOR
+    val hideThinking = appSettings.getHideThinking() || !isAssistantOrOperator
+    val expandThinking = appSettings.getExpandThinking()
+
     ChatScreenContent(
         uiState = uiState,
         textToSpeech = textToSpeech,
@@ -153,6 +165,8 @@ fun ChatScreen(
         isSandboxAvailable = isSandboxAvailable,
         isSshAvailable = isSshAvailable,
         navigationTabBar = navigationTabBar,
+        hideThinking = hideThinking,
+        expandThinking = expandThinking,
     )
 }
 
@@ -167,6 +181,8 @@ fun ChatScreenContent(
     initialSandboxOpen: Boolean = false,
     previewSandboxState: SandboxUiState? = null,
     previewSandboxLines: ImmutableList<TerminalLine> = persistentListOf(),
+    hideThinking: Boolean = false,
+    expandThinking: Boolean = false,
 ) {
     if (uiState.isInteractiveMode && !uiState.isRestoring) {
         InteractiveModeScreen(uiState = uiState)
@@ -181,6 +197,8 @@ fun ChatScreenContent(
             initialSandboxOpen = initialSandboxOpen,
             previewSandboxState = previewSandboxState,
             previewSandboxLines = previewSandboxLines,
+            hideThinking = hideThinking,
+            expandThinking = expandThinking,
         )
     }
 }
@@ -475,6 +493,8 @@ private fun ChatModeScreen(
     initialSandboxOpen: Boolean = false,
     previewSandboxState: SandboxUiState? = null,
     previewSandboxLines: ImmutableList<TerminalLine> = persistentListOf(),
+    hideThinking: Boolean = false,
+    expandThinking: Boolean = false,
 ) {
     var showHistorySheet by remember { mutableStateOf(false) }
     var isSandboxOpen by rememberSaveable { mutableStateOf(initialSandboxOpen) }
@@ -881,6 +901,8 @@ private fun ChatModeScreen(
                                                             null
                                                         },
                                                         reasoningSegments = reasoningSegmentsByAssistantId[history.id] ?: persistentListOf(),
+                                                        hideThinking = hideThinking,
+                                                        expandThinking = expandThinking,
                                                     )
                                                     if (history.fallbackServiceName != null) {
                                                         androidx.compose.material3.Text(
@@ -904,6 +926,8 @@ private fun ChatModeScreen(
                                                         setIsSpeaking = {},
                                                         reasoningSegments = reasoningSegmentsByAssistantId[history.id]
                                                             ?: persistentListOf(history.content),
+                                                        hideThinking = hideThinking,
+                                                        expandThinking = expandThinking,
                                                     )
                                                 }
                                             }

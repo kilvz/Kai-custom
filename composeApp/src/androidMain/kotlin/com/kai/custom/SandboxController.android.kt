@@ -243,6 +243,28 @@ class AndroidSandboxController : SandboxController {
         }
     }
 
+    override suspend fun executeCommandStructured(
+        command: String,
+        sessionId: String,
+        useRoot: Boolean,
+        timeoutSeconds: Long,
+    ): ExecResult = withContext(Dispatchers.IO) {
+        val state = sandboxManager.state.value
+        val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
+        if (state !is SandboxState.Ready && !(state is SandboxState.Error && rootfsExists)) {
+            return@withContext ExecResult(error = "Sandbox not ready")
+        }
+        val executor = sandboxManager.createProotExecutor()
+        val result = executor.execute(command, timeoutSeconds = timeoutSeconds)
+        ExecResult(
+            success = result["success"] as? Boolean == true,
+            stdout = result["stdout"] as? String ?: "",
+            stderr = result["stderr"] as? String ?: "",
+            exitCode = result["exit_code"] as? Int,
+            error = result["error"] as? String,
+        )
+    }
+
     override suspend fun executeCommandStreaming(
         command: String,
         onStdout: (String) -> Unit,
@@ -530,6 +552,8 @@ class AndroidSandboxController : SandboxController {
         return whatsAppPipeline(label = "Updating")
     }
 
+    private var lastWhatsAppLog: String? = null
+
     private suspend fun whatsAppPipeline(label: String): Boolean {
         val current = sandboxManager.state.value
         if (current !is SandboxState.Ready) {
@@ -541,45 +565,72 @@ class AndroidSandboxController : SandboxController {
             working: Boolean = false,
             error: Boolean = false,
             statusText: String = "",
+            lastWhatsAppError: String? = null,
         ) {
             _status.value = _status.value.copy(
                 working = working,
                 error = error,
                 statusText = statusText,
+                lastWhatsAppError = lastWhatsAppError ?: _status.value.lastWhatsAppError,
             )
+        }
+
+        fun logStep(step: String, detail: String = "") {
+            val msg = "[WHATSAPP] $step | $detail"
+            android.util.Log.i("SandboxController", msg)
+            lastWhatsAppLog = msg
+        }
+
+        fun logFail(step: String, result: Map<String, Any?>) {
+            val stderr = (result["stderr"] as? String)?.take(1000) ?: ""
+            val stdout = (result["stdout"] as? String)?.take(1000) ?: ""
+            val error = (result["error"] as? String)?.take(1000) ?: ""
+            val msg = "[WHATSAPP_FAIL] $step | stderr=$stderr | stdout=$stdout | error=$error"
+            android.util.Log.e("SandboxController", msg)
+            lastWhatsAppLog = msg
+            updateStatus(lastWhatsAppError = msg)
         }
 
         return withContext(Dispatchers.IO) {
             val executor = sandboxManager.createProotExecutor()
 
+            logStep("START", "$label WhatsApp bridge")
+
             updateStatus(working = true, statusText = "$label WhatsApp bridge (deploying)…")
 
+            logStep("MKDIR", "creating /root/whatsapp-bridge")
             val mkdir = executor.execute("mkdir -p /root/whatsapp-bridge", timeoutSeconds = 10)
             if (mkdir["success"] as? Boolean != true) {
-                android.util.Log.e("SandboxController", "mkdir failed: ${mkdir["stderr"]}")
+                logFail("mkdir", mkdir)
                 updateStatus(error = true, statusText = "WhatsApp $label: mkdir failed")
                 return@withContext false
             }
 
+            logStep("WRITE_B64", "writing bridge.js.b64")
             val bridgeWrite = executor.execute(
                 "cat > /root/whatsapp-bridge/bridge.js.b64 << 'ENDB64'\n$BRIDGE_JS_BASE64\nENDB64",
                 timeoutSeconds = 30,
             )
             if (bridgeWrite["success"] as? Boolean != true) {
-                android.util.Log.e("SandboxController", "bridge.js.b64 write failed: ${bridgeWrite["stderr"]}")
+                logFail("b64_write", bridgeWrite)
                 updateStatus(error = true, statusText = "WhatsApp $label: bridge.js write failed")
                 return@withContext false
             }
 
+            logStep("DECODE", "decoding bridge.js")
             val bridgeDecode = executor.execute(
                 "base64 -d /root/whatsapp-bridge/bridge.js.b64 > /root/whatsapp-bridge/bridge.js && rm /root/whatsapp-bridge/bridge.js.b64",
                 timeoutSeconds = 30,
             )
             if (bridgeDecode["success"] as? Boolean != true) {
-                android.util.Log.e("SandboxController", "bridge.js decode failed: ${bridgeDecode["stderr"]}")
+                logFail("b64_decode", bridgeDecode)
                 updateStatus(error = true, statusText = "WhatsApp $label: bridge.js decode failed")
                 return@withContext false
             }
+
+            logStep("NODE_CHECK", "checking node version")
+            val nodeVer = executor.execute("node --version 2>&1", timeoutSeconds = 10)
+            logStep("NODE_VERSION", (nodeVer["stdout"] as? String)?.trim() ?: (nodeVer["stderr"] as? String)?.trim() ?: "unknown")
 
             val nodeInstallCmd = buildString {
                 append("NODE_VER=v22.14.0; ")
@@ -599,12 +650,14 @@ class AndroidSandboxController : SandboxController {
                 timeoutSeconds = 120,
             )
             if (nodeDl["success"] as? Boolean != true) {
-                android.util.Log.e("SandboxController", "node download failed: ${nodeDl["stderr"]}")
+                logFail("node_install", nodeDl)
                 updateStatus(error = true, statusText = "WhatsApp $label: node install failed")
                 return@withContext false
             }
+            logStep("NODE_DONE", "node ready")
 
             updateStatus(working = true, statusText = "$label WhatsApp bridge (npm)…")
+            logStep("NPM_INSTALL", "starting npm install (timeout 300s)")
 
             val install = executor.execute(
                 "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
@@ -612,30 +665,35 @@ class AndroidSandboxController : SandboxController {
             )
 
             if (install["success"] as? Boolean != true) {
+                logFail("npm_install", install)
                 val stderr = install["stderr"] as? String ?: ""
                 val stdout = install["stdout"] as? String ?: ""
                 val error = install["error"] as? String ?: ""
                 val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
-                android.util.Log.e("SandboxController", "npm install failed: $msg")
                 updateStatus(error = true, statusText = "WhatsApp $label failed: $msg")
                 return@withContext false
             }
+            logStep("NPM_DONE", "npm install succeeded")
 
             updateStatus(working = true, statusText = "Verifying WhatsApp bridge…")
+            logStep("VERIFY", "checking require('@whiskeysockets/baileys')")
 
             val verify = executor.execute(
-                "node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
+                "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>&1",
                 timeoutSeconds = 30,
             )
             val ok = verify["success"] as? Boolean == true && (verify["stdout"] as? String)?.trim() == "1"
             if (!ok) {
+                logFail("verify", verify)
                 updateStatus(error = true, statusText = "WhatsApp $label: require check failed")
                 return@withContext false
             }
+            logStep("VERIFY_OK", "require check passed")
 
             appSettings.setWhatsAppInstalled(true)
             updateStatus()
-            android.util.Log.i("SandboxController", "WhatsApp ${label.lowercase()}d successfully")
+            logStep("DONE", "WhatsApp ${label.lowercase()}d successfully")
+            lastWhatsAppLog = null
             true
         }
     }

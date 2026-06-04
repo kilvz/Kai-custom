@@ -14,6 +14,7 @@ data class SandboxStatus(
     val packagesInstalled: Boolean = false,
     val error: Boolean = false,
     val needsReset: Boolean = false,
+    val lastWhatsAppError: String? = null,
 )
 
 interface CommandHandle {
@@ -53,6 +54,14 @@ object SandboxSessions {
     fun isPersistable(sessionId: String): Boolean = sessionId != TERMINAL && sessionId != SYSTEM && sessionId != DEFAULT
 }
 
+data class ExecResult(
+    val success: Boolean = false,
+    val stdout: String = "",
+    val stderr: String = "",
+    val exitCode: Int? = null,
+    val error: String? = null,
+)
+
 interface SandboxController {
     val status: StateFlow<SandboxStatus>
 
@@ -68,6 +77,13 @@ interface SandboxController {
         useRoot: Boolean = true,
         timeoutSeconds: Long = 30,
     ): String
+
+    suspend fun executeCommandStructured(
+        command: String,
+        sessionId: String = SandboxSessions.DEFAULT,
+        useRoot: Boolean = true,
+        timeoutSeconds: Long = 30,
+    ): ExecResult = ExecResult(error = "Not implemented")
     suspend fun executeCommandStreaming(
         command: String,
         onStdout: (String) -> Unit,

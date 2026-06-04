@@ -379,6 +379,19 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_DYNAMIC_UI_ENABLED, enabled)
     }
 
+    // Thinking display
+    fun getHideThinking(): Boolean = settings.getBoolean(KEY_HIDE_THINKING, false)
+
+    fun setHideThinking(enabled: Boolean) {
+        settings.putBoolean(KEY_HIDE_THINKING, enabled)
+    }
+
+    fun getExpandThinking(): Boolean = settings.getBoolean(KEY_EXPAND_THINKING, false)
+
+    fun setExpandThinking(enabled: Boolean) {
+        settings.putBoolean(KEY_EXPAND_THINKING, enabled)
+    }
+
     private val _themeModeFlow = MutableStateFlow(loadInitialThemeMode())
     val themeModeFlow: StateFlow<ThemeMode> = _themeModeFlow
 
@@ -509,10 +522,10 @@ class AppSettings(internal val settings: Settings) {
     fun setWhatsAppReadReceipt(enabled: Boolean) { settings.putBoolean(KEY_WHATSAPP_READ_RECEIPT, enabled) }
 
     // Baileys connection config
-    fun getBaileysBrowserName(): String = settings.getString(KEY_BAILEYS_BROWSER_NAME, "Kai-custom")
+    fun getBaileysBrowserName(): String = settings.getString(KEY_BAILEYS_BROWSER_NAME, "Windows")
     fun setBaileysBrowserName(v: String) { settings.putString(KEY_BAILEYS_BROWSER_NAME, v) }
 
-    fun getBaileysBrowserVersion(): String = settings.getString(KEY_BAILEYS_BROWSER_VERSION, "3.8.0")
+    fun getBaileysBrowserVersion(): String = settings.getString(KEY_BAILEYS_BROWSER_VERSION, "130.0.0.0")
     fun setBaileysBrowserVersion(v: String) { settings.putString(KEY_BAILEYS_BROWSER_VERSION, v) }
 
     fun getBaileysMarkOnline(): Boolean = settings.getBoolean(KEY_BAILEYS_MARK_ONLINE, true)
@@ -924,6 +937,8 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
         const val KEY_DYNAMIC_UI_ENABLED = "dynamic_ui_enabled"
+        const val KEY_HIDE_THINKING = "hide_thinking"
+        const val KEY_EXPAND_THINKING = "expand_thinking"
         const val KEY_OLED_MODE_ENABLED = "oled_mode_enabled"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_DAEMON_ENABLED = "daemon_enabled"

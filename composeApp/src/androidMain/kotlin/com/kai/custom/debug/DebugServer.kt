@@ -36,6 +36,7 @@ import com.kai.custom.data.SplinterlandsStatusResponse
 import com.kai.custom.data.StateResponse
 import com.kai.custom.data.TelegramStatusResponse
 import com.kai.custom.data.ThemeMode
+import com.kai.custom.data.ToolCallRequest
 import com.kai.custom.data.ToolCallResponse
 import com.kai.custom.data.ToolExecutor
 import com.kai.custom.data.WakeWordSettings
@@ -67,6 +68,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
 
@@ -756,6 +758,26 @@ class DebugServer(
                     )), ContentType.Application.Json)
                 }
 
+                post("/whatsapp/pair") {
+                    val err = auth(call) ?: return@post
+                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
+                    val phone = try { json.decodeFromString<Map<String, String>>(raw)["phone"] } catch (_: Exception) { null }
+                    if (phone.isNullOrBlank()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing phone number — send {\"phone\":\"628123456789\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    try {
+                        val code = withContext(Dispatchers.Default) { whatsAppLifecycleManager.requestPairingCode(phone.trim()) }
+                        if (code != null) {
+                            call.respondText(json.encodeToString(mapOf("success" to true, "code" to code)), ContentType.Application.Json)
+                        } else {
+                            call.respondText(json.encodeToString(ErrorResponse("Failed to get pairing code — bridge may not be connected")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                        }
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Pairing error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
                 post("/whatsapp/install") {
                     val err = auth(call) ?: return@post
                     try {
@@ -840,6 +862,39 @@ class DebugServer(
                     call.respondText(result, ContentType.Text.Plain)
                 }
 
+                // ======================= TOOLS =======================
+                post("/tools/call") {
+                    val err = auth(call) ?: return@post
+                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
+                    val toolRequest = try { json.decodeFromString<ToolCallRequest>(raw) } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body — expected {\"tool\":\"...\",\"arguments\":{}}")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    }
+                    val args = toolRequest.arguments.toString()
+                    val result = withContext(Dispatchers.Default) {
+                        try {
+                            toolExecutor.executeTool(toolRequest.tool, args)
+                        } catch (e: Exception) {
+                            """{"success": false, "error": "${e.message?.replace("\"", "\\\"") ?: "Unknown error"}"}"""
+                        }
+                    }
+                    call.respondText(result, ContentType.Application.Json)
+                }
+
+                get("/tools/list") {
+                    val err = auth(call) ?: return@get
+                    val tools = getAvailableTools()
+                    call.respondText(json.encodeToString(buildJsonArray {
+                        tools.forEach { t ->
+                            add(buildJsonObject {
+                                put("name", JsonPrimitive(t.schema.name))
+                                put("description", JsonPrimitive(t.schema.description))
+                                put("timeout", JsonPrimitive(t.timeout.inWholeSeconds))
+                                put("input_schema", JsonPrimitive(json.encodeToString(t.schema.parameters)))
+                            })
+                        }
+                    }), ContentType.Application.Json)
+                }
+
                 // ======================= SANDBOX =======================
                 get("/sandbox/status") {
                     val err = auth(call) ?: return@get
@@ -851,6 +906,7 @@ class DebugServer(
                         put("progress", s.progress?.let { JsonPrimitive(it) } ?: JsonNull)
                         put("statusText", JsonPrimitive(s.statusText))
                         put("error", JsonPrimitive(s.error))
+                        put("lastWhatsAppError", s.lastWhatsAppError?.let { JsonPrimitive(it) } ?: JsonNull)
                         put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
                         put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
                         put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
@@ -882,8 +938,19 @@ class DebugServer(
                     if (command.isBlank()) { call.respondText(json.encodeToString(ErrorResponse("Missing command body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
                     val useRoot = call.request.queryParameters["root"]?.toBooleanStrictOrNull() ?: false
                     val timeout = call.request.queryParameters["timeout"]?.toLongOrNull() ?: 60L
-                    val output = withContext(Dispatchers.Default) { sandboxController.executeCommand(command, useRoot = useRoot, timeoutSeconds = timeout) }
-                    call.respondText(output, ContentType.Text.Plain)
+                    val format = call.request.queryParameters["format"] ?: "text"
+                    val result = withContext(Dispatchers.Default) { sandboxController.executeCommandStructured(command, useRoot = useRoot, timeoutSeconds = timeout) }
+                    if (format == "json") {
+                        call.respondText(json.encodeToString(buildJsonObject {
+                            put("success", JsonPrimitive(result.success))
+                            put("stdout", JsonPrimitive(result.stdout))
+                            put("stderr", JsonPrimitive(result.stderr))
+                            put("exit_code", result.exitCode?.let { JsonPrimitive(it) } ?: JsonNull)
+                            put("error", result.error?.let { JsonPrimitive(it) } ?: JsonNull)
+                        }), ContentType.Application.Json)
+                    } else {
+                        call.respondText(result.stdout + result.stderr + (result.error?.let { "\n$it" } ?: ""), ContentType.Text.Plain)
+                    }
                 }
 
                 post("/sandbox/backup") {

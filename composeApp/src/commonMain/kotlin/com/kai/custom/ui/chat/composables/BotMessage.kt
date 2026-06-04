@@ -79,6 +79,8 @@ internal fun BotMessage(
     frozen: FrozenSubmission? = null,
     onResubmit: ((event: String, data: Map<String, String>) -> Unit)? = null,
     reasoningSegments: ImmutableList<String> = persistentListOf(),
+    hideThinking: Boolean = false,
+    expandThinking: Boolean = false,
 ) {
     val document = remember(message) { parseMarkdown(message) }
     var isEditing by remember(frozen) { mutableStateOf(false) }
@@ -98,9 +100,10 @@ internal fun BotMessage(
             val nonBlankSegments = remember(reasoningSegments) {
                 reasoningSegments.filter { it.isNotBlank() }.toImmutableList()
             }
-            if (nonBlankSegments.isNotEmpty()) {
+            if (nonBlankSegments.isNotEmpty() && !hideThinking) {
                 ReasoningBlockquote(
                     segments = nonBlankSegments,
+                    initiallyExpanded = expandThinking,
                     modifier = Modifier.fillMaxWidth()
                         .padding(start = 16.dp, top = 12.dp, end = 16.dp),
                 )
@@ -200,9 +203,10 @@ internal fun BotMessage(
 @Composable
 private fun ReasoningBlockquote(
     segments: ImmutableList<String>,
+    initiallyExpanded: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(initiallyExpanded) }
     // Preview always reflects the MOST RECENT thinking segment so the user gets a
     // visual update each time a new reasoning phase starts, without expanding.
     val preview = remember(segments) {

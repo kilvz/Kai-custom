@@ -310,7 +310,7 @@ class LinuxSandboxManager(
             )
         } else {
             listOf(
-                "bash", "curl", "wget", "git", "jq", "python3", "py3-pip", "nodejs",
+                "bash", "curl", "wget", "git", "jq", "python3", "py3-pip", "nodejs", "npm",
                 "openssh-client", "lftp", "rsync", "ca-certificates", "xz",
             )
         }
@@ -539,6 +539,11 @@ class LinuxSandboxManager(
                 }
                 runCatching { SshConfigManager(java.io.File(homePath)).ensureDefaults() }
                     .onFailure { android.util.Log.w("LinuxSandbox", "ssh defaults seed failed: ${it.message}") }
+                _state.value = SandboxState.Installing("Installing edge-tts...")
+                runCatching {
+                    val pip = if (distro == "ubuntu") "pip3" else "pip"
+                    executor.execute("$pip install --no-cache-dir edge-tts 2>&1", timeoutSeconds = 60)
+                }.onFailure { android.util.Log.w("LinuxSandbox", "edge-tts install failed: ${it.message}") }
                 _state.value = SandboxState.Ready
             } catch (_: kotlinx.coroutines.CancellationException) {
                 _state.value = SandboxState.Ready

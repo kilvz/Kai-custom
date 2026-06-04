@@ -645,8 +645,18 @@ actual fun getAvailableTools(): List<Tool> {
         if (isWhatsAppSupported) {
             val whatsAppStore: com.kai.custom.data.WhatsAppStore by inject(com.kai.custom.data.WhatsAppStore::class.java)
             val whatsAppPoller: com.kai.custom.whatsapp.WhatsAppPoller by inject(com.kai.custom.whatsapp.WhatsAppPoller::class.java)
-            if (whatsAppStore.isWhatsAppEnabled() && whatsAppStore.isWhatsAppInstalled() && whatsAppStore.isWhatsAppAuthenticated()) {
-                addAll(com.kai.custom.tools.getWhatsAppTools(whatsAppStore, whatsAppPoller))
+            val whatsAppLifecycleManager: com.kai.custom.whatsapp.WhatsAppLifecycleManager by inject(com.kai.custom.whatsapp.WhatsAppLifecycleManager::class.java)
+            if (whatsAppStore.isWhatsAppEnabled()) {
+                if (whatsAppStore.isWhatsAppInstalled()) {
+                    if (whatsAppStore.isWhatsAppAuthenticated()) {
+                        addAll(com.kai.custom.tools.getWhatsAppTools(whatsAppStore, whatsAppPoller))
+                    }
+                }
+                addAll(com.kai.custom.tools.getWhatsAppAdminTools(
+                    appSettings = appSettings,
+                    restartBridge = { whatsAppLifecycleManager.restart() },
+                    updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
+                ))
             }
         }
 
@@ -706,10 +716,9 @@ actual fun getAvailableTools(): List<Tool> {
                                     override fun onProviderEnabled(p0: String) {}
                                     override fun onProviderDisabled(p0: String) {}
                                 }
-                                locationManager.requestLocationUpdates(provider, 0L, 0f, locationListener)
+                                locationManager.requestLocationUpdates(provider, 0L, 0f, locationListener, android.os.Looper.getMainLooper())
                                 latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
                                 locationManager.removeUpdates(locationListener)
-                                latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
                                 result
                             }
                         } catch (e: Exception) {

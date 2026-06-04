@@ -22,7 +22,7 @@ All endpoints except `/health` require `Authorization: Bearer <token>` header. T
 {"error": "Invalid or missing token"}
 ```
 
-## Endpoints (77 total)
+## Endpoints (~80 total)
 
 ### Health & State
 
@@ -98,6 +98,8 @@ All endpoints except `/health` require `Authorization: Bearer <token>` header. T
 | `GET` | `/tools/enabled` | Yes | Tool enabled/disabled map |
 | `POST` | `/tools/enabled/{toolId}` | Yes | Enable/disable a tool |
 | `POST` | `/tools/{name}` | Yes | Execute a tool by name (raw body = JSON args) |
+| `POST` | `/tools/call` | Yes | Execute a tool by name with JSON body `{"tool":"...","arguments":{}}` |
+| `GET` | `/tools/list` | Yes | List all tools with full schemas (name, description, timeout, input schema) |
 
 ### Memory
 
@@ -162,10 +164,10 @@ All endpoints except `/health` require `Authorization: Bearer <token>` header. T
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `GET` | `/sandbox/status` | Yes | Sandbox status (installed, ready, working, progress, error, distro settings) |
+| `GET` | `/sandbox/status` | Yes | Sandbox status (installed, ready, working, progress, error, distro settings, lastWhatsAppError) |
 | `POST` | `/sandbox/setup` | Yes | Start sandbox rootfs setup (download + extract) |
 | `POST` | `/sandbox/install-packages` | Yes | Install sandbox packages (bash, curl, git, python3, nodejs, etc.) |
-| `POST` | `/sandbox/exec` | Yes | Run raw command in sandbox (`?root=`, `?timeout=` params) |
+| `POST` | `/sandbox/exec` | Yes | Run raw command in sandbox (`?root=`, `?timeout=` params, `?format=json` for structured response with success/stdout/stderr/exit_code/error) |
 | `POST` | `/sandbox/reset` | Yes | Delete rootfs and reset sandbox to NotInstalled state |
 
 ### WhatsApp (Baileys Bridge)
@@ -238,6 +240,21 @@ curl.exe -s -X POST http://localhost:18500/whatsapp/refresh-qr -H "Authorization
 $body = '{"value":"true"}'
 $f = [System.IO.Path]::GetTempFileName(); [System.IO.File]::WriteAllText($f, $body)
 curl.exe -s -X POST http://localhost:18500/settings/root_enabled -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "@$f"
+Remove-Item $f -EA 0
+```
+
+#### Execute a tool directly (debug tool calls without AI)
+```powershell
+$body = '{"tool":"list_directory","arguments":{"path":"/root","recursive":false}}'
+$f = [System.IO.Path]::GetTempFileName(); [System.IO.File]::WriteAllText($f, $body)
+curl.exe -s -X POST http://localhost:18500/tools/call -H "Authorization: Bearer $token" -H "Content-Type: application/json" -d "@$f"
+Remove-Item $f -EA 0
+```
+
+#### Run sandbox command with structured JSON response (includes exit code)
+```powershell
+$f = [System.IO.Path]::GetTempFileName(); [System.IO.File]::WriteAllText($f, "ls -la /root")
+curl.exe -s -X POST "http://localhost:18500/sandbox/exec?timeout=15&format=json" -H "Authorization: Bearer $token" -d "@$f"
 Remove-Item $f -EA 0
 ```
 

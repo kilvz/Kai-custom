@@ -111,14 +111,17 @@ class McpServerManager(private val appSettings: AppSettings) {
         val client = McpClient(server.url, server.headers)
         return try {
             client.initialize()
-            val toolDefs = client.listTools()
-            val metadata = toolDefs.map { def ->
-                McpToolMetadata(
-                    serverId = serverId,
-                    name = def.name,
-                    description = def.description ?: "",
-                    inputSchema = def.inputSchema,
-                )
+            val metadata = try {
+                client.listTools().map { def ->
+                    McpToolMetadata(
+                        serverId = serverId,
+                        name = def.name,
+                        description = def.description ?: "",
+                        inputSchema = def.inputSchema,
+                    )
+                }
+            } catch (_: Exception) {
+                emptyList()
             }
             mutex.withLock {
                 clients[serverId] = client

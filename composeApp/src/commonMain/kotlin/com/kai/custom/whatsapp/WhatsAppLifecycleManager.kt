@@ -46,19 +46,18 @@ class WhatsAppLifecycleManager(
     suspend fun setupAndStart() {
         if (started) return
         writeBridgeJs()
-        if (appSettings.isWhatsAppInstalled()) {
-            val check = sandboxController.executeCommand(
-                command = "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
-                sessionId = SandboxSessions.SYSTEM,
-                useRoot = false,
-            )
-            if (check.trim() != "1") {
-                appSettings.setWhatsAppInstalled(false)
-                return
-            }
-        } else {
+        // Verify baileys is actually available on disk — don't trust the stored flag
+        // (it can be stale after an aborted restart). If not found, try to install.
+        val check = sandboxController.executeCommand(
+            command = "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+        )
+        if (check.trim() != "1") {
+            appSettings.setWhatsAppInstalled(false)
             return
         }
+        appSettings.setWhatsAppInstalled(true)
         started = true
 
         mcpServerManager.registerBuiltInServer(
@@ -86,6 +85,7 @@ class WhatsAppLifecycleManager(
         val result = mcpServerManager.connectAndDiscoverTools(SERVER_ID)
         if (result.isFailure) return false
         refreshAuthState()
+        refreshQrCode()
         connected = true
         return true
     }
@@ -95,9 +95,21 @@ class WhatsAppLifecycleManager(
     suspend fun restart() {
         stop()
         delay(2000)
-        appSettings.setWhatsAppInstalled(false)
-        ensureInstalled()
+        // Check if baileys is still available before resetting the flag
+        val check = sandboxController.executeCommand(
+            command = "cd /root/whatsapp-bridge && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+        )
+        if (check.trim() != "1") {
+            appSettings.setWhatsAppInstalled(false)
+            ensureInstalled()
+        }
         setupAndStart()
+    }
+
+    suspend fun updateBridgeConfig() {
+        writeBridgeConfig()
     }
 
     suspend fun stop() {
@@ -127,13 +139,31 @@ class WhatsAppLifecycleManager(
         }
     }
 
+    suspend fun requestPairingCode(phone: String): String? {
+        try {
+            val client = mcpServerManager.getClient(SERVER_ID) ?: return null
+            val resultStr = client.callTool("request_pairing_code", buildJsonObject {
+                put("phone", JsonPrimitive(phone))
+            })
+            val root = SharedJson.parseToJsonElement(resultStr).jsonObject
+            val formatted = root["formatted"]?.jsonPrimitive?.content
+                ?: root["code"]?.jsonPrimitive?.content
+                ?: ""
+            return formatted
+        } catch (_: Exception) {
+            return null
+        }
+    }
+
     suspend fun refreshQrCode() {
         try {
             val client = mcpServerManager.getClient(SERVER_ID) ?: return
             val resultStr = client.callTool("get_qr_code", buildJsonObject { })
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
             val authenticated = root["authenticated"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
-            val qr = root["qr"]?.jsonPrimitive?.content ?: ""
+            val qr = root["qrBase64"]?.jsonPrimitive?.content
+                ?: root["qr"]?.jsonPrimitive?.content
+                ?: ""
             if (authenticated) {
                 whatsAppStore.setWhatsAppAuthenticated(true)
                 whatsAppStore.setWhatsAppQrCode("")
@@ -239,10 +269,10 @@ class WhatsAppLifecycleManager(
 
     private suspend fun startBridgeServer() {
         sandboxController.executeCommand(
-            command = "setsid nohup node /root/whatsapp-bridge/bridge.js > /tmp/whatsapp-bridge.log 2>&1 &",
+            command = "fuser -k 8317/tcp 2>/dev/null; setsid nohup node /root/whatsapp-bridge/bridge.js > /tmp/whatsapp-bridge.log 2>&1 &",
             sessionId = SandboxSessions.SYSTEM,
-            useRoot = true,
-            timeoutSeconds = 5,
+            useRoot = false,
+            timeoutSeconds = 10,
         )
     }
 }

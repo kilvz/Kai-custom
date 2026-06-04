@@ -1,6 +1,9 @@
 package com.kai.custom.data
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 @Serializable
 data class HealthResponse(
@@ -65,7 +68,8 @@ data class SearchRequest(
 
 @Serializable
 data class ToolCallRequest(
-    val arguments: Map<String, String> = emptyMap(),
+    val tool: String = "",
+    val arguments: JsonElement = JsonObject(emptyMap()),
 )
 
 @Serializable

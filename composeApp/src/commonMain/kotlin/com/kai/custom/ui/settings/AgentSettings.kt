@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,9 +49,11 @@ import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.TaskTrigger
 import com.kai.custom.saveFileToDevice
+import com.kai.custom.data.AppSettings
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.SettingsListItem
 import com.kai.custom.ui.handCursor
+import org.koin.compose.koinInject
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
@@ -400,6 +403,7 @@ private fun SoulEditor(
     onDeletePersona: (String) -> Unit = {},
     onCreatePersona: (String, BehaviorStyle) -> Unit = { _, _ -> },
 ) {
+    val appSettings: AppSettings = koinInject()
     var editedSoul by remember(soulText) { mutableStateOf(soulText) }
     val hasChanges = editedSoul != soulText
     val maxChars = 4000
@@ -455,6 +459,42 @@ private fun SoulEditor(
             )
         }
         Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(12.dp))
+
+        // ── Thinking Display ──
+        val isCustomBehavior = activePersona?.behaviorStyle != BehaviorStyle.ASSISTANT &&
+            activePersona?.behaviorStyle != BehaviorStyle.OPERATOR
+        val effectiveHideDesc = if (isCustomBehavior) {
+            "Auto-hidden (non-assistant/operator persona)"
+        } else {
+            "Hide the AI's chain-of-thought reasoning"
+        }
+        var hideThinking by remember { mutableStateOf(appSettings.getHideThinking()) }
+        var expandThinking by remember { mutableStateOf(appSettings.getExpandThinking()) }
+        LaunchedEffect(isCustomBehavior) {
+            hideThinking = appSettings.getHideThinking()
+        }
+        ToggleableHeadline(
+            title = "Hide Thinking",
+            description = effectiveHideDesc,
+            checked = hideThinking || isCustomBehavior,
+            enabled = !isCustomBehavior,
+            onCheckedChange = {
+                hideThinking = it
+                appSettings.setHideThinking(it)
+            },
+        )
+        ToggleableHeadline(
+            title = "Expand Thinking",
+            description = "Always expand the thinking section by default",
+            checked = expandThinking,
+            onCheckedChange = {
+                expandThinking = it
+                appSettings.setExpandThinking(it)
+            },
+        )
+        Spacer(Modifier.height(12.dp))
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
 

@@ -438,6 +438,17 @@ actual fun getAvailableTools(): List<Tool> {
                 add(SshDisconnectTool)
             }
         }
+        if (isWhatsAppSupported) {
+            val whatsAppStore: com.kai.custom.data.WhatsAppStore by inject(com.kai.custom.data.WhatsAppStore::class.java)
+            val whatsAppLifecycleManager: com.kai.custom.whatsapp.WhatsAppLifecycleManager by inject(com.kai.custom.whatsapp.WhatsAppLifecycleManager::class.java)
+            if (whatsAppStore.isWhatsAppEnabled()) {
+                addAll(com.kai.custom.tools.getWhatsAppAdminTools(
+                    appSettings = appSettings,
+                    restartBridge = { whatsAppLifecycleManager.restart() },
+                    updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
+                ))
+            }
+        }
         addAll(mcpServerManager.getEnabledMcpTools())
     }
 }

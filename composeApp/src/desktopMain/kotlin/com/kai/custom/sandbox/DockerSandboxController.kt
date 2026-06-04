@@ -97,6 +97,10 @@ class DockerSandboxController(
             try {
                 dockerManager.execCommand(containerName,
                     "apk add --no-cache python3 nodejs npm curl git bash sudo")
+                _status.value = _status.value.copy(statusText = "Installing edge-tts...")
+                runCatching {
+                    dockerManager.execCommand(containerName, "pip install --no-cache-dir edge-tts 2>&1")
+                }
                 _status.value = _status.value.copy(
                     working = false, packagesInstalled = true,
                     statusText = "Packages installed",

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kai.custom.SandboxController
+import com.kai.custom.SandboxSessions
 import com.kai.custom.data.DataRepository
 import com.kai.custom.decodeToImageBitmap
 import kotlin.io.encoding.Base64
@@ -229,12 +232,81 @@ private fun WhatsAppSection(
                 return@Column
             }
 
-            // Install / QR / Connected
+            // Live progress during install
+            if (sandboxStatus.working) {
+                Text(
+                    text = sandboxStatus.statusText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(4.dp))
+            }
+
+            // Bridge status
+            var bridgeRunning by remember { mutableStateOf(false) }
+            LaunchedEffect(isEnabled) {
+                while (isEnabled) {
+                    try {
+                        val check = sandboxController.executeCommand(
+                            command = "pgrep -f 'node.*bridge\\.js' 2>/dev/null || echo DEAD",
+                            sessionId = SandboxSessions.SYSTEM,
+                            useRoot = false,
+                            timeoutSeconds = 5,
+                        )
+                        bridgeRunning = check.trim() != "DEAD"
+                    } catch (_: Exception) {
+                        bridgeRunning = false
+                    }
+                    kotlinx.coroutines.delay(5000)
+                }
+            }
+
+            // Manual bridge controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (bridgeRunning) Icons.Default.Check else Icons.Default.Close,
+                        contentDescription = null,
+                        tint = if (bridgeRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "Bridge: ${if (bridgeRunning) "Running" else "Stopped"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Button(
+                    onClick = {
+                        scope.launch {
+                            sandboxController.executeCommand(
+                                command = "fuser -k 8317/tcp 2>/dev/null; setsid nohup node /root/whatsapp-bridge/bridge.js > /tmp/whatsapp-bridge.log 2>&1 &",
+                                sessionId = SandboxSessions.SYSTEM,
+                                useRoot = false,
+                                timeoutSeconds = 10,
+                            )
+                            kotlinx.coroutines.delay(2000)
+                            whatsAppLifecycleManager.restart()
+                        }
+                    },
+                    modifier = Modifier.handCursor().height(28.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                ) {
+                    Text("Start Bridge", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+
+            // Install / Pairing Code / QR / Connected
             if (!dataRepository.isWhatsAppInstalled()) {
                 Button(
                     onClick = {
                         scope.launch {
-                            statusMessage = "Installing..."
                             val installed = sandboxController.installWhatsAppBridge()
                             if (installed) {
                                 dataRepository.setWhatsAppInstalled(true)
@@ -250,14 +322,83 @@ private fun WhatsAppSection(
                     Text("Install")
                 }
             } else if (!dataRepository.isWhatsAppAuthenticated()) {
+                // Pairing code section
+                var phoneNumber by remember { mutableStateOf("") }
+                var pairingCode by remember { mutableStateOf("") }
+                var pairingLoading by remember { mutableStateOf(false) }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Option 1: Enter phone number for pairing code (easier):",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedTextField(
+                        value = phoneNumber,
+                        onValueChange = { phoneNumber = it },
+                        placeholder = { Text("e.g. 628123456789") },
+                        label = { Text("Phone number") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        modifier = Modifier.weight(1f).handCursor(),
+                        enabled = !pairingLoading,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                pairingLoading = true
+                                pairingCode = ""
+                                val code = whatsAppLifecycleManager.requestPairingCode(phoneNumber.trim())
+                                if (code != null) {
+                                    pairingCode = code
+                                    statusMessage = "Pairing code generated"
+                                } else {
+                                    statusMessage = "Failed to get pairing code"
+                                }
+                                pairingLoading = false
+                            }
+                        },
+                        modifier = Modifier.handCursor(),
+                        enabled = phoneNumber.isNotBlank() && !pairingLoading,
+                    ) {
+                        Text(if (pairingLoading) "Requesting..." else "Request Code")
+                    }
+                }
+                if (pairingCode.isNotBlank()) {
+                    Spacer(Modifier.height(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "Enter this code in WhatsApp → Linked Devices → Link a Device:",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = pairingCode,
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "Option 2: Scan QR code with WhatsApp on your phone:",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(4.dp))
                 val qrCode = dataRepository.getWhatsAppQrCode()
                 if (qrCode.isNotBlank()) {
-                    Text(
-                        text = "Scan this QR code with WhatsApp on your phone:",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.height(4.dp))
                     val qrBitmap = remember(qrCode) {
                         try {
                             decodeToImageBitmap(Base64.decode(qrCode))
@@ -326,6 +467,29 @@ private fun WhatsAppSection(
                     onCheckedChange = {
                         readReceipt = it
                         dataRepository.setWhatsAppReadReceipt(it)
+                    },
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Sync full history toggle
+            var syncHistory by remember { mutableStateOf(dataRepository.getBaileysSyncHistory()) }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Sync full history",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Switch(
+                    checked = syncHistory,
+                    onCheckedChange = {
+                        syncHistory = it
+                        dataRepository.setBaileysSyncHistory(it)
                     },
                 )
             }
