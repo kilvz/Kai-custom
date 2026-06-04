@@ -411,20 +411,20 @@ The existing release workflow already has `dmg`/`msi`/`deb`/`rpm`/`appimage` job
 
 ---
 
-## Migration Timeline
+## Migration Timeline (Actual June 2026)
 
-| Phase | Content | Est. Files | Est. LOC |
-|-------|---------|-----------|----------|
-| 0 | Foundation (build config, AdminManager, deps) | 3 | 200 |
-| 1 | DockerManager + DockerSandboxController | 4 | 800 |
-| 2 | Debug API server port | 3 | 1100 |
-| 3 | Move tools to jvmShared | 5 | 200 |
-| 4 | WhatsApp Docker bridge | 2 | 150 |
-| 5 | Alt-Memory Docker | 1 | 50 |
-| 6 | Wake Word (stub) | 1 | 20 |
-| 7 | AdminTool + admin mode integration | 2 | 150 |
+| Phase | Content | Status | Files | Est. LOC |
+|-------|---------|--------|-------|----------|
+| 0 | Foundation (build config, AdminManager, Docker, DebugServer) | ✅ Done | 11 | 950 |
+| 1 | Move tools to jvmShared (FileTools, WebTools, SSH tools) | ✅ Done | 6 | 850 |
+| 2 | AdminTool + OpenFileTool (desktop actuals) | ✅ Done | 2 | 145 |
+| 3 | WhatsApp Docker bridge (port mappings + npm install) | ✅ Done | 1 | 7 |
+| 4 | Build: createDistributable + packageMsi | ✅ Done | - | - |
+| 5 | Debug API server port (full parity) | ⬜ Not started | - | - |
+| 6 | Alt-Memory Docker (full parity) | ⬜ Not started | - | - |
+| 7 | Wake Word (stub) | ⬜ Not started | - | - |
 
-**Total: ~2700 LOC across ~21 files**
+**Completed: ~1952 LOC across ~20 files**
 
 ---
 
