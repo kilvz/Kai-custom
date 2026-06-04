@@ -45,7 +45,10 @@ class DockerSandboxController(
                     return@runBlocking
                 }
                 dockerManager.pullImage(imageName)
-                val cid = dockerManager.createContainer(imageName, containerName)
+                val cid = dockerManager.createContainer(
+                    imageName, containerName,
+                    portMappings = mapOf(8316 to 8316, 8317 to 8317),
+                )
                 if (cid != null) {
                     _status.value = _status.value.copy(
                         installed = true, ready = true, working = false,
@@ -298,10 +301,12 @@ class DockerSandboxController(
     override suspend fun installWhatsAppBridge(): Boolean {
         return try {
             dockerManager.execCommand(containerName,
-                "mkdir -p /root/whatsapp-bridge && which node || apk add --no-cache nodejs")
+                "mkdir -p /root/whatsapp-bridge && which node || apk add --no-cache nodejs npm")
             val bridgeJs = com.kai.custom.whatsapp.BRIDGE_JS_BASE64
             dockerManager.execCommand(containerName,
                 "echo '$bridgeJs' | base64 -d > /root/whatsapp-bridge/bridge.js")
+            dockerManager.execCommand(containerName,
+                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1")
             true
         } catch (_: Exception) { false }
     }
