@@ -889,10 +889,10 @@ class DebugServer(
                 post("/sandbox/backup") {
                     val err = auth(call) ?: return@post
                     val result = withContext(Dispatchers.Default) { sandboxController.backupSandbox() }
-                    result.onSuccess { path ->
+                    result.onSuccess { backup ->
                         call.respondText(json.encodeToString(buildJsonObject {
                             put("success", JsonPrimitive(true))
-                            put("path", JsonPrimitive(path))
+                            put("path", JsonPrimitive(backup.path))
                         }), ContentType.Application.Json)
                     }.onFailure { e ->
                         call.respondText(json.encodeToString(ErrorResponse("Backup failed: ${e.message}")), ContentType.Application.Json, HttpStatusCode.InternalServerError)

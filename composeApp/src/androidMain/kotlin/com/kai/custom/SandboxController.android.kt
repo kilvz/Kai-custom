@@ -645,31 +645,83 @@ class AndroidSandboxController : SandboxController {
         whatsAppLifecycle.stop()
     }
 
-    override suspend fun backupSandbox(outputPath: String?): Result<String> = withContext(Dispatchers.IO) {
+    override suspend fun backupSandbox(outputPath: String?): Result<SandboxController.BackupResult> = withContext(Dispatchers.IO) {
         val rootfs = File(sandboxManager.rootfsPath)
         if (!rootfs.isDirectory) {
-            return@withContext Result.failure(IllegalStateException("Sandbox rootfs not found at ${rootfs.path}"))
+            return@withContext Result.failure<SandboxController.BackupResult>(IllegalStateException("Sandbox rootfs not found at ${rootfs.path}"))
         }
-        val dest = outputPath?.let { File(it) }
-            ?: File(context.getExternalFilesDir(null), "sandbox-backup")
-        dest.mkdirs()
-        val tarFile = File(dest, "sandbox-rootfs-${System.currentTimeMillis()}.tar.gz")
+        if (android.os.Build.VERSION.SDK_INT in 23..28) {
+            val permissionGranted = androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!permissionGranted) {
+                return@withContext Result.failure<SandboxController.BackupResult>(SecurityException(
+                    "Storage permission is required to save backups. Grant it in Settings → Apps → Kai → Permissions → Storage."
+                ))
+            }
+        }
+        val timestamp = System.currentTimeMillis()
+        val fileName = "sandbox-rootfs-$timestamp.tar.gz"
+        val tmpDir = File(context.cacheDir, "sandbox-backup-tmp")
+        tmpDir.mkdirs()
+        val tmpFile = File(tmpDir, fileName)
         try {
             val process = ProcessBuilder(
-                "tar", "-czf", tarFile.absolutePath,
+                "tar", "-czf", tmpFile.absolutePath,
                 "-C", rootfs.parentFile.absolutePath,
                 rootfs.name,
             ).redirectErrorStream(true).start()
             val exitCode = process.waitFor()
             if (exitCode != 0) {
                 val err = process.inputStream.bufferedReader().readText()
-                return@withContext Result.failure(IOException("tar failed (exit=$exitCode): $err"))
+                return@withContext Result.failure<SandboxController.BackupResult>(IOException("tar failed (exit=$exitCode): $err"))
             }
-            android.util.Log.i("SandboxController", "Sandbox backed up to ${tarFile.absolutePath} (${tarFile.length()} bytes)")
-            Result.success(tarFile.absolutePath)
+
+            val bytes = tmpFile.readBytes()
+            val destPath: String
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val values = android.content.ContentValues().apply {
+                    put(android.provider.MediaStore.Downloads.DISPLAY_NAME, fileName)
+                    put(android.provider.MediaStore.Downloads.MIME_TYPE, "application/gzip")
+                    put(android.provider.MediaStore.Downloads.RELATIVE_PATH, android.os.Environment.DIRECTORY_DOWNLOADS + "/Kai")
+                }
+                val uri = context.contentResolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                if (uri == null) {
+                    val fallback = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Kai/$fileName")
+                    fallback.parentFile?.mkdirs()
+                    fallback.writeBytes(bytes)
+                    destPath = fallback.absolutePath
+                } else {
+                    context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) }
+                    destPath = "/storage/emulated/0/Download/Kai/$fileName"
+                }
+            } else {
+                val dest = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Kai/$fileName")
+                dest.parentFile?.mkdirs()
+                dest.writeBytes(bytes)
+                destPath = dest.absolutePath
+            }
+
+            tmpFile.delete()
+            android.util.Log.i("SandboxController", "Sandbox backed up to $destPath")
+
+            val toastText = "Sandbox backup saved to Downloads/Kai/"
+            try {
+                val handler = android.os.Handler(android.os.Looper.getMainLooper())
+                handler.post { android.widget.Toast.makeText(context, toastText, android.widget.Toast.LENGTH_LONG).show() }
+            } catch (_: Exception) {}
+
+            val finalPath = if (outputPath != null) {
+                java.io.File(destPath).copyTo(java.io.File(outputPath), overwrite = true)
+                outputPath
+            } else {
+                destPath
+            }
+            Result.success(SandboxController.BackupResult(path = finalPath, bytes = bytes))
         } catch (e: Exception) {
             android.util.Log.e("SandboxController", "Backup failed", e)
-            Result.failure(e)
+            Result.failure<SandboxController.BackupResult>(e)
         }
     }
 

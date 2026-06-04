@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.10.1
+
+### Bug Fixes
+- fix: `list_media` tool — "Invalid token LIMIT" error on Android 11+ due to `LIMIT` in sortOrder string. Now uses `ContentResolver.QUERY_ARG_LIMIT` bundle API on API 30+.
+
+### Sandbox — Backup & Import
+- feat: Export button opens system "Save as" file picker (SAF) — user chooses where to save
+- feat: `POST /sandbox/backup` Debug API endpoint — triggers backup on device, returns path
+- feat: `POST /sandbox/import` Debug API endpoint — accepts raw tar.gz body, restores rootfs
+- feat: file picker integration for Import (tar.gz/tgz/tar via FileKit)
+- fix: `backupSandbox()` directory creation — `dest.mkdirs()` instead of `dest.parentFile?.mkdirs()`
+- change: `importSandbox()` interface changed from file path to `ByteArray`, Android impl writes temp file
+- fix: Export/Import buttons placed below "Run sandbox as root" toggle
+- fix: backup saved to temp then user picks location via file picker
+- fix: storage permission check on API 23-28 before saving backup
+
+### Infrastructure
+- feat: `writeBridgeJs()` extracted as separate function, called from both `installIfNeeded()` and `setupAndStart()`
+- fix: AGENTS.md verify command corrected, assemble tasks documented
+
 ## v3.10.0
 
 ### WhatsApp — Persistent History & Alt-Memory Direct Store

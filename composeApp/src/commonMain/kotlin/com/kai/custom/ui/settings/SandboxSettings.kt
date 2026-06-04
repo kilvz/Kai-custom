@@ -27,6 +27,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.kai.custom.saveFileToDevice
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.sandbox.SandboxProgressRow
 import io.github.vinceglb.filekit.dialogs.FileKitType
@@ -67,6 +69,7 @@ internal fun SandboxSettingsCard(
     onUpdateAltMemory: () -> Unit = {},
     onBackupSandbox: () -> Unit = {},
     onImportSandbox: (ByteArray) -> Unit = {},
+    onExportSaved: () -> Unit = {},
     onDistroChanged: (String) -> Unit = {},
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
@@ -80,6 +83,11 @@ internal fun SandboxSettingsCard(
                 onImportSandbox(bytes)
             }
         }
+    }
+    LaunchedEffect(sandboxState.backupExportBytes) {
+        val bytes = sandboxState.backupExportBytes ?: return@LaunchedEffect
+        saveFileToDevice(bytes, "sandbox-rootfs", "tar.gz")
+        onExportSaved()
     }
     SettingsCard {
         Row(

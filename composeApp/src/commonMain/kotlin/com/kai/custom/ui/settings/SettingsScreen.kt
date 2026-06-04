@@ -358,6 +358,7 @@ fun SettingsScreen(
         onDistroChanged = sandboxViewModel::onDistroChanged,
         onBackupSandbox = sandboxViewModel::onBackupSandbox,
         onImportSandbox = sandboxViewModel::onImportSandbox,
+        onExportSaved = sandboxViewModel::onExportSaved,
         sshState = sshState,
         sshViewModel = sshViewModel,
         onNavigateBack = onNavigateBack,
@@ -382,6 +383,7 @@ fun SettingsScreenContent(
     onDistroChanged: (String) -> Unit = {},
     onBackupSandbox: () -> Unit = {},
     onImportSandbox: (ByteArray) -> Unit = {},
+    onExportSaved: () -> Unit = {},
     sshState: SshUiState = SshUiState(),
     sshViewModel: SshViewModel? = null,
     onNavigateBack: () -> Unit = {},
@@ -651,6 +653,7 @@ fun SettingsScreenContent(
                                     onDistroChanged = onDistroChanged,
                                     onBackupSandbox = onBackupSandbox,
                                     onImportSandbox = onImportSandbox,
+                                    onExportSaved = onExportSaved,
                                 )
                             }
                         }

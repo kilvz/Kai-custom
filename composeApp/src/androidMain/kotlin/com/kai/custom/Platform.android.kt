@@ -1295,7 +1295,17 @@ actual fun getAvailableTools(): List<Tool> {
                             val results = mutableMapOf<String, Any>()
                             fun queryMedia(uri: android.net.Uri, sortField: String): List<Map<String, Any>> {
                                 val list = mutableListOf<Map<String, Any>>()
-                                val cursor = context.contentResolver.query(uri, arrayOf("_id", "_display_name", "_size", "date_added"), null, null, "$sortField DESC LIMIT $limit")
+                                val projection = arrayOf("_id", "_display_name", "_size", "date_added")
+                                val cursor = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                                    val bundle = android.os.Bundle().apply {
+                                        putString(android.content.ContentResolver.QUERY_ARG_SORT_COLUMNS, sortField)
+                                        putInt(android.content.ContentResolver.QUERY_ARG_SORT_DIRECTION, 2)
+                                        putInt(android.content.ContentResolver.QUERY_ARG_LIMIT, limit)
+                                    }
+                                    context.contentResolver.query(uri, projection, bundle, null)
+                                } else {
+                                    context.contentResolver.query(uri, projection, null, null, "$sortField DESC LIMIT $limit")
+                                }
                                 cursor?.use { c ->
                                     while (c.moveToNext()) {
                                         list.add(mapOf("name" to (c.getString(1) ?: ""), "size" to c.getLong(2), "date_added" to c.getLong(3)))

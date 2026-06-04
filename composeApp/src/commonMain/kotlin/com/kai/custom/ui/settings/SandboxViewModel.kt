@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.Platform
 import com.kai.custom.SandboxController
+import com.kai.custom.SandboxController.BackupResult
 import com.kai.custom.SandboxStatus
 import com.kai.custom.currentPlatform
 import com.kai.custom.isRootAvailable
@@ -32,6 +33,7 @@ data class SandboxUiState(
     val rootErrorMessage: String? = null,
     val altMemoryInstalled: Boolean = false,
     val needsReset: Boolean = false,
+    val backupExportBytes: ByteArray? = null,
 )
 
 class SandboxViewModel(
@@ -141,14 +143,18 @@ class SandboxViewModel(
 
     fun onBackupSandbox() {
         viewModelScope.launch {
-            _state.update { it.copy(isWorking = true, sandboxStatusText = "Backing up sandbox...") }
+            _state.update { it.copy(isWorking = true, sandboxStatusText = "Creating backup...") }
             val result = sandboxController.backupSandbox()
-            result.onSuccess { path ->
-                _state.update { it.copy(isWorking = false, sandboxStatusText = "Backup saved to $path") }
+            result.onSuccess { backup ->
+                _state.update { it.copy(isWorking = false, backupExportBytes = backup.bytes, sandboxStatusText = "Choose where to save the backup") }
             }.onFailure { e ->
                 _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusText = "Backup failed: ${e.message}") }
             }
         }
+    }
+
+    fun onExportSaved() {
+        _state.update { it.copy(backupExportBytes = null) }
     }
 
     fun onImportSandbox(data: ByteArray) {
