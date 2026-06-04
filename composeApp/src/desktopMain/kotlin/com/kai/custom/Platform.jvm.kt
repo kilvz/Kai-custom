@@ -23,6 +23,7 @@ import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sendHeartbeatNotification
+import com.kai.custom.tools.AdminTool
 import com.kai.custom.tools.ApplyPatchTool
 import com.kai.custom.tools.CommonTools
 import com.kai.custom.tools.EditFileTool
@@ -31,6 +32,7 @@ import com.kai.custom.tools.GlobTool
 import com.kai.custom.tools.GrepTool
 import com.kai.custom.tools.HeartbeatTools
 import com.kai.custom.tools.InternetSearchTool
+import com.kai.custom.tools.OpenFileTool
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
 import com.kai.custom.tools.ReadFileTool
@@ -182,6 +184,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     addAll(CommonTools.commonToolDefinitions)
     add(ShellCommandTool.toolInfo)
     add(ProcessManagerTool.toolInfo)
+    add(AdminTool.toolInfo)
     add(ReadFileTool.toolInfo)
     add(WriteFileTool.toolInfo)
     add(EditFileTool.toolInfo)
@@ -191,6 +194,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(TodoWriteTool.toolInfo)
     add(WebFetchTool.toolInfo)
     add(InternetSearchTool.toolInfo)
+    add(OpenFileTool.toolInfo)
     add(SshCommandTool.toolInfo)
     add(SshConfigureHostTool.toolInfo)
     add(SshConnectTool.toolInfo)
@@ -405,6 +409,9 @@ actual fun getAvailableTools(): List<Tool> {
                 },
             )
         }
+        if (appSettings.isToolEnabled(AdminTool.schema.name)) {
+            add(AdminTool)
+        }
         if (appSettings.isSandboxEnabled()) {
             add(ReadFileTool)
             add(WriteFileTool)
@@ -415,6 +422,7 @@ actual fun getAvailableTools(): List<Tool> {
             add(TodoWriteTool)
             add(WebFetchTool)
             add(InternetSearchTool)
+            add(OpenFileTool)
         }
         if (appSettings.isSshEnabled()) {
             if (appSettings.isToolEnabled(SshCommandTool.schema.name)) {
