@@ -23,13 +23,26 @@ import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sendHeartbeatNotification
+import com.kai.custom.tools.ApplyPatchTool
 import com.kai.custom.tools.CommonTools
+import com.kai.custom.tools.EditFileTool
 import com.kai.custom.tools.EmailTools
+import com.kai.custom.tools.GlobTool
+import com.kai.custom.tools.GrepTool
 import com.kai.custom.tools.HeartbeatTools
+import com.kai.custom.tools.InternetSearchTool
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
+import com.kai.custom.tools.ReadFileTool
 import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.ShellCommandTool
+import com.kai.custom.tools.SshCommandTool
+import com.kai.custom.tools.SshConfigureHostTool
+import com.kai.custom.tools.SshConnectTool
+import com.kai.custom.tools.SshDisconnectTool
+import com.kai.custom.tools.TodoWriteTool
+import com.kai.custom.tools.WebFetchTool
+import com.kai.custom.tools.WriteFileTool
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
@@ -169,6 +182,19 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     addAll(CommonTools.commonToolDefinitions)
     add(ShellCommandTool.toolInfo)
     add(ProcessManagerTool.toolInfo)
+    add(ReadFileTool.toolInfo)
+    add(WriteFileTool.toolInfo)
+    add(EditFileTool.toolInfo)
+    add(GlobTool.toolInfo)
+    add(GrepTool.toolInfo)
+    add(ApplyPatchTool.toolInfo)
+    add(TodoWriteTool.toolInfo)
+    add(WebFetchTool.toolInfo)
+    add(InternetSearchTool.toolInfo)
+    add(SshCommandTool.toolInfo)
+    add(SshConfigureHostTool.toolInfo)
+    add(SshConnectTool.toolInfo)
+    add(SshDisconnectTool.toolInfo)
     add(PhoneTools.deviceInfoToolInfo)
     add(PhoneTools.clipboardToolInfo)
     add(PhoneTools.networkInfoToolInfo)
@@ -378,6 +404,31 @@ actual fun getAvailableTools(): List<Tool> {
                     override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS location is not available on Desktop")
                 },
             )
+        }
+        if (appSettings.isSandboxEnabled()) {
+            add(ReadFileTool)
+            add(WriteFileTool)
+            add(EditFileTool)
+            add(GlobTool)
+            add(GrepTool)
+            add(ApplyPatchTool)
+            add(TodoWriteTool)
+            add(WebFetchTool)
+            add(InternetSearchTool)
+        }
+        if (appSettings.isSshEnabled()) {
+            if (appSettings.isToolEnabled(SshCommandTool.schema.name)) {
+                add(SshCommandTool)
+            }
+            if (appSettings.isToolEnabled(SshConfigureHostTool.schema.name)) {
+                add(SshConfigureHostTool)
+            }
+            if (appSettings.isToolEnabled(SshConnectTool.schema.name)) {
+                add(SshConnectTool)
+            }
+            if (appSettings.isToolEnabled(SshDisconnectTool.schema.name)) {
+                add(SshDisconnectTool)
+            }
         }
         addAll(mcpServerManager.getEnabledMcpTools())
     }

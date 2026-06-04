@@ -57,7 +57,6 @@ object SshConnectTool : Tool {
     override suspend fun execute(args: Map<String, Any>): Any {
         val profileName = args["profile_name"] as? String
 
-        // If only profile_name given (no host), load saved profile
         val host = args["host"] as? String
         val username = args["username"] as? String
 
@@ -65,7 +64,6 @@ object SshConnectTool : Tool {
         val actualProfileName: String?
 
         if (host == null && username == null && profileName != null) {
-            // Load from saved profile
             val profile = appSettings.getSshProfiles().find { it.name == profileName }
                 ?: return mapOf("success" to false as Any, "error" to "Profile '$profileName' not found. Available profiles: ${appSettings.getSshProfiles().joinToString { p -> "'${p.name}'" }}" as Any)
             config = SshConfig(
@@ -105,7 +103,6 @@ object SshConnectTool : Tool {
             actualProfileName = profileName
         }
 
-        // Save as profile if profile_name provided
         if (actualProfileName != null) {
             val profile = SshProfile(
                 name = actualProfileName,
