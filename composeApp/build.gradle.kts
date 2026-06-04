@@ -166,6 +166,10 @@ kotlin {
             implementation(libs.slf4j.nop)
             implementation(libs.litert.lm.jvm)
             implementation(libs.jsch)
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.cio)
+            implementation(libs.ktor.server.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

@@ -17,6 +17,7 @@ import com.kai.custom.data.EncryptedFileSettings
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.root.AdminManager
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
@@ -109,9 +110,9 @@ actual val isSplinterlandsSupported: Boolean = true
 
 actual val isShizukuSupported: Boolean = false
 
-actual val isRootSupported: Boolean = false
+actual val isRootSupported: Boolean = true
 
-actual fun isRootAvailable(): Boolean = false
+actual fun isRootAvailable(): Boolean = com.kai.custom.root.AdminManager.isAdmin()
 
 actual fun isShizukuPermissionGranted(): Boolean = false
 
