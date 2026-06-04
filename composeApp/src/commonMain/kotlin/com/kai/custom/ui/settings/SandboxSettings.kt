@@ -324,7 +324,8 @@ private fun DistroSelector(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .width(240.dp),
+                .width(240.dp)
+                .handCursor(),
         )
         ExposedDropdownMenu(
             expanded = expanded,

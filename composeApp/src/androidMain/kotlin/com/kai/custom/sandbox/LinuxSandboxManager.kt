@@ -311,7 +311,7 @@ class LinuxSandboxManager(
         } else {
             listOf(
                 "bash", "curl", "wget", "git", "jq", "python3", "py3-pip", "nodejs",
-                "openssh-client", "lftp", "rsync", "ca-certificates",
+                "openssh-client", "lftp", "rsync", "ca-certificates", "xz",
             )
         }
         val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
@@ -591,13 +591,12 @@ class LinuxSandboxManager(
     }
 
     fun arePackagesInstalled(): Boolean {
-        val bins = listOf(
-            "usr/bin/bash", "usr/bin/curl", "usr/bin/wget", "usr/bin/git",
-            "usr/bin/jq", "usr/bin/python3", "usr/bin/pip3", "usr/bin/node",
-            "usr/bin/ssh", "usr/bin/lftp", "usr/bin/rsync",
+        val coreBins = listOf(
+            "usr/bin/curl", "usr/bin/wget", "usr/bin/git",
+            "usr/bin/python3", "usr/bin/node", "usr/bin/ssh",
         )
-        val allBins = bins.all { File(rootfsPath, it).exists() }
+        val coreOk = coreBins.all { File(rootfsPath, it).exists() }
         val caCerts = File(rootfsPath, "etc/ssl/certs/ca-certificates.crt").exists()
-        return allBins && caCerts
+        return coreOk && caCerts
     }
 }

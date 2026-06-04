@@ -666,9 +666,10 @@ class AndroidSandboxController : SandboxController {
         tmpDir.mkdirs()
         val tmpFile = File(tmpDir, fileName)
         try {
+            val rootfsParent = rootfs.parentFile?.absolutePath ?: rootfs.absolutePath
             val process = ProcessBuilder(
                 "tar", "-czf", tmpFile.absolutePath,
-                "-C", rootfs.parentFile.absolutePath,
+                "-C", rootfsParent,
                 rootfs.name,
             ).redirectErrorStream(true).start()
             val exitCode = process.waitFor()

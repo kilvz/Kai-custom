@@ -127,6 +127,9 @@ interface SandboxController {
 
     /** Restore rootfs from a gzipped tarball [data]. Deletes current rootfs first. */
     suspend fun importSandbox(data: ByteArray): Result<Unit> = Result.failure(NotImplementedError())
+
+    /** Install Docker Desktop on the host (desktop only). No-op on Android. */
+    suspend fun installDocker(): Boolean = false
 }
 
 expect fun createSandboxController(): SandboxController

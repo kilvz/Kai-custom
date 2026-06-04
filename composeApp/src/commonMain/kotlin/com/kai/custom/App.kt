@@ -37,6 +37,8 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.svg.SvgDecoder
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ThemeMode
+import org.koin.core.module.Module
+import org.koin.dsl.module
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationPermissionController
@@ -89,6 +91,7 @@ fun App(
     textToSpeech: TextToSpeechInstance? = null,
     isKoinStarted: Boolean = false,
     onAppOpens: ((Int) -> Unit)? = null,
+    extraKoinModules: List<Module> = emptyList(),
 ) {
     setSingletonImageLoaderFactory { context: PlatformContext ->
         ImageLoader.Builder(context)
@@ -106,7 +109,7 @@ fun App(
     } else {
         KoinApplication(
             configuration = koinConfiguration {
-                modules(appModule)
+                modules(appModule + extraKoinModules)
             },
         ) {
             AppContent(navController, lightColorScheme, darkColorScheme, textToSpeech, onAppOpens)

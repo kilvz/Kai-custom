@@ -6,12 +6,14 @@ import com.kai.custom.data.AppSettings
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.ToolExecutor
+import com.kai.custom.mcp.McpServerManager
 
 class DebugApiControllerDesktop(
     private val dataRepository: DataRepository,
     private val memoryStore: MemoryStore,
     private val appSettings: AppSettings,
     private val toolExecutor: ToolExecutor,
+    private val mcpServerManager: McpServerManager,
     private val sandboxController: SandboxController,
 ) : DebugApiController {
 
@@ -28,6 +30,7 @@ class DebugApiControllerDesktop(
                 memoryStore = memoryStore,
                 appSettings = appSettings,
                 toolExecutor = toolExecutor,
+                mcpServerManager = mcpServerManager,
                 sandboxController = sandboxController,
             )
             server!!.start()

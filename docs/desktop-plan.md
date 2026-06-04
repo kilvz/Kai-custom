@@ -224,9 +224,11 @@ class DebugServerDesktop(
     private val toolExecutor: ToolExecutor,
     private val mcpServerManager: McpServerManager,
     private val sandboxController: SandboxController,
-    // No WhatsAppLifecycleManager on desktop — replaced with Docker-based variant
+    // No WhatsAppLifecycleManager — Docker-based via sandboxController.installWhatsAppBridge()
 )
 ```
+
+**Status:** ✅ Ported — ~720 LOC with all ~80 endpoints. Android-only endpoints (SMS, local inference, wake word) return stubs with sensible defaults.
 
 ### `DebugApiControllerDesktop.kt`
 
@@ -352,21 +354,30 @@ actual class WhatsAppLifecycleManager { ... } // or inject via Koin
 
 ---
 
-## Phase 6 — Alt-Memory (Docker-hosted)
+## Phase 6 — Alt-Memory (Dedicated Docker Container)
 
-Alt-memory Python server runs inside the Docker container:
+Alt-memory runs as its own Docker container (not inside the sandbox container), built from `kilv/alt-memory:full` on Docker Hub:
 
 ```kotlin
-// In DockerSandboxController:
-override suspend fun startAltMemory() {
-    dockerManager.execBash(containerId, "pip install alt-memory && alt-memory-server --port 8316 &")
-}
-override suspend fun stopAltMemory() {
-    dockerManager.execBash(containerId, "pkill -f alt-memory-server")
+// AltMemoryDockerManager.kt
+class AltMemoryDockerManager(private val dockerManager: DockerManager) {
+    suspend fun pullImage()       // docker pull kilv/alt-memory:full
+    suspend fun startContainer()  // docker run -d --name kai-alt-memory -p 8316:8316 ...
+    suspend fun stopContainer()   // docker stop kai-alt-memory
+    suspend fun checkHealth()     // GET http://localhost:8316/health
 }
 ```
 
-Port forwarding: user maps `localhost:8316` to container via `docker run -p 8316:8316`.
+Container command: `alt-memory mcp --host 0.0.0.0 --port 8316 --transport sse`
+
+**Benefits over inline approach:**
+- `--restart unless-stopped` keeps it alive across crashes
+- Named volume `alt-memory-data:/root/.alt-memory` survives restarts
+- No `&` in docker exec (broken — process dies when exec session ends)
+- Clean separation from sandbox container
+- Pre-built image on Docker Hub (no local build needed)
+
+**Port mapping:** host `8316` → container `8316`
 
 ---
 
@@ -420,11 +431,11 @@ The existing release workflow already has `dmg`/`msi`/`deb`/`rpm`/`appimage` job
 | 2 | AdminTool + OpenFileTool (desktop actuals) | ✅ Done | 2 | 145 |
 | 3 | WhatsApp Docker bridge (port mappings + npm install) | ✅ Done | 1 | 7 |
 | 4 | Build: createDistributable + packageMsi | ✅ Done | - | - |
-| 5 | Debug API server port (full parity) | ⬜ Not started | - | - |
-| 6 | Alt-Memory Docker (full parity) | ⬜ Not started | - | - |
+| 5 | Debug API server port (full parity) | ✅ Done | 3 | 720 |
+| 6 | Alt-Memory Docker (full parity) | ✅ Done | 2 | 160 |
 | 7 | Wake Word (stub) | ⬜ Not started | - | - |
 
-**Completed: ~1952 LOC across ~20 files**
+**Completed: ~2832 LOC across ~25 files**
 
 ---
 

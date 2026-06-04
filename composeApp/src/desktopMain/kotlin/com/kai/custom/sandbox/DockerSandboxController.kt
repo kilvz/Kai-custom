@@ -8,9 +8,12 @@ import com.kai.custom.SandboxStatus
 import com.kai.custom.TerminalLine
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.mutableStateListOf
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.ByteArrayOutputStream
@@ -19,7 +22,9 @@ import java.util.concurrent.TimeUnit
 
 class DockerSandboxController(
     private val dockerManager: DockerManager = DockerManager(),
+    private val altMemoryDockerManager: AltMemoryDockerManager = AltMemoryDockerManager(dockerManager),
 ) : SandboxController {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _status = MutableStateFlow(SandboxStatus())
     override val status: StateFlow<SandboxStatus> = _status
@@ -34,7 +39,7 @@ class DockerSandboxController(
 
     override fun setup() {
         _status.value = _status.value.copy(working = true, statusText = "Setting up Docker sandbox...")
-        kotlinx.coroutines.runBlocking {
+        scope.launch {
             try {
                 val info = dockerManager.getInfo()
                 if (!info.available) {
@@ -42,9 +47,11 @@ class DockerSandboxController(
                         working = false, error = true,
                         statusText = "Docker is not available. Please install Docker Desktop.",
                     )
-                    return@runBlocking
+                    return@launch
                 }
+                _status.value = _status.value.copy(statusText = "Pulling Docker image ($imageName)...")
                 dockerManager.pullImage(imageName)
+                _status.value = _status.value.copy(statusText = "Creating sandbox container...")
                 val cid = dockerManager.createContainer(
                     imageName, containerName,
                     portMappings = mapOf(8316 to 8316, 8317 to 8317),
@@ -52,7 +59,7 @@ class DockerSandboxController(
                 if (cid != null) {
                     _status.value = _status.value.copy(
                         installed = true, ready = true, working = false,
-                        statusText = "Sandbox ready",
+                        statusText = "Sandbox ready ($imageName)",
                     )
                     refreshStatus()
                 } else {
@@ -75,7 +82,8 @@ class DockerSandboxController(
     }
 
     override fun reset() {
-        kotlinx.coroutines.runBlocking {
+        _status.value = _status.value.copy(working = true, statusText = "Removing sandbox container...")
+        scope.launch {
             dockerManager.removeContainer(containerName, force = true)
             _status.value = SandboxStatus()
             sessionProcesses.clear()
@@ -85,7 +93,7 @@ class DockerSandboxController(
 
     override fun installPackages() {
         _status.value = _status.value.copy(working = true, statusText = "Installing packages...")
-        kotlinx.coroutines.runBlocking {
+        scope.launch {
             try {
                 dockerManager.execCommand(containerName,
                     "apk add --no-cache python3 nodejs npm curl git bash sudo")
@@ -273,21 +281,20 @@ class DockerSandboxController(
     }
 
     override suspend fun startAltMemory() {
-        dockerManager.execCommand(containerName,
-            "pip3 install alt-memory 2>/dev/null && alt-memory-server --port 8316 --host 0.0.0.0 &")
+        altMemoryDockerManager.startContainer()
     }
 
     override suspend fun stopAltMemory() {
-        dockerManager.execCommand(containerName, "pkill -f alt-memory-server 2>/dev/null || true")
+        altMemoryDockerManager.stopContainer()
     }
 
     override suspend fun installAltMemoryPackage(): Boolean {
-        val output = dockerManager.execCommand(containerName,
-            "pip3 install alt-memory 2>&1; echo EXIT:\$?")
-        return output.contains("EXIT:0")
+        return altMemoryDockerManager.pullImage() && altMemoryDockerManager.startContainer()
     }
 
-    override suspend fun updateAltMemoryPackage(): Boolean = installAltMemoryPackage()
+    override suspend fun updateAltMemoryPackage(): Boolean {
+        return altMemoryDockerManager.pullAndRestart()
+    }
 
     override suspend fun startWhatsApp() {
         dockerManager.execCommand(containerName,
@@ -373,4 +380,6 @@ class DockerSandboxController(
             _sessions.value = _sessions.value + sessionId
         }
     }
+
+    override suspend fun installDocker(): Boolean = true
 }

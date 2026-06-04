@@ -49,7 +49,7 @@ class SandboxViewModel(
         applyStatus(
             sandboxController.status.value,
             SandboxUiState(
-                showSandbox = currentPlatform is Platform.Mobile.Android,
+                showSandbox = currentPlatform is Platform.Mobile.Android || currentPlatform is Platform.Desktop,
                 isSandboxEnabled = dataRepository.isSandboxEnabled(),
                 isSandboxStorageMountEnabled = dataRepository.isSandboxStorageMountEnabled(),
                 isSandboxRootEnabled = dataRepository.isSandboxRootEnabled(),

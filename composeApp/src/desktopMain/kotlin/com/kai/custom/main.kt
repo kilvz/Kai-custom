@@ -19,6 +19,7 @@ import kai.composeapp.generated.resources.logo
 import nl.marc_apps.tts.TextToSpeechEngine
 import nl.marc_apps.tts.TextToSpeechInstance
 import nl.marc_apps.tts.experimental.ExperimentalDesktopTarget
+import com.kai.custom.data.dimension.dimensionModule
 import nl.marc_apps.tts.rememberTextToSpeechOrNull
 import org.jetbrains.compose.resources.painterResource
 
@@ -53,6 +54,7 @@ fun main() {
             App(
                 navController = navController,
                 textToSpeech = textToSpeech,
+                extraKoinModules = listOf(dimensionModule),
             )
         }
     }
