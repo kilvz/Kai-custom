@@ -128,3 +128,6 @@ expect fun sendHeartbeatNotification(title: String, body: String)
 
 /** Maps tool IDs to required platform permissions. On Android these are Manifest.permission strings. */
 expect fun getToolPermissionMap(): Map<String, List<String>>
+
+/** Converts a hardware keycode to a human-readable name (e.g. 24 -> "KEYCODE_VOLUME_UP"). */
+expect fun keyCodeToName(keyCode: Int): String

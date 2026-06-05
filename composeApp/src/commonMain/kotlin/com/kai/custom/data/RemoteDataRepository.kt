@@ -2117,6 +2117,11 @@ class RemoteDataRepository(
         appSettings.setPreferredLanguage(lang)
     }
 
+    override fun getPttTriggerKeyCode(): Int = appSettings.getPttTriggerKeyCode()
+    override fun setPttTriggerKeyCode(keyCode: Int) {
+        appSettings.setPttTriggerKeyCode(keyCode)
+    }
+
     override fun getHeartbeatConfig(): HeartbeatConfig = heartbeatManager.getConfig()
 
     override fun setHeartbeatEnabled(enabled: Boolean) {

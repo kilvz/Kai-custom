@@ -3,6 +3,7 @@ package com.kai.custom
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -95,6 +96,28 @@ class MainActivity : ComponentActivity() {
                 },
             )
         }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+            if (PttTriggerManager.captureMode.value) {
+                PttTriggerManager.reportCapturedKey(event.keyCode)
+                return true
+            }
+            val appSettings: com.kai.custom.data.AppSettings = get()
+            if (appSettings.getPttTriggerKeyCode() == event.keyCode) {
+                PttTriggerManager.triggerDown()
+                return true
+            }
+        }
+        if (event.action == KeyEvent.ACTION_UP) {
+            val appSettings: com.kai.custom.data.AppSettings = get()
+            if (appSettings.getPttTriggerKeyCode() == event.keyCode) {
+                PttTriggerManager.triggerUp()
+                return true
+            }
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onStart() {

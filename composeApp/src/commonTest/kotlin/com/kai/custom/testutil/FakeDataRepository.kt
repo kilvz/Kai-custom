@@ -780,11 +780,14 @@ class FakeDataRepository : DataRepository {
     override fun getWakeWordTemplate(): String = ""
     override fun setWakeWordTemplate(template: String) {}
 
-    // Language
-    override fun getPreferredLanguage(): String = "en"
-    override fun setPreferredLanguage(lang: String) {}
+// Language
+override fun getPreferredLanguage(): String = "en"
+override fun setPreferredLanguage(lang: String) {}
 
-    // Telegram
+override fun getPttTriggerKeyCode(): Int = 0
+override fun setPttTriggerKeyCode(keyCode: Int) {}
+
+// Telegram
     override fun isTelegramEnabled(): Boolean = false
     override fun setTelegramEnabled(enabled: Boolean) {}
     override fun getTelegramBotToken(): String = ""

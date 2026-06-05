@@ -369,9 +369,13 @@ class AppSettings(internal val settings: Settings) {
     }
 
     fun getAltMemoryMode(): String = settings.getString(KEY_ALT_MEMORY_MODE, "native")
-
     fun setAltMemoryMode(mode: String) {
         settings.putString(KEY_ALT_MEMORY_MODE, mode)
+    }
+
+    fun getPttTriggerKeyCode(): Int = settings.getInt(KEY_PTT_TRIGGER_KEYCODE, 0)
+    fun setPttTriggerKeyCode(keyCode: Int) {
+        settings.putInt(KEY_PTT_TRIGGER_KEYCODE, keyCode)
     }
 
     // Agent memories
@@ -947,6 +951,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_PERSONA_NAME = "current_persona" // legacy, use active_persona_id
         const val KEY_ACTIVE_PERSONA_ID = "active_persona_id"
         const val KEY_MEMORY_ENABLED = "memory_enabled"
+        const val KEY_PTT_TRIGGER_KEYCODE = "ptt_trigger_keycode"
         const val KEY_ALT_MEMORY_ENABLED = "alt_memory_enabled"
         const val KEY_ALT_MEMORY_INSTALLED = "alt_memory_installed"
         const val KEY_ALT_MEMORY_MODE = "alt_memory_mode"

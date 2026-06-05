@@ -149,6 +149,8 @@ actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {}
 
 actual fun getToolPermissionMap(): Map<String, List<String>> = emptyMap()
 
+actual fun keyCodeToName(keyCode: Int): String = "Key $keyCode"
+
 actual suspend fun compressImageBytes(bytes: ByteArray, mimeType: String): ByteArray {
     if (!mimeType.startsWith("image/")) return bytes
     return try {

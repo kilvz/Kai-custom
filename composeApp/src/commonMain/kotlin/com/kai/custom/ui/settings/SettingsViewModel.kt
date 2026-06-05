@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.DaemonController
 import com.kai.custom.DebugApiController
+import com.kai.custom.PttTriggerManager
 import com.kai.custom.SandboxController
 import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
@@ -162,6 +163,7 @@ class SettingsViewModel(
         wakeWordEnrolled = dataRepository.getWakeWordTemplate().isNotBlank(),
         isEnrolling = false,
         preferredLanguage = dataRepository.getPreferredLanguage(),
+        pttTriggerKeyCode = dataRepository.getPttTriggerKeyCode(),
         uiScale = dataRepository.getUiScale(),
         showUiScale = currentPlatform is Platform.Desktop,
         mcpServers = buildMcpServerEntries().toImmutableList(),
@@ -232,6 +234,8 @@ class SettingsViewModel(
         onChangePreferredLanguage = ::onChangePreferredLanguage,
         onChangeWakeWordMode = ::onChangeWakeWordMode,
         onEnrollWakeWord = ::onEnrollWakeWord,
+        onCapturePttTrigger = ::onCapturePttTrigger,
+        onClearPttTrigger = ::onClearPttTrigger,
         onChangeUiScale = ::onChangeUiScale,
         onAddMcpServer = ::onAddMcpServer,
         onRemoveMcpServer = ::onRemoveMcpServer,
@@ -930,6 +934,22 @@ class SettingsViewModel(
                 _state.update { it.copy(isEnrolling = false, wakeWordEnrollmentMessage = "") }
             }
         }
+    }
+
+    private fun onCapturePttTrigger() {
+        PttTriggerManager.startCapture()
+        viewModelScope.launch {
+            PttTriggerManager.capturedKeyCode.collect { keyCode ->
+                if (keyCode != 0) {
+                    dataRepository.setPttTriggerKeyCode(keyCode)
+                    return@collect
+                }
+            }
+        }
+    }
+
+    private fun onClearPttTrigger() {
+        dataRepository.setPttTriggerKeyCode(0)
     }
 
     private fun onDownloadLocalModel(model: LocalModel) {

@@ -198,6 +198,8 @@ actual fun getToolPermissionMap(): Map<String, List<String>> = mapOf(
     "create_calendar_event" to listOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR),
 )
 
+actual fun keyCodeToName(keyCode: Int): String = android.view.KeyEvent.keyCodeToString(keyCode)
+
 actual suspend fun compressImageBytes(bytes: ByteArray, mimeType: String): ByteArray {
     if (!mimeType.startsWith("image/")) return bytes
     return try {

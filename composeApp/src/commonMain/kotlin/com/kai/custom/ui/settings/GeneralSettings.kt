@@ -28,6 +28,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,9 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kai.custom.PttTriggerManager
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.languageOptions
 import com.kai.custom.isDebugBuild
+import com.kai.custom.keyCodeToName
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.KaiSlider
 import com.kai.custom.ui.handCursor
@@ -73,6 +76,7 @@ internal fun GeneralContent(
     wakeWordEnrolled: Boolean,
     isEnrolling: Boolean,
     wakeWordEnrollmentMessage: String,
+    pttTriggerKeyCode: Int,
     preferredLanguage: String,
     showDebugApiSection: Boolean = false,
     isDebugApiEnabled: Boolean = false,
@@ -143,6 +147,13 @@ internal fun GeneralContent(
                             onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
                             onChangeWakeWordMode = actions.onChangeWakeWordMode,
                             onEnrollWakeWord = actions.onEnrollWakeWord,
+                        )
+                    }
+                    SettingsCard {
+                        PttTriggerSection(
+                            pttTriggerKeyCode = pttTriggerKeyCode,
+                            onCapture = actions.onCapturePttTrigger,
+                            onClear = actions.onClearPttTrigger,
                         )
                     }
                     SettingsCard {
@@ -220,6 +231,13 @@ internal fun GeneralContent(
                     )
                 }
                 SettingsCard {
+                    PttTriggerSection(
+                        pttTriggerKeyCode = pttTriggerKeyCode,
+                        onCapture = actions.onCapturePttTrigger,
+                        onClear = actions.onClearPttTrigger,
+                    )
+                }
+                SettingsCard {
                     LanguageSection(
                         preferredLanguage = preferredLanguage,
                         onChangePreferredLanguage = actions.onChangePreferredLanguage,
@@ -238,8 +256,67 @@ internal fun GeneralContent(
                             isDebugEndpointEnabled = isDebugEndpointEnabled,
                             onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
                         )
-                    }
                 }
+            }
+        }
+    }
+    }
+}
+
+@Composable
+private fun PttTriggerSection(
+    pttTriggerKeyCode: Int,
+    onCapture: () -> Unit,
+    onClear: () -> Unit,
+) {
+    val isCapturing by PttTriggerManager.captureMode.collectAsState()
+    val keyName = if (pttTriggerKeyCode != 0) keyCodeToName(pttTriggerKeyCode) else null
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Push-to-Talk",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Press-and-hold a hardware button to start voice input in interactive mode",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        if (pttTriggerKeyCode != 0) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = CenterVertically,
+            ) {
+                Text(
+                    text = "Button: ${keyName ?: pttTriggerKeyCode.toString()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                OutlinedButton(onClick = onClear) {
+                    Text("Clear")
+                }
+            }
+        } else {
+            Text(
+                text = "Button: Logo touch only",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = onCapture,
+            enabled = !isCapturing,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            if (isCapturing) {
+                Text("Press a button on your device...")
+            } else {
+                Text(if (pttTriggerKeyCode != 0) "Change button" else "Capture button")
             }
         }
     }

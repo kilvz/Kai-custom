@@ -502,6 +502,7 @@ fun SettingsScreenContent(
                                     wakeWordEnrolled = filteredUiState.wakeWordEnrolled,
                                     isEnrolling = filteredUiState.isEnrolling,
                                     wakeWordEnrollmentMessage = filteredUiState.wakeWordEnrollmentMessage,
+                                    pttTriggerKeyCode = filteredUiState.pttTriggerKeyCode,
                                     preferredLanguage = filteredUiState.preferredLanguage,
                                     showDebugApiSection = filteredUiState.showDebugApiSection,
                                     isDebugApiEnabled = filteredUiState.isDebugApiEnabled,

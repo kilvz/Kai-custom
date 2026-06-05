@@ -84,6 +84,8 @@ import com.kai.custom.BackIcon
 import com.kai.custom.TerminalLine
 import com.kai.custom.data.Service
 import com.kai.custom.data.supportsAgenticFlows
+import com.kai.custom.PttEvent
+import com.kai.custom.PttTriggerManager
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.onDragAndDropEventDropped
 import com.kai.custom.ui.chat.EditMessageDialog
@@ -241,6 +243,15 @@ private fun InteractiveModeScreen(
     val showFullInput = inputExpanded && !uiState.isLoading
     var questionInputText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
+    }
+
+    LaunchedEffect(Unit) {
+        PttTriggerManager.events.collect { event ->
+            when (event) {
+                PttEvent.DOWN -> onStartVoiceInput()
+                PttEvent.UP -> onStopVoiceInput()
+            }
+        }
     }
 
     Box(

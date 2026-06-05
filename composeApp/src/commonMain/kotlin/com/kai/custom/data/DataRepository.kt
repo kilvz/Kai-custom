@@ -182,6 +182,9 @@ interface DataRepository {
     fun getPreferredLanguage(): String
     fun setPreferredLanguage(lang: String)
 
+    fun getPttTriggerKeyCode(): Int
+    fun setPttTriggerKeyCode(keyCode: Int)
+
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean
     fun setSandboxEnabled(enabled: Boolean)
