@@ -73,9 +73,10 @@ class ProotExecutor(
     ): Map<String, Any> {
         val effectiveTimeout = timeoutSeconds.coerceIn(1, MAX_TIMEOUT_SECONDS)
 
+        var process: Process? = null
         return try {
             val envVars = buildEnvVars(extraEnv)
-            val process = Runtime.getRuntime().exec(
+            process = Runtime.getRuntime().exec(
                 buildCommandArray(command, workingDir, envVars),
                 envVars,
                 File(rootfsPath).parentFile,
@@ -114,6 +115,8 @@ class ProotExecutor(
                 "success" to false,
                 "error" to (e.message ?: "Failed to execute command in sandbox"),
             )
+        } finally {
+            process?.destroyForcibly()
         }
     }
 

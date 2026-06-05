@@ -152,7 +152,7 @@ fun ChatScreen(
 
     val appSettings: AppSettings = koinInject()
     val personaManager = remember { PersonaManager(appSettings) }
-    val activePersona = remember { personaManager.getActivePersona() }
+    val activePersona = personaManager.getActivePersona()
     val isAssistantOrOperator = activePersona.behaviorStyle == BehaviorStyle.ASSISTANT ||
         activePersona.behaviorStyle == BehaviorStyle.OPERATOR
     val hideThinking = appSettings.getHideThinking() || !isAssistantOrOperator

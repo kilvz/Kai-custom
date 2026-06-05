@@ -49,6 +49,7 @@ class DaemonService : Service() {
     }
 
     override fun onDestroy() {
+        taskScheduler.stop()
         debugApiController.stop()
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()

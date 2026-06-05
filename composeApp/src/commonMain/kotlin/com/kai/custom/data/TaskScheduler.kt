@@ -155,6 +155,11 @@ class TaskScheduler(
         }
     }
 
+    fun stop() {
+        activeJob?.cancel()
+        activeJob = null
+    }
+
     /**
      * Run one heartbeat cycle: build the prompt, call the AI, record the result, and
      * surface any non-OK response (in-app message + push notification when backgrounded).
@@ -312,6 +317,7 @@ class TaskScheduler(
         val failures = task.consecutiveFailures + 1
         val reason = error ?: "unknown error"
         val log = appendExecution(task, success = false, message = reason)
+        val store = taskStore ?: return
 
         if (task.cron != null) {
             // Cron task failed — advance to the next scheduled time instead of retrying every cycle
@@ -321,7 +327,7 @@ class TaskScheduler(
                 null
             }
             if (nextExecution != null) {
-                taskStore!!.updateTask(
+                store.updateTask(
                     task.copy(
                         scheduledAtEpochMs = nextExecution.toEpochMilliseconds(),
                         lastResult = "Failed at $now: $reason (next retry at $nextExecution)",
@@ -330,7 +336,7 @@ class TaskScheduler(
                     ),
                 )
             } else {
-                taskStore!!.updateTask(
+                store.updateTask(
                     task.copy(
                         status = TaskStatus.COMPLETED,
                         lastResult = "Failed at $now: $reason (no next schedule)",
@@ -342,7 +348,7 @@ class TaskScheduler(
         } else {
             // One-time task — apply exponential backoff
             val backoffMs = min(POLL_INTERVAL_MS * (1L shl min(failures, 10)), MAX_BACKOFF_MS)
-            taskStore!!.updateTask(
+            store.updateTask(
                 task.copy(
                     scheduledAtEpochMs = now.toEpochMilliseconds() + backoffMs,
                     lastResult = "Failed at $now: $reason (retry after ${backoffMs / 1000}s backoff)",

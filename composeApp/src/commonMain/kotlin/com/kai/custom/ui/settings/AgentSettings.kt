@@ -164,6 +164,21 @@ internal fun AgentContent(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     SettingsCard {
+                        SoulEditor(
+                            soulText = soulText,
+                            soulAuto = soulAuto,
+                            personaName = personaName,
+                            onSaveSoul = actions.onSaveSoul,
+                            onChangePersonaName = actions.onChangePersonaName,
+                            personas = personas,
+                            activePersonaId = activePersonaId,
+                            onSwitchPersona = actions.onSwitchPersona,
+                            onSavePersona = actions.onSavePersona,
+                            onDeletePersona = actions.onDeletePersona,
+                            onCreatePersona = actions.onCreatePersona,
+                        )
+                    }
+                    SettingsCard {
                 MemoryList(
                         memories = memories,
                         onDeleteMemory = actions.onDeleteMemory,

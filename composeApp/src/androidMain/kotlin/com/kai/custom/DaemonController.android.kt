@@ -19,7 +19,7 @@ class AndroidDaemonController : DaemonController {
         try {
             val intent = Intent(context, DaemonService::class.java)
             context.startForegroundService(intent)
-        } catch (_: ForegroundServiceStartNotAllowedException) {
+        } catch (_: Exception) {
             // App is not in a foreground state — cannot start foreground service (Android 12+)
         }
     }
