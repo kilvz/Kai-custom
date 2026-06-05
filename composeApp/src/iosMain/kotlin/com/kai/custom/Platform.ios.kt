@@ -344,6 +344,11 @@ actual suspend fun saveFileToDevice(bytes: ByteArray, baseName: String, extensio
     file?.write(bytes)
 }
 
+actual suspend fun saveFileToDevice(path: String, baseName: String, extension: String) {
+    val file = FileKit.openFileSaver(suggestedName = baseName, defaultExtension = extension)
+    file?.write(java.io.File(path).readBytes())
+}
+
 @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 actual fun sendHeartbeatNotification(title: String, body: String) {
     // The authorization completion runs asynchronously on a system queue, so it's outside the

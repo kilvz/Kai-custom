@@ -95,7 +95,7 @@ fun getWhatsAppAdminTools(
             name = "update_baileys_config",
             description = "Update the Baileys WhatsApp library configuration, including browser " +
                 "identification (name and version), mark-online behavior, sync-history, and " +
-                "link-preview settings. The bridge will be reconfigured with the new values.",
+                "link-preview settings. The bridge will be automatically restarted with the new values.",
             parameters = mapOf(
                 "browser_name" to ParameterSchema(
                     type = "string",
@@ -145,7 +145,7 @@ fun getWhatsAppAdminTools(
                 updateBridgeConfig()
                 return mapOf(
                     "success" to true,
-                    "message" to "Baileys config updated",
+                    "message" to "Baileys config updated and bridge restarting",
                     "browser_name" to appSettings.getBaileysBrowserName(),
                     "browser_version" to appSettings.getBaileysBrowserVersion(),
                     "mark_online" to appSettings.getBaileysMarkOnline(),
@@ -169,5 +169,15 @@ val whatsAppToolDefinitions: List<ToolInfo> = listOf(
         id = "send_whatsapp_message",
         name = "Send WhatsApp Message",
         description = "Send a proactive message to a WhatsApp chat",
+    ),
+    ToolInfo(
+        id = "restart_whatsapp_bridge",
+        name = "Restart WhatsApp Bridge",
+        description = "Restart the WhatsApp bridge process",
+    ),
+    ToolInfo(
+        id = "update_baileys_config",
+        name = "Update Baileys Config",
+        description = "Update WhatsApp library configuration and restart bridge",
     ),
 )

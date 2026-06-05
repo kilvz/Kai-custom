@@ -1,4 +1,4 @@
-import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, Browsers } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, Browsers, makeInMemoryStore } from '@whiskeysockets/baileys';
 import express from 'express';
 import pino from 'pino';
 import QRCode from 'qrcode';
@@ -15,7 +15,7 @@ const UNREAD_FILE = '/tmp/whatsapp-unread.json';
 const PORT = parseInt(process.env.WA_BRIDGE_PORT || '8317', 10);
 
 let sock = null;
-let store = null;
+const store = makeInMemoryStore({ logger });
 let currentQr = null;
 let connected = false;
 let pairingMode = false;
@@ -91,6 +91,7 @@ async function initBaileys() {
     qrTimeout: 120_000,
   });
 
+  store.bind(sock.ev);
   sock.ev.on('creds.update', saveCreds);
 
   sock.ev.on('connection.update', async (update) => {

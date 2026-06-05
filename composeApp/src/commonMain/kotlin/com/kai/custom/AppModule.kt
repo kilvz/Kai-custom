@@ -121,7 +121,7 @@ val appModule = module {
         WhatsAppStore(get())
     }
     single<WhatsAppPoller> {
-        WhatsAppPoller(get<WhatsAppStore>(), lazy { get<DataRepository>() }, get<McpServerManager>(), get<MemoryStore>())
+        WhatsAppPoller(get<WhatsAppStore>(), lazy { get<DataRepository>() }, get<McpServerManager>())
     }
     single<WhatsAppLifecycleManager> {
         WhatsAppLifecycleManager(get<SandboxController>(), get<McpServerManager>(), get(), get<WhatsAppStore>())

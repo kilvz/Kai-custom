@@ -650,7 +650,7 @@ class AndroidSandboxController : SandboxController {
             logStep("NPM_INSTALL", "starting npm install (timeout 300s)")
 
             val install = executor.execute(
-                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
+                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys express qrcode pino 2>&1",
                 timeoutSeconds = 300,
             )
 
@@ -720,13 +720,17 @@ class AndroidSandboxController : SandboxController {
                 "-C", rootfsParent,
                 rootfs.name,
             ).redirectErrorStream(true).start()
-            val exitCode = process.waitFor()
+            val completed = process.waitFor(30, java.util.concurrent.TimeUnit.MINUTES)
+            if (!completed) {
+                process.destroyForcibly()
+                return@withContext Result.failure<SandboxController.BackupResult>(IOException("tar timed out after 30 minutes"))
+            }
+            val exitCode = process.exitValue()
             if (exitCode != 0) {
                 val err = process.inputStream.bufferedReader().readText()
                 return@withContext Result.failure<SandboxController.BackupResult>(IOException("tar failed (exit=$exitCode): $err"))
             }
 
-            val bytes = tmpFile.readBytes()
             val destPath: String
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -739,16 +743,18 @@ class AndroidSandboxController : SandboxController {
                 if (uri == null) {
                     val fallback = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Kai/$fileName")
                     fallback.parentFile?.mkdirs()
-                    fallback.writeBytes(bytes)
+                    tmpFile.copyTo(fallback, overwrite = true)
                     destPath = fallback.absolutePath
                 } else {
-                    context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) }
+                    context.contentResolver.openOutputStream(uri)?.use { out ->
+                        tmpFile.inputStream().use { it.copyTo(out) }
+                    }
                     destPath = "/storage/emulated/0/Download/Kai/$fileName"
                 }
             } else {
                 val dest = File(android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS), "Kai/$fileName")
                 dest.parentFile?.mkdirs()
-                dest.writeBytes(bytes)
+                tmpFile.copyTo(dest, overwrite = true)
                 destPath = dest.absolutePath
             }
 
@@ -767,7 +773,7 @@ class AndroidSandboxController : SandboxController {
             } else {
                 destPath
             }
-            Result.success(SandboxController.BackupResult(path = finalPath, bytes = bytes))
+            Result.success(SandboxController.BackupResult(path = finalPath))
         } catch (e: Exception) {
             android.util.Log.e("SandboxController", "Backup failed", e)
             Result.failure<SandboxController.BackupResult>(e)
@@ -791,7 +797,12 @@ class AndroidSandboxController : SandboxController {
                 "tar", "-xzf", tmpFile.absolutePath,
                 "-C", rootfsParent.absolutePath,
             ).redirectErrorStream(true).start()
-            val exitCode = process.waitFor()
+            val completed = process.waitFor(30, java.util.concurrent.TimeUnit.MINUTES)
+            if (!completed) {
+                process.destroyForcibly()
+                return@withContext Result.failure(IOException("tar extract timed out after 30 minutes"))
+            }
+            val exitCode = process.exitValue()
             if (exitCode != 0) {
                 val err = process.inputStream.bufferedReader().readText()
                 return@withContext Result.failure(IOException("tar extract failed (exit=$exitCode): $err"))

@@ -28,6 +28,7 @@ enum class ImportSection {
     HEARTBEAT,
     EMAIL,
     SMS,
+    WHATSAPP,
     SPLINTERLANDS,
     TOOLS,
     MCP,
@@ -89,6 +90,12 @@ fun detectExportableSections(json: JsonObject): Map<ImportSection, String?> {
         sections[ImportSection.SPLINTERLANDS] = null
     }
 
+    val waEnabled = json["whatsapp_enabled"]?.jsonPrimitive?.content?.toBoolean() == true
+    val waHasContacts = json["whatsapp_allowed_contacts"]?.jsonPrimitive?.content?.isNotBlank() == true
+    if (waEnabled || waHasContacts) {
+        sections[ImportSection.WHATSAPP] = null
+    }
+
     val toolOverrides = json["tool_overrides"]?.jsonObject
     if (toolOverrides != null && toolOverrides.isNotEmpty()) {
         val enabled = toolOverrides.count { (_, v) ->
@@ -142,6 +149,9 @@ fun detectImportSections(json: JsonObject): Map<ImportSection, String?> {
     }
     if (json["splinterlands_enabled"] != null || json["splinterlands_account"] != null) {
         sections[ImportSection.SPLINTERLANDS] = null
+    }
+    if (json["whatsapp_enabled"] != null || json["whatsapp_read_only"] != null || json["whatsapp_reply_mode"] != null) {
+        sections[ImportSection.WHATSAPP] = null
     }
     if (json["tool_overrides"] != null) {
         val enabled = json["tool_overrides"]?.jsonObject?.count { (_, v) ->

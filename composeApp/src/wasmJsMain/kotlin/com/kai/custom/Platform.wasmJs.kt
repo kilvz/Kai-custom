@@ -209,6 +209,10 @@ actual suspend fun saveFileToDevice(bytes: ByteArray, baseName: String, extensio
     FileKit.download(bytes = bytes, fileName = "$baseName.$extension")
 }
 
+actual suspend fun saveFileToDevice(path: String, baseName: String, extension: String) {
+    throw NotImplementedError("saveFileToDevice(path) not available on WasmJs")
+}
+
 // Web notifications API isn't wired up; stub.
 actual fun sendHeartbeatNotification(title: String, body: String) = Unit
 

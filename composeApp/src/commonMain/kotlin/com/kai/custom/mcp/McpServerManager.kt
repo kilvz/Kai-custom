@@ -21,6 +21,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     private val mutex = Mutex()
+    private val lock = Any()
     private val clients = mutableMapOf<String, McpClient>()
     private val discoveredTools = mutableMapOf<String, List<McpToolMetadata>>()
 
@@ -105,8 +106,11 @@ class McpServerManager(private val appSettings: AppSettings) {
         val server = getAllServers().find { it.id == serverId }
             ?: return Result.failure(McpException("Server not found: $serverId"))
 
-        // Close existing client if any
-        mutex.withLock { clients[serverId] }?.close()
+        mutex.withLock {
+            clients[serverId]?.close()
+            clients.remove(serverId)
+            discoveredTools.remove(serverId)
+        }
 
         val client = McpClient(server.url, server.headers)
         return try {
@@ -140,10 +144,16 @@ class McpServerManager(private val appSettings: AppSettings) {
 
     fun getEnabledMcpTools(): List<Tool> {
         val enabledServers = getAllServers().filter { it.isEnabled }.map { it.id }.toSet()
+        val toolsSnapshot: List<Pair<String, List<McpToolMetadata>>>
+        val clientsSnapshot: Map<String, McpClient>
+        synchronized(lock) {
+            toolsSnapshot = discoveredTools.entries.map { it.key to it.value }
+            clientsSnapshot = clients.toMap()
+        }
         return buildList {
-            for ((serverId, tools) in discoveredTools) {
+            for ((serverId, tools) in toolsSnapshot) {
                 if (serverId !in enabledServers) continue
-                val client = clients[serverId] ?: continue
+                val client = clientsSnapshot[serverId] ?: continue
                 for (meta in tools) {
                     val toolId = McpTool.toolId(serverId, meta.name)
                     if (appSettings.isToolEnabled(toolId)) {
@@ -155,7 +165,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     fun getToolsForServer(serverId: String): List<ToolInfo> {
-        val tools = discoveredTools[serverId] ?: return emptyList()
+        val tools = synchronized(lock) { discoveredTools[serverId] } ?: return emptyList()
         return tools.map { meta ->
             val toolId = McpTool.toolId(serverId, meta.name)
             ToolInfo(

@@ -1,25 +1,25 @@
 package com.kai.custom.whatsapp
 
 import com.kai.custom.data.DataRepository
-import com.kai.custom.data.MemoryCategory
-import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.SharedJson
 import com.kai.custom.data.WhatsAppPendingMessage
 import com.kai.custom.data.WhatsAppStore
 import com.kai.custom.mcp.McpServerManager
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 
 class WhatsAppPoller(
     private val whatsAppStore: WhatsAppStore,
     private val dataRepository: Lazy<DataRepository>,
     private val mcpServerManager: McpServerManager,
-    private val memoryStore: MemoryStore,
 ) {
     private val json = SharedJson
+
+    companion object {
+        private const val TAG = "[WhatsAppPoller]"
+        /** Max pending messages kept in SharedPreferences to prevent unbounded growth. */
+        private const val MAX_PENDING = 200
+    }
 
     /**
      * Convert markdown formatting to WhatsApp-native formatting.
@@ -66,7 +66,8 @@ class WhatsAppPoller(
 
             val messages = try {
                 json.decodeFromString<List<WhatsAppPendingMessage>>(resultStr)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                println("$TAG Failed to parse unread messages: ${e.message}")
                 return
             }
 
@@ -78,16 +79,18 @@ class WhatsAppPoller(
 
             if (newMessages.isEmpty()) return
 
-            whatsAppStore.setPending(existing + newMessages)
+            // Cap pending list to prevent unbounded SharedPreferences growth
+            val updated = (existing + newMessages).takeLast(MAX_PENDING)
+            whatsAppStore.setPending(updated)
 
             for (msg in newMessages) {
-                storeMessageAsMemory(msg)
                 handleMessage(msg)
             }
 
             val markRead = whatsAppStore.isWhatsAppReadReceipt()
             client.callTool("clear_unread_messages", buildJsonObject { put("markRead", JsonPrimitive(markRead)) })
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("$TAG Poll error: ${e.message}")
         }
     }
 
@@ -99,7 +102,8 @@ class WhatsAppPoller(
             if (response.isNotBlank()) {
                 sendMessage(msg.chatId, sanitizeForWhatsApp(response))
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("$TAG Reply error for ${msg.chatId}: ${e.message}")
         }
     }
 
@@ -109,10 +113,13 @@ class WhatsAppPoller(
             "selected" -> {
                 val contacts = whatsAppStore.getWhatsAppAllowedContacts()
                     .split(",")
-                    .map { it.trim() }
+                    .map { it.trim().lowercase() }
                     .filter { it.isNotBlank() }
                 if (contacts.isEmpty()) return false
-                contacts.any { msg.chatId.contains(it) || msg.fromName.contains(it) }
+                // Extract phone from JID (e.g. "628123456789@s.whatsapp.net" → "628123456789")
+                val phone = msg.chatId.substringBefore("@").lowercase()
+                val name = msg.fromName.lowercase()
+                contacts.any { filter -> phone == filter || phone.endsWith(filter) || name == filter }
             }
             else -> !msg.fromMe
         }
@@ -125,27 +132,16 @@ class WhatsAppPoller(
                 "send_message",
                 buildJsonObject {
                     put("phone", JsonPrimitive(chatId))
-                    put("text", JsonPrimitive(sanitizeForWhatsApp(text)))
+                    put("text", JsonPrimitive(text))
                 },
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("$TAG Send error to $chatId: ${e.message}")
         }
     }
 
     suspend fun sendProactiveMessage(chatId: String, text: String) {
-        sendMessage(chatId, text)
+        sendMessage(chatId, sanitizeForWhatsApp(text))
     }
 
-    private suspend fun storeMessageAsMemory(msg: WhatsAppPendingMessage) {
-        try {
-            val phone = msg.sender.ifBlank { msg.chatId.split("@")[0] }
-            memoryStore.store(
-                key = "whatsapp_msg_${msg.chatId}_${msg.messageId}",
-                content = "WhatsApp message from ${msg.fromName} (phone: $phone): ${msg.text}",
-                category = MemoryCategory.GENERAL,
-                source = "whatsapp",
-            )
-        } catch (_: Exception) {
-        }
-    }
 }

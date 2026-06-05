@@ -476,6 +476,11 @@ actual suspend fun saveFileToDevice(bytes: ByteArray, baseName: String, extensio
     file?.write(bytes)
 }
 
+actual suspend fun saveFileToDevice(path: String, baseName: String, extension: String) {
+    val bytes = java.io.File(path).readBytes()
+    saveFileToDevice(bytes, baseName, extension)
+}
+
 /**
  * Posts a native OS notification. Each platform has its own surface:
  *   - macOS: `osascript` invokes the user-facing Notification Center.

@@ -123,6 +123,19 @@ fun AppSettings.exportToJson(
         map["sms_send_enabled"] = JsonPrimitive(isSmsSendEnabled())
     }
 
+    if (ImportSection.WHATSAPP in sections) {
+        map["whatsapp_enabled"] = JsonPrimitive(isWhatsAppEnabled())
+        map["whatsapp_read_only"] = JsonPrimitive(isWhatsAppReadOnly())
+        map["whatsapp_reply_mode"] = JsonPrimitive(getWhatsAppReplyMode())
+        map["whatsapp_allowed_contacts"] = JsonPrimitive(getWhatsAppAllowedContacts())
+        map["whatsapp_read_receipt"] = JsonPrimitive(isWhatsAppReadReceipt())
+        map["baileys_browser_name"] = JsonPrimitive(getBaileysBrowserName())
+        map["baileys_browser_version"] = JsonPrimitive(getBaileysBrowserVersion())
+        map["baileys_mark_online"] = JsonPrimitive(getBaileysMarkOnline())
+        map["baileys_sync_history"] = JsonPrimitive(getBaileysSyncHistory())
+        map["baileys_link_previews"] = JsonPrimitive(getBaileysLinkPreviews())
+    }
+
     if (ImportSection.SPLINTERLANDS in sections) {
         map["splinterlands_enabled"] = JsonPrimitive(isSplinterlandsEnabled())
         val splinterlandsAccountJson = getSplinterlandsAccountJson()
@@ -327,6 +340,34 @@ fun AppSettings.importFromJson(
         setSmsEnabled(false)
         setSmsPollIntervalMinutes(15)
         setSmsSendEnabled(false)
+    }
+
+    if (ImportSection.WHATSAPP in sections) {
+        try {
+            setWhatsAppEnabled(json["whatsapp_enabled"]?.jsonPrimitive?.content?.toBoolean() ?: false)
+            setWhatsAppReadOnly(json["whatsapp_read_only"]?.jsonPrimitive?.content?.toBoolean() ?: true)
+            setWhatsAppReplyMode(json["whatsapp_reply_mode"]?.jsonPrimitive?.content ?: "all")
+            setWhatsAppAllowedContacts(json["whatsapp_allowed_contacts"]?.jsonPrimitive?.content ?: "")
+            setWhatsAppReadReceipt(json["whatsapp_read_receipt"]?.jsonPrimitive?.content?.toBoolean() ?: false)
+            setBaileysBrowserName(json["baileys_browser_name"]?.jsonPrimitive?.content ?: "Windows")
+            setBaileysBrowserVersion(json["baileys_browser_version"]?.jsonPrimitive?.content ?: "130.0.0.0")
+            setBaileysMarkOnline(json["baileys_mark_online"]?.jsonPrimitive?.content?.toBoolean() ?: true)
+            setBaileysSyncHistory(json["baileys_sync_history"]?.jsonPrimitive?.content?.toBoolean() ?: false)
+            setBaileysLinkPreviews(json["baileys_link_previews"]?.jsonPrimitive?.content?.toBoolean() ?: true)
+        } catch (_: Exception) {
+            errors++
+        }
+    } else if (replace) {
+        setWhatsAppEnabled(false)
+        setWhatsAppReadOnly(true)
+        setWhatsAppReplyMode("all")
+        setWhatsAppAllowedContacts("")
+        setWhatsAppReadReceipt(false)
+        setBaileysBrowserName("Windows")
+        setBaileysBrowserVersion("130.0.0.0")
+        setBaileysMarkOnline(true)
+        setBaileysSyncHistory(false)
+        setBaileysLinkPreviews(true)
     }
 
     if (ImportSection.SPLINTERLANDS in sections) {

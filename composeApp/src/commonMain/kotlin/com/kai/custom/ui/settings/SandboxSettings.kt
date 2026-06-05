@@ -84,9 +84,9 @@ internal fun SandboxSettingsCard(
             }
         }
     }
-    LaunchedEffect(sandboxState.backupExportBytes) {
-        val bytes = sandboxState.backupExportBytes ?: return@LaunchedEffect
-        saveFileToDevice(bytes, "sandbox-rootfs", "tar.gz")
+    LaunchedEffect(sandboxState.backupExportPath) {
+        val path = sandboxState.backupExportPath ?: return@LaunchedEffect
+        saveFileToDevice(path, "sandbox-rootfs", "tar.gz")
         onExportSaved()
     }
     SettingsCard {

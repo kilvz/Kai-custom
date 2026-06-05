@@ -124,21 +124,9 @@ interface SandboxController {
     suspend fun installWhatsAppBridge(): Boolean = false
     suspend fun updateWhatsAppBridge(): Boolean = false
 
-    data class BackupResult(val path: String, val bytes: ByteArray) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-        other as BackupResult
-        return path == other.path && bytes.contentEquals(other.bytes)
-    }
-    override fun hashCode(): Int {
-        var result = path.hashCode()
-        result = 31 * result + bytes.contentHashCode()
-        return result
-    }
-}
+    data class BackupResult(val path: String)
 
-/** Create a gzipped tarball of the rootfs at [outputPath], returns the path on success. */
+    /** Create a gzipped tarball of the rootfs at [outputPath], returns the path on success. */
     suspend fun backupSandbox(outputPath: String? = null): Result<BackupResult> = Result.failure(NotImplementedError())
 
     /** Restore rootfs from a gzipped tarball [data]. Deletes current rootfs first. */

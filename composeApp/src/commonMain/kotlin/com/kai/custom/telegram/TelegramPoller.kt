@@ -24,6 +24,10 @@ class TelegramPoller(
     private val json = Json { ignoreUnknownKeys = true }
     private val client = httpClient {}
 
+    fun close() {
+        client.close()
+    }
+
     suspend fun poll() {
         val token = telegramStore.getBotToken()
         if (token.isBlank()) return
@@ -102,7 +106,8 @@ class TelegramPoller(
             if (response.isNotBlank()) {
                 sendMessage(msg.chatId, response, msg.messageId)
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("[TelegramPoller] Reply error: ${e.message}")
         }
     }
 
@@ -121,7 +126,8 @@ class TelegramPoller(
                     ),
                 )
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("[TelegramPoller] Send error: ${e.message}")
         }
     }
 

@@ -23,6 +23,7 @@ class AutoMemoryLearner(
     private val dataRepository: DataRepository,
     private val scope: CoroutineScope,
 ) {
+    @Volatile
     private var exchangeCount = 0
 
     /** Call after every successful AI response. Triggers extraction when interval reached. */

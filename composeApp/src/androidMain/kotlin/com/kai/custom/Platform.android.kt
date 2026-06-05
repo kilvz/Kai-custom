@@ -1417,6 +1417,11 @@ actual suspend fun saveFileToDevice(bytes: ByteArray, baseName: String, extensio
     file?.write(bytes)
 }
 
+actual suspend fun saveFileToDevice(path: String, baseName: String, extension: String) {
+    val bytes = java.io.File(path).readBytes()
+    saveFileToDevice(bytes, baseName, extension)
+}
+
 actual fun openTtsSettings() {
     val context: Context by inject(Context::class.java)
     try {

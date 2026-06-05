@@ -20,6 +20,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
+
 class WhatsAppLifecycleManager(
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
@@ -32,9 +33,10 @@ class WhatsAppLifecycleManager(
         private const val BRIDGE_JS_URL = "https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/whatsapp-bridge/bridge.js"
     }
 
-    private var started = false
-    private var connected = false
+    @Volatile private var started = false
+    @Volatile private var connected = false
     private var retryJob: Job? = null
+    private var setupJob: Job? = null
 
     suspend fun ensureInstalled(): Boolean {
         if (appSettings.isWhatsAppInstalled()) return true
@@ -76,7 +78,7 @@ class WhatsAppLifecycleManager(
             url = "http://127.0.0.1:8317/mcp",
         )
 
-        CoroutineScope(Dispatchers.Default).launch {
+        setupJob = CoroutineScope(Dispatchers.Default).launch {
             writeBridgeConfig()
             startBridgeServer()
         }
@@ -120,6 +122,8 @@ class WhatsAppLifecycleManager(
 
     suspend fun updateBridgeConfig() {
         writeBridgeConfig()
+        // Restart bridge so it picks up the new config
+        restart()
     }
 
     suspend fun stop() {
@@ -127,6 +131,8 @@ class WhatsAppLifecycleManager(
         connected = false
         retryJob?.cancel()
         retryJob = null
+        setupJob?.cancel()
+        setupJob = null
         try {
             sandboxController.executeCommand(
                 command = "pkill -f 'whatsapp-bridge' 2>/dev/null || true",
@@ -143,8 +149,8 @@ class WhatsAppLifecycleManager(
             val client = mcpServerManager.getClient(SERVER_ID) ?: return
             val resultStr = client.callTool("is_authenticated", buildJsonObject { })
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
-            val auth = root["connected"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
-            whatsAppStore.setWhatsAppAuthenticated(auth)
+            val authenticated = root["authenticated"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            appSettings.setWhatsAppAuthenticated(authenticated)
         } catch (_: Exception) {
         }
     }
@@ -173,121 +179,74 @@ class WhatsAppLifecycleManager(
             val client = mcpServerManager.getClient(SERVER_ID) ?: return
             val resultStr = client.callTool("get_qr_code", buildJsonObject { })
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
+            val available = root["available"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            val base64 = root["base64"]?.jsonPrimitive?.content ?: ""
+            if (available && base64.isNotBlank()) {
+                appSettings.setWhatsAppQrCode(base64)
+            }
             val authenticated = root["authenticated"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
-            val qr = root["qrBase64"]?.jsonPrimitive?.content
-                ?: root["qr"]?.jsonPrimitive?.content
-                ?: ""
             if (authenticated) {
-                whatsAppStore.setWhatsAppAuthenticated(true)
-                whatsAppStore.setWhatsAppQrCode("")
-            } else if (qr.isNotBlank()) {
-                whatsAppStore.setWhatsAppQrCode(qr)
+                appSettings.setWhatsAppAuthenticated(true)
+                appSettings.setWhatsAppQrCode("")
             }
         } catch (_: Exception) {
         }
     }
 
     suspend fun forceRefreshQr() {
-        whatsAppStore.setWhatsAppQrCode("")
-        whatsAppStore.setWhatsAppAuthenticated(false)
-        stop()
-        delay(500)
-        setupAndStart()
-        // Aggressively poll for QR — don't wait for the retry loop
-        for (i in 0 until 30) {
-            delay(1000)
-            tryConnect()
-            refreshQrCode()
-            if (whatsAppStore.getWhatsAppQrCode().isNotBlank()) break
+        try {
+            stop()
+            delay(2000)
+            appSettings.setWhatsAppAuthenticated(false)
+            appSettings.setWhatsAppQrCode("")
+            setupAndStart()
+            // Wait for QR to appear
+            repeat(30) {
+                delay(1000)
+                tryConnect()
+                refreshQrCode()
+                if (appSettings.getWhatsAppQrCode().isNotBlank()) return
+            }
+        } catch (_: Exception) {
         }
     }
 
     suspend fun resetBridge() {
         stop()
-        delay(2000)
-        started = false
-        writeBridgeJs(force = true)
+        delay(1000)
+        sandboxController.executeCommand(
+            command = "rm -rf /root/whatsapp-bridge/auth_info 2>/dev/null; echo RESET_OK",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+        )
+        appSettings.setWhatsAppAuthenticated(false)
+        appSettings.setWhatsAppQrCode("")
         setupAndStart()
     }
 
-    private suspend fun writeBridgeJs(force: Boolean = false) {
-        val bridgeDir = "/root/whatsapp-bridge"
-
-        sandboxController.executeCommand(
-            command = "mkdir -p $bridgeDir",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-            timeoutSeconds = 5,
-        )
-
-        val dlCmd = if (force) {
-            "curl -sL '$BRIDGE_JS_URL' -o $bridgeDir/bridge.js && echo DOWNLOAD_OK"
-        } else {
-            "test -f $bridgeDir/bridge.js || curl -sL '$BRIDGE_JS_URL' -o $bridgeDir/bridge.js && echo DOWNLOAD_OK"
+    private suspend fun writeBridgeJs(force: Boolean) {
+        if (!force) {
+            val exists = sandboxController.executeCommand(
+                command = "test -f /root/whatsapp-bridge/bridge.js && echo OK",
+                sessionId = SandboxSessions.SYSTEM,
+                useRoot = false,
+            )
+            if (exists.trim() == "OK") return
         }
         sandboxController.executeCommand(
-            command = dlCmd,
+            command = "mkdir -p /root/whatsapp-bridge && curl -sL '$BRIDGE_JS_URL' -o /root/whatsapp-bridge/bridge.js",
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 30,
         )
     }
 
+    /**
+     * Delegates to SandboxController.installWhatsAppBridge() which has the
+     * canonical install pipeline (Node.js download, npm install, verification).
+     */
     private suspend fun installIfNeeded(): Boolean {
-        val bridgeDir = "/root/whatsapp-bridge"
-
-        writeBridgeJs(force = true)
-
-        val npmOk = sandboxController.executeCommand(
-            command = "cd $bridgeDir && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-        )
-        if (npmOk.trim() == "1") return true
-
-        val nodeInstallCmd = buildString {
-            append("NODE_VER=v22.14.0; ")
-            append("ARCH=\$(uname -m); ")
-            append("case \"\$ARCH\" in aarch64) NA=arm64 ;; x86_64) NA=x64 ;; armv7l) NA=armv7l ;; *) echo \"unsupported arch \$ARCH\"; exit 1 ;; esac; ")
-            append("if ! command -v node >/dev/null 2>&1 || [ \"\$(node --version 2>/dev/null | cut -d. -f1 | tr -d v)\" -lt 20 ]; then ")
-            append("  mkdir -p /usr/local/node22 && ")
-            append("  curl -sL \"https://nodejs.org/dist/\${NODE_VER}/node-\${NODE_VER}-linux-\${NA}.tar.xz\" | tar -xJ -C /usr/local/node22 --strip-components=1 2>&1 && ")
-            append("  ln -sf /usr/local/node22/bin/node /usr/local/bin/node && ")
-            append("  ln -sf /usr/local/node22/bin/npm /usr/local/bin/npm && ")
-            append("  ln -sf /usr/local/node22/bin/npx /usr/local/bin/npx; ")
-            append("fi; ")
-            append("echo NODE_OK")
-        }
-        sandboxController.executeCommand(
-            command = nodeInstallCmd,
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-            timeoutSeconds = 120,
-        )
-
-        sandboxController.executeCommand(
-            command = "cd $bridgeDir && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-            timeoutSeconds = 180,
-        )
-
-        // Apply Baileys v7 RC auth handshake fixes (idempotent)
-        sandboxController.executeCommand(
-            command = "cd $bridgeDir && " +
-                "sed -i 's/passive: !0/passive: !1/g; s/passive: true/passive: false/g; s/lidDbMigrated:[^,}]*[,]*//g' " +
-                "node_modules/@whiskeysockets/baileys/lib/Utils/validate-connection.js 2>/dev/null; echo PATCH_OK",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-            timeoutSeconds = 15,
-        )
-
-        val verify = sandboxController.executeCommand(
-            command = "cd $bridgeDir && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-        )
-        return verify.trim() == "1"
+        return sandboxController.installWhatsAppBridge()
     }
 
     private suspend fun writeBridgeConfig() {

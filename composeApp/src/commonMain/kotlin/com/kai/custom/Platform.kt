@@ -116,6 +116,8 @@ expect fun decodeToImageBitmap(bytes: ByteArray): ImageBitmap?
 
 expect suspend fun saveFileToDevice(bytes: ByteArray, baseName: String, extension: String)
 
+expect suspend fun saveFileToDevice(path: String, baseName: String, extension: String)
+
 /**
  * Fires a background push notification for a heartbeat that produced a non-trivial
  * response. Android additionally wires a tap-to-open-heartbeat deep link via its

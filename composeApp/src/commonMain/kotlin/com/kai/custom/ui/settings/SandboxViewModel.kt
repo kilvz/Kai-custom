@@ -33,7 +33,7 @@ data class SandboxUiState(
     val rootErrorMessage: String? = null,
     val altMemoryInstalled: Boolean = false,
     val needsReset: Boolean = false,
-    val backupExportBytes: ByteArray? = null,
+    val backupExportPath: String? = null,
 )
 
 class SandboxViewModel(
@@ -146,7 +146,7 @@ class SandboxViewModel(
             _state.update { it.copy(isWorking = true, sandboxStatusText = "Creating backup...") }
             val result = sandboxController.backupSandbox()
             result.onSuccess { backup ->
-                _state.update { it.copy(isWorking = false, backupExportBytes = backup.bytes, sandboxStatusText = "Choose where to save the backup") }
+                _state.update { it.copy(isWorking = false, backupExportPath = backup.path, sandboxStatusText = "Choose where to save the backup") }
             }.onFailure { e ->
                 _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusText = "Backup failed: ${e.message}") }
             }
@@ -154,7 +154,7 @@ class SandboxViewModel(
     }
 
     fun onExportSaved() {
-        _state.update { it.copy(backupExportBytes = null) }
+        _state.update { it.copy(backupExportPath = null) }
     }
 
     fun onImportSandbox(data: ByteArray) {

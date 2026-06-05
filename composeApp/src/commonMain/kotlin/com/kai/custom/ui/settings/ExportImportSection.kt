@@ -380,6 +380,7 @@ private fun sectionDisplayName(section: ImportSection): String = when (section) 
     ImportSection.HEARTBEAT -> stringResource(Res.string.settings_import_section_heartbeat)
     ImportSection.EMAIL -> stringResource(Res.string.settings_import_section_email)
     ImportSection.SMS -> stringResource(Res.string.settings_sms)
+    ImportSection.WHATSAPP -> "WhatsApp"
     ImportSection.SPLINTERLANDS -> "Splinterlands"
     ImportSection.TOOLS -> stringResource(Res.string.settings_import_section_tools)
     ImportSection.MCP -> stringResource(Res.string.settings_import_section_mcp)
