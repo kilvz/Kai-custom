@@ -360,11 +360,11 @@ private fun WhatsAppSection(
                                 pairingLoading = true
                                 pairingCode = ""
                                 val code = whatsAppLifecycleManager.requestPairingCode(phoneNumber.trim())
-                                if (code != null) {
+                                if (!code.isNullOrBlank()) {
                                     pairingCode = code
                                     statusMessage = "Pairing code generated"
                                 } else {
-                                    statusMessage = "Failed to get pairing code"
+                                    statusMessage = "Failed — bridge may not be connected yet. Try Reset Bridge first."
                                 }
                                 pairingLoading = false
                             }

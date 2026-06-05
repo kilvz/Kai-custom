@@ -155,11 +155,14 @@ class WhatsAppLifecycleManager(
             val resultStr = client.callTool("request_pairing_code", buildJsonObject {
                 put("phone", JsonPrimitive(phone))
             })
+            if (resultStr.isBlank()) return null
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
+            // Check for error responses from the bridge
+            val error = root["error"]?.jsonPrimitive?.content
+            if (!error.isNullOrBlank()) return null
             val formatted = root["formatted"]?.jsonPrimitive?.content
                 ?: root["code"]?.jsonPrimitive?.content
-                ?: ""
-            return formatted
+            return formatted?.takeIf { it.isNotBlank() }
         } catch (_: Exception) {
             return null
         }
