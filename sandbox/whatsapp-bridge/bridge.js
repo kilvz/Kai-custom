@@ -51,7 +51,7 @@ async function initBaileys() {
   const { version } = await fetchLatestBaileysVersion();
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const cfg = loadConfig();
-  const browser = cfg.browser || ['Windows', 'Chrome', '130.0.0.0'];
+  const browser = cfg.browser || ['Chrome (Windows)', '', ''];
   const markOnline = cfg.markOnlineOnConnect !== undefined ? cfg.markOnlineOnConnect : true;
   const syncHistory = cfg.syncFullHistory !== undefined ? cfg.syncFullHistory : false;
   const linkPreviews = cfg.generateHighQualityLinkPreview !== undefined ? cfg.generateHighQualityLinkPreview : true;
