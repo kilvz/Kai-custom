@@ -15,6 +15,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,6 +69,7 @@ import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draw.blur
@@ -185,7 +187,11 @@ fun ChatScreenContent(
     expandThinking: Boolean = false,
 ) {
     if (uiState.isInteractiveMode && !uiState.isRestoring) {
-        InteractiveModeScreen(uiState = uiState)
+        InteractiveModeScreen(
+            uiState = uiState,
+            onStartVoiceInput = uiState.actions.startVoiceInput,
+            onStopVoiceInput = uiState.actions.stopVoiceInput,
+        )
     } else {
         ChatModeScreen(
             uiState = uiState,
@@ -206,7 +212,11 @@ fun ChatScreenContent(
 // --- Interactive Mode ---
 
 @Composable
-private fun InteractiveModeScreen(uiState: ChatUiState) {
+private fun InteractiveModeScreen(
+    uiState: ChatUiState,
+    onStartVoiceInput: () -> Unit,
+    onStopVoiceInput: () -> Unit,
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Intercept system back to exit interactive mode instead of closing the app
@@ -260,7 +270,21 @@ private fun InteractiveModeScreen(uiState: ChatUiState) {
                         horizontalAlignment = CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
                     ) {
-                        LogoAnimation()
+                        LogoAnimation(
+                            modifier = Modifier.pointerInput(Unit) {
+                                detectTapGestures(
+                                    onPress = {
+                                        onStartVoiceInput()
+                                        try {
+                                            awaitRelease()
+                                        } finally {
+                                            onStopVoiceInput()
+                                        }
+                                    },
+                                )
+                            },
+                            isRecording = uiState.isVoiceInputActive,
+                        )
                         Spacer(Modifier.height(16.dp))
                         Text(
                             text = stringResource(Res.string.interactive_welcome_title),
