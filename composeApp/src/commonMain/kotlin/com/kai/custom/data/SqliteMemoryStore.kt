@@ -162,6 +162,9 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override fun getAllMemories(max: Int): List<MemoryEntry> = allEntities(max).mapNotNull { entityToEntry(it) }
 
+    /** O(1) key lookup via the indexed metadata store — avoids loading all memories for dedup. */
+    override fun containsKey(key: String): Boolean = dimension.getEntityByMetadataKey("memory_key", key) != null
+
     override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> {
         if (query.isBlank()) return emptyList()
         return dimension.searchEntities(query, limit).mapNotNull { entityToEntry(it.entity) }

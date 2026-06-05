@@ -73,6 +73,9 @@ interface MemoryStore {
 
     fun getAllMemories(max: Int = 1000): List<MemoryEntry>
 
+    /** Returns true if a memory with [key] exists. Default: O(n) scan via [getAllMemories]. Implementations can override for O(1) lookup. */
+    fun containsKey(key: String): Boolean = getAllMemories().any { it.key == key }
+
     fun searchMemories(query: String, limit: Int = 10, mode: String = "hybrid"): List<MemoryEntry>
 
     fun getPromotionCandidates(minHits: Int = 5, max: Int = 500): List<MemoryEntry>

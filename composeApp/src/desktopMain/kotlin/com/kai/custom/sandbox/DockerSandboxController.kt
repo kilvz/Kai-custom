@@ -330,9 +330,7 @@ class DockerSandboxController(
                 val path = outputPath ?: "${System.getProperty("java.io.tmpdir")}/sandbox-rootfs-${System.currentTimeMillis()}.tar.gz"
                 val ok = dockerManager.exportContainer(containerName, path)
                 if (ok) {
-                    val file = File(path)
-                    val bytes = file.readBytes()
-                    Result.success(SandboxController.BackupResult(path, bytes))
+                    Result.success(SandboxController.BackupResult(path))
                 } else {
                     Result.failure(Exception("Docker export failed"))
                 }

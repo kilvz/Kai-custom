@@ -37,8 +37,21 @@ import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
 import com.kai.custom.tools.ReadFileTool
 import com.kai.custom.tools.SchedulingTools
+import com.kai.custom.tools.CreateCalendarEventToolDesktop
+import com.kai.custom.tools.ListInstalledAppsToolDesktop
+import com.kai.custom.tools.ListMediaToolDesktop
+import com.kai.custom.tools.NotificationReaderDesktop
+import com.kai.custom.tools.OpenCodeToolDesktop
+import com.kai.custom.tools.ReadCalendarToolDesktop
+import com.kai.custom.tools.ReadContactsToolDesktop
+import com.kai.custom.tools.ReadLogsToolDesktop
+import com.kai.custom.tools.ScanBluetoothToolDesktop
+import com.kai.custom.tools.SetAlarmToolDesktop
 import com.kai.custom.tools.ShellCommandTool
+import com.kai.custom.tools.SpeakTextToolDesktop
 import com.kai.custom.tools.SshCommandTool
+import com.kai.custom.tools.WifiInfoToolDesktop
+import com.kai.custom.tools.WriteContactToolDesktop
 import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshConnectTool
 import com.kai.custom.tools.SshDisconnectTool
@@ -204,6 +217,21 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(PhoneTools.networkInfoToolInfo)
     add(PhoneTools.batteryInfoToolInfo)
     add(PhoneTools.gpsLocationToolInfo)
+    add(PhoneTools.wifiInfoToolInfo)
+    add(PhoneTools.installedAppsToolInfo)
+    add(PhoneTools.readCalendarToolInfo)
+    add(PhoneTools.writeContactToolInfo)
+    add(PhoneTools.scanBluetoothToolInfo)
+    add(PhoneTools.listMediaToolInfo)
+    add(PhoneTools.readLogsToolInfo)
+    add(ListInstalledAppsToolDesktop.toolInfo)
+    add(ListMediaToolDesktop.toolInfo)
+    add(ReadLogsToolDesktop.toolInfo)
+    add(ReadContactsToolDesktop.toolInfo)
+    add(WriteContactToolDesktop.toolInfo)
+    add(ReadCalendarToolDesktop.toolInfo)
+    add(CreateCalendarEventToolDesktop.toolInfo)
+    add(NotificationReaderDesktop.toolInfo)
     add(
         ToolInfo(
             id = "send_notification",
@@ -213,6 +241,8 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             descriptionRes = Res.string.tool_send_notification_description,
         ),
     )
+    add(ScanBluetoothToolDesktop.toolInfo)
+    add(WifiInfoToolDesktop.toolInfo)
 }
 
 actual fun getAvailableTools(): List<Tool> {
@@ -408,6 +438,45 @@ actual fun getAvailableTools(): List<Tool> {
                     override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS location is not available on Desktop")
                 },
             )
+        }
+        if (appSettings.isToolEnabled(PhoneTools.wifiInfoToolInfo.id)) {
+            add(WifiInfoToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.installedAppsToolInfo.id)) {
+            add(ListInstalledAppsToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.listMediaToolInfo.id)) {
+            add(ListMediaToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.readLogsToolInfo.id)) {
+            add(ReadLogsToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.readContactsToolInfo.id)) {
+            add(ReadContactsToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.writeContactToolInfo.id)) {
+            add(WriteContactToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.readCalendarToolInfo.id)) {
+            add(ReadCalendarToolDesktop)
+        }
+        if (appSettings.isToolEnabled(PhoneTools.scanBluetoothToolInfo.id)) {
+            add(ScanBluetoothToolDesktop)
+        }
+        if (appSettings.isToolEnabled(OpenCodeToolDesktop.toolInfo.id)) {
+            add(OpenCodeToolDesktop)
+        }
+        if (appSettings.isToolEnabled(SpeakTextToolDesktop.toolInfo.id)) {
+            add(SpeakTextToolDesktop)
+        }
+        if (appSettings.isToolEnabled(NotificationReaderDesktop.toolInfo.id)) {
+            add(NotificationReaderDesktop)
+        }
+        if (appSettings.isToolEnabled(SetAlarmToolDesktop.toolInfo.id)) {
+            add(SetAlarmToolDesktop)
+        }
+        if (appSettings.isToolEnabled(CreateCalendarEventToolDesktop.toolInfo.id)) {
+            add(CreateCalendarEventToolDesktop)
         }
         if (appSettings.isToolEnabled(AdminTool.schema.name)) {
             add(AdminTool)

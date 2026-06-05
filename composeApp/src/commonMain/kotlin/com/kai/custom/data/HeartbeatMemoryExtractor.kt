@@ -28,11 +28,10 @@ class HeartbeatMemoryExtractor(
             val extraction = dataRepository.askSilently(prompt)
             if (extraction.isBlank()) return
 
-            val existingKeys = memoryStore.getAllMemories().map { it.key }.toSet()
             val items = parseExtraction(extraction)
             var extractedCount = 0
             for (item in items) {
-                if (item.key in existingKeys) continue
+                if (memoryStore.containsKey(item.key)) continue
                 memoryStore.storeProtected(
                     key = item.key,
                     content = item.content,

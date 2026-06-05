@@ -45,10 +45,9 @@ class AutoMemoryLearner(
                 val response = dataRepository.askSilently(prompt)
                 if (response.isBlank()) return@launch
 
-                val existingKeys = memoryStore.getAllMemories().map { it.key }.toSet()
                 val extracted = parseExtraction(response)
                 for (item in extracted) {
-                    if (item.key in existingKeys) continue
+                    if (memoryStore.containsKey(item.key)) continue
                     memoryStore.store(
                         key = item.key,
                         content = item.content,

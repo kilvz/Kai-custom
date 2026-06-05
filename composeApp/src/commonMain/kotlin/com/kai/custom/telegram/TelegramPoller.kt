@@ -119,11 +119,11 @@ class TelegramPoller(
             client.post(url) {
                 contentType(ContentType.Application.Json)
                 setBody(
-                    mapOf(
-                        "chat_id" to chatId,
-                        "text" to text,
-                        "reply_to_message_id" to replyToMessageId,
-                    ),
+                    buildMap {
+                        put("chat_id", chatId)
+                        put("text", text)
+                        if (replyToMessageId != null) put("reply_to_message_id", replyToMessageId)
+                    },
                 )
             }
         } catch (e: Exception) {

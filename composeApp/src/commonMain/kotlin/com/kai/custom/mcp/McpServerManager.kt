@@ -106,9 +106,9 @@ class McpServerManager(private val appSettings: AppSettings) {
         val server = getAllServers().find { it.id == serverId }
             ?: return Result.failure(McpException("Server not found: $serverId"))
 
+        // Close existing client and remove stale state atomically before creating the new one
         mutex.withLock {
-            clients[serverId]?.close()
-            clients.remove(serverId)
+            clients.remove(serverId)?.close()
             discoveredTools.remove(serverId)
         }
 
@@ -134,20 +134,17 @@ class McpServerManager(private val appSettings: AppSettings) {
             Result.success(metadata)
         } catch (e: Exception) {
             client.close()
-            mutex.withLock {
-                clients.remove(serverId)
-                discoveredTools.remove(serverId)
-            }
             Result.failure(e)
         }
     }
 
     fun getEnabledMcpTools(): List<Tool> {
         val enabledServers = getAllServers().filter { it.isEnabled }.map { it.id }.toSet()
-        val toolsSnapshot: List<Pair<String, List<McpToolMetadata>>>
+        // Snapshot under lock to avoid ConcurrentModificationException if a reconnect happens
+        val toolsSnapshot: Map<String, List<McpToolMetadata>>
         val clientsSnapshot: Map<String, McpClient>
-        synchronized(lock) {
-            toolsSnapshot = discoveredTools.entries.map { it.key to it.value }
+        synchronized(mutex) {
+            toolsSnapshot = discoveredTools.toMap()
             clientsSnapshot = clients.toMap()
         }
         return buildList {
@@ -165,7 +162,7 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     fun getToolsForServer(serverId: String): List<ToolInfo> {
-        val tools = synchronized(lock) { discoveredTools[serverId] } ?: return emptyList()
+        val tools = synchronized(mutex) { discoveredTools[serverId] } ?: return emptyList()
         return tools.map { meta ->
             val toolId = McpTool.toolId(serverId, meta.name)
             ToolInfo(
@@ -184,9 +181,9 @@ class McpServerManager(private val appSettings: AppSettings) {
                 .filter { !clients.containsKey(it.id) }
                 .map { server ->
                     async {
-                        try {
-                            connectAndDiscoverTools(server.id)
-                        } catch (_: Exception) {
+                        val result = connectAndDiscoverTools(server.id)
+                        result.onFailure { e ->
+                            println("[McpServerManager] Failed to connect to '${server.name}': ${e.message}")
                         }
                     }
                 }

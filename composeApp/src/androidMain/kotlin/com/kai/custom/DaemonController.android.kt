@@ -1,6 +1,5 @@
 package com.kai.custom
 
-import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
 import com.kai.custom.data.AppSettings
@@ -20,7 +19,9 @@ class AndroidDaemonController : DaemonController {
             val intent = Intent(context, DaemonService::class.java)
             context.startForegroundService(intent)
         } catch (_: Exception) {
-            // App is not in a foreground state — cannot start foreground service (Android 12+)
+            // App is not in a foreground state, missing FGS type declaration, or OEM restriction —
+            // cannot start foreground service. Silently ignore; the scheduler will still run
+            // in-process via the Activity scope until the service can be started.
         }
     }
 
