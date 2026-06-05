@@ -182,6 +182,7 @@ fun QuestionInput(
             SkillAutocomplete(
                 skills = installedSkills,
                 query = slashQuery,
+                activeSkill = activeSkill,
                 onSelect = { skill ->
                     onSetActiveSkill(skill)
                     val text = textState.text

@@ -26,16 +26,23 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun SkillAutocomplete(
     skills: ImmutableList<SkillManifest>,
     query: String,
-    onSelect: (SkillManifest) -> Unit,
+    activeSkill: SkillManifest? = null,
+    onSelect: (SkillManifest?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val filtered = remember(skills, query) {
+    val filtered = remember(skills, query, activeSkill) {
         val q = query.lowercase()
-        if (q.isEmpty()) {
+        val matched = if (q.isEmpty()) {
             skills
         } else {
             skills.filter { it.id.startsWith(q) || it.id.contains(q) }
         }
+        val stopEntry = if (activeSkill != null && ("stop".startsWith(q) || q.isEmpty())) {
+            listOfNotNull(null)
+        } else {
+            emptyList()
+        }
+        stopEntry + matched
     }
     if (filtered.isEmpty()) return
 
@@ -54,12 +61,39 @@ internal fun SkillAutocomplete(
             .heightIn(max = 200.dp)
             .verticalScroll(scrollState),
     ) {
-        for (skill in filtered) {
-            SkillRow(
-                skill = skill,
-                onClick = { onSelect(skill) },
-            )
+        for (entry in filtered) {
+            if (entry == null) {
+                StopRow(onClick = { onSelect(null) })
+            } else {
+                SkillRow(
+                    skill = entry,
+                    onClick = { onSelect(entry) },
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun StopRow(onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .handCursor()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = "/stop",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            fontWeight = FontWeight.Medium,
+        )
+        Text(
+            text = "Deactivate current skill",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
