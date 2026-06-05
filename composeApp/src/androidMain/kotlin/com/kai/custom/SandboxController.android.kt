@@ -7,7 +7,7 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.mcp.AltMemoryLifecycleManager
 import com.kai.custom.mcp.McpServerManager
-import com.kai.custom.whatsapp.BRIDGE_JS_BASE64
+
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.ProotExecutor
@@ -606,25 +606,15 @@ class AndroidSandboxController : SandboxController {
                 return@withContext false
             }
 
-            logStep("WRITE_B64", "writing bridge.js.b64")
-            val bridgeWrite = executor.execute(
-                "cat > /root/whatsapp-bridge/bridge.js.b64 << 'ENDB64'\n$BRIDGE_JS_BASE64\nENDB64",
+            logStep("DOWNLOAD", "downloading bridge.js from repo")
+            val bridgeUrl = "https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/whatsapp-bridge/bridge.js"
+            val bridgeDl = executor.execute(
+                "curl -sL '$bridgeUrl' -o /root/whatsapp-bridge/bridge.js && echo DOWNLOAD_OK",
                 timeoutSeconds = 30,
             )
-            if (bridgeWrite["success"] as? Boolean != true) {
-                logFail("b64_write", bridgeWrite)
-                updateStatus(error = true, statusText = "WhatsApp $label: bridge.js write failed")
-                return@withContext false
-            }
-
-            logStep("DECODE", "decoding bridge.js")
-            val bridgeDecode = executor.execute(
-                "base64 -d /root/whatsapp-bridge/bridge.js.b64 > /root/whatsapp-bridge/bridge.js && rm /root/whatsapp-bridge/bridge.js.b64",
-                timeoutSeconds = 30,
-            )
-            if (bridgeDecode["success"] as? Boolean != true) {
-                logFail("b64_decode", bridgeDecode)
-                updateStatus(error = true, statusText = "WhatsApp $label: bridge.js decode failed")
+            if (bridgeDl["success"] as? Boolean != true || (bridgeDl["stdout"] as? String)?.trim() != "DOWNLOAD_OK") {
+                logFail("download", bridgeDl)
+                updateStatus(error = true, statusText = "WhatsApp $label: download bridge.js failed")
                 return@withContext false
             }
 

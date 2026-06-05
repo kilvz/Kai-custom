@@ -505,6 +505,34 @@ class DebugServerDesktop(
                     call.respondText(json.encodeToString(results.map { buildJsonObject { put("key", JsonPrimitive(it.key)); put("content", JsonPrimitive(it.content)); put("category", JsonPrimitive(it.category.name)); put("hit_count", JsonPrimitive(it.hitCount)) } }), ContentType.Application.Json)
                 }
 
+                // ======================= DIARY =======================
+                get("/diary") {
+                    val err = auth(call) ?: return@get
+                    val entries = memoryStore.diaryRead("kai", 100)
+                    call.respondText(json.encodeToString(entries.map {
+                        buildJsonObject {
+                            put("id", JsonPrimitive(it.id))
+                            put("topic", JsonPrimitive(it.topic))
+                            put("content", JsonPrimitive(it.content))
+                            put("created_at", JsonPrimitive(it.createdAt))
+                        }
+                    }), ContentType.Application.Json)
+                }
+
+                delete("/diary/{id}") {
+                    val err = auth(call) ?: return@delete
+                    val id = call.parameters["id"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@delete
+                    }
+                    val deleted = withContext(Dispatchers.Default) { memoryStore.diaryDelete(id) }
+                    if (!deleted) {
+                        call.respondText(json.encodeToString(ErrorResponse("Not found")), ContentType.Application.Json, HttpStatusCode.NotFound)
+                        return@delete
+                    }
+                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("deleted", JsonPrimitive(id)) }), ContentType.Application.Json)
+                }
+
                 // ======================= ALT-MEMORY =======================
                 get("/alt-memory") {
                     val err = auth(call) ?: return@get

@@ -6,7 +6,6 @@ import com.kai.custom.data.AppSettings
 import com.kai.custom.data.SharedJson
 import com.kai.custom.data.WhatsAppStore
 import com.kai.custom.mcp.McpServerManager
-import com.kai.custom.whatsapp.BRIDGE_JS_BASE64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,7 +28,8 @@ class WhatsAppLifecycleManager(
 ) {
     companion object {
         private const val SERVER_ID = "whatsapp"
-        private const val RETRY_INTERVAL_MS = 10_000L
+        private const val RETRY_INTERVAL_MS = 3_000L
+        private const val BRIDGE_JS_URL = "https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/whatsapp-bridge/bridge.js"
     }
 
     private var started = false
@@ -45,7 +45,7 @@ class WhatsAppLifecycleManager(
 
     suspend fun setupAndStart() {
         if (started) return
-        writeBridgeJs()
+        writeBridgeJs(force = false)
         // Verify baileys is actually available on disk — don't trust the stored flag
         // (it can be stale after an aborted restart). If not found, try to install.
         val check = sandboxController.executeCommand(
@@ -59,6 +59,16 @@ class WhatsAppLifecycleManager(
         }
         appSettings.setWhatsAppInstalled(true)
         started = true
+
+        // Apply Baileys v7 RC auth handshake fixes (idempotent)
+        sandboxController.executeCommand(
+            command = "cd /root/whatsapp-bridge && " +
+                "sed -i 's/passive: !0/passive: !1/g; s/passive: true/passive: false/g; s/lidDbMigrated:[^,}]*[,]*//g' " +
+                "node_modules/@whiskeysockets/baileys/lib/Utils/validate-connection.js 2>/dev/null; echo PATCH_OK",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+            timeoutSeconds = 15,
+        )
 
         mcpServerManager.registerBuiltInServer(
             id = SERVER_ID,
@@ -174,7 +184,30 @@ class WhatsAppLifecycleManager(
         }
     }
 
-    private suspend fun writeBridgeJs() {
+    suspend fun forceRefreshQr() {
+        whatsAppStore.setWhatsAppQrCode("")
+        whatsAppStore.setWhatsAppAuthenticated(false)
+        stop()
+        delay(500)
+        setupAndStart()
+        // Aggressively poll for QR — don't wait for the retry loop
+        for (i in 0 until 30) {
+            delay(1000)
+            tryConnect()
+            refreshQrCode()
+            if (whatsAppStore.getWhatsAppQrCode().isNotBlank()) break
+        }
+    }
+
+    suspend fun resetBridge() {
+        stop()
+        delay(2000)
+        started = false
+        writeBridgeJs(force = true)
+        setupAndStart()
+    }
+
+    private suspend fun writeBridgeJs(force: Boolean = false) {
         val bridgeDir = "/root/whatsapp-bridge"
 
         sandboxController.executeCommand(
@@ -184,15 +217,13 @@ class WhatsAppLifecycleManager(
             timeoutSeconds = 5,
         )
 
+        val dlCmd = if (force) {
+            "curl -sL '$BRIDGE_JS_URL' -o $bridgeDir/bridge.js && echo DOWNLOAD_OK"
+        } else {
+            "test -f $bridgeDir/bridge.js || curl -sL '$BRIDGE_JS_URL' -o $bridgeDir/bridge.js && echo DOWNLOAD_OK"
+        }
         sandboxController.executeCommand(
-            command = "cat > $bridgeDir/bridge.js.b64 << 'ENDB64'\n${BRIDGE_JS_BASE64}\nENDB64",
-            sessionId = SandboxSessions.SYSTEM,
-            useRoot = false,
-            timeoutSeconds = 30,
-        )
-
-        sandboxController.executeCommand(
-            command = "base64 -d $bridgeDir/bridge.js.b64 > $bridgeDir/bridge.js && rm $bridgeDir/bridge.js.b64",
+            command = dlCmd,
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 30,
@@ -202,7 +233,7 @@ class WhatsAppLifecycleManager(
     private suspend fun installIfNeeded(): Boolean {
         val bridgeDir = "/root/whatsapp-bridge"
 
-        writeBridgeJs()
+        writeBridgeJs(force = true)
 
         val npmOk = sandboxController.executeCommand(
             command = "cd $bridgeDir && node -e 'require(\"@whiskeysockets/baileys\"); console.log(1)' 2>/dev/null",
@@ -236,6 +267,16 @@ class WhatsAppLifecycleManager(
             sessionId = SandboxSessions.SYSTEM,
             useRoot = false,
             timeoutSeconds = 180,
+        )
+
+        // Apply Baileys v7 RC auth handshake fixes (idempotent)
+        sandboxController.executeCommand(
+            command = "cd $bridgeDir && " +
+                "sed -i 's/passive: !0/passive: !1/g; s/passive: true/passive: false/g; s/lidDbMigrated:[^,}]*[,]*//g' " +
+                "node_modules/@whiskeysockets/baileys/lib/Utils/validate-connection.js 2>/dev/null; echo PATCH_OK",
+            sessionId = SandboxSessions.SYSTEM,
+            useRoot = false,
+            timeoutSeconds = 15,
         )
 
         val verify = sandboxController.executeCommand(

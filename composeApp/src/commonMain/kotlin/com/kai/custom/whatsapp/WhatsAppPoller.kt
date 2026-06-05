@@ -21,6 +21,38 @@ class WhatsAppPoller(
 ) {
     private val json = SharedJson
 
+    /**
+     * Convert markdown formatting to WhatsApp-native formatting.
+     *
+     * WhatsApp supports:
+     *   *bold*   _italic_   ~strikethrough~   ```monospace```
+     *
+     * But it does NOT support language identifiers on fenced code blocks
+     * (e.g. ```python). Sending those causes the code to render as plain
+     * text instead of monospace.
+     */
+    private fun sanitizeForWhatsApp(text: String): String {
+        var result = text
+
+        // 1. Strip language identifiers from fenced code blocks:
+        //    ```python\n  →  ```\n
+        //    ```js\n      →  ```\n
+        //    ```kotlin\n  →  ```\n
+        result = result.replace(Regex("```[a-zA-Z0-9_+#.-]+\\s*\\n"), "```\n")
+
+        // 2. Convert markdown bold **text** → *text* (WhatsApp bold)
+        //    But skip if already single-asterisk (avoid double-converting)
+        result = result.replace(Regex("\\*\\*(.+?)\\*\\*"), "*$1*")
+
+        // 3. Convert markdown links [text](url) → text (url)
+        result = result.replace(Regex("\\[([^]]+)]\\(([^)]+)\\)"), "$1 ($2)")
+
+        // 4. Convert markdown headers ## Title → *Title*
+        result = result.replace(Regex("(?m)^#{1,6}\\s+(.+)$"), "*$1*")
+
+        return result.trim()
+    }
+
     suspend fun poll() {
         if (!whatsAppStore.isWhatsAppEnabled()) return
         if (!whatsAppStore.isWhatsAppInstalled()) return
@@ -65,7 +97,7 @@ class WhatsAppPoller(
         try {
             val response = dataRepository.value.askSilently(msg.text)
             if (response.isNotBlank()) {
-                sendMessage(msg.chatId, response)
+                sendMessage(msg.chatId, sanitizeForWhatsApp(response))
             }
         } catch (_: Exception) {
         }
@@ -93,7 +125,7 @@ class WhatsAppPoller(
                 "send_message",
                 buildJsonObject {
                     put("phone", JsonPrimitive(chatId))
-                    put("text", JsonPrimitive(text))
+                    put("text", JsonPrimitive(sanitizeForWhatsApp(text)))
                 },
             )
         } catch (_: Exception) {

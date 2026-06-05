@@ -1,4 +1,4 @@
-import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, Browsers } from '@whiskeysockets/baileys';
 import express from 'express';
 import pino from 'pino';
 import QRCode from 'qrcode';
@@ -19,9 +19,27 @@ let store = null;
 let currentQr = null;
 let connected = false;
 let pairingMode = false;
+let consecutiveFailures = 0;
 
 const logger = pino({ level: 'error' });
 const recentlySent = new Set();
+
+// Hardcoded fallback — fetchLatestBaileysVersion() often returns versions
+// that WhatsApp servers have already deprecated, causing 405 rejections.
+const FALLBACK_VERSION = [2, 3000, 1017531287];
+
+async function resolveVersion() {
+  try {
+    const { version } = await Promise.race([
+      fetchLatestBaileysVersion(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000)),
+    ]);
+    if (version && Array.isArray(version) && version.length >= 3) return version;
+  } catch (e) {
+    console.log('[BRIDGE] fetchLatestBaileysVersion failed (' + e.message + '), using fallback');
+  }
+  return FALLBACK_VERSION;
+}
 
 function loadConfig() {
   try {
@@ -48,10 +66,11 @@ function clearUnread() {
 }
 
 async function initBaileys() {
-  const { version } = await fetchLatestBaileysVersion();
+  const version = await resolveVersion();
+  console.log('[BRIDGE] Using WA version: ' + JSON.stringify(version));
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const cfg = loadConfig();
-  const browser = cfg.browser || ['Chrome (Windows)', '130.0.0.0', 'Windows 10'];
+  const browser = cfg.browser || Browsers.windows('Chrome');
   const markOnline = cfg.markOnlineOnConnect !== undefined ? cfg.markOnlineOnConnect : true;
   const syncHistory = cfg.syncFullHistory !== undefined ? cfg.syncFullHistory : false;
   const linkPreviews = cfg.generateHighQualityLinkPreview !== undefined ? cfg.generateHighQualityLinkPreview : true;
@@ -89,6 +108,7 @@ async function initBaileys() {
     if (connection === 'open') {
       connected = true;
       pairingMode = false;
+      consecutiveFailures = 0;
       currentQr = null;
       try { fs.unlinkSync(QR_FILE); } catch (e) {}
       try { fs.unlinkSync(QR_BASE64_FILE); } catch (e) {}
@@ -96,17 +116,31 @@ async function initBaileys() {
     }
     if (connection === 'close') {
       connected = false;
+      consecutiveFailures++;
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       const statusMsg = lastDisconnect?.error?.output?.payload?.error || (lastDisconnect?.error?.message) || '';
       const reason = lastDisconnect?.error?.reason || '';
-      console.log('[BRIDGE] Connection closed. statusCode=' + statusCode + ' reason=' + reason + ' msg=' + statusMsg);
-      if (statusCode === DisconnectReason.loggedOut) {
-        console.log('[BRIDGE] Logged out (stale auth). Clearing auth and restarting...');
+      console.log('[BRIDGE] Connection closed. statusCode=' + statusCode + ' reason=' + reason + ' msg=' + statusMsg + ' failures=' + consecutiveFailures);
+      if (statusCode === DisconnectReason.loggedOut || statusCode === 401) {
+        console.log('[BRIDGE] Logged out / auth rejected. Clearing auth and restarting...');
         try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
+        consecutiveFailures = 0;
         setTimeout(() => initBaileys(), 3000);
+      } else if (statusCode === 405 || statusCode === 403) {
+        // Version mismatch — WhatsApp rejected handshake
+        console.log('[BRIDGE] Version/handshake rejected (HTTP ' + statusCode + '). Retrying in 5s...');
+        setTimeout(() => initBaileys(), 5000);
+      } else if (consecutiveFailures >= 5) {
+        // Too many failures — likely stale auth, nuke and restart fresh
+        console.log('[BRIDGE] Too many consecutive failures (' + consecutiveFailures + '). Clearing auth...');
+        try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
+        consecutiveFailures = 0;
+        setTimeout(() => initBaileys(), 5000);
       } else {
-        console.log('[BRIDGE] Reconnecting in 30s...');
-        setTimeout(() => initBaileys(), 30000);
+        // Exponential backoff: 5s, 10s, 20s, 30s (capped)
+        const delay = Math.min(5000 * Math.pow(2, consecutiveFailures - 1), 30000);
+        console.log('[BRIDGE] Reconnecting in ' + (delay / 1000) + 's...');
+        setTimeout(() => initBaileys(), delay);
       }
     }
   });

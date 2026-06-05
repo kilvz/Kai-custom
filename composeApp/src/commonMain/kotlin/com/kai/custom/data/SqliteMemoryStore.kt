@@ -220,6 +220,12 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         dimension.putEntity(entity)
     }
 
+    override suspend fun diaryDelete(id: String): Boolean = mutex.withLock {
+        val entity = dimension.getEntity(id) ?: return@withLock false
+        dimension.deleteEntity(entity.id)
+        true
+    }
+
     override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
         val all = dimension.getEntitiesByDomain(DimensionConfig.REALM_AGENT, DimensionConfig.DOMAIN_DIARY)
             .filter { it.metadata["agent_name"] == agentName }

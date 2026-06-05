@@ -91,4 +91,5 @@ interface MemoryStore {
     // Diary
     suspend fun diaryWrite(agentName: String, content: String, topic: String = "general")
     fun diaryRead(agentName: String, lastN: Int = 10): List<DiaryEntry>
+    suspend fun diaryDelete(id: String): Boolean
 }

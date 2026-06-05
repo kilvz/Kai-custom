@@ -313,9 +313,9 @@ class DockerSandboxController(
         return try {
             dockerManager.execCommand(containerName,
                 "mkdir -p /root/whatsapp-bridge && which node || apk add --no-cache nodejs npm")
-            val bridgeJs = com.kai.custom.whatsapp.BRIDGE_JS_BASE64
+            val bridgeUrl = "https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/whatsapp-bridge/bridge.js"
             dockerManager.execCommand(containerName,
-                "echo '$bridgeJs' | base64 -d > /root/whatsapp-bridge/bridge.js")
+                "curl -sL '$bridgeUrl' -o /root/whatsapp-bridge/bridge.js")
             dockerManager.execCommand(containerName,
                 "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1")
             true

@@ -30,7 +30,6 @@ private val UBUNTU_MIRRORS = listOf(
 )
 
 private val UBUNTU_APT_MIRRORS = listOf(
-    "http://archive.ubuntu.com/ubuntu/",
     "http://ports.ubuntu.com/ubuntu-ports/",
 )
 private const val TAR_BLOCK_SIZE = 512
@@ -44,13 +43,7 @@ private const val TAR_PREFIX_OFFSET = 345
 class RootfsDownloader(private val httpClient: HttpClient) {
 
     fun getMirrors(distro: String, arch: String = "aarch64"): List<String> = when (distro) {
-        "ubuntu" -> {
-            val ubuntuArch = toUbuntuArch(arch)
-            // Non-x86 architectures must use ports.ubuntu.com — archive.ubuntu.com
-            // only serves amd64/i386. Place the correct mirror first.
-            if (ubuntuArch == "amd64" || ubuntuArch == "i386") UBUNTU_APT_MIRRORS
-            else UBUNTU_APT_MIRRORS.reversed()
-        }
+        "ubuntu" -> UBUNTU_APT_MIRRORS
         else -> ALPINE_MIRRORS
     }
 

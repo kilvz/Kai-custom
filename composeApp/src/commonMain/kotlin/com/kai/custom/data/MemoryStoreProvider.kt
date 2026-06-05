@@ -189,6 +189,8 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         }
     }
 
+    override suspend fun diaryDelete(id: String): Boolean = sqliteStore.diaryDelete(id)
+
     override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
         if (!isUsingAltMemory) return sqliteStore.diaryRead(agentName, lastN)
         return try {

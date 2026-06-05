@@ -367,14 +367,24 @@ class AltMemoryClient(
     // Diary
 
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
-        client.callTool(
-            "record_write",
-            buildJsonObject {
-                put("agent", JsonPrimitive(agentName))
-                put("entry", JsonPrimitive(content))
+        try {
+            client.callTool("diary_write", buildJsonObject {
+                put("agent_name", JsonPrimitive(agentName))
+                put("content", JsonPrimitive(content))
                 put("topic", JsonPrimitive(topic))
-            },
-        )
+            })
+        } catch (_: Exception) { }
+    }
+
+    override suspend fun diaryDelete(id: String): Boolean {
+        try {
+            client.callTool("delete_entity", buildJsonObject {
+                put("entity_id", JsonPrimitive(id))
+            })
+            return true
+        } catch (_: Exception) {
+            return false
+        }
     }
 
     override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> = try {
