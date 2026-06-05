@@ -18,8 +18,10 @@ let sock = null;
 let store = null;
 let currentQr = null;
 let connected = false;
+let pairingMode = false;
 
-const logger = pino({ level: 'silent' });
+const logger = pino({ level: 'error' });
+const recentlySent = new Set();
 
 function loadConfig() {
   try {
@@ -65,6 +67,9 @@ async function initBaileys() {
     generateHighQualityLinkPreview: linkPreviews,
     syncFullHistory: syncHistory,
     shouldSyncHistoryMsg: () => shouldSync,
+    connectTimeoutMs: 120_000,
+    keepAliveIntervalMs: 30_000,
+    qrTimeout: 120_000,
   });
 
   sock.ev.on('creds.update', saveCreds);
@@ -79,34 +84,48 @@ async function initBaileys() {
         fs.writeFileSync(QR_FILE, png);
         fs.writeFileSync(QR_BASE64_FILE, png.toString('base64'));
       } catch (e) {}
+      console.log('[BRIDGE] QR received');
     }
     if (connection === 'open') {
       connected = true;
+      pairingMode = false;
       currentQr = null;
       try { fs.unlinkSync(QR_FILE); } catch (e) {}
       try { fs.unlinkSync(QR_BASE64_FILE); } catch (e) {}
+      console.log('[BRIDGE] Connection open');
     }
     if (connection === 'close') {
       connected = false;
       const statusCode = lastDisconnect?.error?.output?.statusCode;
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-      if (shouldReconnect) setTimeout(() => initBaileys(), 5000);
+      const statusMsg = lastDisconnect?.error?.output?.payload?.error || (lastDisconnect?.error?.message) || '';
+      const reason = lastDisconnect?.error?.reason || '';
+      console.log('[BRIDGE] Connection closed. statusCode=' + statusCode + ' reason=' + reason + ' msg=' + statusMsg);
+      if (statusCode === DisconnectReason.loggedOut) {
+        console.log('[BRIDGE] Logged out (stale auth). Clearing auth and restarting...');
+        try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
+        setTimeout(() => initBaileys(), 3000);
+      } else {
+        console.log('[BRIDGE] Reconnecting in 30s...');
+        setTimeout(() => initBaileys(), 30000);
+      }
     }
   });
 
   sock.ev.on('messages.upsert', async (m) => {
-    const msgs = m.messages.filter(msg => msg.key.fromMe === false && msg.message);
+    const msgs = m.messages.filter(msg => msg.message && !recentlySent.has(msg.key.id));
     if (msgs.length > 0) {
       const unread = loadUnread();
       for (const msg of msgs) {
         const remoteJid = msg.key.remoteJid;
-        const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
+        const text = msg.message.conversation || msg.message.extendedTextMessage?.text || msg.message.imageMessage?.caption || '';
         if (text) {
           unread.push({
             chatId: remoteJid,
             messageId: msg.key.id,
             text,
             fromName: msg.pushName || remoteJid.split('@')[0],
+            fromMe: msg.key.fromMe || false,
+            sender: msg.key.participant || remoteJid,
             timestamp: msg.messageTimestamp,
           });
         }
@@ -245,7 +264,12 @@ app.post('/mcp', async (req, res) => {
           {
             name: 'clear_unread_messages',
             description: 'Clear the unread messages queue (call after processing)',
-            inputSchema: { type: 'object', properties: {} },
+            inputSchema: {
+              type: 'object',
+              properties: {
+                markRead: { type: 'boolean', description: 'Whether to mark messages as read (send read receipts)' },
+              },
+            },
           },
         ],
       },
@@ -265,7 +289,11 @@ app.post('/mcp', async (req, res) => {
       switch (name) {
         case 'send_message': {
           const jid = formatJid(args.phone);
-          await sock.sendMessage(jid, { text: args.text });
+          const sent = await sock.sendMessage(jid, { text: args.text });
+          if (sent?.key?.id) {
+            recentlySent.add(sent.key.id);
+            setTimeout(() => recentlySent.delete(sent.key.id), 10000);
+          }
           content = [{ type: 'text', text: JSON.stringify({ success: true, to: jid }) }];
           break;
         }
@@ -314,6 +342,10 @@ app.post('/mcp', async (req, res) => {
           if (!phone) {
             return res.json({ jsonrpc: '2.0', id, error: { code: -32000, message: 'Phone number required' } });
           }
+          pairingMode = true;
+          currentQr = null;
+          try { fs.unlinkSync(QR_FILE); } catch (e) {}
+          try { fs.unlinkSync(QR_BASE64_FILE); } catch (e) {}
           const code = await sock.requestPairingCode(phone);
           const formatted = code.match(/.{1,4}/g)?.join('-') || code;
           content = [{ type: 'text', text: JSON.stringify({ code, formatted }) }];
@@ -323,6 +355,8 @@ app.post('/mcp', async (req, res) => {
         case 'get_qr_code': {
           if (connected) {
             content = [{ type: 'text', text: JSON.stringify({ authenticated: true, qr: null }) }];
+          } else if (pairingMode) {
+            content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: '' }) }];
           } else {
             try {
               if (fs.existsSync(QR_BASE64_FILE)) {
@@ -349,6 +383,16 @@ app.post('/mcp', async (req, res) => {
         }
 
         case 'clear_unread_messages': {
+          const markRead = args && args.markRead === true;
+          if (markRead && sock) {
+            const unread = loadUnread();
+            const keys = unread
+              .filter(u => !u.fromMe)
+              .map(u => ({ remoteJid: u.chatId, id: u.messageId, fromMe: false }));
+            if (keys.length > 0) {
+              sock.readMessages(keys).catch(() => {});
+            }
+          }
           clearUnread();
           content = [{ type: 'text', text: JSON.stringify({ success: true }) }];
           break;
