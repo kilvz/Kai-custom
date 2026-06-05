@@ -36,7 +36,9 @@
    <uses-permission android:name="android.permission.READ_LOGS"/>
    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
-   <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
+
 
     <application
         android:name="com.kai.custom.KaiApplication"
@@ -89,6 +91,17 @@
             android:name="com.kai.custom.wakeword.WakeWordService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+        <service
+            android:name="com.kai.custom.ScreenReaderService"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
         <uses-native-library android:name="libvndksupport.so" android:required="false"/>
         <uses-native-library android:name="libOpenCL.so" android:required="false"/>
     </application>

@@ -145,6 +145,7 @@ data class SettingsUiState(
     val localDownloadProgress: Float? = null,
     val localDownloadError: DownloadError? = null,
     val modelContextTokens: ImmutableMap<String, Int> = persistentMapOf(),
+    val modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
     val currentSponsors: ImmutableList<SponsorsResponseDto.Sponsor> = persistentListOf(),
     val pastSponsors: ImmutableList<SponsorsResponseDto.Sponsor> = persistentListOf(),
     val pendingDeletion: PendingDeletion? = null,

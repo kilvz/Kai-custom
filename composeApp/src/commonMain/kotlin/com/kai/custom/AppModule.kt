@@ -43,6 +43,7 @@ import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
 import com.kai.custom.tools.ToolPermissionBridge
+import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.ui.chat.ChatViewModel
 import com.kai.custom.ui.sandbox.SandboxFileBrowserViewModel
 import com.kai.custom.ui.sandbox.SandboxPackagesViewModel
@@ -63,6 +64,7 @@ val appModule = module {
     single<SmsSendPermissionController> { SmsSendPermissionController() }
     single<MicrophonePermissionController> { MicrophonePermissionController() }
     single<ToolPermissionBridge> { ToolPermissionBridge() }
+    single<ActivityResultBridge> { ActivityResultBridge() }
     single<SmsReader> { SmsReader() }
     single<SmsSender> { SmsSender() }
     single<NotificationListenerController> { NotificationListenerController() }

@@ -125,8 +125,64 @@ object PhoneTools {
         description = "Read recent system logs (logcat)",
     )
 
+    val setGpsLocationToolInfo = ToolInfo(
+        id = "set_gps_location",
+        name = "Set GPS Location",
+        description = "Set a mock GPS location on the device. Opens mock location settings if not configured.",
+    )
+
+    val takePictureToolInfo = ToolInfo(
+        id = "take_picture",
+        name = "Take Picture",
+        description = "Capture a photo using the device camera (front or back). Saves to AI storage and returns the image for vision-capable models.",
+    )
+
+    val hearSurroundingsToolInfo = ToolInfo(
+        id = "hear_surroundings",
+        name = "Hear Surroundings",
+        description = "Listen through the device microphone, transcribe speech to text using built-in speech recognition, and return the transcription. The AI automatically decides which language to respond in.",
+    )
+
+    val screenshotToolInfo = ToolInfo(
+        id = "screenshot",
+        name = "Take Screenshot",
+        description = "Capture the current device screen and save it for AI analysis.",
+    )
+
+    val launchActivityToolInfo = ToolInfo(
+        id = "launch_activity",
+        name = "Launch Activity",
+        description = "Launch any Android activity by package name and activity class name.",
+    )
+
+    val modifySettingsToolInfo = ToolInfo(
+        id = "modify_settings",
+        name = "Modify Settings",
+        description = "Modify Android system/global/secure settings. Requires WRITE_SETTINGS permission.",
+    )
+
+    val readScreenTextToolInfo = ToolInfo(
+        id = "read_screen_text",
+        name = "Read Screen Text",
+        description = "Read all visible text on the current screen using AccessibilityService.",
+    )
+
+    val navigateScreenToolInfo = ToolInfo(
+        id = "navigate_screen",
+        name = "Navigate Screen",
+        description = "Navigate on screen using AccessibilityService. Supports click_text, click_coordinates, back, scroll_down, scroll_up, home, recents, notifications.",
+    )
+
     val phoneToolDefinitions = listOf(
         gpsLocationToolInfo,
+        setGpsLocationToolInfo,
+        takePictureToolInfo,
+        hearSurroundingsToolInfo,
+        screenshotToolInfo,
+        launchActivityToolInfo,
+        modifySettingsToolInfo,
+        readScreenTextToolInfo,
+        navigateScreenToolInfo,
         readContactsToolInfo,
         deviceInfoToolInfo,
         batteryInfoToolInfo,

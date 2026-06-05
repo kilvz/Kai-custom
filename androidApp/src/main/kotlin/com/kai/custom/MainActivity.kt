@@ -99,20 +99,24 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        android.util.Log.d("PTT_DEBUG", "dispatchKeyEvent: keyCode=${event.keyCode} action=${event.action} captureMode=${PttTriggerManager.captureMode.value} repeatCount=${event.repeatCount}")
+        val appSettings: com.kai.custom.data.AppSettings = get()
+        android.util.Log.d("PTT_DEBUG", "  storedKeyCode=${appSettings.getPttTriggerKeyCode()} match=${appSettings.getPttTriggerKeyCode() == event.keyCode}")
         if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
             if (PttTriggerManager.captureMode.value) {
+                android.util.Log.d("PTT_DEBUG", "  reporting captured key ${event.keyCode}")
                 PttTriggerManager.reportCapturedKey(event.keyCode)
                 return true
             }
-            val appSettings: com.kai.custom.data.AppSettings = get()
             if (appSettings.getPttTriggerKeyCode() == event.keyCode) {
+                android.util.Log.d("PTT_DEBUG", "  triggering DOWN")
                 PttTriggerManager.triggerDown()
                 return true
             }
         }
         if (event.action == KeyEvent.ACTION_UP) {
-            val appSettings: com.kai.custom.data.AppSettings = get()
             if (appSettings.getPttTriggerKeyCode() == event.keyCode) {
+                android.util.Log.d("PTT_DEBUG", "  triggering UP")
                 PttTriggerManager.triggerUp()
                 return true
             }

@@ -887,6 +887,20 @@ class AppSettings(internal val settings: Settings) {
         settings.putInt("$KEY_MODEL_CONTEXT_PREFIX$modelId", contextTokens)
     }
 
+    // Max output tokens per model (0 = use provider default / not configured)
+    fun getModelMaxTokens(modelId: String): Int = settings.getInt("$KEY_MODEL_MAX_TOKENS_PREFIX$modelId", 0)
+
+    fun setModelMaxTokens(modelId: String, maxTokens: Int) {
+        settings.putInt("$KEY_MODEL_MAX_TOKENS_PREFIX$modelId", maxTokens)
+    }
+
+    // Default calendar account ID
+    fun getDefaultCalendarId(): Long = settings.getLong(KEY_DEFAULT_CALENDAR_ID, -1L)
+
+    fun setDefaultCalendarId(calendarId: Long) {
+        settings.putLong(KEY_DEFAULT_CALENDAR_ID, calendarId)
+    }
+
     // Splinterlands
     fun isSplinterlandsEnabled(): Boolean = settings.getBoolean(KEY_SPLINTERLANDS_ENABLED, false)
 
@@ -1010,6 +1024,9 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SPLINTERLANDS_INSTANCE_IDS = "splinterlands_instance_ids"
 
         const val KEY_MODEL_CONTEXT_PREFIX = "model_context_"
+        const val KEY_MODEL_MAX_TOKENS_PREFIX = "model_maxtokens_"
+
+        const val KEY_DEFAULT_CALENDAR_ID = "default_calendar_id"
 
         const val KEY_SANDBOX_ENABLED = "sandbox_enabled"
         const val KEY_SANDBOX_STORAGE_MOUNT = "sandbox_storage_mount"

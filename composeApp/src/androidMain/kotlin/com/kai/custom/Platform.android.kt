@@ -17,6 +17,9 @@ import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.provider.ContactsContract
 import android.provider.MediaStore
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.speech.RecognitionListener
 import android.telephony.TelephonyManager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -81,6 +84,7 @@ import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshConnectTool
 import com.kai.custom.tools.SshDisconnectTool
 import com.kai.custom.tools.WebSearchTool
+import com.kai.custom.tools.ToolPermissionBridge
 import com.russhwolf.settings.BuildConfig
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -93,6 +97,11 @@ import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.android.Android
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.isSuccess
+import io.ktor.utils.io.readAvailable
+import io.ktor.client.plugins.HttpTimeout
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_create_calendar_event_description
 import kai.composeapp.generated.resources.tool_create_calendar_event_name
@@ -119,6 +128,8 @@ import kai.composeapp.generated.resources.tool_send_notification_name
 import kai.composeapp.generated.resources.tool_set_alarm_description
 import kai.composeapp.generated.resources.tool_set_alarm_name
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.coroutines.CoroutineContext
 
@@ -189,6 +200,9 @@ actual fun requestShizukuPermission(onGranted: (() -> Unit)?) {
 
 actual fun getToolPermissionMap(): Map<String, List<String>> = mapOf(
     "get_gps_location" to listOf(Manifest.permission.ACCESS_FINE_LOCATION),
+    "set_gps_location" to listOf(Manifest.permission.ACCESS_FINE_LOCATION),
+    "take_picture" to listOf(Manifest.permission.CAMERA),
+    "hear_surroundings" to listOf(Manifest.permission.RECORD_AUDIO),
     "read_contacts" to listOf(Manifest.permission.READ_CONTACTS),
     "get_wifi_info" to listOf(Manifest.permission.ACCESS_FINE_LOCATION),
     "read_calendar_events" to listOf(Manifest.permission.READ_CALENDAR),
@@ -327,6 +341,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     addAll(com.kai.custom.tools.telegramToolDefinitions)
     // Phone tools — full device access
     add(PhoneTools.gpsLocationToolInfo.copy(isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)))
+    add(PhoneTools.setGpsLocationToolInfo.copy(isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)))
     add(PhoneTools.readContactsToolInfo.copy(isEnabled = hasPermission(Manifest.permission.READ_CONTACTS)))
     add(PhoneTools.deviceInfoToolInfo)
     add(PhoneTools.batteryInfoToolInfo)
@@ -345,6 +360,13 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(PhoneTools.scanBluetoothToolInfo)
     add(PhoneTools.listMediaToolInfo)
     add(PhoneTools.readLogsToolInfo)
+    add(PhoneTools.takePictureToolInfo.copy(isEnabled = hasPermission(Manifest.permission.CAMERA)))
+    add(PhoneTools.hearSurroundingsToolInfo.copy(isEnabled = hasPermission(Manifest.permission.RECORD_AUDIO)))
+    add(PhoneTools.screenshotToolInfo)
+    add(PhoneTools.launchActivityToolInfo)
+    add(PhoneTools.modifySettingsToolInfo)
+    add(PhoneTools.readScreenTextToolInfo)
+    add(PhoneTools.navigateScreenToolInfo)
     // SMS tools are intentionally absent here: availability is driven by the Agent-tab
     // master toggles (isSmsEnabled / isSmsSendEnabled) plus the FOSS-only `isSmsSupported`
     // check in `getAvailableTools()`. Listing per-tool toggles in the Tools tab was dead
@@ -359,8 +381,9 @@ actual fun getAvailableTools(): List<Tool> {
     val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
     val taskStore: TaskStore by inject(TaskStore::class.java)
     val calendarPermissionController: CalendarPermissionController by inject(CalendarPermissionController::class.java)
-    val calendarRepository = CalendarRepository(context, calendarPermissionController)
+    val calendarRepository = CalendarRepository(context, calendarPermissionController, appSettings.getDefaultCalendarId())
     val emailStore: EmailStore by inject(EmailStore::class.java)
+    val toolPermissionBridge: ToolPermissionBridge by inject(ToolPermissionBridge::class.java)
 
     val allTools = buildList {
         if (appSettings.isMemoryEnabled()) {
@@ -725,6 +748,413 @@ actual fun getAvailableTools(): List<Tool> {
                             }
                         } catch (e: Exception) {
                             mapOf("success" to false, "error" to "Failed to get location: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // Set GPS Location (mock)
+        if (appSettings.isToolEnabled(PhoneTools.setGpsLocationToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "set_gps_location",
+                        description = "Set a mock GPS location on the device using the mock location app. Opens Developer Options → 'Select mock location app' if Kai is not set as the mock provider.",
+                        parameters = mapOf(
+                            "latitude" to ParameterSchema("number", "Target latitude coordinate (e.g. 48.8566)", true),
+                            "longitude" to ParameterSchema("number", "Target longitude coordinate (e.g. 2.3522)", true),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        val latitude = (args["latitude"] as? Number)?.toDouble()
+                        val longitude = (args["longitude"] as? Number)?.toDouble()
+                        if (latitude == null || longitude == null) {
+                            return mapOf("success" to false, "error" to "latitude and longitude are required")
+                        }
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            return mapOf("success" to false, "error" to "Location permission not granted. Grant it in Settings > Apps > Kai > Permissions.")
+                        }
+                        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+
+                        fun removeExistingTestProviders() {
+                            try { locationManager.removeTestProvider(android.location.LocationManager.GPS_PROVIDER) } catch (_: Exception) {}
+                            try { locationManager.removeTestProvider(android.location.LocationManager.NETWORK_PROVIDER) } catch (_: Exception) {}
+                        }
+
+                        return try {
+                            removeExistingTestProviders()
+                            try {
+                                locationManager.addTestProvider(
+                                    android.location.LocationManager.GPS_PROVIDER,
+                                    false, false, false, false, true, true, true,
+                                    @Suppress("DEPRECATION") android.location.Criteria.POWER_HIGH,
+                                    @Suppress("DEPRECATION") android.location.Criteria.ACCURACY_FINE
+                                )
+                                locationManager.setTestProviderEnabled(android.location.LocationManager.GPS_PROVIDER, true)
+                            } catch (_: SecurityException) {
+                                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                                return mapOf(
+                                    "success" to false,
+                                    "error" to "Kai is not set as the mock location provider. " +
+                                        "Developer Options have been opened — please go to 'Select mock location app' and choose Kai.",
+                                )
+                            }
+                            val mockLocation = android.location.Location(android.location.LocationManager.GPS_PROVIDER).apply {
+                                this.latitude = latitude
+                                this.longitude = longitude
+                                accuracy = 1.0f
+                                time = System.currentTimeMillis()
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                                    elapsedRealtimeNanos = android.os.SystemClock.elapsedRealtimeNanos()
+                                }
+                            }
+                            locationManager.setTestProviderLocation(android.location.LocationManager.GPS_PROVIDER, mockLocation)
+                            mapOf(
+                                "success" to true,
+                                "latitude" to latitude,
+                                "longitude" to longitude,
+                                "message" to "Mock GPS location set to ($latitude, $longitude). Disable mock location in Developer Options to restore real GPS.",
+                            )
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to set location: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Take Picture ──
+        if (appSettings.isToolEnabled(PhoneTools.takePictureToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "take_picture",
+                        description = "Capture a photo using the device camera. Returns the image path for AI analysis. Specify camera: 'back' (default) or 'front'.",
+                        parameters = mapOf(
+                            "camera" to ParameterSchema("string", "Which camera to use: 'back' or 'front' (default 'back')", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            val granted = toolPermissionBridge.requestPermission(Manifest.permission.CAMERA)
+                            if (!granted) {
+                                return mapOf("success" to false, "error" to "Camera permission not granted.")
+                            }
+                        }
+                        val useFront = args["camera"]?.toString() == "front"
+                        val outputFile = java.io.File(context.cacheDir, "kai_capture_${System.currentTimeMillis()}.jpg")
+                        val outputUri = androidx.core.content.FileProvider.getUriForFile(
+                            context, "${context.packageName}.fileprovider", outputFile
+                        )
+                        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                            putExtra(MediaStore.EXTRA_OUTPUT, outputUri)
+                            if (useFront && Build.VERSION.SDK_INT >= 34) {
+                                putExtra("android.intent.extra.CAMERA_FACING", 0)
+                            }
+                            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        return try {
+                            context.startActivity(intent)
+                            // Wait briefly for user to take the photo
+                            var elapsed = 0
+                            val maxWait = 120_000L
+                            while (elapsed < maxWait && !outputFile.exists()) {
+                                kotlinx.coroutines.delay(500)
+                                elapsed += 500
+                            }
+                            if (outputFile.exists()) {
+                                val aiDir = java.io.File(context.filesDir, "ai_captures")
+                                aiDir.mkdirs()
+                                val saved = java.io.File(aiDir, "capture_${System.currentTimeMillis()}.jpg")
+                                outputFile.copyTo(saved, overwrite = true)
+                                outputFile.delete()
+                                mapOf(
+                                    "success" to true,
+                                    "path" to saved.absolutePath,
+                                    "message" to "Photo saved to ${saved.absolutePath}",
+                                )
+                            } else {
+                                mapOf("success" to false, "error" to "Camera was not used or photo was not saved.")
+                            }
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to take picture: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Hear Surroundings ──
+        if (appSettings.isToolEnabled(PhoneTools.hearSurroundingsToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "hear_surroundings",
+                        description = "Listen through the device microphone, transcribe speech to text, and return the transcription. The AI automatically determines the response language.",
+                        parameters = mapOf(
+                            "duration_seconds" to ParameterSchema("integer", "Maximum listening duration in seconds (default 10, max 60)", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                            val granted = toolPermissionBridge.requestPermission(Manifest.permission.RECORD_AUDIO)
+                            if (!granted) {
+                                return mapOf("success" to false, "error" to "Microphone permission not granted.")
+                            }
+                        }
+                        val maxDuration = (args["duration_seconds"] as? Number)?.toInt()?.coerceIn(1, 60) ?: 10
+                        val deferred = kotlinx.coroutines.CompletableDeferred<Map<String, Any>>()
+                        val recognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(context)
+                        val listener = object : android.speech.RecognitionListener {
+                            override fun onReadyForSpeech(params: android.os.Bundle?) {}
+                            override fun onBeginningOfSpeech() {}
+                            override fun onRmsChanged(rmsdB: Float) {}
+                            override fun onBufferReceived(buffer: ByteArray?) {}
+                            override fun onEndOfSpeech() { /* will be handled by timeout */ }
+                            override fun onError(error: Int) {
+                                val msg = when (error) {
+                                    android.speech.SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
+                                    android.speech.SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech detected"
+                                    android.speech.SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Speech recognizer is busy"
+                                    else -> "Recognition error: $error"
+                                }
+                                deferred.complete(mapOf("success" to false, "error" to msg))
+                            }
+                            override fun onResults(results: android.os.Bundle?) {
+                                val matches = results?.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION)
+                                val text = matches?.firstOrNull()?.takeIf { it.isNotBlank() }
+                                if (text != null) {
+                                    deferred.complete(mapOf(
+                                        "success" to true,
+                                        "transcription" to text,
+                                        "message" to "Heard: $text",
+                                    ))
+                                } else {
+                                    deferred.complete(mapOf("success" to false, "error" to "No speech detected"))
+                                }
+                            }
+                            override fun onPartialResults(partialResults: android.os.Bundle?) {}
+                            override fun onEvent(eventType: Int, params: android.os.Bundle?) {}
+                        }
+                        recognizer.setRecognitionListener(listener)
+                        val intent = Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                            putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                            putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+                            putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
+                        }
+                        recognizer.startListening(intent)
+                        val timeoutMs = (maxDuration + 5) * 1000L
+                        val result = withTimeoutOrNull(timeoutMs) { deferred.await() }
+                        recognizer.destroy()
+                        return result ?: mapOf("success" to false, "error" to "Listening timed out after ${maxDuration}s")
+                    }
+                },
+            )
+        }
+
+        // ── Take Screenshot ──
+        if (appSettings.isToolEnabled(PhoneTools.screenshotToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "screenshot",
+                        description = "Capture the current device screen and save it for AI analysis.",
+                        parameters = emptyMap(),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val tempFile = java.io.File(context.cacheDir, "screenshot_${System.currentTimeMillis()}.png")
+                        val process = Runtime.getRuntime().exec(arrayOf("screencap", "-p", tempFile.absolutePath))
+                        val exitCode = process.waitFor()
+                        if (exitCode == 0 && tempFile.exists() && tempFile.length() > 0) {
+                            val aiDir = java.io.File(context.filesDir, "ai_captures")
+                            aiDir.mkdirs()
+                            val saved = java.io.File(aiDir, "screenshot_${System.currentTimeMillis()}.png")
+                            tempFile.copyTo(saved, overwrite = true)
+                            tempFile.delete()
+                            mapOf(
+                                "success" to true,
+                                "path" to saved.absolutePath,
+                                "message" to "Screenshot saved",
+                            )
+                        } else {
+                            mapOf("success" to false, "error" to "Failed to capture screen (exit code $exitCode). On Android 12+, grant screen capture permission via MediaProjection.")
+                        }
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to take screenshot: ${e.message}")
+                    }
+                },
+            )
+        }
+
+        // ── Launch Activity ──
+        if (appSettings.isToolEnabled(PhoneTools.launchActivityToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "launch_activity",
+                        description = "Launch any Android activity by package and class name. Optionally specify an action and data URI.",
+                        parameters = mapOf(
+                            "package" to ParameterSchema("string", "Package name (e.g. com.android.settings)", true),
+                            "activity" to ParameterSchema("string", "Full activity class name (e.g. com.android.settings.Settings)", true),
+                            "action" to ParameterSchema("string", "Optional Intent action (e.g. android.intent.action.VIEW)", false),
+                            "data_uri" to ParameterSchema("string", "Optional data URI for the intent", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val pkg = args["package"]?.toString() ?: return mapOf("success" to false, "error" to "package is required")
+                        val activity = args["activity"]?.toString() ?: return mapOf("success" to false, "error" to "activity is required")
+                        val action = args["action"]?.toString()
+                        val dataUri = args["data_uri"]?.toString()
+                        val intent = Intent(action ?: Intent.ACTION_MAIN).apply {
+                            setClassName(pkg, activity)
+                            dataUri?.let { data = android.net.Uri.parse(it) }
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                        mapOf("success" to true, "message" to "Launched $pkg/$activity")
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to launch activity: ${e.message}")
+                    }
+                },
+            )
+        }
+
+        // ── Modify Settings ──
+        if (appSettings.isToolEnabled(PhoneTools.modifySettingsToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "modify_settings",
+                        description = "Modify Android system/global/secure settings. Opens WRITE_SETTINGS permission screen if not granted. Namespace: 'system' (default), 'global', or 'secure'.",
+                        parameters = mapOf(
+                            "key" to ParameterSchema("string", "Setting key (e.g. screen_brightness, wifi_on)", true),
+                            "value" to ParameterSchema("string", "Value to set", true),
+                            "namespace" to ParameterSchema("string", "Settings namespace: 'system', 'global', or 'secure' (default 'system')", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        val key = args["key"]?.toString() ?: return mapOf("success" to false, "error" to "key is required")
+                        val value = args["value"]?.toString() ?: return mapOf("success" to false, "error" to "value is required")
+                        val namespace = args["namespace"]?.toString()?.lowercase() ?: "system"
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.System.canWrite(context)) {
+                            val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                                data = android.net.Uri.parse("package:${context.packageName}")
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                            return mapOf(
+                                "success" to false,
+                                "error" to "WRITE_SETTINGS permission not granted. Settings screen has been opened — please grant the permission and try again.",
+                            )
+                        }
+
+                        return try {
+                            val resolver = context.contentResolver
+                            when (namespace) {
+                                "global" -> android.provider.Settings.Global.putString(resolver, key, value)
+                                "secure" -> android.provider.Settings.Secure.putString(resolver, key, value)
+                                else -> android.provider.Settings.System.putString(resolver, key, value)
+                            }
+                            mapOf("success" to true, "key" to key, "value" to value, "namespace" to namespace)
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to set $namespace/$key: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Read Screen Text ──
+        if (appSettings.isToolEnabled(PhoneTools.readScreenTextToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "read_screen_text",
+                        description = "Read all visible text on the current screen using AccessibilityService. Opens accessibility settings if the service is not enabled.",
+                        parameters = emptyMap(),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (!com.kai.custom.ScreenReaderService.isConnected()) {
+                            val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                            return mapOf(
+                                "success" to false,
+                                "error" to "Accessibility Service is not enabled. Settings opened — please enable 'Kai Screen Reader' in Accessibility settings and try again.",
+                            )
+                        }
+                        return try {
+                            val text = com.kai.custom.ScreenReaderService.readScreenText()
+                            if (text.isNullOrBlank()) {
+                                mapOf("success" to true, "text" to "", "message" to "No text found on screen")
+                            } else {
+                                mapOf("success" to true, "text" to text, "char_count" to text.length)
+                            }
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to read screen: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Navigate Screen ──
+        if (appSettings.isToolEnabled(PhoneTools.navigateScreenToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "navigate_screen",
+                        description = "Navigate on screen using AccessibilityService. Actions: click_text (tap text/label), click_coordinates (tap x,y), back, scroll_down, scroll_up, home, recents, notifications.",
+                        parameters = mapOf(
+                            "action" to ParameterSchema("string", "Action to perform: click_text, click_coordinates, back, scroll_down, scroll_up, home, recents, notifications", true),
+                            "text" to ParameterSchema("string", "Text to tap (required for click_text action)", false),
+                            "x" to ParameterSchema("number", "X coordinate (required for click_coordinates action)", false),
+                            "y" to ParameterSchema("number", "Y coordinate (required for click_coordinates action)", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (!com.kai.custom.ScreenReaderService.isConnected()) {
+                            val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                            return mapOf(
+                                "success" to false,
+                                "error" to "Accessibility Service is not enabled. Settings opened — please enable 'Kai Screen Reader' in Accessibility.",
+                            )
+                        }
+                        val action = args["action"]?.toString() ?: return mapOf("success" to false, "error" to "action is required")
+                        return try {
+                            val result = when (action) {
+                                "click_text" -> {
+                                    val text = args["text"]?.toString()
+                                    if (text.isNullOrBlank()) return mapOf("success" to false, "error" to "text is required for click_text")
+                                    com.kai.custom.ScreenReaderService.clickOnText(text)
+                                }
+                                "click_coordinates" -> {
+                                    val x = (args["x"] as? Number)?.toFloat()
+                                    val y = (args["y"] as? Number)?.toFloat()
+                                    if (x == null || y == null) return mapOf("success" to false, "error" to "x and y are required for click_coordinates")
+                                    com.kai.custom.ScreenReaderService.clickOnCoordinates(x, y)
+                                }
+                                "back" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
+                                "home" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+                                "recents" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_RECENTS)
+                                "notifications" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS)
+                                "scroll_down" -> com.kai.custom.ScreenReaderService.scrollForward()
+                                "scroll_up" -> com.kai.custom.ScreenReaderService.scrollBackward()
+                                else -> return mapOf("success" to false, "error" to "Unknown action: $action")
+                            }
+                            mapOf("success" to result, "action" to action, "message" to if (result) "$action performed" else "$action failed")
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to $action: ${e.message}")
                         }
                     }
                 },
@@ -1368,12 +1798,76 @@ actual fun getAvailableTools(): List<Tool> {
             )
         }
 
+        add(generatePollinationImageTool(context))
         addAll(mcpServerManager.getEnabledMcpTools())
     }
 
     // Deduplicate by name — MCP servers may expose tools with the same
     // names as built-in tools (e.g. memory_store, search_memories).
     return allTools.distinctBy { it.schema.name }
+}
+
+private fun generatePollinationImageTool(context: Context): Tool = object : Tool {
+    override val schema = ToolSchema(
+        name = "generate_image",
+        description = "Generate an image from a text prompt using Pollinations.ai. Returns the path to the downloaded image file.",
+        parameters = mapOf(
+            "prompt" to ParameterSchema("string", "Text description of the image to generate", true),
+            "width" to ParameterSchema("integer", "Image width in pixels (default: 1024)", false),
+            "height" to ParameterSchema("integer", "Image height in pixels (default: 1024)", false),
+            "seed" to ParameterSchema("integer", "Random seed for reproducible results", false),
+            "model" to ParameterSchema("string", "Model to use (e.g. 'flux', 'turbo')", false),
+        ),
+    )
+
+    override suspend fun execute(args: Map<String, Any>): Any = try {
+        val prompt = (args["prompt"] as? String)?.trim()
+            ?: return mapOf("success" to false, "error" to "Prompt is required")
+        val width = args["width"] as? Int ?: 1024
+        val height = args["height"] as? Int ?: 1024
+        val seed = args["seed"] as? Int
+        val model = args["model"] as? String
+
+        val encodedPrompt = java.net.URLEncoder.encode(prompt, "UTF-8")
+        val url = StringBuilder("https://image.pollinations.ai/prompt/$encodedPrompt")
+        val params = mutableListOf("width=$width", "height=$height")
+        if (seed != null) params.add("seed=$seed")
+        if (model != null) params.add("model=$model")
+        url.append("?${params.joinToString("&")}")
+
+        val client = httpClient {
+            install(HttpTimeout) { requestTimeoutMillis = 120_000 }
+        }
+        try {
+            client.prepareGet(url.toString()).execute { response ->
+                if (!response.status.isSuccess()) {
+                    return@execute mapOf("success" to false, "error" to "Pollinations API returned HTTP ${response.status.value}")
+                }
+                val channel = response.bodyAsChannel()
+                val aiDir = java.io.File(context.filesDir, "ai_captures")
+                aiDir.mkdirs()
+                val outputFile = java.io.File(aiDir, "pollination_${System.currentTimeMillis()}.jpg")
+                java.io.FileOutputStream(outputFile).use { output ->
+                    val buffer = ByteArray(8192)
+                    while (!channel.isClosedForRead) {
+                        val bytesRead = channel.readAvailable(buffer)
+                        if (bytesRead <= 0) break
+                        output.write(buffer, 0, bytesRead)
+                    }
+                }
+                mapOf(
+                    "success" to true,
+                    "path" to outputFile.absolutePath,
+                    "file_size" to outputFile.length(),
+                    "message" to "Image saved to ${outputFile.absolutePath}",
+                )
+            }
+        } finally {
+            client.close()
+        }
+    } catch (e: Exception) {
+        mapOf("success" to false, "error" to "Failed to generate image: ${e.message}")
+    }
 }
 
 actual fun openUrl(url: String): Boolean = try {
@@ -1482,3 +1976,28 @@ private fun isEmulator(): Boolean {
 }
 
 actual fun defaultOpenAICompatibleBaseUrl(): String = if (isEmulator()) "http://10.0.2.2:11434/v1" else "http://localhost:11434/v1"
+
+actual fun listCalendarAccounts(): List<CalendarAccount> {
+    val context: Context by inject(Context::class.java)
+    val projection = arrayOf(
+        CalendarContract.Calendars._ID,
+        CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+        CalendarContract.Calendars.ACCOUNT_NAME,
+    )
+    val selection = "${CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL} >= ?"
+    val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_CONTRIBUTOR.toString())
+    val accounts = mutableListOf<CalendarAccount>()
+    context.contentResolver.query(
+        CalendarContract.Calendars.CONTENT_URI,
+        projection, selection, selectionArgs,
+        "${CalendarContract.Calendars.CALENDAR_DISPLAY_NAME} ASC",
+    )?.use { cursor ->
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Calendars._ID))
+            val name = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)) ?: ""
+            val account = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Calendars.ACCOUNT_NAME)) ?: ""
+            accounts.add(CalendarAccount(id, if (account.isNotBlank()) "$name ($account)" else name))
+        }
+    }
+    return accounts
+}

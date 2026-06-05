@@ -41,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -197,6 +198,8 @@ internal fun ServicesContent(
     localDownloadProgress: Float?,
     localDownloadError: DownloadError?,
     modelContextTokens: ImmutableMap<String, Int>,
+    modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelMaxTokens: (String, Int) -> Unit = { _, _ -> },
     availableServicesToAdd: ImmutableList<Service>,
     isFreeFallbackEnabled: Boolean,
 ) {
@@ -236,6 +239,8 @@ internal fun ServicesContent(
                     onDeleteLocalModel = actions.onDeleteLocalModel,
                     onChangeModelContextTokens = actions.onChangeModelContextTokens,
                     modelContextTokens = modelContextTokens,
+                    onChangeModelMaxTokens = onChangeModelMaxTokens,
+                    modelMaxTokens = modelMaxTokens,
                 )
             }
         }
@@ -352,6 +357,8 @@ private fun ConfiguredServiceCardContent(
     onDeleteLocalModel: (String) -> Unit = {},
     onChangeModelContextTokens: (String, Int) -> Unit = { _, _ -> },
     modelContextTokens: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelMaxTokens: (String, Int) -> Unit = { _, _ -> },
+    modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
 ) {
     Column(
         modifier = Modifier
@@ -463,6 +470,13 @@ private fun ConfiguredServiceCardContent(
                         connectionStatus = entry.connectionStatus,
                     )
                 }
+
+                Spacer(Modifier.height(8.dp))
+                MaxTokensSlider(
+                    modelId = entry.selectedModel?.id ?: entry.service.id,
+                    maxTokens = modelMaxTokens[entry.selectedModel?.id ?: entry.service.id] ?: 0,
+                    onChangeMaxTokens = { onChangeModelMaxTokens(entry.selectedModel?.id ?: entry.service.id, it) },
+                )
 
                 Spacer(Modifier.height(12.dp))
 
@@ -940,4 +954,47 @@ private fun ApiKeyField(
         },
         singleLine = singleLine,
     )
+}
+
+@Composable
+private fun MaxTokensSlider(
+    modelId: String,
+    maxTokens: Int,
+    onChangeMaxTokens: (Int) -> Unit,
+) {
+    var sliderValue by remember(maxTokens) { mutableStateOf(maxTokens.toFloat().coerceIn(512f, 32768f)) }
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Max Output Tokens",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = if (maxTokens == 0) "Default" else maxTokens.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = sliderValue,
+            onValueChange = { sliderValue = it },
+            onValueChangeFinished = {
+                val value = sliderValue.roundToInt()
+                onChangeMaxTokens(if (value <= 512) 0 else value)
+            },
+            valueRange = 512f..32768f,
+            steps = 62,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = "Set to 512 for default (provider-specific). Adjust up for longer responses, down for faster responses.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }

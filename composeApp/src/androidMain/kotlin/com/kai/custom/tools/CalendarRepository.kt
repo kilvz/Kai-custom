@@ -25,6 +25,7 @@ sealed class CalendarResult {
 class CalendarRepository(
     private val context: Context,
     private val permissionController: CalendarPermissionController,
+    private val defaultCalendarId: Long = -1L,
 ) {
 
     fun hasCalendarPermission(): Boolean {
@@ -66,6 +67,40 @@ class CalendarRepository(
         return null
     }
 
+    fun listCalendarAccounts(): List<Pair<Long, String>> {
+        val projection = arrayOf(
+            CalendarContract.Calendars._ID,
+            CalendarContract.Calendars.ACCOUNT_NAME,
+            CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+        )
+
+        val selection = "${CalendarContract.Calendars.CALENDAR_ACCESS_LEVEL} >= ?"
+        val selectionArgs = arrayOf(CalendarContract.Calendars.CAL_ACCESS_CONTRIBUTOR.toString())
+
+        val accounts = mutableListOf<Pair<Long, String>>()
+        context.contentResolver.query(
+            CalendarContract.Calendars.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            "${CalendarContract.Calendars.CALENDAR_DISPLAY_NAME} ASC",
+        )?.use { cursor ->
+            while (cursor.moveToNext()) {
+                val idIndex = cursor.getColumnIndex(CalendarContract.Calendars._ID)
+                val nameIndex = cursor.getColumnIndex(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)
+                val accountIndex = cursor.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME)
+                if (idIndex >= 0) {
+                    val id = cursor.getLong(idIndex)
+                    val displayName = if (nameIndex >= 0) cursor.getString(nameIndex) else "Calendar $id"
+                    val accountName = if (accountIndex >= 0) cursor.getString(accountIndex) else ""
+                    val label = if (accountName.isNotBlank()) "$displayName ($accountName)" else displayName
+                    accounts.add(id to label)
+                }
+            }
+        }
+        return accounts
+    }
+
     suspend fun createEvent(
         title: String,
         startTimeIso: String,
@@ -89,7 +124,7 @@ class CalendarRepository(
             Log.d(TAG, "Permission already granted")
         }
 
-        val calendarId = getPrimaryCalendarId()
+        val calendarId = if (defaultCalendarId > 0) defaultCalendarId else getPrimaryCalendarId()
             ?: return CalendarResult.Error("No writable calendar found. Please set up a calendar account on your device.")
 
         val startMillis: Long

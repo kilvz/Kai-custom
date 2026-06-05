@@ -34,16 +34,21 @@ class AndroidSpeechToText : SpeechToText {
             onError("Microphone permission not granted. Grant it in Settings > Apps > Kai > Permissions.")
             return
         }
-        // Release any previous recognizer that wasn't cleaned up
         recognizer?.destroy()
         recognizer = null
         isListening = true
         recognizer = SpeechRecognizer.createSpeechRecognizer(context)
         recognizer?.setRecognitionListener(object : RecognitionListener {
-            override fun onResults(results: Bundle) {
+            private fun cleanup() {
                 isListening = false
+                recognizer?.destroy()
+                recognizer = null
+            }
+
+            override fun onResults(results: Bundle) {
                 val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 val text = matches?.firstOrNull()
+                cleanup()
                 if (text != null) {
                     onFinalResult(text)
                 } else {
@@ -58,7 +63,7 @@ class AndroidSpeechToText : SpeechToText {
             }
 
             override fun onError(error: Int) {
-                isListening = false
+                cleanup()
                 val message = when (error) {
                     SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
                     SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timed out"
@@ -91,8 +96,6 @@ class AndroidSpeechToText : SpeechToText {
     override fun stopListening() {
         isListening = false
         recognizer?.stopListening()
-        recognizer?.destroy()
-        recognizer = null
     }
 
     override fun cancel() {

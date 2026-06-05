@@ -578,6 +578,7 @@ fun SettingsScreenContent(
                                     localDownloadProgress = filteredUiState.localDownloadProgress,
                                     localDownloadError = filteredUiState.localDownloadError,
                                     modelContextTokens = filteredUiState.modelContextTokens,
+                                    modelMaxTokens = filteredUiState.modelMaxTokens,
                                     availableServicesToAdd = filteredUiState.availableServicesToAdd,
                                     isFreeFallbackEnabled = filteredUiState.isFreeFallbackEnabled,
                                 )

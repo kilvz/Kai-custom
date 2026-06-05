@@ -173,6 +173,7 @@ class SettingsViewModel(
         localDownloadingModelId = dataRepository.getLocalDownloadingModelId()?.value,
         localDownloadProgress = dataRepository.getLocalDownloadProgress()?.value,
         modelContextTokens = buildModelContextTokensMap(),
+        modelMaxTokens = buildModelMaxTokensMap(),
         installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
         activeSkill = dataRepository.getActiveSkill(),
         schemaResetMessage = dataRepository.getSchemaResetMessage(),
@@ -247,6 +248,7 @@ class SettingsViewModel(
         onCancelLocalModelDownload = ::onCancelLocalModelDownload,
         onDeleteLocalModel = ::onDeleteLocalModel,
         onChangeModelContextTokens = ::onChangeModelContextTokens,
+        onChangeModelMaxTokens = ::onChangeModelMaxTokens,
         onExportSettings = ::onExportSettings,
         onPrepareExport = ::onPrepareExport,
         onImportSettings = ::onImportSettings,
@@ -937,11 +939,14 @@ class SettingsViewModel(
     }
 
     private fun onCapturePttTrigger() {
+        println("PTT_DEBUG: onCapturePttTrigger called, captureMode=${PttTriggerManager.captureMode.value}")
         PttTriggerManager.startCapture()
         viewModelScope.launch {
             PttTriggerManager.capturedKeyCode.collect { keyCode ->
+                println("PTT_DEBUG: capturedKeyCode received=$keyCode")
                 if (keyCode != 0) {
                     dataRepository.setPttTriggerKeyCode(keyCode)
+                    _state.update { it.copy(pttTriggerKeyCode = keyCode) }
                     return@collect
                 }
             }
@@ -949,7 +954,9 @@ class SettingsViewModel(
     }
 
     private fun onClearPttTrigger() {
+        println("PTT_DEBUG: onClearPttTrigger called, current=${dataRepository.getPttTriggerKeyCode()}")
         dataRepository.setPttTriggerKeyCode(0)
+        _state.update { it.copy(pttTriggerKeyCode = 0) }
     }
 
     private fun onDownloadLocalModel(model: LocalModel) {
@@ -976,6 +983,18 @@ class SettingsViewModel(
         val stored = dataRepository.getModelContextTokens(model.id)
         model.id to if (stored > 0) stored else model.defaultContextTokens
     }.toImmutableMap()
+
+    private fun buildModelMaxTokensMap() = dataRepository.getLocalAvailableModels().associate { model ->
+        model.id to dataRepository.getModelMaxTokens(model.id)
+    }.toImmutableMap()
+
+    private fun onChangeModelMaxTokens(modelId: String, maxTokens: Int) {
+        if (_state.value.modelMaxTokens[modelId] == maxTokens) return
+        dataRepository.setModelMaxTokens(modelId, maxTokens)
+        _state.update {
+            it.copy(modelMaxTokens = it.modelMaxTokens.toMutableMap().apply { put(modelId, maxTokens) }.toImmutableMap())
+        }
+    }
 
     private fun onDeleteLocalModel(modelId: String) {
         viewModelScope.launch(backgroundDispatcher) {

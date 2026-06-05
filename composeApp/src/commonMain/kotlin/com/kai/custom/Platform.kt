@@ -131,3 +131,6 @@ expect fun getToolPermissionMap(): Map<String, List<String>>
 
 /** Converts a hardware keycode to a human-readable name (e.g. 24 -> "KEYCODE_VOLUME_UP"). */
 expect fun keyCodeToName(keyCode: Int): String
+
+data class CalendarAccount(val id: Long, val displayName: String)
+expect fun listCalendarAccounts(): List<CalendarAccount>

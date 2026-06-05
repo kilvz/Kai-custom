@@ -311,6 +311,10 @@ interface DataRepository {
     fun getTotalDeviceMemoryBytes(): Long
     fun getModelContextTokens(modelId: String): Int
     fun setModelContextTokens(modelId: String, contextTokens: Int)
+    fun getModelMaxTokens(modelId: String): Int
+    fun setModelMaxTokens(modelId: String, maxTokens: Int)
+    fun getDefaultCalendarId(): Long
+    fun setDefaultCalendarId(calendarId: Long)
     suspend fun releaseLocalEngine()
     fun getLocalDownloadingModelId(): StateFlow<String?>?
     fun getLocalDownloadProgress(): StateFlow<Float?>?

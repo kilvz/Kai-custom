@@ -15,7 +15,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -128,6 +131,7 @@ import kai.composeapp.generated.resources.interactive_title
 import kai.composeapp.generated.resources.interactive_ui_parsing_failed
 import kai.composeapp.generated.resources.interactive_welcome_subtitle
 import kai.composeapp.generated.resources.interactive_welcome_title
+import kai.composeapp.generated.resources.tool_speak_text_name
 import kai.composeapp.generated.resources.scroll_to_bottom_content_description
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -221,7 +225,6 @@ private fun InteractiveModeScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Intercept system back to exit interactive mode instead of closing the app
     com.kai.custom.PlatformBackHandler(enabled = true) {
         uiState.actions.exitInteractiveMode()
     }
@@ -229,8 +232,6 @@ private fun InteractiveModeScreen(
     val hasAssistantResponse = remember(uiState.history) {
         uiState.history.any { it.role == History.Role.ASSISTANT }
     }
-    // Interactive mode drives a tool-calling loop and emits kai-ui JSON, so the
-    // switcher only lists services/models capable of agentic flows.
     val interactiveServices = remember(uiState.availableServices) {
         uiState.availableServices
             .filter { supportsAgenticFlows(it.serviceId, it.modelId) }
@@ -244,11 +245,20 @@ private fun InteractiveModeScreen(
     var questionInputText by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(""))
     }
+    var hasUsedPtt by remember { mutableStateOf(false) }
+    val currentOnStart by rememberUpdatedState(onStartVoiceInput)
+    val currentOnStop by rememberUpdatedState(onStopVoiceInput)
+    val speakToolName = stringResource(Res.string.tool_speak_text_name)
+    val isSpeaking by remember(uiState.history) {
+        derivedStateOf {
+            uiState.history.any { it.role == History.Role.TOOL_EXECUTING && it.toolName == speakToolName }
+        }
+    }
 
     LaunchedEffect(Unit) {
         PttTriggerManager.events.collect { event ->
             when (event) {
-                PttEvent.DOWN -> onStartVoiceInput()
+                PttEvent.DOWN -> { hasUsedPtt = true; onStartVoiceInput() }
                 PttEvent.UP -> onStopVoiceInput()
             }
         }
@@ -263,7 +273,6 @@ private fun InteractiveModeScreen(
             .imePadding(),
     ) {
         Column(Modifier.fillMaxSize()) {
-            // Top bar with back and close
             InteractiveModeTopBar(
                 onBack = uiState.actions.goBackInteractiveMode,
                 onExit = uiState.actions.exitInteractiveMode,
@@ -274,42 +283,8 @@ private fun InteractiveModeScreen(
             Box(
                 modifier = Modifier.fillMaxSize(),
             ) {
-                // Content area fills remaining space
-                if (!hasAssistantResponse && !uiState.isLoading) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        LogoAnimation(
-                            modifier = Modifier.pointerInput(Unit) {
-                                detectTapGestures(
-                                    onPress = {
-                                        onStartVoiceInput()
-                                        try {
-                                            awaitRelease()
-                                        } finally {
-                                            onStopVoiceInput()
-                                        }
-                                    },
-                                )
-                            },
-                            isRecording = uiState.isVoiceInputActive,
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(Res.string.interactive_welcome_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Text(
-                            text = stringResource(Res.string.interactive_welcome_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp),
-                        )
-                    }
-                } else {
+                // Chat content (hidden in PTT mode, visible in text mode)
+                if (hasAssistantResponse && !hasUsedPtt) {
                     SelectionContainer {
                         InteractiveModeContent(
                             uiState = uiState,
@@ -319,7 +294,68 @@ private fun InteractiveModeScreen(
                     }
                 }
 
-                // Full QuestionInput stays in the column flow
+                // Centered PTT / welcome content (visible in PTT mode or before first response)
+                if (!hasAssistantResponse || hasUsedPtt) {
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .pointerInput(currentOnStart, currentOnStop) {
+                                awaitEachGesture {
+                                    awaitFirstDown(requireUnconsumed = false)
+                                    hasUsedPtt = true
+                                    currentOnStart()
+                                    try {
+                                        waitForUpOrCancellation()
+                                    } finally {
+                                        currentOnStop()
+                                    }
+                                }
+                            },
+                        horizontalAlignment = CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        LogoAnimation(
+                            isRecording = uiState.isVoiceInputActive,
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        when {
+                            isSpeaking -> {
+                                Text(
+                                    text = "Speaking...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            hasAssistantResponse -> {
+                                val lastResponse = uiState.history.lastRenderedAssistant()?.content?.toSpeakableText().orEmpty()
+                                if (lastResponse.isNotEmpty()) {
+                                    Text(
+                                        text = lastResponse,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 4,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(top = 4.dp),
+                                    )
+                                }
+                            }
+                            else -> {
+                                Text(
+                                    text = stringResource(Res.string.interactive_welcome_title),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    text = stringResource(Res.string.interactive_welcome_subtitle),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+
                 if (showFullInput) {
                     QuestionInput(
                         modifier = Modifier.align(Alignment.BottomEnd),
@@ -327,9 +363,10 @@ private fun InteractiveModeScreen(
                         addFile = uiState.actions.addFile,
                         removeFile = uiState.actions.removeFile,
                         ask = {
-                            inputExpanded = false
-                            uiState.actions.ask(it)
-                        },
+                             inputExpanded = false
+                             hasUsedPtt = false
+                             uiState.actions.ask(it)
+                         },
                         supportedFileExtensions = uiState.supportedFileExtensions,
                         textState = questionInputText,
                         onTextStateChange = { questionInputText = it },
@@ -340,12 +377,14 @@ private fun InteractiveModeScreen(
                         installedSkills = uiState.installedSkills,
                         activeSkill = uiState.activeSkill,
                         onSetActiveSkill = uiState.actions.onSetActiveSkill,
+                        isVoiceInputActive = uiState.isVoiceInputActive,
+                        onStartVoiceInput = uiState.actions.startVoiceInput,
+                        onStopVoiceInput = uiState.actions.stopVoiceInput,
                     )
                 }
             }
         }
 
-        // Collapsed pill floats over content at the bottom-end
         if (!showFullInput) {
             val gradientBrush = com.kai.custom.ui.gradientBrush
             Row(

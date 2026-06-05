@@ -182,6 +182,7 @@ class Requests {
         tools: List<Tool> = emptyList(),
         customHeaders: Map<String, String> = emptyMap(),
         requestTimeoutMs: Long? = null,
+        maxTokens: Int? = null,
     ): Result<OpenAICompatibleChatResponseDto> = try {
         val apiKey = getApiKeyOrThrow(service, credentials)
         val model = credentials.modelId.ifEmpty { null }
@@ -203,6 +204,7 @@ class Requests {
                         model = model,
                         tools = tools.mapNotNull { runCatching { it.toRequestTool() }.getOrNull() }
                             .ifEmpty { null },
+                        maxTokens = maxTokens,
                     ),
                 )
             }
@@ -300,6 +302,7 @@ class Requests {
         tools: List<Tool> = emptyList(),
         systemInstruction: String? = null,
         requestTimeoutMs: Long? = null,
+        maxTokens: Int? = null,
     ): Result<AnthropicChatResponseDto> = try {
         val apiKey = credentials.apiKey.ifEmpty { throw AnthropicInvalidApiKeyException() }
         val response: HttpResponse =
@@ -317,7 +320,7 @@ class Requests {
                     AnthropicChatRequestDto(
                         model = credentials.modelId,
                         messages = messages,
-                        max_tokens = 8192,
+                        max_tokens = maxTokens ?: 8192,
                         system = systemInstruction,
                         tools = tools.mapNotNull { runCatching { it.toAnthropicTool() }.getOrNull() }
                             .ifEmpty { null },

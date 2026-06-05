@@ -51,6 +51,8 @@ import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
 import com.kai.custom.tools.SetupToolPermissionHandler
 import com.kai.custom.tools.ToolPermissionBridge
+import com.kai.custom.tools.SetupActivityResultHandler
+import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.ui.DarkColorScheme
 import com.kai.custom.ui.LightColorScheme
 import com.kai.custom.ui.Theme
@@ -152,6 +154,9 @@ private fun AppContent(
 
     val toolPermissionBridge = koinInject<ToolPermissionBridge>()
     SetupToolPermissionHandler(toolPermissionBridge)
+
+    val activityResultBridge = koinInject<ActivityResultBridge>()
+    SetupActivityResultHandler(activityResultBridge)
 
     // Wake word — start/stop listening when the Voice toggle or mode changes
     val wakeWordController = koinInject<WakeWordController>()

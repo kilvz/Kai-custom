@@ -51,10 +51,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kai.custom.CalendarAccount
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxSessions
 import com.kai.custom.data.DataRepository
 import com.kai.custom.decodeToImageBitmap
+import com.kai.custom.listCalendarAccounts
 import kotlin.io.encoding.Base64
 import com.kai.custom.ui.handCursor
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
@@ -107,6 +109,10 @@ internal fun IntegrationsContent(
         }
 
         SettingsCard {
+            CalendarSection(dataRepository)
+        }
+
+        SettingsCard {
             WhatsAppSection(dataRepository, sandboxController, whatsAppLifecycleManager)
         }
 
@@ -129,6 +135,78 @@ internal fun IntegrationsContent(
                     modifier = Modifier.handCursor(),
                 ) {
                     Text(stringResource(Res.string.settings_open_github_issue))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalendarSection(dataRepository: DataRepository) {
+    var accounts by remember { mutableStateOf(emptyList<CalendarAccount>()) }
+    var selectedId by remember { mutableStateOf(dataRepository.getDefaultCalendarId()) }
+    var expanded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        accounts = listCalendarAccounts()
+        if (accounts.none { it.id == selectedId }) selectedId = -1L
+    }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Default Calendar",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Select which calendar the AI uses for creating events. Defaults to the primary calendar.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        Box {
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.fillMaxWidth().handCursor().clickable { expanded = true },
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = if (selectedId > 0) {
+                            accounts.find { it.id == selectedId }?.displayName ?: "Calendar $selectedId"
+                        } else "Auto (primary calendar)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Auto (primary calendar)") },
+                    onClick = {
+                        selectedId = -1L
+                        dataRepository.setDefaultCalendarId(-1L)
+                        expanded = false
+                    },
+                )
+                accounts.forEach { account ->
+                    DropdownMenuItem(
+                        text = { Text(account.displayName) },
+                        onClick = {
+                            selectedId = account.id
+                            dataRepository.setDefaultCalendarId(account.id)
+                            expanded = false
+                        },
+                    )
                 }
             }
         }

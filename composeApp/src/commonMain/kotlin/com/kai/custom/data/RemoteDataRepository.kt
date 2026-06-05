@@ -649,7 +649,8 @@ class RemoteDataRepository(
                     handleAnthropicChatWithTools(creds, messages, tools, systemPrompt, history)
                 } else {
                     val anthropicMessages = buildAnthropicMessages(messages)
-                    val response = requests.anthropicChat(creds, anthropicMessages, systemInstruction = systemPrompt).getOrThrow()
+                    val maxTokens = getModelMaxTokens(creds.modelId).let { if (it > 0) it else null }
+                    val response = requests.anthropicChat(creds, anthropicMessages, systemInstruction = systemPrompt, maxTokens = maxTokens).getOrThrow()
                     AssistantTurn(response.extractText())
                 }
             }
@@ -659,7 +660,8 @@ class RemoteDataRepository(
                     handleOpenAICompatibleChatWithTools(service, creds, messages, tools, systemPrompt, history)
                 } else {
                     val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt)
-                    val message = requests.openAICompatibleChat(service, creds, openAIMessages).getOrThrow()
+                    val maxTokens = getModelMaxTokens(creds.modelId).let { if (it > 0) it else null }
+                    val message = requests.openAICompatibleChat(service, creds, openAIMessages, maxTokens = maxTokens).getOrThrow()
                         .choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
                     val content = message.effectiveContent ?: throw OpenAICompatibleEmptyResponseException()
                     AssistantTurn(content, message.reasoningTraceFor(content))
@@ -2532,6 +2534,18 @@ class RemoteDataRepository(
 
     override fun setModelContextTokens(modelId: String, contextTokens: Int) {
         appSettings.setModelContextTokens(modelId, contextTokens)
+    }
+
+    override fun getModelMaxTokens(modelId: String): Int = appSettings.getModelMaxTokens(modelId)
+
+    override fun setModelMaxTokens(modelId: String, maxTokens: Int) {
+        appSettings.setModelMaxTokens(modelId, maxTokens)
+    }
+
+    override fun getDefaultCalendarId(): Long = appSettings.getDefaultCalendarId()
+
+    override fun setDefaultCalendarId(calendarId: Long) {
+        appSettings.setDefaultCalendarId(calendarId)
     }
 
     override suspend fun releaseLocalEngine() {

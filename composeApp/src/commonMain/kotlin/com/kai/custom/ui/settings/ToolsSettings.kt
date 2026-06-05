@@ -135,10 +135,11 @@ internal fun ToolsContent(
         } else {
             val categories = mapOf(
                 "Device Info" to listOf("get_device_info", "get_battery_info", "get_phone_state"),
-                "Network & Location" to listOf("get_network_info", "get_wifi_info", "get_gps_location", "web_search", "get_location_from_ip"),
+                "Network & Location" to listOf("get_network_info", "get_wifi_info", "get_gps_location", "set_gps_location", "web_search", "get_location_from_ip"),
                 "Contacts & Calendar" to listOf("read_contacts", "write_contact", "read_calendar_events", "create_calendar_event"),
-                "Media & Clipboard" to listOf("list_media", "read_clipboard"),
-                "Apps & System" to listOf("list_installed_apps", "read_device_logs", "open_file", "open_url", "fetch_url"),
+                "Camera & Sensors" to listOf("take_picture", "hear_surroundings", "screenshot", "list_media", "read_clipboard"),
+                "Apps & System" to listOf("list_installed_apps", "read_device_logs", "open_file", "open_url", "fetch_url", "launch_activity", "modify_settings"),
+                "Accessibility" to listOf("read_screen_text", "navigate_screen"),
                 "Bluetooth" to listOf("scan_bluetooth_devices"),
                 "Notifications & Alarms" to listOf("send_notification", "set_alarm"),
                 "Shell & Automation" to listOf("execute_shell_command", "run_root", "run_adb", "run_opencode", "speak_text", "manage_process"),

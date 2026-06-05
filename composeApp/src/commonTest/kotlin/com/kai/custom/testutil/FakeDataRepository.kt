@@ -740,6 +740,10 @@ class FakeDataRepository : DataRepository {
     override fun getTotalDeviceMemoryBytes(): Long = Long.MAX_VALUE
     override fun getModelContextTokens(modelId: String): Int = 0
     override fun setModelContextTokens(modelId: String, contextTokens: Int) {}
+    override fun getModelMaxTokens(modelId: String): Int = 8192
+    override fun setModelMaxTokens(modelId: String, maxTokens: Int) {}
+    override fun getDefaultCalendarId(): Long = -1L
+    override fun setDefaultCalendarId(calendarId: Long) {}
     override suspend fun releaseLocalEngine() {}
     override fun getLocalDownloadingModelId(): StateFlow<String?>? = null
     override fun getLocalDownloadProgress(): StateFlow<Float?>? = null
