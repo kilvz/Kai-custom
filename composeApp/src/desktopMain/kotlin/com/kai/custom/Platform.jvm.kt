@@ -49,6 +49,7 @@ import com.kai.custom.tools.ScanBluetoothToolDesktop
 import com.kai.custom.tools.SetAlarmToolDesktop
 import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SpeakTextToolDesktop
+import com.kai.custom.tools.telegramToolDefinitions
 import com.kai.custom.tools.SshCommandTool
 import com.kai.custom.tools.WifiInfoToolDesktop
 import com.kai.custom.tools.WriteContactToolDesktop
@@ -243,6 +244,8 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     )
     add(ScanBluetoothToolDesktop.toolInfo)
     add(WifiInfoToolDesktop.toolInfo)
+    addAll(telegramToolDefinitions)
+    add(PhoneTools.getPhoneStateToolInfo)
 }
 
 private val jsonIgnoreUnknown = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
@@ -514,6 +517,42 @@ actual fun getAvailableTools(): List<Tool> {
         if (appSettings.isToolEnabled(NotificationReaderDesktop.toolInfo.id)) {
             add(NotificationReaderDesktop)
         }
+        if (appSettings.isToolEnabled(PhoneTools.getPhoneStateToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "get_phone_state",
+                        description = "Get network connectivity status (desktop — no cellular radio)",
+                        parameters = emptyMap(),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        var hasWifi = false; var hasEthernet = false
+                        val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
+                        while (interfaces.hasMoreElements()) {
+                            val intf = interfaces.nextElement()
+                            if (intf.isUp && !intf.isLoopback) {
+                                val name = intf.name.lowercase()
+                                if ("wlan" in name || "wi-fi" in name || "wifi" in name) hasWifi = true
+                                if ("eth" in name || "ethernet" in name) hasEthernet = true
+                            }
+                        }
+                        mapOf(
+                            "success" to true,
+                            "has_cellular" to false,
+                            "has_wifi" to hasWifi,
+                            "has_ethernet" to hasEthernet,
+                            "connection_type" to when {
+                                hasWifi -> "wifi"
+                                hasEthernet -> "ethernet"
+                                else -> "unknown"
+                            },
+                        )
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to get network state: ${e.message}")
+                    }
+                },
+            )
+        }
         if (appSettings.isToolEnabled(SetAlarmToolDesktop.toolInfo.id)) {
             add(SetAlarmToolDesktop)
         }
@@ -558,6 +597,13 @@ actual fun getAvailableTools(): List<Tool> {
                     restartBridge = { whatsAppLifecycleManager.restart() },
                     updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
                 ))
+            }
+        }
+        if (isTelegramSupported) {
+            val telegramStore: com.kai.custom.data.TelegramStore by inject(com.kai.custom.data.TelegramStore::class.java)
+            val telegramPoller: com.kai.custom.telegram.TelegramPoller by inject(com.kai.custom.telegram.TelegramPoller::class.java)
+            if (telegramStore.isTelegramEnabled() && telegramStore.getBotToken().isNotBlank()) {
+                addAll(com.kai.custom.tools.getTelegramTools(telegramStore, telegramPoller))
             }
         }
         addAll(mcpServerManager.getEnabledMcpTools())
