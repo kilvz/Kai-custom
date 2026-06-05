@@ -245,6 +245,8 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(WifiInfoToolDesktop.toolInfo)
 }
 
+private val jsonIgnoreUnknown = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+
 actual fun getAvailableTools(): List<Tool> {
     val appSettings: AppSettings by inject(AppSettings::class.java)
     val memoryStore: MemoryStore by inject(MemoryStore::class.java)
@@ -262,7 +264,7 @@ actual fun getAvailableTools(): List<Tool> {
         if (appSettings.isSchedulingEnabled()) {
             addAll(SchedulingTools.getSchedulingTools(taskStore))
         }
-        if (appSettings.isToolEnabled(ShellCommandTool.schema.name, defaultEnabled = false)) {
+        if (appSettings.isToolEnabled(ShellCommandTool.schema.name, defaultEnabled = true)) {
             add(ShellCommandTool)
             add(ProcessManagerTool)
         }
@@ -293,6 +295,22 @@ actual fun getAvailableTools(): List<Tool> {
                                 "max_memory_mb" to maxMemory / (1024 * 1024),
                                 "total_memory_mb" to totalMemory / (1024 * 1024),
                                 "free_memory_mb" to freeMemory / (1024 * 1024),
+                                "physical_total_mb" to try {
+                                    val os = java.lang.management.ManagementFactory.getOperatingSystemMXBean()
+                                    if (os is com.sun.management.OperatingSystemMXBean) os.getTotalMemorySize() / (1024 * 1024) else null
+                                } catch (_: Exception) { null },
+                                "physical_free_mb" to try {
+                                    val os = java.lang.management.ManagementFactory.getOperatingSystemMXBean()
+                                    if (os is com.sun.management.OperatingSystemMXBean) os.getFreeMemorySize() / (1024 * 1024) else null
+                                } catch (_: Exception) { null },
+                                "total_disk_mb" to try {
+                                    val root = java.io.File.listRoots().firstOrNull()
+                                    root?.totalSpace?.div(1024 * 1024)
+                                } catch (_: Exception) { null },
+                                "free_disk_mb" to try {
+                                    val root = java.io.File.listRoots().firstOrNull()
+                                    root?.freeSpace?.div(1024 * 1024)
+                                } catch (_: Exception) { null },
                             ),
                         )
                     }
@@ -432,10 +450,34 @@ actual fun getAvailableTools(): List<Tool> {
                 object : Tool {
                     override val schema = ToolSchema(
                         name = "get_gps_location",
-                        description = "Get GPS location (not available on Desktop)",
+                        description = "Get approximate location via GeoIP (ipinfo.io)",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any = mapOf("success" to false, "error" to "GPS location is not available on Desktop")
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val url = java.net.URI("https://ipinfo.io/json").toURL()
+                        val conn = url.openConnection() as java.net.HttpURLConnection
+                        conn.connectTimeout = 10_000
+                        conn.readTimeout = 10_000
+                        val body = conn.inputStream.bufferedReader().readText()
+                        val data = jsonIgnoreUnknown
+                            .decodeFromString<Map<String, String>>(body)
+                        val locParts = data["loc"]?.split(",")?.map { it.trim() } ?: emptyList()
+                        val lat = locParts.getOrNull(0)?.toDoubleOrNull()
+                        val lon = locParts.getOrNull(1)?.toDoubleOrNull()
+                        mapOf(
+                            "success" to true,
+                            "latitude" to lat,
+                            "longitude" to lon,
+                            "city" to (data["city"] ?: ""),
+                            "region" to (data["region"] ?: ""),
+                            "country" to (data["country"] ?: ""),
+                            "ip" to (data["ip"] ?: ""),
+                            "source" to "GeoIP (ipinfo.io)",
+                            "accuracy" to "city-level (~25km)",
+                        )
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to get location: ${e.message}")
+                    }
                 },
             )
         }

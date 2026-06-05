@@ -193,6 +193,7 @@ class DebugServerDesktop(
                         put("splinterlands_enabled", JsonPrimitive(appSettings.isSplinterlandsEnabled()))
                         put("active_skill_id", JsonPrimitive(dataRepository.getActiveSkill()?.id ?: ""))
                         put("alt_memory_migration_complete", JsonPrimitive(appSettings.isAltMemoryMigrationComplete()))
+                        put("alt_memory_mode", JsonPrimitive(appSettings.getAltMemoryMode()))
                         put("whatsapp_enabled", JsonPrimitive(appSettings.isWhatsAppEnabled()))
                         put("whatsapp_read_only", JsonPrimitive(appSettings.isWhatsAppReadOnly()))
                         put("whatsapp_reply_mode", JsonPrimitive(appSettings.getWhatsAppReplyMode()))
@@ -230,6 +231,7 @@ class DebugServerDesktop(
                             "alt_memory_enabled" -> dataRepository.setAltMemoryEnabled(v.toBoolean())
                             "alt_memory_installed" -> appSettings.setAltMemoryInstalled(v.toBoolean())
                             "alt_memory_migration_complete" -> appSettings.setAltMemoryMigrationComplete(v.toBoolean())
+                            "alt_memory_mode" -> appSettings.setAltMemoryMode(v)
                             "scheduling_enabled" -> dataRepository.setSchedulingEnabled(v.toBoolean())
                             "dynamic_ui_enabled" -> dataRepository.setDynamicUiEnabled(v.toBoolean())
                             "theme_mode" -> { val mode = com.kai.custom.data.ThemeMode.entries.find { it.name.equals(v, ignoreCase = true) }; if (mode != null) dataRepository.setThemeMode(mode) }
@@ -801,6 +803,27 @@ class DebugServerDesktop(
                         call.respondText(json.encodeToString(mapOf("success" to true)), ContentType.Application.Json)
                     } catch (e: Exception) {
                         call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Restart error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
+                    }
+                }
+
+                post("/whatsapp/pair") {
+                    val err = auth(call) ?: return@post
+                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
+                    val phone = try { json.decodeFromString<Map<String, String>>(raw)["phone"] } catch (_: Exception) { null }
+                    if (phone.isNullOrBlank()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing phone number — send {\"phone\":\"628123456789\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    try {
+                        withContext(Dispatchers.Default) {
+                            val bridge = com.kai.custom.whatsapp.DesktopWhatsAppBridgeManager()
+                            bridge.ensureInstalled()
+                            bridge.start()
+                            bridge.requestPairingCode(phone.trim())
+                        }
+                        call.respondText(json.encodeToString(mapOf("success" to true, "message" to "Pairing code requested")), ContentType.Application.Json)
+                    } catch (e: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Pairing error")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
                     }
                 }
 

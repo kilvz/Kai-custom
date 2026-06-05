@@ -368,6 +368,12 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_ALT_MEMORY_INSTALLED, installed)
     }
 
+    fun getAltMemoryMode(): String = settings.getString(KEY_ALT_MEMORY_MODE, "native")
+
+    fun setAltMemoryMode(mode: String) {
+        settings.putString(KEY_ALT_MEMORY_MODE, mode)
+    }
+
     // Agent memories
     fun getMemoriesJson(): String = settings.getString(KEY_AGENT_MEMORIES, "[]")
 
@@ -943,6 +949,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_MEMORY_ENABLED = "memory_enabled"
         const val KEY_ALT_MEMORY_ENABLED = "alt_memory_enabled"
         const val KEY_ALT_MEMORY_INSTALLED = "alt_memory_installed"
+        const val KEY_ALT_MEMORY_MODE = "alt_memory_mode"
         const val KEY_AGENT_MEMORIES = "agent_memories"
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"

@@ -6,17 +6,27 @@ import com.kai.custom.SandboxController
 import com.kai.custom.SandboxFileEntry
 import com.kai.custom.SandboxStatus
 import com.kai.custom.TerminalLine
+import com.kai.custom.data.AppSettings
+import com.kai.custom.data.DataRepository
+import com.kai.custom.data.MemoryCategory
+import com.kai.custom.data.MemoryStoreProvider
+import com.kai.custom.data.PersonaManager
+import com.kai.custom.data.dimension.DimensionConfig
+import com.kai.custom.mcp.McpServerManager
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.mutableStateListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import org.koin.java.KoinJavaComponent.inject
 import java.io.File
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +34,10 @@ class DockerSandboxController(
     private val dockerManager: DockerManager = DockerManager(),
     private val altMemoryDockerManager: AltMemoryDockerManager = AltMemoryDockerManager(dockerManager),
 ) : SandboxController {
+    private val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
+    private val appSettings: AppSettings by inject(AppSettings::class.java)
+    private val memoryStore: MemoryStoreProvider by inject(MemoryStoreProvider::class.java)
+    private val dataRepository: DataRepository by inject(DataRepository::class.java)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _status = MutableStateFlow(SandboxStatus())
@@ -284,20 +298,132 @@ class DockerSandboxController(
         }
     }
 
+    companion object {
+        private const val ALT_MEMORY_URL = "http://127.0.0.1:8316/mcp"
+        private const val ALT_MEMORY_ID = "alt_memory"
+        private const val RETRY_INTERVAL_MS = 3_000L
+        private const val MAX_RETRIES = 10
+    }
+
+    private val nativeAltMemory by lazy { NativeAltMemoryManager() }
+
+    private val isNativeMode: Boolean get() = appSettings.getAltMemoryMode() == "native"
+
     override suspend fun startAltMemory() {
-        altMemoryDockerManager.startContainer()
+        if (isNativeMode) {
+            if (nativeAltMemory.start()) initAltMemoryMcp()
+        } else {
+            if (altMemoryDockerManager.startContainer()) initAltMemoryMcp()
+        }
     }
 
     override suspend fun stopAltMemory() {
-        altMemoryDockerManager.stopContainer()
+        if (isNativeMode) {
+            nativeAltMemory.stop()
+        } else {
+            altMemoryDockerManager.stopContainer()
+        }
+        mcpServerManager.removeBuiltInServer(ALT_MEMORY_ID)
     }
 
     override suspend fun installAltMemoryPackage(): Boolean {
-        return altMemoryDockerManager.pullImage() && altMemoryDockerManager.startContainer()
+        val ok = if (isNativeMode) {
+            if (!nativeAltMemory.isAvailable() && !nativeAltMemory.install()) return false
+            nativeAltMemory.start()
+        } else {
+            if (!altMemoryDockerManager.pullImage()) return false
+            altMemoryDockerManager.startContainer()
+        }
+        if (!ok) return false
+        return initAltMemoryMcp()
     }
 
     override suspend fun updateAltMemoryPackage(): Boolean {
-        return altMemoryDockerManager.pullAndRestart()
+        stopAltMemory()
+        if (isNativeMode) {
+            if (!nativeAltMemory.install()) return false
+            return installAltMemoryPackage()
+        }
+        return altMemoryDockerManager.pullAndRestart() && initAltMemoryMcp()
+    }
+
+    private suspend fun initAltMemoryMcp(): Boolean {
+        return withContext(Dispatchers.Default) {
+            mcpServerManager.registerBuiltInServer(
+                id = ALT_MEMORY_ID,
+                name = "Alt Memory",
+                url = ALT_MEMORY_URL,
+            )
+            for (attempt in 1..MAX_RETRIES) {
+                delay(RETRY_INTERVAL_MS)
+                val result = mcpServerManager.connectAndDiscoverTools(ALT_MEMORY_ID)
+                if (result.isSuccess) {
+                    appSettings.setAltMemoryInstalled(true)
+                    runAltMemoryMigration()
+                    return@withContext true
+                }
+            }
+            mcpServerManager.removeBuiltInServer(ALT_MEMORY_ID)
+            false
+        }
+    }
+
+    private suspend fun runAltMemoryMigration() {
+        if (appSettings.isAltMemoryMigrationComplete()) {
+            memoryStore.useAltMemory(
+                mcpServerManager.getClient(ALT_MEMORY_ID)!!,
+                appSettings,
+            )
+            return
+        }
+        val client = mcpServerManager.getClient(ALT_MEMORY_ID) ?: return
+        val memories = memoryStore.getAllMemories()
+        for (entry in memories) {
+            try {
+                val realm = when (entry.category) {
+                    MemoryCategory.GENERAL, MemoryCategory.LEARNING, MemoryCategory.ERROR -> DimensionConfig.REALM_AGENT
+                    MemoryCategory.PREFERENCE -> DimensionConfig.REALM_USER
+                }
+                val domain = when (entry.category) {
+                    MemoryCategory.GENERAL -> DimensionConfig.DOMAIN_MEMORIES
+                    MemoryCategory.PREFERENCE -> DimensionConfig.DOMAIN_PREFERENCES
+                    MemoryCategory.LEARNING -> DimensionConfig.DOMAIN_LEARNINGS
+                    MemoryCategory.ERROR -> DimensionConfig.DOMAIN_ERRORS
+                }
+                client.callTool(
+                    "add_entity",
+                    buildJsonObject {
+                        put("entity_id", JsonPrimitive(entry.key))
+                        put("realm", JsonPrimitive(realm))
+                        put("domain", JsonPrimitive(domain))
+                        put("content", JsonPrimitive(entry.content))
+                        put("metadata", buildJsonObject {
+                            put("memory_key", JsonPrimitive(entry.key))
+                            put("category", JsonPrimitive(entry.category.name))
+                            put("hit_count", JsonPrimitive(entry.hitCount.toString()))
+                            put("type", JsonPrimitive("memory_entry"))
+                            entry.source?.let { put("source", JsonPrimitive(it)) }
+                            if (entry.protected) put("protected", JsonPrimitive("true"))
+                        })
+                    },
+                )
+            } catch (_: Exception) {}
+        }
+        appSettings.setAltMemoryMigrationComplete(true)
+        memoryStore.useAltMemory(client, appSettings)
+        for (builtIn in PersonaManager.builtIns) {
+            memoryStore.syncPersonaToRemote(builtIn)
+        }
+        val personaId = appSettings.getActivePersonaId()
+        memoryStore.setPersona(personaId)
+        val remotePersonas = memoryStore.fetchRemotePersonas()
+        val localPersonas = dataRepository.getAllPersonas()
+        val localIds = localPersonas.map { it.id }.toSet()
+        for (rp in remotePersonas) {
+            if (rp.id !in localIds) {
+                dataRepository.savePersona(rp)
+            }
+        }
     }
 
     override suspend fun startWhatsApp() {

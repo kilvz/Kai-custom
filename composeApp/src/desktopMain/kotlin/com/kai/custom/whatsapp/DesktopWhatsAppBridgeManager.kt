@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileWriter
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 class DesktopWhatsAppBridgeManager {
     private var bridgeProcess: Process? = null
@@ -46,7 +46,7 @@ class DesktopWhatsAppBridgeManager {
                 val bridgeJs = File(bridgeDir, "bridge.js")
                 if (!bridgeJs.exists()) {
                     try {
-                        val url = URL(BRIDGE_JS_URL)
+                        val url = URI(BRIDGE_JS_URL).toURL()
                         val conn = url.openConnection() as HttpURLConnection
                         conn.connectTimeout = 15000
                         conn.inputStream.bufferedReader().readText().let { content ->
@@ -131,15 +131,16 @@ class DesktopWhatsAppBridgeManager {
         isRunning = false
     }
 
-    fun requestPairingCode() {
+    fun requestPairingCode(phone: String = "") {
         if (!isRunning) return
         try {
-            val url = URL("http://127.0.0.1:$BRIDGE_PORT/request-pairing-code")
+            val url = URI("http://127.0.0.1:$BRIDGE_PORT/request-pairing-code").toURL()
             val conn = url.openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.connectTimeout = 5000
             conn.doOutput = true
-            conn.outputStream.write("{}".toByteArray())
+            val body = """{"phone":"$phone"}"""
+            conn.outputStream.write(body.toByteArray())
             val response = conn.inputStream.bufferedReader().readText()
             println("[DesktopWhatsAppBridge] Pairing response: $response")
         } catch (e: Exception) {
@@ -155,7 +156,7 @@ class DesktopWhatsAppBridgeManager {
 
     private fun checkHealth(): Boolean {
         return try {
-            val url = URL(HEALTH_URL)
+            val url = URI(HEALTH_URL).toURL()
             val conn = url.openConnection() as HttpURLConnection
             conn.connectTimeout = 2000
             conn.responseCode == 200
