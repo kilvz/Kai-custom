@@ -472,11 +472,25 @@ private fun ConfiguredServiceCardContent(
                 }
 
                 Spacer(Modifier.height(8.dp))
-                MaxTokensSlider(
-                    modelId = entry.selectedModel?.id ?: entry.service.id,
-                    maxTokens = modelMaxTokens[entry.selectedModel?.id ?: entry.service.id] ?: 0,
-                    onChangeMaxTokens = { onChangeModelMaxTokens(entry.selectedModel?.id ?: entry.service.id, it) },
-                )
+
+                var advancedExpanded by remember { mutableStateOf(false) }
+                Row(
+                    modifier = Modifier.fillMaxWidth().handCursor().clickable { advancedExpanded = !advancedExpanded },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = if (advancedExpanded) "Advanced ▾" else "Advanced ▸",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (advancedExpanded) {
+                    MaxTokensSlider(
+                        modelId = entry.selectedModel?.id ?: entry.service.id,
+                        maxTokens = modelMaxTokens[entry.selectedModel?.id ?: entry.service.id] ?: 0,
+                        onChangeMaxTokens = { onChangeModelMaxTokens(entry.selectedModel?.id ?: entry.service.id, it) },
+                    )
+                }
 
                 Spacer(Modifier.height(12.dp))
 
