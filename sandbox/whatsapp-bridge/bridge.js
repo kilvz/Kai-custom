@@ -346,6 +346,19 @@ app.post('/mcp', async (req, res) => {
           currentQr = null;
           try { fs.unlinkSync(QR_FILE); } catch (e) {}
           try { fs.unlinkSync(QR_BASE64_FILE); } catch (e) {}
+          // Ensure WebSocket is alive before requesting pairing code
+          const wsOpen = sock?.ws?.readyState === 1;
+          if (!wsOpen) {
+            await initBaileys();
+            for (let i = 0; i < 30; i++) {
+              if (sock?.ws?.readyState === 1) break;
+              await new Promise(r => setTimeout(r, 500));
+            }
+          }
+          if (sock?.ws?.readyState !== 1) {
+            content = [{ type: 'text', text: JSON.stringify({ error: 'WebSocket not connected after timeout' }) }];
+            break;
+          }
           const code = await sock.requestPairingCode(phone);
           const formatted = code.match(/.{1,4}/g)?.join('-') || code;
           content = [{ type: 'text', text: JSON.stringify({ code, formatted }) }];
