@@ -62,6 +62,7 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.settings_open_github_issue
 import kai.composeapp.generated.resources.settings_request_integration_description
 import kai.composeapp.generated.resources.settings_request_integration_title
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -261,6 +262,16 @@ private fun WhatsAppSection(
                 }
             }
 
+            // QR poller — keeps the displayed QR in sync with the bridge
+            LaunchedEffect(isEnabled, bridgeRunning) {
+                while (isEnabled && bridgeRunning) {
+                    delay(1000)
+                    if (!dataRepository.isWhatsAppAuthenticated()) {
+                        whatsAppLifecycleManager.refreshQrCode()
+                    }
+                }
+            }
+
             // Manual bridge controls
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -284,26 +295,21 @@ private fun WhatsAppSection(
                 Button(
                     onClick = {
                         scope.launch {
-                            sandboxController.executeCommand(
-                                command = "fuser -k 8317/tcp 2>/dev/null; setsid nohup node /root/whatsapp-bridge/bridge.js > /tmp/whatsapp-bridge.log 2>&1 &",
-                                sessionId = SandboxSessions.SYSTEM,
-                                useRoot = false,
-                                timeoutSeconds = 10,
-                            )
-                            kotlinx.coroutines.delay(2000)
-                            whatsAppLifecycleManager.restart()
+                            statusMessage = "Resetting..."
+                            whatsAppLifecycleManager.resetBridge()
+                            statusMessage = "Bridge reset done"
                         }
                     },
                     modifier = Modifier.handCursor().height(28.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                 ) {
-                    Text("Start Bridge", style = MaterialTheme.typography.labelSmall)
+                    Text("Reset Bridge", style = MaterialTheme.typography.labelSmall)
                 }
             }
             Spacer(Modifier.height(8.dp))
 
             // Install / Pairing Code / QR / Connected
-            if (!dataRepository.isWhatsAppInstalled()) {
+            if (!dataRepository.isWhatsAppInstalled() && !whatsAppLifecycleManager.isConnected()) {
                 Button(
                     onClick = {
                         scope.launch {
@@ -423,7 +429,8 @@ private fun WhatsAppSection(
                 OutlinedButton(
                     onClick = {
                         scope.launch {
-                            whatsAppLifecycleManager.refreshQrCode()
+                            statusMessage = "Forcing new QR..."
+                            whatsAppLifecycleManager.forceRefreshQr()
                             statusMessage = "QR refreshed"
                         }
                     },
