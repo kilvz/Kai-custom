@@ -328,6 +328,7 @@ interface DataRepository {
     fun getActiveSkill(): SkillManifest?
     fun setActiveSkill(skill: SkillManifest?)
     suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest>
+    suspend fun installSkillFromClawHub(slug: String): Result<SkillManifest>
     suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest>
     suspend fun uninstallSkill(id: String)
     suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>>

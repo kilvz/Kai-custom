@@ -762,6 +762,7 @@ class FakeDataRepository : DataRepository {
         activeSkill = skill
     }
     override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromGitHub not implemented in FakeDataRepository"))
+    override suspend fun installSkillFromClawHub(slug: String): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromClawHub not implemented in FakeDataRepository"))
     override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = Result.failure(UnsupportedOperationException("installSkillFromRegistryEntry not implemented in FakeDataRepository"))
     override suspend fun uninstallSkill(id: String) {}
     override suspend fun browseMarketplaceSkills(): Result<List<RegistrySkillEntry>> = Result.success(emptyList())

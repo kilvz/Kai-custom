@@ -38,7 +38,7 @@ internal fun SkillAutocomplete(
             skills.filter { it.id.startsWith(q) || it.id.contains(q) }
         }
         val stopEntry = if (activeSkill != null && ("stop".startsWith(q) || q.isEmpty())) {
-            listOfNotNull(null)
+            listOf<SkillManifest?>(null)
         } else {
             emptyList()
         }

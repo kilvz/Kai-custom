@@ -2579,6 +2579,9 @@ class RemoteDataRepository(
     override suspend fun installSkillFromGitHub(owner: String, repo: String, ref: String, path: String): Result<SkillManifest> = skillManager?.installFromGitHub(owner, repo, ref, path)
         ?: Result.failure(IllegalStateException("SkillManager not available"))
 
+    override suspend fun installSkillFromClawHub(slug: String): Result<SkillManifest> = skillManager?.installFromClawHub(slug)
+        ?: Result.failure(IllegalStateException("SkillManager not available"))
+
     override suspend fun installSkillFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = skillManager?.installFromRegistryEntry(entry)
         ?: Result.failure(IllegalStateException("SkillManager not available"))
 

@@ -117,6 +117,10 @@ internal fun IntegrationsContent(
         }
 
         SettingsCard {
+            ClawHubSearchSection(dataRepository)
+        }
+
+        SettingsCard {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(Res.string.settings_request_integration_title),
@@ -147,7 +151,7 @@ private fun CalendarSection(dataRepository: DataRepository) {
     var selectedId by remember { mutableStateOf(dataRepository.getDefaultCalendarId()) }
     var expanded by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        accounts = listCalendarAccounts()
+        accounts = try { listCalendarAccounts() } catch (_: SecurityException) { emptyList() }
         if (accounts.none { it.id == selectedId }) selectedId = -1L
     }
     Column(modifier = Modifier.fillMaxWidth()) {

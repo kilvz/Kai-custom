@@ -5,8 +5,13 @@ import com.kai.custom.httpClient
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -31,7 +36,7 @@ class SkillRegistry(
                 .map { async { browseMarketplace(it).getOrNull().orEmpty() } }
                 .awaitAll()
                 .flatten()
-                .distinctBy { "${it.owner}/${it.repo}/${it.skillPath}" }
+                .distinctBy { it.slug ?: "${it.owner}/${it.repo}/${it.skillPath}" }
         }
     }
 
@@ -73,10 +78,13 @@ class SkillRegistry(
     }
 
     suspend fun fetchSkillFiles(source: SkillSource): Result<DownloadedSkill> = runCatching {
-        val (owner, repo, ref, path) = when (source) {
-            is SkillSource.GitHub -> Quad(source.owner, source.repo, source.ref, source.path)
+        when (source) {
+            is SkillSource.GitHub -> fetchGitHubSkill(source.owner, source.repo, source.ref, source.path)
+            is SkillSource.ClawHub -> fetchClawHubSkill(source.slug).getOrThrow()
         }
+    }
 
+    private suspend fun fetchGitHubSkill(owner: String, repo: String, ref: String, path: String): DownloadedSkill {
         val skillMd = fetchRawFile(owner, repo, ref, "$path/SKILL.md")
             ?: error("SKILL.md not found at $owner/$repo:$ref:$path/SKILL.md")
         val parsed = when (val r = SkillFrontmatterParser.parse(skillMd)) {
@@ -103,12 +111,139 @@ class SkillRegistry(
                 .toMap()
         }
 
-        DownloadedSkill(
+        return DownloadedSkill(
             id = parsed.id,
             description = parsed.description,
             rawSkillMd = skillMd,
             files = files,
         )
+    }
+
+    suspend fun searchClawHub(query: String): Result<List<RegistrySkillEntry>> = runCatching {
+        val response = client.get("$CLAWHUB_API_BASE/search") {
+            parameter("q", query)
+        }
+        if (!response.status.isSuccess()) return@runCatching emptyList<RegistrySkillEntry>()
+        val body = response.bodyAsText()
+        val root = json.parseToJsonElement(body).jsonObject
+        val results = root["results"]?.jsonArray ?: root["skills"]?.jsonArray ?: return@runCatching emptyList()
+        results.mapNotNull { entry ->
+            val obj = entry.jsonObject
+            val slug = obj["slug"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+            val displayName = obj["displayName"]?.jsonPrimitive?.contentOrNull ?: slug
+            val summary = obj["summary"]?.jsonPrimitive?.contentOrNull ?: ""
+            val ownerHandle = obj["ownerHandle"]?.jsonPrimitive?.contentOrNull ?: ""
+            RegistrySkillEntry(
+                id = slug,
+                description = summary,
+                displayName = displayName,
+                slug = slug,
+                ownerHandle = ownerHandle,
+                sourceName = "ClawHub",
+            )
+        }
+    }
+
+    suspend fun fetchClawHubSkill(slug: String): Result<DownloadedSkill> = runCatching {
+        val detailUrl = "$CLAWHUB_API_BASE/skills/$slug"
+        val detailResponse = client.get(detailUrl)
+        if (!detailResponse.status.isSuccess()) error("Skill '$slug' not found on ClawHub")
+        val detailBody = detailResponse.bodyAsText()
+        val detailRoot = json.parseToJsonElement(detailBody).jsonObject
+
+        val version = detailRoot["latestVersion"]?.jsonObject
+            ?.get("version")?.jsonPrimitive?.contentOrNull ?: "latest"
+
+        val skillMd = fetchClawHubFile(slug, "SKILL.md", version)
+            ?: error("Failed to download SKILL.md for '$slug'")
+        val parsed = when (val r = SkillFrontmatterParser.parse(skillMd)) {
+            is SkillFrontmatterParser.Result.Ok -> r
+            is SkillFrontmatterParser.Result.Err -> error("Invalid SKILL.md frontmatter in '$slug': ${r.reason}")
+        }
+
+        DownloadedSkill(
+            id = parsed.id,
+            description = parsed.description,
+            rawSkillMd = skillMd,
+            files = emptyMap(),
+        )
+    }
+
+    suspend fun fetchSecurityData(entries: List<RegistrySkillEntry>): List<RegistrySkillEntry> {
+        if (entries.isEmpty()) return entries
+        return coroutineScope {
+            val versionMap = entries.map { entry ->
+                async {
+                    val slug = entry.slug ?: return@async null
+                    slug to fetchClawHubVersion(slug)
+                }
+            }.awaitAll().filterNotNull().filter { it.second != null }.map { (slug, v) ->
+                slug to v!!
+            }.toMap()
+
+            if (versionMap.isEmpty()) return@coroutineScope entries
+
+            val verdicts = fetchSecurityVerdicts(versionMap)
+
+            entries.map { entry ->
+                val slug = entry.slug
+                if (slug != null && verdicts.containsKey(slug)) {
+                    entry.copy(securityStatus = verdicts[slug])
+                } else {
+                    entry
+                }
+            }
+        }
+    }
+
+    private suspend fun fetchClawHubVersion(slug: String): String? {
+        return try {
+            val response = client.get("$CLAWHUB_API_BASE/skills/$slug")
+            if (!response.status.isSuccess()) return null
+            val body = response.bodyAsText()
+            val skill = json.parseToJsonElement(body).jsonObject["skill"]?.jsonObject ?: return null
+            skill["tags"]?.jsonObject?.get("latest")?.jsonPrimitive?.contentOrNull
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private suspend fun fetchSecurityVerdicts(versionMap: Map<String, String>): Map<String, String> {
+        return try {
+            val items = versionMap.entries.joinToString(",") { (slug, version) ->
+                """{"slug":"$slug","version":"$version"}"""
+            }
+            val jsonBody = """{"items":[$items]}"""
+            val response = client.post("$CLAWHUB_API_BASE/skills/-/security-verdicts") {
+                contentType(ContentType.Application.Json)
+                setBody(jsonBody)
+            }
+            if (!response.status.isSuccess()) return emptyMap()
+            val body = response.bodyAsText()
+            val root = json.parseToJsonElement(body).jsonObject
+            val itemsArray = root["items"]?.jsonArray ?: return emptyMap()
+            val result = mutableMapOf<String, String>()
+            for (item in itemsArray) {
+                val obj = item.jsonObject
+                val slug = obj["slug"]?.jsonPrimitive?.contentOrNull ?: continue
+                val security = obj["security"]?.jsonObject
+                val status = security?.get("status")?.jsonPrimitive?.contentOrNull
+                if (status != null) result[slug] = status
+            }
+            result
+        } catch (_: Exception) {
+            emptyMap()
+        }
+    }
+
+    private suspend fun fetchClawHubFile(slug: String, path: String, version: String): String? {
+        val response = client.get("$CLAWHUB_API_BASE/skills/$slug/file") {
+            parameter("path", path)
+            parameter("version", version)
+        }
+        if (response.status == HttpStatusCode.NotFound) return null
+        if (!response.status.isSuccess()) return null
+        return response.bodyAsText()
     }
 
     private suspend fun fetchRepoTree(owner: String, repo: String, ref: String): Set<String> {
@@ -137,9 +272,8 @@ class SkillRegistry(
         return response.bodyAsText()
     }
 
-    private data class Quad(val a: String, val b: String, val c: String, val d: String)
-
     companion object {
+        private const val CLAWHUB_API_BASE = "https://clawhub.ai/api/v1"
         private const val MARKETPLACE_MANIFEST_PATH = ".claude-plugin/marketplace.json"
         private const val MAX_BUNDLED_FILE_CHARS = 256_000
 

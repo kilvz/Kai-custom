@@ -16,6 +16,10 @@ sealed class SkillSource {
         val ref: String = "main",
         val path: String,
     ) : SkillSource()
+
+    data class ClawHub(
+        val slug: String,
+    ) : SkillSource()
 }
 
 data class DownloadedSkill(
@@ -28,10 +32,14 @@ data class DownloadedSkill(
 data class RegistrySkillEntry(
     val id: String,
     val description: String,
-    val owner: String,
-    val repo: String,
-    val ref: String,
-    val skillPath: String,
-    val requiresSandbox: Boolean,
-    val sourceName: String,
+    val displayName: String = "",
+    val owner: String = "",
+    val repo: String = "",
+    val ref: String = "",
+    val skillPath: String = "",
+    val ownerHandle: String = "",
+    val requiresSandbox: Boolean = false,
+    val sourceName: String = "",
+    val slug: String? = null,
+    val securityStatus: String? = null,
 )
