@@ -75,17 +75,42 @@ class ImapClient(
 
     /**
      * Fetch email headers (From, Subject, Date, Message-ID) and a text preview.
+     * Batches all UIDs into a single UID FETCH command to avoid N round-trips.
      */
     suspend fun fetchHeaders(uids: List<Long>, accountId: String): List<EmailMessage> {
         if (uids.isEmpty()) return emptyList()
         val conn = connection ?: throw IllegalStateException("Not connected")
-        val messages = mutableListOf<EmailMessage>()
 
-        for (uid in uids.take(50)) { // Limit to 50 emails per fetch
-            val tag = nextTag()
-            conn.writeLine("$tag FETCH $uid (BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE MESSAGE-ID)] BODY.PEEK[TEXT]<0.200> FLAGS)")
-            val response = readUntilTaggedOrGreeting(tag)
-            val msg = parseEmailFromFetch(uid, accountId, response)
+        val batch = uids.take(50)
+        val tag = nextTag()
+        conn.writeLine("$tag UID FETCH ${batch.joinToString(",")} (BODY.PEEK[HEADER.FIELDS (FROM SUBJECT DATE MESSAGE-ID)] BODY.PEEK[TEXT]<0.200> FLAGS)")
+        val response = readUntilTaggedOrGreeting(tag)
+
+        // Split multi-message response on "* N FETCH (" boundaries
+        val blocks = mutableListOf<String>()
+        val currentBlock = StringBuilder()
+        var inFetchBlock = false
+        for (line in response.lines()) {
+            if (line.trimStart().startsWith("* ") && line.contains(" FETCH ")) {
+                if (inFetchBlock) {
+                    blocks.add(currentBlock.toString().trim())
+                    currentBlock.clear()
+                }
+                inFetchBlock = true
+            }
+            if (inFetchBlock) {
+                currentBlock.appendLine(line)
+            }
+        }
+        if (inFetchBlock && currentBlock.isNotBlank()) {
+            blocks.add(currentBlock.toString().trim())
+        }
+
+        val messages = mutableListOf<EmailMessage>()
+        for (block in blocks) {
+            val uidMatch = Regex("""\bUID (\d+)""", RegexOption.IGNORE_CASE).find(block)
+            val uid = uidMatch?.groupValues?.get(1)?.toLongOrNull() ?: continue
+            val msg = parseEmailFromFetch(uid, accountId, block)
             if (msg != null) messages.add(msg)
         }
         return messages

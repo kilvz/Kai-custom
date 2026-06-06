@@ -128,6 +128,11 @@ fi
 echo "Checking out proot at $PROOT_COMMIT..."
 git -C "$BUILD_DIR/proot-patched" checkout -q "$PROOT_COMMIT"
 
+# DISABLE_EXEC_PROT: workaround for GrapheneOS W^X enforcement. Proot's loader
+# calls mprotect(PROT_WRITE|PROT_EXEC) on tracee code segments, which GrapheneOS
+# blocks (kernel denies W+X mappings). This flag removes those mprotect calls —
+# the ELF loader on Android already maps code as executable implicitly.
+#
 # Apply link-emulation patch for protected_hardlinks (Android 14+)
 if [[ -f "$SCRIPT_DIR/patches/exit.c" ]]; then
     echo "Applying link-emulation patch (exit.c)..."
@@ -284,7 +289,7 @@ build_proot() {
         export STRIP="$llvm_strip_bin"
         export OBJCOPY="$llvm_objcopy_bin"
         export OBJDUMP="${TOOLCHAIN}/llvm-objdump"
-        export CFLAGS="-DARG_MAX=131072 -ffile-prefix-map=${cc_script_dir}=. -I${cc_sysroot}/include -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
+        export CFLAGS="-DARG_MAX=131072 -DDISABLE_EXEC_PROT -ffile-prefix-map=${cc_script_dir}=. -I${cc_sysroot}/include -Wno-error=implicit-function-declaration -Wno-error=int-conversion"
         export LDFLAGS="-L${cc_sysroot}/lib"
         export PATH="$tmp_bin:$PATH"
         # Use a relative path for PROOT_UNBUNDLE_LOADER to avoid embedding

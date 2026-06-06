@@ -181,6 +181,14 @@ class LinuxSandboxManager(
         downloader.writeResolvConf(rootfsDir)
         downloader.fixAptDirectories(rootfsDir)
 
+        // Sync system clock into the sandbox — proot doesn't forward the host
+        // clock on some devices (Samsung M13 etc.), leaving the date at 1970 or
+        // 1900, which breaks SSL certificate validation for apt/curl/wget.
+        runCatching {
+            val now = System.currentTimeMillis() / 1000
+            createProotExecutor().execute("date -s @$now", timeoutSeconds = 10)
+        }
+
         // Skip apk update/apt-get update if packages are already installed
         val pythonBinary = if (distro == "ubuntu") "usr/bin/python3" else "usr/bin/python3"
         val packagesAlreadyInstalled = File(rootfsDir, pythonBinary).exists() ||
