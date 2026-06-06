@@ -169,8 +169,20 @@ internal fun SandboxSettingsCard(
                             Text("Alt-Memory")
                         }
                     } else {
+                        val cv = sandboxState.altMemoryCurrentVersion
+                        val lv = sandboxState.altMemoryLatestVersion
+                        val isUpToDate = cv != null && lv != null && cv == lv
+                        val label = if (isUpToDate) "Reinstall Alt-Memory" else "Update Alt-Memory"
                         OutlinedButton(onClick = onUpdateAltMemory, modifier = Modifier.handCursor()) {
-                            Text("Update Alt-Memory")
+                            Text(label)
+                        }
+                        if (cv != null && lv != null && !isUpToDate) {
+                            Text(
+                                text = "Current: $cv → Latest: $lv",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 8.dp),
+                            )
                         }
                     }
                     OutlinedButton(onClick = { showResetDialog = true }, modifier = Modifier.handCursor()) {

@@ -32,6 +32,9 @@ data class SandboxUiState(
     val hasError: Boolean = false,
     val rootErrorMessage: String? = null,
     val altMemoryInstalled: Boolean = false,
+    val altMemoryCurrentVersion: String? = null,
+    val altMemoryLatestVersion: String? = null,
+    val altMemoryVersionChecking: Boolean = false,
     val needsReset: Boolean = false,
     val backupExportPath: String? = null,
 )
@@ -65,6 +68,9 @@ class SandboxViewModel(
         viewModelScope.launch {
             sandboxController.status.collect { sandboxStatus ->
                 _state.update { applyStatus(sandboxStatus, it) }
+                if (sandboxStatus.ready && _state.value.altMemoryInstalled) {
+                    checkAltMemoryVersions()
+                }
             }
         }
     }
@@ -133,6 +139,22 @@ class SandboxViewModel(
             val installed = sandboxController.updateAltMemoryPackage()
             dataRepository.setAltMemoryInstalled(installed)
             _state.update { it.copy(altMemoryInstalled = installed) }
+            checkAltMemoryVersions()
+        }
+    }
+
+    fun checkAltMemoryVersions() {
+        viewModelScope.launch {
+            if (_state.value.altMemoryVersionChecking) return@launch
+            _state.update { it.copy(altMemoryVersionChecking = true) }
+            val (current, latest) = sandboxController.getAltMemoryVersions()
+            _state.update {
+                it.copy(
+                    altMemoryCurrentVersion = current,
+                    altMemoryLatestVersion = latest,
+                    altMemoryVersionChecking = false,
+                )
+            }
         }
     }
 

@@ -106,6 +106,7 @@ fun QuestionInput(
     installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
     activeSkill: SkillManifest? = null,
     onSetActiveSkill: (SkillManifest?) -> Unit = {},
+    enterToSend: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -212,8 +213,7 @@ fun QuestionInput(
                     shape = RoundedCornerShape(28.dp),
                 )
                 .onPreviewKeyEvent { event ->
-                    // Only handle hardware keyboard on desktop/web platforms
-                    if (currentPlatform !is Platform.Mobile && event.key.keyCode == Key.Enter.keyCode && event.type == KeyEventType.KeyDown) {
+                    if (event.key.keyCode == Key.Enter.keyCode && event.type == KeyEventType.KeyDown) {
                         if (event.isShiftPressed) {
                             // Shift+Enter -> manually insert newline
                             val currentText = textState.text
@@ -229,8 +229,8 @@ fun QuestionInput(
                                 ),
                             )
                             return@onPreviewKeyEvent true
-                        } else {
-                            // Enter without Shift -> send message and consume event
+                        } else if (enterToSend || currentPlatform !is Platform.Mobile) {
+                            // Enter without Shift -> send message
                             submitQuestion()
                             return@onPreviewKeyEvent true
                         }
@@ -256,12 +256,12 @@ fun QuestionInput(
                             onSelectService = onSelectService,
                         )
                     }
-                    if (isLoading) {
+                    if (textState.text.isNotBlank()) {
+                        TrailingIcon(icon = Res.drawable.ic_up, onClick = { submitQuestion() })
+                    } else if (isLoading) {
                         TrailingIcon(icon = Res.drawable.ic_stop, onClick = cancel, isPulsing = true)
                     } else if (isVoiceInputActive) {
                         VoiceRecordingIcon(onClick = onStopVoiceInput)
-                    } else if (textState.text.isNotBlank()) {
-                        TrailingIcon(icon = Res.drawable.ic_up, onClick = { submitQuestion() })
                     } else {
                         CircleIconButton(
                             icon = Icons.Filled.Mic,
@@ -271,10 +271,10 @@ fun QuestionInput(
                     }
                 }
             },
-            keyboardActions = if (currentPlatform !is Platform.Mobile) {
+            keyboardActions = if (enterToSend || currentPlatform !is Platform.Mobile) {
                 KeyboardActions(onSend = { submitQuestion() })
             } else {
-                KeyboardActions() // No keyboard send action on mobile
+                KeyboardActions()
             },
             leadingIcon = {
                 CircleIconButton(
@@ -285,7 +285,7 @@ fun QuestionInput(
                 )
             },
             keyboardOptions = KeyboardOptions(
-                imeAction = if (currentPlatform is Platform.Mobile) ImeAction.Default else ImeAction.Send,
+                imeAction = if (!enterToSend && currentPlatform is Platform.Mobile) ImeAction.Default else ImeAction.Send,
             ),
         )
         val inInspection = LocalInspectionMode.current

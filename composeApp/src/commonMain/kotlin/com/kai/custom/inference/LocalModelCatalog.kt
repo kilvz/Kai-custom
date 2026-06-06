@@ -1,6 +1,52 @@
 package com.kai.custom.inference
 
-val MODEL_CATALOG = listOf(
+// ── Standard models (Apache-2.0, official litert-community) ──
+val STANDARD_MODELS = listOf(
+    LocalModel(
+        id = "qwen3-0.6b",
+        displayName = "Qwen3 0.6B",
+        fileName = "Qwen3-0.6B.litertlm",
+        sizeBytes = 614_236_160L,
+        downloadUrl = "https://huggingface.co/litert-community/Qwen3-0.6B/resolve/main/Qwen3-0.6B.litertlm",
+        gpuMemoryMb = 300,
+        defaultContextTokens = 4_096,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 35_000,
+    ),
+    LocalModel(
+        id = "qwen3-4b",
+        displayName = "Qwen3 4B (INT4)",
+        fileName = "qwen3_4b_mixed_int4.litertlm",
+        sizeBytes = 2_660_000_000L,
+        downloadUrl = "https://huggingface.co/litert-community/Qwen3-4B/resolve/main/qwen3_4b_mixed_int4.litertlm",
+        gpuMemoryMb = 400,
+        defaultContextTokens = 2_048,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 45_000,
+        isRecommended = true,
+    ),
+    LocalModel(
+        id = "qwen3-8b",
+        displayName = "Qwen3 8B (INT4)",
+        fileName = "qwen3_8b_mixed_int4.litertlm",
+        sizeBytes = 4_890_000_000L,
+        downloadUrl = "https://huggingface.co/litert-community/Qwen3-8B/resolve/main/qwen3_8b_mixed_int4.litertlm",
+        gpuMemoryMb = 500,
+        defaultContextTokens = 2_048,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 60_000,
+    ),
+    LocalModel(
+        id = "tinyswallow-1.5b",
+        displayName = "TinySwallow 1.5B",
+        fileName = "TinySwallow-1.5B-Instruct.litertlm",
+        sizeBytes = 1_570_000_000L,
+        downloadUrl = "https://huggingface.co/litert-community/TinySwallow-1.5B-Instruct/resolve/main/TinySwallow-1.5B-Instruct.litertlm",
+        gpuMemoryMb = 250,
+        defaultContextTokens = 2_048,
+        maxContextTokens = 8_192,
+        kvPerTokenBytes = 20_000,
+    ),
     LocalModel(
         id = "gemma-4-e2b-it",
         displayName = "Gemma 4 E2B IT",
@@ -24,18 +70,35 @@ val MODEL_CATALOG = listOf(
         maxContextTokens = 32_768,
         kvPerTokenBytes = 75_000,
     ),
+)
+
+// ── Uncensored models (abliterated, third-party conversions) ──
+val UNCENSORED_MODELS = listOf(
     LocalModel(
-        id = "qwen3-0.6b",
-        displayName = "Qwen3 0.6B",
-        fileName = "Qwen3-0.6B.litertlm",
-        sizeBytes = 614_236_160L,
-        downloadUrl = "https://huggingface.co/litert-community/Qwen3-0.6B/resolve/main/Qwen3-0.6B.litertlm",
-        gpuMemoryMb = 300,
-        defaultContextTokens = 4_096,
+        id = "uncensored-gemma-4-e2b",
+        displayName = "Gemma 4 E2B (Uncensored)",
+        fileName = "Gemma-4-E2B-Abliterated.litertlm",
+        sizeBytes = 2_560_000_000L,
+        downloadUrl = "https://huggingface.co/DuoNeural/Gemma-4-Abliterated-LiteRT/resolve/main/Gemma-4-E2B-Abliterated.litertlm",
+        gpuMemoryMb = 676,
+        defaultContextTokens = 2_048,
         maxContextTokens = 32_768,
-        kvPerTokenBytes = 35_000,
+        kvPerTokenBytes = 50_000,
+    ),
+    LocalModel(
+        id = "uncensored-gemma-4-e4b",
+        displayName = "Gemma 4 E4B (Uncensored)",
+        fileName = "Gemma-4-E4B-Abliterated.litertlm",
+        sizeBytes = 4_120_000_000L,
+        downloadUrl = "https://huggingface.co/DuoNeural/Gemma-4-Abliterated-LiteRT/resolve/main/Gemma-4-E4B-Abliterated.litertlm",
+        gpuMemoryMb = 710,
+        defaultContextTokens = 2_048,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 75_000,
     ),
 )
+
+val MODEL_CATALOG = STANDARD_MODELS + UNCENSORED_MODELS
 
 private val THINK_BLOCK_REGEX = Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL)
 

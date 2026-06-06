@@ -173,6 +173,7 @@ fun ChatScreen(
         navigationTabBar = navigationTabBar,
         hideThinking = hideThinking,
         expandThinking = expandThinking,
+        enterToSend = appSettings.isEnterToSend(),
     )
 }
 
@@ -189,12 +190,14 @@ fun ChatScreenContent(
     previewSandboxLines: ImmutableList<TerminalLine> = persistentListOf(),
     hideThinking: Boolean = false,
     expandThinking: Boolean = false,
+    enterToSend: Boolean = false,
 ) {
     if (uiState.isInteractiveMode && !uiState.isRestoring) {
         InteractiveModeScreen(
             uiState = uiState,
             onStartVoiceInput = uiState.actions.startVoiceInput,
             onStopVoiceInput = uiState.actions.stopVoiceInput,
+            enterToSend = enterToSend,
         )
     } else {
         ChatModeScreen(
@@ -209,6 +212,7 @@ fun ChatScreenContent(
             previewSandboxLines = previewSandboxLines,
             hideThinking = hideThinking,
             expandThinking = expandThinking,
+            enterToSend = enterToSend,
         )
     }
 }
@@ -220,6 +224,7 @@ private fun InteractiveModeScreen(
     uiState: ChatUiState,
     onStartVoiceInput: () -> Unit,
     onStopVoiceInput: () -> Unit,
+    enterToSend: Boolean = false,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -382,6 +387,7 @@ private fun InteractiveModeScreen(
                         isVoiceInputActive = uiState.isVoiceInputActive,
                         onStartVoiceInput = uiState.actions.startVoiceInput,
                         onStopVoiceInput = uiState.actions.stopVoiceInput,
+                        enterToSend = enterToSend,
                     )
                 }
             }
@@ -571,6 +577,7 @@ private fun ChatModeScreen(
     previewSandboxLines: ImmutableList<TerminalLine> = persistentListOf(),
     hideThinking: Boolean = false,
     expandThinking: Boolean = false,
+    enterToSend: Boolean = false,
 ) {
     var showHistorySheet by remember { mutableStateOf(false) }
     var isSandboxOpen by rememberSaveable { mutableStateOf(initialSandboxOpen) }
@@ -1031,6 +1038,11 @@ private fun ChatModeScreen(
                                             )
                                         }
                                     }
+                                    uiState.pendingMessages.forEachIndexed { idx, msg ->
+                                        item(key = "pending_$idx") {
+                                            UserMessage(message = msg, attachments = persistentListOf())
+                                        }
+                                    }
                                     uiState.error?.let { error ->
                                         item(key = "error") {
                                             ErrorMessage(error = error, retry = uiState.actions.retry)
@@ -1089,6 +1101,7 @@ private fun ChatModeScreen(
                     installedSkills = uiState.installedSkills,
                     activeSkill = uiState.activeSkill,
                     onSetActiveSkill = uiState.actions.onSetActiveSkill,
+                    enterToSend = enterToSend,
                 )
             }
         }

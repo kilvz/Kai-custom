@@ -684,7 +684,19 @@ private fun LiteRTSettings(
 
     Spacer(Modifier.height(12.dp))
 
+    var shownUncensoredHeader by remember { mutableStateOf(false) }
     availableModels.forEach { model ->
+        val isUncensored = model.id.startsWith("uncensored-")
+        if (isUncensored && !shownUncensoredHeader) {
+            shownUncensoredHeader = true
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Uncensored",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
+        }
         val isDownloaded = model.id in downloadedIds
         val isSelected = selectedModel?.id == model.id
         val isDownloading = downloadingModelId == model.id

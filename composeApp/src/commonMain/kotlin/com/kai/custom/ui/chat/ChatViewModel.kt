@@ -94,6 +94,7 @@ class ChatViewModel(
         }
     }
     private var currentJob: Job? = null
+    private val messageQueue = mutableListOf<String>()
     private var pendingConversationDeleteJob: Job? = null
     private val _state = MutableStateFlow(
         ChatUiState(
@@ -240,11 +241,16 @@ class ChatViewModel(
     }
 
     private fun askInternal(question: String?, uiSubmission: UiSubmission?) {
-        // Prevent concurrent requests
-        if (_state.value.isLoading) return
-
         // Capture files before launching coroutine to avoid race with files being cleared
         val files = _state.value.files
+
+        // If already loading, queue the message for sequential processing
+        if (_state.value.isLoading) {
+            if (question != null) {
+                enqueue(question)
+            }
+            return
+        }
 
         currentJob = viewModelScope.launch(backgroundDispatcher) {
             _state.update {
@@ -261,10 +267,6 @@ class ChatViewModel(
                 if (_state.value.isInteractiveMode) {
                     retryIfNoValidKaiUi()
                 }
-
-                _state.update {
-                    it.copy(isLoading = false)
-                }
             } catch (exception: Exception) {
                 // CancellationException must be re-thrown to properly propagate coroutine cancellation
                 if (exception is CancellationException) throw exception
@@ -272,10 +274,30 @@ class ChatViewModel(
                 _state.update {
                     it.copy(
                         error = exception.toUiError(),
-                        isLoading = false,
                     )
                 }
+            } finally {
+                processNextInQueue()
             }
+        }
+    }
+
+    private fun enqueue(question: String) {
+        messageQueue.add(question)
+        _state.update {
+            it.copy(pendingMessages = (it.pendingMessages + question).toImmutableList())
+        }
+    }
+
+    private fun processNextInQueue() {
+        if (messageQueue.isNotEmpty()) {
+            val next = messageQueue.removeFirst()
+            _state.update {
+                it.copy(pendingMessages = it.pendingMessages.filterNot { m -> m == next }.toImmutableList())
+            }
+            askInternal(next, null)
+        } else {
+            _state.update { it.copy(isLoading = false, pendingMessages = persistentListOf()) }
         }
     }
 
@@ -361,6 +383,7 @@ class ChatViewModel(
     private fun cancel() {
         currentJob?.cancel()
         currentJob = null
+        messageQueue.clear()
         _state.update {
             it.copy(isLoading = false)
         }

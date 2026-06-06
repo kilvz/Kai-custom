@@ -110,6 +110,7 @@ data class ChatUiState(
     val wasVoiceInput: Boolean = false,
     val installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
     val activeSkill: SkillManifest? = null,
+    val pendingMessages: ImmutableList<String> = persistentListOf(),
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id

@@ -509,6 +509,13 @@ private fun SoulEditor(
                 appSettings.setExpandThinking(it)
             },
         )
+        val enterToSend = appSettings.isEnterToSend()
+        ToggleableHeadline(
+            title = "Enter to Send",
+            description = if (enterToSend) "Enter sends message; Shift+Enter inserts newline" else "Enter inserts newline (desktop: sends without Shift)",
+            checked = enterToSend,
+            onCheckedChange = { appSettings.setEnterToSend(it) },
+        )
         Spacer(Modifier.height(12.dp))
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
@@ -882,6 +889,15 @@ private fun MemoryList(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 16.dp),
             )
+            if (altMemoryEmbedder != null && !isKnownSemanticEmbedder(altMemoryEmbedder)) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Ask your AI to set the default embedder to the best model for semantic search quality.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(start = 16.dp),
+                )
+            }
         }
         Spacer(Modifier.height(12.dp))
 
@@ -1324,4 +1340,10 @@ private fun formatTaskInstant(epochMs: Long): String {
     val month = local.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
     val minute = local.minute.toString().padStart(2, '0')
     return "${local.day} $month ${local.year} ${local.hour}:$minute"
+}
+
+private val nonSemanticEmbedders = setOf("numpy", "spacy")
+
+private fun isKnownSemanticEmbedder(name: String): Boolean {
+    return name.lowercase() !in nonSemanticEmbedders
 }

@@ -1105,5 +1105,11 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_BAILEYS_MARK_ONLINE = "baileys_mark_online"
         const val KEY_BAILEYS_SYNC_HISTORY = "baileys_sync_history"
         const val KEY_BAILEYS_LINK_PREVIEWS = "baileys_link_previews"
+        const val KEY_ENTER_TO_SEND = "enter_to_send"
+    }
+
+    fun isEnterToSend(): Boolean = settings.getBoolean(KEY_ENTER_TO_SEND, false)
+    fun setEnterToSend(enabled: Boolean) {
+        settings.putBoolean(KEY_ENTER_TO_SEND, enabled)
     }
 }

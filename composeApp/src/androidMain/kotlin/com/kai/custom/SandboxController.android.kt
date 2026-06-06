@@ -445,6 +445,31 @@ class AndroidSandboxController : SandboxController {
         return altMemoryPipeline(force = true)
     }
 
+    override suspend fun getAltMemoryVersions(): Pair<String?, String?> {
+        val current = sandboxManager.state.value
+        if (current !is SandboxState.Ready) return Pair(null, null)
+        return withContext(Dispatchers.IO) {
+            val executor = sandboxManager.createProotExecutor()
+            val currentVersion = try {
+                val r = executor.execute(
+                    "python3 -c 'import alt_memory; print(getattr(alt_memory, \"__version__\", \"0.0.0\"))' 2>/dev/null",
+                    timeoutSeconds = 15,
+                )
+                (r["stdout"] as? String)?.trim()?.ifEmpty { null }
+            } catch (_: Exception) { null }
+
+            val latestVersion = try {
+                val r = executor.execute(
+                    "curl -s https://pypi.org/pypi/alt-memory/json | python3 -c \"import sys,json; print(json.load(sys.stdin)['info']['version'])\" 2>/dev/null",
+                    timeoutSeconds = 30,
+                )
+                (r["stdout"] as? String)?.trim()?.ifEmpty { null }
+            } catch (_: Exception) { null }
+
+            Pair(currentVersion, latestVersion)
+        }
+    }
+
     private suspend fun altMemoryPipeline(force: Boolean): Boolean {
         val current = sandboxManager.state.value
         if (current !is SandboxState.Ready) {
