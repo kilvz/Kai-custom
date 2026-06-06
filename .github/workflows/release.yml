@@ -186,12 +186,12 @@ jobs:
       - name: Create tarball
         run: |
           cd composeApp/build/compose/binaries/main-release/app
-          tar czf "$GITHUB_WORKSPACE/Kai-linux-x86_64.tar.gz" Kai
+          tar czf "$GITHUB_WORKSPACE/k.ai-linux-x86_64.tar.gz" Kai
       - name: Upload Tarball Artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-tar-package
-          path: Kai-linux-x86_64.tar.gz
+          path: k.ai-linux-x86_64.tar.gz
 
   appimage:
     name: Generate AppImage
@@ -253,12 +253,12 @@ jobs:
           chmod +x AppDir/AppRun
       - name: Build AppImage
         run: |
-          ARCH=x86_64 ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir Kai-x86_64.AppImage
+          ARCH=x86_64 ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir k.ai-x86_64.AppImage
       - name: Upload AppImage Artifact
         uses: actions/upload-artifact@v4
         with:
           name: appimage-package
-          path: Kai-*.AppImage
+          path: k.ai-*.AppImage
 
   release:
     name: Release APK
@@ -285,7 +285,7 @@ jobs:
           for f in androidApp-foss-*-release-signed.apk; do
             [ -f "$f" ] || continue
             abi=$(echo "$f" | sed 's/androidApp-foss-\(.*\)-release-signed\.apk/\1/')
-            mv "$f" "Kai-${VERSION}-android-${abi}.apk"
+            mv "$f" "k.ai-${VERSION}-android-${abi}.apk"
           done
 
       - name: Extract changelog
@@ -308,4 +308,4 @@ jobs:
         with:
           name: Release ${{ github.ref_name }}
           body_path: changelog.txt
-          files: Kai-*
+          files: k.ai-*
