@@ -435,10 +435,10 @@ object ApplyPatchTool : Tool {
             sandboxController.executeCommand("rm -f /root/.kai/_pending_patch.diff", useRoot = true, timeoutSeconds = 5)
 
             if (wasBlank || (!resultP0.contains("FAILED") && !resultP0.contains("No such file") && resultP0.isNotBlank())) {
-                val effective = if (wasBlank) resultP0 else resultP1
+                val effective = resultP0
                 if (effective.contains("Hunk #1 succeeded") || effective.contains("patching file")) {
                     val patchedFiles = parsePatchFiles(patchText)
-                    return mapOf("success" to true, "method" to if (wasBlank) "patch -p1" else "patch -p0", "output" to effective.trim(), "files" to patchedFiles)
+                    return mapOf("success" to true, "method" to "patch -p0", "output" to effective.trim(), "files" to patchedFiles)
                 }
             }
 

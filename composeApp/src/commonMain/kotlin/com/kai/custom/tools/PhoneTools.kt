@@ -146,7 +146,7 @@ object PhoneTools {
     val screenshotToolInfo = ToolInfo(
         id = "screenshot",
         name = "Take Screenshot",
-        description = "Capture the current device screen and save it for AI analysis.",
+        description = "Capture the current device screen and save it for AI analysis. On Android 12+, requires MediaProjection permission (granted per-session when tool runs).",
     )
 
     val launchActivityToolInfo = ToolInfo(
@@ -158,19 +158,19 @@ object PhoneTools {
     val modifySettingsToolInfo = ToolInfo(
         id = "modify_settings",
         name = "Modify Settings",
-        description = "Modify Android system/global/secure settings. Requires WRITE_SETTINGS permission.",
+        description = "Modify Android system/global/secure settings. Requires WRITE_SETTINGS permission (opens settings screen when tool runs if not granted).",
     )
 
     val readScreenTextToolInfo = ToolInfo(
         id = "read_screen_text",
         name = "Read Screen Text",
-        description = "Read all visible text on the current screen using AccessibilityService.",
+        description = "Read all visible text on the current screen using AccessibilityService. Requires Kai Screen Reader enabled in Accessibility settings (opens settings when tool runs if not enabled).",
     )
 
     val navigateScreenToolInfo = ToolInfo(
         id = "navigate_screen",
         name = "Navigate Screen",
-        description = "Navigate on screen using AccessibilityService. Supports click_text, click_coordinates, back, scroll_down, scroll_up, home, recents, notifications.",
+        description = "Navigate on screen using AccessibilityService (click, scroll, back, home). Requires Kai Screen Reader enabled in Accessibility settings (opens settings when tool runs if not enabled).",
     )
 
     val phoneToolDefinitions = listOf(

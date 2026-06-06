@@ -210,6 +210,8 @@ actual fun getToolPermissionMap(): Map<String, List<String>> = mapOf(
     "get_phone_state" to listOf(Manifest.permission.READ_PHONE_STATE),
     "send_notification" to listOf(Manifest.permission.POST_NOTIFICATIONS),
     "create_calendar_event" to listOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR),
+    "list_media" to listOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO),
+    "scan_bluetooth_devices" to listOf(Manifest.permission.BLUETOOTH_CONNECT),
 )
 
 actual fun keyCodeToName(keyCode: Int): String = android.view.KeyEvent.keyCodeToString(keyCode)
@@ -1810,13 +1812,12 @@ actual fun getAvailableTools(): List<Tool> {
 private fun generatePollinationImageTool(context: Context): Tool = object : Tool {
     override val schema = ToolSchema(
         name = "generate_image",
-        description = "Generate an image from a text prompt using Pollinations.ai. Returns the path to the downloaded image file.",
+        description = "Generate an image from a text prompt (free, via image.pollinations.ai). Returns the path to the downloaded image file.",
         parameters = mapOf(
             "prompt" to ParameterSchema("string", "Text description of the image to generate", true),
             "width" to ParameterSchema("integer", "Image width in pixels (default: 1024)", false),
             "height" to ParameterSchema("integer", "Image height in pixels (default: 1024)", false),
             "seed" to ParameterSchema("integer", "Random seed for reproducible results", false),
-            "model" to ParameterSchema("string", "Model to use (e.g. 'flux', 'turbo')", false),
         ),
     )
 
@@ -1826,13 +1827,11 @@ private fun generatePollinationImageTool(context: Context): Tool = object : Tool
         val width = args["width"] as? Int ?: 1024
         val height = args["height"] as? Int ?: 1024
         val seed = args["seed"] as? Int
-        val model = args["model"] as? String
 
         val encodedPrompt = java.net.URLEncoder.encode(prompt, "UTF-8")
         val url = StringBuilder("https://image.pollinations.ai/prompt/$encodedPrompt")
         val params = mutableListOf("width=$width", "height=$height")
         if (seed != null) params.add("seed=$seed")
-        if (model != null) params.add("model=$model")
         url.append("?${params.joinToString("&")}")
 
         val client = httpClient {
