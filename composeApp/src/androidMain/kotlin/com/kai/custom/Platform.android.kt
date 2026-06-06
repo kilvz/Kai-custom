@@ -1972,21 +1972,18 @@ actual fun openTtsSettings() {
 
 actual fun openBatteryOptimizationSettings() {
     val context: Context by inject(Context::class.java)
-    try {
-        val intent = Intent(
-            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-            android.net.Uri.parse("package:${context.packageName}"),
-        ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-        context.startActivity(intent)
-    } catch (_: Exception) {
-        // Fallback: open general battery optimization list
+    val intents = buildList {
+        // General battery optimization list (user finds Kai manually) — works on all OEMs
+        add(Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+        // Direct dialog — remapped to autostart/background permissions on some OEMs (Xiaomi etc.)
+        add(Intent(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, android.net.Uri.parse("package:${context.packageName}")))
+    }
+    for (intent in intents) {
         try {
-            val intent = Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(intent)
-        } catch (_: Exception) {
-            // Battery optimization settings not available
-        }
+            return
+        } catch (_: Exception) { }
     }
 }
 
