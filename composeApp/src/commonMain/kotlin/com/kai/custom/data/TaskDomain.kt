@@ -19,20 +19,41 @@ object TaskClassifier {
         "what do i", "store this", "save this", "learn this",
     )
     private val emailKeywords = setOf(
-        "email", "mail", "inbox", "send to", "compose", "reply",
-        "check.*mail", "unread",
+        "email",
+        "mail",
+        "inbox",
+        "send to",
+        "compose",
+        "reply",
+        "check.*mail",
+        "unread",
     )
     private val scheduleKeywords = setOf(
-        "remind", "schedule", "task", "reminder", "calendar",
-        "at \\d{1,2}:\\d{2}", "in \\d+ (minute|hour|day)",
+        "remind",
+        "schedule",
+        "task",
+        "reminder",
+        "calendar",
+        "at \\d{1,2}:\\d{2}",
+        "in \\d+ (minute|hour|day)",
     )
     private val notificationKeywords = setOf(
-        "notification", "notify", "alert", "ping", "what.*new",
-        "any update", "anything",
+        "notification",
+        "notify",
+        "alert",
+        "ping",
+        "what.*new",
+        "any update",
+        "anything",
     )
     private val webSearchKeywords = setOf(
-        "search", "look up", "find online", "google", "browse",
-        "what is", "who is",
+        "search",
+        "look up",
+        "find online",
+        "google",
+        "browse",
+        "what is",
+        "who is",
     )
     private val deviceKeywords = setOf(
         "location", "alarm", "contact", "device", "wifi", "bluetooth",
@@ -43,8 +64,14 @@ object TaskClassifier {
         "refactor", "implement", "fix", "bug", "syntax",
     )
     private val analysisKeywords = setOf(
-        "analyze", "compare", "summarize", "explain", "evaluate",
-        "review", "audit", "investigate",
+        "analyze",
+        "compare",
+        "summarize",
+        "explain",
+        "evaluate",
+        "review",
+        "audit",
+        "investigate",
     )
 
     fun classify(query: String, hasFiles: Boolean = false): Set<TaskDomain> {
@@ -62,13 +89,11 @@ object TaskClassifier {
         return domains
     }
 
-    private fun matchesAny(text: String, keywords: Set<String>): Boolean {
-        return keywords.any { keyword ->
-            if (keyword.contains("\\")) {
-                Regex(keyword).containsMatchIn(text)
-            } else {
-                text.contains(keyword)
-            }
+    private fun matchesAny(text: String, keywords: Set<String>): Boolean = keywords.any { keyword ->
+        if (keyword.contains("\\")) {
+            Regex(keyword).containsMatchIn(text)
+        } else {
+            text.contains(keyword)
         }
     }
 }

@@ -17,9 +17,9 @@ import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.provider.ContactsContract
 import android.provider.MediaStore
+import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.speech.RecognitionListener
 import android.telephony.TelephonyManager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -51,29 +51,26 @@ import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
 import com.kai.custom.tools.AdbTool
+import com.kai.custom.tools.ApplyPatchTool
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.CalendarRepository
 import com.kai.custom.tools.CalendarResult
 import com.kai.custom.tools.CommonTools
+import com.kai.custom.tools.EditFileTool
 import com.kai.custom.tools.EmailTools
+import com.kai.custom.tools.GlobTool
+import com.kai.custom.tools.GrepTool
 import com.kai.custom.tools.HeartbeatTools
+import com.kai.custom.tools.InternetSearchTool
 import com.kai.custom.tools.NotificationHelper
 import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.NotificationResult
 import com.kai.custom.tools.NotificationTools
 import com.kai.custom.tools.OpenCodeTool
 import com.kai.custom.tools.OpenFileTool
-import com.kai.custom.tools.ReadFileTool
-import com.kai.custom.tools.WriteFileTool
-import com.kai.custom.tools.EditFileTool
-import com.kai.custom.tools.GlobTool
-import com.kai.custom.tools.GrepTool
-import com.kai.custom.tools.ApplyPatchTool
-import com.kai.custom.tools.TodoWriteTool
-import com.kai.custom.tools.WebFetchTool
-import com.kai.custom.tools.InternetSearchTool
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
+import com.kai.custom.tools.ReadFileTool
 import com.kai.custom.tools.RootTool
 import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.ShellCommandTool
@@ -83,8 +80,11 @@ import com.kai.custom.tools.SshCommandTool
 import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshConnectTool
 import com.kai.custom.tools.SshDisconnectTool
-import com.kai.custom.tools.WebSearchTool
+import com.kai.custom.tools.TodoWriteTool
 import com.kai.custom.tools.ToolPermissionBridge
+import com.kai.custom.tools.WebFetchTool
+import com.kai.custom.tools.WebSearchTool
+import com.kai.custom.tools.WriteFileTool
 import com.russhwolf.settings.BuildConfig
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -97,11 +97,11 @@ import io.github.vinceglb.filekit.write
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.readAvailable
-import io.ktor.client.plugins.HttpTimeout
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_create_calendar_event_description
 import kai.composeapp.generated.resources.tool_create_calendar_event_name
@@ -284,8 +284,7 @@ actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnec
 actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     val context: Context by inject(Context::class.java)
 
-    fun hasPermission(permission: String): Boolean =
-        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+    fun hasPermission(permission: String): Boolean = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
     addAll(CommonTools.commonToolDefinitions)
     add(
@@ -680,11 +679,13 @@ actual fun getAvailableTools(): List<Tool> {
                         addAll(com.kai.custom.tools.getWhatsAppTools(whatsAppStore, whatsAppPoller))
                     }
                 }
-                addAll(com.kai.custom.tools.getWhatsAppAdminTools(
-                    appSettings = appSettings,
-                    restartBridge = { whatsAppLifecycleManager.restart() },
-                    updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
-                ))
+                addAll(
+                    com.kai.custom.tools.getWhatsAppAdminTools(
+                        appSettings = appSettings,
+                        restartBridge = { whatsAppLifecycleManager.restart() },
+                        updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
+                    ),
+                )
             }
         }
 
@@ -781,8 +782,12 @@ actual fun getAvailableTools(): List<Tool> {
                         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
 
                         fun removeExistingTestProviders() {
-                            try { locationManager.removeTestProvider(android.location.LocationManager.GPS_PROVIDER) } catch (_: Exception) {}
-                            try { locationManager.removeTestProvider(android.location.LocationManager.NETWORK_PROVIDER) } catch (_: Exception) {}
+                            try {
+                                locationManager.removeTestProvider(android.location.LocationManager.GPS_PROVIDER)
+                            } catch (_: Exception) {}
+                            try {
+                                locationManager.removeTestProvider(android.location.LocationManager.NETWORK_PROVIDER)
+                            } catch (_: Exception) {}
                         }
 
                         return try {
@@ -792,7 +797,7 @@ actual fun getAvailableTools(): List<Tool> {
                                     android.location.LocationManager.GPS_PROVIDER,
                                     false, false, false, false, true, true, true,
                                     @Suppress("DEPRECATION") android.location.Criteria.POWER_HIGH,
-                                    @Suppress("DEPRECATION") android.location.Criteria.ACCURACY_FINE
+                                    @Suppress("DEPRECATION") android.location.Criteria.ACCURACY_FINE,
                                 )
                                 locationManager.setTestProviderEnabled(android.location.LocationManager.GPS_PROVIDER, true)
                             } catch (_: SecurityException) {
@@ -851,7 +856,9 @@ actual fun getAvailableTools(): List<Tool> {
                         val useFront = args["camera"]?.toString() == "front"
                         val outputFile = java.io.File(context.cacheDir, "kai_capture_${System.currentTimeMillis()}.jpg")
                         val outputUri = androidx.core.content.FileProvider.getUriForFile(
-                            context, "${context.packageName}.fileprovider", outputFile
+                            context,
+                            "${context.packageName}.fileprovider",
+                            outputFile,
                         )
                         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                             putExtra(MediaStore.EXTRA_OUTPUT, outputUri)
@@ -931,11 +938,13 @@ actual fun getAvailableTools(): List<Tool> {
                                 val matches = results?.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION)
                                 val text = matches?.firstOrNull()?.takeIf { it.isNotBlank() }
                                 if (text != null) {
-                                    deferred.complete(mapOf(
-                                        "success" to true,
-                                        "transcription" to text,
-                                        "message" to "Heard: $text",
-                                    ))
+                                    deferred.complete(
+                                        mapOf(
+                                            "success" to true,
+                                            "transcription" to text,
+                                            "message" to "Heard: $text",
+                                        ),
+                                    )
                                 } else {
                                     deferred.complete(mapOf("success" to false, "error" to "No speech detected"))
                                 }
@@ -1114,7 +1123,7 @@ actual fun getAvailableTools(): List<Tool> {
                 object : Tool {
                     override val schema = ToolSchema(
                         name = "read_screen_text",
-                        description = "Read all visible text on the current screen using AccessibilityService. Opens accessibility settings if the service is not enabled.",
+                        description = "Read all visible text on the current screen. For scrolling through long content (e.g. WhatsApp chats), use extract_scrollable_content instead — it automates the scroll+read loop in one call.",
                         parameters = emptyMap(),
                     )
                     override suspend fun execute(args: Map<String, Any>): Any {
@@ -1131,12 +1140,60 @@ actual fun getAvailableTools(): List<Tool> {
                         return try {
                             val text = com.kai.custom.ScreenReaderService.readScreenText()
                             if (text.isNullOrBlank()) {
-                                mapOf("success" to true, "text" to "", "message" to "No text found on screen")
+                                // Fall back to Shizuku + uiautomator dump
+                                val fallbackText = com.kai.custom.ScreenReaderService.readScreenTextWithFallback()
+                                if (fallbackText.isNullOrBlank()) {
+                                    mapOf("success" to true, "text" to "", "message" to "No text found on screen")
+                                } else {
+                                    mapOf("success" to true, "text" to fallbackText, "char_count" to fallbackText.length, "source" to "uiautomator")
+                                }
                             } else {
-                                mapOf("success" to true, "text" to text, "char_count" to text.length)
+                                mapOf("success" to true, "text" to text, "char_count" to text.length, "source" to "accessibility")
                             }
                         } catch (e: Exception) {
                             mapOf("success" to false, "error" to "Failed to read screen: ${e.message}")
+                        }
+                    }
+                },
+            )
+        }
+
+        // ── Extract Scrollable Content ──
+        if (appSettings.isToolEnabled(PhoneTools.readScreenTextToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "extract_scrollable_content",
+                        description = "Automatically scroll through the current screen and capture all visible text. Use this for reading entire conversations, long lists, or documents. Specify direction 'up' for WhatsApp chats (older messages at top). Returns text from each scroll position, separated by ---.",
+                        parameters = mapOf(
+                            "direction" to ParameterSchema("string", "Scroll direction: 'down' (default) or 'up'. Use 'up' for WhatsApp chats (scrolling to older messages).", false),
+                            "max_scrolls" to ParameterSchema("integer", "Maximum scroll steps (default 20)", false),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        if (!com.kai.custom.ScreenReaderService.isConnected()) {
+                            val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                            return mapOf("success" to false, "error" to "Accessibility Service not enabled. Settings opened.")
+                        }
+                        val direction = args["direction"]?.toString() ?: "down"
+                        val maxScrolls = (args["max_scrolls"] as? Number)?.toInt()?.coerceIn(1, 50) ?: 20
+                        return try {
+                            val text = com.kai.custom.ScreenReaderService.extractScrollableContent(direction, maxScrolls)
+                            if (text.isNullOrBlank()) {
+                                mapOf("success" to true, "text" to "", "message" to "No scrollable content found")
+                            } else {
+                                mapOf(
+                                    "success" to true,
+                                    "text" to text,
+                                    "char_count" to text.length,
+                                    "scrolls" to (text.split("---").size).coerceAtLeast(1),
+                                )
+                            }
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to extract scrollable content: ${e.message}")
                         }
                     }
                 },
@@ -1176,18 +1233,26 @@ actual fun getAvailableTools(): List<Tool> {
                                     if (text.isNullOrBlank()) return mapOf("success" to false, "error" to "text is required for click_text")
                                     com.kai.custom.ScreenReaderService.clickOnText(text)
                                 }
+
                                 "click_coordinates" -> {
                                     val x = (args["x"] as? Number)?.toFloat()
                                     val y = (args["y"] as? Number)?.toFloat()
                                     if (x == null || y == null) return mapOf("success" to false, "error" to "x and y are required for click_coordinates")
                                     com.kai.custom.ScreenReaderService.clickOnCoordinates(x, y)
                                 }
+
                                 "back" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
+
                                 "home" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+
                                 "recents" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_RECENTS)
+
                                 "notifications" -> com.kai.custom.ScreenReaderService.globalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_NOTIFICATIONS)
+
                                 "scroll_down" -> com.kai.custom.ScreenReaderService.scrollForward()
+
                                 "scroll_up" -> com.kai.custom.ScreenReaderService.scrollBackward()
+
                                 else -> return mapOf("success" to false, "error" to "Unknown action: $action")
                             }
                             mapOf("success" to result, "action" to action, "message" to if (result) "$action performed" else "$action failed")
@@ -1688,6 +1753,7 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Get cellular network info: operator, signal strength, network type",
                         parameters = emptyMap(),
                     )
+
                     @Suppress("DEPRECATION")
                     override suspend fun execute(args: Map<String, Any>): Any {
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
@@ -1735,6 +1801,7 @@ actual fun getAvailableTools(): List<Tool> {
                             "scan" to ParameterSchema("boolean", "Whether to perform a scan for new devices (default false)", false),
                         ),
                     )
+
                     @Suppress("DEPRECATION")
                     override suspend fun execute(args: Map<String, Any>): Any {
                         return try {
@@ -2062,7 +2129,9 @@ actual fun listCalendarAccounts(): List<CalendarAccount> {
     val accounts = mutableListOf<CalendarAccount>()
     context.contentResolver.query(
         CalendarContract.Calendars.CONTENT_URI,
-        projection, selection, selectionArgs,
+        projection,
+        selection,
+        selectionArgs,
         "${CalendarContract.Calendars.CALENDAR_DISPLAY_NAME} ASC",
     )?.use { cursor ->
         while (cursor.moveToNext()) {

@@ -34,16 +34,14 @@ import com.kai.custom.splinterlands.SplinterlandsApi
 import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
 import com.kai.custom.telegram.TelegramPoller
+import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.tools.CalendarPermissionController
-import com.kai.custom.whatsapp.WhatsAppLifecycleManager
-import com.kai.custom.whatsapp.WhatsAppPoller
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
 import com.kai.custom.tools.ToolPermissionBridge
-import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.ui.chat.ChatViewModel
 import com.kai.custom.ui.sandbox.SandboxFileBrowserViewModel
 import com.kai.custom.ui.sandbox.SandboxPackagesViewModel
@@ -54,6 +52,8 @@ import com.kai.custom.ui.settings.SplinterlandsViewModel
 import com.kai.custom.ui.settings.SshViewModel
 import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.wakeword.createWakeWordController
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
+import com.kai.custom.whatsapp.WhatsAppPoller
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

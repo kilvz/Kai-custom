@@ -17,6 +17,7 @@ class WhatsAppPoller(
 
     companion object {
         private const val TAG = "[WhatsAppPoller]"
+
         /** Max pending messages kept in SharedPreferences to prevent unbounded growth. */
         private const val MAX_PENDING = 200
     }
@@ -110,6 +111,7 @@ class WhatsAppPoller(
     private fun shouldReply(msg: WhatsAppPendingMessage): Boolean {
         return when (whatsAppStore.getWhatsAppReplyMode()) {
             "self" -> msg.fromMe
+
             "selected" -> {
                 val contacts = whatsAppStore.getWhatsAppAllowedContacts()
                     .split(",")
@@ -121,6 +123,7 @@ class WhatsAppPoller(
                 val name = msg.fromName.lowercase()
                 contacts.any { filter -> phone == filter || phone.endsWith(filter) || name == filter }
             }
+
             else -> !msg.fromMe
         }
     }
@@ -143,5 +146,4 @@ class WhatsAppPoller(
     suspend fun sendProactiveMessage(chatId: String, text: String) {
         sendMessage(chatId, sanitizeForWhatsApp(text))
     }
-
 }

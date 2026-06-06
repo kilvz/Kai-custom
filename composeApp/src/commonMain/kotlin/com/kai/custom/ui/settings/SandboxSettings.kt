@@ -43,7 +43,6 @@ import com.kai.custom.ui.sandbox.SandboxProgressRow
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
-import kotlinx.coroutines.launch
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.settings_sandbox_cancel
 import kai.composeapp.generated.resources.settings_sandbox_description
@@ -52,6 +51,7 @@ import kai.composeapp.generated.resources.settings_sandbox_install
 import kai.composeapp.generated.resources.settings_sandbox_install_packages
 import kai.composeapp.generated.resources.settings_sandbox_uninstall
 import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +65,7 @@ internal fun SandboxSettingsCard(
     onCancelSandbox: () -> Unit,
     onResetSandbox: () -> Unit,
     onInstallPackages: () -> Unit,
-                onInstallAltMemory: () -> Unit = {},
+    onInstallAltMemory: () -> Unit = {},
     onUpdateAltMemory: () -> Unit = {},
     onBackupSandbox: () -> Unit = {},
     onImportSandbox: (ByteArray) -> Unit = {},
@@ -169,7 +169,7 @@ internal fun SandboxSettingsCard(
                             Text("Alt-Memory")
                         }
                     } else {
-                    OutlinedButton(onClick = onUpdateAltMemory, modifier = Modifier.handCursor()) {
+                        OutlinedButton(onClick = onUpdateAltMemory, modifier = Modifier.handCursor()) {
                             Text("Update Alt-Memory")
                         }
                     }

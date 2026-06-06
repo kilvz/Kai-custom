@@ -98,6 +98,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.lifecycle.process)
+            implementation(libs.androidx.lifecycle.viewmodel.savedstate)
             implementation(libs.spght.encryptedprefs)
             implementation(libs.ktor.client.android)
             implementation(libs.koin.android)

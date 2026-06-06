@@ -5,8 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.Shader
-import android.graphics.Typeface
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -20,26 +20,27 @@ internal class FloatingBallView(
         style = Paint.Style.FILL
     }
 
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        textSize = sizePx * 0.42f
-        textAlign = Paint.Align.CENTER
-        typeface = Typeface.DEFAULT_BOLD
-        letterSpacing = 0.05f
-    }
-
     private val outerGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = Color.parseColor("#402D5BFF")
+        color = Color.parseColor("#401565C0")
     }
 
     private val rimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = sizePx * 0.02f
-        color = Color.parseColor("#55FFFFFF")
+        color = Color.parseColor("#5590CAF9")
     }
 
     private var gradientInitialized = false
+
+    private val appIcon: android.graphics.drawable.Drawable? by lazy {
+        try {
+            val iconRes = context.resources.getIdentifier("ic_launcher", "drawable", context.packageName)
+            if (iconRes != 0) context.resources.getDrawable(iconRes, context.theme) else null
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -49,11 +50,13 @@ internal class FloatingBallView(
 
         if (!gradientInitialized) {
             gradientPaint.shader = LinearGradient(
-                cx - radius, cy - radius,
-                cx + radius, cy + radius,
+                cx - radius,
+                cy - radius,
+                cx + radius,
+                cy + radius,
                 intArrayOf(
-                    Color.parseColor("#3366FF"),
-                    Color.parseColor("#7B2FFF"),
+                    Color.parseColor("#1565C0"),
+                    Color.parseColor("#1E88E5"),
                 ),
                 null,
                 Shader.TileMode.CLAMP,
@@ -70,13 +73,20 @@ internal class FloatingBallView(
         // Subtle rim highlight
         canvas.drawCircle(cx, cy, radius - rimPaint.strokeWidth / 2f, rimPaint)
 
-        // "K" letter
-        val baseline = cy - (textPaint.ascent() + textPaint.descent()) / 2f
-        canvas.drawText("K", cx, baseline, textPaint)
+        // App icon — centered at circle center (cx, cy), sized to 64% of circle diameter
+        appIcon?.let { icon ->
+            val iconSize = (sizePx * 0.64f).toInt()
+            icon.setBounds(
+                cx.toInt() - iconSize / 2,
+                cy.toInt() - iconSize / 2,
+                cx.toInt() + iconSize / 2,
+                cy.toInt() + iconSize / 2,
+            )
+            icon.draw(canvas)
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        // Slightly larger to accommodate glow
         val size = (sizePx * 1.2f).toInt()
         setMeasuredDimension(size, size)
     }

@@ -29,7 +29,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     ): MemoryEntry {
         val entry = sqliteStore.store(key, content, category, source)
         if (isUsingAltMemory) {
-            try { delegate.store(key, content, category, source) } catch (_: Exception) { }
+            try {
+                delegate.store(key, content, category, source)
+            } catch (_: Exception) { }
         }
         return entry
     }
@@ -37,7 +39,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun updateContent(key: String, content: String): MemoryEntry? {
         val entry = sqliteStore.updateContent(key, content)
         if (isUsingAltMemory && entry != null) {
-            try { delegate.updateContent(key, content) } catch (_: Exception) { }
+            try {
+                delegate.updateContent(key, content)
+            } catch (_: Exception) { }
         }
         return entry
     }
@@ -45,7 +49,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun reinforceMemory(key: String): MemoryEntry? {
         val entry = sqliteStore.reinforceMemory(key)
         if (isUsingAltMemory && entry != null) {
-            try { delegate.reinforceMemory(key) } catch (_: Exception) { }
+            try {
+                delegate.reinforceMemory(key)
+            } catch (_: Exception) { }
         }
         return entry
     }
@@ -53,7 +59,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun forget(key: String): Boolean {
         val ok = sqliteStore.forget(key)
         if (isUsingAltMemory) {
-            try { delegate.forget(key) } catch (_: Exception) { }
+            try {
+                delegate.forget(key)
+            } catch (_: Exception) { }
         }
         return ok
     }
@@ -74,11 +82,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     // ── Unprotected reads: SQL only ──
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> =
-        sqliteStore.getUserMemories(max)
+    override fun getUserMemories(max: Int): List<MemoryEntry> = sqliteStore.getUserMemories(max)
 
-    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> =
-        sqliteStore.searchMemories(query, limit, mode)
+    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> = sqliteStore.searchMemories(query, limit, mode)
 
     // ── Protected reads: alt-memory when active, SQL fallback ──
 
@@ -119,7 +125,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     // ── Passthrough: delegate to alt-memory when active ──
 
     override suspend fun setPersona(personaId: String) {
-        try { delegate.setPersona(personaId) } catch (_: Exception) { }
+        try {
+            delegate.setPersona(personaId)
+        } catch (_: Exception) { }
     }
 
     override suspend fun fetchRemotePersonas(): List<PersonaConfig> = try {
@@ -129,11 +137,15 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override suspend fun syncPersonaToRemote(config: PersonaConfig) {
-        try { delegate.syncPersonaToRemote(config) } catch (_: Exception) { }
+        try {
+            delegate.syncPersonaToRemote(config)
+        } catch (_: Exception) { }
     }
 
     override suspend fun deleteRemotePersona(id: String) {
-        try { delegate.deleteRemotePersona(id) } catch (_: Exception) { }
+        try {
+            delegate.deleteRemotePersona(id)
+        } catch (_: Exception) { }
     }
 
     override fun schemaResetMessage(): String? = try {
@@ -149,7 +161,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override fun importDimension(data: ByteArray) {
-        try { delegate.importDimension(data) } catch (_: Exception) { }
+        try {
+            delegate.importDimension(data)
+        } catch (_: Exception) { }
         sqliteStore.importDimension(data)
     }
 
@@ -158,7 +172,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
         val fact = sqliteStore.addFact(subject, predicate, `object`)
         if (isUsingAltMemory) {
-            try { delegate.addFact(subject, predicate, `object`) } catch (_: Exception) { }
+            try {
+                delegate.addFact(subject, predicate, `object`)
+            } catch (_: Exception) { }
         }
         return fact
     }
@@ -176,7 +192,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {
         sqliteStore.invalidateFact(subject, predicate, `object`)
         if (isUsingAltMemory) {
-            try { delegate.invalidateFact(subject, predicate, `object`) } catch (_: Exception) { }
+            try {
+                delegate.invalidateFact(subject, predicate, `object`)
+            } catch (_: Exception) { }
         }
     }
 
@@ -185,7 +203,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
         sqliteStore.diaryWrite(agentName, content, topic)
         if (isUsingAltMemory) {
-            try { delegate.diaryWrite(agentName, content, topic) } catch (_: Exception) { }
+            try {
+                delegate.diaryWrite(agentName, content, topic)
+            } catch (_: Exception) { }
         }
     }
 

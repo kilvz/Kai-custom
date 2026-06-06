@@ -41,9 +41,9 @@ import com.kai.custom.data.ToolCallResponse
 import com.kai.custom.data.ToolExecutor
 import com.kai.custom.data.WakeWordSettings
 import com.kai.custom.getAvailableTools
-import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import com.kai.custom.isDebugBuild
 import com.kai.custom.mcp.McpServerManager
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -55,9 +55,9 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
+import io.ktor.server.response.header
 import io.ktor.server.response.respondBytes
 import io.ktor.server.response.respondText
-import io.ktor.server.response.header
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -85,7 +85,10 @@ class DebugServer(
     private var serverJob: EmbeddedServer<*, *>? = null
     private var token: String = ""
 
-    private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
+    private val json = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
 
     fun start() {
         if (running) return
@@ -99,7 +102,12 @@ class DebugServer(
 
         val s = embeddedServer(CIO, port = 18500, host = "127.0.0.1") {
             install(ContentNegotiation) {
-                json(Json { prettyPrint = true; ignoreUnknownKeys = true })
+                json(
+                    Json {
+                        prettyPrint = true
+                        ignoreUnknownKeys = true
+                    },
+                )
             }
             routing {
                 // ======================= HEALTH =======================
@@ -123,19 +131,24 @@ class DebugServer(
                 // ======================= STATE =======================
                 get("/state") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(StateResponse(
-                        historyCount = dataRepository.chatHistory.value.size,
-                        memoryCount = memoryStore.getAllMemories().size,
-                        toolCount = getAvailableTools().size,
-                        isDaemonEnabled = dataRepository.isDaemonEnabled(),
-                        isFloatingBallEnabled = dataRepository.isFloatingBallEnabled(),
-                        isMemoryEnabled = dataRepository.isMemoryEnabled(),
-                        isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
-                        isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
-                        currentServiceId = dataRepository.currentService().id,
-                        sandboxInstalled = sandboxController.status.value.installed,
-                        sandboxReady = sandboxController.status.value.ready,
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            StateResponse(
+                                historyCount = dataRepository.chatHistory.value.size,
+                                memoryCount = memoryStore.getAllMemories().size,
+                                toolCount = getAvailableTools().size,
+                                isDaemonEnabled = dataRepository.isDaemonEnabled(),
+                                isFloatingBallEnabled = dataRepository.isFloatingBallEnabled(),
+                                isMemoryEnabled = dataRepository.isMemoryEnabled(),
+                                isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
+                                isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
+                                currentServiceId = dataRepository.currentService().id,
+                                sandboxInstalled = sandboxController.status.value.installed,
+                                sandboxReady = sandboxController.status.value.ready,
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= FULL SETTINGS =======================
@@ -161,142 +174,217 @@ class DebugServer(
                             put("serviceId", JsonPrimitive(it.serviceId))
                         }
                     }
-                    call.respondText(json.encodeToString(buildJsonObject {
-                        put("soul_user", JsonPrimitive(dataRepository.getSoulUser()))
-                        put("soul_auto", JsonPrimitive(dataRepository.getSoulAuto()))
-                        put("persona_name", JsonPrimitive(dataRepository.getPersonaName()))
-                        put("active_persona_id", JsonPrimitive(activePersona.id))
-                        put("persona_list", kotlinx.serialization.json.JsonArray(personaList))
-                        put("current_service_id", JsonPrimitive(dataRepository.currentService().id))
-                        put("configured_services", kotlinx.serialization.json.JsonArray(configuredServices))
-                        put("free_fallback_enabled", JsonPrimitive(dataRepository.isFreeFallbackEnabled()))
-                        put("free_mode", JsonPrimitive(dataRepository.getFreeMode().name))
-                        put("free_service_primary", JsonPrimitive(dataRepository.isFreeServicePrimary()))
-                        put("memory_enabled", JsonPrimitive(dataRepository.isMemoryEnabled()))
-                        put("alt_memory_enabled", JsonPrimitive(dataRepository.isAltMemoryEnabled()))
-                        put("alt_memory_installed", JsonPrimitive(appSettings.isAltMemoryInstalled()))
-                        put("scheduling_enabled", JsonPrimitive(dataRepository.isSchedulingEnabled()))
-                        put("dynamic_ui_enabled", JsonPrimitive(dataRepository.isDynamicUiEnabled()))
-                        put("theme_mode", JsonPrimitive(dataRepository.getThemeMode().name))
-                        put("interactive_mode", JsonPrimitive(dataRepository.isInteractiveModeActive()))
-                        put("daemon_enabled", JsonPrimitive(dataRepository.isDaemonEnabled()))
-                        put("floating_ball_enabled", JsonPrimitive(dataRepository.isFloatingBallEnabled()))
-                        put("wake_word_enabled", JsonPrimitive(dataRepository.isWakeWordEnabled()))
-                        put("wake_word_phrase", JsonPrimitive(dataRepository.getWakeWordPhrase()))
-                        put("wake_word_mode", JsonPrimitive(dataRepository.getWakeWordMode()))
-                        put("wake_word_template", JsonPrimitive(dataRepository.getWakeWordTemplate()))
-                        put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
-                        put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
-                        put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
-                        put("sandbox_root_enabled", JsonPrimitive(dataRepository.isSandboxRootEnabled()))
-                        put("heartbeat_enabled", JsonPrimitive(cfg.enabled))
-                        put("heartbeat_interval_minutes", JsonPrimitive(cfg.intervalMinutes))
-                        put("heartbeat_active_hours_start", JsonPrimitive(cfg.activeHoursStart))
-                        put("heartbeat_active_hours_end", JsonPrimitive(cfg.activeHoursEnd))
-                        put("heartbeat_prompt", JsonPrimitive(dataRepository.getHeartbeatPrompt()))
-                        put("email_enabled", JsonPrimitive(dataRepository.isEmailEnabled()))
-                        put("email_poll_interval_minutes", JsonPrimitive(dataRepository.getEmailPollIntervalMinutes()))
-                        put("sms_enabled", JsonPrimitive(dataRepository.isSmsEnabled()))
-                        put("sms_send_enabled", JsonPrimitive(dataRepository.isSmsSendEnabled()))
-                        put("sms_poll_interval_minutes", JsonPrimitive(dataRepository.getSmsPollIntervalMinutes()))
-                        put("notifications_enabled", JsonPrimitive(dataRepository.isNotificationsEnabled()))
-                        put("shizuku_enabled", JsonPrimitive(dataRepository.isShizukuEnabled()))
-                        put("root_enabled", JsonPrimitive(dataRepository.isRootEnabled()))
-                        put("debug_api_enabled", JsonPrimitive(dataRepository.isDebugApiEnabled()))
-                        put("debug_endpoint_enabled", JsonPrimitive(dataRepository.isDebugEndpointEnabled()))
-                        put("telegram_enabled", JsonPrimitive(dataRepository.isTelegramEnabled()))
-                        put("ssh_enabled", JsonPrimitive(appSettings.isSshEnabled()))
-                        put("preferred_language", JsonPrimitive(dataRepository.getPreferredLanguage()))
-                        put("ui_scale", JsonPrimitive(dataRepository.getUiScale()))
-                        put("splinterlands_enabled", JsonPrimitive(appSettings.isSplinterlandsEnabled()))
-                        put("active_skill_id", JsonPrimitive(dataRepository.getActiveSkill()?.id ?: ""))
-                        put("alt_memory_migration_complete", JsonPrimitive(appSettings.isAltMemoryMigrationComplete()))
-                        put("whatsapp_enabled", JsonPrimitive(appSettings.isWhatsAppEnabled()))
-                        put("whatsapp_read_only", JsonPrimitive(appSettings.isWhatsAppReadOnly()))
-                        put("whatsapp_reply_mode", JsonPrimitive(appSettings.getWhatsAppReplyMode()))
-                        put("whatsapp_allowed_contacts", JsonPrimitive(appSettings.getWhatsAppAllowedContacts()))
-                        put("whatsapp_read_receipt", JsonPrimitive(appSettings.isWhatsAppReadReceipt()))
-                        put("whatsapp_installed", JsonPrimitive(appSettings.isWhatsAppInstalled()))
-                        put("whatsapp_authenticated", JsonPrimitive(appSettings.isWhatsAppAuthenticated()))
-                        put("baileys_browser_name", JsonPrimitive(appSettings.getBaileysBrowserName()))
-                        put("baileys_browser_version", JsonPrimitive(appSettings.getBaileysBrowserVersion()))
-                        put("baileys_mark_online", JsonPrimitive(appSettings.getBaileysMarkOnline()))
-                        put("baileys_sync_history", JsonPrimitive(appSettings.getBaileysSyncHistory()))
-                        put("baileys_link_previews", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("soul_user", JsonPrimitive(dataRepository.getSoulUser()))
+                                put("soul_auto", JsonPrimitive(dataRepository.getSoulAuto()))
+                                put("persona_name", JsonPrimitive(dataRepository.getPersonaName()))
+                                put("active_persona_id", JsonPrimitive(activePersona.id))
+                                put("persona_list", kotlinx.serialization.json.JsonArray(personaList))
+                                put("current_service_id", JsonPrimitive(dataRepository.currentService().id))
+                                put("configured_services", kotlinx.serialization.json.JsonArray(configuredServices))
+                                put("free_fallback_enabled", JsonPrimitive(dataRepository.isFreeFallbackEnabled()))
+                                put("free_mode", JsonPrimitive(dataRepository.getFreeMode().name))
+                                put("free_service_primary", JsonPrimitive(dataRepository.isFreeServicePrimary()))
+                                put("memory_enabled", JsonPrimitive(dataRepository.isMemoryEnabled()))
+                                put("alt_memory_enabled", JsonPrimitive(dataRepository.isAltMemoryEnabled()))
+                                put("alt_memory_installed", JsonPrimitive(appSettings.isAltMemoryInstalled()))
+                                put("scheduling_enabled", JsonPrimitive(dataRepository.isSchedulingEnabled()))
+                                put("dynamic_ui_enabled", JsonPrimitive(dataRepository.isDynamicUiEnabled()))
+                                put("theme_mode", JsonPrimitive(dataRepository.getThemeMode().name))
+                                put("interactive_mode", JsonPrimitive(dataRepository.isInteractiveModeActive()))
+                                put("daemon_enabled", JsonPrimitive(dataRepository.isDaemonEnabled()))
+                                put("floating_ball_enabled", JsonPrimitive(dataRepository.isFloatingBallEnabled()))
+                                put("wake_word_enabled", JsonPrimitive(dataRepository.isWakeWordEnabled()))
+                                put("wake_word_phrase", JsonPrimitive(dataRepository.getWakeWordPhrase()))
+                                put("wake_word_mode", JsonPrimitive(dataRepository.getWakeWordMode()))
+                                put("wake_word_template", JsonPrimitive(dataRepository.getWakeWordTemplate()))
+                                put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
+                                put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
+                                put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
+                                put("sandbox_root_enabled", JsonPrimitive(dataRepository.isSandboxRootEnabled()))
+                                put("heartbeat_enabled", JsonPrimitive(cfg.enabled))
+                                put("heartbeat_interval_minutes", JsonPrimitive(cfg.intervalMinutes))
+                                put("heartbeat_active_hours_start", JsonPrimitive(cfg.activeHoursStart))
+                                put("heartbeat_active_hours_end", JsonPrimitive(cfg.activeHoursEnd))
+                                put("heartbeat_prompt", JsonPrimitive(dataRepository.getHeartbeatPrompt()))
+                                put("email_enabled", JsonPrimitive(dataRepository.isEmailEnabled()))
+                                put("email_poll_interval_minutes", JsonPrimitive(dataRepository.getEmailPollIntervalMinutes()))
+                                put("sms_enabled", JsonPrimitive(dataRepository.isSmsEnabled()))
+                                put("sms_send_enabled", JsonPrimitive(dataRepository.isSmsSendEnabled()))
+                                put("sms_poll_interval_minutes", JsonPrimitive(dataRepository.getSmsPollIntervalMinutes()))
+                                put("notifications_enabled", JsonPrimitive(dataRepository.isNotificationsEnabled()))
+                                put("shizuku_enabled", JsonPrimitive(dataRepository.isShizukuEnabled()))
+                                put("root_enabled", JsonPrimitive(dataRepository.isRootEnabled()))
+                                put("debug_api_enabled", JsonPrimitive(dataRepository.isDebugApiEnabled()))
+                                put("debug_endpoint_enabled", JsonPrimitive(dataRepository.isDebugEndpointEnabled()))
+                                put("telegram_enabled", JsonPrimitive(dataRepository.isTelegramEnabled()))
+                                put("ssh_enabled", JsonPrimitive(appSettings.isSshEnabled()))
+                                put("preferred_language", JsonPrimitive(dataRepository.getPreferredLanguage()))
+                                put("ui_scale", JsonPrimitive(dataRepository.getUiScale()))
+                                put("splinterlands_enabled", JsonPrimitive(appSettings.isSplinterlandsEnabled()))
+                                put("active_skill_id", JsonPrimitive(dataRepository.getActiveSkill()?.id ?: ""))
+                                put("alt_memory_migration_complete", JsonPrimitive(appSettings.isAltMemoryMigrationComplete()))
+                                put("whatsapp_enabled", JsonPrimitive(appSettings.isWhatsAppEnabled()))
+                                put("whatsapp_read_only", JsonPrimitive(appSettings.isWhatsAppReadOnly()))
+                                put("whatsapp_reply_mode", JsonPrimitive(appSettings.getWhatsAppReplyMode()))
+                                put("whatsapp_allowed_contacts", JsonPrimitive(appSettings.getWhatsAppAllowedContacts()))
+                                put("whatsapp_read_receipt", JsonPrimitive(appSettings.isWhatsAppReadReceipt()))
+                                put("whatsapp_installed", JsonPrimitive(appSettings.isWhatsAppInstalled()))
+                                put("whatsapp_authenticated", JsonPrimitive(appSettings.isWhatsAppAuthenticated()))
+                                put("baileys_browser_name", JsonPrimitive(appSettings.getBaileysBrowserName()))
+                                put("baileys_browser_version", JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+                                put("baileys_mark_online", JsonPrimitive(appSettings.getBaileysMarkOnline()))
+                                put("baileys_sync_history", JsonPrimitive(appSettings.getBaileysSyncHistory()))
+                                put("baileys_link_previews", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= UPDATE SETTING =======================
                 post("/settings/{key}") {
                     val err = auth(call) ?: return@post
-                    val key = call.parameters["key"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
-                    val rawBody = try { call.receiveText() } catch (_: Exception) { "" }
-                    val updateRequest = try { json.decodeFromString<SettingUpdateRequest>(rawBody) } catch (_: Exception) {
-                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    val key = call.parameters["key"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val rawBody = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val updateRequest = try {
+                        json.decodeFromString<SettingUpdateRequest>(rawBody)
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
                     }
                     try {
                         val v = updateRequest.value
                         when (key) {
                             "soul_text" -> dataRepository.setSoulText(v)
+
                             "persona_name" -> dataRepository.setPersonaName(v)
+
                             "active_persona_id" -> dataRepository.switchPersona(v)
+
                             "preferred_language" -> dataRepository.setPreferredLanguage(v)
+
                             "free_service_primary" -> dataRepository.setFreeServicePrimary(v.toBoolean())
+
                             "free_fallback_enabled" -> dataRepository.setFreeFallbackEnabled(v.toBoolean())
-                            "free_mode" -> { val mode = com.kai.custom.data.FreeMode.entries.find { it.name == v.uppercase() }; if (mode != null) dataRepository.setFreeMode(mode) }
+
+                            "free_mode" -> {
+                                val mode = com.kai.custom.data.FreeMode.entries.find { it.name == v.uppercase() }
+                                if (mode != null) dataRepository.setFreeMode(mode)
+                            }
+
                             "memory_enabled" -> dataRepository.setMemoryEnabled(v.toBoolean())
+
                             "alt_memory_enabled" -> dataRepository.setAltMemoryEnabled(v.toBoolean())
+
                             "alt_memory_installed" -> appSettings.setAltMemoryInstalled(v.toBoolean())
+
                             "alt_memory_migration_complete" -> appSettings.setAltMemoryMigrationComplete(v.toBoolean())
+
                             "scheduling_enabled" -> dataRepository.setSchedulingEnabled(v.toBoolean())
+
                             "dynamic_ui_enabled" -> dataRepository.setDynamicUiEnabled(v.toBoolean())
-                            "theme_mode" -> { val mode = ThemeMode.entries.find { it.name.equals(v, ignoreCase = true) }; if (mode != null) dataRepository.setThemeMode(mode) }
+
+                            "theme_mode" -> {
+                                val mode = ThemeMode.entries.find { it.name.equals(v, ignoreCase = true) }
+                                if (mode != null) dataRepository.setThemeMode(mode)
+                            }
+
                             "interactive_mode" -> dataRepository.setInteractiveMode(v.toBoolean())
+
                             "daemon_enabled" -> dataRepository.setDaemonEnabled(v.toBoolean())
+
                             "floating_ball_enabled" -> dataRepository.setFloatingBallEnabled(v.toBoolean())
+
                             "wake_word_enabled" -> dataRepository.setWakeWordEnabled(v.toBoolean())
+
                             "wake_word_phrase" -> dataRepository.setWakeWordPhrase(v)
+
                             "wake_word_mode" -> dataRepository.setWakeWordMode(v)
+
                             "wake_word_template" -> dataRepository.setWakeWordTemplate(v)
+
                             "sandbox_enabled" -> dataRepository.setSandboxEnabled(v.toBoolean())
+
                             "sandbox_storage_mount" -> dataRepository.setSandboxStorageMountEnabled(v.toBoolean())
+
                             "sandbox_storage_mount_enabled" -> dataRepository.setSandboxStorageMountEnabled(v.toBoolean())
+
                             "sandbox_distro" -> dataRepository.setSandboxDistro(v)
+
                             "sandbox_root_enabled" -> dataRepository.setSandboxRootEnabled(v.toBoolean())
+
                             "heartbeat_enabled" -> dataRepository.setHeartbeatEnabled(v.toBoolean())
+
                             "root_enabled" -> dataRepository.setRootEnabled(v.toBoolean())
+
                             "shizuku_enabled" -> dataRepository.setShizukuEnabled(v.toBoolean())
+
                             "notifications_enabled" -> dataRepository.setNotificationsEnabled(v.toBoolean())
+
                             "email_enabled" -> dataRepository.setEmailEnabled(v.toBoolean())
+
                             "sms_enabled" -> dataRepository.setSmsEnabled(v.toBoolean())
+
                             "sms_send_enabled" -> dataRepository.setSmsSendEnabled(v.toBoolean())
+
                             "telegram_enabled" -> dataRepository.setTelegramEnabled(v.toBoolean())
+
                             "debug_api_enabled" -> dataRepository.setDebugApiEnabled(v.toBoolean())
+
                             "debug_endpoint_enabled" -> dataRepository.setDebugEndpointEnabled(v.toBoolean())
+
                             "ui_scale" -> dataRepository.setUiScale(v.toFloat())
+
                             "heartbeat_interval_minutes" -> dataRepository.setHeartbeatIntervalMinutes(v.toInt())
+
                             "heartbeat_active_hours_start" -> {
                                 val hours = dataRepository.getHeartbeatConfig()
                                 dataRepository.setHeartbeatActiveHours(v.toInt(), hours.activeHoursEnd)
                             }
+
                             "heartbeat_active_hours_end" -> {
                                 val hours = dataRepository.getHeartbeatConfig()
                                 dataRepository.setHeartbeatActiveHours(hours.activeHoursStart, v.toInt())
                             }
+
                             "heartbeat_prompt" -> dataRepository.setHeartbeatPrompt(v)
+
                             "email_poll_interval_minutes" -> dataRepository.setEmailPollIntervalMinutes(v.toInt())
+
                             "sms_poll_interval_minutes" -> dataRepository.setSmsPollIntervalMinutes(v.toInt())
+
                             "soul_user" -> dataRepository.setSoulUser(v)
+
                             "whatsapp_enabled" -> appSettings.setWhatsAppEnabled(v.toBoolean())
+
                             "whatsapp_read_only" -> appSettings.setWhatsAppReadOnly(v.toBoolean())
+
                             "whatsapp_reply_mode" -> appSettings.setWhatsAppReplyMode(v)
+
                             "whatsapp_allowed_contacts" -> appSettings.setWhatsAppAllowedContacts(v)
+
                             "whatsapp_read_receipt" -> appSettings.setWhatsAppReadReceipt(v.toBoolean())
+
                             "baileys_browser_name" -> appSettings.setBaileysBrowserName(v)
+
                             "baileys_browser_version" -> appSettings.setBaileysBrowserVersion(v)
+
                             "baileys_mark_online" -> appSettings.setBaileysMarkOnline(v.toBoolean())
+
                             "baileys_sync_history" -> appSettings.setBaileysSyncHistory(v.toBoolean())
+
                             "baileys_link_previews" -> appSettings.setBaileysLinkPreviews(v.toBoolean())
+
                             else -> {
                                 call.respondText(json.encodeToString(ErrorResponse("Unknown setting: $key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                                 return@post
@@ -313,9 +401,16 @@ class DebugServer(
                     val err = auth(call) ?: return@get
                     val activeId = dataRepository.getActivePersona().id
                     val personas = dataRepository.getAllPersonas().map {
-                        PersonaListEntry(id = it.id, name = it.name, description = it.description,
-                            behaviorStyle = it.behaviorStyle.name, languageStyle = it.languageStyle.name,
-                            characterType = it.characterType.name, isBuiltIn = it.isBuiltIn, isActive = it.id == activeId)
+                        PersonaListEntry(
+                            id = it.id,
+                            name = it.name,
+                            description = it.description,
+                            behaviorStyle = it.behaviorStyle.name,
+                            languageStyle = it.languageStyle.name,
+                            characterType = it.characterType.name,
+                            isBuiltIn = it.isBuiltIn,
+                            isActive = it.id == activeId,
+                        )
                     }
                     call.respondText(json.encodeToString(personas), ContentType.Application.Json)
                 }
@@ -325,7 +420,15 @@ class DebugServer(
                     try {
                         val config = json.decodeFromString<com.kai.custom.data.PersonaConfig>(call.receiveText())
                         dataRepository.savePersona(config)
-                        call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("id", JsonPrimitive(config.id)) }), ContentType.Application.Json)
+                        call.respondText(
+                            json.encodeToString(
+                                buildJsonObject {
+                                    put("success", JsonPrimitive(true))
+                                    put("id", JsonPrimitive(config.id))
+                                },
+                            ),
+                            ContentType.Application.Json,
+                        )
                     } catch (e: Exception) {
                         call.respondText(json.encodeToString(ErrorResponse(e.message ?: "Invalid persona")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                     }
@@ -333,16 +436,38 @@ class DebugServer(
 
                 post("/persona/switch/{id}") {
                     val err = auth(call) ?: return@post
-                    val id = call.parameters["id"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val id = call.parameters["id"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     withContext(Dispatchers.Default) { dataRepository.switchPersona(id) }
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("active_persona_id", JsonPrimitive(id)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("active_persona_id", JsonPrimitive(id))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 delete("/persona/{id}") {
                     val err = auth(call) ?: return@delete
-                    val id = call.parameters["id"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@delete }
+                    val id = call.parameters["id"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@delete
+                    }
                     dataRepository.deletePersona(id)
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("deleted", JsonPrimitive(id)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("deleted", JsonPrimitive(id))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= CONVERSATIONS =======================
@@ -356,9 +481,20 @@ class DebugServer(
 
                 post("/conversation/load/{id}") {
                     val err = auth(call) ?: return@post
-                    val id = call.parameters["id"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val id = call.parameters["id"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     dataRepository.loadConversation(id)
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("conversation_id", JsonPrimitive(id)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("conversation_id", JsonPrimitive(id))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/conversation/new") {
@@ -369,9 +505,20 @@ class DebugServer(
 
                 post("/conversation/delete/{id}") {
                     val err = auth(call) ?: return@post
-                    val id = call.parameters["id"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val id = call.parameters["id"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     withContext(Dispatchers.Default) { dataRepository.deleteConversation(id) }
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("deleted", JsonPrimitive(id)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("deleted", JsonPrimitive(id))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= SERVICES =======================
@@ -391,35 +538,67 @@ class DebugServer(
 
                 post("/service/add/{serviceId}") {
                     val err = auth(call) ?: return@post
-                    val serviceId = call.parameters["serviceId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing serviceId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val serviceId = call.parameters["serviceId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing serviceId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val instance = dataRepository.addConfiguredService(serviceId)
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("instance_id", JsonPrimitive(instance.instanceId)); put("service_id", JsonPrimitive(serviceId)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("instance_id", JsonPrimitive(instance.instanceId))
+                                put("service_id", JsonPrimitive(serviceId))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/service/remove") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<ServiceRemoveRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<ServiceRemoveRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     dataRepository.removeConfiguredService(body.instanceId)
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
 
                 post("/service/api-key") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<ApiKeyUpdateRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<ApiKeyUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     dataRepository.updateInstanceApiKey(body.instanceId, body.apiKey)
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
 
                 post("/service/base-url") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<BaseUrlUpdateRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<BaseUrlUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     dataRepository.updateInstanceBaseUrl(body.instanceId, body.baseUrl)
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
 
                 post("/service/model") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<ModelSelectRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<ModelSelectRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     dataRepository.updateInstanceSelectedModel(body.instanceId, com.kai.custom.data.Service.fromId(body.serviceId), body.modelId)
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
@@ -432,15 +611,21 @@ class DebugServer(
                             put("name", JsonPrimitive(tool.schema.name))
                             put("description", JsonPrimitive(tool.schema.description))
                             put("timeout_seconds", JsonPrimitive(tool.timeout.inWholeSeconds))
-                            put("parameters", buildJsonObject {
-                                tool.schema.parameters.forEach { (key, p) ->
-                                    put(key, buildJsonObject {
-                                        put("type", JsonPrimitive(p.type))
-                                        put("description", JsonPrimitive(p.description))
-                                        put("required", JsonPrimitive(p.required))
-                                    })
-                                }
-                            })
+                            put(
+                                "parameters",
+                                buildJsonObject {
+                                    tool.schema.parameters.forEach { (key, p) ->
+                                        put(
+                                            key,
+                                            buildJsonObject {
+                                                put("type", JsonPrimitive(p.type))
+                                                put("description", JsonPrimitive(p.description))
+                                                put("required", JsonPrimitive(p.required))
+                                            },
+                                        )
+                                    }
+                                },
+                            )
                         }
                     }
                     call.respondText(json.encodeToString(tools), ContentType.Application.Json)
@@ -448,9 +633,19 @@ class DebugServer(
 
                 get("/tools/definitions") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(dataRepository.getToolDefinitions().map { info ->
-                        buildJsonObject { put("id", JsonPrimitive(info.id)); put("name", JsonPrimitive(info.name)); put("description", JsonPrimitive(info.description)); put("enabled", JsonPrimitive(info.isEnabled)) }
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            dataRepository.getToolDefinitions().map { info ->
+                                buildJsonObject {
+                                    put("id", JsonPrimitive(info.id))
+                                    put("name", JsonPrimitive(info.name))
+                                    put("description", JsonPrimitive(info.description))
+                                    put("enabled", JsonPrimitive(info.isEnabled))
+                                }
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 get("/tools/enabled") {
@@ -461,24 +656,45 @@ class DebugServer(
 
                 post("/tools/enabled/{toolId}") {
                     val err = auth(call) ?: return@post
-                    val toolId = call.parameters["toolId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing toolId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
-                    val body = try { json.decodeFromString<SettingUpdateRequest>(call.receiveText()) } catch (_: Exception) {
-                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    val toolId = call.parameters["toolId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing toolId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val body = try {
+                        json.decodeFromString<SettingUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
                     }
                     dataRepository.setToolEnabled(toolId, body.value.toBoolean())
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("tool_id", JsonPrimitive(toolId)); put("enabled", JsonPrimitive(body.value)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("tool_id", JsonPrimitive(toolId))
+                                put("enabled", JsonPrimitive(body.value))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/tools/{name}") {
                     val err = auth(call) ?: return@post
                     val name = call.parameters["name"] ?: run {
-                        call.respondText(json.encodeToString(ToolCallResponse(success = false, name = "", error = "Missing tool name")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                        call.respondText(json.encodeToString(ToolCallResponse(success = false, name = "", error = "Missing tool name")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
                     }
-                    val body = try { call.receiveText() } catch (_: Exception) { "{}" }
+                    val body = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        "{}"
+                    }
                     val result = try {
                         toolExecutor.executeTool(name, body.ifBlank { "{}" })
                     } catch (e: Exception) {
-                        call.respondText(json.encodeToString(ToolCallResponse(success = false, name = name, error = e.message ?: "Unknown error")), ContentType.Application.Json); return@post
+                        call.respondText(json.encodeToString(ToolCallResponse(success = false, name = name, error = e.message ?: "Unknown error")), ContentType.Application.Json)
+                        return@post
                     }
                     call.respondText(json.encodeToString(ToolCallResponse(success = true, name = name, result = result)), ContentType.Application.Json)
                 }
@@ -486,57 +702,149 @@ class DebugServer(
                 // ======================= MEMORY =======================
                 get("/memories") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(memoryStore.getAllMemories().map {
-                        buildJsonObject { put("key", JsonPrimitive(it.key)); put("content", JsonPrimitive(it.content)); put("category", JsonPrimitive(it.category.name)); put("protected", JsonPrimitive(it.protected)) }
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            memoryStore.getAllMemories().map {
+                                buildJsonObject {
+                                    put("key", JsonPrimitive(it.key))
+                                    put("content", JsonPrimitive(it.content))
+                                    put("category", JsonPrimitive(it.category.name))
+                                    put("protected", JsonPrimitive(it.protected))
+                                }
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 get("/memory/{key}") {
                     val err = auth(call) ?: return@get
-                    val key = call.parameters["key"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@get }
+                    val key = call.parameters["key"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@get
+                    }
                     val entry = memoryStore.getAllMemories().find { it.key == key }
-                    if (entry == null) { call.respondText(json.encodeToString(ErrorResponse("Not found")), ContentType.Application.Json, HttpStatusCode.NotFound); return@get }
-                    call.respondText(json.encodeToString(buildJsonObject { put("key", JsonPrimitive(entry.key)); put("content", JsonPrimitive(entry.content)); put("category", JsonPrimitive(entry.category.name)); put("protected", JsonPrimitive(entry.protected)) }), ContentType.Application.Json)
+                    if (entry == null) {
+                        call.respondText(json.encodeToString(ErrorResponse("Not found")), ContentType.Application.Json, HttpStatusCode.NotFound)
+                        return@get
+                    }
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("key", JsonPrimitive(entry.key))
+                                put("content", JsonPrimitive(entry.content))
+                                put("category", JsonPrimitive(entry.category.name))
+                                put("protected", JsonPrimitive(entry.protected))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/memory") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val body = try { json.decodeFromString<MemoryRequest>(raw) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid JSON")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
-                    if (body.key.isBlank()) { call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
-                    val category = try { MemoryCategory.valueOf(body.category?.uppercase() ?: "GENERAL") } catch (_: Exception) { MemoryCategory.GENERAL }
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val body = try {
+                        json.decodeFromString<MemoryRequest>(raw)
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    if (body.key.isBlank()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
+                    val category = try {
+                        MemoryCategory.valueOf(body.category?.uppercase() ?: "GENERAL")
+                    } catch (_: Exception) {
+                        MemoryCategory.GENERAL
+                    }
                     val entry = withContext(Dispatchers.Default) { memoryStore.store(body.key, body.content, category) }
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("key", JsonPrimitive(entry.key)); put("content", JsonPrimitive(entry.content)); put("category", JsonPrimitive(entry.category.name)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("key", JsonPrimitive(entry.key))
+                                put("content", JsonPrimitive(entry.content))
+                                put("category", JsonPrimitive(entry.category.name))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 delete("/memory/{key}") {
                     val err = auth(call) ?: return@delete
-                    val key = call.parameters["key"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@delete }
+                    val key = call.parameters["key"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing key")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@delete
+                    }
                     val deleted = withContext(Dispatchers.Default) { memoryStore.forget(key) }
-                    if (!deleted) { call.respondText(json.encodeToString(ErrorResponse("Not found or protected")), ContentType.Application.Json, HttpStatusCode.NotFound); return@delete }
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("key", JsonPrimitive(key)) }), ContentType.Application.Json)
+                    if (!deleted) {
+                        call.respondText(json.encodeToString(ErrorResponse("Not found or protected")), ContentType.Application.Json, HttpStatusCode.NotFound)
+                        return@delete
+                    }
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("key", JsonPrimitive(key))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/memory/search") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val body = try { json.decodeFromString<SearchRequest>(raw) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val body = try {
+                        json.decodeFromString<SearchRequest>(raw)
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val results = memoryStore.searchMemories(body.query, body.limit ?: 10)
-                    call.respondText(json.encodeToString(results.map { buildJsonObject { put("key", JsonPrimitive(it.key)); put("content", JsonPrimitive(it.content)); put("category", JsonPrimitive(it.category.name)); put("hit_count", JsonPrimitive(it.hitCount)) } }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            results.map {
+                                buildJsonObject {
+                                    put("key", JsonPrimitive(it.key))
+                                    put("content", JsonPrimitive(it.content))
+                                    put("category", JsonPrimitive(it.category.name))
+                                    put("hit_count", JsonPrimitive(it.hitCount))
+                                }
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= DIARY =======================
                 get("/diary") {
                     val err = auth(call) ?: return@get
                     val entries = memoryStore.diaryRead("kai", 100)
-                    call.respondText(json.encodeToString(entries.map {
-                        buildJsonObject {
-                            put("id", JsonPrimitive(it.id))
-                            put("topic", JsonPrimitive(it.topic))
-                            put("content", JsonPrimitive(it.content))
-                            put("created_at", JsonPrimitive(it.createdAt))
-                        }
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            entries.map {
+                                buildJsonObject {
+                                    put("id", JsonPrimitive(it.id))
+                                    put("topic", JsonPrimitive(it.topic))
+                                    put("content", JsonPrimitive(it.content))
+                                    put("created_at", JsonPrimitive(it.createdAt))
+                                }
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 delete("/diary/{id}") {
@@ -550,19 +858,34 @@ class DebugServer(
                         call.respondText(json.encodeToString(ErrorResponse("Not found")), ContentType.Application.Json, HttpStatusCode.NotFound)
                         return@delete
                     }
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("deleted", JsonPrimitive(id)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("deleted", JsonPrimitive(id))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= ALT-MEMORY =======================
                 get("/alt-memory") {
                     val err = auth(call) ?: return@get
                     val allMemories = memoryStore.getAllMemories()
-                    call.respondText(json.encodeToString(AltMemoryStatusResponse(
-                        enabled = appSettings.isAltMemoryEnabled(), installed = appSettings.isAltMemoryInstalled(),
-                        connected = mcpServerManager.isConnected("alt_memory"),
-                        localMemoryCount = allMemories.size, behaviorMemoryCount = allMemories.count { it.protected },
-                        migrationComplete = appSettings.isAltMemoryMigrationComplete(),
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            AltMemoryStatusResponse(
+                                enabled = appSettings.isAltMemoryEnabled(),
+                                installed = appSettings.isAltMemoryInstalled(),
+                                connected = mcpServerManager.isConnected("alt_memory"),
+                                localMemoryCount = allMemories.size,
+                                behaviorMemoryCount = allMemories.count { it.protected },
+                                migrationComplete = appSettings.isAltMemoryMigrationComplete(),
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= MCP SERVERS =======================
@@ -576,25 +899,53 @@ class DebugServer(
 
                 post("/mcp/add") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<McpServerAddRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<McpServerAddRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val config = withContext(Dispatchers.Default) { dataRepository.addMcpServer(body.name, body.url, emptyMap()) }
-                        call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("id", JsonPrimitive(config.id)); put("name", JsonPrimitive(config.name)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("id", JsonPrimitive(config.id))
+                                put("name", JsonPrimitive(config.name))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 delete("/mcp/{serverId}") {
                     val err = auth(call) ?: return@delete
-                    val serverId = call.parameters["serverId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing serverId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@delete }
+                    val serverId = call.parameters["serverId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing serverId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@delete
+                    }
                     dataRepository.removeMcpServer(serverId)
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
 
                 post("/mcp/connect/{serverId}") {
                     val err = auth(call) ?: return@post
-                    val serverId = call.parameters["serverId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing serverId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val serverId = call.parameters["serverId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing serverId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val result = withContext(Dispatchers.Default) { dataRepository.connectMcpServer(serverId) }
                     if (result.isSuccess) {
                         val toolCount = result.getOrNull()?.size ?: 0
-                        call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("tools", JsonPrimitive(toolCount)) }), ContentType.Application.Json)
+                        call.respondText(
+                            json.encodeToString(
+                                buildJsonObject {
+                                    put("success", JsonPrimitive(true))
+                                    put("tools", JsonPrimitive(toolCount))
+                                },
+                            ),
+                            ContentType.Application.Json,
+                        )
                     } else {
                         call.respondText(json.encodeToString(ErrorResponse(result.exceptionOrNull()?.message ?: "Connection failed")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
                     }
@@ -612,10 +963,23 @@ class DebugServer(
 
                 post("/skill/install") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<InstallSkillRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<InstallSkillRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val result = withContext(Dispatchers.Default) { dataRepository.installSkillFromGitHub(body.owner, body.repo, body.ref, body.path) }
                     if (result.isSuccess) {
-                        call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); result.getOrNull()?.id?.let { put("id", JsonPrimitive(it)) } }), ContentType.Application.Json)
+                        call.respondText(
+                            json.encodeToString(
+                                buildJsonObject {
+                                    put("success", JsonPrimitive(true))
+                                    result.getOrNull()?.id?.let { put("id", JsonPrimitive(it)) }
+                                },
+                            ),
+                            ContentType.Application.Json,
+                        )
                     } else {
                         call.respondText(json.encodeToString(ErrorResponse(result.exceptionOrNull()?.message ?: "Install failed")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
                     }
@@ -623,14 +987,22 @@ class DebugServer(
 
                 post("/skill/uninstall/{id}") {
                     val err = auth(call) ?: return@post
-                    val id = call.parameters["id"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val id = call.parameters["id"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing id")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     withContext(Dispatchers.Default) { dataRepository.uninstallSkill(id) }
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
 
                 post("/skill/activate") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<SettingUpdateRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<SettingUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     if (body.value.isBlank()) {
                         dataRepository.setActiveSkill(null)
                     } else {
@@ -644,17 +1016,31 @@ class DebugServer(
                 get("/heartbeat") {
                     val err = auth(call) ?: return@get
                     val cfg = dataRepository.getHeartbeatConfig()
-                    call.respondText(json.encodeToString(HeartbeatConfigResponse(
-                        enabled = cfg.enabled, intervalMinutes = cfg.intervalMinutes,
-                        activeHoursStart = cfg.activeHoursStart, activeHoursEnd = cfg.activeHoursEnd,
-                        lastHeartbeatEpochMs = cfg.lastHeartbeatEpochMs, heartbeatInstanceId = cfg.heartbeatInstanceId,
-                        prompt = dataRepository.getHeartbeatPrompt(), log = dataRepository.getHeartbeatLog(),
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            HeartbeatConfigResponse(
+                                enabled = cfg.enabled,
+                                intervalMinutes = cfg.intervalMinutes,
+                                activeHoursStart = cfg.activeHoursStart,
+                                activeHoursEnd = cfg.activeHoursEnd,
+                                lastHeartbeatEpochMs = cfg.lastHeartbeatEpochMs,
+                                heartbeatInstanceId = cfg.heartbeatInstanceId,
+                                prompt = dataRepository.getHeartbeatPrompt(),
+                                log = dataRepository.getHeartbeatLog(),
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/heartbeat") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<HeartbeatUpdateRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<HeartbeatUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     body.enabled?.let { dataRepository.setHeartbeatEnabled(it) }
                     body.intervalMinutes?.let { dataRepository.setHeartbeatIntervalMinutes(it) }
                     body.activeHoursStart?.let { s -> dataRepository.setHeartbeatActiveHours(s, body.activeHoursEnd ?: dataRepository.getHeartbeatConfig().activeHoursEnd) }
@@ -665,14 +1051,24 @@ class DebugServer(
                 // ======================= EMAIL =======================
                 get("/email") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(dataRepository.getEmailAccounts().map {
-                        com.kai.custom.data.EmailAccountDebugView(id = it.id, email = it.email, displayName = it.displayName)
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            dataRepository.getEmailAccounts().map {
+                                com.kai.custom.data.EmailAccountDebugView(id = it.id, email = it.email, displayName = it.displayName)
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/email/add") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<EmailAccountRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<EmailAccountRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     appSettings.setEmailPassword(body.id, body.password)
                     val accounts = dataRepository.getEmailAccounts().toMutableList()
                     accounts.add(com.kai.custom.data.EmailAccount(id = body.id, email = body.email, displayName = body.displayName, imapHost = body.imapHost, imapPort = body.imapPort, smtpHost = body.smtpHost, smtpPort = body.smtpPort, username = body.username, useStartTls = body.useStartTls))
@@ -682,14 +1078,20 @@ class DebugServer(
 
                 delete("/email/{accountId}") {
                     val err = auth(call) ?: return@delete
-                    val accountId = call.parameters["accountId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing accountId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@delete }
+                    val accountId = call.parameters["accountId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing accountId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@delete
+                    }
                     withContext(Dispatchers.Default) { dataRepository.removeEmailAccount(accountId) }
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
 
                 post("/email/poll/{accountId}") {
                     val err = auth(call) ?: return@post
-                    val accountId = call.parameters["accountId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing accountId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val accountId = call.parameters["accountId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing accountId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     withContext(Dispatchers.Default) { dataRepository.pollEmailAccount(accountId) }
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
@@ -705,14 +1107,20 @@ class DebugServer(
 
                 post("/sms/send/{draftId}") {
                     val err = auth(call) ?: return@post
-                    val draftId = call.parameters["draftId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing draftId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val draftId = call.parameters["draftId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing draftId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val result = withContext(Dispatchers.Default) { dataRepository.sendSmsDraft(draftId) }
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(result)) }), ContentType.Application.Json)
                 }
 
                 post("/sms/discard/{draftId}") {
                     val err = auth(call) ?: return@post
-                    val draftId = call.parameters["draftId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing draftId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val draftId = call.parameters["draftId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing draftId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     withContext(Dispatchers.Default) { dataRepository.discardSmsDraft(draftId) }
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
@@ -720,18 +1128,39 @@ class DebugServer(
                 // ======================= LOCAL INFERENCE =======================
                 get("/local/models") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(dataRepository.getLocalAvailableModels().map {
-                        LocalModelSummary(id = it.id, isDownloaded = dataRepository.getLocalDownloadedModels().any { d -> d.id == it.id }, contextTokens = dataRepository.getModelContextTokens(it.id))
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            dataRepository.getLocalAvailableModels().map {
+                                LocalModelSummary(id = it.id, isDownloaded = dataRepository.getLocalDownloadedModels().any { d -> d.id == it.id }, contextTokens = dataRepository.getModelContextTokens(it.id))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/local/download") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<SettingUpdateRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<SettingUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val model = dataRepository.getLocalAvailableModels().find { it.id == body.value }
-                    if (model == null) { call.respondText(json.encodeToString(ErrorResponse("Model not found")), ContentType.Application.Json, HttpStatusCode.NotFound); return@post }
+                    if (model == null) {
+                        call.respondText(json.encodeToString(ErrorResponse("Model not found")), ContentType.Application.Json, HttpStatusCode.NotFound)
+                        return@post
+                    }
                     dataRepository.startLocalModelDownload(model)
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("model_id", JsonPrimitive(body.value)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("model_id", JsonPrimitive(body.value))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/local/cancel") {
@@ -742,7 +1171,10 @@ class DebugServer(
 
                 delete("/local/{modelId}") {
                     val err = auth(call) ?: return@delete
-                    val modelId = call.parameters["modelId"] ?: run { call.respondText(json.encodeToString(ErrorResponse("Missing modelId")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@delete }
+                    val modelId = call.parameters["modelId"] ?: run {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing modelId")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@delete
+                    }
                     withContext(Dispatchers.Default) { dataRepository.deleteLocalModel(modelId) }
                     call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)) }), ContentType.Application.Json)
                 }
@@ -750,16 +1182,31 @@ class DebugServer(
                 // ======================= WAKE WORD =======================
                 get("/wake-word") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(WakeWordSettings(
-                        enabled = dataRepository.isWakeWordEnabled(), phrase = dataRepository.getWakeWordPhrase(),
-                        mode = dataRepository.getWakeWordMode(), template = dataRepository.getWakeWordTemplate(),
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            WakeWordSettings(
+                                enabled = dataRepository.isWakeWordEnabled(),
+                                phrase = dataRepository.getWakeWordPhrase(),
+                                mode = dataRepository.getWakeWordMode(),
+                                template = dataRepository.getWakeWordTemplate(),
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/wake-word") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val body = try { json.decodeFromString<SettingUpdateRequest>(raw) } catch (_: Exception) { null }
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val body = try {
+                        json.decodeFromString<SettingUpdateRequest>(raw)
+                    } catch (_: Exception) {
+                        null
+                    }
                     if (body != null) {
                         dataRepository.setWakeWordEnabled(body.value.toBoolean())
                     }
@@ -769,30 +1216,49 @@ class DebugServer(
                 // ======================= TELEGRAM =======================
                 get("/telegram") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(TelegramStatusResponse(
-                        enabled = dataRepository.isTelegramEnabled(), botTokenPresent = dataRepository.getTelegramBotToken().isNotBlank(),
-                        authorizedChatIds = dataRepository.getTelegramAuthorizedChatIds().toList(),
-                        pendingCount = dataRepository.getPendingTelegramCount(),
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            TelegramStatusResponse(
+                                enabled = dataRepository.isTelegramEnabled(),
+                                botTokenPresent = dataRepository.getTelegramBotToken().isNotBlank(),
+                                authorizedChatIds = dataRepository.getTelegramAuthorizedChatIds().toList(),
+                                pendingCount = dataRepository.getPendingTelegramCount(),
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= WHATSAPP =======================
                 get("/whatsapp") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(com.kai.custom.data.WhatsAppStatusResponse(
-                        enabled = appSettings.isWhatsAppEnabled(),
-                        readOnly = appSettings.isWhatsAppReadOnly(),
-                        installed = appSettings.isWhatsAppInstalled(),
-                        authenticated = appSettings.isWhatsAppAuthenticated(),
-                        qrCode = appSettings.getWhatsAppQrCode(),
-                        pendingCount = com.kai.custom.data.WhatsAppStore(appSettings).getPending().size,
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            com.kai.custom.data.WhatsAppStatusResponse(
+                                enabled = appSettings.isWhatsAppEnabled(),
+                                readOnly = appSettings.isWhatsAppReadOnly(),
+                                installed = appSettings.isWhatsAppInstalled(),
+                                authenticated = appSettings.isWhatsAppAuthenticated(),
+                                qrCode = appSettings.getWhatsAppQrCode(),
+                                pendingCount = com.kai.custom.data.WhatsAppStore(appSettings).getPending().size,
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/whatsapp/pair") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val phone = try { json.decodeFromString<Map<String, String>>(raw)["phone"] } catch (_: Exception) { null }
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val phone = try {
+                        json.decodeFromString<Map<String, String>>(raw)["phone"]
+                    } catch (_: Exception) {
+                        null
+                    }
                     if (phone.isNullOrBlank()) {
                         call.respondText(json.encodeToString(ErrorResponse("Missing phone number — send {\"phone\":\"628123456789\"}")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                         return@post
@@ -851,44 +1317,75 @@ class DebugServer(
 
                 get("/whatsapp/settings") {
                     val err = auth(call) ?: return@get
-                    call.respondText(buildJsonObject {
-                        put("browser_name", JsonPrimitive(appSettings.getBaileysBrowserName()))
-                        put("browser_version", JsonPrimitive(appSettings.getBaileysBrowserVersion()))
-                        put("mark_online_on_connect", JsonPrimitive(appSettings.getBaileysMarkOnline()))
-                        put("sync_full_history", JsonPrimitive(appSettings.getBaileysSyncHistory()))
-                        put("generate_high_quality_link_preview", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
-                    }.toString(), ContentType.Application.Json)
+                    call.respondText(
+                        buildJsonObject {
+                            put("browser_name", JsonPrimitive(appSettings.getBaileysBrowserName()))
+                            put("browser_version", JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+                            put("mark_online_on_connect", JsonPrimitive(appSettings.getBaileysMarkOnline()))
+                            put("sync_full_history", JsonPrimitive(appSettings.getBaileysSyncHistory()))
+                            put("generate_high_quality_link_preview", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
+                        }.toString(),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= SPLINTERLANDS =======================
                 get("/splinterlands") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(SplinterlandsStatusResponse(
-                        enabled = appSettings.isSplinterlandsEnabled(), accountPresent = appSettings.getSplinterlandsAccountJson().isNotBlank(),
-                    )), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            SplinterlandsStatusResponse(
+                                enabled = appSettings.isSplinterlandsEnabled(),
+                                accountPresent = appSettings.getSplinterlandsAccountJson().isNotBlank(),
+                            ),
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= CHAT =======================
                 post("/chat") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val chatRequest = try { json.decodeFromString<ChatRequest>(raw) } catch (_: Exception) {
-                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val chatRequest = try {
+                        json.decodeFromString<ChatRequest>(raw)
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
                     }
                     val result = withContext(Dispatchers.Default) {
-                        try { dataRepository.askWithToolsVerbose(chatRequest.message) } catch (e: Exception) { AskWithToolsResult("Error: ${e.message}") }
+                        try {
+                            dataRepository.askWithToolsVerbose(chatRequest.message)
+                        } catch (e: Exception) {
+                            AskWithToolsResult("Error: ${e.message}")
+                        }
                     }
                     call.respondText(json.encodeToString(ChatResponse(response = result.response, toolCalls = result.toolCalls)), ContentType.Application.Json)
                 }
 
                 post("/chat/silent") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val chatRequest = try { json.decodeFromString<ChatRequest>(raw) } catch (_: Exception) {
-                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val chatRequest = try {
+                        json.decodeFromString<ChatRequest>(raw)
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
                     }
                     val result = withContext(Dispatchers.Default) {
-                        try { dataRepository.askSilently(chatRequest.message) } catch (e: Exception) { "Error: ${e.message}" }
+                        try {
+                            dataRepository.askSilently(chatRequest.message)
+                        } catch (e: Exception) {
+                            "Error: ${e.message}"
+                        }
                     }
                     call.respondText(result, ContentType.Text.Plain)
                 }
@@ -896,9 +1393,16 @@ class DebugServer(
                 // ======================= TOOLS =======================
                 post("/tools/call") {
                     val err = auth(call) ?: return@post
-                    val raw = try { call.receiveText() } catch (_: Exception) { "" }
-                    val toolRequest = try { json.decodeFromString<ToolCallRequest>(raw) } catch (_: Exception) {
-                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body — expected {\"tool\":\"...\",\"arguments\":{}}")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post
+                    val raw = try {
+                        call.receiveText()
+                    } catch (_: Exception) {
+                        ""
+                    }
+                    val toolRequest = try {
+                        json.decodeFromString<ToolCallRequest>(raw)
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid JSON body — expected {\"tool\":\"...\",\"arguments\":{}}")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
                     }
                     val args = toolRequest.arguments.toString()
                     val result = withContext(Dispatchers.Default) {
@@ -914,35 +1418,47 @@ class DebugServer(
                 get("/tools/list") {
                     val err = auth(call) ?: return@get
                     val tools = getAvailableTools()
-                    call.respondText(json.encodeToString(buildJsonArray {
-                        tools.forEach { t ->
-                            add(buildJsonObject {
-                                put("name", JsonPrimitive(t.schema.name))
-                                put("description", JsonPrimitive(t.schema.description))
-                                put("timeout", JsonPrimitive(t.timeout.inWholeSeconds))
-                                put("input_schema", JsonPrimitive(json.encodeToString(t.schema.parameters)))
-                            })
-                        }
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonArray {
+                                tools.forEach { t ->
+                                    add(
+                                        buildJsonObject {
+                                            put("name", JsonPrimitive(t.schema.name))
+                                            put("description", JsonPrimitive(t.schema.description))
+                                            put("timeout", JsonPrimitive(t.timeout.inWholeSeconds))
+                                            put("input_schema", JsonPrimitive(json.encodeToString(t.schema.parameters)))
+                                        },
+                                    )
+                                }
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= SANDBOX =======================
                 get("/sandbox/status") {
                     val err = auth(call) ?: return@get
                     val s = sandboxController.status.value
-                    call.respondText(json.encodeToString(buildJsonObject {
-                        put("installed", JsonPrimitive(s.installed))
-                        put("ready", JsonPrimitive(s.ready))
-                        put("working", JsonPrimitive(s.working))
-                        put("progress", s.progress?.let { JsonPrimitive(it) } ?: JsonNull)
-                        put("statusText", JsonPrimitive(s.statusText))
-                        put("error", JsonPrimitive(s.error))
-                        put("lastWhatsAppError", s.lastWhatsAppError?.let { JsonPrimitive(it) } ?: JsonNull)
-                        put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
-                        put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
-                        put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
-                        put("sandbox_root_enabled", JsonPrimitive(dataRepository.isSandboxRootEnabled()))
-                    }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("installed", JsonPrimitive(s.installed))
+                                put("ready", JsonPrimitive(s.ready))
+                                put("working", JsonPrimitive(s.working))
+                                put("progress", s.progress?.let { JsonPrimitive(it) } ?: JsonNull)
+                                put("statusText", JsonPrimitive(s.statusText))
+                                put("error", JsonPrimitive(s.error))
+                                put("lastWhatsAppError", s.lastWhatsAppError?.let { JsonPrimitive(it) } ?: JsonNull)
+                                put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
+                                put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
+                                put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
+                                put("sandbox_root_enabled", JsonPrimitive(dataRepository.isSandboxRootEnabled()))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/sandbox/setup") {
@@ -966,19 +1482,27 @@ class DebugServer(
                 post("/sandbox/exec") {
                     val err = auth(call) ?: return@post
                     val command = call.receiveText().trim()
-                    if (command.isBlank()) { call.respondText(json.encodeToString(ErrorResponse("Missing command body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    if (command.isBlank()) {
+                        call.respondText(json.encodeToString(ErrorResponse("Missing command body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val useRoot = call.request.queryParameters["root"]?.toBooleanStrictOrNull() ?: false
                     val timeout = call.request.queryParameters["timeout"]?.toLongOrNull() ?: 60L
                     val format = call.request.queryParameters["format"] ?: "text"
                     val result = withContext(Dispatchers.Default) { sandboxController.executeCommandStructured(command, useRoot = useRoot, timeoutSeconds = timeout) }
                     if (format == "json") {
-                        call.respondText(json.encodeToString(buildJsonObject {
-                            put("success", JsonPrimitive(result.success))
-                            put("stdout", JsonPrimitive(result.stdout))
-                            put("stderr", JsonPrimitive(result.stderr))
-                            put("exit_code", result.exitCode?.let { JsonPrimitive(it) } ?: JsonNull)
-                            put("error", result.error?.let { JsonPrimitive(it) } ?: JsonNull)
-                        }), ContentType.Application.Json)
+                        call.respondText(
+                            json.encodeToString(
+                                buildJsonObject {
+                                    put("success", JsonPrimitive(result.success))
+                                    put("stdout", JsonPrimitive(result.stdout))
+                                    put("stderr", JsonPrimitive(result.stderr))
+                                    put("exit_code", result.exitCode?.let { JsonPrimitive(it) } ?: JsonNull)
+                                    put("error", result.error?.let { JsonPrimitive(it) } ?: JsonNull)
+                                },
+                            ),
+                            ContentType.Application.Json,
+                        )
                     } else {
                         call.respondText(result.stdout + result.stderr + (result.error?.let { "\n$it" } ?: ""), ContentType.Text.Plain)
                     }
@@ -988,10 +1512,15 @@ class DebugServer(
                     val err = auth(call) ?: return@post
                     val result = withContext(Dispatchers.Default) { sandboxController.backupSandbox() }
                     result.onSuccess { backup ->
-                        call.respondText(json.encodeToString(buildJsonObject {
-                            put("success", JsonPrimitive(true))
-                            put("path", JsonPrimitive(backup.path))
-                        }), ContentType.Application.Json)
+                        call.respondText(
+                            json.encodeToString(
+                                buildJsonObject {
+                                    put("success", JsonPrimitive(true))
+                                    put("path", JsonPrimitive(backup.path))
+                                },
+                            ),
+                            ContentType.Application.Json,
+                        )
                     }.onFailure { e ->
                         call.respondText(json.encodeToString(ErrorResponse("Backup failed: ${e.message}")), ContentType.Application.Json, HttpStatusCode.InternalServerError)
                     }
@@ -999,7 +1528,9 @@ class DebugServer(
 
                 post("/sandbox/import") {
                     val err = auth(call) ?: return@post
-                    val bytes = try { call.receive<ByteArray>() } catch (_: Exception) {
+                    val bytes = try {
+                        call.receive<ByteArray>()
+                    } catch (_: Exception) {
                         call.respondText(json.encodeToString(ErrorResponse("Missing or invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
                         return@post
                     }
@@ -1048,7 +1579,17 @@ class DebugServer(
                 // ======================= EXPORT / IMPORT =======================
                 get("/export/preview") {
                     val err = auth(call) ?: return@get
-                    call.respondText(json.encodeToString(dataRepository.getExportPreview().map { (section, count) -> buildJsonObject { put("section", JsonPrimitive(section.name)); put("count", JsonPrimitive(count)) } }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            dataRepository.getExportPreview().map { (section, count) ->
+                                buildJsonObject {
+                                    put("section", JsonPrimitive(section.name))
+                                    put("count", JsonPrimitive(count))
+                                }
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 post("/export") {
@@ -1059,18 +1600,44 @@ class DebugServer(
 
                 post("/import") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<ImportRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<ImportRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     val sections = if (body.sections.isEmpty()) com.kai.custom.data.ImportSection.entries.toSet() else body.sections.map { com.kai.custom.data.ImportSection.valueOf(it.uppercase()) }.toSet()
                     val count = dataRepository.importSettingsFromJson(body.json, sections, body.replace)
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("imported", JsonPrimitive(count)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("imported", JsonPrimitive(count))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= INTERACTIVE MODE =======================
                 post("/interactive") {
                     val err = auth(call) ?: return@post
-                    val body = try { json.decodeFromString<SettingUpdateRequest>(call.receiveText()) } catch (_: Exception) { call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest); return@post }
+                    val body = try {
+                        json.decodeFromString<SettingUpdateRequest>(call.receiveText())
+                    } catch (_: Exception) {
+                        call.respondText(json.encodeToString(ErrorResponse("Invalid body")), ContentType.Application.Json, HttpStatusCode.BadRequest)
+                        return@post
+                    }
                     dataRepository.setInteractiveMode(body.value.toBoolean())
-                    call.respondText(json.encodeToString(buildJsonObject { put("success", JsonPrimitive(true)); put("interactive_mode", JsonPrimitive(body.value)) }), ContentType.Application.Json)
+                    call.respondText(
+                        json.encodeToString(
+                            buildJsonObject {
+                                put("success", JsonPrimitive(true))
+                                put("interactive_mode", JsonPrimitive(body.value))
+                            },
+                        ),
+                        ContentType.Application.Json,
+                    )
                 }
 
                 // ======================= REGENERATE =======================

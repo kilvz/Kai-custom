@@ -12,7 +12,6 @@ import com.kai.custom.email.EmailPoller
 import com.kai.custom.formatFileSize
 import com.kai.custom.getAvailableTools
 import com.kai.custom.getPlatformToolDefinitions
-import com.kai.custom.isDebugBuild
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -22,6 +21,7 @@ import com.kai.custom.inference.LocalModel
 import com.kai.custom.inference.LocalTool
 import com.kai.custom.inference.NoModelDownloadedException
 import com.kai.custom.inference.getTotalMemoryBytes
+import com.kai.custom.isDebugBuild
 import com.kai.custom.mcp.McpServerConfig
 import com.kai.custom.mcp.McpServerManager
 import com.kai.custom.network.AllServicesFailedException
@@ -2011,21 +2011,34 @@ class RemoteDataRepository(
     override fun getWhatsAppQrCode(): String = appSettings.getWhatsAppQrCode()
 
     override fun getBaileysBrowserName(): String = appSettings.getBaileysBrowserName()
-    override fun setBaileysBrowserName(v: String) { appSettings.setBaileysBrowserName(v) }
+    override fun setBaileysBrowserName(v: String) {
+        appSettings.setBaileysBrowserName(v)
+    }
     override fun getBaileysBrowserVersion(): String = appSettings.getBaileysBrowserVersion()
-    override fun setBaileysBrowserVersion(v: String) { appSettings.setBaileysBrowserVersion(v) }
+    override fun setBaileysBrowserVersion(v: String) {
+        appSettings.setBaileysBrowserVersion(v)
+    }
     override fun getBaileysMarkOnline(): Boolean = appSettings.getBaileysMarkOnline()
-    override fun setBaileysMarkOnline(v: Boolean) { appSettings.setBaileysMarkOnline(v) }
+    override fun setBaileysMarkOnline(v: Boolean) {
+        appSettings.setBaileysMarkOnline(v)
+    }
     override fun getBaileysSyncHistory(): Boolean = appSettings.getBaileysSyncHistory()
-    override fun setBaileysSyncHistory(v: Boolean) { appSettings.setBaileysSyncHistory(v) }
+    override fun setBaileysSyncHistory(v: Boolean) {
+        appSettings.setBaileysSyncHistory(v)
+    }
     override fun getBaileysLinkPreviews(): Boolean = appSettings.getBaileysLinkPreviews()
-    override fun setBaileysLinkPreviews(v: Boolean) { appSettings.setBaileysLinkPreviews(v) }
+    override fun setBaileysLinkPreviews(v: Boolean) {
+        appSettings.setBaileysLinkPreviews(v)
+    }
     override fun getBaileysConfigJson(): String = buildJsonObject {
-        put("browser", buildJsonArray {
-            add(JsonPrimitive(appSettings.getBaileysBrowserName()))
-            add(JsonPrimitive("Chrome"))
-            add(JsonPrimitive(appSettings.getBaileysBrowserVersion()))
-        })
+        put(
+            "browser",
+            buildJsonArray {
+                add(JsonPrimitive(appSettings.getBaileysBrowserName()))
+                add(JsonPrimitive("Chrome"))
+                add(JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+            },
+        )
         put("markOnlineOnConnect", JsonPrimitive(appSettings.getBaileysMarkOnline()))
         put("syncFullHistory", JsonPrimitive(appSettings.getBaileysSyncHistory()))
         put("generateHighQualityLinkPreview", JsonPrimitive(appSettings.getBaileysLinkPreviews()))
@@ -2381,11 +2394,13 @@ class RemoteDataRepository(
         val toolCalls = localHistory.value.flatMap { msg ->
             msg.toolCalls?.flatMap { tc ->
                 val toolResult = localHistory.value.find { it.role == History.Role.TOOL && it.toolCallId == tc.id }
-                listOf(com.kai.custom.data.ToolCallInfo(
-                    name = tc.name,
-                    arguments = tc.arguments,
-                    result = toolResult?.content,
-                ))
+                listOf(
+                    com.kai.custom.data.ToolCallInfo(
+                        name = tc.name,
+                        arguments = tc.arguments,
+                        result = toolResult?.content,
+                    ),
+                )
             } ?: emptyList()
         }
         return AskWithToolsResult(response = result.content, toolCalls = toolCalls)

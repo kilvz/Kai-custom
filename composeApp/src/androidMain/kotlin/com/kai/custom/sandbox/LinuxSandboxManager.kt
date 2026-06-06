@@ -336,14 +336,14 @@ class LinuxSandboxManager(
                 if (distro == "ubuntu") {
                     executor.execute(
                         "for pid in /proc/[0-9]*/cmdline; do " +
-                        "  grep -q dpkg \"\$pid\" 2>/dev/null && " +
-                        "  kill -9 \$(echo \"\$pid\" | cut -d/ -f3) 2>/dev/null || true; " +
-                        "done; " +
-                        "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                        "/var/lib/apt/lists/lock /var/cache/apt/archives/lock " +
-                        "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
-                        "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*; " +
-                        "dpkg --configure -a 2>/dev/null",
+                            "  grep -q dpkg \"\$pid\" 2>/dev/null && " +
+                            "  kill -9 \$(echo \"\$pid\" | cut -d/ -f3) 2>/dev/null || true; " +
+                            "done; " +
+                            "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
+                            "/var/lib/apt/lists/lock /var/cache/apt/archives/lock " +
+                            "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                            "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*; " +
+                            "dpkg --configure -a 2>/dev/null",
                         timeoutSeconds = 30,
                     )
                 }
@@ -411,8 +411,11 @@ class LinuxSandboxManager(
                     _state.value = SandboxState.Installing("Downloading ${packages.size} packages...")
                     var downloaded = false
                     for (attempt in 1..2) {
-                        val mirrors = if (attempt == 1) downloader.getMirrors(distro, arch)
-                        else downloader.getMirrors(distro, arch).map { it.replace("https://", "http://") }
+                        val mirrors = if (attempt == 1) {
+                            downloader.getMirrors(distro, arch)
+                        } else {
+                            downloader.getMirrors(distro, arch).map { it.replace("https://", "http://") }
+                        }
                         for (mirror in mirrors) {
                             downloader.writeRepositories(rootfsDir, mirror, distro)
                             // Refresh package lists for this mirror before downloading
@@ -444,9 +447,9 @@ class LinuxSandboxManager(
                     runCatching {
                         executor.execute(
                             "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                            "/var/cache/apt/archives/lock " +
-                            "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
-                            "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                "/var/cache/apt/archives/lock " +
+                                "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
                             timeoutSeconds = 5,
                         )
                     }
@@ -459,9 +462,9 @@ class LinuxSandboxManager(
                         runCatching {
                             executor.execute(
                                 "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                                "/var/cache/apt/archives/lock " +
-                                "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
-                                "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                    "/var/cache/apt/archives/lock " +
+                                    "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                    "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
                                 timeoutSeconds = 5,
                             )
                         }
@@ -475,9 +478,9 @@ class LinuxSandboxManager(
                         runCatching {
                             executor.execute(
                                 "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                                "/var/cache/apt/archives/lock " +
-                                "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
-                                "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                    "/var/cache/apt/archives/lock " +
+                                    "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                    "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
                                 timeoutSeconds = 5,
                             )
                         }
@@ -494,9 +497,9 @@ class LinuxSandboxManager(
                             runCatching {
                                 executor.execute(
                                     "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                                    "/var/cache/apt/archives/lock " +
-                                    "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
-                                    "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                        "/var/cache/apt/archives/lock " +
+                                        "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                        "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
                                     timeoutSeconds = 5,
                                 )
                             }
@@ -537,9 +540,9 @@ class LinuxSandboxManager(
                     runCatching {
                         executor.execute(
                             "rm -f /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock " +
-                            "/var/cache/apt/archives/lock " +
-                            "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
-                            "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
+                                "/var/cache/apt/archives/lock " +
+                                "/etc/group.lock /etc/gshadow.lock /etc/passwd.lock /etc/shadow.lock " +
+                                "/etc/group.[0-9]* /etc/gshadow.[0-9]* /etc/passwd.[0-9]* /etc/shadow.[0-9]*",
                             timeoutSeconds = 5,
                         )
                     }
@@ -605,8 +608,12 @@ class LinuxSandboxManager(
 
     fun arePackagesInstalled(): Boolean {
         val coreBins = listOf(
-            "usr/bin/curl", "usr/bin/wget", "usr/bin/git",
-            "usr/bin/python3", "usr/bin/node", "usr/bin/ssh",
+            "usr/bin/curl",
+            "usr/bin/wget",
+            "usr/bin/git",
+            "usr/bin/python3",
+            "usr/bin/node",
+            "usr/bin/ssh",
         )
         val coreOk = coreBins.all { File(rootfsPath, it).exists() }
         val caCerts = File(rootfsPath, "etc/ssl/certs/ca-certificates.crt").exists()

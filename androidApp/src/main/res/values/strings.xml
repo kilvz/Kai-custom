@@ -5,5 +5,6 @@
     <string name="daemon_notification_text">Daemon is running</string>
     <string name="wake_word_channel_name">Wake Word Detection</string>
     <string name="wake_word_channel_description">Listening for wake word in the background</string>
-    <string name="wake_word_notification_text">Listening for wake wordâ€¦</string>
+    <string name="wake_word_notification_text">Listening for wake word...</string>
+    <string name="accessibility_service_name">Kai Screen Reader</string>
 </resources>

@@ -35,8 +35,7 @@ class AltMemoryClient(
 
     private fun personaRealm(): String = "persona_$activePersonaId"
 
-    private fun realmForProtected(): String =
-        if (activePersonaId.isNotBlank()) personaRealm() else DimensionConfig.REALM_AGENT
+    private fun realmForProtected(): String = if (activePersonaId.isNotBlank()) personaRealm() else DimensionConfig.REALM_AGENT
 
     private fun domainForCategory(category: MemoryCategory): String = when (category) {
         MemoryCategory.GENERAL -> DimensionConfig.DOMAIN_MEMORIES
@@ -245,9 +244,12 @@ class AltMemoryClient(
 
     override fun getBehaviorMemories(): List<MemoryEntry> = try {
         val response = runBlockingCompat {
-            client.callTool("export_collection", buildJsonObject {
-                put("realm", JsonPrimitive(realmForProtected()))
-            })
+            client.callTool(
+                "export_collection",
+                buildJsonObject {
+                    put("realm", JsonPrimitive(realmForProtected()))
+                },
+            )
         }
         parseEntityList(response).mapNotNull { altEntityToEntry(it) }.filter { it.protected }
     } catch (_: Exception) {
@@ -368,19 +370,25 @@ class AltMemoryClient(
 
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
         try {
-            client.callTool("diary_write", buildJsonObject {
-                put("agent_name", JsonPrimitive(agentName))
-                put("content", JsonPrimitive(content))
-                put("topic", JsonPrimitive(topic))
-            })
+            client.callTool(
+                "diary_write",
+                buildJsonObject {
+                    put("agent_name", JsonPrimitive(agentName))
+                    put("content", JsonPrimitive(content))
+                    put("topic", JsonPrimitive(topic))
+                },
+            )
         } catch (_: Exception) { }
     }
 
     override suspend fun diaryDelete(id: String): Boolean {
         try {
-            client.callTool("delete_entity", buildJsonObject {
-                put("entity_id", JsonPrimitive(id))
-            })
+            client.callTool(
+                "delete_entity",
+                buildJsonObject {
+                    put("entity_id", JsonPrimitive(id))
+                },
+            )
             return true
         } catch (_: Exception) {
             return false

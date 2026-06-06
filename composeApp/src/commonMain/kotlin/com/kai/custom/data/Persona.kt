@@ -115,7 +115,7 @@ fun PersonaConfig.toBehaviorTraitBlock(): String = buildString {
             BehaviorStyle.ASSISTANT -> "offer help, confirm before acting"
             BehaviorStyle.OPERATOR -> "execute tasks silently, concise output"
             BehaviorStyle.CUSTOM -> "follow the instructions above"
-        }
+        },
     )
     append('\n')
     append("- Character: ")
@@ -128,6 +128,6 @@ fun PersonaConfig.toBehaviorTraitBlock(): String = buildString {
             CharacterType.COMPANION -> "warm, friendly tone"
             CharacterType.CRITIC -> "analytical, constructive tone"
             CharacterType.CREATOR -> "innovative, proactive tone"
-        }
+        },
     )
 }

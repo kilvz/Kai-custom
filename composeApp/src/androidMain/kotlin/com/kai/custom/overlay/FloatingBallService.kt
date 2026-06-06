@@ -7,8 +7,8 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Icon
 import android.graphics.PixelFormat
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -72,16 +72,20 @@ class FloatingBallService : Service() {
 
     private fun showOverlay() {
         val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val controller = chatController ?: run { Log.d("Kai_Ball", "showOverlay: no controller"); return }
+        val controller = chatController ?: run {
+            Log.d("Kai_Ball", "showOverlay: no controller")
+            return
+        }
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            else
+            } else {
                 @Suppress("DEPRECATION")
-                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.TYPE_PHONE
+            },
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT,
@@ -141,12 +145,14 @@ class FloatingBallService : Service() {
     private fun buildPermissionNotification(): Notification {
         val settingsIntent = Intent(
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-            Uri.parse("package:${packageName}"),
+            Uri.parse("package:$packageName"),
         ).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val settingsPendingIntent = PendingIntent.getActivity(
-            this, 2, settingsIntent,
+            this,
+            2,
+            settingsIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -154,7 +160,9 @@ class FloatingBallService : Service() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val launchPendingIntent = PendingIntent.getActivity(
-            this, 1, launchIntent,
+            this,
+            1,
+            launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -172,7 +180,9 @@ class FloatingBallService : Service() {
             putExtra(KEY_EVENT, EVENT_STOP)
         }
         val stopPendingIntent = PendingIntent.getService(
-            this, 0, stopIntent,
+            this,
+            0,
+            stopIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -180,7 +190,9 @@ class FloatingBallService : Service() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val launchPendingIntent = PendingIntent.getActivity(
-            this, 1, launchIntent,
+            this,
+            1,
+            launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -189,11 +201,13 @@ class FloatingBallService : Service() {
             .setContentText("Tap to open Kai")
             .setSmallIcon(android.R.drawable.ic_popup_sync)
             .setContentIntent(launchPendingIntent)
-            .addAction(Notification.Action.Builder(
-                Icon.createWithResource(this, android.R.drawable.ic_menu_close_clear_cancel),
-                "Stop",
-                stopPendingIntent,
-            ).build())
+            .addAction(
+                Notification.Action.Builder(
+                    Icon.createWithResource(this, android.R.drawable.ic_menu_close_clear_cancel),
+                    "Stop",
+                    stopPendingIntent,
+                ).build(),
+            )
             .setOngoing(true)
             .build()
     }

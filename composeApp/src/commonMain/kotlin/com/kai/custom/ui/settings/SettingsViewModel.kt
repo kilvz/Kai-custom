@@ -4,13 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.DaemonController
 import com.kai.custom.DebugApiController
+import com.kai.custom.Platform
 import com.kai.custom.PttTriggerManager
 import com.kai.custom.SandboxController
-import com.kai.custom.Platform
 import com.kai.custom.currentPlatform
+import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.ImportSection
-import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.Service
 import com.kai.custom.data.TaskScheduler
@@ -21,6 +21,7 @@ import com.kai.custom.getToolPermissionMap
 import com.kai.custom.httpClient
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.isEmailSupported
+import com.kai.custom.isMockLocationConfigured
 import com.kai.custom.isNotificationsSupported
 import com.kai.custom.isRootAvailable
 import com.kai.custom.isRootSupported
@@ -40,9 +41,8 @@ import com.kai.custom.network.OpenAICompatibleInvalidApiKeyException
 import com.kai.custom.network.OpenAICompatibleQuotaExhaustedException
 import com.kai.custom.network.OpenAICompatibleRateLimitExceededException
 import com.kai.custom.network.dtos.SponsorsResponseDto
-import com.kai.custom.openTtsSettings
-import com.kai.custom.isMockLocationConfigured
 import com.kai.custom.openMockLocationSettings
+import com.kai.custom.openTtsSettings
 import com.kai.custom.requestShizukuPermission
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
@@ -621,8 +621,16 @@ class SettingsViewModel(
             val client = mcpServerManager.getClient("alt_memory") ?: return
             val backendRaw = client.callTool("get_backend", buildJsonObject { })
             val embedderRaw = client.callTool("get_default_embedder", buildJsonObject { })
-            val backend = try { Json.parseToJsonElement(backendRaw).jsonObject["backend"]?.jsonPrimitive?.content } catch (_: Exception) { backendRaw }
-            val embedder = try { Json.parseToJsonElement(embedderRaw).jsonObject["default_embedder"]?.jsonPrimitive?.content } catch (_: Exception) { embedderRaw }
+            val backend = try {
+                Json.parseToJsonElement(backendRaw).jsonObject["backend"]?.jsonPrimitive?.content
+            } catch (_: Exception) {
+                backendRaw
+            }
+            val embedder = try {
+                Json.parseToJsonElement(embedderRaw).jsonObject["default_embedder"]?.jsonPrimitive?.content
+            } catch (_: Exception) {
+                embedderRaw
+            }
             _state.update { it.copy(altMemoryBackend = backend, altMemoryEmbedder = embedder) }
         } catch (_: Exception) { }
     }
@@ -690,11 +698,13 @@ class SettingsViewModel(
             while (debugApiController.isTransitioning) {
                 delay(100)
             }
-            _state.update { it.copy(
-                isDebugApiEnabled = enabled,
-                debugApiRunning = debugApiController.isRunning,
-                debugApiTransitioning = false
-            )}
+            _state.update {
+                it.copy(
+                    isDebugApiEnabled = enabled,
+                    debugApiRunning = debugApiController.isRunning,
+                    debugApiTransitioning = false,
+                )
+            }
         }
     }
 

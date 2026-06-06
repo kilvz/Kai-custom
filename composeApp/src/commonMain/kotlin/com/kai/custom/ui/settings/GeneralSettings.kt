@@ -27,8 +27,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -84,6 +84,7 @@ internal fun GeneralContent(
     debugApiRunning: Boolean = false,
     debugApiTransitioning: Boolean = false,
     isDebugEndpointEnabled: Boolean = false,
+    shizukuPermissionGranted: Boolean = false,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
@@ -109,6 +110,7 @@ internal fun GeneralContent(
                             FloatingBallToggle(
                                 isFloatingBallEnabled = isFloatingBallEnabled,
                                 onToggleFloatingBall = actions.onToggleFloatingBall,
+                                shizukuPermissionGranted = shizukuPermissionGranted,
                             )
                         }
                     }
@@ -203,6 +205,7 @@ internal fun GeneralContent(
                         FloatingBallToggle(
                             isFloatingBallEnabled = isFloatingBallEnabled,
                             onToggleFloatingBall = actions.onToggleFloatingBall,
+                            shizukuPermissionGranted = shizukuPermissionGranted,
                         )
                     }
                 }
@@ -273,10 +276,10 @@ internal fun GeneralContent(
                             isDebugEndpointEnabled = isDebugEndpointEnabled,
                             onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
                         )
+                    }
                 }
             }
         }
-    }
     }
 }
 
@@ -467,14 +470,53 @@ private fun DaemonModeToggle(
 private fun FloatingBallToggle(
     isFloatingBallEnabled: Boolean,
     onToggleFloatingBall: (Boolean) -> Unit,
+    shizukuPermissionGranted: Boolean,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ToggleableHeadline(
             title = "Floating Assistant",
-            description = "Show a draggable floating ball overlay for quick access to Kai — ask about anything on your screen.",
+            description = "Show a draggable floating ball overlay for quick access. Requires Accessibility Service for screen reading and Shizuku for best results.",
             checked = isFloatingBallEnabled,
             onCheckedChange = onToggleFloatingBall,
+            actions = {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                ) {
+                    Text(
+                        text = "Experimental",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    )
+                }
+            },
         )
+        if (isFloatingBallEnabled && !shizukuPermissionGranted) {
+            Spacer(Modifier.height(8.dp))
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Shizuku recommended for reliable screen reading. Grant Shizuku permission in the Agent tab.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -816,7 +858,13 @@ private fun DebugApiSection(
             Column(modifier = Modifier.fillMaxWidth()) {
                 ToggleableHeadline(
                     title = "Debug API Server",
-                    description = if (debugApiRunning) "Running on 127.0.0.1:18500" else if (debugApiTransitioning) "Restarting..." else "HTTP server for debugging. Requires daemon. See logcat for auth token.",
+                    description = if (debugApiRunning) {
+                        "Running on 127.0.0.1:18500"
+                    } else if (debugApiTransitioning) {
+                        "Restarting..."
+                    } else {
+                        "HTTP server for debugging. Requires daemon. See logcat for auth token."
+                    },
                     checked = isDebugApiEnabled,
                     enabled = !debugApiTransitioning,
                     onCheckedChange = onToggleDebugApi,

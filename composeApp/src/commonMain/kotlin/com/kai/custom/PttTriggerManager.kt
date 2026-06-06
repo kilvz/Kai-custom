@@ -19,13 +19,21 @@ object PttTriggerManager {
     private val _capturedKeyCode = MutableSharedFlow<Int>(extraBufferCapacity = 1, replay = 0)
     val capturedKeyCode: SharedFlow<Int> = _capturedKeyCode.asSharedFlow()
 
-    fun triggerDown() { _events.tryEmit(PttEvent.DOWN) }
-    fun triggerUp() { _events.tryEmit(PttEvent.UP) }
+    fun triggerDown() {
+        _events.tryEmit(PttEvent.DOWN)
+    }
+    fun triggerUp() {
+        _events.tryEmit(PttEvent.UP)
+    }
 
-    fun startCapture() { _captureMode.value = true }
+    fun startCapture() {
+        _captureMode.value = true
+    }
     fun reportCapturedKey(keyCode: Int) {
         _capturedKeyCode.tryEmit(keyCode)
         _captureMode.value = false
     }
-    fun cancelCapture() { _captureMode.value = false }
+    fun cancelCapture() {
+        _captureMode.value = false
+    }
 }

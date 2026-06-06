@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -24,6 +25,8 @@ class OverlayChatController(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    val personaName: String get() = dataRepository.getPersonaName().ifBlank { "Kai" }
+
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
@@ -32,6 +35,9 @@ class OverlayChatController(
 
     private val _isVisible = MutableStateFlow(false)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
+
+    // Preserve conversation context across exchanges
+    private val conversationContext = mutableListOf<Pair<String, String>>()
 
     fun show() {
         _isVisible.value = true
@@ -53,27 +59,83 @@ class OverlayChatController(
 
         scope.launch {
             try {
-                val screenText = ScreenReaderService.readScreenText()
+                // Capture current screen content
+                val screenText = withContext(Dispatchers.IO) {
+                    ScreenReaderService.readScreenTextWithFallback()
+                }
+
+                // Build context-rich prompt: screen + history + question
                 val prompt = buildString {
                     if (!screenText.isNullOrBlank()) {
-                        appendLine("Current screen content:")
+                        appendLine("## Current Screen Content")
                         appendLine(screenText)
                         appendLine()
                     }
-                    appendLine("User asks: $text")
+                    if (conversationContext.isNotEmpty()) {
+                        appendLine("## Conversation History")
+                        for ((user, assistant) in conversationContext) {
+                            appendLine("User: $user")
+                            appendLine("Assistant: $assistant")
+                        }
+                        appendLine()
+                    }
+                    appendLine("## Current Question")
+                    appendLine(text)
                 }
-                val response = dataRepository.askSilently(prompt)
+
+                // Use user-configured service first, falling back to default
+                val instances = dataRepository.getConfiguredServiceInstances()
+                var lastError: String? = null
+
+                val response = if (instances.isNotEmpty()) {
+                    var result: String? = null
+                    for (instance in instances) {
+                        try {
+                            result = dataRepository.askWithTools(prompt, instance.instanceId)
+                            if (result.isNotEmpty()) break
+                        } catch (e: Exception) {
+                            lastError = e.message ?: e.javaClass.simpleName
+                            android.util.Log.w("Kai_Overlay", "Instance ${instance.instanceId} failed: $lastError")
+                        }
+                    }
+                    result
+                } else {
+                    null
+                }
+
+                val finalResponse = response ?: run {
+                    try {
+                        dataRepository.askWithTools(prompt)
+                    } catch (e: Exception) {
+                        lastError = e.message ?: e.javaClass.simpleName
+                        throw e
+                    }
+                }
+
+                // Store in conversation context for future exchanges
+                conversationContext.add(text to finalResponse)
+                if (conversationContext.size > 10) {
+                    conversationContext.removeAt(0)
+                }
+
                 val assistantMsg = ChatMessage(
                     id = Uuid.random().toString(),
                     role = "assistant",
-                    content = response,
+                    content = finalResponse,
                 )
                 _messages.update { it + assistantMsg }
             } catch (e: Exception) {
+                android.util.Log.e("Kai_Overlay", "askWithTools failed", e)
+                val detail = e.message ?: e.javaClass.simpleName
+                // Save to conversation context so "try again" retains history
+                conversationContext.add(text to "[API ERROR] $detail")
+                if (conversationContext.size > 10) {
+                    conversationContext.removeAt(0)
+                }
                 val errorMsg = ChatMessage(
                     id = Uuid.random().toString(),
                     role = "assistant",
-                    content = "Sorry, I couldn't process that: ${e.message}",
+                    content = "Sorry, I couldn't process that: $detail",
                 )
                 _messages.update { it + errorMsg }
             } finally {
@@ -84,5 +146,6 @@ class OverlayChatController(
 
     fun clearMessages() {
         _messages.value = emptyList()
+        conversationContext.clear()
     }
 }

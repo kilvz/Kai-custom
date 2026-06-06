@@ -124,8 +124,12 @@ class CalendarRepository(
             Log.d(TAG, "Permission already granted")
         }
 
-        val calendarId = if (defaultCalendarId > 0) defaultCalendarId else getPrimaryCalendarId()
-            ?: return CalendarResult.Error("No writable calendar found. Please set up a calendar account on your device.")
+        val calendarId = if (defaultCalendarId > 0) {
+            defaultCalendarId
+        } else {
+            getPrimaryCalendarId()
+                ?: return CalendarResult.Error("No writable calendar found. Please set up a calendar account on your device.")
+        }
 
         val startMillis: Long
         val endMillis: Long

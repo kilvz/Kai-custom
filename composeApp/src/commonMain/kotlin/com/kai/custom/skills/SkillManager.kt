@@ -47,12 +47,10 @@ class SkillManager(
 
     suspend fun installFromClawHub(slug: String): Result<SkillManifest> = registry.fetchClawHubSkill(slug).mapCatching { install(it) }
 
-    suspend fun installFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> {
-        return if (entry.slug != null) {
-            installFromClawHub(entry.slug)
-        } else {
-            installFromGitHub(entry.owner, entry.repo, entry.ref, entry.skillPath)
-        }
+    suspend fun installFromRegistryEntry(entry: RegistrySkillEntry): Result<SkillManifest> = if (entry.slug != null) {
+        installFromClawHub(entry.slug)
+    } else {
+        installFromGitHub(entry.owner, entry.repo, entry.ref, entry.skillPath)
     }
 
     suspend fun browseMarketplaces(): Result<List<RegistrySkillEntry>> = registry.browseMarketplaces(curatedSkillMarketplaces)

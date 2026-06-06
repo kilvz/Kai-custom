@@ -15,11 +15,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,11 +71,11 @@ import androidx.compose.ui.Alignment.Companion.BottomCenter
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draganddrop.DragAndDropEvent
 import androidx.compose.ui.draganddrop.DragAndDropTarget
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
@@ -84,11 +83,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kai.custom.BackIcon
-import com.kai.custom.TerminalLine
-import com.kai.custom.data.Service
-import com.kai.custom.data.supportsAgenticFlows
 import com.kai.custom.PttEvent
 import com.kai.custom.PttTriggerManager
+import com.kai.custom.TerminalLine
+import com.kai.custom.data.AppSettings
+import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.PersonaManager
+import com.kai.custom.data.Service
+import com.kai.custom.data.supportsAgenticFlows
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.onDragAndDropEventDropped
 import com.kai.custom.ui.chat.EditMessageDialog
@@ -131,8 +133,8 @@ import kai.composeapp.generated.resources.interactive_title
 import kai.composeapp.generated.resources.interactive_ui_parsing_failed
 import kai.composeapp.generated.resources.interactive_welcome_subtitle
 import kai.composeapp.generated.resources.interactive_welcome_title
-import kai.composeapp.generated.resources.tool_speak_text_name
 import kai.composeapp.generated.resources.scroll_to_bottom_content_description
+import kai.composeapp.generated.resources.tool_speak_text_name
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -141,11 +143,8 @@ import nl.marc_apps.tts.TextToSpeechInstance
 import nl.marc_apps.tts.errors.TextToSpeechSynthesisInterruptedError
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
-import com.kai.custom.data.AppSettings
-import com.kai.custom.data.BehaviorStyle
-import com.kai.custom.data.PersonaManager
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ChatScreen(
@@ -258,7 +257,11 @@ private fun InteractiveModeScreen(
     LaunchedEffect(Unit) {
         PttTriggerManager.events.collect { event ->
             when (event) {
-                PttEvent.DOWN -> { hasUsedPtt = true; onStartVoiceInput() }
+                PttEvent.DOWN -> {
+                    hasUsedPtt = true
+                    onStartVoiceInput()
+                }
+
                 PttEvent.UP -> onStopVoiceInput()
             }
         }
@@ -326,6 +329,7 @@ private fun InteractiveModeScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
+
                             hasAssistantResponse -> {
                                 val lastResponse = uiState.history.lastRenderedAssistant()?.content?.toSpeakableText().orEmpty()
                                 if (lastResponse.isNotEmpty()) {
@@ -339,6 +343,7 @@ private fun InteractiveModeScreen(
                                     )
                                 }
                             }
+
                             else -> {
                                 Text(
                                     text = stringResource(Res.string.interactive_welcome_title),
@@ -363,10 +368,10 @@ private fun InteractiveModeScreen(
                         addFile = uiState.actions.addFile,
                         removeFile = uiState.actions.removeFile,
                         ask = {
-                             inputExpanded = false
-                             hasUsedPtt = false
-                             uiState.actions.ask(it)
-                         },
+                            inputExpanded = false
+                            hasUsedPtt = false
+                            uiState.actions.ask(it)
+                        },
                         supportedFileExtensions = uiState.supportedFileExtensions,
                         textState = questionInputText,
                         onTextStateChange = { questionInputText = it },

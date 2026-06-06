@@ -3,11 +3,11 @@ package com.kai.custom.ui.settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -57,7 +57,6 @@ import com.kai.custom.SandboxSessions
 import com.kai.custom.data.DataRepository
 import com.kai.custom.decodeToImageBitmap
 import com.kai.custom.listCalendarAccounts
-import kotlin.io.encoding.Base64
 import com.kai.custom.ui.handCursor
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kai.composeapp.generated.resources.Res
@@ -69,6 +68,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.io.encoding.Base64
 
 @Composable
 internal fun IntegrationsContent(
@@ -151,7 +151,11 @@ private fun CalendarSection(dataRepository: DataRepository) {
     var selectedId by remember { mutableStateOf(dataRepository.getDefaultCalendarId()) }
     var expanded by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        accounts = try { listCalendarAccounts() } catch (_: SecurityException) { emptyList() }
+        accounts = try {
+            listCalendarAccounts()
+        } catch (_: SecurityException) {
+            emptyList()
+        }
         if (accounts.none { it.id == selectedId }) selectedId = -1L
     }
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -180,7 +184,9 @@ private fun CalendarSection(dataRepository: DataRepository) {
                     Text(
                         text = if (selectedId > 0) {
                             accounts.find { it.id == selectedId }?.displayName ?: "Calendar $selectedId"
-                        } else "Auto (primary calendar)",
+                        } else {
+                            "Auto (primary calendar)"
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),
                     )

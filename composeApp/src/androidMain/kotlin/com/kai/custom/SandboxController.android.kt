@@ -7,14 +7,13 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.mcp.AltMemoryLifecycleManager
 import com.kai.custom.mcp.McpServerManager
-
-import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.ProotExecutor
 import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SessionShell
 import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.resolveSandboxAbsolute
+import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -700,12 +699,15 @@ class AndroidSandboxController : SandboxController {
         }
         if (android.os.Build.VERSION.SDK_INT in 23..28) {
             val permissionGranted = androidx.core.content.ContextCompat.checkSelfPermission(
-                context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                context,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
             if (!permissionGranted) {
-                return@withContext Result.failure<SandboxController.BackupResult>(SecurityException(
-                    "Storage permission is required to save backups. Grant it in Settings → Apps → Kai → Permissions → Storage."
-                ))
+                return@withContext Result.failure<SandboxController.BackupResult>(
+                    SecurityException(
+                        "Storage permission is required to save backups. Grant it in Settings → Apps → Kai → Permissions → Storage.",
+                    ),
+                )
             }
         }
         val timestamp = System.currentTimeMillis()
@@ -716,8 +718,11 @@ class AndroidSandboxController : SandboxController {
         try {
             val rootfsParent = rootfs.parentFile?.absolutePath ?: rootfs.absolutePath
             val process = ProcessBuilder(
-                "tar", "-czf", tmpFile.absolutePath,
-                "-C", rootfsParent,
+                "tar",
+                "-czf",
+                tmpFile.absolutePath,
+                "-C",
+                rootfsParent,
                 rootfs.name,
             ).redirectErrorStream(true).start()
             val completed = process.waitFor(30, java.util.concurrent.TimeUnit.MINUTES)
@@ -794,8 +799,11 @@ class AndroidSandboxController : SandboxController {
             }
             rootfsParent.mkdirs()
             val process = ProcessBuilder(
-                "tar", "-xzf", tmpFile.absolutePath,
-                "-C", rootfsParent.absolutePath,
+                "tar",
+                "-xzf",
+                tmpFile.absolutePath,
+                "-C",
+                rootfsParent.absolutePath,
             ).redirectErrorStream(true).start()
             val completed = process.waitFor(30, java.util.concurrent.TimeUnit.MINUTES)
             if (!completed) {

@@ -6,12 +6,15 @@ import android.graphics.Outline
 import android.graphics.drawable.GradientDrawable
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -26,44 +29,42 @@ internal class FloatingChatView(
     context: Context,
     private val controller: OverlayChatController,
     private val onClose: () -> Unit = {},
+    private val onHeaderDrag: ((dx: Float, dy: Float) -> Unit)? = null,
+    private val onHeaderDragEnd: (() -> Unit)? = null,
 ) : FrameLayout(context) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     private val messagesContainer: LinearLayout
-    private val scrollView: ScrollView
-    private val loadingRow: LinearLayout
+    private val messagesScroll: ScrollView
     private val sendButton: TextView
     private val inputField: EditText
+    private val loadingRow: LinearLayout
 
     private val density = context.resources.displayMetrics.density
-    private val maxBubbleWidthPx = (context.resources.displayMetrics.widthPixels * 0.62f).toInt()
 
-    // Colors
-    private val surfaceBg = Color.parseColor("#1A1A2E")
-    private val headerStart = Color.parseColor("#2D5BFF")
-    private val headerEnd = Color.parseColor("#7B2FFF")
-    private val accentBlue = Color.parseColor("#4B8BFF")
-    private val inputBgColor = Color.parseColor("#2A2A45")
-    private val textPrimary = Color.parseColor("#F0F0F5")
-    private val textSecondary = Color.parseColor("#8888AA")
-    private val userBubbleStart = Color.parseColor("#3366FF")
-    private val userBubbleEnd = Color.parseColor("#7744FF")
-    private val assistantBubbleBg = Color.parseColor("#2A2A45")
+    private val surfaceBg = Color.parseColor("#1E1E1E")
+    private val headerStart = Color.parseColor("#1565C0")
+    private val headerEnd = Color.parseColor("#1E88E5")
+    private val accentBlue = Color.parseColor("#90CAF9")
+    private val inputBgColor = Color.parseColor("#2A2A2A")
+    private val textPrimary = Color.parseColor("#FFFFFF")
+    private val textSecondary = Color.parseColor("#9E9E9E")
+    private val userBubble = Color.parseColor("#1565C0")
+    private val assistantBubble = Color.parseColor("#2A2A2A")
     private val cornerRadiusPx = (20 * density)
 
     init {
-        val mp = ViewGroup.LayoutParams.MATCH_PARENT
-        val wc = ViewGroup.LayoutParams.WRAP_CONTENT
+        val mp = LinearLayout.LayoutParams.MATCH_PARENT
+        val wc = LinearLayout.LayoutParams.WRAP_CONTENT
 
-        // Outer container with rounded corners + shadow
         val outerCard = LinearLayout(context).apply {
             layoutParams = LinearLayout.LayoutParams(mp, mp)
             orientation = LinearLayout.VERTICAL
             val cardBg = GradientDrawable().apply {
                 setColor(surfaceBg)
                 cornerRadius = cornerRadiusPx
-                setStroke((1 * density).toInt(), Color.parseColor("#333355"))
+                setStroke((1 * density).toInt(), Color.parseColor("#333333"))
             }
             background = cardBg
             clipToOutline = true
@@ -85,83 +86,109 @@ internal class FloatingChatView(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 intArrayOf(headerStart, headerEnd),
             )
-            // Only round top corners
             headerBg.cornerRadii = floatArrayOf(
-                cornerRadiusPx, cornerRadiusPx, // top-left
-                cornerRadiusPx, cornerRadiusPx, // top-right
-                0f, 0f, // bottom-right
-                0f, 0f, // bottom-left
+                cornerRadiusPx,
+                cornerRadiusPx,
+                cornerRadiusPx,
+                cornerRadiusPx,
+                0f,
+                0f,
+                0f,
+                0f,
             )
             background = headerBg
             setPadding(dp(14), dp(12), dp(10), dp(12))
         }
+        var headerDragStartX = 0f
+        var headerDragStartY = 0f
+        header.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    headerDragStartX = event.x
+                    headerDragStartY = event.y
+                    v.parent.requestDisallowInterceptTouchEvent(true)
+                    true
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    val dx = event.x - headerDragStartX
+                    val dy = event.y - headerDragStartY
+                    if (Math.abs(dx) > 5f || Math.abs(dy) > 5f) {
+                        onHeaderDrag?.invoke(dx, dy)
+                        headerDragStartX = event.x
+                        headerDragStartY = event.y
+                    }
+                    true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    onHeaderDragEnd?.invoke()
+                    true
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    onHeaderDragEnd?.invoke()
+                    true
+                }
+
+                else -> false
+            }
+        }
         outerCard.addView(header)
 
-        // Kai icon circle
-        val iconCircle = FrameLayout(context).apply {
-            val iconSize = dp(28)
+        // Kai icon
+        val iconSize = dp(28)
+        val iconView = ImageView(context).apply {
             layoutParams = LinearLayout.LayoutParams(iconSize, iconSize).apply {
                 setMargins(0, 0, dp(10), 0)
             }
-            val circleBg = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(Color.parseColor("#FFFFFF30"))
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            isClickable = true
+            setOnClickListener {
+                controller.hide()
+                onClose()
             }
-            background = circleBg
         }
-        val iconLetter = TextView(context).apply {
-            text = "K"
-            setTextColor(Color.WHITE)
-            textSize = 14f
-            gravity = Gravity.CENTER
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            )
-            typeface = android.graphics.Typeface.DEFAULT_BOLD
-        }
-        iconCircle.addView(iconLetter)
-        header.addView(iconCircle)
+        try {
+            val iconRes = context.resources.getIdentifier("ic_launcher", "drawable", context.packageName)
+            if (iconRes != 0) iconView.setImageResource(iconRes)
+        } catch (_: Exception) {}
+        header.addView(iconView)
 
-        // Title
         TextView(context).apply {
-            text = "Kai"
+            text = controller.personaName
             setTextColor(Color.WHITE)
             textSize = 16f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             layoutParams = LinearLayout.LayoutParams(0, wc, 1f)
         }.also { header.addView(it) }
 
-        // Close button
-        TextView(context).apply {
-            text = "✕"
-            setTextColor(Color.parseColor("#FFFFFFCC"))
-            textSize = 16f
-            gravity = Gravity.CENTER
-            val closeSize = dp(32)
-            layoutParams = LinearLayout.LayoutParams(closeSize, closeSize)
-            val closeBg = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(Color.parseColor("#FFFFFF20"))
-            }
-            background = closeBg
-            setOnClickListener { controller.hide(); onClose() }
+        View(context).apply {
+            layoutParams = LinearLayout.LayoutParams(dp(32), dp(32))
         }.also { header.addView(it) }
 
-        // ── Messages area ──
-        scrollView = ScrollView(context).apply {
+        // ── Messages area (pure Views) ──
+        messagesScroll = ScrollView(context).apply {
             layoutParams = LinearLayout.LayoutParams(mp, 0, 1f)
-            setPadding(dp(10), dp(8), dp(10), dp(4))
-            isVerticalScrollBarEnabled = false
-            overScrollMode = View.OVER_SCROLL_NEVER
+            isVerticalScrollBarEnabled = true
         }
-        outerCard.addView(scrollView)
-
         messagesContainer = LinearLayout(context).apply {
-            layoutParams = ViewGroup.LayoutParams(mp, wc)
+            layoutParams = LinearLayout.LayoutParams(mp, wc)
             orientation = LinearLayout.VERTICAL
+            setPadding(dp(10), dp(8), dp(10), dp(8))
         }
-        scrollView.addView(messagesContainer)
+        messagesScroll.addView(messagesContainer)
+        outerCard.addView(messagesScroll)
+
+        // ── Empty state ──
+        val emptyText = TextView(context).apply {
+            text = "Ask about anything\non your screen"
+            setTextColor(textSecondary)
+            textSize = 14f
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(mp, dp(120))
+        }
+        messagesContainer.addView(emptyText)
 
         // ── Loading indicator ──
         loadingRow = LinearLayout(context).apply {
@@ -172,14 +199,13 @@ internal class FloatingChatView(
             gravity = Gravity.START or Gravity.CENTER_VERTICAL
             visibility = View.GONE
         }
-
         val loadingBubble = TextView(context).apply {
-            text = "Thinking…"
+            text = "Thinking\u2026"
             setTextColor(textSecondary)
             textSize = 12f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.ITALIC)
             val bg = GradientDrawable().apply {
-                setColor(assistantBubbleBg)
+                setColor(Color.parseColor("#2A2A2A"))
                 cornerRadius = dp(14).toFloat()
             }
             background = bg
@@ -193,7 +219,7 @@ internal class FloatingChatView(
             layoutParams = LinearLayout.LayoutParams(mp, dp(1)).apply {
                 setMargins(dp(12), 0, dp(12), 0)
             }
-            setBackgroundColor(Color.parseColor("#333355"))
+            setBackgroundColor(Color.parseColor("#333333"))
         }.also { outerCard.addView(it) }
 
         // ── Input row ──
@@ -205,9 +231,14 @@ internal class FloatingChatView(
             val bottomBg = GradientDrawable().apply {
                 setColor(surfaceBg)
                 cornerRadii = floatArrayOf(
-                    0f, 0f, 0f, 0f,
-                    cornerRadiusPx, cornerRadiusPx,
-                    cornerRadiusPx, cornerRadiusPx,
+                    0f,
+                    0f,
+                    0f,
+                    0f,
+                    cornerRadiusPx,
+                    cornerRadiusPx,
+                    cornerRadiusPx,
+                    cornerRadiusPx,
                 )
             }
             background = bottomBg
@@ -215,7 +246,7 @@ internal class FloatingChatView(
         outerCard.addView(inputContainer)
 
         inputField = EditText(context).apply {
-            hint = "Ask about your screen…"
+            hint = "Ask about your screen\u2026"
             setTextColor(textPrimary)
             setHintTextColor(textSecondary)
             textSize = 14f
@@ -226,16 +257,15 @@ internal class FloatingChatView(
             val inputBg = GradientDrawable().apply {
                 setColor(inputBgColor)
                 cornerRadius = dp(16).toFloat()
-                setStroke(dp(1), Color.parseColor("#3A3A5E"))
+                setStroke(dp(1), Color.parseColor("#3A3A3A"))
             }
             background = inputBg
             setPadding(dp(14), dp(10), dp(14), dp(10))
         }
         inputContainer.addView(inputField)
 
-        // Send button (circle with arrow)
         sendButton = TextView(context).apply {
-            text = "↑"
+            text = "\u2191"
             setTextColor(Color.WHITE)
             textSize = 18f
             gravity = Gravity.CENTER
@@ -266,10 +296,10 @@ internal class FloatingChatView(
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // ── Observe state ──
+        // ── Observe messages ──
         scope.launch {
-            controller.messages.collectLatest { messages ->
-                updateMessages(messages)
+            controller.messages.collectLatest { msgs ->
+                rebuildMessages(msgs)
             }
         }
         scope.launch {
@@ -279,7 +309,6 @@ internal class FloatingChatView(
                     sendButton.isEnabled = false
                     sendButton.alpha = 0.4f
                     updateSendButtonBg(sendButton, false)
-                    scrollView.post { scrollView.fullScroll(View.FOCUS_DOWN) }
                 } else {
                     val hasText = inputField.text.isNotBlank()
                     sendButton.isEnabled = hasText
@@ -290,103 +319,94 @@ internal class FloatingChatView(
         }
     }
 
+    private fun rebuildMessages(msgs: List<ChatMessage>) {
+        messagesContainer.removeAllViews()
+        if (msgs.isEmpty()) {
+            val emptyText = TextView(context).apply {
+                text = "Ask about anything\non your screen"
+                setTextColor(textSecondary)
+                textSize = 14f
+                gravity = Gravity.CENTER
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    dp(120),
+                )
+            }
+            messagesContainer.addView(emptyText)
+            return
+        }
+        for (msg in msgs) {
+            val isUser = msg.role == "user"
+            val bubble = createBubble(msg.content, isUser)
+            messagesContainer.addView(bubble)
+        }
+        messagesScroll.post { messagesScroll.fullScroll(View.FOCUS_DOWN) }
+    }
+
+    private fun createBubble(msgText: String, isUser: Boolean): View {
+        val wc = LinearLayout.LayoutParams.WRAP_CONTENT
+        val lp = if (isUser) {
+            LinearLayout.LayoutParams(wc, wc).apply {
+                gravity = Gravity.END
+                setMargins(dp(40), dp(3), 0, dp(3))
+            }
+        } else {
+            LinearLayout.LayoutParams(wc, wc).apply {
+                gravity = Gravity.START
+                setMargins(0, dp(3), dp(40), dp(3))
+            }
+        }
+
+        val shape = GradientDrawable().apply {
+            if (isUser) {
+                setColor(userBubble)
+                cornerRadii = floatArrayOf(
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(4).toFloat(),
+                    dp(4).toFloat(),
+                )
+            } else {
+                setColor(assistantBubble)
+                cornerRadii = floatArrayOf(
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                    dp(4).toFloat(),
+                    dp(4).toFloat(),
+                    dp(16).toFloat(),
+                    dp(16).toFloat(),
+                )
+            }
+        }
+
+        val tv = TextView(context)
+        tv.layoutParams = lp
+        tv.text = msgText
+        tv.setTextColor(textPrimary)
+        tv.textSize = 13.5f
+        tv.setPadding(dp(14), dp(9), dp(14), dp(9))
+        tv.background = shape
+        tv.movementMethod = ScrollingMovementMethod()
+        tv.maxWidth = dp(300)
+        return tv
+    }
+
     private fun updateSendButtonBg(view: TextView, active: Boolean) {
         val bg = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
             if (active) {
                 setColor(accentBlue)
             } else {
-                setColor(Color.parseColor("#3A3A5E"))
+                setColor(Color.parseColor("#3A3A3A"))
             }
         }
         view.background = bg
-    }
-
-    private fun updateMessages(messages: List<ChatMessage>) {
-        messagesContainer.removeAllViews()
-        if (messages.isEmpty()) {
-            val emptyContainer = LinearLayout(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                )
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setPadding(dp(16), dp(40), dp(16), dp(40))
-            }
-
-            // Icon
-            TextView(context).apply {
-                text = "💬"
-                textSize = 28f
-                gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                ).apply { setMargins(0, 0, 0, dp(8)) }
-            }.also { emptyContainer.addView(it) }
-
-            // Text
-            TextView(context).apply {
-                text = "Ask about anything\non your screen"
-                setTextColor(textSecondary)
-                textSize = 14f
-                gravity = Gravity.CENTER
-                layoutParams = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                )
-            }.also { emptyContainer.addView(it) }
-
-            messagesContainer.addView(emptyContainer)
-        } else {
-            for (msg in messages) {
-                messagesContainer.addView(createBubble(msg))
-            }
-        }
-        scrollView.post { scrollView.fullScroll(View.FOCUS_DOWN) }
-    }
-
-    private fun createBubble(msg: ChatMessage): View {
-        val isUser = msg.role == "user"
-        val wrapper = FrameLayout(context).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                setMargins(0, dp(3), 0, dp(3))
-            }
-        }
-
-        val bubble = TextView(context).apply {
-            text = msg.content
-            setTextColor(if (isUser) Color.WHITE else textPrimary)
-            textSize = 13.5f
-            setLineSpacing(dp(2).toFloat(), 1f)
-            setPadding(dp(14), dp(9), dp(14), dp(9))
-
-            val bg = GradientDrawable()
-            val r = dp(16).toFloat()
-            if (isUser) {
-                bg.colors = intArrayOf(userBubbleStart, userBubbleEnd)
-                bg.orientation = GradientDrawable.Orientation.TL_BR
-                bg.cornerRadii = floatArrayOf(r, r, r, r, dp(4).toFloat(), dp(4).toFloat(), r, r)
-            } else {
-                bg.setColor(assistantBubbleBg)
-                bg.cornerRadii = floatArrayOf(r, r, r, r, r, r, dp(4).toFloat(), dp(4).toFloat())
-            }
-            background = bg
-            maxWidth = maxBubbleWidthPx
-
-            layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            ).apply {
-                gravity = if (isUser) Gravity.END else Gravity.START
-            }
-        }
-        wrapper.addView(bubble)
-        return wrapper
     }
 
     private fun dp(value: Int): Int = (value * density).toInt()

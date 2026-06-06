@@ -522,47 +522,75 @@ class AppSettings(internal val settings: Settings) {
 
     // WhatsApp Bridge (Baileys MCP via proot sandbox)
     fun isWhatsAppEnabled(): Boolean = settings.getBoolean(KEY_WHATSAPP_ENABLED, false)
-    fun setWhatsAppEnabled(enabled: Boolean) { settings.putBoolean(KEY_WHATSAPP_ENABLED, enabled) }
+    fun setWhatsAppEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_WHATSAPP_ENABLED, enabled)
+    }
 
     fun isWhatsAppInstalled(): Boolean = settings.getBoolean(KEY_WHATSAPP_INSTALLED, false)
-    fun setWhatsAppInstalled(installed: Boolean) { settings.putBoolean(KEY_WHATSAPP_INSTALLED, installed) }
+    fun setWhatsAppInstalled(installed: Boolean) {
+        settings.putBoolean(KEY_WHATSAPP_INSTALLED, installed)
+    }
 
     fun isWhatsAppAuthenticated(): Boolean = settings.getBoolean(KEY_WHATSAPP_AUTHENTICATED, false)
-    fun setWhatsAppAuthenticated(auth: Boolean) { settings.putBoolean(KEY_WHATSAPP_AUTHENTICATED, auth) }
+    fun setWhatsAppAuthenticated(auth: Boolean) {
+        settings.putBoolean(KEY_WHATSAPP_AUTHENTICATED, auth)
+    }
 
     fun getWhatsAppQrCode(): String = settings.getString(KEY_WHATSAPP_QR_CODE, "")
-    fun setWhatsAppQrCode(qr: String) { settings.putString(KEY_WHATSAPP_QR_CODE, qr) }
+    fun setWhatsAppQrCode(qr: String) {
+        settings.putString(KEY_WHATSAPP_QR_CODE, qr)
+    }
 
     fun getWhatsAppPendingJson(): String = settings.getString(KEY_WHATSAPP_PENDING, "")
-    fun setWhatsAppPendingJson(json: String) { settings.putString(KEY_WHATSAPP_PENDING, json) }
+    fun setWhatsAppPendingJson(json: String) {
+        settings.putString(KEY_WHATSAPP_PENDING, json)
+    }
 
     fun isWhatsAppReadOnly(): Boolean = settings.getBoolean(KEY_WHATSAPP_READ_ONLY, true)
-    fun setWhatsAppReadOnly(readOnly: Boolean) { settings.putBoolean(KEY_WHATSAPP_READ_ONLY, readOnly) }
+    fun setWhatsAppReadOnly(readOnly: Boolean) {
+        settings.putBoolean(KEY_WHATSAPP_READ_ONLY, readOnly)
+    }
 
     fun getWhatsAppReplyMode(): String = settings.getString(KEY_WHATSAPP_REPLY_MODE, "all")
-    fun setWhatsAppReplyMode(mode: String) { settings.putString(KEY_WHATSAPP_REPLY_MODE, mode) }
+    fun setWhatsAppReplyMode(mode: String) {
+        settings.putString(KEY_WHATSAPP_REPLY_MODE, mode)
+    }
 
     fun getWhatsAppAllowedContacts(): String = settings.getString(KEY_WHATSAPP_ALLOWED_CONTACTS, "")
-    fun setWhatsAppAllowedContacts(contacts: String) { settings.putString(KEY_WHATSAPP_ALLOWED_CONTACTS, contacts) }
+    fun setWhatsAppAllowedContacts(contacts: String) {
+        settings.putString(KEY_WHATSAPP_ALLOWED_CONTACTS, contacts)
+    }
 
     fun isWhatsAppReadReceipt(): Boolean = settings.getBoolean(KEY_WHATSAPP_READ_RECEIPT, false)
-    fun setWhatsAppReadReceipt(enabled: Boolean) { settings.putBoolean(KEY_WHATSAPP_READ_RECEIPT, enabled) }
+    fun setWhatsAppReadReceipt(enabled: Boolean) {
+        settings.putBoolean(KEY_WHATSAPP_READ_RECEIPT, enabled)
+    }
 
     // Baileys connection config
     fun getBaileysBrowserName(): String = settings.getString(KEY_BAILEYS_BROWSER_NAME, "Windows")
-    fun setBaileysBrowserName(v: String) { settings.putString(KEY_BAILEYS_BROWSER_NAME, v) }
+    fun setBaileysBrowserName(v: String) {
+        settings.putString(KEY_BAILEYS_BROWSER_NAME, v)
+    }
 
     fun getBaileysBrowserVersion(): String = settings.getString(KEY_BAILEYS_BROWSER_VERSION, "130.0.0.0")
-    fun setBaileysBrowserVersion(v: String) { settings.putString(KEY_BAILEYS_BROWSER_VERSION, v) }
+    fun setBaileysBrowserVersion(v: String) {
+        settings.putString(KEY_BAILEYS_BROWSER_VERSION, v)
+    }
 
     fun getBaileysMarkOnline(): Boolean = settings.getBoolean(KEY_BAILEYS_MARK_ONLINE, true)
-    fun setBaileysMarkOnline(v: Boolean) { settings.putBoolean(KEY_BAILEYS_MARK_ONLINE, v) }
+    fun setBaileysMarkOnline(v: Boolean) {
+        settings.putBoolean(KEY_BAILEYS_MARK_ONLINE, v)
+    }
 
     fun getBaileysSyncHistory(): Boolean = settings.getBoolean(KEY_BAILEYS_SYNC_HISTORY, false)
-    fun setBaileysSyncHistory(v: Boolean) { settings.putBoolean(KEY_BAILEYS_SYNC_HISTORY, v) }
+    fun setBaileysSyncHistory(v: Boolean) {
+        settings.putBoolean(KEY_BAILEYS_SYNC_HISTORY, v)
+    }
 
     fun getBaileysLinkPreviews(): Boolean = settings.getBoolean(KEY_BAILEYS_LINK_PREVIEWS, true)
-    fun setBaileysLinkPreviews(v: Boolean) { settings.putBoolean(KEY_BAILEYS_LINK_PREVIEWS, v) }
+    fun setBaileysLinkPreviews(v: Boolean) {
+        settings.putBoolean(KEY_BAILEYS_LINK_PREVIEWS, v)
+    }
 
     // SSH connection
     fun isSshEnabled(): Boolean = settings.getBoolean(KEY_SSH_ENABLED, true)

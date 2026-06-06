@@ -20,7 +20,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-
 class WhatsAppLifecycleManager(
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
@@ -34,6 +33,7 @@ class WhatsAppLifecycleManager(
     }
 
     @Volatile private var started = false
+
     @Volatile private var connected = false
     private var retryJob: Job? = null
     private var setupJob: Job? = null
@@ -158,9 +158,12 @@ class WhatsAppLifecycleManager(
     suspend fun requestPairingCode(phone: String): String? {
         try {
             val client = mcpServerManager.getClient(SERVER_ID) ?: return null
-            val resultStr = client.callTool("request_pairing_code", buildJsonObject {
-                put("phone", JsonPrimitive(phone))
-            })
+            val resultStr = client.callTool(
+                "request_pairing_code",
+                buildJsonObject {
+                    put("phone", JsonPrimitive(phone))
+                },
+            )
             if (resultStr.isBlank()) return null
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
             // Check for error responses from the bridge
@@ -245,17 +248,18 @@ class WhatsAppLifecycleManager(
      * Delegates to SandboxController.installWhatsAppBridge() which has the
      * canonical install pipeline (Node.js download, npm install, verification).
      */
-    private suspend fun installIfNeeded(): Boolean {
-        return sandboxController.installWhatsAppBridge()
-    }
+    private suspend fun installIfNeeded(): Boolean = sandboxController.installWhatsAppBridge()
 
     private suspend fun writeBridgeConfig() {
         val configJson = buildJsonObject {
-            put("browser", buildJsonArray {
-                add(JsonPrimitive(appSettings.getBaileysBrowserName()))
-                add(JsonPrimitive("Chrome"))
-                add(JsonPrimitive(appSettings.getBaileysBrowserVersion()))
-            })
+            put(
+                "browser",
+                buildJsonArray {
+                    add(JsonPrimitive(appSettings.getBaileysBrowserName()))
+                    add(JsonPrimitive("Chrome"))
+                    add(JsonPrimitive(appSettings.getBaileysBrowserVersion()))
+                },
+            )
             put("markOnlineOnConnect", JsonPrimitive(appSettings.getBaileysMarkOnline()))
             put("syncFullHistory", JsonPrimitive(appSettings.getBaileysSyncHistory()))
             put("generateHighQualityLinkPreview", JsonPrimitive(appSettings.getBaileysLinkPreviews()))

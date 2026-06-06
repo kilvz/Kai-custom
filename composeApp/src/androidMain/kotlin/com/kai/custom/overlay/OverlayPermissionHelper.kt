@@ -7,8 +7,7 @@ import android.provider.Settings
 
 object OverlayPermissionHelper {
 
-    fun canDrawOverlays(context: Context): Boolean =
-        Settings.canDrawOverlays(context)
+    fun canDrawOverlays(context: Context): Boolean = Settings.canDrawOverlays(context)
 
     fun openOverlaySettings(context: Context) {
         val intent = Intent(

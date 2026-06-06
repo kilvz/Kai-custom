@@ -37,22 +37,20 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.svg.SvgDecoder
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ThemeMode
-import org.koin.core.module.Module
-import org.koin.dsl.module
+import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationPermissionController
+import com.kai.custom.tools.SetupActivityResultHandler
 import com.kai.custom.tools.SetupCalendarPermissionHandler
 import com.kai.custom.tools.SetupMicrophonePermissionHandler
 import com.kai.custom.tools.SetupNotificationPermissionHandler
 import com.kai.custom.tools.SetupSmsPermissionHandler
 import com.kai.custom.tools.SetupSmsSendPermissionHandler
+import com.kai.custom.tools.SetupToolPermissionHandler
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
-import com.kai.custom.tools.SetupToolPermissionHandler
 import com.kai.custom.tools.ToolPermissionBridge
-import com.kai.custom.tools.SetupActivityResultHandler
-import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.ui.DarkColorScheme
 import com.kai.custom.ui.LightColorScheme
 import com.kai.custom.ui.Theme
@@ -75,7 +73,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.module.Module
 import org.koin.dsl.koinConfiguration
+import org.koin.dsl.module
 
 @Serializable
 @SerialName("home")

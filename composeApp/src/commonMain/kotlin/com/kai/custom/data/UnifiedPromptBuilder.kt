@@ -63,9 +63,7 @@ internal const val DEFAULT_AUTOMATION_SECTION =
 // ─── Persona Sections ────────────────────────────────────────────
 
 internal class SoulIdentitySection : PersonaSection {
-    override fun build(context: PromptContext): String {
-        return context.soul
-    }
+    override fun build(context: PromptContext): String = context.soul
 }
 
 internal class CorePersonalitySection(private val defaultSoul: String) : PersonaSection {
@@ -76,9 +74,7 @@ internal class CorePersonalitySection(private val defaultSoul: String) : Persona
 }
 
 internal class HonestyRuleSection : PersonaSection {
-    override fun build(context: PromptContext): String? {
-        return DEFAULT_HONESTY_RULE
-    }
+    override fun build(context: PromptContext): String? = DEFAULT_HONESTY_RULE
 }
 
 internal class LanguageSection : PersonaSection {
@@ -94,72 +90,57 @@ internal class ToolUseSection : TechnicalSection {
     override val id = "tool_use"
     override fun shouldInclude(context: PromptContext): Boolean = context.hasTools
 
-    override fun build(context: PromptContext): String {
-        return if (context.renderMode == RenderMode.UPSTREAM_COMPAT) {
-            DEFAULT_TOOL_USE_SECTION + "\n\n" + DEFAULT_ACTING_SECTION
-        } else {
-            "## Tool Use\nUse tools to verify work and resolve ambiguity. Don't ask the user for lookups you can do yourself. Check available tools in the tools array before saying a capability is unavailable. Summarize noisy output instead of dumping raw logs."
-        }
+    override fun build(context: PromptContext): String = if (context.renderMode == RenderMode.UPSTREAM_COMPAT) {
+        DEFAULT_TOOL_USE_SECTION + "\n\n" + DEFAULT_ACTING_SECTION
+    } else {
+        "## Tool Use\nUse tools to verify work and resolve ambiguity. Don't ask the user for lookups you can do yourself. Check available tools in the tools array before saying a capability is unavailable. Summarize noisy output instead of dumping raw logs."
     }
 }
 
 internal class MemorySystemSection : TechnicalSection {
     override val id = "memory_system"
-    override fun shouldInclude(context: PromptContext): Boolean =
-        context.memoryEnabled && context.variant == SystemPromptVariant.CHAT_REMOTE
+    override fun shouldInclude(context: PromptContext): Boolean = context.memoryEnabled && context.variant == SystemPromptVariant.CHAT_REMOTE
 
-    override fun build(context: PromptContext): String {
-        return if (context.renderMode == RenderMode.UPSTREAM_COMPAT) {
-            DEFAULT_STRUCTURED_LEARNING_SECTION
-        } else {
-            "## Memory System\n" +
-                "Use memory_store to record user preferences, corrections, project facts, decisions, fixes that worked, and error resolutions.\n" +
-                "Use memory_learn to record categorized learnings (PREFERENCE, LEARNING, ERROR).\n" +
-                "Use memory_reinforce when a stored learning produces a good outcome.\n" +
-                "Search memory with memory_search before re-solving recurring problems or asking the user to repeat known facts.\n" +
-                "Do not store transient chatter, guesses, secrets, or one-off noise.\n" +
-                "If memory conflicts with current evidence or user correction, trust the current evidence/user and update memory."
-        }
+    override fun build(context: PromptContext): String = if (context.renderMode == RenderMode.UPSTREAM_COMPAT) {
+        DEFAULT_STRUCTURED_LEARNING_SECTION
+    } else {
+        "## Memory System\n" +
+            "Use memory_store to record user preferences, corrections, project facts, decisions, fixes that worked, and error resolutions.\n" +
+            "Use memory_learn to record categorized learnings (PREFERENCE, LEARNING, ERROR).\n" +
+            "Use memory_reinforce when a stored learning produces a good outcome.\n" +
+            "Search memory with memory_search before re-solving recurring problems or asking the user to repeat known facts.\n" +
+            "Do not store transient chatter, guesses, secrets, or one-off noise.\n" +
+            "If memory conflicts with current evidence or user correction, trust the current evidence/user and update memory."
     }
 }
 
 internal class MemorySearchGuidanceSection : TechnicalSection {
     override val id = "memory_search_guidance"
-    override fun shouldInclude(context: PromptContext): Boolean =
-        context.memoryEnabled && context.renderMode != RenderMode.UPSTREAM_COMPAT
+    override fun shouldInclude(context: PromptContext): Boolean = context.memoryEnabled && context.renderMode != RenderMode.UPSTREAM_COMPAT
 
-    override fun build(context: PromptContext): String {
-        return "When you don't know something or need information, first search your memory with search_memories (supports vector/semantic and keyword matching). If not found, search the internet with web_search. Save what you learn with memory_store."
-    }
+    override fun build(context: PromptContext): String = "When you don't know something or need information, first search your memory with search_memories (supports vector/semantic and keyword matching). If not found, search the internet with web_search. Save what you learn with memory_store."
 }
 
 internal class AutomationSection : TechnicalSection {
     override val id = "automation"
-    override fun shouldInclude(context: PromptContext): Boolean =
-        context.schedulingEnabled && context.variant == SystemPromptVariant.CHAT_REMOTE
+    override fun shouldInclude(context: PromptContext): Boolean = context.schedulingEnabled && context.variant == SystemPromptVariant.CHAT_REMOTE
 
-    override fun build(context: PromptContext): String {
-        return DEFAULT_AUTOMATION_SECTION
-    }
+    override fun build(context: PromptContext): String = DEFAULT_AUTOMATION_SECTION
 }
 
 internal class EmailPolicySection : TechnicalSection {
     override val id = "email_policy"
-    override fun shouldInclude(context: PromptContext): Boolean =
-        context.emailAccounts.isNotEmpty() && context.variant == SystemPromptVariant.CHAT_REMOTE
+    override fun shouldInclude(context: PromptContext): Boolean = context.emailAccounts.isNotEmpty() && context.variant == SystemPromptVariant.CHAT_REMOTE
 
-    override fun build(context: PromptContext): String {
-        return "## Email Policy\n" +
-            "Before calling compose_email or reply_email, present the full draft (to, subject, body) in chat and get explicit confirmation.\n" +
-            "Never call send tools on the same turn you draft \u2014 the user must have a chance to correct."
-    }
+    override fun build(context: PromptContext): String = "## Email Policy\n" +
+        "Before calling compose_email or reply_email, present the full draft (to, subject, body) in chat and get explicit confirmation.\n" +
+        "Never call send tools on the same turn you draft \u2014 the user must have a chance to correct."
 }
 
 internal class IntegrationStatusSection : TechnicalSection {
     override val id = "integration_status"
-    override fun shouldInclude(context: PromptContext): Boolean =
-        context.variant == SystemPromptVariant.CHAT_REMOTE &&
-            (context.emailAccounts.isNotEmpty() || context.pendingTasks.isNotEmpty() || context.heartbeatAdditions.isNotEmpty())
+    override fun shouldInclude(context: PromptContext): Boolean = context.variant == SystemPromptVariant.CHAT_REMOTE &&
+        (context.emailAccounts.isNotEmpty() || context.pendingTasks.isNotEmpty() || context.heartbeatAdditions.isNotEmpty())
 
     override fun build(context: PromptContext): String {
         val sb = StringBuilder()
@@ -214,40 +195,39 @@ internal class ContextSection : TechnicalSection {
 
 internal class DynamicUiSection : TechnicalSection {
     override val id = "dynamic_ui"
-    override fun shouldInclude(context: PromptContext): Boolean =
-        context.variant == SystemPromptVariant.CHAT_REMOTE && context.uiMode != ChatPromptUiMode.NONE
+    override fun shouldInclude(context: PromptContext): Boolean = context.variant == SystemPromptVariant.CHAT_REMOTE && context.uiMode != ChatPromptUiMode.NONE
 
-    override fun build(context: PromptContext): String {
-        return when (context.uiMode) {
-            ChatPromptUiMode.DYNAMIC_UI -> {
-                val sb = StringBuilder()
-                sb.append("## Dynamic UI\n")
-                sb.append("You can enhance your chat responses with interactive UI elements using kai-ui blocks. Proactively use them whenever you need input from the user.\n\n")
-                sb.append(KAI_UI_COMPONENT_CATALOG)
-                sb.append("Layout tips:\n")
-                sb.append("- Put buttons INSIDE cards, directly below related content\n")
-                sb.append("- Use rows for groups of buttons or chips \u2014 rows wrap automatically\n")
-                sb.append("- Keep button labels short (1-3 words)\n\n")
-                sb.append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Your name?\",\"style\":\"title\"},{\"type\":\"text_input\",\"id\":\"name\",\"placeholder\":\"Enter name\"},{\"type\":\"button\",\"label\":\"Submit\",\"action\":{\"type\":\"callback\",\"event\":\"submit\",\"collectFrom\":[\"name\"]}}]}\n```\n")
-                sb.toString()
-            }
-            ChatPromptUiMode.INTERACTIVE_UI -> {
-                val sb = StringBuilder()
-                sb.append("## Interactive UI Mode (ACTIVE)\n")
-                sb.append("The user ONLY sees rendered kai-ui components. Your ENTIRE response must be a single ```kai-ui code fence.\n\n")
-                sb.append(KAI_UI_COMPONENT_CATALOG)
-                sb.append("Rules:\n")
-                sb.append("- Each response is a COMPLETE screen layout.\n")
-                sb.append("- Every screen MUST have at least one interactive element with a callback action.\n")
-                sb.append("- Use callbacks for collecting choices, submitting forms, navigating between steps.\n")
-                sb.append("- Do NOT include back buttons or navigation controls.\n")
-                sb.append("- Never show loading/fetching states \u2014 present all content immediately.\n")
-                sb.append("- Each screen is independent. No client-side state persistence.\n\n")
-                sb.append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Welcome\",\"style\":\"headline\"},{\"type\":\"card\",\"children\":[{\"type\":\"text\",\"value\":\"What would you like to do?\",\"style\":\"title\"},{\"type\":\"button\",\"label\":\"Get Started\",\"action\":{\"type\":\"callback\",\"event\":\"get_started\"}}]}]}\n```\n")
-                sb.toString()
-            }
-            ChatPromptUiMode.NONE -> ""
+    override fun build(context: PromptContext): String = when (context.uiMode) {
+        ChatPromptUiMode.DYNAMIC_UI -> {
+            val sb = StringBuilder()
+            sb.append("## Dynamic UI\n")
+            sb.append("You can enhance your chat responses with interactive UI elements using kai-ui blocks. Proactively use them whenever you need input from the user.\n\n")
+            sb.append(KAI_UI_COMPONENT_CATALOG)
+            sb.append("Layout tips:\n")
+            sb.append("- Put buttons INSIDE cards, directly below related content\n")
+            sb.append("- Use rows for groups of buttons or chips \u2014 rows wrap automatically\n")
+            sb.append("- Keep button labels short (1-3 words)\n\n")
+            sb.append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Your name?\",\"style\":\"title\"},{\"type\":\"text_input\",\"id\":\"name\",\"placeholder\":\"Enter name\"},{\"type\":\"button\",\"label\":\"Submit\",\"action\":{\"type\":\"callback\",\"event\":\"submit\",\"collectFrom\":[\"name\"]}}]}\n```\n")
+            sb.toString()
         }
+
+        ChatPromptUiMode.INTERACTIVE_UI -> {
+            val sb = StringBuilder()
+            sb.append("## Interactive UI Mode (ACTIVE)\n")
+            sb.append("The user ONLY sees rendered kai-ui components. Your ENTIRE response must be a single ```kai-ui code fence.\n\n")
+            sb.append(KAI_UI_COMPONENT_CATALOG)
+            sb.append("Rules:\n")
+            sb.append("- Each response is a COMPLETE screen layout.\n")
+            sb.append("- Every screen MUST have at least one interactive element with a callback action.\n")
+            sb.append("- Use callbacks for collecting choices, submitting forms, navigating between steps.\n")
+            sb.append("- Do NOT include back buttons or navigation controls.\n")
+            sb.append("- Never show loading/fetching states \u2014 present all content immediately.\n")
+            sb.append("- Each screen is independent. No client-side state persistence.\n\n")
+            sb.append("Example:\n```kai-ui\n{\"type\":\"column\",\"children\":[{\"type\":\"text\",\"value\":\"Welcome\",\"style\":\"headline\"},{\"type\":\"card\",\"children\":[{\"type\":\"text\",\"value\":\"What would you like to do?\",\"style\":\"title\"},{\"type\":\"button\",\"label\":\"Get Started\",\"action\":{\"type\":\"callback\",\"event\":\"get_started\"}}]}]}\n```\n")
+            sb.toString()
+        }
+
+        ChatPromptUiMode.NONE -> ""
     }
 }
 
@@ -256,9 +236,7 @@ internal class DynamicUiSection : TechnicalSection {
 internal class RelevantMemoryDumpAdapter : TaskAdapter {
     override val id = "memory_dump"
 
-    override fun shouldActivate(domains: Set<TaskDomain>): Boolean {
-        return domains.any { it != TaskDomain.GENERAL_CHAT } || TaskDomain.MEMORY_QUERY in domains
-    }
+    override fun shouldActivate(domains: Set<TaskDomain>): Boolean = domains.any { it != TaskDomain.GENERAL_CHAT } || TaskDomain.MEMORY_QUERY in domains
 
     override fun build(context: PromptContext): String? {
         if (!context.memoryEnabled) return null
@@ -322,8 +300,7 @@ internal class RelevantMemoryDumpAdapter : TaskAdapter {
 internal class ActiveFileContextAdapter : TaskAdapter {
     override val id = "file_context"
 
-    override fun shouldActivate(domains: Set<TaskDomain>): Boolean =
-        TaskDomain.FILE_OPERATION in domains
+    override fun shouldActivate(domains: Set<TaskDomain>): Boolean = TaskDomain.FILE_OPERATION in domains
 
     override fun build(context: PromptContext): String? {
         if (context.attachedFiles.isEmpty()) return null

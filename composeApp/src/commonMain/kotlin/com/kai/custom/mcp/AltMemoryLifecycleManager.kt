@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
-
 class AltMemoryLifecycleManager(
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
@@ -28,6 +27,7 @@ class AltMemoryLifecycleManager(
         private const val ALT_MEMORY_URL = "http://127.0.0.1:8316/mcp"
         private const val SERVER_ID = "alt_memory"
         private const val MCP_SESSION_ID = "__alt_memory__"
+
         /** How often to re-check whether the MCP server has come up. */
         private const val RETRY_INTERVAL_MS = 10_000L
     }
@@ -249,5 +249,4 @@ class AltMemoryLifecycleManager(
             timeoutSeconds = 5,
         )
     }
-
 }

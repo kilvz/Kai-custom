@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.kai.custom.data.AppSettings
 import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
@@ -49,11 +50,9 @@ import com.kai.custom.data.ServiceEntry
 import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.TaskTrigger
 import com.kai.custom.saveFileToDevice
-import com.kai.custom.data.AppSettings
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.SettingsListItem
 import com.kai.custom.ui.handCursor
-import org.koin.compose.koinInject
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
@@ -97,6 +96,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import kotlin.time.Instant
 
 @Composable
@@ -179,23 +179,23 @@ internal fun AgentContent(
                         )
                     }
                     SettingsCard {
-                MemoryList(
-                        memories = memories,
-                        onDeleteMemory = actions.onDeleteMemory,
-                        onUpdateMemory = actions.onUpdateMemory,
-                        isMemoryEnabled = isMemoryEnabled,
-                        isAltMemoryEnabled = isAltMemoryEnabled,
-                        altMemoryInstalled = altMemoryInstalled,
-                        altMemoryConnected = altMemoryConnected,
-                        altMemoryBackend = altMemoryBackend,
-                        altMemoryEmbedder = altMemoryEmbedder,
-                        sandboxReady = sandboxReady,
-                        onToggleMemory = actions.onToggleMemory,
-                        onToggleAltMemory = onToggleAltMemory,
-                        onExportDimension = actions.onExportDimension,
-                        onImportDimension = actions.onImportDimension,
-                    )
-                }
+                        MemoryList(
+                            memories = memories,
+                            onDeleteMemory = actions.onDeleteMemory,
+                            onUpdateMemory = actions.onUpdateMemory,
+                            isMemoryEnabled = isMemoryEnabled,
+                            isAltMemoryEnabled = isAltMemoryEnabled,
+                            altMemoryInstalled = altMemoryInstalled,
+                            altMemoryConnected = altMemoryConnected,
+                            altMemoryBackend = altMemoryBackend,
+                            altMemoryEmbedder = altMemoryEmbedder,
+                            sandboxReady = sandboxReady,
+                            onToggleMemory = actions.onToggleMemory,
+                            onToggleAltMemory = onToggleAltMemory,
+                            onExportDimension = actions.onExportDimension,
+                            onImportDimension = actions.onImportDimension,
+                        )
+                    }
                     SettingsCard {
                         ScheduledTaskList(
                             tasks = scheduledTasks,
