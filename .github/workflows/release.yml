@@ -186,7 +186,7 @@ jobs:
       - name: Create tarball
         run: |
           cd composeApp/build/compose/binaries/main-release/app
-          tar czf "$GITHUB_WORKSPACE/k.ai-linux-x86_64.tar.gz" Kai
+          tar czf "$GITHUB_WORKSPACE/k.ai-linux-x86_64.tar.gz" k.ai
       - name: Upload Tarball Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -225,16 +225,16 @@ jobs:
           mkdir -p AppDir/usr/share/applications
           mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
 
-          cp -r composeApp/build/compose/binaries/main-release/app/Kai/* AppDir/usr/lib/
+          cp -r composeApp/build/compose/binaries/main-release/app/k.ai/* AppDir/usr/lib/
 
           cp composeApp/icon.png AppDir/usr/share/icons/hicolor/256x256/apps/kai.png
           cp composeApp/icon.png AppDir/kai.png
 
           cat > AppDir/kai.desktop << 'EOF'
           [Desktop Entry]
-          Name=Kai
+          Name=k.ai
           Comment=AI Assistant Application
-          Exec=kai
+          Exec=k.ai
           Icon=kai
           Type=Application
           Categories=Utility;
@@ -248,7 +248,7 @@ jobs:
           HERE=${SELF%/*}
           export PATH="${HERE}/usr/lib/bin:${PATH}"
           export LD_LIBRARY_PATH="${HERE}/usr/lib/lib/runtime/lib:${LD_LIBRARY_PATH}"
-          exec "${HERE}/usr/lib/bin/Kai" "$@"
+          exec "${HERE}/usr/lib/bin/k.ai" "$@"
           EOF
           chmod +x AppDir/AppRun
       - name: Build AppImage
