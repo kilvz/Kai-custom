@@ -35,6 +35,7 @@ data class StateResponse(
     val memoryCount: Int,
     val toolCount: Int,
     val isDaemonEnabled: Boolean,
+    val isFloatingBallEnabled: Boolean,
     val isMemoryEnabled: Boolean,
     val isSchedulingEnabled: Boolean,
     val isHeartbeatEnabled: Boolean,

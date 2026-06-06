@@ -492,6 +492,7 @@ fun SettingsScreenContent(
                                     actions = actions,
                                     showDaemonToggle = filteredUiState.showDaemonToggle,
                                     isDaemonEnabled = filteredUiState.isDaemonEnabled,
+                                    isFloatingBallEnabled = filteredUiState.isFloatingBallEnabled,
                                     isDynamicUiEnabled = filteredUiState.isDynamicUiEnabled,
                                     themeMode = filteredUiState.themeMode,
                                     showUiScale = filteredUiState.showUiScale,

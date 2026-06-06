@@ -442,6 +442,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_DAEMON_ENABLED, enabled)
     }
 
+    // Floating ball overlay
+    fun isFloatingBallEnabled(): Boolean = settings.getBoolean(KEY_FLOATING_BALL_ENABLED, false)
+
+    fun setFloatingBallEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_FLOATING_BALL_ENABLED, enabled)
+    }
+
     // Linux Sandbox
     fun isSandboxEnabled(): Boolean = settings.getBoolean(KEY_SANDBOX_ENABLED, true)
 
@@ -978,6 +985,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_OLED_MODE_ENABLED = "oled_mode_enabled"
         const val KEY_THEME_MODE = "theme_mode"
         const val KEY_DAEMON_ENABLED = "daemon_enabled"
+        const val KEY_FLOATING_BALL_ENABLED = "floating_ball_enabled"
         const val KEY_HEARTBEAT_CONFIG = "heartbeat_config"
         const val KEY_HEARTBEAT_PROMPT = "heartbeat_prompt"
         const val KEY_HEARTBEAT_LOG = "heartbeat_log"

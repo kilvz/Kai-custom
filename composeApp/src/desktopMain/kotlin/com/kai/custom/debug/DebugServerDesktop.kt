@@ -112,6 +112,7 @@ class DebugServerDesktop(
                         memoryCount = memoryStore.getAllMemories().size,
                         toolCount = getAvailableTools().size,
                         isDaemonEnabled = dataRepository.isDaemonEnabled(),
+                        isFloatingBallEnabled = dataRepository.isFloatingBallEnabled(),
                         isMemoryEnabled = dataRepository.isMemoryEnabled(),
                         isSchedulingEnabled = dataRepository.isSchedulingEnabled(),
                         isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
@@ -164,6 +165,7 @@ class DebugServerDesktop(
                         put("theme_mode", JsonPrimitive(dataRepository.getThemeMode().name))
                         put("interactive_mode", JsonPrimitive(dataRepository.isInteractiveModeActive()))
                         put("daemon_enabled", JsonPrimitive(dataRepository.isDaemonEnabled()))
+                        put("floating_ball_enabled", JsonPrimitive(dataRepository.isFloatingBallEnabled()))
                         put("wake_word_enabled", JsonPrimitive(dataRepository.isWakeWordEnabled()))
                         put("wake_word_phrase", JsonPrimitive(dataRepository.getWakeWordPhrase()))
                         put("wake_word_mode", JsonPrimitive(dataRepository.getWakeWordMode()))
@@ -237,6 +239,7 @@ class DebugServerDesktop(
                             "theme_mode" -> { val mode = com.kai.custom.data.ThemeMode.entries.find { it.name.equals(v, ignoreCase = true) }; if (mode != null) dataRepository.setThemeMode(mode) }
                             "interactive_mode" -> dataRepository.setInteractiveMode(v.toBoolean())
                             "daemon_enabled" -> dataRepository.setDaemonEnabled(v.toBoolean())
+                            "floating_ball_enabled" -> dataRepository.setFloatingBallEnabled(v.toBoolean())
                             "wake_word_enabled" -> dataRepository.setWakeWordEnabled(v.toBoolean())
                             "wake_word_phrase" -> dataRepository.setWakeWordPhrase(v)
                             "wake_word_mode" -> dataRepository.setWakeWordMode(v)

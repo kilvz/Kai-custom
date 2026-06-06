@@ -2070,6 +2070,12 @@ class RemoteDataRepository(
         appSettings.setDaemonEnabled(enabled)
     }
 
+    override fun isFloatingBallEnabled(): Boolean = appSettings.isFloatingBallEnabled()
+
+    override fun setFloatingBallEnabled(enabled: Boolean) {
+        appSettings.setFloatingBallEnabled(enabled)
+    }
+
     override fun isSandboxEnabled(): Boolean = appSettings.isSandboxEnabled()
 
     override fun setSandboxEnabled(enabled: Boolean) {

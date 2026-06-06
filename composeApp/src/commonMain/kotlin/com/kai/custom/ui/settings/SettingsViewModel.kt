@@ -113,6 +113,7 @@ class SettingsViewModel(
         scheduledTasks = dataRepository.getScheduledTasks().toImmutableList(),
         isDaemonEnabled = dataRepository.isDaemonEnabled(),
         showDaemonToggle = currentPlatform is Platform.Mobile.Android,
+        isFloatingBallEnabled = dataRepository.isFloatingBallEnabled(),
         isHeartbeatEnabled = dataRepository.getHeartbeatConfig().enabled,
         heartbeatIntervalMinutes = dataRepository.getHeartbeatConfig().intervalMinutes,
         heartbeatActiveHoursStart = dataRepository.getHeartbeatConfig().activeHoursStart,
@@ -208,6 +209,7 @@ class SettingsViewModel(
         onToggleScheduling = ::onToggleScheduling,
         onCancelTask = ::onCancelTask,
         onToggleDaemon = ::onToggleDaemon,
+        onToggleFloatingBall = ::onToggleFloatingBall,
         onToggleHeartbeat = ::onToggleHeartbeat,
         onChangeHeartbeatInterval = ::onChangeHeartbeatInterval,
         onChangeHeartbeatActiveHours = ::onChangeHeartbeatActiveHours,
@@ -664,6 +666,16 @@ class SettingsViewModel(
             daemonController.stop()
         }
         _state.update { it.copy(isDaemonEnabled = enabled) }
+    }
+
+    private fun onToggleFloatingBall(enabled: Boolean) {
+        dataRepository.setFloatingBallEnabled(enabled)
+        if (enabled) {
+            daemonController.startFloatingBall()
+        } else {
+            daemonController.stopFloatingBall()
+        }
+        _state.update { it.copy(isFloatingBallEnabled = enabled) }
     }
 
     private fun onToggleDebugApi(enabled: Boolean) {

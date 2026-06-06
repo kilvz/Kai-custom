@@ -181,6 +181,8 @@
     <string name="settings_task_details_no_runs">No runs recorded yet.</string>
     <string name="settings_daemon_mode">Daemon Mode</string>
     <string name="settings_daemon_mode_description">Keep K.Ai running in the background so scheduled tasks execute even when the app is not in the foreground.</string>
+    <string name="settings_floating_ball">Floating Assistant</string>
+    <string name="settings_floating_ball_description">Show a draggable floating ball overlay for quick access to Kai — ask about anything on your screen.</string>
     <string name="settings_heartbeat">Heartbeat</string>
     <string name="settings_heartbeat_description">Periodic self-checks that let the AI review memories and tasks without user input. Runs every %1$d minutes during active hours.</string>
     <string name="settings_heartbeat_interval">Interval</string>

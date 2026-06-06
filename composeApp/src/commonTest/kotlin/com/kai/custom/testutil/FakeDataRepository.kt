@@ -536,6 +536,15 @@ class FakeDataRepository : DataRepository {
         daemonEnabled = enabled
     }
 
+    // Floating ball overlay
+    private var floatingBallEnabled = false
+
+    override fun isFloatingBallEnabled(): Boolean = floatingBallEnabled
+
+    override fun setFloatingBallEnabled(enabled: Boolean) {
+        floatingBallEnabled = enabled
+    }
+
     override fun isSandboxEnabled(): Boolean = true
 
     override fun setSandboxEnabled(enabled: Boolean) {

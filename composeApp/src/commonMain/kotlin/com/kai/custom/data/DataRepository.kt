@@ -170,6 +170,10 @@ interface DataRepository {
     fun isDaemonEnabled(): Boolean
     fun setDaemonEnabled(enabled: Boolean)
 
+    // Floating ball overlay
+    fun isFloatingBallEnabled(): Boolean
+    fun setFloatingBallEnabled(enabled: Boolean)
+
     // Wake word detection
     fun isWakeWordEnabled(): Boolean
     fun setWakeWordEnabled(enabled: Boolean)

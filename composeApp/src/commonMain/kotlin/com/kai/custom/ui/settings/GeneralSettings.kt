@@ -66,6 +66,7 @@ internal fun GeneralContent(
     actions: SettingsActions,
     showDaemonToggle: Boolean,
     isDaemonEnabled: Boolean,
+    isFloatingBallEnabled: Boolean,
     isDynamicUiEnabled: Boolean,
     themeMode: ThemeMode,
     showUiScale: Boolean,
@@ -100,6 +101,14 @@ internal fun GeneralContent(
                             DaemonModeToggle(
                                 isDaemonEnabled = isDaemonEnabled,
                                 onToggleDaemon = actions.onToggleDaemon,
+                            )
+                        }
+                    }
+                    if (showDaemonToggle) {
+                        SettingsCard {
+                            FloatingBallToggle(
+                                isFloatingBallEnabled = isFloatingBallEnabled,
+                                onToggleFloatingBall = actions.onToggleFloatingBall,
                             )
                         }
                     }
@@ -186,6 +195,14 @@ internal fun GeneralContent(
                         DaemonModeToggle(
                             isDaemonEnabled = isDaemonEnabled,
                             onToggleDaemon = actions.onToggleDaemon,
+                        )
+                    }
+                }
+                if (showDaemonToggle) {
+                    SettingsCard {
+                        FloatingBallToggle(
+                            isFloatingBallEnabled = isFloatingBallEnabled,
+                            onToggleFloatingBall = actions.onToggleFloatingBall,
                         )
                     }
                 }
@@ -442,6 +459,21 @@ private fun DaemonModeToggle(
             description = stringResource(Res.string.settings_daemon_mode_description),
             checked = isDaemonEnabled,
             onCheckedChange = onToggleDaemon,
+        )
+    }
+}
+
+@Composable
+private fun FloatingBallToggle(
+    isFloatingBallEnabled: Boolean,
+    onToggleFloatingBall: (Boolean) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ToggleableHeadline(
+            title = "Floating Assistant",
+            description = "Show a draggable floating ball overlay for quick access to Kai — ask about anything on your screen.",
+            checked = isFloatingBallEnabled,
+            onCheckedChange = onToggleFloatingBall,
         )
     }
 }

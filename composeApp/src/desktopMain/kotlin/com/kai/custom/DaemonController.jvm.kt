@@ -65,6 +65,10 @@ class SystemTrayDaemonController : DaemonController {
         }
     }
 
+    override fun startFloatingBall() {}
+
+    override fun stopFloatingBall() {}
+
     fun hideWindow(frame: java.awt.Window) {
         hiddenFrames.add(frame)
         frame.isVisible = false
