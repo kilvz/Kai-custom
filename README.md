@@ -1,6 +1,6 @@
 # K.Ai
 
-An **open-source personal AI assistant** that runs on **Android, Windows, Mac, and Linux**.
+A **FOSS fork** of the personal AI assistant — package name `com.kai.custom`. Runs on **Android, Windows, Mac, and Linux**.
 
 Your AI doesn't just chat — it remembers, learns, takes action, and even automates tasks for you.
 
@@ -79,18 +79,22 @@ User → Chat → AI → Memory ↔ Heartbeat
 
 ## Build & Install (Android)
 
-```bash
+```powershell
 # Build
-./gradlew :androidApp:assembleFossDebug
+.\gradlew.bat :androidApp:assembleFossDebug
 
 # Install on device
-adb install -r androidApp/build/outputs/apk/foss/debug/androidApp-foss-arm64-v8a-debug.apk
+adb install -r androidApp\build\outputs\apk\foss\debug\androidApp-foss-arm64-v8a-debug.apk
 ```
 
-Requires JDK 21+, Android SDK API 35+, and a device running Android 12+.
+Requires JDK 21+, Android SDK API 36+, and a device running Android 12+.
+
+Release artifacts are published as `k.ai-<version>-android-<abi>.apk`.
 
 ## License
 
 Apache License 2.0. See [LICENSE.txt](LICENSE.txt).
 
-Based on [Kai](https://github.com/SimonSchubert/Kai) by Simon Schubert.
+Based on [Kai](https://github.com/SimonSchubert/Kai) by Simon Schubert (upstream v2.7.0).
+
+FOSS fork at [kilvz/Kai-custom](https://github.com/kilvz/Kai-custom) — current version **3.18.0**.
