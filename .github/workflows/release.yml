@@ -129,6 +129,8 @@ jobs:
           java-version: "21"
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
+      - name: Install DEB packaging tools
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
       - name: Build DEB
         run: ./gradlew packageReleaseDeb --stacktrace --no-daemon
       - name: Upload DEB Artifact
@@ -155,7 +157,7 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Install RPM build tools
-        run: sudo apt-get update && sudo apt-get install -y rpm
+        run: sudo apt-get update && sudo apt-get install -y rpm rpm-build
       - name: Build RPM
         run: ./gradlew packageReleaseRpm --stacktrace --no-daemon
       - name: Upload RPM Artifact
@@ -182,7 +184,7 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Build application distribution
-        run: ./gradlew createReleaseDistributable --stacktrace --no-daemon
+        run: ./gradlew createReleaseDistributable --stacktrace --no-daemon -Dorg.gradle.jvmargs=-Xmx6g
       - name: Create tarball
         run: |
           cd composeApp/build/compose/binaries/main-release/app
@@ -217,7 +219,7 @@ jobs:
           wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
       - name: Build application distribution
-        run: ./gradlew createReleaseDistributable --stacktrace --no-daemon
+        run: ./gradlew createReleaseDistributable --stacktrace --no-daemon -Dorg.gradle.jvmargs=-Xmx6g
       - name: Create AppDir structure
         run: |
           mkdir -p AppDir/usr/bin
