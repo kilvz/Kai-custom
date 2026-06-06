@@ -13,6 +13,7 @@ enum class BehaviorStyle(val displayName: String) {
 }
 
 enum class LanguageStyle(val displayName: String) {
+    NONE("None"),
     FORMAL("Formal"),
     CASUAL("Casual"),
     TECHNICAL("Technical"),
@@ -21,6 +22,7 @@ enum class LanguageStyle(val displayName: String) {
 }
 
 enum class CharacterType(val displayName: String) {
+    NONE("None"),
     HELPER("Helper"),
     EXPERT("Expert"),
     COMPANION("Companion"),
@@ -104,9 +106,11 @@ class PersonaManager(private val appSettings: AppSettings) {
 }
 
 fun PersonaConfig.toBehaviorTraitBlock(): String = buildString {
-    append("- Language: ")
-    append(languageStyle.displayName)
-    append('\n')
+    if (languageStyle != LanguageStyle.NONE) {
+        append("- Language: ")
+        append(languageStyle.displayName)
+        append('\n')
+    }
     append("- Role: ")
     append(behaviorStyle.displayName)
     append(" \u2014 ")
@@ -118,16 +122,19 @@ fun PersonaConfig.toBehaviorTraitBlock(): String = buildString {
         },
     )
     append('\n')
-    append("- Character: ")
-    append(characterType.displayName)
-    append(" \u2014 ")
-    append(
-        when (characterType) {
-            CharacterType.HELPER -> "patient, supportive tone"
-            CharacterType.EXPERT -> "authoritative, knowledgeable tone"
-            CharacterType.COMPANION -> "warm, friendly tone"
-            CharacterType.CRITIC -> "analytical, constructive tone"
-            CharacterType.CREATOR -> "innovative, proactive tone"
-        },
-    )
+    if (characterType != CharacterType.NONE) {
+        append("- Character: ")
+        append(characterType.displayName)
+        append(" \u2014 ")
+        append(
+            when (characterType) {
+                CharacterType.NONE -> ""
+                CharacterType.HELPER -> "patient, supportive tone"
+                CharacterType.EXPERT -> "authoritative, knowledgeable tone"
+                CharacterType.COMPANION -> "warm, friendly tone"
+                CharacterType.CRITIC -> "analytical, constructive tone"
+                CharacterType.CREATOR -> "innovative, proactive tone"
+            },
+        )
+    }
 }

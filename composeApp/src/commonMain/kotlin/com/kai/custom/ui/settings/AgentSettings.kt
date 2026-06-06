@@ -3,6 +3,7 @@
 package com.kai.custom.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -39,11 +43,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.CharacterType
 import com.kai.custom.data.EmailAccount
+import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.EmailSyncState
 import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.RemotePersonaCatalog
+import com.kai.custom.data.RemotePersonaEntry
 import com.kai.custom.data.RenderMode
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.ServiceEntry
@@ -416,7 +424,7 @@ private fun SoulEditor(
     onSwitchPersona: (String) -> Unit = {},
     onSavePersona: (PersonaConfig) -> Unit = {},
     onDeletePersona: (String) -> Unit = {},
-    onCreatePersona: (String, BehaviorStyle) -> Unit = { _, _ -> },
+    onCreatePersona: (String, BehaviorStyle, LanguageStyle, CharacterType) -> Unit = { _, _, _, _ -> },
 ) {
     val appSettings: AppSettings = koinInject()
     var editedSoul by remember(soulText) { mutableStateOf(soulText) }
@@ -460,8 +468,10 @@ private fun SoulEditor(
                 }
                 if (activePersona != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        TraitBadge(activePersona.languageStyle.displayName)
-                        TraitBadge(activePersona.characterType.displayName)
+                        if (activePersona.languageStyle != LanguageStyle.NONE)
+                            TraitBadge(activePersona.languageStyle.displayName)
+                        if (activePersona.characterType != CharacterType.NONE)
+                            TraitBadge(activePersona.characterType.displayName)
                         if (activePersona.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
                     }
                 }
@@ -519,6 +529,54 @@ private fun SoulEditor(
         Spacer(Modifier.height(12.dp))
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
+
+        // ── Character Definition (persona defaultSoul) ──
+        if (activePersona != null) {
+            val isCustom = !activePersona.isBuiltIn
+            var editedDefaultSoul by remember(activePersona.id, activePersona.defaultSoul) {
+                mutableStateOf(activePersona.defaultSoul)
+            }
+            val hasDefChanges = editedDefaultSoul != activePersona.defaultSoul
+            Text(
+                text = "Character Definition",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = if (isCustom) "Define the persona's core personality, behavior, and character." else "Built-in persona — read-only.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            KaiOutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = editedDefaultSoul,
+                onValueChange = { if (it.length <= maxChars) editedDefaultSoul = it },
+                minLines = 6,
+                maxLines = 8,
+                readOnly = !isCustom,
+                label = { Text("Character Definition") },
+            )
+            Text(
+                text = "${editedDefaultSoul.length}/$maxChars",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End,
+            )
+            if (isCustom && hasDefChanges) {
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        onSavePersona(activePersona.copy(defaultSoul = editedDefaultSoul.trim()))
+                    },
+                    modifier = Modifier.align(CenterHorizontally).handCursor(),
+                ) { Text("Save Character Definition") }
+            }
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(12.dp))
+        }
 
         // ── Custom Soul (Layer 3 — user-specific) ──
         Text(
@@ -617,6 +675,7 @@ private fun SoulEditor(
             onSwitchPersona = onSwitchPersona,
             onCreatePersona = onCreatePersona,
             onDeletePersona = onDeletePersona,
+            onSavePersona = onSavePersona,
             onDismiss = { showPersonaSelector = false },
         )
     }
@@ -627,8 +686,9 @@ private fun PersonaSelectorDialog(
     personas: ImmutableList<PersonaConfig>,
     activePersonaId: String,
     onSwitchPersona: (String) -> Unit,
-    onCreatePersona: (String, BehaviorStyle) -> Unit,
+    onCreatePersona: (String, BehaviorStyle, LanguageStyle, CharacterType) -> Unit,
     onDeletePersona: (String) -> Unit,
+    onSavePersona: (PersonaConfig) -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     val categories = listOf(
@@ -699,8 +759,10 @@ private fun PersonaSelectorDialog(
                                 )
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                TraitBadge(p.languageStyle.displayName)
-                                TraitBadge(p.characterType.displayName)
+                                if (p.languageStyle != LanguageStyle.NONE)
+                                    TraitBadge(p.languageStyle.displayName)
+                                if (p.characterType != CharacterType.NONE)
+                                    TraitBadge(p.characterType.displayName)
                                 if (p.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
                             }
                         }
@@ -721,6 +783,19 @@ private fun PersonaSelectorDialog(
                         onClick = { showCreateDialog = true },
                         modifier = Modifier.handCursor(),
                     ) { Text("+ Custom") }
+                    var showCommunity by remember { mutableStateOf(false) }
+                    OutlinedButton(
+                        onClick = { showCommunity = true },
+                        modifier = Modifier.handCursor(),
+                    ) { Text("Community") }
+                    if (showCommunity) {
+                        CommunityPersonaBrowseDialog(
+                            onDismiss = { showCommunity = false },
+                            onSavePersona = onSavePersona,
+                            onSwitchPersona = onSwitchPersona,
+                            onCloseAll = { showCommunity = false; onDismiss() },
+                        )
+                    }
                     val activePersona = personas.find { it.id == activePersonaId }
                     if (activePersona?.isBuiltIn == false) {
                         OutlinedButton(
@@ -745,9 +820,9 @@ private fun PersonaSelectorDialog(
     if (showCreateDialog) {
         CreatePersonaDialog(
             onDismiss = { showCreateDialog = false },
-            onCreate = { name, style ->
+            onCreate = { name, style, lang, char ->
                 showCreateDialog = false
-                onCreatePersona(name, style)
+                onCreatePersona(name, style, lang, char)
             },
         )
     }
@@ -766,10 +841,14 @@ private fun TraitBadge(label: String) {
 @Composable
 private fun CreatePersonaDialog(
     onDismiss: () -> Unit,
-    onCreate: (name: String, behaviorStyle: BehaviorStyle) -> Unit,
+    onCreate: (name: String, behaviorStyle: BehaviorStyle, languageStyle: LanguageStyle, characterType: CharacterType) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
     var selectedStyle by remember { mutableStateOf(BehaviorStyle.ASSISTANT) }
+    var selectedLang by remember { mutableStateOf(LanguageStyle.NONE) }
+    var selectedChar by remember { mutableStateOf(CharacterType.NONE) }
+    var expandedLang by remember { mutableStateOf(false) }
+    var expandedChar by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -794,12 +873,49 @@ private fun CreatePersonaDialog(
                         Text(style.displayName, style = MaterialTheme.typography.bodyMedium)
                     }
                 }
+                Spacer(Modifier.height(4.dp))
+                Text("Language Style", style = MaterialTheme.typography.bodySmall)
+                Box {
+                    OutlinedButton(
+                        onClick = { expandedLang = true },
+                        modifier = Modifier.fillMaxWidth().handCursor(),
+                    ) { Text(selectedLang.displayName) }
+                    DropdownMenu(
+                        expanded = expandedLang,
+                        onDismissRequest = { expandedLang = false },
+                    ) {
+                        LanguageStyle.entries.forEach { lang ->
+                            DropdownMenuItem(
+                                text = { Text(lang.displayName) },
+                                onClick = { selectedLang = lang; expandedLang = false },
+                            )
+                        }
+                    }
+                }
+                Text("Character Type", style = MaterialTheme.typography.bodySmall)
+                Box {
+                    OutlinedButton(
+                        onClick = { expandedChar = true },
+                        modifier = Modifier.fillMaxWidth().handCursor(),
+                    ) { Text(selectedChar.displayName) }
+                    DropdownMenu(
+                        expanded = expandedChar,
+                        onDismissRequest = { expandedChar = false },
+                    ) {
+                        CharacterType.entries.forEach { char ->
+                            DropdownMenuItem(
+                                text = { Text(char.displayName) },
+                                onClick = { selectedChar = char; expandedChar = false },
+                            )
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    if (name.isNotBlank()) onCreate(name.trim(), selectedStyle)
+                    if (name.isNotBlank()) onCreate(name.trim(), selectedStyle, selectedLang, selectedChar)
                 },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.handCursor(),
@@ -810,6 +926,129 @@ private fun CreatePersonaDialog(
                 onClick = onDismiss,
                 modifier = Modifier.handCursor(),
             ) { Text("Cancel") }
+        },
+    )
+}
+
+@Composable
+private fun CommunityPersonaBrowseDialog(
+    onDismiss: () -> Unit,
+    onSavePersona: (PersonaConfig) -> Unit,
+    onSwitchPersona: (String) -> Unit,
+    onCloseAll: () -> Unit,
+) {
+    val catalog = remember { RemotePersonaCatalog() }
+    var personas by remember { mutableStateOf<List<RemotePersonaEntry>?>(null) }
+    var loading by remember { mutableStateOf(true) }
+    var error by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(false) }
+    var importedSuccess by remember { mutableStateOf(false) }
+    var importedName by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        val list = catalog.listPersonas()
+        if (list.isNotEmpty()) {
+            personas = list
+            loading = false
+        } else {
+            loading = false
+            error = true
+        }
+    }
+
+    if (importing) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Importing") },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (importedSuccess) {
+                        Text("Imported: $importedName")
+                        Spacer(Modifier.height(8.dp))
+                        Text("Persona added and activated.", style = MaterialTheme.typography.bodySmall)
+                    } else {
+                        CircularProgressIndicator()
+                        Spacer(Modifier.height(8.dp))
+                        Text("Downloading persona...")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = onCloseAll,
+                    modifier = Modifier.handCursor(),
+                ) { Text("Done") }
+            },
+        )
+        return
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Community Personas") },
+        text = {
+            when {
+                loading -> Text("Loading...")
+                error -> Text("Could not load community personas.")
+                personas.isNullOrEmpty() -> Text("No personas available.")
+                else -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = "From kilvz/personas",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        val list = personas ?: emptyList()
+                        list.forEach { entry ->
+                            var downloading by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                onClick = { downloading = true },
+                                modifier = Modifier.fillMaxWidth().handCursor(),
+                                enabled = !downloading,
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = entry.name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onBackground,
+                                    )
+                                }
+                                if (downloading) {
+                                    Text("Downloading...")
+                                } else {
+                                    Text("Import")
+                                }
+                            }
+                            LaunchedEffect(downloading) {
+                                if (downloading) {
+                                    importing = true
+                                    val config = catalog.downloadPersona(entry.id)
+                                    if (config != null) {
+                                        onSavePersona(config)
+                                        onSwitchPersona(config.id)
+                                        importedName = config.name
+                                        importedSuccess = true
+                                    } else {
+                                        importedName = "Failed to download"
+                                        importedSuccess = false
+                                    }
+                                    downloading = false
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.handCursor(),
+            ) { Text("Close") }
         },
     )
 }

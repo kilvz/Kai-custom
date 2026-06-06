@@ -91,6 +91,7 @@ sealed class Service(
     val apiKeyUrl: String? = null,
     val apiKeyUrlDisplay: String? = null,
     val isOnDevice: Boolean = false,
+    val supportsImages: Boolean = false,
     val supportsPdf: Boolean = false,
     val reasoningRequestMode: ReasoningRequestMode = ReasoningRequestMode.NONE,
 ) {
@@ -206,6 +207,7 @@ sealed class Service(
         modelsUrl = "https://api.openai.com/v1/models",
         apiKeyUrl = "https://platform.openai.com/api-keys",
         apiKeyUrlDisplay = "platform.openai.com/api-keys",
+        supportsImages = true,
         supportsPdf = true,
     )
 

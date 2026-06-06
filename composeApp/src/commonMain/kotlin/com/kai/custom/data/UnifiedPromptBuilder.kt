@@ -5,6 +5,7 @@ import kotlin.time.Instant
 enum class RenderMode {
     UPSTREAM_COMPAT,
     FORK_ENHANCED,
+    CHARACTER,
 }
 
 internal interface PersonaSection {
@@ -337,6 +338,16 @@ internal class UnifiedPromptBuilder(
     )
 
     fun build(context: PromptContext): String {
+        if (context.renderMode == RenderMode.CHARACTER) {
+            // CHARACTER mode: pure persona definition, no assistant framing
+            val soul = personaSections.mapNotNull { it.build(context) }.joinToString("\n\n")
+            val customSoul = buildCustomSoul(context)
+            val task = taskAdapters
+                .filter { it.shouldActivate(context.taskDomains) }
+                .mapNotNull { it.build(context) }
+                .joinToString("\n\n")
+            return listOfNotNull(soul, customSoul, task).joinToString("\n\n")
+        }
         val persona = personaSections.mapNotNull { it.build(context) }.joinToString("\n\n")
         val technical = technicalSections
             .filter { it.shouldInclude(context) }

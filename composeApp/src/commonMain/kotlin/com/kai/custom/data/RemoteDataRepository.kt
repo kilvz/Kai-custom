@@ -29,6 +29,7 @@ import com.kai.custom.network.AnthropicGenericException
 import com.kai.custom.network.AnthropicInsufficientCreditsException
 import com.kai.custom.network.ContextWindowExceededException
 import com.kai.custom.network.FileTooLargeException
+import com.kai.custom.network.OpenAICompatibleBadRequestException
 import com.kai.custom.network.OpenAICompatibleEmptyResponseException
 import com.kai.custom.network.OpenAICompatibleQuotaExhaustedException
 import com.kai.custom.network.Requests
@@ -37,6 +38,7 @@ import com.kai.custom.network.UnsupportedFileTypeException
 import com.kai.custom.network.dtos.anthropic.AnthropicChatRequestDto
 import com.kai.custom.network.dtos.anthropic.extractText
 import com.kai.custom.network.dtos.gemini.extractText
+import com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
 import com.kai.custom.network.dtos.openaicompatible.extractInlineToolCalls
 import com.kai.custom.network.toUiError
 import com.kai.custom.network.tools.Tool
@@ -90,6 +92,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
@@ -740,10 +743,13 @@ class RemoteDataRepository(
                     // compressImageBytes can fall back to the original bytes on failure or on
                     // platforms without compression — guard against Base64 OOM for oversized input.
                     if (compressed.size > MAX_IMAGE_BYTES) throw FileTooLargeException()
+                    // Also write to sandbox so non-vision models can access the file via tools
+                    val imageName = fileName.substringBeforeLast('.').take(40) + ".jpg"
+                    binaryFilesToWrite.add(imageName to compressed)
                     Attachment(
                         data = Base64.encode(compressed),
                         mimeType = "image/jpeg",
-                        fileName = null,
+                        fileName = imageName,
                     )
                 }
 
@@ -904,6 +910,32 @@ class RemoteDataRepository(
         }
     }
 
+    private fun hasImageContent(msgs: List<OpenAICompatibleChatRequestDto.Message>): Boolean {
+        return msgs.any { msg ->
+            val content = msg.content
+            content is JsonArray && content.any { el ->
+                (el as? JsonObject)?.get("type")?.jsonPrimitive?.content == "image_url"
+            }
+        }
+    }
+
+    private fun stripImages(msgs: List<OpenAICompatibleChatRequestDto.Message>): List<OpenAICompatibleChatRequestDto.Message> {
+        return msgs.map { msg ->
+            val content = msg.content
+            if (content is JsonArray && content.any {
+                    (it as? JsonObject)?.get("type")?.jsonPrimitive?.content == "image_url"
+                }) {
+                val textParts = content.mapNotNull { el ->
+                    val obj = el as? JsonObject
+                    if (obj?.get("type")?.jsonPrimitive?.content == "text") {
+                        obj["text"]?.jsonPrimitive?.content
+                    } else null
+                }
+                msg.copy(content = JsonPrimitive(textParts.joinToString(" ")))
+            } else msg
+        }
+    }
+
     private suspend fun handleOpenAICompatibleChatWithTools(
         service: Service,
         credentials: ServiceCredentials,
@@ -916,8 +948,18 @@ class RemoteDataRepository(
         val strategy = object : ToolLoopStrategy {
             override suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult {
                 val msgs = trimMessagesForContext(buildOpenAIMessages(service, history, systemPrompt), contextWindowTokens)
-                val response = retryApiCall {
-                    requests.openAICompatibleChat(service, credentials, msgs, tools).getOrThrow()
+                val hasImages = hasImageContent(msgs)
+                val response = try {
+                    retryApiCall {
+                        requests.openAICompatibleChat(service, credentials, msgs, tools).getOrThrow()
+                    }
+                } catch (e: OpenAICompatibleBadRequestException) {
+                    if (hasImages) {
+                        val textMsgs = stripImages(msgs)
+                        retryApiCall {
+                            requests.openAICompatibleChat(service, credentials, textMsgs, tools).getOrThrow()
+                        }
+                    } else throw e
                 }
                 val message = response.choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
                 var calls = message.toolCalls.orEmpty().map { tc ->

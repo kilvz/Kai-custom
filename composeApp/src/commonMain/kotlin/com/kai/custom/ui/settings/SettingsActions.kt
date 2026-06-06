@@ -2,7 +2,9 @@ package com.kai.custom.ui.settings
 
 import androidx.compose.runtime.Immutable
 import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.CharacterType
 import com.kai.custom.data.ImportSection
+import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.Service
 import com.kai.custom.data.ThemeMode
@@ -26,7 +28,7 @@ data class SettingsActions(
     val onSwitchPersona: (String) -> Unit,
     val onSavePersona: (PersonaConfig) -> Unit,
     val onDeletePersona: (String) -> Unit,
-    val onCreatePersona: (String, BehaviorStyle) -> Unit,
+    val onCreatePersona: (String, BehaviorStyle, LanguageStyle, CharacterType) -> Unit,
     val onToggleDynamicUi: (Boolean) -> Unit,
     val onChangeThemeMode: (ThemeMode) -> Unit,
     val onToggleMemory: (Boolean) -> Unit,
@@ -107,7 +109,7 @@ data class SettingsActions(
             onSwitchPersona = {},
             onSavePersona = {},
             onDeletePersona = {},
-            onCreatePersona = { _, _ -> },
+            onCreatePersona = { _, _, _, _ -> },
             onToggleDynamicUi = {},
             onChangeThemeMode = {},
             onToggleMemory = {},

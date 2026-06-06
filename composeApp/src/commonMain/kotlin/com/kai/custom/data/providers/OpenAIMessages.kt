@@ -21,7 +21,7 @@ internal fun buildOpenAIMessages(
     }
     addAll(
         sanitizeToolMessages(
-            messages.map { it.toGroqMessageDto(service.reasoningRequestMode) },
+            messages.map { it.toGroqMessageDto(service.reasoningRequestMode, service.supportsImages) },
         ),
     )
 }

@@ -9,7 +9,10 @@ import com.kai.custom.PttTriggerManager
 import com.kai.custom.SandboxController
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.CharacterType
 import com.kai.custom.data.DataRepository
+import com.kai.custom.data.LanguageStyle
+import com.kai.custom.data.RenderMode
 import com.kai.custom.data.ImportSection
 import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.Service
@@ -557,13 +560,16 @@ class SettingsViewModel(
         }
     }
 
-    private fun onCreatePersona(name: String, behaviorStyle: BehaviorStyle) {
+    private fun onCreatePersona(name: String, behaviorStyle: BehaviorStyle, languageStyle: LanguageStyle, characterType: CharacterType) {
         val id = "custom_${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}"
         val config = PersonaConfig(
             id = id,
             name = name,
             description = "Custom persona",
             behaviorStyle = behaviorStyle,
+            languageStyle = languageStyle,
+            characterType = characterType,
+            renderMode = RenderMode.CHARACTER,
             isBuiltIn = false,
         )
         dataRepository.savePersona(config)

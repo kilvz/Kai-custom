@@ -155,13 +155,16 @@ data class ToolCallInfo(
 
 fun History.toGroqMessageDto(
     reasoningMode: ReasoningRequestMode = ReasoningRequestMode.NONE,
+    supportsImages: Boolean = false,
 ): OpenAICompatibleChatRequestDto.Message = when (role) {
     History.Role.USER -> {
         val split = attachments.splitForMessage()
         // Images become image_url parts. Text files get merged into the text prefix.
         // PDFs and other non-image binaries get a text stub from splitForMessage.
-        val imageAttachments = split.binaries.filter { it.mimeType.startsWith("image/") }
-        val fullText = "${split.textPrefix}$content"
+        val allImages = split.binaries.filter { it.mimeType.startsWith("image/") }
+        val imageAttachments = if (supportsImages) allImages else emptyList()
+        val imageNotice = if (allImages.isNotEmpty() && !supportsImages) "[Attached image(s)] " else ""
+        val fullText = "$imageNotice${split.textPrefix}$content"
         val messageContent: JsonElement = if (imageAttachments.isEmpty()) {
             JsonPrimitive(fullText)
         } else {
