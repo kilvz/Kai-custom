@@ -689,6 +689,8 @@ actual fun sendHeartbeatNotification(title: String, body: String) {
 actual fun openTtsSettings() = Unit
 
 actual fun openBatteryOptimizationSettings() = Unit
+actual fun openMockLocationSettings() = Unit
+actual fun isMockLocationConfigured(): Boolean = true
 actual fun isBatteryOptimizationDisabled(): Boolean = true
 actual fun defaultOpenAICompatibleBaseUrl(): String = "http://localhost:11434/v1"
 actual fun listCalendarAccounts(): List<CalendarAccount> = emptyList()

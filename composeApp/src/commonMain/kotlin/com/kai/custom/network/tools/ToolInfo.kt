@@ -16,4 +16,5 @@ data class ToolInfo(
     val nameRes: StringResource? = null,
     val descriptionRes: StringResource? = null,
     val isEnabled: Boolean = true,
+    val disabledHint: String? = null,
 )

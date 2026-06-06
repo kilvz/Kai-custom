@@ -343,7 +343,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     addAll(com.kai.custom.tools.telegramToolDefinitions)
     // Phone tools — full device access
     add(PhoneTools.gpsLocationToolInfo.copy(isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)))
-    add(PhoneTools.setGpsLocationToolInfo.copy(isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)))
+    add(PhoneTools.setGpsLocationToolInfo.copy(isEnabled = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) && isMockLocationConfigured()))
     add(PhoneTools.readContactsToolInfo.copy(isEnabled = hasPermission(Manifest.permission.READ_CONTACTS)))
     add(PhoneTools.deviceInfoToolInfo)
     add(PhoneTools.batteryInfoToolInfo)
@@ -365,6 +365,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(PhoneTools.takePictureToolInfo.copy(isEnabled = hasPermission(Manifest.permission.CAMERA)))
     add(PhoneTools.hearSurroundingsToolInfo.copy(isEnabled = hasPermission(Manifest.permission.RECORD_AUDIO)))
     add(PhoneTools.screenshotToolInfo)
+    add(PhoneTools.listActivitiesToolInfo)
     add(PhoneTools.launchActivityToolInfo)
     add(PhoneTools.modifySettingsToolInfo)
     add(PhoneTools.readScreenTextToolInfo)
@@ -757,7 +758,7 @@ actual fun getAvailableTools(): List<Tool> {
         }
 
         // Set GPS Location (mock)
-        if (appSettings.isToolEnabled(PhoneTools.setGpsLocationToolInfo.id)) {
+        if (appSettings.isToolEnabled(PhoneTools.setGpsLocationToolInfo.id) && isMockLocationConfigured()) {
             add(
                 object : Tool {
                     override val schema = ToolSchema(
@@ -993,32 +994,67 @@ actual fun getAvailableTools(): List<Tool> {
             )
         }
 
+        // ── List Activities ──
+        if (appSettings.isToolEnabled(PhoneTools.listActivitiesToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "list_activities",
+                        description = "List exported activities in a given app package. Returns activity class names with their intent filter actions and labels, so you know which activities can be launched.",
+                        parameters = mapOf(
+                            "package" to ParameterSchema("string", "Package name (e.g. com.android.settings)", true),
+                        ),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                        val pkg = args["package"]?.toString() ?: return mapOf("success" to false, "error" to "package is required")
+                        val info = context.packageManager.getPackageInfo(pkg, PackageManager.GET_ACTIVITIES) ?: return mapOf("success" to false, "error" to "Package '$pkg' not found")
+                        val activities = info.activities?.map { activity ->
+                            mapOf(
+                                "name" to activity.name,
+                                "label" to activity.loadLabel(context.packageManager).toString(),
+                                "exported" to activity.exported,
+                            )
+                        } ?: emptyList()
+                        mapOf("success" to true, "package" to pkg, "activities" to activities)
+                    } catch (e: Exception) {
+                        mapOf("success" to false, "error" to "Failed to list activities: ${e.message}")
+                    }
+                },
+            )
+        }
+
         // ── Launch Activity ──
         if (appSettings.isToolEnabled(PhoneTools.launchActivityToolInfo.id)) {
             add(
                 object : Tool {
                     override val schema = ToolSchema(
                         name = "launch_activity",
-                        description = "Launch any Android activity by package and class name. Optionally specify an action and data URI.",
+                        description = "Launch an Android app or activity by package name. If no specific activity class is given, the app's default launcher activity is used.",
                         parameters = mapOf(
                             "package" to ParameterSchema("string", "Package name (e.g. com.android.settings)", true),
-                            "activity" to ParameterSchema("string", "Full activity class name (e.g. com.android.settings.Settings)", true),
+                            "activity" to ParameterSchema("string", "Optional full activity class name (e.g. com.android.settings.Settings). If omitted, launches the app's default launcher activity.", false),
                             "action" to ParameterSchema("string", "Optional Intent action (e.g. android.intent.action.VIEW)", false),
                             "data_uri" to ParameterSchema("string", "Optional data URI for the intent", false),
                         ),
                     )
                     override suspend fun execute(args: Map<String, Any>): Any = try {
                         val pkg = args["package"]?.toString() ?: return mapOf("success" to false, "error" to "package is required")
-                        val activity = args["activity"]?.toString() ?: return mapOf("success" to false, "error" to "activity is required")
+                        val activity = args["activity"]?.toString()
                         val action = args["action"]?.toString()
                         val dataUri = args["data_uri"]?.toString()
-                        val intent = Intent(action ?: Intent.ACTION_MAIN).apply {
-                            setClassName(pkg, activity)
-                            dataUri?.let { data = android.net.Uri.parse(it) }
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        val intent = if (activity != null) {
+                            Intent(action ?: Intent.ACTION_MAIN).apply {
+                                setClassName(pkg, activity)
+                                dataUri?.let { data = android.net.Uri.parse(it) }
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                        } else {
+                            context.packageManager.getLaunchIntentForPackage(pkg)?.apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            } ?: return mapOf("success" to false, "error" to "No launch intent found for package '$pkg'")
                         }
                         context.startActivity(intent)
-                        mapOf("success" to true, "message" to "Launched $pkg/$activity")
+                        mapOf("success" to true, "message" to "Launched ${if (activity != null) "$pkg/$activity" else pkg}")
                     } catch (e: Exception) {
                         mapOf("success" to false, "error" to "Failed to launch activity: ${e.message}")
                     }
@@ -1937,11 +1973,20 @@ actual fun openTtsSettings() {
 actual fun openBatteryOptimizationSettings() {
     val context: Context by inject(Context::class.java)
     try {
-        val intent = Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent = Intent(
+            android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+            android.net.Uri.parse("package:${context.packageName}"),
+        ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         context.startActivity(intent)
     } catch (_: Exception) {
-        // Battery optimization settings not available
+        // Fallback: open general battery optimization list
+        try {
+            val intent = Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+        } catch (_: Exception) {
+            // Battery optimization settings not available
+        }
     }
 }
 
@@ -1950,6 +1995,38 @@ actual fun isBatteryOptimizationDisabled(): Boolean {
     val context: Context by inject(Context::class.java)
     val pm = context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
     return pm.isIgnoringBatteryOptimizations(context.packageName)
+}
+
+actual fun openMockLocationSettings() {
+    val context: Context by inject(Context::class.java)
+    try {
+        val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+    } catch (_: Exception) {
+        // Developer settings not available
+    }
+}
+
+actual fun isMockLocationConfigured(): Boolean {
+    val context: Context by inject(Context::class.java)
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+    return try {
+        locationManager.addTestProvider(
+            android.location.LocationManager.GPS_PROVIDER,
+            false, false, false, false, true, true, true,
+            @Suppress("DEPRECATION") android.location.Criteria.POWER_HIGH,
+            @Suppress("DEPRECATION") android.location.Criteria.ACCURACY_FINE,
+        )
+        locationManager.removeTestProvider(android.location.LocationManager.GPS_PROVIDER)
+        true
+    } catch (_: SecurityException) {
+        false
+    } catch (_: IllegalArgumentException) {
+        // Provider already exists from a previous call — that's fine, mock location works
+        true
+    }
 }
 
 /**

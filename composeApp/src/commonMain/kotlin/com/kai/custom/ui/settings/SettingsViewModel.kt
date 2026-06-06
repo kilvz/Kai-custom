@@ -41,6 +41,8 @@ import com.kai.custom.network.OpenAICompatibleQuotaExhaustedException
 import com.kai.custom.network.OpenAICompatibleRateLimitExceededException
 import com.kai.custom.network.dtos.SponsorsResponseDto
 import com.kai.custom.openTtsSettings
+import com.kai.custom.isMockLocationConfigured
+import com.kai.custom.openMockLocationSettings
 import com.kai.custom.requestShizukuPermission
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
@@ -1034,10 +1036,18 @@ class SettingsViewModel(
                 viewModelScope.launch(backgroundDispatcher) {
                     val granted = toolPermissionBridge.requestPermission(*permissions.toTypedArray())
                     if (granted) {
+                        if (toolId == "set_gps_location" && !isMockLocationConfigured()) {
+                            openMockLocationSettings()
+                            return@launch
+                        }
                         dataRepository.setToolEnabled(toolId, true)
                         updateToolEnabledInState(toolId, true)
                     }
                 }
+                return
+            }
+            if (toolId == "set_gps_location" && !isMockLocationConfigured()) {
+                openMockLocationSettings()
                 return
             }
         }

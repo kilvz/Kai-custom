@@ -155,6 +155,12 @@ object PhoneTools {
         description = "Launch any Android activity by package name and activity class name.",
     )
 
+    val listActivitiesToolInfo = ToolInfo(
+        id = "list_activities",
+        name = "List Activities",
+        description = "List all exported activities in a given app package.",
+    )
+
     val modifySettingsToolInfo = ToolInfo(
         id = "modify_settings",
         name = "Modify Settings",
@@ -180,6 +186,7 @@ object PhoneTools {
         hearSurroundingsToolInfo,
         screenshotToolInfo,
         launchActivityToolInfo,
+        listActivitiesToolInfo,
         modifySettingsToolInfo,
         readScreenTextToolInfo,
         navigateScreenToolInfo,

@@ -97,6 +97,12 @@ expect fun openTtsSettings()
 
 expect fun openBatteryOptimizationSettings()
 
+/** Opens Developer Options → "Select mock location app" so the user can set Kai as the mock provider. No-op on non-Android. */
+expect fun openMockLocationSettings()
+
+/** Returns true when Kai is set as the mock location app in Developer Options. Always true on non-Android. */
+expect fun isMockLocationConfigured(): Boolean
+
 /**
  * Returns the default base URL for the OpenAI-Compatible service (local Ollama).
  * On Android emulators, returns the host-loopback address (10.0.2.2) instead of localhost.
