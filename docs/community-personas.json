@@ -1,0 +1,769 @@
+{
+  "personas": [
+    {
+      "id": "adam_grant",
+      "name": "Adam Grant",
+      "description": "Community persona"
+    },
+    {
+      "id": "addison_rae",
+      "name": "Addison Rae",
+      "description": "Community persona"
+    },
+    {
+      "id": "ady_barkan",
+      "name": "Ady Barkan",
+      "description": "Community persona"
+    },
+    {
+      "id": "ai_weiwei",
+      "name": "Ai Weiwei",
+      "description": "Community persona"
+    },
+    {
+      "id": "alan_watts",
+      "name": "Alan Watts",
+      "description": "Community persona"
+    },
+    {
+      "id": "alexandria_ocasio-cortez",
+      "name": "Alexandria Ocasio Cortez",
+      "description": "Community persona"
+    },
+    {
+      "id": "alicia_garza",
+      "name": "Alicia Garza",
+      "description": "Community persona"
+    },
+    {
+      "id": "alix_earle",
+      "name": "Alix Earle",
+      "description": "Community persona"
+    },
+    {
+      "id": "anderson_cooper",
+      "name": "Anderson Cooper",
+      "description": "Community persona"
+    },
+    {
+      "id": "andy_jassy",
+      "name": "Andy Jassy",
+      "description": "Community persona"
+    },
+    {
+      "id": "anna_wintour",
+      "name": "Anna Wintour",
+      "description": "Community persona"
+    },
+    {
+      "id": "bad_bunny_(benito_antonio_martínez_ocasio)",
+      "name": "Bad Bunny (Benito Antonio Martínez Ocasio)",
+      "description": "Community persona"
+    },
+    {
+      "id": "banksy",
+      "name": "Banksy",
+      "description": "Community persona"
+    },
+    {
+      "id": "benjamin_netanyahu",
+      "name": "Benjamin Netanyahu",
+      "description": "Community persona"
+    },
+    {
+      "id": "bernie_sanders",
+      "name": "Bernie Sanders",
+      "description": "Community persona"
+    },
+    {
+      "id": "beyoncé_(beyoncé_knowles-carter)",
+      "name": "Beyoncé (Beyoncé Knowles Carter)",
+      "description": "Community persona"
+    },
+    {
+      "id": "bill_gates",
+      "name": "Bill Gates",
+      "description": "Community persona"
+    },
+    {
+      "id": "bob_iger",
+      "name": "Bob Iger",
+      "description": "Community persona"
+    },
+    {
+      "id": "brené_brown",
+      "name": "Brené Brown",
+      "description": "Community persona"
+    },
+    {
+      "id": "brian_cornell",
+      "name": "Brian Cornell",
+      "description": "Community persona"
+    },
+    {
+      "id": "bts",
+      "name": "Bts",
+      "description": "Community persona"
+    },
+    {
+      "id": "caitlin_clark",
+      "name": "Caitlin Clark",
+      "description": "Community persona"
+    },
+    {
+      "id": "charles_koch",
+      "name": "Charles Koch",
+      "description": "Community persona"
+    },
+    {
+      "id": "charli_d'amelio",
+      "name": "Charli D'Amelio",
+      "description": "Community persona"
+    },
+    {
+      "id": "christine_lagarde",
+      "name": "Christine Lagarde",
+      "description": "Community persona"
+    },
+    {
+      "id": "claudia_sheinbaum",
+      "name": "Claudia Sheinbaum",
+      "description": "Community persona"
+    },
+    {
+      "id": "conan_o'brien",
+      "name": "Conan O'Brien",
+      "description": "Community persona"
+    },
+    {
+      "id": "confucius",
+      "name": "Confucius",
+      "description": "Community persona"
+    },
+    {
+      "id": "cornel_west",
+      "name": "Cornel West",
+      "description": "Community persona"
+    },
+    {
+      "id": "corpse_husband",
+      "name": "Corpse Husband",
+      "description": "Community persona"
+    },
+    {
+      "id": "cristiano_ronaldo",
+      "name": "Cristiano Ronaldo",
+      "description": "Community persona"
+    },
+    {
+      "id": "dalai_lama_(tenzin_gyatso)",
+      "name": "Dalai Lama (Tenzin Gyatso)",
+      "description": "Community persona"
+    },
+    {
+      "id": "david_attenborough",
+      "name": "David Attenborough",
+      "description": "Community persona"
+    },
+    {
+      "id": "david_dobrik",
+      "name": "David Dobrik",
+      "description": "Community persona"
+    },
+    {
+      "id": "david_zaslav",
+      "name": "David Zaslav",
+      "description": "Community persona"
+    },
+    {
+      "id": "donald_trump",
+      "name": "Donald Trump",
+      "description": "Community persona"
+    },
+    {
+      "id": "doug_mcmillon",
+      "name": "Doug Mcmillon",
+      "description": "Community persona"
+    },
+    {
+      "id": "drake_(aubrey_graham)",
+      "name": "Drake (Aubrey Graham)",
+      "description": "Community persona"
+    },
+    {
+      "id": "dream_(clay)",
+      "name": "Dream (Clay)",
+      "description": "Community persona"
+    },
+    {
+      "id": "dwayne_\"the_rock\"_johnson",
+      "name": "Dwayne \"The Rock\" Johnson",
+      "description": "Community persona"
+    },
+    {
+      "id": "elizabeth_warren",
+      "name": "Elizabeth Warren",
+      "description": "Community persona"
+    },
+    {
+      "id": "ellen_degeneres",
+      "name": "Ellen Degeneres",
+      "description": "Community persona"
+    },
+    {
+      "id": "elon_musk",
+      "name": "Elon Musk",
+      "description": "Community persona"
+    },
+    {
+      "id": "emma_chamberlain",
+      "name": "Emma Chamberlain",
+      "description": "Community persona"
+    },
+    {
+      "id": "emmanuel_macron",
+      "name": "Emmanuel Macron",
+      "description": "Community persona"
+    },
+    {
+      "id": "gavin_newsom",
+      "name": "Gavin Newsom",
+      "description": "Community persona"
+    },
+    {
+      "id": "george_soros",
+      "name": "George Soros",
+      "description": "Community persona"
+    },
+    {
+      "id": "giorgia_meloni",
+      "name": "Giorgia Meloni",
+      "description": "Community persona"
+    },
+    {
+      "id": "gordon_ramsay",
+      "name": "Gordon Ramsay",
+      "description": "Community persona"
+    },
+    {
+      "id": "greg_abbott",
+      "name": "Greg Abbott",
+      "description": "Community persona"
+    },
+    {
+      "id": "greta_thunberg",
+      "name": "Greta Thunberg",
+      "description": "Community persona"
+    },
+    {
+      "id": "gretchen_whitmer",
+      "name": "Gretchen Whitmer",
+      "description": "Community persona"
+    },
+    {
+      "id": "hakeem_jeffries",
+      "name": "Hakeem Jeffries",
+      "description": "Community persona"
+    },
+    {
+      "id": "howard_schultz",
+      "name": "Howard Schultz",
+      "description": "Community persona"
+    },
+    {
+      "id": "j.d._vance",
+      "name": "J.D. Vance",
+      "description": "Community persona"
+    },
+    {
+      "id": "jacinda_ardern",
+      "name": "Jacinda Ardern",
+      "description": "Community persona"
+    },
+    {
+      "id": "jack_ma_(ma_yun)",
+      "name": "Jack Ma (Ma Yun)",
+      "description": "Community persona"
+    },
+    {
+      "id": "jake_paul",
+      "name": "Jake Paul",
+      "description": "Community persona"
+    },
+    {
+      "id": "jalen_hurts",
+      "name": "Jalen Hurts",
+      "description": "Community persona"
+    },
+    {
+      "id": "jamie_dimon",
+      "name": "Jamie Dimon",
+      "description": "Community persona"
+    },
+    {
+      "id": "janet_yellen",
+      "name": "Janet Yellen",
+      "description": "Community persona"
+    },
+    {
+      "id": "jeff_bezos",
+      "name": "Jeff Bezos",
+      "description": "Community persona"
+    },
+    {
+      "id": "jeff_koons",
+      "name": "Jeff Koons",
+      "description": "Community persona"
+    },
+    {
+      "id": "jensen_huang",
+      "name": "Jensen Huang",
+      "description": "Community persona"
+    },
+    {
+      "id": "jerome_powell",
+      "name": "Jerome Powell",
+      "description": "Community persona"
+    },
+    {
+      "id": "jimmy_fallon",
+      "name": "Jimmy Fallon",
+      "description": "Community persona"
+    },
+    {
+      "id": "joe_rogan",
+      "name": "Joe Rogan",
+      "description": "Community persona"
+    },
+    {
+      "id": "john_oliver",
+      "name": "John Oliver",
+      "description": "Community persona"
+    },
+    {
+      "id": "john_roberts",
+      "name": "John Roberts",
+      "description": "Community persona"
+    },
+    {
+      "id": "john_thune",
+      "name": "John Thune",
+      "description": "Community persona"
+    },
+    {
+      "id": "jordan_peterson",
+      "name": "Jordan Peterson",
+      "description": "Community persona"
+    },
+    {
+      "id": "judith_butler",
+      "name": "Judith Butler",
+      "description": "Community persona"
+    },
+    {
+      "id": "kanye_west_(ye)",
+      "name": "Kanye West (Ye)",
+      "description": "Community persona"
+    },
+    {
+      "id": "keir_starmer",
+      "name": "Keir Starmer",
+      "description": "Community persona"
+    },
+    {
+      "id": "kendrick_lamar_(kendrick_lamar_duckworth)",
+      "name": "Kendrick Lamar (Kendrick Lamar Duckworth)",
+      "description": "Community persona"
+    },
+    {
+      "id": "khaby_lame_(khabane_lame)",
+      "name": "Khaby Lame (Khabane Lame)",
+      "description": "Community persona"
+    },
+    {
+      "id": "kim_kardashian",
+      "name": "Kim Kardashian",
+      "description": "Community persona"
+    },
+    {
+      "id": "kylie_jenner",
+      "name": "Kylie Jenner",
+      "description": "Community persona"
+    },
+    {
+      "id": "larry_fink",
+      "name": "Larry Fink",
+      "description": "Community persona"
+    },
+    {
+      "id": "larry_page",
+      "name": "Larry Page",
+      "description": "Community persona"
+    },
+    {
+      "id": "lebron_james",
+      "name": "Lebron James",
+      "description": "Community persona"
+    },
+    {
+      "id": "leonardo_da_vinci",
+      "name": "Leonardo Da Vinci",
+      "description": "Community persona"
+    },
+    {
+      "id": "lionel_messi",
+      "name": "Lionel Messi",
+      "description": "Community persona"
+    },
+    {
+      "id": "logan_paul",
+      "name": "Logan Paul",
+      "description": "Community persona"
+    },
+    {
+      "id": "lula_da_silva",
+      "name": "Lula Da Silva",
+      "description": "Community persona"
+    },
+    {
+      "id": "mackenzie_scott",
+      "name": "Mackenzie Scott",
+      "description": "Community persona"
+    },
+    {
+      "id": "malala_yousafzai",
+      "name": "Malala Yousafzai",
+      "description": "Community persona"
+    },
+    {
+      "id": "malcolm_gladwell",
+      "name": "Malcolm Gladwell",
+      "description": "Community persona"
+    },
+    {
+      "id": "marco_rubio",
+      "name": "Marco Rubio",
+      "description": "Community persona"
+    },
+    {
+      "id": "margot_robbie",
+      "name": "Margot Robbie",
+      "description": "Community persona"
+    },
+    {
+      "id": "marina_abramović",
+      "name": "Marina Abramović",
+      "description": "Community persona"
+    },
+    {
+      "id": "mark_zuckerberg",
+      "name": "Mark Zuckerberg",
+      "description": "Community persona"
+    },
+    {
+      "id": "markiplier_(mark_fischbach)",
+      "name": "Markiplier (Mark Fischbach)",
+      "description": "Community persona"
+    },
+    {
+      "id": "mary_barra",
+      "name": "Mary Barra",
+      "description": "Community persona"
+    },
+    {
+      "id": "melinda_gates",
+      "name": "Melinda Gates",
+      "description": "Community persona"
+    },
+    {
+      "id": "michael_bloomberg",
+      "name": "Michael Bloomberg",
+      "description": "Community persona"
+    },
+    {
+      "id": "michio_kaku",
+      "name": "Michio Kaku",
+      "description": "Community persona"
+    },
+    {
+      "id": "mike_johnson",
+      "name": "Mike Johnson",
+      "description": "Community persona"
+    },
+    {
+      "id": "mitzi_jonelle_tan",
+      "name": "Mitzi Jonelle Tan",
+      "description": "Community persona"
+    },
+    {
+      "id": "mohammed_bin_salman",
+      "name": "Mohammed Bin Salman",
+      "description": "Community persona"
+    },
+    {
+      "id": "mrbeast_(jimmy_donaldson)",
+      "name": "Mrbeast (Jimmy Donaldson)",
+      "description": "Community persona"
+    },
+    {
+      "id": "mukesh_ambani",
+      "name": "Mukesh Ambani",
+      "description": "Community persona"
+    },
+    {
+      "id": "narendra_modi",
+      "name": "Narendra Modi",
+      "description": "Community persona"
+    },
+    {
+      "id": "nassim_nicholas_taleb",
+      "name": "Nassim Nicholas Taleb",
+      "description": "Community persona"
+    },
+    {
+      "id": "neil_degrasse_tyson",
+      "name": "Neil Degrasse Tyson",
+      "description": "Community persona"
+    },
+    {
+      "id": "ninja_(richard_tyler_blevins)",
+      "name": "Ninja (Richard Tyler Blevins)",
+      "description": "Community persona"
+    },
+    {
+      "id": "noam_chomsky",
+      "name": "Noam Chomsky",
+      "description": "Community persona"
+    },
+    {
+      "id": "oprah_winfrey",
+      "name": "Oprah Winfrey",
+      "description": "Community persona"
+    },
+    {
+      "id": "patrisse_khan-cullors",
+      "name": "Patrisse Khan Cullors",
+      "description": "Community persona"
+    },
+    {
+      "id": "pete_hegseth",
+      "name": "Pete Hegseth",
+      "description": "Community persona"
+    },
+    {
+      "id": "peter_singer",
+      "name": "Peter Singer",
+      "description": "Community persona"
+    },
+    {
+      "id": "pewdiepie_(felix_kjellberg)",
+      "name": "Pewdiepie (Felix Kjellberg)",
+      "description": "Community persona"
+    },
+    {
+      "id": "phish",
+      "name": "Phish",
+      "description": "Community persona"
+    },
+    {
+      "id": "pokimane_(imane_anys)",
+      "name": "Pokimane (Imane Anys)",
+      "description": "Community persona"
+    },
+    {
+      "id": "pope_francis",
+      "name": "Pope Francis",
+      "description": "Community persona"
+    },
+    {
+      "id": "rachel_maddow",
+      "name": "Rachel Maddow",
+      "description": "Community persona"
+    },
+    {
+      "id": "recep_tayyip_erdoğan",
+      "name": "Recep Tayyip Erdoğan",
+      "description": "Community persona"
+    },
+    {
+      "id": "reed_hastings",
+      "name": "Reed Hastings",
+      "description": "Community persona"
+    },
+    {
+      "id": "rihanna_(robyn_rihanna_fenty)",
+      "name": "Rihanna (Robyn Rihanna Fenty)",
+      "description": "Community persona"
+    },
+    {
+      "id": "robert_f._kennedy_jr.",
+      "name": "Robert F. Kennedy Jr.",
+      "description": "Community persona"
+    },
+    {
+      "id": "rupert_murdoch",
+      "name": "Rupert Murdoch",
+      "description": "Community persona"
+    },
+    {
+      "id": "ryan_reynolds",
+      "name": "Ryan Reynolds",
+      "description": "Community persona"
+    },
+    {
+      "id": "sabrina_carpenter",
+      "name": "Sabrina Carpenter",
+      "description": "Community persona"
+    },
+    {
+      "id": "sam_altman",
+      "name": "Sam Altman",
+      "description": "Community persona"
+    },
+    {
+      "id": "sam_harris",
+      "name": "Sam Harris",
+      "description": "Community persona"
+    },
+    {
+      "id": "satya_nadella",
+      "name": "Satya Nadella",
+      "description": "Community persona"
+    },
+    {
+      "id": "sean_hannity",
+      "name": "Sean Hannity",
+      "description": "Community persona"
+    },
+    {
+      "id": "serena_williams",
+      "name": "Serena Williams",
+      "description": "Community persona"
+    },
+    {
+      "id": "sergey_brin",
+      "name": "Sergey Brin",
+      "description": "Community persona"
+    },
+    {
+      "id": "shohei_ohtani",
+      "name": "Shohei Ohtani",
+      "description": "Community persona"
+    },
+    {
+      "id": "slavoj_žižek",
+      "name": "Slavoj Žižek",
+      "description": "Community persona"
+    },
+    {
+      "id": "stephen_colbert",
+      "name": "Stephen Colbert",
+      "description": "Community persona"
+    },
+    {
+      "id": "steve_jobs",
+      "name": "Steve Jobs",
+      "description": "Community persona"
+    },
+    {
+      "id": "steven_pinker",
+      "name": "Steven Pinker",
+      "description": "Community persona"
+    },
+    {
+      "id": "sundar_pichai",
+      "name": "Sundar Pichai",
+      "description": "Community persona"
+    },
+    {
+      "id": "ta-nehisi_coates",
+      "name": "Ta Nehisi Coates",
+      "description": "Community persona"
+    },
+    {
+      "id": "tarana_burke",
+      "name": "Tarana Burke",
+      "description": "Community persona"
+    },
+    {
+      "id": "taylor_swift",
+      "name": "Taylor Swift",
+      "description": "Community persona"
+    },
+    {
+      "id": "thomas_piketty",
+      "name": "Thomas Piketty",
+      "description": "Community persona"
+    },
+    {
+      "id": "tim_cook",
+      "name": "Tim Cook",
+      "description": "Community persona"
+    },
+    {
+      "id": "timothée_chalamet",
+      "name": "Timothée Chalamet",
+      "description": "Community persona"
+    },
+    {
+      "id": "trevor_noah",
+      "name": "Trevor Noah",
+      "description": "Community persona"
+    },
+    {
+      "id": "tucker_carlson",
+      "name": "Tucker Carlson",
+      "description": "Community persona"
+    },
+    {
+      "id": "ursula_von_der_leyen",
+      "name": "Ursula Von Der Leyen",
+      "description": "Community persona"
+    },
+    {
+      "id": "vanessa_nakate",
+      "name": "Vanessa Nakate",
+      "description": "Community persona"
+    },
+    {
+      "id": "virgil_abloh",
+      "name": "Virgil Abloh",
+      "description": "Community persona"
+    },
+    {
+      "id": "vladimir_putin",
+      "name": "Vladimir Putin",
+      "description": "Community persona"
+    },
+    {
+      "id": "volodymyr_zelensky",
+      "name": "Volodymyr Zelensky",
+      "description": "Community persona"
+    },
+    {
+      "id": "warren_buffett",
+      "name": "Warren Buffett",
+      "description": "Community persona"
+    },
+    {
+      "id": "xi_jinping",
+      "name": "Xi Jinping",
+      "description": "Community persona"
+    },
+    {
+      "id": "yayoi_kusama",
+      "name": "Yayoi Kusama",
+      "description": "Community persona"
+    },
+    {
+      "id": "yuval_noah_harari",
+      "name": "Yuval Noah Harari",
+      "description": "Community persona"
+    },
+    {
+      "id": "zendaya",
+      "name": "Zendaya",
+      "description": "Community persona"
+    }
+  ]
+}
