@@ -40,7 +40,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -288,13 +287,11 @@ private fun InteractiveModeScreen(
             ) {
                 // Chat content (hidden in PTT mode, visible in text mode)
                 if (hasAssistantResponse && !hasUsedPtt) {
-                    SelectionContainer {
-                        InteractiveModeContent(
-                            uiState = uiState,
-                            modifier = Modifier.fillMaxSize(),
-                            bottomPadding = 88.dp,
-                        )
-                    }
+                    InteractiveModeContent(
+                        uiState = uiState,
+                        modifier = Modifier.fillMaxSize(),
+                        bottomPadding = 88.dp,
+                    )
                 }
 
                 // Centered PTT / welcome content (visible in PTT mode or before first response)
