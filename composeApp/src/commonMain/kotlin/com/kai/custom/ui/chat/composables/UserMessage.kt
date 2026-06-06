@@ -132,6 +132,8 @@ internal fun UserMessage(
                         modifier = Modifier.size(18.dp),
                     )
                 }
+            } else {
+                Spacer(Modifier.size(32.dp))
             }
         }
     }

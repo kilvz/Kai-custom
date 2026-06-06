@@ -245,10 +245,9 @@ class ChatViewModel(
         val files = _state.value.files
 
         // If already loading, queue the message for sequential processing
-        if (_state.value.isLoading) {
-            if (question != null) {
-                enqueue(question)
-            }
+        // (but skip the guard when called from processNextInQueue — isLoading is still true)
+        if (_state.value.isLoading && question != null && !isProcessingFromQueue) {
+            enqueue(question)
             return
         }
 
@@ -267,6 +266,8 @@ class ChatViewModel(
                 if (_state.value.isInteractiveMode) {
                     retryIfNoValidKaiUi()
                 }
+                // Only remove from pending on success — failed messages stay queued for retry
+                dequeuePending(question)
             } catch (exception: Exception) {
                 // CancellationException must be re-thrown to properly propagate coroutine cancellation
                 if (exception is CancellationException) throw exception
@@ -277,10 +278,13 @@ class ChatViewModel(
                     )
                 }
             } finally {
+                isProcessingFromQueue = false
                 processNextInQueue()
             }
         }
     }
+
+    private var isProcessingFromQueue = false
 
     private fun enqueue(question: String) {
         messageQueue.add(question)
@@ -289,12 +293,18 @@ class ChatViewModel(
         }
     }
 
+    private fun dequeuePending(question: String?) {
+        if (question == null) return
+        messageQueue.remove(question)
+        _state.update {
+            it.copy(pendingMessages = it.pendingMessages.filterNot { m -> m == question }.toImmutableList())
+        }
+    }
+
     private fun processNextInQueue() {
         if (messageQueue.isNotEmpty()) {
-            val next = messageQueue.removeFirst()
-            _state.update {
-                it.copy(pendingMessages = it.pendingMessages.filterNot { m -> m == next }.toImmutableList())
-            }
+            val next = messageQueue.first()
+            isProcessingFromQueue = true
             askInternal(next, null)
         } else {
             _state.update { it.copy(isLoading = false, pendingMessages = persistentListOf()) }
@@ -516,12 +526,13 @@ class ChatViewModel(
     private fun loadConversation(id: String) {
         currentJob?.cancel()
         currentJob = null
+        messageQueue.clear()
         val conversation = dataRepository.savedConversations.value.find { it.id == id }
         val isInteractive = conversation?.type == Conversation.TYPE_INTERACTIVE
         dataRepository.setInteractiveMode(isInteractive)
         dataRepository.loadConversation(id)
         _state.update {
-            it.copy(error = null, isInteractiveMode = isInteractive, isLoading = false)
+            it.copy(error = null, isInteractiveMode = isInteractive, isLoading = false, pendingMessages = persistentListOf())
         }
     }
 
@@ -581,18 +592,20 @@ class ChatViewModel(
     private fun startNewChat() {
         currentJob?.cancel()
         currentJob = null
+        messageQueue.clear()
         dataRepository.startNewChat()
         dataRepository.setInteractiveMode(false)
         _state.update {
-            it.copy(error = null, isInteractiveMode = false, isLoading = false)
+            it.copy(error = null, isInteractiveMode = false, isLoading = false, pendingMessages = persistentListOf())
         }
     }
 
     private fun enterInteractiveMode() {
+        messageQueue.clear()
         dataRepository.startNewChat()
         dataRepository.setInteractiveMode(true)
         _state.update {
-            it.copy(isInteractiveMode = true, error = null)
+            it.copy(isInteractiveMode = true, error = null, pendingMessages = persistentListOf())
         }
     }
 

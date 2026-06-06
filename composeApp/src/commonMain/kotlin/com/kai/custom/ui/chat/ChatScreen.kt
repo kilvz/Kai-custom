@@ -1038,6 +1038,22 @@ private fun ChatModeScreen(
                                             )
                                         }
                                     }
+                                    if (uiState.pendingMessages.isNotEmpty()) {
+                                        item(key = "pending_sep") {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                            ) {
+                                                Box(Modifier.weight(1f).height(1.dp).background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)))
+                                                Text(
+                                                    text = " queued ",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                                )
+                                                Box(Modifier.weight(1f).height(1.dp).background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)))
+                                            }
+                                        }
+                                    }
                                     uiState.pendingMessages.forEachIndexed { idx, msg ->
                                         item(key = "pending_$idx") {
                                             UserMessage(message = msg, attachments = persistentListOf())
