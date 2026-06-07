@@ -317,6 +317,8 @@ interface DataRepository {
     fun setModelContextTokens(modelId: String, contextTokens: Int)
     fun getModelMaxTokens(modelId: String): Int
     fun setModelMaxTokens(modelId: String, maxTokens: Int)
+    fun getModelTemperature(modelId: String): Float
+    fun setModelTemperature(modelId: String, temperature: Float)
     fun getDefaultCalendarId(): Long
     fun setDefaultCalendarId(calendarId: Long)
     suspend fun releaseLocalEngine()

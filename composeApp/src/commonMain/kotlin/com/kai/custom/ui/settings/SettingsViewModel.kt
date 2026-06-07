@@ -180,6 +180,7 @@ class SettingsViewModel(
         localDownloadProgress = dataRepository.getLocalDownloadProgress()?.value,
         modelContextTokens = buildModelContextTokensMap(),
         modelMaxTokens = buildModelMaxTokensMap(),
+        modelTemperature = buildModelTemperatureMap(),
         installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
         activeSkill = dataRepository.getActiveSkill(),
         schemaResetMessage = dataRepository.getSchemaResetMessage(),
@@ -256,6 +257,7 @@ class SettingsViewModel(
         onDeleteLocalModel = ::onDeleteLocalModel,
         onChangeModelContextTokens = ::onChangeModelContextTokens,
         onChangeModelMaxTokens = ::onChangeModelMaxTokens,
+        onChangeModelTemperature = ::onChangeModelTemperature,
         onExportSettings = ::onExportSettings,
         onPrepareExport = ::onPrepareExport,
         onImportSettings = ::onImportSettings,
@@ -1023,6 +1025,18 @@ class SettingsViewModel(
         dataRepository.setModelMaxTokens(modelId, maxTokens)
         _state.update {
             it.copy(modelMaxTokens = it.modelMaxTokens.toMutableMap().apply { put(modelId, maxTokens) }.toImmutableMap())
+        }
+    }
+
+    private fun buildModelTemperatureMap() = dataRepository.getLocalAvailableModels().associate { model ->
+        model.id to dataRepository.getModelTemperature(model.id)
+    }.toImmutableMap()
+
+    private fun onChangeModelTemperature(modelId: String, temperature: Float) {
+        if (_state.value.modelTemperature[modelId] == temperature) return
+        dataRepository.setModelTemperature(modelId, temperature)
+        _state.update {
+            it.copy(modelTemperature = it.modelTemperature.toMutableMap().apply { put(modelId, temperature) }.toImmutableMap())
         }
     }
 

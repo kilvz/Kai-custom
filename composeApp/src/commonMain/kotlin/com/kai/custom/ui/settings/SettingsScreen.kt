@@ -581,6 +581,8 @@ fun SettingsScreenContent(
                                     localDownloadError = filteredUiState.localDownloadError,
                                     modelContextTokens = filteredUiState.modelContextTokens,
                                     modelMaxTokens = filteredUiState.modelMaxTokens,
+                                    modelTemperature = filteredUiState.modelTemperature,
+                                    onChangeModelTemperature = actions.onChangeModelTemperature,
                                     availableServicesToAdd = filteredUiState.availableServicesToAdd,
                                     isFreeFallbackEnabled = filteredUiState.isFreeFallbackEnabled,
                                 )

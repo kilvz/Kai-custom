@@ -282,12 +282,23 @@ class AppSettings(internal val settings: Settings) {
     }
 
     /** Returns persona identity: name prefix + default soul (character definition). */
-    fun getSoulText(personaId: String = getActivePersonaId()): String {
+    fun getSoulText(personaId: String = getActivePersonaId(), localModel: Boolean = false): String {
         val persona = getPersonaName(personaId)
         val prefix = "You are $persona."
         val config = personaManagerSafe?.getPersona(personaId)
         val defaultSoul = config?.defaultSoul
-        if (!defaultSoul.isNullOrBlank()) return "$prefix\n\n$defaultSoul"
+        if (!defaultSoul.isNullOrBlank()) {
+            if (localModel) {
+                val identity = defaultSoul.lineSequence()
+                    .firstOrNull { it.startsWith("**Identity**:") }
+                    ?.removePrefix("**Identity**: You are ")
+                    ?.removePrefix("**Identity**:")
+                    ?.trim()
+                if (!identity.isNullOrBlank()) return "$prefix $identity"
+                return defaultSoul.lineSequence().first().take(100).let { "$prefix $it" }
+            }
+            return "$prefix\n\n$defaultSoul"
+        }
         return prefix
     }
 
@@ -929,6 +940,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putInt("$KEY_MODEL_MAX_TOKENS_PREFIX$modelId", maxTokens)
     }
 
+    // Temperature per model (0.0 = min, 2.0 = max, 0.8 = default)
+    fun getModelTemperature(modelId: String): Float = settings.getFloat("$KEY_MODEL_TEMPERATURE_PREFIX$modelId", 0.8f)
+
+    fun setModelTemperature(modelId: String, temperature: Float) {
+        settings.putFloat("$KEY_MODEL_TEMPERATURE_PREFIX$modelId", temperature.coerceIn(0.0f, 2.0f))
+    }
+
     // Default calendar account ID
     fun getDefaultCalendarId(): Long = settings.getLong(KEY_DEFAULT_CALENDAR_ID, -1L)
 
@@ -1061,6 +1079,7 @@ class AppSettings(internal val settings: Settings) {
 
         const val KEY_MODEL_CONTEXT_PREFIX = "model_context_"
         const val KEY_MODEL_MAX_TOKENS_PREFIX = "model_maxtokens_"
+        const val KEY_MODEL_TEMPERATURE_PREFIX = "model_temperature_"
 
         const val KEY_DEFAULT_CALENDAR_ID = "default_calendar_id"
 

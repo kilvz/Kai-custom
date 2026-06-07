@@ -456,6 +456,7 @@ class RemoteDataRepository(
         val catalogModel = engine.getAvailableModels().find { it.id == model.id }
         val storedContext = appSettings.getModelContextTokens(model.id)
         val contextTokens = if (storedContext > 0) storedContext else catalogModel?.defaultContextTokens ?: 0
+        val temperature = appSettings.getModelTemperature(model.id)
 
         val needsInit = engine.engineState.value != EngineState.READY || engine.currentModelId != model.id
         if (needsInit) {
@@ -497,7 +498,7 @@ class RemoteDataRepository(
         }
 
         return try {
-            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = localTools)
+            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = localTools, temperature = temperature)
         } catch (e: RuntimeException) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             // litert-lm's strict ANTLR function-call parser sometimes rejects malformed
@@ -506,7 +507,7 @@ class RemoteDataRepository(
             // error in the UI. With an empty tool list, LiteRTInferenceEngine sets
             // automaticToolCalling = false, so the parser is bypassed entirely on the retry.
             println("LiteRT: tool-call parser failed (${e.message?.take(200)}). Falling back to plain chat.")
-            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = emptyList())
+            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = emptyList(), temperature = temperature)
         }
     }
 
@@ -1880,7 +1881,7 @@ class RemoteDataRepository(
 
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? {
         val activePersona = personaManager.getActivePersona()
-        val soul = appSettings.getSoulText(activePersona.id).ifEmpty { getString(Res.string.default_soul) }
+        val soul = appSettings.getSoulText(activePersona.id, localModel = variant == SystemPromptVariant.CHAT_LOCAL).ifEmpty { getString(Res.string.default_soul) }
         val memoryEnabled = appSettings.isMemoryEnabled()
         val schedulingEnabled = appSettings.isSchedulingEnabled()
 
@@ -2577,6 +2578,12 @@ class RemoteDataRepository(
 
     override fun setModelMaxTokens(modelId: String, maxTokens: Int) {
         appSettings.setModelMaxTokens(modelId, maxTokens)
+    }
+
+    override fun getModelTemperature(modelId: String): Float = appSettings.getModelTemperature(modelId)
+
+    override fun setModelTemperature(modelId: String, temperature: Float) {
+        appSettings.setModelTemperature(modelId, temperature)
     }
 
     override fun getDefaultCalendarId(): Long = appSettings.getDefaultCalendarId()

@@ -200,6 +200,8 @@ internal fun ServicesContent(
     modelContextTokens: ImmutableMap<String, Int>,
     modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
     onChangeModelMaxTokens: (String, Int) -> Unit = { _, _ -> },
+    modelTemperature: ImmutableMap<String, Float> = persistentMapOf(),
+    onChangeModelTemperature: (String, Float) -> Unit = { _, _ -> },
     availableServicesToAdd: ImmutableList<Service>,
     isFreeFallbackEnabled: Boolean,
 ) {
@@ -241,6 +243,8 @@ internal fun ServicesContent(
                     modelContextTokens = modelContextTokens,
                     onChangeModelMaxTokens = onChangeModelMaxTokens,
                     modelMaxTokens = modelMaxTokens,
+                    onChangeModelTemperature = onChangeModelTemperature,
+                    modelTemperature = modelTemperature,
                 )
             }
         }
@@ -359,6 +363,8 @@ private fun ConfiguredServiceCardContent(
     modelContextTokens: ImmutableMap<String, Int> = persistentMapOf(),
     onChangeModelMaxTokens: (String, Int) -> Unit = { _, _ -> },
     modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelTemperature: (String, Float) -> Unit = { _, _ -> },
+    modelTemperature: ImmutableMap<String, Float> = persistentMapOf(),
 ) {
     Column(
         modifier = Modifier
@@ -489,6 +495,11 @@ private fun ConfiguredServiceCardContent(
                         modelId = entry.selectedModel?.id ?: entry.service.id,
                         maxTokens = modelMaxTokens[entry.selectedModel?.id ?: entry.service.id] ?: 0,
                         onChangeMaxTokens = { onChangeModelMaxTokens(entry.selectedModel?.id ?: entry.service.id, it) },
+                    )
+                    TemperatureSlider(
+                        modelId = entry.selectedModel?.id ?: entry.service.id,
+                        temperature = modelTemperature[entry.selectedModel?.id ?: entry.service.id] ?: 0.8f,
+                        onChangeTemperature = { onChangeModelTemperature(entry.selectedModel?.id ?: entry.service.id, it) },
                     )
                 }
 
@@ -1019,6 +1030,67 @@ private fun MaxTokensSlider(
         )
         Text(
             text = "Set to 512 for default (provider-specific). Adjust up for longer responses, down for faster responses.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun TemperatureSlider(
+    modelId: String,
+    temperature: Float,
+    onChangeTemperature: (Float) -> Unit,
+) {
+    var sliderValue by remember(temperature) { mutableStateOf(temperature.coerceIn(0.0f, 2.0f)) }
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Temperature",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = "%.2f".format(sliderValue),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = sliderValue,
+            onValueChange = { sliderValue = (it * 20).roundToInt() / 20f },
+            onValueChangeFinished = { onChangeTemperature(sliderValue) },
+            valueRange = 0.0f..2.0f,
+            steps = 39,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "0.0 — Deterministic",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Default: 0.8",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "2.0 — Creative",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Lower values make output more focused and deterministic. Higher values make it more creative and varied.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

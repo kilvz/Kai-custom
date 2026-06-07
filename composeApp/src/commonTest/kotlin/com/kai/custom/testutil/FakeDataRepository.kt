@@ -751,6 +751,8 @@ class FakeDataRepository : DataRepository {
     override fun setModelContextTokens(modelId: String, contextTokens: Int) {}
     override fun getModelMaxTokens(modelId: String): Int = 8192
     override fun setModelMaxTokens(modelId: String, maxTokens: Int) {}
+    override fun getModelTemperature(modelId: String): Float = 0.8f
+    override fun setModelTemperature(modelId: String, temperature: Float) {}
     override fun getDefaultCalendarId(): Long = -1L
     override fun setDefaultCalendarId(calendarId: Long) {}
     override suspend fun releaseLocalEngine() {}

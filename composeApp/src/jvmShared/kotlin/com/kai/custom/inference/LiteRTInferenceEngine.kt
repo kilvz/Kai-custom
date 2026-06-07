@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.io.File
@@ -32,6 +34,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class LiteRTInferenceEngine : LocalInferenceEngine {
 
+    private val mutex = Mutex()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var downloadJob: Job? = null
     private var idleReleaseJob: Job? = null
@@ -58,6 +61,10 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
     override val downloadError: StateFlow<DownloadError?> = _downloadError
 
     override suspend fun initialize(model: DownloadedModel, contextTokens: Int) {
+        mutex.withLock { initializeInternal(model, contextTokens) }
+    }
+
+    private suspend fun initializeInternal(model: DownloadedModel, contextTokens: Int) {
         withContext(Dispatchers.IO) {
             idleReleaseJob?.cancel()
             if (currentModelId == model.id && currentContextTokens == contextTokens && _engineState.value == EngineState.READY) return@withContext
@@ -79,7 +86,7 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                 // otherwise its GPU/CPU working set counts against the headroom check and
                 // switching between models spuriously fails (e.g. Qwen -> Gemma 4).
                 val hadExistingEngine = engine != null
-                release()
+                releaseInternal()
                 _engineState.value = EngineState.INITIALIZING
 
                 if (hadExistingEngine) {
@@ -160,6 +167,10 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
     }
 
     override suspend fun release() {
+        mutex.withLock { releaseInternal() }
+    }
+
+    private suspend fun releaseInternal() {
         withContext(Dispatchers.IO) {
             // Null before close so a concurrent release() sees null and skips —
             // Conversation.close() / Engine.close() throw IllegalStateException on double-close.
@@ -184,51 +195,54 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
         messages: List<InferenceMessage>,
         systemPrompt: String?,
         tools: List<LocalTool>,
-    ): String = withContext(Dispatchers.IO) {
-        idleReleaseJob?.cancel()
-        try {
-            val currentEngine = engine ?: throw IllegalStateException("Engine not initialized")
+        temperature: Float,
+    ): String {
+        return mutex.withLock {
+            withContext(Dispatchers.IO) {
+                idleReleaseJob?.cancel()
+            try {
+                val currentEngine = engine ?: throw IllegalStateException("Engine not initialized")
 
-            val lastUserIndex = messages.indexOfLast { it.role == "user" }
-            if (lastUserIndex < 0) throw IllegalStateException("No user message found")
+                val lastUserIndex = messages.indexOfLast { it.role == "user" }
+                if (lastUserIndex < 0) throw IllegalStateException("No user message found")
 
-            val sanitizedSystemPrompt = sanitizeForLiteRt(systemPrompt)
-            val initialMessages = messages.subList(0, lastUserIndex).map { msg ->
-                val sanitized = sanitizeForLiteRt(msg.content) ?: ""
-                when (msg.role) {
-                    "user" -> Message.user(sanitized)
-                    else -> Message.model(sanitized)
+                val sanitizedSystemPrompt = sanitizeForLiteRt(systemPrompt)
+                val initialMessages = messages.subList(0, lastUserIndex).map { msg ->
+                    val sanitized = sanitizeForLiteRt(msg.content) ?: ""
+                    when (msg.role) {
+                        "user" -> Message.user(sanitized)
+                        else -> Message.model(sanitized)
+                    }
                 }
-            }
 
-            val toolProviders = tools.map { tool(LocalToolOpenApiAdapter(it)) }
-            val config = ConversationConfig(
-                systemInstruction = sanitizedSystemPrompt?.let { Contents.of(it) },
-                initialMessages = initialMessages,
-                tools = toolProviders,
-                samplerConfig = SamplerConfig(topK = 40, topP = 0.95, temperature = 0.8),
-                // automaticToolCalling = true drives the parser; only enable when we
-                // actually have tools, otherwise plain-text responses get parsed as FCs.
-                automaticToolCalling = toolProviders.isNotEmpty(),
-            )
-            val prev = conversation
-            conversation = null
-            runCatching { prev?.close() }
-            val conv = currentEngine.createConversation(config)
-            conversation = conv
+                val toolProviders = tools.map { tool(LocalToolOpenApiAdapter(it)) }
+                val config = ConversationConfig(
+                    systemInstruction = sanitizedSystemPrompt?.let { Contents.of(it) },
+                    initialMessages = initialMessages,
+                    tools = toolProviders,
+                    samplerConfig = SamplerConfig(topK = 40, topP = 0.95, temperature = temperature.toDouble()),
+                    automaticToolCalling = toolProviders.isNotEmpty(),
+                )
+                val prev = conversation
+                conversation = null
+                runCatching { prev?.close() }
+                val conv = currentEngine.createConversation(config)
+                conversation = conv
 
-            val lastMessage = sanitizeForLiteRt(messages[lastUserIndex].content) ?: ""
-            val response = try {
-                withTimeout(INFERENCE_TIMEOUT_MS.milliseconds) {
-                    conv.sendMessage(lastMessage)
+                val lastMessage = sanitizeForLiteRt(messages[lastUserIndex].content) ?: ""
+                val response = try {
+                    withTimeout(INFERENCE_TIMEOUT_MS.milliseconds) {
+                        conv.sendMessage(lastMessage)
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    throw InferenceTimeoutException()
                 }
-            } catch (e: TimeoutCancellationException) {
-                throw InferenceTimeoutException()
+                stripThinkBlocks(response.toString())
+            } finally {
+                scheduleIdleRelease()
             }
-            stripThinkBlocks(response.toString())
-        } finally {
-            scheduleIdleRelease()
         }
+    }
     }
 
     /**
@@ -375,15 +389,17 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
     }
 
     override suspend fun deleteModel(modelId: String) {
-        withContext(Dispatchers.IO) {
-            // Wait for any in-flight idle release so its native teardown doesn't race with deleteRecursively().
-            idleReleaseJob?.cancelAndJoin()
-            idleReleaseJob = null
-            if (currentModelId == modelId) {
-                release()
+        mutex.withLock {
+            withContext(Dispatchers.IO) {
+                // Wait for any in-flight idle release so its native teardown doesn't race with deleteRecursively().
+                idleReleaseJob?.cancelAndJoin()
+                idleReleaseJob = null
+                if (currentModelId == modelId) {
+                    releaseInternal()
+                }
+                val modelDir = File(getModelStorageDirectory(), modelId)
+                modelDir.deleteRecursively()
             }
-            val modelDir = File(getModelStorageDirectory(), modelId)
-            modelDir.deleteRecursively()
         }
     }
 }

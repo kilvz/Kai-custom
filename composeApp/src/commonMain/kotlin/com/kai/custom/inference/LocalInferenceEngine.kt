@@ -105,6 +105,7 @@ interface LocalInferenceEngine {
         messages: List<InferenceMessage>,
         systemPrompt: String?,
         tools: List<LocalTool> = emptyList(),
+        temperature: Float = 0.8f,
     ): String
 
     fun getDownloadedModels(): List<DownloadedModel>
