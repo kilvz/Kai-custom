@@ -114,6 +114,7 @@ class ScreenReaderService : AccessibilityService() {
                 if (info.type != AccessibilityWindowInfo.TYPE_APPLICATION) continue
                 val root = info.root ?: continue
                 try {
+                    if (root.packageName?.toString() == "com.kai.custom") continue
                     val text = collectText(root)
                     if (text.isNotBlank()) {
                         cachedScreenText = text
@@ -318,7 +319,10 @@ class ScreenReaderService : AccessibilityService() {
 
         fun clickOnCoordinates(x: Float, y: Float): Boolean {
             val service = instance ?: return false
-            if (isOverlayActive) onOverlaySuppress?.invoke(true)
+            if (isOverlayActive) {
+                onOverlaySuppress?.invoke(true)
+                Thread.sleep(150)
+            }
             val path = Path().apply { moveTo(x, y) }
             val stroke = GestureDescription.StrokeDescription(path, 0, 100)
             val gesture = GestureDescription.Builder().addStroke(stroke).build()
@@ -405,7 +409,10 @@ class ScreenReaderService : AccessibilityService() {
         }
 
         private fun gestureScroll(service: AccessibilityService, forward: Boolean): Boolean {
-            if (isOverlayActive) onOverlaySuppress?.invoke(true)
+            if (isOverlayActive) {
+                onOverlaySuppress?.invoke(true)
+                Thread.sleep(150)
+            }
             val displayMetrics = service.resources.displayMetrics
             val cx = displayMetrics.widthPixels / 2f
             val startY: Float

@@ -82,12 +82,11 @@ internal class FloatingBallLayout(context: Context) : FrameLayout(context) {
             onHeaderDragEnd = {
                 if (isHeaderDragging) {
                     isHeaderDragging = false
-                    val dm = context.resources.displayMetrics
                     val cp = chatView.layoutParams as FrameLayout.LayoutParams
                     val newLeft = (headerStartMarginLeft + headerDragTotalX.toInt())
-                        .coerceIn(0, dm.widthPixels - chatWidthPx)
+                        .coerceIn(0, context.resources.displayMetrics.widthPixels - chatWidthPx)
                     val newTop = (headerStartMarginTop + headerDragTotalY.toInt())
-                        .coerceIn(0, dm.heightPixels - chatHeightPx)
+                        .coerceIn(0, context.resources.displayMetrics.heightPixels - chatHeightPx)
                     cp.setMargins(newLeft, newTop, 0, 0)
                     chatView.translationX = 0f
                     chatView.translationY = 0f
@@ -101,22 +100,20 @@ internal class FloatingBallLayout(context: Context) : FrameLayout(context) {
         addView(chatView, LayoutParams(chatWidthPx, chatHeightPx))
 
         com.kai.custom.ScreenReaderService.onOverlaySuppress = { suppress ->
-            if (suppress) {
-                dismissOverlay?.visibility = View.GONE
-                layoutParams?.let { lp ->
-                    lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    try {
-                        windowManager.updateViewLayout(this, lp)
-                    } catch (_: Exception) {}
+            if (!isHeaderDragging && !isDragging) {
+                if (suppress) {
+                    dismissOverlay?.visibility = View.GONE
+                    layoutParams?.let { lp ->
+                        lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        try { windowManager.updateViewLayout(this, lp) } catch (_: Exception) {}
+                    }
+                } else {
+                    layoutParams?.let { lp ->
+                        lp.flags = lp.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
+                        try { windowManager.updateViewLayout(this, lp) } catch (_: Exception) {}
+                    }
+                    dismissOverlay?.visibility = View.VISIBLE
                 }
-            } else {
-                layoutParams?.let { lp ->
-                    lp.flags = lp.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-                    try {
-                        windowManager.updateViewLayout(this, lp)
-                    } catch (_: Exception) {}
-                }
-                dismissOverlay?.visibility = View.VISIBLE
             }
         }
     }

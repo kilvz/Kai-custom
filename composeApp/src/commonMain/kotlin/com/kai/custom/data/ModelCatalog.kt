@@ -349,6 +349,7 @@ internal object ModelCatalog {
         "qwen3.5-plus" to CuratedModelInfo("Qwen3.5 Plus", 128_000, "2026-02"),
         "qwen3.6-plus-free" to CuratedModelInfo("Qwen3.6 Plus (Free)", 131_072, "2026-03"),
         "qwen3.7-max" to CuratedModelInfo("Qwen3.7 Max", 262_144, "2026-05"),
+        "qwen3.7-max-20260517" to CuratedModelInfo("Qwen3.7 Max", 262_144, "2026-05"),
         "qwen2.5-72b-instruct" to CuratedModelInfo("Qwen 2.5 72B", 131_072, "2024-09", "72B"),
         "qwen2.5-72b-instruct-turbo" to CuratedModelInfo("Qwen 2.5 72B", 131_072, "2024-09", "72B"),
         "qwen2.5-72b" to CuratedModelInfo("Qwen 2.5 72B", 131_072, "2024-09", "72B"),
@@ -433,6 +434,7 @@ internal object ModelCatalog {
         // ==============================================================
         // MiniMax
         // ==============================================================
+        "minimax-m3" to CuratedModelInfo("MiniMax M3", 1_000_000, "2026-05"),
         "minimax-m2.7" to CuratedModelInfo("MiniMax M2.7", 1_000_000, "2026-03"),
         "minimax-m2.5-free" to CuratedModelInfo("MiniMax M2.5 (Free)", 1_000_000, "2025-12"),
         "minimax-m2" to CuratedModelInfo("MiniMax M2", 1_000_000, "2025-10"),
@@ -692,6 +694,9 @@ internal object ModelCatalog {
         // ==============================================================
         // Anthropic — additional
         // ==============================================================
+        "claude-opus-4-8" to CuratedModelInfo("Claude Opus 4.8", 1_000_000, "2026-06"),
+        "claude-opus-4.8" to CuratedModelInfo("Claude Opus 4.8", 1_000_000, "2026-06"),
+        "claude-opus-4-8-thinking" to CuratedModelInfo("Claude Opus 4.8 Thinking", 1_000_000, "2026-06"),
         "claude-opus-4.7" to CuratedModelInfo("Claude Opus 4.7", 1_000_000, "2026-04"),
         "claude-opus-4-7" to CuratedModelInfo("Claude Opus 4.7", 1_000_000, "2026-04"),
         "claude-opus-4-7-thinking" to CuratedModelInfo("Claude Opus 4.7 Thinking", 1_000_000, "2026-04"),

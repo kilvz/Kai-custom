@@ -99,24 +99,24 @@ internal class FloatingChatView(
             background = headerBg
             setPadding(dp(14), dp(12), dp(10), dp(12))
         }
-        var headerDragStartX = 0f
-        var headerDragStartY = 0f
+        var headerDragStartRawX = 0f
+        var headerDragStartRawY = 0f
         header.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    headerDragStartX = event.x
-                    headerDragStartY = event.y
+                    headerDragStartRawX = event.rawX
+                    headerDragStartRawY = event.rawY
                     v.parent.requestDisallowInterceptTouchEvent(true)
                     true
                 }
 
                 MotionEvent.ACTION_MOVE -> {
-                    val dx = event.x - headerDragStartX
-                    val dy = event.y - headerDragStartY
+                    val dx = event.rawX - headerDragStartRawX
+                    val dy = event.rawY - headerDragStartRawY
                     if (Math.abs(dx) > 5f || Math.abs(dy) > 5f) {
                         onHeaderDrag?.invoke(dx, dy)
-                        headerDragStartX = event.x
-                        headerDragStartY = event.y
+                        headerDragStartRawX = event.rawX
+                        headerDragStartRawY = event.rawY
                     }
                     true
                 }
