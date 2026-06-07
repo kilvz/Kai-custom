@@ -156,22 +156,10 @@ fun PluginSettingsCard() {
                                 statusText = "Generating persona..."
                                 sentPrompt = personaPrompt
 
-                                val chatHistory = dataRepository.chatHistory.value
-                                dataRepository.ask(personaPrompt, emptyList(), null)
-
-                                // Read the assistant response from chat history
-                                val history = dataRepository.chatHistory.value
-                                val response = history.lastOrNull { it.role == com.kai.custom.ui.chat.History.Role.ASSISTANT }?.content
-                                    ?: history.lastOrNull()?.content ?: ""
-
-                                // Restore chat history so plugin doesn't pollute user's chat
-                                // Actually, chatHistory is a MutableStateFlow — we can restore it
-                                @Suppress("UNCHECKED_CAST")
-                                (dataRepository.chatHistory as? kotlinx.coroutines.flow.MutableStateFlow<List<com.kai.custom.ui.chat.History>>)
-                                    ?.value = chatHistory
+                                val response = dataRepository.askSilently(personaPrompt, 300_000L)
 
                                 if (response.isBlank()) { error = "AI returned empty response."; return@launch }
-                                step1Response = response.take(2000)
+                                step1Response = response.take(5000)
                                 statusText = "Done (${response.length} chars)"
 
                                 val name = description.split(" ").take(3).joinToString(" ").replaceFirstChar(Char::uppercase)
@@ -200,8 +188,9 @@ fun PluginSettingsCard() {
                                 usingCondensed = true
                             } catch (e: Exception) {
                                 error = e.message ?: "Generation failed."
+                            } finally {
+                                generating = false
                             }
-                            generating = false
                         }
                     },
                     enabled = !generating && prompt.isNotBlank(),
@@ -214,18 +203,18 @@ fun PluginSettingsCard() {
                         CircularProgressIndicator(modifier = Modifier.padding(start = 8.dp))
                         Spacer(Modifier.width(8.dp))
                     }
-                    Column {
-                        Text(statusText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        if (step1Response.isNotBlank()) {
-                            Spacer(Modifier.height(4.dp))
-                            Text("AI response:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            SelectionContainer {
-                                Text(
-                                    text = step1Response,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
+                    Text(statusText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                
+                if (step1Response.isNotBlank()) {
+                    Column(modifier = Modifier.padding(top = 8.dp)) {
+                        Text("Raw AI Response:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        SelectionContainer {
+                            Text(
+                                text = step1Response,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                 }

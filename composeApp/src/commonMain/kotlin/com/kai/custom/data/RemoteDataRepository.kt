@@ -2448,41 +2448,15 @@ class RemoteDataRepository(
         return AskWithToolsResult(response = result.content, toolCalls = toolCalls)
     }
 
-    override suspend fun askSilently(question: String): String {
+    override suspend fun askSilently(question: String, timeoutMs: Long): String {
         val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
         if (fallbackEntries.isEmpty()) return ""
 
         val entry = fallbackEntries.first()
-        val messages = listOf(History(role = History.Role.USER, content = question))
-
-        if (entry.service.isOnDevice) {
-            val localPrompt = getActiveSystemPrompt(SystemPromptVariant.CHAT_LOCAL)
-            return askWithLocalEngine(messages, localPrompt, entry.instanceId, MutableStateFlow(messages))
-        }
-
-        val systemPrompt = getActiveSystemPrompt()
-        val creds = instanceCredentials(entry.instanceId, entry.service)
-
-        return when (entry.service) {
-            Service.Gemini -> {
-                val geminiMessages = messages.map { it.toGeminiMessageDto() }
-                val response = requests.geminiChat(creds, geminiMessages, systemInstruction = systemPrompt).getOrThrow()
-                response.extractText()
-            }
-
-            Service.Anthropic -> {
-                val anthropicMessages = buildAnthropicMessages(messages)
-                val response = requests.anthropicChat(creds, anthropicMessages, systemInstruction = systemPrompt).getOrThrow()
-                response.extractText()
-            }
-
-            else -> {
-                val openAIMessages = buildOpenAIMessages(entry.service, messages, systemPrompt)
-                val response = requests.openAICompatibleChat(entry.service, creds, openAIMessages).getOrThrow()
-                response.choices.firstOrNull()?.message?.effectiveContent ?: ""
-            }
-        }
+        return askSilentlyWithInstance(entry.instanceId, question, timeoutMs)
     }
+
+
 
     override suspend fun askSilentlyWithInstance(instanceId: String, prompt: String, timeoutMs: Long): String {
         val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId }
