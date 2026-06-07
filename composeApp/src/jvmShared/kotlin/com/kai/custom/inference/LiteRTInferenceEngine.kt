@@ -41,6 +41,9 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
     override var currentModelId: String? = null
         private set
     private var currentContextTokens: Int = 0
+    private var useCpuOnly: Boolean = false
+
+    private val crashFlagFile: File by lazy { File(getModelCacheDirectory(), GPU_CRASH_FLAG) }
 
     private val _engineState = MutableStateFlow(EngineState.UNINITIALIZED)
     override val engineState: StateFlow<EngineState> = _engineState
@@ -63,6 +66,13 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                 val modelFile = File(model.filePath)
                 if (!modelFile.exists() || modelFile.length() < 1_000_000) {
                     throw IllegalStateException("Model file missing or too small: ${model.filePath}")
+                }
+
+                // Check GPU crash flag from previous run
+                if (crashFlagFile.exists()) {
+                    println("LiteRT: GPU crash flag detected, forcing CPU backend")
+                    crashFlagFile.delete()
+                    useCpuOnly = true
                 }
 
                 // Release any currently-loaded engine before measuring available memory,
@@ -102,25 +112,41 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                 println("LiteRT: initializing model=${model.id} maxNumTokens=$requestedTokens")
 
                 val newEngine = try {
-                    try {
-                        initWithBackend(Backend.GPU(), requestedTokens)
-                    } catch (e: Exception) {
+                    if (useCpuOnly) {
+                        println("LiteRT: GPU disabled by crash flag, using CPU")
                         initWithBackend(Backend.CPU(), requestedTokens)
+                    } else {
+                        // Set crash flag before GPU init — if SIGSEGV kills us, flag persists
+                        crashFlagFile.createNewFile()
+                        try {
+                            initWithBackend(Backend.GPU(), requestedTokens)
+                        } catch (e: Exception) {
+                            crashFlagFile.delete()
+                            initWithBackend(Backend.CPU(), requestedTokens)
+                        }
                     }
                 } catch (e: Exception) {
                     // Context size not supported — retry with model default
                     println("LiteRT: init failed with maxNumTokens=$requestedTokens, falling back to default: ${e.message}")
                     if (requestedTokens != null) {
-                        try {
-                            initWithBackend(Backend.GPU(), null)
-                        } catch (e2: Exception) {
+                        if (useCpuOnly) {
                             initWithBackend(Backend.CPU(), null)
+                        } else {
+                            crashFlagFile.createNewFile()
+                            try {
+                                initWithBackend(Backend.GPU(), null)
+                            } catch (e2: Exception) {
+                                crashFlagFile.delete()
+                                initWithBackend(Backend.CPU(), null)
+                            }
                         }
                     } else {
                         throw e
                     }
                 }
 
+                // GPU init succeeded — clear crash flag
+                crashFlagFile.delete()
                 engine = newEngine
                 conversation = newEngine.createConversation()
                 currentModelId = model.id
@@ -142,6 +168,7 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
             conversation = null
             engine = null
             currentModelId = null
+            useCpuOnly = false
             _engineState.value = EngineState.UNINITIALIZED
             runCatching { convToClose?.close() }
             runCatching { engineToClose?.close() }
@@ -229,6 +256,7 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
         private const val MIN_MEMORY_HEADROOM_BYTES = 512L * 1024 * 1024 // 512 MB
         private const val DOWNLOAD_SPACE_BUFFER_BYTES = 500L * 1024 * 1024 // 500 MB
         private const val GPU_DRAIN_DELAY_MS = 750L
+        private const val GPU_CRASH_FLAG = "gpu_crashed.flag"
     }
 
     override fun getDownloadedModels(): List<DownloadedModel> {

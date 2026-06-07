@@ -14,8 +14,16 @@ data class RemotePersonaEntry(
     val description: String = "",
 )
 
-@Serializable
-private data class PersonaIndex(val personas: List<RemotePersonaEntry>)
+enum class PersonaFormat(val displayName: String) {
+    AUTO("Auto (match provider)"),
+    CONDENSED("Condensed"),
+    SYNTHESIZED("Full (synthesized)"),
+    CHATGPT("ChatGPT"),
+    CLAUDE("Claude"),
+    GEMINI("Gemini"),
+    CHARACTERAI("Character.AI"),
+    ALTERNATIVE("Alternative"),
+}
 
 object PersonaIndexCache {
     val entries: List<String> = listOf(
@@ -59,6 +67,29 @@ val PERSONA_INDEX_CACHE: List<RemotePersonaEntry> = PersonaIndexCache.entries.ma
     RemotePersonaEntry(id = name, name = display, description = "Community persona")
 }
 
+private val FORMAT_TO_FILE: Map<PersonaFormat, String> = mapOf(
+    PersonaFormat.CONDENSED to "prompts/condensed.md",
+    PersonaFormat.CHATGPT to "prompts/chatgpt.md",
+    PersonaFormat.CLAUDE to "prompts/claude.md",
+    PersonaFormat.GEMINI to "prompts/gemini.md",
+    PersonaFormat.CHARACTERAI to "prompts/characterai.md",
+    PersonaFormat.ALTERNATIVE to "prompts/alternative.md",
+)
+
+private val SERVICE_TO_FORMAT: Map<String, PersonaFormat> = mapOf(
+    Service.OpenAI.id to PersonaFormat.CHATGPT,
+    Service.Anthropic.id to PersonaFormat.CLAUDE,
+    Service.Gemini.id to PersonaFormat.GEMINI,
+)
+
+private fun detectBestFormat(services: List<ServiceInstance>): PersonaFormat {
+    for (instance in services) {
+        val match = SERVICE_TO_FORMAT[instance.serviceId]
+        if (match != null) return match
+    }
+    return PersonaFormat.CONDENSED
+}
+
 class RemotePersonaCatalog {
 
     companion object {
@@ -72,8 +103,9 @@ class RemotePersonaCatalog {
         return try {
             val client = httpClient()
             val raw = client.get(INDEX_URL) {
-                header("User-Agent", "Kai-custom/3.19.0")
+                header("User-Agent", "Kai-custom/3.20.0")
             }.bodyAsText()
+            client.close()
             val idx = json.decodeFromString<PersonaIndex>(raw)
             idx.personas.ifEmpty { PERSONA_INDEX_CACHE }
         } catch (_: Exception) {
@@ -81,13 +113,27 @@ class RemotePersonaCatalog {
         }
     }
 
-    suspend fun downloadPersona(id: String): PersonaConfig? {
+    private suspend fun fetchUrl(url: String): String? = try {
+        val client = httpClient()
+        val raw = client.get(url) {
+            header("User-Agent", "Kai-custom/3.20.0")
+        }.bodyAsText()
+        client.close()
+        if (raw.isBlank()) null else raw
+    } catch (_: Exception) { null }
+
+    suspend fun downloadPersona(id: String, format: PersonaFormat = PersonaFormat.CONDENSED, configuredServices: List<ServiceInstance> = emptyList()): PersonaConfig? {
         return try {
-            val client = httpClient()
-            val raw = client.get("$RAW_BASE/$id/synthesized.md") {
-                header("User-Agent", "Kai-custom/3.19.0")
-            }.bodyAsText()
-            if (raw.isBlank()) return null
+            val effectiveFormat = if (format == PersonaFormat.AUTO) detectBestFormat(configuredServices) else format
+            val raw = if (effectiveFormat == PersonaFormat.SYNTHESIZED) {
+                fetchUrl("$RAW_BASE/$id/synthesized.md")
+            } else {
+                val file = FORMAT_TO_FILE[effectiveFormat]
+                if (file != null) fetchUrl("$RAW_BASE/$id/$file") ?: fetchUrl("$RAW_BASE/$id/synthesized.md")
+                else fetchUrl("$RAW_BASE/$id/synthesized.md")
+            }
+            if (raw == null || raw.isBlank()) return null
+            val cleaned = raw.trim().substringAfter("---").trim().ifEmpty { raw.trim() }
             val name = id.replace("-", " ").replace("_", " ")
                 .split(" ").joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
             PersonaConfig(
@@ -97,7 +143,7 @@ class RemotePersonaCatalog {
                 behaviorStyle = BehaviorStyle.CUSTOM,
                 languageStyle = LanguageStyle.NONE,
                 characterType = CharacterType.NONE,
-                defaultSoul = raw.trim(),
+                defaultSoul = cleaned,
                 renderMode = RenderMode.CHARACTER,
                 isBuiltIn = false,
             )
@@ -106,3 +152,6 @@ class RemotePersonaCatalog {
         }
     }
 }
+
+@Serializable
+private data class PersonaIndex(val personas: List<RemotePersonaEntry>)

@@ -660,6 +660,10 @@ fun SettingsScreenContent(
                                     onExportSaved = onExportSaved,
                                 )
                             }
+
+                            SettingsTab.Plugins -> {
+                                PluginSettingsCard()
+                            }
                         }
 
                         Spacer(Modifier.height(16.dp))
@@ -753,6 +757,7 @@ private fun SettingsTabSelector(
                             SettingsTab.Sandbox -> stringResource(Res.string.settings_tab_sandbox)
                             SettingsTab.Integrations -> stringResource(Res.string.settings_tab_integrations)
                             SettingsTab.SSH -> stringResource(Res.string.settings_tab_ssh)
+                            SettingsTab.Plugins -> "Plugins"
                         },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         color = MaterialTheme.colorScheme.primary,

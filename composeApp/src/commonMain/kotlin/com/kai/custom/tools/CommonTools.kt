@@ -1,9 +1,15 @@
 package com.kai.custom.tools
 
 import com.kai.custom.data.AppSettings
+import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.CharacterType
+import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.MemoryCategory
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.MemoryStore
+import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.PersonaManager
+import com.kai.custom.data.RenderMode
 import com.kai.custom.httpClient
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
@@ -18,6 +24,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_get_local_time_description
 import kai.composeapp.generated.resources.tool_get_local_time_name
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kai.composeapp.generated.resources.tool_get_location_description
 import kai.composeapp.generated.resources.tool_get_location_name
 import kai.composeapp.generated.resources.tool_memory_forget_description
@@ -602,4 +610,153 @@ object CommonTools {
         diaryWriteTool(memoryStore),
         diaryReadTool(memoryStore),
     )
+
+    // ── Persona Management Tools ──
+
+    val savePersonaToolSchema = ToolSchema(
+        name = "save_persona",
+        description = "Save a character persona. First generate BOTH a condensed version AND a full synthesized profile, then call this tool with both. The condensed version is used by default; the full version is stored so the user can switch anytime.",
+        parameters = mapOf(
+            "name" to ParameterSchema(
+                type = "string",
+                description = "Name for the persona",
+                required = true,
+            ),
+            "character_text" to ParameterSchema(
+                type = "string",
+                description = "CONDENSED version — must use this exact format:\n\n---\n\n**Identity**: You are [sentence].\n\n**Key Characteristics**:\n*   **[Trait]**: [description]\n\n**Communication Style**:\n[paragraphs]\n\n**Essential Knowledge**:\n[paragraph]\n\n**Specific Behaviors & Phrases**:\n*   [behavior]\n\n**General Response Guidelines**:\n*   **[guideline]**: [description]",
+                required = true,
+            ),
+            "full_text" to ParameterSchema(
+                type = "string",
+                description = "FULL synthesized profile — include ALL sections: ### 0. Core Essence, ### 1. Biographical Foundation and Personality, ### 2. Voice/Communication Analysis, ### 3. Signature Language Patterns, ### 4. Narrative/Communication Structure, ### 5. Subject Matter Expertise, ### 6. Philosophical Framework, ### 7. Emotional Range and Expression, ### 8. Distinctive Patterns and Quirks, ### 9. Evolution Over Time, ### 10. Practical Application Guidelines, ### 10.5. Platform Adaptation Bank. Written in second person. 3,500-4,500 words.",
+                required = false,
+            ),
+            "description" to ParameterSchema(
+                type = "string",
+                description = "Short description of the persona (one sentence).",
+                required = false,
+            ),
+        ),
+    )
+
+    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+    fun savePersonaTool(
+        appSettings: AppSettings,
+        personaManager: PersonaManager,
+    ): Tool = object : Tool {
+        override val schema = savePersonaToolSchema
+        override val timeout: Duration = 30.seconds
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val name = (args["name"] as? String)?.trim()
+                ?: return mapOf("success" to false, "error" to "name is required")
+            val characterText = (args["character_text"] as? String)?.trim()
+                ?: return mapOf("success" to false, "error" to "character_text is required")
+            val fullText = (args["full_text"] as? String)?.trim()
+            val description = (args["description"] as? String)?.trim() ?: ""
+
+            val id = "persona_${name.lowercase().replace(Regex("[^a-z0-9]"), "_")}_${kotlin.uuid.Uuid.random().toString().take(6)}"
+
+            if (!fullText.isNullOrBlank()) {
+                appSettings.settings.putString("persona_full_$id", fullText)
+            }
+
+            val config = PersonaConfig(
+                id = id,
+                name = name.take(50),
+                description = description.take(200),
+                behaviorStyle = BehaviorStyle.CUSTOM,
+                languageStyle = LanguageStyle.NONE,
+                characterType = CharacterType.NONE,
+                defaultSoul = characterText,
+                renderMode = RenderMode.CHARACTER,
+                isBuiltIn = false,
+            )
+            personaManager.savePersona(config)
+
+            val versions = if (!fullText.isNullOrBlank()) " (condensed + full)" else " (condensed)"
+            return mapOf(
+                "success" to true,
+                "persona_id" to id,
+                "persona_name" to name,
+                "has_full_version" to !fullText.isNullOrBlank(),
+                "message" to "Persona '$name' saved$versions. Call switch_persona with id '$id' to activate it.",
+            )
+        }
+    }
+
+    val switchPersonaToolSchema = ToolSchema(
+        name = "switch_persona",
+        description = "Switch the active persona to an existing one. Use list_personas first to find available personas.",
+        parameters = mapOf(
+            "persona_id" to ParameterSchema(
+                type = "string",
+                description = "The ID of the persona to switch to",
+                required = true,
+            ),
+        ),
+    )
+
+    fun switchPersonaTool(personaManager: PersonaManager): Tool = object : Tool {
+        override val schema = switchPersonaToolSchema
+        override val timeout: Duration = 10.seconds
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val personaId = (args["persona_id"] as? String)?.trim()
+                ?: return mapOf("success" to false, "error" to "persona_id is required")
+            val persona = personaManager.getPersona(personaId)
+            if (persona == null) return mapOf("success" to false, "error" to "Persona not found: $personaId")
+            personaManager.setActivePersonaId(personaId)
+            return mapOf("success" to true, "persona_name" to persona.name, "message" to "Switched to '${persona.name}'.")
+        }
+    }
+
+    val listPersonasToolSchema = ToolSchema(
+        name = "list_personas",
+        description = "List all available personas (both built-in and custom). Returns their IDs and names. Use the ID to switch with switch_persona.",
+        parameters = mapOf(),
+    )
+
+    fun listPersonasTool(personaManager: PersonaManager): Tool = object : Tool {
+        override val schema = listPersonasToolSchema
+        override val timeout: Duration = 10.seconds
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val all = personaManager.getAllPersonas()
+            val activeId = personaManager.getActivePersonaId()
+            return mapOf(
+                "success" to true,
+                "active_persona_id" to activeId,
+                "personas" to all.map { mapOf("id" to it.id, "name" to it.name, "is_active" to (it.id == activeId)) },
+            )
+        }
+    }
+
+    val deletePersonaToolSchema = ToolSchema(
+        name = "delete_persona",
+        description = "Delete a custom persona by its ID. Cannot delete built-in personas. Use list_personas first to find persona IDs.",
+        parameters = mapOf(
+            "persona_id" to ParameterSchema(
+                type = "string",
+                description = "The ID of the persona to delete",
+                required = true,
+            ),
+        ),
+    )
+
+    fun deletePersonaTool(personaManager: PersonaManager): Tool = object : Tool {
+        override val schema = deletePersonaToolSchema
+        override val timeout: Duration = 10.seconds
+
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val personaId = (args["persona_id"] as? String)?.trim()
+                ?: return mapOf("success" to false, "error" to "persona_id is required")
+            val persona = personaManager.getPersona(personaId)
+            if (persona == null) return mapOf("success" to false, "error" to "Persona not found: $personaId")
+            if (persona.isBuiltIn) return mapOf("success" to false, "error" to "Cannot delete built-in persona")
+            personaManager.deletePersona(personaId)
+            return mapOf("success" to true, "message" to "Persona '${persona.name}' deleted.")
+        }
+    }
 }

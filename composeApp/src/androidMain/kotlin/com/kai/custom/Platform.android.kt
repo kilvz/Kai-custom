@@ -31,7 +31,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import com.kai.custom.data.AppSettings
+import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailStore
+import com.kai.custom.data.PersonaManager
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.NotificationStore
 import com.kai.custom.data.SmsDraftStore
@@ -387,6 +389,9 @@ actual fun getAvailableTools(): List<Tool> {
     val emailStore: EmailStore by inject(EmailStore::class.java)
     val toolPermissionBridge: ToolPermissionBridge by inject(ToolPermissionBridge::class.java)
 
+    val dataRepository: DataRepository by inject(DataRepository::class.java)
+    val personaManager = PersonaManager(appSettings)
+
     val allTools = buildList {
         if (appSettings.isMemoryEnabled()) {
             addAll(CommonTools.getMemoryTools(memoryStore))
@@ -399,6 +404,12 @@ actual fun getAvailableTools(): List<Tool> {
         }
         if (appSettings.isToolEnabled(CommonTools.localTimeTool.schema.name)) {
             add(CommonTools.localTimeTool)
+        }
+        if (appSettings.isToolEnabled(CommonTools.savePersonaToolSchema.name)) {
+            add(CommonTools.savePersonaTool(appSettings, personaManager))
+            add(CommonTools.switchPersonaTool(personaManager))
+            add(CommonTools.listPersonasTool(personaManager))
+            add(CommonTools.deletePersonaTool(personaManager))
         }
 
         if (appSettings.isToolEnabled(CommonTools.ipLocationTool.schema.name)) {

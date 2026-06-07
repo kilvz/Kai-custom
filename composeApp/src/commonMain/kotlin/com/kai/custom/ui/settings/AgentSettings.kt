@@ -43,6 +43,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.BehaviorStyle
+import com.kai.custom.data.DataRepository
+import com.kai.custom.data.PersonaFormat
 import com.kai.custom.data.CharacterType
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.LanguageStyle
@@ -514,6 +516,7 @@ private fun SoulEditor(
             title = "Expand Thinking",
             description = "Always expand the thinking section by default",
             checked = expandThinking,
+            enabled = !isCustomBehavior && !hideThinking,
             onCheckedChange = {
                 expandThinking = it
                 appSettings.setExpandThinking(it)
@@ -531,7 +534,7 @@ private fun SoulEditor(
         Spacer(Modifier.height(12.dp))
 
         // ── Character Definition (persona defaultSoul) ──
-        if (activePersona != null) {
+        if (activePersona != null && !activePersona.id.startsWith("community_")) {
             val isCustom = !activePersona.isBuiltIn
             var editedDefaultSoul by remember(activePersona.id, activePersona.defaultSoul) {
                 mutableStateOf(activePersona.defaultSoul)
@@ -572,6 +575,50 @@ private fun SoulEditor(
                     },
                     modifier = Modifier.align(CenterHorizontally).handCursor(),
                 ) { Text("Save Character Definition") }
+            }
+            // Toggle between condensed and full profile
+            val fullProfileKey = "persona_full_${activePersona.id}"
+            val hasFullProfile = appSettings.settings.getStringOrNull(fullProfileKey) != null
+            var isFullProfileActive by remember(activePersona.id) {
+                mutableStateOf(activePersona.defaultSoul.length > 10000 || appSettings.settings.getStringOrNull("profile_version_${activePersona.id}") == "full")
+            }
+            if (hasFullProfile) {
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedButton(
+                        onClick = {
+                            val fullText = appSettings.settings.getString(fullProfileKey, "")
+                            if (isFullProfileActive) {
+                                // Switch to condensed — restore the original condensed from the full key prefix
+                                val condensed = appSettings.settings.getString("persona_condensed_${activePersona.id}", activePersona.defaultSoul)
+                                onSavePersona(activePersona.copy(defaultSoul = condensed))
+                                appSettings.settings.putString("profile_version_${activePersona.id}", "condensed")
+                            } else {
+                                // Switch to full
+                                appSettings.settings.putString("persona_condensed_${activePersona.id}", activePersona.defaultSoul)
+                                onSavePersona(activePersona.copy(defaultSoul = fullText))
+                                appSettings.settings.putString("profile_version_${activePersona.id}", "full")
+                            }
+                            isFullProfileActive = !isFullProfileActive
+                        },
+                        modifier = Modifier.handCursor(),
+                    ) {
+                        Text(if (isFullProfileActive) "Switch to Condensed" else "Switch to Full Profile")
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = if (isFullProfileActive) "Full profile active" else "Condensed active",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {},
+                    enabled = false,
+                    modifier = Modifier.handCursor(),
+                ) { Text("Full profile not available") }
             }
             Spacer(Modifier.height(16.dp))
             HorizontalDivider()
@@ -938,56 +985,49 @@ private fun CommunityPersonaBrowseDialog(
     onCloseAll: () -> Unit,
 ) {
     val catalog = remember { RemotePersonaCatalog() }
+    val scope = rememberCoroutineScope()
+    val appSettings: AppSettings = koinInject()
+    val dataRepository: DataRepository = koinInject()
     var personas by remember { mutableStateOf<List<RemotePersonaEntry>?>(null) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf(false) }
     var importing by remember { mutableStateOf(false) }
     var importedSuccess by remember { mutableStateOf(false) }
     var importedName by remember { mutableStateOf("") }
+    var importFailed by remember { mutableStateOf(false) }
+    var selectedFormat by remember { mutableStateOf(PersonaFormat.AUTO) }
+    var formatExpanded by remember { mutableStateOf(false) }
+    val configuredServices = remember { dataRepository.getConfiguredServiceInstances() }
 
     LaunchedEffect(Unit) {
         val list = catalog.listPersonas()
         if (list.isNotEmpty()) {
             personas = list
-            loading = false
-        } else {
-            loading = false
-            error = true
         }
-    }
-
-    if (importing) {
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text("Importing") },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    if (importedSuccess) {
-                        Text("Imported: $importedName")
-                        Spacer(Modifier.height(8.dp))
-                        Text("Persona added and activated.", style = MaterialTheme.typography.bodySmall)
-                    } else {
-                        CircularProgressIndicator()
-                        Spacer(Modifier.height(8.dp))
-                        Text("Downloading persona...")
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = onCloseAll,
-                    modifier = Modifier.handCursor(),
-                ) { Text("Done") }
-            },
-        )
-        return
+        loading = false
+        error = list.isEmpty()
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Community Personas") },
+        title = { Text(if (importing) "Importing" else "Community Personas") },
         text = {
             when {
+                importing -> {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        if (importedSuccess) {
+                            Text("Imported: $importedName")
+                            Spacer(Modifier.height(8.dp))
+                            Text("Persona added and activated.", style = MaterialTheme.typography.bodySmall)
+                        } else if (importFailed) {
+                            Text("Failed to download persona.")
+                        } else {
+                            CircularProgressIndicator()
+                            Spacer(Modifier.height(8.dp))
+                            Text("Downloading persona...")
+                        }
+                    }
+                }
                 loading -> Text("Loading...")
                 error -> Text("Could not load community personas.")
                 personas.isNullOrEmpty() -> Text("No personas available.")
@@ -1002,11 +1042,50 @@ private fun CommunityPersonaBrowseDialog(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(Modifier.height(8.dp))
+                        // Format selector
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Format: ", style = MaterialTheme.typography.bodySmall)
+                            Box {
+                                OutlinedButton(
+                                    onClick = { formatExpanded = true },
+                                    modifier = Modifier.handCursor(),
+                                ) { Text(selectedFormat.displayName, maxLines = 1) }
+                                DropdownMenu(
+                                    expanded = formatExpanded,
+                                    onDismissRequest = { formatExpanded = false },
+                                ) {
+                                    PersonaFormat.entries.forEach { fmt ->
+                                        DropdownMenuItem(
+                                            text = { Text(fmt.displayName) },
+                                            onClick = { selectedFormat = fmt; formatExpanded = false },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
                         val list = personas ?: emptyList()
                         list.forEach { entry ->
                             var downloading by remember { mutableStateOf(false) }
                             OutlinedButton(
-                                onClick = { downloading = true },
+                                onClick = {
+                                    downloading = true
+                                    importing = true
+                                    importFailed = false
+                                    importedSuccess = false
+                                    scope.launch {
+                                        val config = catalog.downloadPersona(entry.id, selectedFormat, configuredServices)
+                                        if (config != null) {
+                                            onSavePersona(config)
+                                            onSwitchPersona(config.id)
+                                            importedName = config.name
+                                            importedSuccess = true
+                                        } else {
+                                            importFailed = true
+                                        }
+                                        downloading = false
+                                    }
+                                },
                                 modifier = Modifier.fillMaxWidth().handCursor(),
                                 enabled = !downloading,
                             ) {
@@ -1023,22 +1102,6 @@ private fun CommunityPersonaBrowseDialog(
                                     Text("Import")
                                 }
                             }
-                            LaunchedEffect(downloading) {
-                                if (downloading) {
-                                    importing = true
-                                    val config = catalog.downloadPersona(entry.id)
-                                    if (config != null) {
-                                        onSavePersona(config)
-                                        onSwitchPersona(config.id)
-                                        importedName = config.name
-                                        importedSuccess = true
-                                    } else {
-                                        importedName = "Failed to download"
-                                        importedSuccess = false
-                                    }
-                                    downloading = false
-                                }
-                            }
                         }
                     }
                 }
@@ -1046,9 +1109,10 @@ private fun CommunityPersonaBrowseDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = onDismiss,
+                onClick = { if (importing && (importedSuccess || importFailed)) onCloseAll() else onDismiss() },
                 modifier = Modifier.handCursor(),
-            ) { Text("Close") }
+                enabled = !importing || importedSuccess || importFailed,
+            ) { Text("Done") }
         },
     )
 }
