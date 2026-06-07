@@ -16,6 +16,7 @@ Same rock-solid core. More features. Still FOSS, still private.
 | **Custom Characters** | Give your AI a name and personality. Pick from 150+ premade characters or create your own. |
 | **Character Mode** | Pure roleplay — no "how can I help you" framing. The AI just *becomes* the character. |
 | **Plugin System** | Extra tools you can turn on, including an AI persona creator. |
+| **ClawHub Skills** | Browse and install community skills from clawhub.ai directly in-app. |
 | **Telegram & WhatsApp** | Connect your messaging apps. The AI reads, remembers, and can reply. |
 | **SSH Remote Access** | Your AI logs into your servers and runs commands. Save profiles for quick access. |
 | **Wake Word** | Say "Hey Kai" hands-free. Works even when the app is in the background. |
@@ -70,4 +71,4 @@ curl.exe -s http://127.0.0.1:18500/health
 
 ## License
 
-Apache 2.0. Based on [Kai 9000](https://github.com/SimonSchubert/Kai) by Simon Schubert (v2.7.0).
+Apache 2.0. Based on [Kai 9000](https://github.com/SimonSchubert/Kai) by Simon Schubert.
