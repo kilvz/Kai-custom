@@ -619,7 +619,6 @@ private fun ConfiguredServiceCardContent(
                 )
             }
         }
-
         // Expanded content
         if (isExpanded) {
             Column(modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 16.dp)) {
@@ -695,12 +694,12 @@ private fun ConfiguredServiceCardContent(
                             topP = modelTopP[entry.selectedModel?.id ?: entry.service.id] ?: 0.95f,
                             onChangeTopP = { onChangeModelTopP(entry.selectedModel?.id ?: entry.service.id, it) },
                         )
+                        TemperatureSlider(
+                            modelId = entry.selectedModel?.id ?: entry.service.id,
+                            temperature = modelTemperature[entry.selectedModel?.id ?: entry.service.id] ?: 0.8f,
+                            onChangeTemperature = { onChangeModelTemperature(entry.selectedModel?.id ?: entry.service.id, it) },
+                        )
                     }
-                    TemperatureSlider(
-                        modelId = entry.selectedModel?.id ?: entry.service.id,
-                        temperature = modelTemperature[entry.selectedModel?.id ?: entry.service.id] ?: 0.8f,
-                        onChangeTemperature = { onChangeModelTemperature(entry.selectedModel?.id ?: entry.service.id, it) },
-                    )
                     if (entry.service.isOnDevice) {
                         Spacer(Modifier.height(8.dp))
                         Row(
@@ -1275,7 +1274,7 @@ private fun MaxTokensSlider(
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = if (maxTokens == 0) "Default" else maxTokens.toString(),
+                text = if (sliderValue.roundToInt() <= 512) "Default" else sliderValue.roundToInt().toString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

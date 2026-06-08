@@ -3,7 +3,7 @@ package com.kai.custom
 interface DaemonController {
     fun start()
     fun stop()
-    fun startFloatingBall()
+    fun startFloatingBall(): Boolean
     fun stopFloatingBall()
 }
 

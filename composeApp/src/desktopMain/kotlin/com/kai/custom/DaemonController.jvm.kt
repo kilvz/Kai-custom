@@ -67,7 +67,7 @@ class SystemTrayDaemonController : DaemonController {
         }
     }
 
-    override fun startFloatingBall() {}
+    override fun startFloatingBall() = true
 
     override fun stopFloatingBall() {}
 

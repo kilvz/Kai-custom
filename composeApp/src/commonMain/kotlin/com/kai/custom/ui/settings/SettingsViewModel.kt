@@ -694,12 +694,13 @@ class SettingsViewModel(
     }
 
     private fun onToggleFloatingBall(enabled: Boolean) {
-        dataRepository.setFloatingBallEnabled(enabled)
         if (enabled) {
-            daemonController.startFloatingBall()
+            val started = daemonController.startFloatingBall()
+            if (!started) return
         } else {
             daemonController.stopFloatingBall()
         }
+        dataRepository.setFloatingBallEnabled(enabled)
         _state.update { it.copy(isFloatingBallEnabled = enabled) }
     }
 
