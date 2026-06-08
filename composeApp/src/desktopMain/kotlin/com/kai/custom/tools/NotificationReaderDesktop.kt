@@ -28,9 +28,14 @@ object NotificationReaderDesktop : Tool {
         return try {
             when {
                 os.contains("windows") -> readWindowsNotifications(maxResults)
+
                 os.contains("linux") -> readLinuxNotifications(maxResults)
-                else -> mapOf("success" to true, "notifications" to emptyList<Map<String, String>>(),
-                    "message" to "Notification reading not fully supported on this platform")
+
+                else -> mapOf(
+                    "success" to true,
+                    "notifications" to emptyList<Map<String, String>>(),
+                    "message" to "Notification reading not fully supported on this platform",
+                )
             }
         } catch (e: Exception) {
             mapOf("success" to false, "error" to "Failed to read notifications: ${e.message}")
@@ -59,10 +64,12 @@ object NotificationReaderDesktop : Tool {
                 val output = proc.inputStream.reader().readText()
                 for (line in output.lines().filter { it.startsWith("NOTIF:") }) {
                     val parts = line.removePrefix("NOTIF: ").split(" | ")
-                    notifications.add(mapOf(
-                        "app" to (parts.getOrNull(0) ?: ""),
-                        "type" to (parts.getOrNull(1) ?: ""),
-                    ))
+                    notifications.add(
+                        mapOf(
+                            "app" to (parts.getOrNull(0) ?: ""),
+                            "type" to (parts.getOrNull(1) ?: ""),
+                        ),
+                    )
                 }
             }
         }

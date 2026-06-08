@@ -41,9 +41,13 @@ class AltMemoryDockerManager(
             val proc = Runtime.getRuntime().exec(args)
             val output = if (proc.waitFor(30, TimeUnit.SECONDS) && proc.exitValue() == 0) {
                 proc.inputStream.bufferedReader().readText().trim()
-            } else null
+            } else {
+                null
+            }
             output != null && output.length == 64
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     suspend fun stopContainer(): Boolean = withContext(Dispatchers.IO) {
@@ -52,38 +56,50 @@ class AltMemoryDockerManager(
             stop.waitFor(15, TimeUnit.SECONDS)
             removeContainerIfExists()
             true
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     suspend fun isContainerRunning(): Boolean = withContext(Dispatchers.IO) {
         try {
             val proc = Runtime.getRuntime().exec(
-                arrayOf("docker", "inspect", "--format", "{{.State.Running}}", CONTAINER_NAME)
+                arrayOf("docker", "inspect", "--format", "{{.State.Running}}", CONTAINER_NAME),
             )
             if (proc.waitFor(5, TimeUnit.SECONDS) && proc.exitValue() == 0) {
                 proc.inputStream.bufferedReader().readText().trim() == "true"
-            } else false
-        } catch (_: Exception) { false }
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     suspend fun isImagePulled(): Boolean = withContext(Dispatchers.IO) {
         try {
             val proc = Runtime.getRuntime().exec(
-                arrayOf("docker", "image", "inspect", IMAGE_REF)
+                arrayOf("docker", "image", "inspect", IMAGE_REF),
             )
             proc.waitFor(5, TimeUnit.SECONDS) && proc.exitValue() == 0
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     suspend fun checkHealth(): Boolean = withContext(Dispatchers.IO) {
         try {
             val proc = Runtime.getRuntime().exec(
-                arrayOf("curl.exe", "-s", "-o", "NUL", "-w", "%{http_code}", "http://127.0.0.1:$PORT/health")
+                arrayOf("curl.exe", "-s", "-o", "NUL", "-w", "%{http_code}", "http://127.0.0.1:$PORT/health"),
             )
             if (proc.waitFor(5, TimeUnit.SECONDS) && proc.exitValue() == 0) {
                 proc.inputStream.bufferedReader().readText().trim() == "200"
-            } else false
-        } catch (_: Exception) { false }
+            } else {
+                false
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     suspend fun restartContainer(): Boolean = withContext(Dispatchers.IO) {

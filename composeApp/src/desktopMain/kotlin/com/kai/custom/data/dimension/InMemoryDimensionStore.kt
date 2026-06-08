@@ -49,8 +49,7 @@ class InMemoryDimensionStore : DimensionStore {
         return domain
     }
 
-    override fun getDomains(realm: String): List<Domain> =
-        domains.values.filter { it.realm == realm }
+    override fun getDomains(realm: String): List<Domain> = domains.values.filter { it.realm == realm }
 
     override fun putEntity(entity: EntityData): EntityData {
         entities[entity.id] = entity
@@ -59,8 +58,7 @@ class InMemoryDimensionStore : DimensionStore {
 
     override fun getEntity(id: String): EntityData? = entities[id]
 
-    override fun getEntitiesByDomain(realm: String, domain: String): List<EntityData> =
-        entities.values.filter { it.realm == realm && it.domain == domain }
+    override fun getEntitiesByDomain(realm: String, domain: String): List<EntityData> = entities.values.filter { it.realm == realm && it.domain == domain }
 
     override fun getAllEntities(): List<EntityData> = entities.values.toList()
 
@@ -68,8 +66,7 @@ class InMemoryDimensionStore : DimensionStore {
 
     override fun countEntities(): Long = entities.size.toLong()
 
-    override fun getEntityByMetadataKey(key: String, value: String): EntityData? =
-        entities.values.find { it.metadata[key] == value }
+    override fun getEntityByMetadataKey(key: String, value: String): EntityData? = entities.values.find { it.metadata[key] == value }
 
     override fun searchEntities(query: String, limit: Int): List<SearchResult> {
         val lower = query.lowercase()
@@ -80,19 +77,16 @@ class InMemoryDimensionStore : DimensionStore {
             .map { SearchResult(it, 0.5) }
     }
 
-    override fun searchSimilar(embedding: List<Float>, limit: Int, minScore: Double): List<SearchResult> =
-        entities.values.take(limit).map { SearchResult(it, 0.0) }
+    override fun searchSimilar(embedding: List<Float>, limit: Int, minScore: Double): List<SearchResult> = entities.values.take(limit).map { SearchResult(it, 0.0) }
 
     override fun putFact(fact: KGFact): KGFact {
         facts[fact.id] = fact
         return fact
     }
 
-    override fun getFactsBySubject(subject: String): List<KGFact> =
-        facts.values.filter { it.subject == subject }
+    override fun getFactsBySubject(subject: String): List<KGFact> = facts.values.filter { it.subject == subject }
 
-    override fun getFactsByObject(`object`: String): List<KGFact> =
-        facts.values.filter { it.`object` == `object` }
+    override fun getFactsByObject(`object`: String): List<KGFact> = facts.values.filter { it.`object` == `object` }
 
     override fun queryKGE(relation: String?, limit: Int): List<KGFact> {
         var result = facts.values.toList()
@@ -125,6 +119,7 @@ class InMemoryDimensionStore : DimensionStore {
     override fun importFromData(data: ByteArray) {
         try {
             val decompressed = GZIPInputStream(ByteArrayInputStream(data)).readAllBytes().toString(Charsets.UTF_8)
+
             @Suppress("UNCHECKED_CAST")
             val map = json.decodeFromString<Map<String, List<Map<String, Any?>>>>(decompressed)
             realms.clear()

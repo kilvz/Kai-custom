@@ -53,6 +53,7 @@ object CreateCalendarEventToolDesktop : Tool {
                     val output = proc.inputStream.reader().readText()
                     mapOf("success" to true, "message" to "Calendar event created", "output" to output)
                 }
+
                 else -> {
                     val escapedTitle = title.replace(":", "").replace("/", "-")
                     val icsContent = buildIcsEvent(title, startTime, endTime, description, location)

@@ -319,6 +319,18 @@ interface DataRepository {
     fun setModelMaxTokens(modelId: String, maxTokens: Int)
     fun getModelTemperature(modelId: String): Float
     fun setModelTemperature(modelId: String, temperature: Float)
+    fun getLocalStyleInstruction(): String
+    fun setLocalStyleInstruction(text: String)
+    fun isLocalModelFullPrompt(): Boolean
+    fun setLocalModelFullPrompt(enabled: Boolean)
+    fun getModelTopK(modelId: String): Int
+    fun setModelTopK(modelId: String, topK: Int)
+    fun getModelTopP(modelId: String): Float
+    fun setModelTopP(modelId: String, topP: Float)
+    fun getImportedModels(): List<com.kai.custom.inference.ImportedModel>
+    fun addImportedModel(model: com.kai.custom.inference.ImportedModel)
+    fun removeImportedModel(modelId: String)
+    suspend fun importLocalModel(bytes: ByteArray, fileName: String): String
     fun getDefaultCalendarId(): Long
     fun setDefaultCalendarId(calendarId: Long)
     suspend fun releaseLocalEngine()

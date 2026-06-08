@@ -181,6 +181,10 @@ class SettingsViewModel(
         modelContextTokens = buildModelContextTokensMap(),
         modelMaxTokens = buildModelMaxTokensMap(),
         modelTemperature = buildModelTemperatureMap(),
+        localStyleInstruction = dataRepository.getLocalStyleInstruction(),
+        localModelFullPrompt = dataRepository.isLocalModelFullPrompt(),
+        modelTopK = buildModelTopKMap(),
+        modelTopP = buildModelTopPMap(),
         installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
         activeSkill = dataRepository.getActiveSkill(),
         schemaResetMessage = dataRepository.getSchemaResetMessage(),
@@ -258,6 +262,11 @@ class SettingsViewModel(
         onChangeModelContextTokens = ::onChangeModelContextTokens,
         onChangeModelMaxTokens = ::onChangeModelMaxTokens,
         onChangeModelTemperature = ::onChangeModelTemperature,
+        onChangeLocalStyleInstruction = ::onChangeLocalStyleInstruction,
+        onChangeLocalModelFullPrompt = ::onChangeLocalModelFullPrompt,
+        onChangeModelTopK = ::onChangeModelTopK,
+        onChangeModelTopP = ::onChangeModelTopP,
+        onImportLocalModel = ::onImportLocalModel,
         onExportSettings = ::onExportSettings,
         onPrepareExport = ::onPrepareExport,
         onImportSettings = ::onImportSettings,
@@ -1039,6 +1048,51 @@ class SettingsViewModel(
             it.copy(modelTemperature = it.modelTemperature.toMutableMap().apply { put(modelId, temperature) }.toImmutableMap())
         }
     }
+
+    private fun onChangeLocalStyleInstruction(text: String) {
+        dataRepository.setLocalStyleInstruction(text)
+        _state.update { it.copy(localStyleInstruction = text) }
+    }
+
+    private fun onChangeLocalModelFullPrompt(enabled: Boolean) {
+        dataRepository.setLocalModelFullPrompt(enabled)
+        _state.update { it.copy(localModelFullPrompt = enabled) }
+    }
+
+    private fun onChangeModelTopK(modelId: String, topK: Int) {
+        if (_state.value.modelTopK[modelId] == topK) return
+        dataRepository.setModelTopK(modelId, topK)
+        _state.update {
+            it.copy(modelTopK = it.modelTopK.toMutableMap().apply { put(modelId, topK) }.toImmutableMap())
+        }
+    }
+
+    private fun onChangeModelTopP(modelId: String, topP: Float) {
+        if (_state.value.modelTopP[modelId] == topP) return
+        dataRepository.setModelTopP(modelId, topP)
+        _state.update {
+            it.copy(modelTopP = it.modelTopP.toMutableMap().apply { put(modelId, topP) }.toImmutableMap())
+        }
+    }
+
+    private fun onImportLocalModel(bytes: ByteArray, fileName: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            try {
+                dataRepository.importLocalModel(bytes, fileName)
+                refreshServiceList()
+            } catch (e: Exception) {
+                println("Import model failed: ${e.message}")
+            }
+        }
+    }
+
+    private fun buildModelTopKMap() = dataRepository.getLocalAvailableModels().associate { model ->
+        model.id to dataRepository.getModelTopK(model.id)
+    }.toImmutableMap()
+
+    private fun buildModelTopPMap() = dataRepository.getLocalAvailableModels().associate { model ->
+        model.id to dataRepository.getModelTopP(model.id)
+    }.toImmutableMap()
 
     private fun onDeleteLocalModel(modelId: String) {
         viewModelScope.launch(backgroundDispatcher) {

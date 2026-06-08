@@ -17,48 +17,48 @@ import com.kai.custom.data.EncryptedFileSettings
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.TaskStore
 import com.kai.custom.mcp.McpServerManager
-import com.kai.custom.root.AdminManager
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
+import com.kai.custom.root.AdminManager
 import com.kai.custom.sendHeartbeatNotification
 import com.kai.custom.tools.AdminTool
 import com.kai.custom.tools.ApplyPatchTool
 import com.kai.custom.tools.CommonTools
+import com.kai.custom.tools.CreateCalendarEventToolDesktop
 import com.kai.custom.tools.EditFileTool
 import com.kai.custom.tools.EmailTools
 import com.kai.custom.tools.GlobTool
 import com.kai.custom.tools.GrepTool
 import com.kai.custom.tools.HeartbeatTools
 import com.kai.custom.tools.InternetSearchTool
-import com.kai.custom.tools.OpenFileTool
-import com.kai.custom.tools.PhoneTools
-import com.kai.custom.tools.ProcessManagerTool
-import com.kai.custom.tools.ReadFileTool
-import com.kai.custom.tools.SchedulingTools
-import com.kai.custom.tools.CreateCalendarEventToolDesktop
 import com.kai.custom.tools.ListInstalledAppsToolDesktop
 import com.kai.custom.tools.ListMediaToolDesktop
 import com.kai.custom.tools.NotificationReaderDesktop
 import com.kai.custom.tools.OpenCodeToolDesktop
+import com.kai.custom.tools.OpenFileTool
+import com.kai.custom.tools.PhoneTools
+import com.kai.custom.tools.ProcessManagerTool
 import com.kai.custom.tools.ReadCalendarToolDesktop
 import com.kai.custom.tools.ReadContactsToolDesktop
+import com.kai.custom.tools.ReadFileTool
 import com.kai.custom.tools.ReadLogsToolDesktop
 import com.kai.custom.tools.ScanBluetoothToolDesktop
+import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.SetAlarmToolDesktop
 import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SpeakTextToolDesktop
-import com.kai.custom.tools.telegramToolDefinitions
 import com.kai.custom.tools.SshCommandTool
-import com.kai.custom.tools.WifiInfoToolDesktop
-import com.kai.custom.tools.WriteContactToolDesktop
 import com.kai.custom.tools.SshConfigureHostTool
 import com.kai.custom.tools.SshConnectTool
 import com.kai.custom.tools.SshDisconnectTool
 import com.kai.custom.tools.TodoWriteTool
 import com.kai.custom.tools.WebFetchTool
+import com.kai.custom.tools.WifiInfoToolDesktop
+import com.kai.custom.tools.WriteContactToolDesktop
 import com.kai.custom.tools.WriteFileTool
+import com.kai.custom.tools.telegramToolDefinitions
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
@@ -303,19 +303,27 @@ actual fun getAvailableTools(): List<Tool> {
                                 "physical_total_mb" to try {
                                     val os = java.lang.management.ManagementFactory.getOperatingSystemMXBean()
                                     if (os is com.sun.management.OperatingSystemMXBean) os.getTotalMemorySize() / (1024 * 1024) else null
-                                } catch (_: Exception) { null },
+                                } catch (_: Exception) {
+                                    null
+                                },
                                 "physical_free_mb" to try {
                                     val os = java.lang.management.ManagementFactory.getOperatingSystemMXBean()
                                     if (os is com.sun.management.OperatingSystemMXBean) os.getFreeMemorySize() / (1024 * 1024) else null
-                                } catch (_: Exception) { null },
+                                } catch (_: Exception) {
+                                    null
+                                },
                                 "total_disk_mb" to try {
                                     val root = java.io.File.listRoots().firstOrNull()
                                     root?.totalSpace?.div(1024 * 1024)
-                                } catch (_: Exception) { null },
+                                } catch (_: Exception) {
+                                    null
+                                },
                                 "free_disk_mb" to try {
                                     val root = java.io.File.listRoots().firstOrNull()
                                     root?.freeSpace?.div(1024 * 1024)
-                                } catch (_: Exception) { null },
+                                } catch (_: Exception) {
+                                    null
+                                },
                             ),
                         )
                     }
@@ -528,7 +536,8 @@ actual fun getAvailableTools(): List<Tool> {
                         parameters = emptyMap(),
                     )
                     override suspend fun execute(args: Map<String, Any>): Any = try {
-                        var hasWifi = false; var hasEthernet = false
+                        var hasWifi = false
+                        var hasEthernet = false
                         val interfaces = java.net.NetworkInterface.getNetworkInterfaces()
                         while (interfaces.hasMoreElements()) {
                             val intf = interfaces.nextElement()
@@ -594,11 +603,13 @@ actual fun getAvailableTools(): List<Tool> {
             val whatsAppStore: com.kai.custom.data.WhatsAppStore by inject(com.kai.custom.data.WhatsAppStore::class.java)
             val whatsAppLifecycleManager: com.kai.custom.whatsapp.WhatsAppLifecycleManager by inject(com.kai.custom.whatsapp.WhatsAppLifecycleManager::class.java)
             if (whatsAppStore.isWhatsAppEnabled()) {
-                addAll(com.kai.custom.tools.getWhatsAppAdminTools(
-                    appSettings = appSettings,
-                    restartBridge = { whatsAppLifecycleManager.restart() },
-                    updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
-                ))
+                addAll(
+                    com.kai.custom.tools.getWhatsAppAdminTools(
+                        appSettings = appSettings,
+                        restartBridge = { whatsAppLifecycleManager.restart() },
+                        updateBridgeConfig = { whatsAppLifecycleManager.updateBridgeConfig() },
+                    ),
+                )
             }
         }
         if (isTelegramSupported) {

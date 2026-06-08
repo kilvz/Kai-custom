@@ -46,13 +46,15 @@ object ListMediaToolDesktop : Tool {
                 dir.walkTopDown().maxDepth(3).forEach { file ->
                     if (results.size >= maxResults) return@forEach
                     if (file.isFile && file.extension.lowercase() in extensions) {
-                        results.add(mapOf(
-                            "name" to file.name,
-                            "path" to file.absolutePath,
-                            "size_bytes" to file.length(),
-                            "last_modified" to file.lastModified(),
-                            "extension" to file.extension,
-                        ))
+                        results.add(
+                            mapOf(
+                                "name" to file.name,
+                                "path" to file.absolutePath,
+                                "size_bytes" to file.length(),
+                                "last_modified" to file.lastModified(),
+                                "extension" to file.extension,
+                            ),
+                        )
                     }
                 }
                 if (results.size >= maxResults) break

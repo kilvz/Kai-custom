@@ -34,7 +34,7 @@ class DesktopWhatsAppBridgeManager {
                         listOf("where", "node")
                     } else {
                         listOf("which", "node")
-                    }
+                    },
                 ).redirectErrorStream(true).start()
                 nodeCheck.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
                 if (nodeCheck.exitValue() != 0) {
@@ -100,8 +100,9 @@ class DesktopWhatsAppBridgeManager {
                 val bridgeDir = getBridgeDir()
                 val cmd = if (System.getProperty("os.name").lowercase().contains("windows")) {
                     listOf(
-                        "cmd.exe", "/c",
-                        "cd /d \"${bridgeDir.absolutePath}\" && node bridge.js"
+                        "cmd.exe",
+                        "/c",
+                        "cd /d \"${bridgeDir.absolutePath}\" && node bridge.js",
                     )
                 } else {
                     listOf("bash", "-c", "cd \"${bridgeDir.absolutePath}\" && node bridge.js")
@@ -148,20 +149,18 @@ class DesktopWhatsAppBridgeManager {
         }
     }
 
-    fun getBridgeLog(): String {
-        return try {
-            bridgeProcess?.inputStream?.bufferedReader()?.readText() ?: "No logs"
-        } catch (_: Exception) { "No logs" }
+    fun getBridgeLog(): String = try {
+        bridgeProcess?.inputStream?.bufferedReader()?.readText() ?: "No logs"
+    } catch (_: Exception) {
+        "No logs"
     }
 
-    private fun checkHealth(): Boolean {
-        return try {
-            val url = URI(HEALTH_URL).toURL()
-            val conn = url.openConnection() as HttpURLConnection
-            conn.connectTimeout = 2000
-            conn.responseCode == 200
-        } catch (_: Exception) {
-            false
-        }
+    private fun checkHealth(): Boolean = try {
+        val url = URI(HEALTH_URL).toURL()
+        val conn = url.openConnection() as HttpURLConnection
+        conn.connectTimeout = 2000
+        conn.responseCode == 200
+    } catch (_: Exception) {
+        false
     }
 }

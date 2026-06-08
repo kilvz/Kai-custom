@@ -3,12 +3,12 @@ package com.kai.custom.tools
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolSchema
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.AudioInputStream
-import javax.sound.sampled.Clip
 import java.io.File
 import java.net.URL
 import java.net.URLEncoder
+import javax.sound.sampled.AudioInputStream
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.Clip
 
 object SpeakTextToolDesktop : Tool {
     private var edgeTtsInstalled = false
@@ -49,7 +49,10 @@ object SpeakTextToolDesktop : Tool {
             "`${'$'}synth.SetOutputToDefaultAudioDevice(); " +
             "`${'$'}synth.Speak(\"$escapedText\")"
         val proc = ProcessBuilder(
-            "powershell.exe", "-NoProfile", "-Command", psCmd
+            "powershell.exe",
+            "-NoProfile",
+            "-Command",
+            psCmd,
         ).redirectErrorStream(true).start()
         proc.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)
         return mapOf("success" to true, "message" to "Speech played via Windows TTS")

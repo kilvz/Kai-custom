@@ -23,7 +23,7 @@ class SystemTrayDaemonController : DaemonController {
             SwingUtilities.invokeLater {
                 val tray = SystemTray.getSystemTray()
                 val image = java.awt.Toolkit.getDefaultToolkit().getImage(
-                    java.net.URI("https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/icon.png").toURL()
+                    java.net.URI("https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/icon.png").toURL(),
                 ).getScaledInstance(16, 16, Image.SCALE_SMOOTH)
 
                 val popup = PopupMenu()
@@ -56,7 +56,9 @@ class SystemTrayDaemonController : DaemonController {
         try {
             SwingUtilities.invokeAndWait {
                 trayIcon?.let { icon ->
-                    try { SystemTray.getSystemTray().remove(icon) } catch (_: Exception) {}
+                    try {
+                        SystemTray.getSystemTray().remove(icon)
+                    } catch (_: Exception) {}
                     trayIcon = null
                 }
             }

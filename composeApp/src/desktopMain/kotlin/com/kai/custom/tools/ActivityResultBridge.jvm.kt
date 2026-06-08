@@ -13,8 +13,12 @@ actual class ActivityResultBridge actual constructor() {
     actual val pendingMimeType: String? = null
     actual val pendingRequestCode: Int = 0
     actual suspend fun launchActivityForResult(
-        action: String, dataUri: String?, packageName: String?,
-        className: String?, mimeType: String?, requestCode: Int,
+        action: String,
+        dataUri: String?,
+        packageName: String?,
+        className: String?,
+        mimeType: String?,
+        requestCode: Int,
     ): ActivityResultData? = null
     actual fun onActivityResult(resultCode: Int, dataString: String?) {}
 }

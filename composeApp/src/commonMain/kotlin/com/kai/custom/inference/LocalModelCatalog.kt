@@ -1,5 +1,7 @@
 package com.kai.custom.inference
 
+import kotlinx.serialization.Serializable
+
 // ── Standard models (Apache-2.0, official litert-community) ──
 val STANDARD_MODELS = listOf(
     LocalModel(
@@ -133,3 +135,11 @@ fun sanitizeForLiteRt(s: String?): String? {
     if (s.none { it.isSurrogate() }) return s
     return s.filter { !it.isSurrogate() }
 }
+
+@Serializable
+data class ImportedModel(
+    val id: String,
+    val displayName: String,
+    val filePath: String,
+    val sizeBytes: Long = 0,
+)

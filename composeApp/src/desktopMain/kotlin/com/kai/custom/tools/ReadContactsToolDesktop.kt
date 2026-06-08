@@ -70,12 +70,14 @@ object ReadContactsToolDesktop : Tool {
                     if (query.isBlank() || name.lowercase().contains(query)) {
                         val telMatch = Regex("TEL[:;](.+)").find(content)
                         val emailMatch = Regex("EMAIL[:;](.+)").find(content)
-                        contacts.add(mapOf(
-                            "name" to name,
-                            "phone" to (telMatch?.groupValues?.getOrNull(1)?.trim() ?: ""),
-                            "email" to (emailMatch?.groupValues?.getOrNull(1)?.trim() ?: ""),
-                            "source" to file.absolutePath,
-                        ))
+                        contacts.add(
+                            mapOf(
+                                "name" to name,
+                                "phone" to (telMatch?.groupValues?.getOrNull(1)?.trim() ?: ""),
+                                "email" to (emailMatch?.groupValues?.getOrNull(1)?.trim() ?: ""),
+                                "source" to file.absolutePath,
+                            ),
+                        )
                     }
                 }
             }
@@ -90,9 +92,13 @@ object ReadContactsToolDesktop : Tool {
         proc.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)
         val lines = proc.inputStream.reader().readText().lines().filter { it.isNotBlank() }
         val contacts = lines.map { mapOf("name" to it) }
-        val filtered = if (query.isBlank()) contacts else contacts.filter {
-            (it["name"] ?: "").lowercase().contains(query)
-        }.take(max)
+        val filtered = if (query.isBlank()) {
+            contacts
+        } else {
+            contacts.filter {
+                (it["name"] ?: "").lowercase().contains(query)
+            }.take(max)
+        }
         return mapOf("success" to true, "count" to filtered.size, "contacts" to filtered)
     }
 }

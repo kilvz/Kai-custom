@@ -88,12 +88,14 @@ object ReadCalendarToolDesktop : Tool {
                         val dtstart = Regex("DTSTART[;:=]?(.+?)(?:\r?\n)").find(vevent)
                         val dtend = Regex("DTEND[;:=]?(.+?)(?:\r?\n)").find(vevent)
                         val location = Regex("LOCATION[:;](.+)").find(vevent)
-                        events.add(mapOf(
-                            "title" to (summary?.groupValues?.getOrNull(1)?.trim() ?: "Untitled"),
-                            "start" to (dtstart?.groupValues?.getOrNull(1)?.trim()?.replace("T", " ") ?: ""),
-                            "end" to (dtend?.groupValues?.getOrNull(1)?.trim()?.replace("T", " ") ?: ""),
-                            "location" to (location?.groupValues?.getOrNull(1)?.trim() ?: ""),
-                        ))
+                        events.add(
+                            mapOf(
+                                "title" to (summary?.groupValues?.getOrNull(1)?.trim() ?: "Untitled"),
+                                "start" to (dtstart?.groupValues?.getOrNull(1)?.trim()?.replace("T", " ") ?: ""),
+                                "end" to (dtend?.groupValues?.getOrNull(1)?.trim()?.replace("T", " ") ?: ""),
+                                "location" to (location?.groupValues?.getOrNull(1)?.trim() ?: ""),
+                            ),
+                        )
                     }
                 } catch (_: Exception) {}
             }

@@ -42,6 +42,7 @@ object SetAlarmToolDesktop : Tool {
                     val output = proc.inputStream.reader().readText()
                     mapOf("success" to true, "message" to "Alarm set for $time", "output" to output)
                 }
+
                 os.contains("linux") -> {
                     val inSeconds = parseTimeToEpoch(time)
                     val cmd = "echo 'notify-send \"$label\"' | at ${if (inSeconds > 0) (inSeconds - System.currentTimeMillis() / 1000).toString() + " seconds from now" else "now + 1 minute"} 2>&1"
@@ -49,12 +50,14 @@ object SetAlarmToolDesktop : Tool {
                     proc.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)
                     mapOf("success" to true, "message" to "Alarm scheduled for $time")
                 }
+
                 os.contains("mac") -> {
                     val cmd = "echo 'display notification \"$label\" with title \"Kai Alarm\"' | at $time 2>&1"
                     val proc = ProcessBuilder("bash", "-c", cmd).redirectErrorStream(true).start()
                     proc.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)
                     mapOf("success" to true, "message" to "Alarm scheduled for $time")
                 }
+
                 else -> mapOf("success" to false, "error" to "Unsupported OS: $os")
             }
         } catch (e: Exception) {
@@ -62,13 +65,11 @@ object SetAlarmToolDesktop : Tool {
         }
     }
 
-    private fun parseTimeToEpoch(isoTime: String): Long {
-        return try {
-            java.time.LocalDateTime.parse(isoTime)
-                .atZone(java.time.ZoneId.systemDefault())
-                .toEpochSecond()
-        } catch (_: Exception) {
-            0L
-        }
+    private fun parseTimeToEpoch(isoTime: String): Long = try {
+        java.time.LocalDateTime.parse(isoTime)
+            .atZone(java.time.ZoneId.systemDefault())
+            .toEpochSecond()
+    } catch (_: Exception) {
+        0L
     }
 }

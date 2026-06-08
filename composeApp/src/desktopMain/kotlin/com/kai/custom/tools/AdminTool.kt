@@ -54,10 +54,11 @@ object AdminTool : Tool {
 
         return try {
             val proc = Runtime.getRuntime().exec(
-                if (System.getProperty("os.name").lowercase().contains("win"))
+                if (System.getProperty("os.name").lowercase().contains("win")) {
                     arrayOf("cmd.exe", "/c", command)
-                else
+                } else {
                     arrayOf("sh", "-c", command)
+                },
             )
 
             val stdout = proc.inputStream.bufferedReader()

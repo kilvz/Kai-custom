@@ -367,15 +367,13 @@ private suspend fun ensureParentDir(filePath: String) {
     sandboxController.executeCommand("mkdir -p '$dir'", useRoot = true, timeoutSeconds = 5)
 }
 
-private fun translateGlobToFind(directory: String, pattern: String): String {
-    return if (pattern.contains("**/")) {
-        val suffix = pattern.substringAfter("**/")
-        "find $directory -type f -name '${shellEscape(suffix)}' 2>/dev/null | head -200"
-    } else if (pattern.contains('*') || pattern.contains('?')) {
-        "find $directory -type f -name '${shellEscape(pattern)}' 2>/dev/null | head -200"
-    } else {
-        "find $directory -type f -name '${shellEscape(pattern)}' 2>/dev/null | head -200"
-    }
+private fun translateGlobToFind(directory: String, pattern: String): String = if (pattern.contains("**/")) {
+    val suffix = pattern.substringAfter("**/")
+    "find $directory -type f -name '${shellEscape(suffix)}' 2>/dev/null | head -200"
+} else if (pattern.contains('*') || pattern.contains('?')) {
+    "find $directory -type f -name '${shellEscape(pattern)}' 2>/dev/null | head -200"
+} else {
+    "find $directory -type f -name '${shellEscape(pattern)}' 2>/dev/null | head -200"
 }
 
 private fun shellEscape(value: String): String = value.replace("'", "'\\''")
@@ -505,15 +503,13 @@ object TodoWriteTool : Tool {
     }
 }
 
-private fun parsePatchFiles(patchText: String): List<String> {
-    return patchText.lines()
-        .filter { it.startsWith("+++ ") || it.startsWith("--- ") }
-        .mapNotNull { line ->
-            val path = line.removePrefix("+++ ").removePrefix("--- ").trim()
-            path.removePrefix("a/").removePrefix("b/").takeIf { it.isNotBlank() }
-        }
-        .distinct()
-}
+private fun parsePatchFiles(patchText: String): List<String> = patchText.lines()
+    .filter { it.startsWith("+++ ") || it.startsWith("--- ") }
+    .mapNotNull { line ->
+        val path = line.removePrefix("+++ ").removePrefix("--- ").trim()
+        path.removePrefix("a/").removePrefix("b/").takeIf { it.isNotBlank() }
+    }
+    .distinct()
 
 private fun buildJsonString(todos: List<Map<String, Any>>): String {
     val items = todos.joinToString(",\n    ") { todo ->

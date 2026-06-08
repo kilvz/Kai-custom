@@ -947,6 +947,56 @@ class AppSettings(internal val settings: Settings) {
         settings.putFloat("$KEY_MODEL_TEMPERATURE_PREFIX$modelId", temperature.coerceIn(0.0f, 2.0f))
     }
 
+    // Local model style instruction — prepended to system prompt for on-device models
+    fun getLocalStyleInstruction(): String = settings.getString(KEY_LOCAL_STYLE_INSTRUCTION, DEFAULT_LOCAL_STYLE_INSTRUCTION)
+
+    fun setLocalStyleInstruction(text: String) {
+        settings.putString(KEY_LOCAL_STYLE_INSTRUCTION, text)
+    }
+
+    fun isLocalModelFullPrompt(): Boolean = settings.getBoolean(KEY_LOCAL_MODEL_FULL_PROMPT, false)
+
+    fun setLocalModelFullPrompt(enabled: Boolean) {
+        settings.putBoolean(KEY_LOCAL_MODEL_FULL_PROMPT, enabled)
+    }
+
+    // Top-K per model (1-100, 40 = default)
+    fun getModelTopK(modelId: String): Int = settings.getInt("$KEY_MODEL_TOP_K_PREFIX$modelId", 40)
+
+    fun setModelTopK(modelId: String, topK: Int) {
+        settings.putInt("$KEY_MODEL_TOP_K_PREFIX$modelId", topK.coerceIn(1, 100))
+    }
+
+    // Top-P per model (0.0-1.0, 0.95 = default)
+    fun getModelTopP(modelId: String): Float = settings.getFloat("$KEY_MODEL_TOP_P_PREFIX$modelId", 0.95f)
+
+    fun setModelTopP(modelId: String, topP: Float) {
+        settings.putFloat("$KEY_MODEL_TOP_P_PREFIX$modelId", topP.coerceIn(0.0f, 1.0f))
+    }
+
+    // Imported custom models
+    private val importedModelsJson = Json { ignoreUnknownKeys = true }
+    private val importedModelsSerializer = ListSerializer(com.kai.custom.inference.ImportedModel.serializer())
+
+    fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> {
+        val raw = settings.getStringOrNull(KEY_IMPORTED_MODELS) ?: return emptyList()
+        return try {
+            importedModelsJson.decodeFromString(importedModelsSerializer, raw)
+        } catch (_: Exception) { emptyList() }
+    }
+
+    fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {
+        val list = getImportedModels().toMutableList()
+        list.removeAll { it.id == model.id }
+        list.add(model)
+        settings.putString(KEY_IMPORTED_MODELS, importedModelsJson.encodeToString(importedModelsSerializer, list))
+    }
+
+    fun removeImportedModel(modelId: String) {
+        val list = getImportedModels().filter { it.id != modelId }
+        settings.putString(KEY_IMPORTED_MODELS, importedModelsJson.encodeToString(importedModelsSerializer, list))
+    }
+
     // Default calendar account ID
     fun getDefaultCalendarId(): Long = settings.getLong(KEY_DEFAULT_CALENDAR_ID, -1L)
 
@@ -1080,6 +1130,12 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_MODEL_CONTEXT_PREFIX = "model_context_"
         const val KEY_MODEL_MAX_TOKENS_PREFIX = "model_maxtokens_"
         const val KEY_MODEL_TEMPERATURE_PREFIX = "model_temperature_"
+        const val KEY_LOCAL_STYLE_INSTRUCTION = "local_style_instruction"
+        const val DEFAULT_LOCAL_STYLE_INSTRUCTION = "Speak naturally and conversationally. Avoid internal monologue, clinical analysis, or robotic formatting. Just respond like a normal person with a natural voice."
+        const val KEY_LOCAL_MODEL_FULL_PROMPT = "local_model_full_prompt"
+        const val KEY_MODEL_TOP_K_PREFIX = "model_topk_"
+        const val KEY_MODEL_TOP_P_PREFIX = "model_topp_"
+        const val KEY_IMPORTED_MODELS = "imported_models"
 
         const val KEY_DEFAULT_CALENDAR_ID = "default_calendar_id"
 

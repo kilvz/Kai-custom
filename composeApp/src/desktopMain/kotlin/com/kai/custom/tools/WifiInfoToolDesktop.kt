@@ -47,8 +47,12 @@ object WifiInfoToolDesktop : Tool {
         val freq = lines.find { it.trimStart().startsWith("Radio type") }?.substringAfter(":")?.trim() ?: ""
         val bssid = lines.find { it.trimStart().startsWith("BSSID") }?.substringAfter(":")?.trim() ?: ""
         return mapOf(
-            "success" to true, "ssid" to ssid, "signal" to signal,
-            "frequency" to freq, "bssid" to bssid, "raw" to output,
+            "success" to true,
+            "ssid" to ssid,
+            "signal" to signal,
+            "frequency" to freq,
+            "bssid" to bssid,
+            "raw" to output,
         )
     }
 

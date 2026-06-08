@@ -457,6 +457,8 @@ class RemoteDataRepository(
         val storedContext = appSettings.getModelContextTokens(model.id)
         val contextTokens = if (storedContext > 0) storedContext else catalogModel?.defaultContextTokens ?: 0
         val temperature = appSettings.getModelTemperature(model.id)
+        val topK = appSettings.getModelTopK(model.id)
+        val topP = appSettings.getModelTopP(model.id)
 
         val needsInit = engine.engineState.value != EngineState.READY || engine.currentModelId != model.id
         if (needsInit) {
@@ -498,7 +500,7 @@ class RemoteDataRepository(
         }
 
         return try {
-            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = localTools, temperature = temperature)
+            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = localTools, temperature = temperature, topK = topK, topP = topP)
         } catch (e: RuntimeException) {
             if (e is kotlinx.coroutines.CancellationException) throw e
             // litert-lm's strict ANTLR function-call parser sometimes rejects malformed
@@ -507,7 +509,7 @@ class RemoteDataRepository(
             // error in the UI. With an empty tool list, LiteRTInferenceEngine sets
             // automaticToolCalling = false, so the parser is bypassed entirely on the retry.
             println("LiteRT: tool-call parser failed (${e.message?.take(200)}). Falling back to plain chat.")
-            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = emptyList(), temperature = temperature)
+            engine.chat(messages = inferenceMessages, systemPrompt = systemPrompt, tools = emptyList(), temperature = temperature, topK = topK, topP = topP)
         }
     }
 
@@ -1881,7 +1883,7 @@ class RemoteDataRepository(
 
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? {
         val activePersona = personaManager.getActivePersona()
-        val soul = appSettings.getSoulText(activePersona.id, localModel = variant == SystemPromptVariant.CHAT_LOCAL).ifEmpty { getString(Res.string.default_soul) }
+        val soul = appSettings.getSoulText(activePersona.id, localModel = variant == SystemPromptVariant.CHAT_LOCAL && !appSettings.isLocalModelFullPrompt()).ifEmpty { getString(Res.string.default_soul) }
         val memoryEnabled = appSettings.isMemoryEnabled()
         val schedulingEnabled = appSettings.isSchedulingEnabled()
 
@@ -1970,6 +1972,8 @@ class RemoteDataRepository(
             renderMode = activePersona.renderMode,
             soulUserText = soulUserText,
             soulAutoText = soulAutoText,
+            localStyleInstruction = appSettings.getLocalStyleInstruction(),
+            behaviorStyle = activePersona.behaviorStyle,
         )
         return UnifiedPromptBuilder().build(pc).ifEmpty { null }
     }
@@ -2560,7 +2564,18 @@ class RemoteDataRepository(
 
     override fun getLocalDownloadError(): StateFlow<DownloadError?>? = localInferenceEngine?.downloadError
 
-    override fun getLocalDownloadedModels(): List<DownloadedModel> = localInferenceEngine?.getDownloadedModels() ?: emptyList()
+    override fun getLocalDownloadedModels(): List<DownloadedModel> {
+        val engineModels = localInferenceEngine?.getDownloadedModels() ?: emptyList()
+        val imported = appSettings.getImportedModels().map { model ->
+            DownloadedModel(
+                id = model.id,
+                displayName = model.displayName,
+                filePath = model.filePath,
+                sizeBytes = model.sizeBytes,
+            )
+        }
+        return engineModels + imported
+    }
 
     override fun getLocalAvailableModels(): List<LocalModel> = localInferenceEngine?.getAvailableModels() ?: emptyList()
 
@@ -2586,6 +2601,40 @@ class RemoteDataRepository(
         appSettings.setModelTemperature(modelId, temperature)
     }
 
+    override fun getLocalStyleInstruction(): String = appSettings.getLocalStyleInstruction()
+
+    override fun setLocalStyleInstruction(text: String) {
+        appSettings.setLocalStyleInstruction(text)
+    }
+
+    override fun isLocalModelFullPrompt(): Boolean = appSettings.isLocalModelFullPrompt()
+
+    override fun setLocalModelFullPrompt(enabled: Boolean) {
+        appSettings.setLocalModelFullPrompt(enabled)
+    }
+
+    override fun getModelTopK(modelId: String): Int = appSettings.getModelTopK(modelId)
+
+    override fun setModelTopK(modelId: String, topK: Int) {
+        appSettings.setModelTopK(modelId, topK)
+    }
+
+    override fun getModelTopP(modelId: String): Float = appSettings.getModelTopP(modelId)
+
+    override fun setModelTopP(modelId: String, topP: Float) {
+        appSettings.setModelTopP(modelId, topP)
+    }
+
+    override fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> = appSettings.getImportedModels()
+
+    override fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {
+        appSettings.addImportedModel(model)
+    }
+
+    override fun removeImportedModel(modelId: String) {
+        appSettings.removeImportedModel(modelId)
+    }
+
     override fun getDefaultCalendarId(): Long = appSettings.getDefaultCalendarId()
 
     override fun setDefaultCalendarId(calendarId: Long) {
@@ -2602,6 +2651,25 @@ class RemoteDataRepository(
 
     override fun cancelLocalModelDownload() {
         localInferenceEngine?.cancelDownload()
+    }
+
+    override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String {
+        val id = "imported_${kotlin.uuid.Uuid.random().toString().take(8)}"
+        val displayName = fileName.removeSuffix(".litertlm").replace("_", " ").replace("-", " ").trim()
+            .replaceFirstChar { it.uppercase() }
+        val modelsDir = com.kai.custom.inference.getModelStorageDirectory()
+        val modelDir = java.io.File(modelsDir, id)
+        modelDir.mkdirs()
+        val targetFile = java.io.File(modelDir, fileName)
+        targetFile.writeBytes(bytes)
+        val model = com.kai.custom.inference.ImportedModel(
+            id = id,
+            displayName = displayName,
+            filePath = targetFile.absolutePath,
+            sizeBytes = targetFile.length(),
+        )
+        appSettings.addImportedModel(model)
+        return id
     }
 
     override suspend fun deleteLocalModel(modelId: String) {

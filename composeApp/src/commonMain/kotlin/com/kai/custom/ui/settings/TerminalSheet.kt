@@ -235,6 +235,8 @@ fun TerminalContent(
             }
         }
 
+        val linesSnapshot = outputLines.toList()
+
         SelectionContainer(
             modifier = Modifier.weight(1f).fillMaxWidth(),
         ) {
@@ -244,13 +246,13 @@ fun TerminalContent(
                     .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
-                if (outputLines.isEmpty()) {
+                if (linesSnapshot.isEmpty()) {
                     Text(
                         text = stringResource(Res.string.terminal_help_text),
                         style = monoStyle(13.sp, colors.dimText),
                     )
                 }
-                outputLines.forEach { line ->
+                linesSnapshot.forEach { line ->
                     when (line) {
                         is TerminalLine.Command -> {
                             Spacer(Modifier.height(4.dp))

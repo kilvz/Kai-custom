@@ -109,6 +109,8 @@ class IosLiteRTInferenceEngine : LocalInferenceEngine {
         systemPrompt: String?,
         tools: List<LocalTool>,
         temperature: Float,
+        topK: Int,
+        topP: Float,
     ): String {
         idleReleaseJob?.cancel()
         val bridge = requireBridge()

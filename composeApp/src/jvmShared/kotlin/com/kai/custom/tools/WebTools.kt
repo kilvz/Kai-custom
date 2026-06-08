@@ -189,10 +189,24 @@ private fun urlDecode(encoded: String): String = buildString {
             encoded[i] == '%' && i + 2 < encoded.length -> {
                 val hex = encoded.substring(i + 1, i + 3)
                 val byte = hex.toIntOrNull(16)
-                if (byte != null) { append(byte.toChar()); i += 3 } else { append(encoded[i]); i++ }
+                if (byte != null) {
+                    append(byte.toChar())
+                    i += 3
+                } else {
+                    append(encoded[i])
+                    i++
+                }
             }
-            encoded[i] == '+' -> { append(' '); i++ }
-            else -> { append(encoded[i]); i++ }
+
+            encoded[i] == '+' -> {
+                append(' ')
+                i++
+            }
+
+            else -> {
+                append(encoded[i])
+                i++
+            }
         }
     }
 }
@@ -211,7 +225,9 @@ private fun urlEncode(s: String): String = s.encodeToByteArray().joinToString(""
     when {
         c in 'a'.code..'z'.code || c in 'A'.code..'Z'.code || c in '0'.code..'9'.code ||
             c == '-'.code || c == '_'.code || c == '.'.code || c == '~'.code -> c.toChar().toString()
+
         c == ' '.code -> "+"
+
         else -> "%${c.toString(16).uppercase().padStart(2, '0')}"
     }
 }

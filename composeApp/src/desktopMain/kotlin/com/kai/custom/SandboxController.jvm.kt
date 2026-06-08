@@ -61,8 +61,7 @@ class NoOpSandboxController(
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = false
     override suspend fun openFile(path: String): Result<Unit> = Result.failure(UnsupportedOperationException("No Docker available"))
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = false
-    override suspend fun renameEntry(path: String, newName: String): Result<String> =
-        Result.failure(UnsupportedOperationException("No Docker available"))
+    override suspend fun renameEntry(path: String, newName: String): Result<String> = Result.failure(UnsupportedOperationException("No Docker available"))
 
     override suspend fun installDocker(): Boolean = dockerManager.installDockerDesktop()
 }

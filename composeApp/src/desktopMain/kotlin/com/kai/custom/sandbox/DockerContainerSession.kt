@@ -1,14 +1,14 @@
 package com.kai.custom.sandbox
 
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kai.custom.CommandHandle
 import com.kai.custom.TerminalLine
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.CompletableDeferred
-import java.io.OutputStream
-import java.io.InputStreamReader
 import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStream
 
 class DockerContainerSession(
     private val containerName: String,
@@ -24,8 +24,13 @@ class DockerContainerSession(
     suspend fun start(): Boolean = withContext(Dispatchers.IO) {
         try {
             val pb = ProcessBuilder(
-                "docker", "exec", "-i", containerName,
-                "sh", "-c", "PS1='[KAI_SHELL] ' sh"
+                "docker",
+                "exec",
+                "-i",
+                containerName,
+                "sh",
+                "-c",
+                "PS1='[KAI_SHELL] ' sh",
             ).redirectErrorStream(true)
             val p = pb.start()
             process = p
@@ -47,15 +52,25 @@ class DockerContainerSession(
                         }
                     }
                 } catch (_: Exception) {}
-            }.apply { isDaemon = true; name = "docker-session-$sessionId"; start() }
+            }.apply {
+                isDaemon = true
+                name = "docker-session-$sessionId"
+                start()
+            }
 
             Thread {
                 val exit = p.waitFor()
                 exitDeferred.complete(exit)
-            }.apply { isDaemon = true; name = "docker-exit-$sessionId"; start() }
+            }.apply {
+                isDaemon = true
+                name = "docker-exit-$sessionId"
+                start()
+            }
 
             true
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     override fun cancel() {

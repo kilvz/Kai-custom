@@ -22,7 +22,12 @@ class NativeAltMemoryManager {
         try {
             val python = findPython()
             val pb = ProcessBuilder(
-                python, "-m", "pip", "install", "alt-memory", "--break-system-packages"
+                python,
+                "-m",
+                "pip",
+                "install",
+                "alt-memory",
+                "--break-system-packages",
             ).redirectErrorStream(true)
             val proc = pb.start()
             val exited = proc.waitFor(120, TimeUnit.SECONDS)
@@ -41,9 +46,14 @@ class NativeAltMemoryManager {
         try {
             val python = findPython()
             val pb = ProcessBuilder(
-                python, "-m", "alt_memory", "mcp",
-                "--transport", "sse",
-                "--port", PORT.toString()
+                python,
+                "-m",
+                "alt_memory",
+                "mcp",
+                "--transport",
+                "sse",
+                "--port",
+                PORT.toString(),
             ).redirectErrorStream(true)
             val proc = pb.start()
             process = proc
@@ -101,27 +111,23 @@ class NativeAltMemoryManager {
         }
     }
 
-    private fun findWhich(name: String): String? {
-        return try {
-            val pb = ProcessBuilder("which", name).redirectErrorStream(true)
-            val proc = pb.start()
-            val line = BufferedReader(InputStreamReader(proc.inputStream)).readLine()
-            proc.waitFor(3, TimeUnit.SECONDS)
-            if (proc.exitValue() == 0 && !line.isNullOrBlank()) line.trim() else null
-        } catch (_: Exception) {
-            null
-        }
+    private fun findWhich(name: String): String? = try {
+        val pb = ProcessBuilder("which", name).redirectErrorStream(true)
+        val proc = pb.start()
+        val line = BufferedReader(InputStreamReader(proc.inputStream)).readLine()
+        proc.waitFor(3, TimeUnit.SECONDS)
+        if (proc.exitValue() == 0 && !line.isNullOrBlank()) line.trim() else null
+    } catch (_: Exception) {
+        null
     }
 
-    private fun findWhere(name: String): String? {
-        return try {
-            val pb = ProcessBuilder("where", "$name.exe").redirectErrorStream(true)
-            val proc = pb.start()
-            val line = BufferedReader(InputStreamReader(proc.inputStream)).readLine()
-            proc.waitFor(3, TimeUnit.SECONDS)
-            if (proc.exitValue() == 0 && !line.isNullOrBlank()) line.trim() else null
-        } catch (_: Exception) {
-            null
-        }
+    private fun findWhere(name: String): String? = try {
+        val pb = ProcessBuilder("where", "$name.exe").redirectErrorStream(true)
+        val proc = pb.start()
+        val line = BufferedReader(InputStreamReader(proc.inputStream)).readLine()
+        proc.waitFor(3, TimeUnit.SECONDS)
+        if (proc.exitValue() == 0 && !line.isNullOrBlank()) line.trim() else null
+    } catch (_: Exception) {
+        null
     }
 }

@@ -50,24 +50,22 @@ object ScanBluetoothToolDesktop : Tool {
         return mapOf("success" to true, "count" to devices.size, "devices" to devices)
     }
 
-    private fun listLinuxBluetooth(action: String): Map<String, Any> {
-        return if (action == "scan") {
-            val proc = ProcessBuilder("bash", "-c", "timeout 10 bluetoothctl -- scan on 2>&1 || true")
-                .redirectErrorStream(true).start()
-            proc.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)
-            val output = proc.inputStream.reader().readText()
-            mapOf("success" to true, "devices" to parseLinuxBluetoothOutput(output))
-        } else {
-            val proc = ProcessBuilder("bash", "-c", "bluetoothctl devices 2>&1 || true")
-                .redirectErrorStream(true).start()
-            proc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
-            val output = proc.inputStream.reader().readText()
-            val paired = output.lines().filter { it.isNotBlank() }.map { line ->
-                val parts = line.split(" ", limit = 3)
-                mapOf("name" to (parts.getOrNull(2) ?: parts.getOrNull(1) ?: ""), "address" to (parts.getOrNull(1) ?: ""))
-            }
-            mapOf("success" to true, "count" to paired.size, "devices" to paired)
+    private fun listLinuxBluetooth(action: String): Map<String, Any> = if (action == "scan") {
+        val proc = ProcessBuilder("bash", "-c", "timeout 10 bluetoothctl -- scan on 2>&1 || true")
+            .redirectErrorStream(true).start()
+        proc.waitFor(15, java.util.concurrent.TimeUnit.SECONDS)
+        val output = proc.inputStream.reader().readText()
+        mapOf("success" to true, "devices" to parseLinuxBluetoothOutput(output))
+    } else {
+        val proc = ProcessBuilder("bash", "-c", "bluetoothctl devices 2>&1 || true")
+            .redirectErrorStream(true).start()
+        proc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
+        val output = proc.inputStream.reader().readText()
+        val paired = output.lines().filter { it.isNotBlank() }.map { line ->
+            val parts = line.split(" ", limit = 3)
+            mapOf("name" to (parts.getOrNull(2) ?: parts.getOrNull(1) ?: ""), "address" to (parts.getOrNull(1) ?: ""))
         }
+        mapOf("success" to true, "count" to paired.size, "devices" to paired)
     }
 
     private fun listMacBluetooth(action: String): Map<String, Any> {
@@ -83,10 +81,12 @@ object ScanBluetoothToolDesktop : Tool {
         for (line in output.lines()) {
             if (line.contains("Device")) {
                 val parts = line.split(" ", limit = 4)
-                devices.add(mapOf(
-                    "name" to (parts.getOrNull(3)?.trim('[', ']') ?: parts.getOrNull(1) ?: ""),
-                    "address" to (parts.getOrNull(2) ?: ""),
-                ))
+                devices.add(
+                    mapOf(
+                        "name" to (parts.getOrNull(3)?.trim('[', ']') ?: parts.getOrNull(1) ?: ""),
+                        "address" to (parts.getOrNull(2) ?: ""),
+                    ),
+                )
             }
         }
         return devices.distinctBy { it["address"] }
@@ -98,8 +98,16 @@ object ScanBluetoothToolDesktop : Tool {
         var start = -1
         for (i in json.indices) {
             when (json[i]) {
-                '{' -> { if (depth++ == 0) start = i }
-                '}' -> { if (--depth == 0 && start >= 0) { results.add(json.substring(start, i + 1)); start = -1 } }
+                '{' -> {
+                    if (depth++ == 0) start = i
+                }
+
+                '}' -> {
+                    if (--depth == 0 && start >= 0) {
+                        results.add(json.substring(start, i + 1))
+                        start = -1
+                    }
+                }
             }
         }
         return results

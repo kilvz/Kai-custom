@@ -753,6 +753,18 @@ class FakeDataRepository : DataRepository {
     override fun setModelMaxTokens(modelId: String, maxTokens: Int) {}
     override fun getModelTemperature(modelId: String): Float = 0.8f
     override fun setModelTemperature(modelId: String, temperature: Float) {}
+    override fun getLocalStyleInstruction(): String = com.kai.custom.data.AppSettings.DEFAULT_LOCAL_STYLE_INSTRUCTION
+    override fun setLocalStyleInstruction(text: String) {}
+    override fun isLocalModelFullPrompt(): Boolean = false
+    override fun setLocalModelFullPrompt(enabled: Boolean) {}
+    override fun getModelTopK(modelId: String): Int = 40
+    override fun setModelTopK(modelId: String, topK: Int) {}
+    override fun getModelTopP(modelId: String): Float = 0.95f
+    override fun setModelTopP(modelId: String, topP: Float) {}
+    override fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> = emptyList()
+    override fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {}
+    override fun removeImportedModel(modelId: String) {}
+    override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String = "fake_imported"
     override fun getDefaultCalendarId(): Long = -1L
     override fun setDefaultCalendarId(calendarId: Long) {}
     override suspend fun releaseLocalEngine() {}

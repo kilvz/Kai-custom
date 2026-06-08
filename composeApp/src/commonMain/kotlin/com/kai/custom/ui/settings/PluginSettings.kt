@@ -189,34 +189,19 @@ fun PluginSettingsCard() {
                                     val description = prompt.trim()
                                     val personaPrompt = buildString {
                                         append("Based on the following description, create a detailed user persona written in second person (\"You are...\"):\n\n")
-                                        append("Persona: $description\n\n")
-                                        append("Create BOTH a condensed version AND a full synthesized profile. Use the EXACT formats below.\n\n")
-                                        append("=== CONDENSED VERSION ===\n")
-                                        append("Use this exact structure:\n")
-                                        append("---\n")
-                                        append("**Identity**: You are [sentence describing who you are].\n\n")
-                                        append("**Key Characteristics**:\n*   **[Trait]**: [detailed description]\n\n")
-                                        append("**Communication Style**:\n[paragraphs describing speaking patterns, tone, mannerisms]\n\n")
-                                        append("**Essential Knowledge**:\n[paragraph about areas of expertise]\n\n")
-                                        append("**Specific Behaviors & Phrases**:\n*   [specific behavior or phrase]\n\n")
-                                        append("**General Response Guidelines**:\n*   **[Guideline]**: [description]\n\n")
-                                        append("400-800 words.\n\n")
-                                        append("=== FULL SYNTHESIZED PROFILE ===\n")
-                                        append("Separate with \"--- FULL PROFILE ---\" then write the full profile with these sections:\n\n")
-                                        append("### Output Summary\n- **Section 0**: Core Essence (Priority Elements)\n- **Sections 1-10**: Core persona profile (3,500-4,500 words total)\n- **Section 11**: Platform Adaptation Bank (500-1,000 words)\n- **Total Length**: 4,500-5,500 words\n\n")
-                                        append("### 0. Core Essence (Priority Elements)\n- **Identity in 25 words**: [capture their fundamental essence and role]\n- **Top 3 defining traits**: [most characteristic attributes that define them]\n- **Primary communication style**: [core approach to interacting with others]\n- **Essential behavioral markers**: [3-5 must-have behaviors for accurate portrayal]\n- **Must-have linguistic patterns**: [3-5 signature language elements]\n\n")
-                                        append("### 1. Biographical Foundation and Personality\nLife story, formative experiences, personality characteristics, defining life events. Include specific incidents and context.\n\n")
-                                        append("### 2. Voice/Communication Analysis\nSpeech pace, tonal qualities, accent, volume dynamics. How voice changes in different emotional states.\n\n")
-                                        append("### 3. Signature Language Patterns\nCommon opening phrases, favorite words, rhetorical devices, linguistic evolution.\n\n")
-                                        append("### 4. Psychological Profile\nCore motivations, fears, defense mechanisms, emotional triggers, cognitive biases.\n\n")
-                                        append("### 5. Interaction Dynamics\nHow they treat different types of people (subordinates, peers, superiors, strangers). Conflict resolution style.\n\n")
-                                        append("### 6. Value System and Beliefs\nCore morality, political/social views, deal-breakers, hills they will die on.\n\n")
-                                        append("### 7. Physicality and Habits\nMannerisms, body language, tics, daily routines, physiological responses to stress.\n\n")
-                                        append("### 8. Knowledge Base and Blind Spots\nAreas of deep expertise, subjects they know nothing about but pretend to, genuine areas of ignorance.\n\n")
-                                        append("### 9. Evolution Over Time\nHow their style has changed, shifts in focus, what has remained constant.\n\n")
-                                        append("### 10. Practical Application Guidelines\nKey elements for accurate emulation, common mistakes to avoid, context-specific adaptations.\n\n")
-                                        append("### 10.5. Platform Adaptation Bank\nBehavioral Rules (If-Then format), Dialogue Examples Bank, Language Pattern Repository.\n\n")
-                                        append("Full profile: 3,500-4,500 words. Be specific with examples and exact phrasing. Each section 300-500 words.")
+                                        append("Description: $description\n\n")
+                                        append("Output TWO sections with EXACTLY this format:\n\n")
+                                        append("SECTION 1 — Full synthesized profile (3,500-4,500 words):\n")
+                                        append("Include all sections: ### 0. Core Essence, ### 1. Biographical Foundation and Personality, ### 2. Voice/Communication Analysis, ### 3. Signature Language Patterns, ### 4. Psychological Profile, ### 5. Interaction Dynamics, ### 6. Value System and Beliefs, ### 7. Physicality and Habits, ### 8. Knowledge Base and Blind Spots, ### 9. Evolution Over Time, ### 10. Practical Application Guidelines, ### 10.5. Platform Adaptation Bank.\n\n")
+                                        append("---FULL---\n")
+                                        append("SECTION 2 — Condensed version (400-800 words):\n")
+                                        append("- Start with: **Identity**: You are [one-sentence description]\n")
+                                        append("- Then **Key Characteristics**: with bullet points\n")
+                                        append("- Then **Communication Style**: paragraph\n")
+                                        append("- Then **Essential Knowledge**: paragraph\n")
+                                        append("- Then **Specific Behaviors & Phrases**: bullet points\n")
+                                        append("- Then **General Response Guidelines**: bullet points\n\n")
+                                        append("Output only the content, no extra section headers or formatting markers like \"=== CONDENSED VERSION ===\".")
                                     }
                                     statusText = "Generating persona..."
                                     sentPrompt = personaPrompt
@@ -243,20 +228,33 @@ fun PluginSettingsCard() {
                                     val name = description.split(" ").take(3).joinToString(" ").replaceFirstChar(Char::uppercase)
                                     val id = "persona_${Uuid.random().toString().take(8)}"
 
-                                    condensedSoul = response.trim()
-                                    fullSoul = response.trim()
-                                    appSettings.settings.putString("persona_full_$id", response.trim())
+                                    val parts = response.split("\n---FULL---\n", limit = 2)
+                                    val cleanFull = parts[0].trim()
+                                    val cleanCondensed = parts.getOrElse(1) { "" }.trim().ifBlank { response.trim() }
 
+                                    condensedSoul = cleanCondensed
+                                    fullSoul = cleanFull
+                                    if (cleanFull.isNotBlank()) {
+                                        appSettings.settings.putString("persona_full_$id", cleanFull)
+                                    }
+                                    appSettings.settings.putString("persona_condensed_$id", cleanCondensed)
+
+                                    val shortDesc = cleanCondensed.lineSequence()
+                                        .firstOrNull { it.startsWith("**Identity**:") }
+                                        ?.removePrefix("**Identity**: You are ")
+                                        ?.removePrefix("**Identity**:")
+                                        ?.trim()
+                                        ?.substringBefore(".")
+                                        ?.trim()
+                                        ?.let { it.take(100) }
                                     val config = PersonaConfig(
                                         id = id,
                                         name = name.take(50),
-                                        description = response.trim().substringBefore("\n").substringBefore(".").take(100).let {
-                                            if (it.length < 10) description.take(100) else it
-                                        },
+                                        description = shortDesc ?: name.take(100),
                                         behaviorStyle = BehaviorStyle.CUSTOM,
                                         languageStyle = LanguageStyle.NONE,
                                         characterType = CharacterType.NONE,
-                                        defaultSoul = response.trim(),
+                                        defaultSoul = cleanCondensed,
                                         renderMode = RenderMode.CHARACTER,
                                         isBuiltIn = false,
                                     )

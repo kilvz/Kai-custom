@@ -36,6 +36,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -48,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -80,6 +82,10 @@ import com.kai.custom.ui.icons.DragIndicator
 import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
 import com.kai.custom.ui.kaiAdaptiveCardSurface
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.readBytes
+import kotlinx.coroutines.launch
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_arrow_drop_down
 import kai.composeapp.generated.resources.litert_cancel
@@ -202,6 +208,15 @@ internal fun ServicesContent(
     onChangeModelMaxTokens: (String, Int) -> Unit = { _, _ -> },
     modelTemperature: ImmutableMap<String, Float> = persistentMapOf(),
     onChangeModelTemperature: (String, Float) -> Unit = { _, _ -> },
+    localStyleInstruction: String = "",
+    onChangeLocalStyleInstruction: (String) -> Unit = {},
+    localModelFullPrompt: Boolean = false,
+    onChangeLocalModelFullPrompt: (Boolean) -> Unit = {},
+    modelTopK: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelTopK: (String, Int) -> Unit = { _, _ -> },
+    modelTopP: ImmutableMap<String, Float> = persistentMapOf(),
+    onChangeModelTopP: (String, Float) -> Unit = { _, _ -> },
+    onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
     availableServicesToAdd: ImmutableList<Service>,
     isFreeFallbackEnabled: Boolean,
 ) {
@@ -245,6 +260,15 @@ internal fun ServicesContent(
                     modelMaxTokens = modelMaxTokens,
                     onChangeModelTemperature = onChangeModelTemperature,
                     modelTemperature = modelTemperature,
+                    localStyleInstruction = localStyleInstruction,
+                    onChangeLocalStyleInstruction = onChangeLocalStyleInstruction,
+                    localModelFullPrompt = localModelFullPrompt,
+                    onChangeLocalModelFullPrompt = onChangeLocalModelFullPrompt,
+                    modelTopK = modelTopK,
+                    onChangeModelTopK = onChangeModelTopK,
+                    modelTopP = modelTopP,
+                    onChangeModelTopP = onChangeModelTopP,
+                    onImportLocalModel = onImportLocalModel,
                 )
             }
         }
@@ -328,14 +352,168 @@ internal fun ServicesContent(
                             }
                         }
                     }
-                    Spacer(Modifier.height(16.dp))
                 }
-                VerticalScrollbarForScroll(
-                    scrollState = addServiceScrollState,
-                    modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight(),
-                )
             }
         }
+    }
+}
+
+@Composable
+private fun TopKSlider(
+    modelId: String,
+    topK: Int,
+    onChangeTopK: (Int) -> Unit,
+) {
+    var sliderValue by remember(topK) { mutableStateOf(topK.toFloat().coerceIn(1f, 100f)) }
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Top-K",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = sliderValue.roundToInt().toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = sliderValue,
+            onValueChange = { sliderValue = it },
+            onValueChangeFinished = { onChangeTopK(sliderValue.roundToInt()) },
+            valueRange = 1f..100f,
+            steps = 98,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "1 — Focused",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Default: 40",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "100 — Diverse",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Limits token candidates. Lower = fewer choices, more predictable. Higher = more variety.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun TopPSlider(
+    modelId: String,
+    topP: Float,
+    onChangeTopP: (Float) -> Unit,
+) {
+    var sliderValue by remember(topP) { mutableStateOf(topP.coerceIn(0.0f, 1.0f)) }
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "Top-P",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = "%.2f".format(sliderValue),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = sliderValue,
+            onValueChange = { sliderValue = (it * 20).roundToInt() / 20f },
+            onValueChangeFinished = { onChangeTopP(sliderValue) },
+            valueRange = 0.0f..1.0f,
+            steps = 19,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "0.0 — Precise",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Default: 0.95",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "1.0 — Broad",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Nucleus sampling. Lower = more conservative, higher = more diverse word choices.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun LocalStyleInstructionField(
+    value: String,
+    onValueChange: (String) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Local Model Style Instruction",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            TextButton(onClick = { onValueChange(com.kai.custom.data.AppSettings.DEFAULT_LOCAL_STYLE_INSTRUCTION) }) {
+                Text("Reset", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            maxLines = 6,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "This instruction is prepended to the system prompt only when using an on-device model. Use it to override the model's default writing style.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -365,6 +543,15 @@ private fun ConfiguredServiceCardContent(
     modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
     onChangeModelTemperature: (String, Float) -> Unit = { _, _ -> },
     modelTemperature: ImmutableMap<String, Float> = persistentMapOf(),
+    localStyleInstruction: String = "",
+    onChangeLocalStyleInstruction: (String) -> Unit = {},
+    localModelFullPrompt: Boolean = false,
+    onChangeLocalModelFullPrompt: (Boolean) -> Unit = {},
+    modelTopK: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelTopK: (String, Int) -> Unit = { _, _ -> },
+    modelTopP: ImmutableMap<String, Float> = persistentMapOf(),
+    onChangeModelTopP: (String, Float) -> Unit = { _, _ -> },
+    onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
 ) {
     Column(
         modifier = Modifier
@@ -452,6 +639,7 @@ private fun ConfiguredServiceCardContent(
                         onDeleteModel = onDeleteLocalModel,
                         onChangeModelContextTokens = onChangeModelContextTokens,
                         modelContextTokens = modelContextTokens,
+                        onImportLocalModel = onImportLocalModel,
                     )
                 } else if (entry.service is Service.OpenAICompatible) {
                     OpenAICompatibleSettings(
@@ -496,11 +684,53 @@ private fun ConfiguredServiceCardContent(
                         maxTokens = modelMaxTokens[entry.selectedModel?.id ?: entry.service.id] ?: 0,
                         onChangeMaxTokens = { onChangeModelMaxTokens(entry.selectedModel?.id ?: entry.service.id, it) },
                     )
+                    if (entry.service.isOnDevice) {
+                        TopKSlider(
+                            modelId = entry.selectedModel?.id ?: entry.service.id,
+                            topK = modelTopK[entry.selectedModel?.id ?: entry.service.id] ?: 40,
+                            onChangeTopK = { onChangeModelTopK(entry.selectedModel?.id ?: entry.service.id, it) },
+                        )
+                        TopPSlider(
+                            modelId = entry.selectedModel?.id ?: entry.service.id,
+                            topP = modelTopP[entry.selectedModel?.id ?: entry.service.id] ?: 0.95f,
+                            onChangeTopP = { onChangeModelTopP(entry.selectedModel?.id ?: entry.service.id, it) },
+                        )
+                    }
                     TemperatureSlider(
                         modelId = entry.selectedModel?.id ?: entry.service.id,
                         temperature = modelTemperature[entry.selectedModel?.id ?: entry.service.id] ?: 0.8f,
                         onChangeTemperature = { onChangeModelTemperature(entry.selectedModel?.id ?: entry.service.id, it) },
                     )
+                    if (entry.service.isOnDevice) {
+                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Full Prompt for Local Models",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                Text(
+                                    text = "When on, uses the full persona prompt instead of the truncated Identity-only version.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Switch(
+                                checked = localModelFullPrompt,
+                                onCheckedChange = onChangeLocalModelFullPrompt,
+                            )
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        LocalStyleInstructionField(
+                            value = localStyleInstruction,
+                            onValueChange = onChangeLocalStyleInstruction,
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -676,8 +906,10 @@ private fun LiteRTSettings(
     onDeleteModel: (String) -> Unit,
     onChangeModelContextTokens: (String, Int) -> Unit,
     modelContextTokens: ImmutableMap<String, Int>,
+    onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
 ) {
     val downloadedIds = remember(downloadedModels) { downloadedModels.map { it.id }.toSet() }
+    val importScope = rememberCoroutineScope()
 
     Text(
         text = stringResource(Res.string.litert_on_device_description),
@@ -849,6 +1081,38 @@ private fun LiteRTSettings(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+
+    Spacer(Modifier.height(12.dp))
+
+    var importError by remember { mutableStateOf(false) }
+    val importFilePicker = rememberFilePickerLauncher(
+        type = FileKitType.File(extensions = listOf("litertlm")),
+    ) { file ->
+        if (file != null) {
+            importScope.launch {
+                try {
+                    onImportLocalModel(file.readBytes(), "imported.litertlm")
+                    importError = false
+                } catch (_: Exception) {
+                    importError = true
+                }
+            }
+        }
+    }
+
+    OutlinedButton(
+        onClick = { importFilePicker.launch() },
+        modifier = Modifier.handCursor(),
+    ) { Text("Import .litertlm File") }
+
+    if (importError) {
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Import failed — check file format and space.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
 }
 
 @Composable

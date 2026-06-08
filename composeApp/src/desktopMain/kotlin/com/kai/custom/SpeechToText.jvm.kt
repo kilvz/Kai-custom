@@ -66,7 +66,7 @@ with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
 
 import os
 os.unlink(f.name)
-""".trimIndent()
+            """.trimIndent()
 
             val pb = ProcessBuilder("python", "-c", script)
                 .redirectErrorStream(true)
@@ -105,15 +105,13 @@ os.unlink(f.name)
         process = null
     }
 
-    private fun checkWhisperAvailable(): Boolean {
-        return try {
-            val proc = ProcessBuilder("python", "-c", "import whisper; print('ok')")
-                .redirectErrorStream(true)
-                .start()
-            val ok = proc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
-            ok && proc.exitValue() == 0
-        } catch (_: Exception) {
-            false
-        }
+    private fun checkWhisperAvailable(): Boolean = try {
+        val proc = ProcessBuilder("python", "-c", "import whisper; print('ok')")
+            .redirectErrorStream(true)
+            .start()
+        val ok = proc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
+        ok && proc.exitValue() == 0
+    } catch (_: Exception) {
+        false
     }
 }

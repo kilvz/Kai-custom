@@ -63,6 +63,16 @@ internal const val DEFAULT_AUTOMATION_SECTION =
 
 // ─── Persona Sections ────────────────────────────────────────────
 
+internal class LocalStyleSection : PersonaSection {
+    override fun build(context: PromptContext): String? {
+        if (context.variant != SystemPromptVariant.CHAT_LOCAL) return null
+        if (context.behaviorStyle != BehaviorStyle.CUSTOM) return null
+        val instruction = context.localStyleInstruction
+        if (instruction.isBlank()) return null
+        return "## Style\n$instruction"
+    }
+}
+
 internal class SoulIdentitySection : PersonaSection {
     override fun build(context: PromptContext): String = context.soul
 }
@@ -315,6 +325,7 @@ internal class UnifiedPromptBuilder(
     private val defaultSoul: String = "",
 ) {
     private val personaSections: MutableList<PersonaSection> = mutableListOf(
+        LocalStyleSection(),
         SoulIdentitySection(),
         CorePersonalitySection(defaultSoul),
         HonestyRuleSection(),

@@ -55,7 +55,7 @@ while True:
     if result >= 0:
         print(json.dumps({"detected": "$keyword"}))
         sys.stdout.flush()
-""".trimIndent()
+            """.trimIndent()
 
             val pb = ProcessBuilder("python", "-c", script)
                 .redirectErrorStream(true)
@@ -69,15 +69,19 @@ while True:
                         val msg = try {
                             json
                                 .decodeFromString<Map<String, String>>(line!!)
-                        } catch (_: Exception) { null }
+                        } catch (_: Exception) {
+                            null
+                        }
                         if (msg?.containsKey("detected") == true) {
                             _wakeWordDetected.tryEmit(msg["detected"] ?: phrase)
                         }
                     }
                 } catch (_: Exception) {
                 }
-            }.also { it.isDaemon = true; it.start() }
-
+            }.also {
+                it.isDaemon = true
+                it.start()
+            }
         } catch (e: Exception) {
             println("[WakeWord] Failed to start: ${e.message}")
         }
@@ -90,11 +94,9 @@ while True:
         listenerThread = null
     }
 
-    override suspend fun enroll(phrase: String, onStatus: (String) -> Unit): String? {
-        return withContext(Dispatchers.IO) {
-            onStatus("Enrollment not supported in Python mode — use Porcupine CLI: pvporcupine_recorder --keyword $phrase")
-            null
-        }
+    override suspend fun enroll(phrase: String, onStatus: (String) -> Unit): String? = withContext(Dispatchers.IO) {
+        onStatus("Enrollment not supported in Python mode — use Porcupine CLI: pvporcupine_recorder --keyword $phrase")
+        null
     }
 
     @Suppress("UNCHECKED_CAST")

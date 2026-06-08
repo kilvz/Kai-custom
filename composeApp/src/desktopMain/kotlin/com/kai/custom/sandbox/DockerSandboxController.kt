@@ -1,5 +1,7 @@
 package com.kai.custom.sandbox
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.kai.custom.CommandHandle
 import com.kai.custom.NoOpCommandHandle
 import com.kai.custom.SandboxController
@@ -13,8 +15,6 @@ import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.data.PersonaManager
 import com.kai.custom.data.dimension.DimensionConfig
 import com.kai.custom.mcp.McpServerManager
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.mutableStateListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -58,7 +58,8 @@ class DockerSandboxController(
                 val info = dockerManager.getInfo()
                 if (!info.available) {
                     _status.value = _status.value.copy(
-                        working = false, error = true,
+                        working = false,
+                        error = true,
                         statusText = "Docker is not available. Please install Docker Desktop.",
                     )
                     return@launch
@@ -67,24 +68,29 @@ class DockerSandboxController(
                 dockerManager.pullImage(imageName)
                 _status.value = _status.value.copy(statusText = "Creating sandbox container...")
                 val cid = dockerManager.createContainer(
-                    imageName, containerName,
+                    imageName,
+                    containerName,
                     portMappings = mapOf(8316 to 8316, 8317 to 8317),
                 )
                 if (cid != null) {
                     _status.value = _status.value.copy(
-                        installed = true, ready = true, working = false,
+                        installed = true,
+                        ready = true,
+                        working = false,
                         statusText = "Sandbox ready ($imageName)",
                     )
                     refreshStatus()
                 } else {
                     _status.value = _status.value.copy(
-                        working = false, error = true,
+                        working = false,
+                        error = true,
                         statusText = "Failed to create Docker container",
                     )
                 }
             } catch (e: Exception) {
                 _status.value = _status.value.copy(
-                    working = false, error = true,
+                    working = false,
+                    error = true,
                     statusText = "Setup failed: ${e.message}",
                 )
             }
@@ -109,19 +115,23 @@ class DockerSandboxController(
         _status.value = _status.value.copy(working = true, statusText = "Installing packages...")
         scope.launch {
             try {
-                dockerManager.execCommand(containerName,
-                    "apk add --no-cache python3 nodejs npm curl git bash sudo")
+                dockerManager.execCommand(
+                    containerName,
+                    "apk add --no-cache python3 nodejs npm curl git bash sudo",
+                )
                 _status.value = _status.value.copy(statusText = "Installing edge-tts...")
                 runCatching {
                     dockerManager.execCommand(containerName, "pip install --no-cache-dir edge-tts 2>&1")
                 }
                 _status.value = _status.value.copy(
-                    working = false, packagesInstalled = true,
+                    working = false,
+                    packagesInstalled = true,
                     statusText = "Packages installed",
                 )
             } catch (e: Exception) {
                 _status.value = _status.value.copy(
-                    working = false, error = true,
+                    working = false,
+                    error = true,
                     statusText = "Install failed: ${e.message}",
                 )
             }
@@ -151,54 +161,61 @@ class DockerSandboxController(
         onStdout: (String) -> Unit,
         onStderr: (String) -> Unit,
         sessionId: String,
-    ): CommandHandle {
-        return withContext(Dispatchers.IO) {
-            try {
-                val proc = Runtime.getRuntime().exec(
-                    arrayOf("docker", "exec", "-i", containerName, "sh", "-c", command)
-                )
-                sessionProcesses[sessionId] = proc
-                addTranscript(sessionId, TerminalLine.Command(command))
+    ): CommandHandle = withContext(Dispatchers.IO) {
+        try {
+            val proc = Runtime.getRuntime().exec(
+                arrayOf("docker", "exec", "-i", containerName, "sh", "-c", command),
+            )
+            sessionProcesses[sessionId] = proc
+            addTranscript(sessionId, TerminalLine.Command(command))
 
-                Thread {
-                    try {
-                        proc.inputStream.bufferedReader().use { reader ->
-                            reader.lines().forEach { line ->
-                                onStdout(line)
-                                kotlinx.coroutines.runBlocking {
-                                    addTranscript(sessionId, TerminalLine.Output(line))
-                                }
+            Thread {
+                try {
+                    proc.inputStream.bufferedReader().use { reader ->
+                        reader.lines().forEach { line ->
+                            onStdout(line)
+                            kotlinx.coroutines.runBlocking {
+                                addTranscript(sessionId, TerminalLine.Output(line))
                             }
                         }
-                    } catch (_: Exception) {}
-                }.apply { isDaemon = true; start() }
-
-                Thread {
-                    try {
-                        proc.errorStream.bufferedReader().use { reader ->
-                            reader.lines().forEach { line ->
-                                onStderr(line)
-                                kotlinx.coroutines.runBlocking {
-                                    addTranscript(sessionId, TerminalLine.Error(line))
-                                }
-                            }
-                        }
-                    } catch (_: Exception) {}
-                }.apply { isDaemon = true; start() }
-
-                object : CommandHandle {
-                    override fun cancel() { proc.destroyForcibly(); sessionProcesses.remove(sessionId) }
-                    override fun isCancelled(): Boolean = !proc.isAlive
-                    override suspend fun writeInput(line: String) {
-                        proc.outputStream.write((line + "\n").toByteArray())
-                        proc.outputStream.flush()
                     }
-                    override suspend fun awaitExit(): Int = proc.waitFor().also { sessionProcesses.remove(sessionId) }
-                }
-            } catch (e: Exception) {
-                addTranscript(sessionId, TerminalLine.Error(e.message ?: "Failed to execute"))
-                NoOpCommandHandle
+                } catch (_: Exception) {}
+            }.apply {
+                isDaemon = true
+                start()
             }
+
+            Thread {
+                try {
+                    proc.errorStream.bufferedReader().use { reader ->
+                        reader.lines().forEach { line ->
+                            onStderr(line)
+                            kotlinx.coroutines.runBlocking {
+                                addTranscript(sessionId, TerminalLine.Error(line))
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }.apply {
+                isDaemon = true
+                start()
+            }
+
+            object : CommandHandle {
+                override fun cancel() {
+                    proc.destroyForcibly()
+                    sessionProcesses.remove(sessionId)
+                }
+                override fun isCancelled(): Boolean = !proc.isAlive
+                override suspend fun writeInput(line: String) {
+                    proc.outputStream.write((line + "\n").toByteArray())
+                    proc.outputStream.flush()
+                }
+                override suspend fun awaitExit(): Int = proc.waitFor().also { sessionProcesses.remove(sessionId) }
+            }
+        } catch (e: Exception) {
+            addTranscript(sessionId, TerminalLine.Error(e.message ?: "Failed to execute"))
+            NoOpCommandHandle
         }
     }
 
@@ -208,9 +225,7 @@ class DockerSandboxController(
         _sessions.value = _sessions.value - sessionId
     }
 
-    override fun transcriptFor(sessionId: String): SnapshotStateList<TerminalLine> {
-        return sessionTranscripts.getOrPut(sessionId, ::mutableStateListOf)
-    }
+    override fun transcriptFor(sessionId: String): SnapshotStateList<TerminalLine> = sessionTranscripts.getOrPut(sessionId, ::mutableStateListOf)
 
     override fun clearTranscript(sessionId: String) {
         sessionTranscripts.remove(sessionId)
@@ -218,8 +233,10 @@ class DockerSandboxController(
 
     override suspend fun listDirectory(path: String): List<SandboxFileEntry> = withContext(Dispatchers.IO) {
         try {
-            val output = dockerManager.execCommand(containerName,
-                "ls -la '$path' 2>/dev/null | tail -n +2")
+            val output = dockerManager.execCommand(
+                containerName,
+                "ls -la '$path' 2>/dev/null | tail -n +2",
+            )
             if (output.isBlank()) return@withContext emptyList()
             output.lines().mapNotNull { line ->
                 try {
@@ -234,16 +251,22 @@ class DockerSandboxController(
                         sizeBytes = parts[4].toLongOrNull() ?: 0L,
                         lastModifiedMs = 0L,
                     )
-                } catch (_: Exception) { null }
+                } catch (_: Exception) {
+                    null
+                }
             }
-        } catch (_: Exception) { emptyList() }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     override suspend fun readTextFile(path: String, maxBytes: Int): String? = withContext(Dispatchers.IO) {
         try {
             val output = dockerManager.execCommand(containerName, "head -c $maxBytes '$path' 2>/dev/null")
             output.ifBlank { null }
-        } catch (_: Exception) { null }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     override suspend fun writeTextFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
@@ -253,7 +276,9 @@ class DockerSandboxController(
                 .replace("'", "'\\''")
             dockerManager.execCommand(containerName, "mkdir -p '${path.substringBeforeLast("/")}' && echo '$escaped' > '$path'")
             true
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = withContext(Dispatchers.IO) {
@@ -263,7 +288,9 @@ class DockerSandboxController(
             val result = dockerManager.copyIn(containerName, tempFile.absolutePath, path)
             tempFile.delete()
             result
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     override suspend fun openFile(path: String): Result<Unit> = withContext(Dispatchers.IO) {
@@ -283,7 +310,9 @@ class DockerSandboxController(
             val flag = if (recursive) "-rf" else "-f"
             val output = dockerManager.execCommand(containerName, "rm $flag '$path' 2>/dev/null; echo \$?")
             output.trim() == "0"
-        } catch (_: Exception) { false }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     override suspend fun renameEntry(path: String, newName: String): Result<String> = withContext(Dispatchers.IO) {
@@ -291,8 +320,11 @@ class DockerSandboxController(
             val parent = path.substringBeforeLast("/")
             val dest = "$parent/$newName"
             val output = dockerManager.execCommand(containerName, "mv '$path' '$dest' 2>/dev/null; echo \$?")
-            if (output.trim() == "0") Result.success(dest)
-            else Result.failure(Exception("Rename failed"))
+            if (output.trim() == "0") {
+                Result.success(dest)
+            } else {
+                Result.failure(Exception("Rename failed"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -397,14 +429,17 @@ class DockerSandboxController(
                         put("realm", JsonPrimitive(realm))
                         put("domain", JsonPrimitive(domain))
                         put("content", JsonPrimitive(entry.content))
-                        put("metadata", buildJsonObject {
-                            put("memory_key", JsonPrimitive(entry.key))
-                            put("category", JsonPrimitive(entry.category.name))
-                            put("hit_count", JsonPrimitive(entry.hitCount.toString()))
-                            put("type", JsonPrimitive("memory_entry"))
-                            entry.source?.let { put("source", JsonPrimitive(it)) }
-                            if (entry.protected) put("protected", JsonPrimitive("true"))
-                        })
+                        put(
+                            "metadata",
+                            buildJsonObject {
+                                put("memory_key", JsonPrimitive(entry.key))
+                                put("category", JsonPrimitive(entry.category.name))
+                                put("hit_count", JsonPrimitive(entry.hitCount.toString()))
+                                put("type", JsonPrimitive("memory_entry"))
+                                entry.source?.let { put("source", JsonPrimitive(it)) }
+                                if (entry.protected) put("protected", JsonPrimitive("true"))
+                            },
+                        )
                     },
                 )
             } catch (_: Exception) {}
@@ -427,63 +462,67 @@ class DockerSandboxController(
     }
 
     override suspend fun startWhatsApp() {
-        dockerManager.execCommand(containerName,
-            "cd /root/whatsapp-bridge && node bridge.js &")
+        dockerManager.execCommand(
+            containerName,
+            "cd /root/whatsapp-bridge && node bridge.js &",
+        )
     }
 
     override suspend fun stopWhatsApp() {
         dockerManager.execCommand(containerName, "pkill -f 'node bridge.js' 2>/dev/null || true")
     }
 
-    override suspend fun installWhatsAppBridge(): Boolean {
-        return try {
-            dockerManager.execCommand(containerName,
-                "mkdir -p /root/whatsapp-bridge && which node || apk add --no-cache nodejs npm")
-            val bridgeUrl = "https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/whatsapp-bridge/bridge.js"
-            dockerManager.execCommand(containerName,
-                "curl -sL '$bridgeUrl' -o /root/whatsapp-bridge/bridge.js")
-            dockerManager.execCommand(containerName,
-                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1")
-            true
-        } catch (_: Exception) { false }
+    override suspend fun installWhatsAppBridge(): Boolean = try {
+        dockerManager.execCommand(
+            containerName,
+            "mkdir -p /root/whatsapp-bridge && which node || apk add --no-cache nodejs npm",
+        )
+        val bridgeUrl = "https://raw.githubusercontent.com/kilvz/Kai-custom/main/sandbox/whatsapp-bridge/bridge.js"
+        dockerManager.execCommand(
+            containerName,
+            "curl -sL '$bridgeUrl' -o /root/whatsapp-bridge/bridge.js",
+        )
+        dockerManager.execCommand(
+            containerName,
+            "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
+        )
+        true
+    } catch (_: Exception) {
+        false
     }
 
     override suspend fun updateWhatsAppBridge(): Boolean = installWhatsAppBridge()
 
-    override suspend fun backupSandbox(outputPath: String?): Result<SandboxController.BackupResult> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val path = outputPath ?: "${System.getProperty("java.io.tmpdir")}/sandbox-rootfs-${System.currentTimeMillis()}.tar.gz"
-                val ok = dockerManager.exportContainer(containerName, path)
-                if (ok) {
-                    Result.success(SandboxController.BackupResult(path))
-                } else {
-                    Result.failure(Exception("Docker export failed"))
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
+    override suspend fun backupSandbox(outputPath: String?): Result<SandboxController.BackupResult> = withContext(Dispatchers.IO) {
+        try {
+            val path = outputPath ?: "${System.getProperty("java.io.tmpdir")}/sandbox-rootfs-${System.currentTimeMillis()}.tar.gz"
+            val ok = dockerManager.exportContainer(containerName, path)
+            if (ok) {
+                Result.success(SandboxController.BackupResult(path))
+            } else {
+                Result.failure(Exception("Docker export failed"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
-    override suspend fun importSandbox(data: ByteArray): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            try {
-                dockerManager.removeContainer(containerName, force = true)
-                val tempFile = File.createTempFile("sandbox_import", ".tar.gz")
-                tempFile.writeBytes(data)
-                dockerManager.importContainer(tempFile.absolutePath, "kai-sandbox-import")
-                val cid = dockerManager.createContainer("kai-sandbox-import", containerName)
-                tempFile.delete()
-                if (cid != null) {
-                    refreshStatus()
-                    Result.success(Unit)
-                } else {
-                    Result.failure(Exception("Failed to create container from import"))
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
+    override suspend fun importSandbox(data: ByteArray): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            dockerManager.removeContainer(containerName, force = true)
+            val tempFile = File.createTempFile("sandbox_import", ".tar.gz")
+            tempFile.writeBytes(data)
+            dockerManager.importContainer(tempFile.absolutePath, "kai-sandbox-import")
+            val cid = dockerManager.createContainer("kai-sandbox-import", containerName)
+            tempFile.delete()
+            if (cid != null) {
+                refreshStatus()
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to create container from import"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

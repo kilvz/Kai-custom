@@ -745,18 +745,13 @@ private fun PersonaSelectorDialog(
     )
     var selectedCategory by remember { mutableStateOf<BehaviorStyle>(BehaviorStyle.ASSISTANT) }
     var showCreateDialog by remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select Persona") },
         text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState),
-            ) {
-                // Category tabs
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Category tabs (fixed, not scrollable)
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     categories.forEach { (style, label) ->
                         val isSelected = selectedCategory == style
@@ -774,57 +769,65 @@ private fun PersonaSelectorDialog(
                 }
                 Spacer(Modifier.height(8.dp))
 
-                // Persona cards
+                // Persona cards (scrollable area)
                 val filtered = personas.filter { it.behaviorStyle == selectedCategory }
-                filtered.forEach { p ->
-                    val isActive = p.id == activePersonaId
-                    OutlinedButton(
-                        onClick = {
-                            if (!isActive) {
-                                onSwitchPersona(p.id)
-                                onDismiss()
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
-                            .handCursor(),
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = p.name,
-                                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
-                            )
-                            if (p.description.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    filtered.forEach { p ->
+                        val isActive = p.id == activePersonaId
+                        OutlinedButton(
+                            onClick = {
+                                if (!isActive) {
+                                    onSwitchPersona(p.id)
+                                    onDismiss()
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 2.dp)
+                                .handCursor(),
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = p.description,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
+                                    text = p.name,
+                                    fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                                )
+                                if (p.description.isNotEmpty()) {
+                                    Text(
+                                        text = p.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    if (p.languageStyle != LanguageStyle.NONE)
+                                        TraitBadge(p.languageStyle.displayName)
+                                    if (p.characterType != CharacterType.NONE)
+                                        TraitBadge(p.characterType.displayName)
+                                    if (p.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
+                                }
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            if (isActive) {
+                                Text(
+                                    text = "ACTIVE",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                if (p.languageStyle != LanguageStyle.NONE)
-                                    TraitBadge(p.languageStyle.displayName)
-                                if (p.characterType != CharacterType.NONE)
-                                    TraitBadge(p.characterType.displayName)
-                                if (p.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
-                            }
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        if (isActive) {
-                            Text(
-                                text = "ACTIVE",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
                         }
                     }
                 }
 
                 Spacer(Modifier.height(8.dp))
+                // Buttons (fixed, not scrollable)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
                         onClick = { showCreateDialog = true },

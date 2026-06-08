@@ -1382,6 +1382,9 @@ class DebugServer(
                     }
                     val result = withContext(Dispatchers.Default) {
                         try {
+                            if (dataRepository.currentService().isOnDevice) {
+                                dataRepository.releaseLocalEngine()
+                            }
                             dataRepository.askSilently(chatRequest.message)
                         } catch (e: Exception) {
                             "Error: ${e.message}"

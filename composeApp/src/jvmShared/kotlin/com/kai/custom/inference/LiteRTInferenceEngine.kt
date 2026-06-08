@@ -196,6 +196,8 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
         systemPrompt: String?,
         tools: List<LocalTool>,
         temperature: Float,
+        topK: Int,
+        topP: Float,
     ): String {
         return mutex.withLock {
             withContext(Dispatchers.IO) {
@@ -220,7 +222,7 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                     systemInstruction = sanitizedSystemPrompt?.let { Contents.of(it) },
                     initialMessages = initialMessages,
                     tools = toolProviders,
-                    samplerConfig = SamplerConfig(topK = 40, topP = 0.95, temperature = temperature.toDouble()),
+                    samplerConfig = SamplerConfig(topK = topK, topP = topP.toDouble(), temperature = temperature.toDouble()),
                     automaticToolCalling = toolProviders.isNotEmpty(),
                 )
                 val prev = conversation

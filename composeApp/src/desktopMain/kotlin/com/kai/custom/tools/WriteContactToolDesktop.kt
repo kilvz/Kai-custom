@@ -34,6 +34,7 @@ object WriteContactToolDesktop : Tool {
                     vcfFile.writeText(vcfContent)
                     mapOf("success" to true, "message" to "Contact saved to ${vcfFile.absolutePath}")
                 }
+
                 else -> {
                     val vcfContent = buildVcf(name, phone, email)
                     val home = System.getProperty("user.home")

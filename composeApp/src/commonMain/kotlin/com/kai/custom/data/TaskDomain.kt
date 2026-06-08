@@ -143,4 +143,6 @@ internal data class PromptContext(
     val attachedFiles: List<String> = emptyList(),
     val soulUserText: String = "",
     val soulAutoText: String = "",
+    val localStyleInstruction: String = "",
+    val behaviorStyle: BehaviorStyle = BehaviorStyle.ASSISTANT,
 )

@@ -22,11 +22,13 @@ object ListInstalledAppsToolDesktop : Tool {
             when {
                 os.contains("windows") -> {
                     val proc = ProcessBuilder(
-                        "powershell.exe", "-NoProfile", "-Command",
+                        "powershell.exe",
+                        "-NoProfile",
+                        "-Command",
                         "Get-ItemProperty HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\* | " +
-                        "Where-Object { \$_.DisplayName } | " +
-                        "Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | " +
-                        "ConvertTo-Json"
+                            "Where-Object { \$_.DisplayName } | " +
+                            "Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | " +
+                            "ConvertTo-Json",
                     ).redirectErrorStream(true).start()
                     proc.waitFor(30, java.util.concurrent.TimeUnit.SECONDS)
                     val output = proc.inputStream.reader().readText()
@@ -34,6 +36,7 @@ object ListInstalledAppsToolDesktop : Tool {
                         parseWindowsApps(output, apps)
                     }
                 }
+
                 os.contains("linux") -> {
                     val proc = ProcessBuilder("dpkg-query", "-W", "-f", "'\${Package}|\${Version}|\${Installed-Size}|\${Status}'")
                         .redirectErrorStream(true).start()
@@ -43,15 +46,18 @@ object ListInstalledAppsToolDesktop : Tool {
                         for (line in output.lines()) {
                             val parts = line.trim('\'').split('|')
                             if (parts.size >= 2 && parts[0].isNotBlank()) {
-                                apps.add(mapOf(
-                                    "name" to parts[0],
-                                    "version" to (parts.getOrNull(1) ?: ""),
-                                    "size_kb" to (parts.getOrNull(2) ?: "0"),
-                                ))
+                                apps.add(
+                                    mapOf(
+                                        "name" to parts[0],
+                                        "version" to (parts.getOrNull(1) ?: ""),
+                                        "size_kb" to (parts.getOrNull(2) ?: "0"),
+                                    ),
+                                )
                             }
                         }
                     }
                 }
+
                 os.contains("mac") -> {
                     File("/Applications").listFiles()?.forEach { app ->
                         if (app.name.endsWith(".app")) {
