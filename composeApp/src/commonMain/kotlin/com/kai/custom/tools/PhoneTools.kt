@@ -128,7 +128,13 @@ object PhoneTools {
     val setGpsLocationToolInfo = ToolInfo(
         id = "set_gps_location",
         name = "Set GPS Location",
-        description = "Set a mock GPS location on the device. Opens mock location settings if not configured.",
+        description = "Set a persistent mock GPS location on the device. Can optionally mimic walking/driving to a destination. Opens mock location settings if not configured.",
+    )
+
+    val stopGpsMockingToolInfo = ToolInfo(
+        id = "stop_gps_mocking",
+        name = "Stop GPS Mocking",
+        description = "Stops the persistent mock GPS location and restores real GPS hardware location.",
     )
 
     val takePictureToolInfo = ToolInfo(
@@ -182,6 +188,7 @@ object PhoneTools {
     val phoneToolDefinitions = listOf(
         gpsLocationToolInfo,
         setGpsLocationToolInfo,
+        stopGpsMockingToolInfo,
         takePictureToolInfo,
         hearSurroundingsToolInfo,
         screenshotToolInfo,

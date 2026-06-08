@@ -775,74 +775,62 @@ actual fun getAvailableTools(): List<Tool> {
                 object : Tool {
                     override val schema = ToolSchema(
                         name = "set_gps_location",
-                        description = "Set a mock GPS location on the device using the mock location app. Opens Developer Options → 'Select mock location app' if Kai is not set as the mock provider.",
+                        description = "Set a persistent mock GPS location on the device. Can optionally simulate walking/driving to a destination.",
                         parameters = mapOf(
-                            "latitude" to ParameterSchema("number", "Target latitude coordinate (e.g. 48.8566)", true),
-                            "longitude" to ParameterSchema("number", "Target longitude coordinate (e.g. 2.3522)", true),
+                            "latitude" to ParameterSchema("number", "Target or starting latitude coordinate (e.g. 48.8566)", true),
+                            "longitude" to ParameterSchema("number", "Target or starting longitude coordinate (e.g. 2.3522)", true),
+                            "destination_latitude" to ParameterSchema("number", "Destination latitude (optional)", false),
+                            "destination_longitude" to ParameterSchema("number", "Destination longitude (optional)", false),
+                            "speed_kmh" to ParameterSchema("number", "Movement speed in km/h (optional, default 5.0)", false),
                         ),
                     )
                     override suspend fun execute(args: Map<String, Any>): Any {
                         val latitude = (args["latitude"] as? Number)?.toDouble()
                         val longitude = (args["longitude"] as? Number)?.toDouble()
+                        val destLat = (args["destination_latitude"] as? Number)?.toDouble()
+                        val destLng = (args["destination_longitude"] as? Number)?.toDouble()
+                        val speedKmh = (args["speed_kmh"] as? Number)?.toDouble()
+
                         if (latitude == null || longitude == null) {
                             return mapOf("success" to false, "error" to "latitude and longitude are required")
                         }
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                             return mapOf("success" to false, "error" to "Location permission not granted. Grant it in Settings > Apps > Kai > Permissions.")
                         }
-                        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
 
-                        fun removeExistingTestProviders() {
-                            try {
-                                locationManager.removeTestProvider(android.location.LocationManager.GPS_PROVIDER)
-                            } catch (_: Exception) {}
-                            try {
-                                locationManager.removeTestProvider(android.location.LocationManager.NETWORK_PROVIDER)
-                            } catch (_: Exception) {}
-                        }
-
-                        return try {
-                            removeExistingTestProviders()
-                            try {
-                                locationManager.addTestProvider(
-                                    android.location.LocationManager.GPS_PROVIDER,
-                                    false, false, false, false, true, true, true,
-                                    @Suppress("DEPRECATION") android.location.Criteria.POWER_HIGH,
-                                    @Suppress("DEPRECATION") android.location.Criteria.ACCURACY_FINE,
-                                )
-                                locationManager.setTestProviderEnabled(android.location.LocationManager.GPS_PROVIDER, true)
-                            } catch (_: SecurityException) {
-                                val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).apply {
-                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                context.startActivity(intent)
-                                return mapOf(
-                                    "success" to false,
-                                    "error" to "Kai is not set as the mock location provider. " +
-                                        "Developer Options have been opened — please go to 'Select mock location app' and choose Kai.",
-                                )
-                            }
-                            val mockLocation = android.location.Location(android.location.LocationManager.GPS_PROVIDER).apply {
-                                this.latitude = latitude
-                                this.longitude = longitude
-                                accuracy = 1.0f
-                                time = System.currentTimeMillis()
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                                    elapsedRealtimeNanos = android.os.SystemClock.elapsedRealtimeNanos()
-                                }
-                            }
-                            locationManager.setTestProviderLocation(android.location.LocationManager.GPS_PROVIDER, mockLocation)
-                            mapOf(
-                                "success" to true,
-                                "latitude" to latitude,
-                                "longitude" to longitude,
-                                "message" to "Mock GPS location set to ($latitude, $longitude). Disable mock location in Developer Options to restore real GPS.",
-                            )
-                        } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to set location: ${e.message}")
+                        val resultMessage = com.kai.custom.tools.MockLocationController.startMocking(
+                            context = context,
+                            startLat = latitude,
+                            startLng = longitude,
+                            destLat = destLat,
+                            destLng = destLng,
+                            speedKmh = speedKmh
+                        )
+                        
+                        return if (resultMessage.contains("not set as the mock location provider")) {
+                            mapOf("success" to false, "error" to resultMessage)
+                        } else {
+                            mapOf("success" to true, "message" to resultMessage)
                         }
                     }
                 },
+            )
+        }
+
+        // Stop GPS Mocking
+        if (appSettings.isToolEnabled(PhoneTools.stopGpsMockingToolInfo.id)) {
+            add(
+                object : Tool {
+                    override val schema = ToolSchema(
+                        name = "stop_gps_mocking",
+                        description = "Stops the persistent mock GPS location and restores real GPS hardware location.",
+                        parameters = emptyMap(),
+                    )
+                    override suspend fun execute(args: Map<String, Any>): Any {
+                        val message = com.kai.custom.tools.MockLocationController.stopMocking(context)
+                        return mapOf("success" to true, "message" to message)
+                    }
+                }
             )
         }
 
@@ -865,7 +853,9 @@ actual fun getAvailableTools(): List<Tool> {
                             }
                         }
                         val useFront = args["camera"]?.toString() == "front"
-                        val outputFile = java.io.File(context.cacheDir, "kai_capture_${System.currentTimeMillis()}.jpg")
+                        val aiDir = java.io.File(context.filesDir, "ai_captures")
+                        aiDir.mkdirs()
+                        val outputFile = java.io.File(aiDir, "capture_${System.currentTimeMillis()}.jpg")
                         val outputUri = androidx.core.content.FileProvider.getUriForFile(
                             context,
                             "${context.packageName}.fileprovider",
@@ -880,7 +870,6 @@ actual fun getAvailableTools(): List<Tool> {
                         }
                         return try {
                             context.startActivity(intent)
-                            // Wait briefly for user to take the photo
                             var elapsed = 0
                             val maxWait = 120_000L
                             while (elapsed < maxWait && !outputFile.exists()) {
@@ -888,15 +877,10 @@ actual fun getAvailableTools(): List<Tool> {
                                 elapsed += 500
                             }
                             if (outputFile.exists()) {
-                                val aiDir = java.io.File(context.filesDir, "ai_captures")
-                                aiDir.mkdirs()
-                                val saved = java.io.File(aiDir, "capture_${System.currentTimeMillis()}.jpg")
-                                outputFile.copyTo(saved, overwrite = true)
-                                outputFile.delete()
                                 mapOf(
                                     "success" to true,
-                                    "path" to saved.absolutePath,
-                                    "message" to "Photo saved to ${saved.absolutePath}",
+                                    "path" to outputFile.absolutePath,
+                                    "message" to "Photo saved to ${outputFile.absolutePath}",
                                 )
                             } else {
                                 mapOf("success" to false, "error" to "Camera was not used or photo was not saved.")
