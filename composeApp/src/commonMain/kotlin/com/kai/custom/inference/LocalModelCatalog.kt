@@ -102,6 +102,31 @@ val UNCENSORED_MODELS = listOf(
 
 val MODEL_CATALOG = STANDARD_MODELS + UNCENSORED_MODELS
 
+val GGUF_MODELS = listOf(
+    LocalModel(
+        id = "gguf_qwen3_4b_abliterated",
+        displayName = "Qwen3 4B Abliterated (GGUF Q4_K_M)",
+        fileName = "Huihui-Qwen3-4B-abliterated-v2.i1-Q4_K_M.gguf",
+        sizeBytes = 2_600_000_000L,
+        downloadUrl = "https://huggingface.co/mradermacher/Huihui-Qwen3-4B-abliterated-v2-i1-GGUF/resolve/main/Huihui-Qwen3-4B-abliterated-v2.i1-Q4_K_M.gguf",
+        gpuMemoryMb = 400,
+        defaultContextTokens = 2_048,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 45_000,
+    ),
+    LocalModel(
+        id = "gguf_qwen3.5_2b_uncensored",
+        displayName = "Qwen3.5 2B Uncensored (GGUF Q4_K_M)",
+        fileName = "qwen3.5-2b-uncensored-q4km.gguf",
+        sizeBytes = 2_000_000_000L,
+        downloadUrl = "https://huggingface.co/mradermacher/Huihui-Qwen3.5-2B-abliterated-i1-GGUF/resolve/main/...",
+        gpuMemoryMb = 200,
+        defaultContextTokens = 2_048,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 25_000,
+    ),
+)
+
 private val THINK_BLOCK_REGEX = Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL)
 
 // Qwen3 emits <think>…</think> blocks as part of its chat template; strip them before
