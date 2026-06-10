@@ -1,36 +1,34 @@
 package com.kai.custom.inference
 
-import android.content.Context
-import java.io.File
-import java.net.URL
-
 object GgufPluginManager {
 
-    private const val PLUGIN_DIR = "plugins"
-    private const val PLUGIN_FILENAME = "libgguf_engine.so"
+    private const val LIB_LLAMA = "llama"
+    private const val LIB_GGUF = "gguf_engine"
 
-    private var loaded = false
+    private var nativeLoaded = false
+    private var nativeInstance: GgufNative? = null
 
-    fun ensurePlugin(context: Context): Boolean {
-        if (loaded) return true
-
-        val pluginFile = getPluginFile(context)
-        if (!pluginFile.exists()) return false
+    @Synchronized
+    fun ensureLoaded(): GgufNative? {
+        if (nativeInstance != null) return nativeInstance
 
         return try {
-            System.load(pluginFile.absolutePath)
-            loaded = true
-            true
+            System.loadLibrary(LIB_LLAMA)
+            System.loadLibrary(LIB_GGUF)
+            nativeLoaded = true
+            val instance = GgufNative()
+            nativeInstance = instance
+            instance
         } catch (e: UnsatisfiedLinkError) {
-            false
+            null
         }
     }
 
-    fun isPluginLoaded(): Boolean = loaded
+    fun isLoaded(): Boolean = nativeLoaded
 
-    fun getPluginFile(context: Context): File {
-        val dir = File(context.filesDir, PLUGIN_DIR)
-        dir.mkdirs()
-        return File(dir, PLUGIN_FILENAME)
+    fun reset() {
+        nativeInstance?.nativeRelease()
+        nativeInstance = null
+        nativeLoaded = false
     }
 }

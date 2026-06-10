@@ -1107,6 +1107,17 @@ internal object ModelCatalog {
         "elephant-alpha" to CuratedModelInfo("Elephant Alpha", 200_000, "2026-04"),
         "owl-alpha" to CuratedModelInfo("Owl Alpha", 200_000, "2026-04"),
 
+        // OpenRouter Free Models (tested — 9 working)
+        "google/gemma-4-31b-it:free" to CuratedModelInfo("Google: Gemma 4 31B (free)", 262_144, "2026-05", "31B"),
+        "google/gemma-4-26b-a4b-it:free" to CuratedModelInfo("Google: Gemma 4 26B A4B (free)", 262_144, "2026-05", "26B"),
+        "nvidia/nemotron-3-ultra-550b-a55b:free" to CuratedModelInfo("NVIDIA: Nemotron 3 Ultra (free)", 1_000_000, "2026-05", "550B"),
+        "nvidia/nemotron-3-super-120b-a12b:free" to CuratedModelInfo("NVIDIA: Nemotron 3 Super (free)", 1_000_000, "2026-05", "120B"),
+        "nvidia/nemotron-nano-12b-v2-vl:free" to CuratedModelInfo("NVIDIA: Nemotron Nano 12B VL (free)", 128_000, "2026-03", "12B"),
+        "openai/gpt-oss-120b:free" to CuratedModelInfo("OpenAI: gpt-oss-120b (free)", 131_072, "2026-05", "120B"),
+        "openai/gpt-oss-20b:free" to CuratedModelInfo("OpenAI: gpt-oss-20b (free)", 131_072, "2026-05", "20B"),
+        "nex-agi/nex-n2-pro:free" to CuratedModelInfo("Nex AGI: Nex-N2-Pro (free)", 262_144, "2026-05", "39B"),
+        "liquid/lfm-2.5-1.2b-instruct:free" to CuratedModelInfo("Liquid: LFM2.5 1.2B (free)", 32_768, "2026-04", "1.2B"),
+
         // ==============================================================
         // Baidu Ernie — additional
         // ==============================================================

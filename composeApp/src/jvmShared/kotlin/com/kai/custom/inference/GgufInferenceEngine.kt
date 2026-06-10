@@ -1,26 +1,44 @@
 package com.kai.custom.inference
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 
 class GgufInferenceEngine(
-    private val native: GgufNative,
+    private val native: GgufNative?,
 ) : LocalInferenceEngine {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var downloadJob: Job? = null
 
     private val _engineState = MutableStateFlow(EngineState.UNINITIALIZED)
     override val engineState: StateFlow<EngineState> = _engineState
 
-    override val currentModelId: String? = null
-    override val downloadingModelId: StateFlow<String?> = MutableStateFlow(null)
-    override val downloadProgress: StateFlow<Float?> = MutableStateFlow(null)
-    override val downloadError: StateFlow<DownloadError?> = MutableStateFlow(null)
+    override var currentModelId: String? = null
+        private set
+
+    private val _downloadingModelId = MutableStateFlow<String?>(null)
+    override val downloadingModelId: StateFlow<String?> = _downloadingModelId
+
+    private val _downloadProgress = MutableStateFlow<Float?>(null)
+    override val downloadProgress: StateFlow<Float?> = _downloadProgress
+
+    private val _downloadError = MutableStateFlow<DownloadError?>(null)
+    override val downloadError: StateFlow<DownloadError?> = _downloadError
 
     override suspend fun initialize(model: DownloadedModel, contextTokens: Int) {
+        if (native == null) throw IllegalStateException("GGUF native library not loaded. Please ensure the app was built with GGUF support.")
         withContext(Dispatchers.IO) {
             _engineState.value = EngineState.INITIALIZING
             try {
@@ -36,7 +54,7 @@ class GgufInferenceEngine(
 
     override suspend fun release() {
         withContext(Dispatchers.IO) {
-            native.nativeRelease()
+            native?.nativeRelease()
             _engineState.value = EngineState.UNINITIALIZED
         }
     }
@@ -55,6 +73,7 @@ class GgufInferenceEngine(
         topK: Int,
         topP: Float,
     ): String = withContext(Dispatchers.IO) {
+        if (native == null) throw IllegalStateException("GGUF native library not loaded")
         val messageStrings = messages.map { msg ->
             "${msg.role}|||${sanitizeForLiteRt(msg.content) ?: ""}"
         }.toTypedArray()
@@ -96,10 +115,75 @@ class GgufInferenceEngine(
     }
 
     override fun startDownload(model: LocalModel) {
-        // Downloads are handled at the app level via existing download infrastructure
+        cancelDownload()
+        downloadJob = scope.launch {
+            _downloadingModelId.value = model.id
+            _downloadProgress.value = 0f
+            _downloadError.value = null
+
+            try {
+                val modelsDir = getGgufModelsDir()
+                modelsDir.mkdirs()
+                val modelDir = File(modelsDir, model.id)
+                modelDir.mkdirs()
+                val targetFile = File(modelDir, model.fileName)
+                val tempFile = File(modelsDir, "${model.id}.tmp")
+                var lastNotifiedPercent = -1
+
+                @Suppress("DEPRECATION")
+                val connection = URL(model.downloadUrl).openConnection() as HttpURLConnection
+                connection.instanceFollowRedirects = true
+                connection.connectTimeout = 30_000
+                connection.readTimeout = 60_000
+                connection.connect()
+
+                val responseCode = connection.responseCode
+                if (responseCode !in 200..299) {
+                    connection.disconnect()
+                    throw IOException("Download failed: HTTP $responseCode")
+                }
+
+                val contentLength = connection.contentLengthLong.takeIf { it > 0 } ?: model.sizeBytes
+                val buffer = ByteArray(65536)
+                var totalBytesRead = 0L
+
+                connection.inputStream.use { input ->
+                    tempFile.outputStream().use { output ->
+                        while (true) {
+                            ensureActive()
+                            val bytesRead = input.read(buffer)
+                            if (bytesRead <= 0) break
+                            output.write(buffer, 0, bytesRead)
+                            totalBytesRead += bytesRead
+                            val percent = (totalBytesRead * 100 / contentLength).toInt().coerceIn(1, 100)
+                            if (percent != lastNotifiedPercent) {
+                                lastNotifiedPercent = percent
+                                _downloadProgress.value = percent / 100f
+                            }
+                        }
+                    }
+                }
+                connection.disconnect()
+
+                if (!tempFile.renameTo(targetFile)) {
+                    tempFile.copyTo(targetFile, overwrite = true)
+                    tempFile.delete()
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _downloadError.value = DownloadError.NETWORK_ERROR
+            } finally {
+                _downloadingModelId.value = null
+                _downloadProgress.value = null
+            }
+        }
     }
 
-    override fun cancelDownload() {}
+    override fun cancelDownload() {
+        downloadJob?.cancel()
+        downloadJob = null
+    }
 
     override suspend fun deleteModel(modelId: String) {
         withContext(Dispatchers.IO) {

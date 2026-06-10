@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/mnt/f/Kai/.build-gguf/shadergen/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

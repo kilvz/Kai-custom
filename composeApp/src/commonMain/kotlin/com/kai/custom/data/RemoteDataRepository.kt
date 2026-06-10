@@ -2655,9 +2655,17 @@ class RemoteDataRepository(
 
     override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String {
         val id = "imported_${kotlin.uuid.Uuid.random().toString().take(8)}"
-        val displayName = fileName.removeSuffix(".litertlm").replace("_", " ").replace("-", " ").trim()
+        val isGguf = fileName.endsWith(".gguf")
+        val displayName = fileName
+            .removeSuffix(".litertlm")
+            .removeSuffix(".gguf")
+            .replace("_", " ").replace("-", " ").trim()
             .replaceFirstChar { it.uppercase() }
-        val modelsDir = com.kai.custom.inference.getModelStorageDirectory()
+        val modelsDir = if (isGguf) {
+            java.io.File(com.kai.custom.inference.getModelStorageDirectory()).parent + "/gguf_models"
+        } else {
+            com.kai.custom.inference.getModelStorageDirectory()
+        }
         val modelDir = java.io.File(modelsDir, id)
         modelDir.mkdirs()
         val targetFile = java.io.File(modelDir, fileName)

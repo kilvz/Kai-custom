@@ -1,111 +1,81 @@
 # build-gguf.ps1 — Cross-compile llama.cpp + JNI wrapper for Android
-#
-# Usage: .\build-gguf.ps1
-#
-# Requirements:
-#   - WSL (Ubuntu) with: git, cmake, make, g++
-#   - Android NDK (set $env:ANDROID_NDK_HOME or detected from local.properties)
-#
-# Output: androidApp/src/main/jniLibs/arm64-v8a/libgguf_engine.so
+# Run from PowerShell. Requires WSL Ubuntu + git + cmake + make + g++.
 
-param(
-    [switch]$Clean
-)
+param([switch]$Clean)
 
 $ErrorActionPreference = "Stop"
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$BuildDir = Join-Path $ScriptDir ".build-gguf"
-$OutputDir = Join-Path $ScriptDir "androidApp\src\main\jniLibs\arm64-v8a"
-$GgufDir = Join-Path $ScriptDir "gguf"
+$ScriptDir = (Get-Item ".").FullName
 
-# Detect NDK
+# Resolve NDK
 if (-not $env:ANDROID_NDK_HOME) {
-    $propFile = Join-Path $ScriptDir "local.properties"
-    if (Test-Path $propFile) {
-        $ndkLine = Select-String -Path $propFile -Pattern "^sdk\.dir" | Select-Object -First 1
-        if ($ndkLine) {
-            $sdkDir = $ndkLine.ToString().Split("=", 2)[1].Trim()
-            $env:ANDROID_NDK_HOME = "$sdkDir\ndk\29.0.14206865"
-        }
-    }
+    $ndkBase = "$env:USERPROFILE\AppData\Local\Android\Sdk\ndk"
+    $latest = Get-ChildItem $ndkBase -Directory | Sort-Object Name -Descending | Select-Object -First 1
+    if ($latest) { $env:ANDROID_NDK_HOME = $latest.FullName }
 }
-if (-not $env:ANDROID_NDK_HOME) {
-    Write-Error "ANDROID_NDK_HOME not set. Set it or add sdk.dir to local.properties"
-    exit 1
-}
+if (-not $env:ANDROID_NDK_HOME) { Write-Error "ANDROID_NDK_HOME not set"; exit 1 }
 Write-Host "NDK: $env:ANDROID_NDK_HOME"
 
-if ($Clean -and (Test-Path $BuildDir)) {
-    Remove-Item -Recurse -Force $BuildDir
-}
-
+$BuildDir = Join-Path $ScriptDir ".build-gguf"
+if ($Clean -and (Test-Path $BuildDir)) { Remove-Item -Recurse -Force $BuildDir }
 New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
-New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
-$wslScript = @'
+# Write bash script
+$bashScript = @'
 #!/usr/bin/env bash
 set -euo pipefail
-
-BUILD_DIR="$1"
-NDK_HOME="$2"
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-# The C++ sources are in the composeApp cpp directory
-CPP_SRC_DIR="${SCRIPT_DIR}/composeApp/src/androidMain/cpp"
-
-mkdir -p "${BUILD_DIR}/llama" "${BUILD_DIR}/build"
-
-# Clone llama.cpp
-if [ ! -d "${BUILD_DIR}/llama/.git" ]; then
-    echo "Cloning llama.cpp..."
-    git clone --depth=1 https://github.com/ggerganov/llama.cpp.git "${BUILD_DIR}/llama"
-fi
-
-# Copy our JNI wrapper into llama.cpp source tree
-cp "${CPP_SRC_DIR}/gguf_context.h" "${BUILD_DIR}/llama/"
-cp "${CPP_SRC_DIR}/gguf_context.cc" "${BUILD_DIR}/llama/"
-cp "${CPP_SRC_DIR}/gguf_jni.cpp" "${BUILD_DIR}/llama/"
-
+PROJECT_DIR="$1"
+NDK_DIR="$2"
+BUILD_DIR="${PROJECT_DIR}/.build-gguf"
+CPP_DIR="${PROJECT_DIR}/composeApp/src/androidMain/cpp"
+OUTPUT_DIR="${PROJECT_DIR}/androidApp/src/main/jniLibs/arm64-v8a"
+GGUF_DIR="${PROJECT_DIR}/gguf"
+mkdir -p "${BUILD_DIR}/llama" "${BUILD_DIR}/build" "${OUTPUT_DIR}" "${GGUF_DIR}"
+echo "=== Cloning llama.cpp ==="
+git clone --depth=1 https://github.com/ggerganov/llama.cpp.git "${BUILD_DIR}/llama"
+echo "=== Copying JNI sources ==="
+cp "${CPP_DIR}/gguf_context.h" "${CPP_DIR}/gguf_context.cc" "${CPP_DIR}/gguf_jni.cpp" "${CPP_DIR}/CMakeLists.txt" "${BUILD_DIR}/llama/"
 cd "${BUILD_DIR}/build"
-
-TOOLCHAIN="${NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
+TOOLCHAIN="${NDK_DIR}/toolchains/llvm/prebuilt/linux-x86_64"
 API=26
-ARCH="aarch64-linux-android"
-TARGET="${ARCH}${API}"
-
+TARGET="aarch64-linux-android${API}"
+echo "=== Configuring CMake ==="
 cmake "${BUILD_DIR}/llama" \
-    -DCMAKE_TOOLCHAIN_FILE="${NDK_HOME}/build/cmake/android.toolchain.cmake" \
-    -DANDROID_ABI=arm64-v8a \
-    -DANDROID_PLATFORM=android-${API} \
+    -DCMAKE_TOOLCHAIN_FILE="${NDK_DIR}/build/cmake/android.toolchain.cmake" \
+    -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-${API} \
     -DCMAKE_C_COMPILER="${TOOLCHAIN}/bin/${TARGET}-clang" \
     -DCMAKE_CXX_COMPILER="${TOOLCHAIN}/bin/${TARGET}-clang++" \
-    -DLLAMA_CUDA=OFF \
-    -DLLAMA_VULKAN=OFF \
-    -DLLAMA_METAL=OFF \
-    -DLLAMA_BUILD_TESTS=OFF \
-    -DLLAMA_BUILD_EXAMPLES=OFF \
-    -DLLAMA_BUILD_SERVER=OFF \
-    -DBUILD_SHARED_LIBS=ON \
-    -DCMAKE_BUILD_TYPE=Release
-
+    -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=OFF \
+    -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+echo "=== Building ==="
 make -j$(nproc) gguf_engine
-
-# Copy output
-cp "${BUILD_DIR}/build/libgguf_engine.so" "${SCRIPT_DIR}/androidApp/src/main/jniLibs/arm64-v8a/"
-cp "${BUILD_DIR}/build/libgguf_engine.so" "${SCRIPT_DIR}/gguf/"
-
-echo "Done! Output: androidApp/src/main/jniLibs/arm64-v8a/libgguf_engine.so"
+cp "${BUILD_DIR}/build/libgguf_engine.so" "${OUTPUT_DIR}/"
+cp "${BUILD_DIR}/build/libgguf_engine.so" "${GGUF_DIR}/"
+echo "=== DONE ==="
+ls -lh "${OUTPUT_DIR}/libgguf_engine.so"
 '@
 
-$wslScriptPath = Join-Path $BuildDir "_build.sh"
-Set-Content -Path $wslScriptPath -Value $wslScript -Encoding ASCII
+$bashPath = Join-Path $BuildDir "build.sh"
+Set-Content -Path $bashPath -Value $bashScript -Encoding ASCII
 
-Write-Host "Running build in WSL..."
-wsl -d Ubuntu bash "$(wslpath -a $wslScriptPath)" "$(wslpath -a $BuildDir)" "$(wslpath -a $env:ANDROID_NDK_HOME)"
+# Convert paths to WSL format: C:\path -> /mnt/c/path
+function ConvertTo-WslPath {
+    param([string]$WinPath)
+    $drive = $WinPath[0].ToString().ToLower()
+    return "/mnt/$drive" + $WinPath.Substring(2).Replace("\", "/")
+}
+
+$wslProject = ConvertTo-WslPath $ScriptDir
+$wslNdk = "/opt/android-ndk-r29"
+
+Write-Host "Running WSL build..."
+Write-Host "  Project: $wslProject"
+Write-Host "  NDK (Linux): $wslNdk"
+
+wsl -d Ubuntu -- bash -c "bash '${wslProject}/.build-gguf/build.sh' '${wslProject}' '${wslNdk}'" 2>&1
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Build failed"
     exit 1
 }
 
-Write-Host "Build successful! libgguf_engine.so is at: $OutputDir"
+Write-Host "Build successful! libgguf_engine.so in gguf/"

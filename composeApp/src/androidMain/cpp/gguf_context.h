@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#include "llama.h"
+#include "include/llama.h"
 
 struct GgufChatMessage {
     std::string role;
@@ -38,7 +38,6 @@ public:
 private:
     llama_model* model;
     llama_context* ctx;
-    llama_sampler* smpl;
     std::mutex mutex;
     bool terminated;
 

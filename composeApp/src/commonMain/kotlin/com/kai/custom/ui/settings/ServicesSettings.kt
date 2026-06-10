@@ -82,8 +82,10 @@ import com.kai.custom.ui.icons.DragIndicator
 import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
 import com.kai.custom.ui.kaiAdaptiveCardSurface
+import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
 import kotlinx.coroutines.launch
 import kai.composeapp.generated.resources.Res
@@ -639,6 +641,7 @@ private fun ConfiguredServiceCardContent(
                         onChangeModelContextTokens = onChangeModelContextTokens,
                         modelContextTokens = modelContextTokens,
                         onImportLocalModel = onImportLocalModel,
+                        onImportPlatformFileComplete = actions.onImportPlatformFileComplete,
                     )
                 } else if (entry.service is Service.OpenAICompatible) {
                     OpenAICompatibleSettings(
@@ -906,6 +909,7 @@ private fun LiteRTSettings(
     onChangeModelContextTokens: (String, Int) -> Unit,
     modelContextTokens: ImmutableMap<String, Int>,
     onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
+    onImportPlatformFileComplete: (com.kai.custom.inference.ImportedModel) -> Unit = {},
 ) {
     val downloadedIds = remember(downloadedModels) { downloadedModels.map { it.id }.toSet() }
     val importScope = rememberCoroutineScope()
@@ -1085,13 +1089,32 @@ private fun LiteRTSettings(
 
     var importError by remember { mutableStateOf(false) }
     val importFilePicker = rememberFilePickerLauncher(
-        type = FileKitType.File(extensions = listOf("litertlm")),
+        type = FileKitType.File(extensions = listOf("litertlm", "gguf")),
     ) { file ->
         if (file != null) {
             importScope.launch {
                 try {
-                    onImportLocalModel(file.readBytes(), "imported.litertlm")
-                    importError = false
+                    val isGguf = try { file.name.endsWith(".gguf") } catch (_: Exception) { false }
+                    val id = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        com.kai.custom.inference.importPlatformFile(file, isGguf)
+                    }
+                    if (id != null) {
+                        val displayName = file.name
+                            .removeSuffix(".litertlm")
+                            .removeSuffix(".gguf")
+                            .replace("_", " ").replace("-", " ").trim()
+                            .replaceFirstChar { it.uppercase() }
+                        val model = com.kai.custom.inference.ImportedModel(
+                            id = id,
+                            displayName = displayName,
+                            filePath = "", // Path is handled internally by the inference engine based on ID
+                            sizeBytes = try { file.size ?: 0L } catch (_: Exception) { 0L },
+                        )
+                        onImportPlatformFileComplete(model)
+                        importError = false
+                    } else {
+                        importError = true
+                    }
                 } catch (_: Exception) {
                     importError = true
                 }
@@ -1102,7 +1125,7 @@ private fun LiteRTSettings(
     OutlinedButton(
         onClick = { importFilePicker.launch() },
         modifier = Modifier.handCursor(),
-    ) { Text("Import .litertlm File") }
+    ) { Text("Import Model File (.litertlm / .gguf)") }
 
     if (importError) {
         Spacer(Modifier.height(4.dp))

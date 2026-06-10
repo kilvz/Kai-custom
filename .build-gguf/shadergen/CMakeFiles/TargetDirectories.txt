@@ -1,0 +1,7 @@
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/vulkan-shaders-gen.dir
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/edit_cache.dir
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/rebuild_cache.dir
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/list_install_components.dir
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/install.dir
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/install/local.dir
+/mnt/f/Kai/.build-gguf/shadergen/CMakeFiles/install/strip.dir

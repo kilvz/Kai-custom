@@ -267,6 +267,12 @@ class SettingsViewModel(
         onChangeModelTopK = ::onChangeModelTopK,
         onChangeModelTopP = ::onChangeModelTopP,
         onImportLocalModel = ::onImportLocalModel,
+        onImportPlatformFileComplete = { model ->
+            viewModelScope.launch(backgroundDispatcher) {
+                dataRepository.addImportedModel(model)
+                refreshServiceList()
+            }
+        },
         onExportSettings = ::onExportSettings,
         onPrepareExport = ::onPrepareExport,
         onImportSettings = ::onImportSettings,

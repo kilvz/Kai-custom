@@ -1,32 +1,24 @@
 #include "gguf_context.h"
-#include <android/log.h>
+#include <cstdio>
 #include <sstream>
 #include <algorithm>
 
-#define LOG_TAG "GGUFEngine"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGI(...) fprintf(stdout, "[GGUF] " __VA_ARGS__); fprintf(stdout, "\n")
+#define LOGE(...) fprintf(stderr, "[GGUF ERROR] " __VA_ARGS__); fprintf(stderr, "\n")
 
-GgufContext::GgufContext() : model(nullptr), ctx(nullptr), smpl(nullptr), terminated(false) {}
+GgufContext::GgufContext() : model(nullptr), ctx(nullptr), terminated(false) {}
 
-GgufContext::~GgufContext() {
-    release();
-}
+GgufContext::~GgufContext() { release(); }
 
 bool GgufContext::loadModel(const std::string& modelPath, int nCtx) {
     std::lock_guard<std::mutex> lock(mutex);
-
     if (model) release();
 
-    // Default context params
     llama_model_params modelParams = llama_model_default_params();
-    modelParams.n_gpu_layers = 0; // CPU only for now
+    modelParams.n_gpu_layers = 0;
 
     model = llama_model_load_from_file(modelPath.c_str(), modelParams);
-    if (!model) {
-        LOGE("Failed to load model from %s", modelPath.c_str());
-        return false;
-    }
+    if (!model) { LOGE("Failed to load model"); return false; }
 
     llama_context_params ctxParams = llama_context_default_params();
     ctxParams.n_ctx = (nCtx > 0) ? nCtx : 2048;
@@ -34,14 +26,9 @@ bool GgufContext::loadModel(const std::string& modelPath, int nCtx) {
     ctxParams.n_threads_batch = N_THREADS;
 
     ctx = llama_init_from_model(model, ctxParams);
-    if (!ctx) {
-        LOGE("Failed to create context");
-        llama_model_free(model);
-        model = nullptr;
-        return false;
-    }
+    if (!ctx) { LOGE("Failed to create context"); llama_model_free(model); model = nullptr; return false; }
 
-    LOGI("Model loaded: %s, n_ctx=%d", modelPath.c_str(), ctxParams.n_ctx);
+    LOGI("Model loaded, n_ctx=%d", ctxParams.n_ctx);
     return true;
 }
 
@@ -57,9 +44,10 @@ std::string GgufContext::chat(
     if (!model || !ctx) return "";
 
     terminated = false;
+    const auto* vocab = llama_model_get_vocab(model);
     std::string result;
 
-    // Build prompt from chat template
+    // Build prompt
     std::ostringstream prompt;
     if (!systemPrompt.empty()) {
         prompt << "<|im_start|>system\n" << systemPrompt << "<|im_end|>\n";
@@ -73,72 +61,56 @@ std::string GgufContext::chat(
     }
     prompt << "<|im_start|>assistant\n";
 
-    // Tokenize
     std::string promptStr = prompt.str();
-    int nTokens = promptStr.length() / 2 + 1024; // rough upper bound
-    std::vector<llama_token> tokens(nTokens);
-    nTokens = llama_tokenize(model, promptStr.data(), promptStr.size(), tokens.data(), tokens.size(), true, false);
-    if (nTokens < 0) {
-        LOGE("Tokenization failed");
-        return "";
-    }
+
+    // Tokenize
+    int nTokensEst = (promptStr.size() / 2) + 1024;
+    std::vector<llama_token> tokens(nTokensEst);
+    int nTokens = llama_tokenize(vocab, promptStr.data(), promptStr.size(), tokens.data(), tokens.size(), true, false);
+    if (nTokens < 0) { LOGE("Tokenization failed"); return ""; }
     tokens.resize(nTokens);
 
     // Eval prompt
-    if (llama_decode(ctx, llama_batch_get_one(tokens.data(), tokens.size(), 0, 0))) {
-        LOGE("Prompt eval failed");
-        return "";
-    }
+    llama_batch batch = llama_batch_get_one(tokens.data(), tokens.size());
+    if (llama_decode(ctx, batch)) { LOGE("Prompt eval failed"); return ""; }
 
-    // Sampling params
-    auto* smplChain = llama_sampler_chain_init(llama_sampler_chain_default_params());
-    if (temperature > 0.0f) {
-        llama_sampler_chain_add(smplChain, llama_sampler_init_min_p(0.05f, 1));
-        llama_sampler_chain_add(smplChain, llama_sampler_init_temp(temperature));
+    // Build sampler chain
+    auto* smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
+    if (topK > 0) {
+        llama_sampler_chain_add(smpl, llama_sampler_init_top_k(topK));
     }
-    llama_sampler_chain_add(smplChain, llama_sampler_init_dist(topK, topP, 69420));
+    if (topP > 0.0f) {
+        llama_sampler_chain_add(smpl, llama_sampler_init_top_p(topP, 1));
+    }
+    if (temperature > 0.0f) {
+        llama_sampler_chain_add(smpl, llama_sampler_init_temp(temperature));
+    }
+    llama_sampler_chain_add(smpl, llama_sampler_init_dist(69420));
 
     // Generate
     int generated = 0;
     int maxGen = (maxTokens > 0) ? maxTokens : 512;
     while (generated < maxGen && !terminated) {
-        llama_token newToken = llama_sampler_sample(smplChain, ctx, -1);
+        llama_token newToken = llama_sampler_sample(smpl, ctx, -1);
 
-        if (llama_token_is_eog(model, newToken)) break;
+        if (llama_vocab_is_eog(vocab, newToken)) break;
 
-        // Append to result
         char buf[256];
-        int n = llama_token_to_piece(model, newToken, buf, sizeof(buf), 0, true);
-        if (n > 0) {
-            result.append(buf, n);
-        }
+        int n = llama_token_to_piece(vocab, newToken, buf, sizeof(buf), 0, true);
+        if (n > 0) result.append(buf, n);
 
-        // Feed back
-        llama_token id = newToken;
-        if (llama_decode(ctx, llama_batch_get_one(&id, 1, llama_n_ctx(ctx) - 1, 0))) {
-            LOGE("Generation decode failed");
-            break;
-        }
+        llama_batch batch2 = llama_batch_get_one(&newToken, 1);
+        if (llama_decode(ctx, batch2)) { LOGE("Decode failed"); break; }
         generated++;
     }
 
-    llama_sampler_free(smplChain);
+    llama_sampler_free(smpl);
     return result;
 }
 
 void GgufContext::release() {
     std::lock_guard<std::mutex> lock(mutex);
     terminated = true;
-    if (smpl) {
-        llama_sampler_free(smpl);
-        smpl = nullptr;
-    }
-    if (ctx) {
-        llama_free(ctx);
-        ctx = nullptr;
-    }
-    if (model) {
-        llama_model_free(model);
-        model = nullptr;
-    }
+    if (ctx) { llama_free(ctx); ctx = nullptr; }
+    if (model) { llama_model_free(model); model = nullptr; }
 }
