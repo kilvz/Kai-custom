@@ -271,6 +271,7 @@ internal fun ServicesContent(
                     modelTopP = modelTopP,
                     onChangeModelTopP = onChangeModelTopP,
                     onImportLocalModel = onImportLocalModel,
+                    onImportPlatformFileComplete = actions.onImportPlatformFileComplete,
                 )
             }
         }
@@ -554,6 +555,7 @@ private fun ConfiguredServiceCardContent(
     modelTopP: ImmutableMap<String, Float> = persistentMapOf(),
     onChangeModelTopP: (String, Float) -> Unit = { _, _ -> },
     onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
+    onImportPlatformFileComplete: (com.kai.custom.inference.ImportedModel) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -641,7 +643,7 @@ private fun ConfiguredServiceCardContent(
                         onChangeModelContextTokens = onChangeModelContextTokens,
                         modelContextTokens = modelContextTokens,
                         onImportLocalModel = onImportLocalModel,
-                        onImportPlatformFileComplete = actions.onImportPlatformFileComplete,
+                        onImportPlatformFileComplete = onImportPlatformFileComplete,
                     )
                 } else if (entry.service is Service.OpenAICompatible) {
                     OpenAICompatibleSettings(
@@ -1108,7 +1110,7 @@ private fun LiteRTSettings(
                             id = id,
                             displayName = displayName,
                             filePath = "", // Path is handled internally by the inference engine based on ID
-                            sizeBytes = try { file.size ?: 0L } catch (_: Exception) { 0L },
+                            sizeBytes = 0L,
                         )
                         onImportPlatformFileComplete(model)
                         importError = false
