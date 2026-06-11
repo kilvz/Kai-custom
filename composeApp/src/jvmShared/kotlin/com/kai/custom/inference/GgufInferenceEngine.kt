@@ -21,6 +21,8 @@ class GgufInferenceEngine(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var downloadJob: Job? = null
+    
+    private var activeSafHandle: PlatformSafHandle? = null
 
     private val _engineState = MutableStateFlow(EngineState.UNINITIALIZED)
     override val engineState: StateFlow<EngineState> = _engineState
@@ -42,7 +44,13 @@ class GgufInferenceEngine(
         withContext(Dispatchers.IO) {
             _engineState.value = EngineState.INITIALIZING
             try {
-                val ok = native.nativeInit(model.filePath, contextTokens)
+                var resolvedPath = model.filePath
+                if (resolvedPath.startsWith("content://")) {
+                    activeSafHandle = openSafPath(resolvedPath)
+                    resolvedPath = activeSafHandle?.let { getSafResolvedPath(it) } ?: resolvedPath
+                }
+
+                val ok = native.nativeInit(resolvedPath, contextTokens)
                 if (!ok) throw IllegalStateException("Failed to initialize GGUF model")
                 _engineState.value = EngineState.READY
             } catch (e: Exception) {
@@ -55,6 +63,8 @@ class GgufInferenceEngine(
     override suspend fun release() {
         withContext(Dispatchers.IO) {
             native?.nativeRelease()
+            activeSafHandle?.let { closeSafHandle(it) }
+            activeSafHandle = null
             _engineState.value = EngineState.UNINITIALIZED
         }
     }
@@ -94,8 +104,17 @@ class GgufInferenceEngine(
         val modelsDir = getGgufModelsDir()
         if (!modelsDir.exists()) return emptyList()
         return modelsDir.listFiles()?.filter { it.isDirectory }?.mapNotNull { modelDir ->
+            val safFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".saf") }
             val ggufFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".gguf") }
-            if (ggufFile != null) {
+            
+            if (safFile != null) {
+                DownloadedModel(
+                    id = modelDir.name,
+                    displayName = modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() },
+                    filePath = safFile.readText().trim(),
+                    sizeBytes = 0L, // Handled dynamically or assume user knows
+                )
+            } else if (ggufFile != null) {
                 DownloadedModel(
                     id = modelDir.name,
                     displayName = modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() },

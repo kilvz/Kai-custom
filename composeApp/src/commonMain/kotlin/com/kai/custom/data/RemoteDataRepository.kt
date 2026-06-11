@@ -363,7 +363,7 @@ class RemoteDataRepository(
             Service.LiteRT -> {
                 val engine = localInferenceEngine ?: return
                 val selectedModelId = appSettings.getInstanceModelId(instanceId)
-                val downloaded = engine.getDownloadedModels()
+                val downloaded = getLocalDownloadedModels()
                 val models = downloaded.map {
                     SettingsModel(
                         id = it.id,
@@ -2574,7 +2574,7 @@ class RemoteDataRepository(
                 sizeBytes = model.sizeBytes,
             )
         }
-        return engineModels + imported
+        return (engineModels + imported).distinctBy { it.id }
     }
 
     override fun getLocalAvailableModels(): List<LocalModel> = localInferenceEngine?.getAvailableModels() ?: emptyList()

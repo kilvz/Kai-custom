@@ -1,47 +1,32 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
-
 package com.kai.custom.inference
 
-import com.kai.custom.getAppFilesDirectory
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.UnsafeNumber
 import platform.Foundation.NSCachesDirectory
+import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
-import platform.Foundation.NSFileSystemFreeSize
 import platform.Foundation.NSNumber
-import platform.Foundation.NSProcessInfo
-import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
 
-private val modelStorageDir: String by lazy {
-    val dir = getAppFilesDirectory() + "/litert_models"
-    NSFileManager.defaultManager.createDirectoryAtPath(dir, true, null, null)
-    dir
-}
-
-private val modelCacheDir: String by lazy {
-    val paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true)
-    val cacheRoot = paths.firstOrNull() as? String ?: getAppFilesDirectory()
-    val dir = "$cacheRoot/litert"
-    NSFileManager.defaultManager.createDirectoryAtPath(dir, true, null, null)
-    dir
-}
-
-actual fun getModelStorageDirectory(): String = modelStorageDir
-
-actual fun getModelCacheDirectory(): String = modelCacheDir
-
-// iOS surfaces low-memory conditions via UIApplication.didReceiveMemoryWarning rather
-// than a queryable "available" value. Skip the pre-check (matches desktop) and rely on
-// the system warning + initialize() retry-with-CPU-backend path.
-actual fun getAvailableMemoryBytes(): Long = Long.MAX_VALUE
-
 @OptIn(ExperimentalForeignApi::class)
-actual fun getTotalMemoryBytes(): Long = NSProcessInfo.processInfo.physicalMemory.toLong()
+private fun getDirectory(directory: platform.Foundation.NSSearchPathDirectory): String {
+    val paths = NSFileManager.defaultManager.URLsForDirectory(directory, NSUserDomainMask)
+    return paths.first().toString().removePrefix("file://")
+}
 
+actual fun getModelStorageDirectory(): String = getDirectory(NSDocumentDirectory) + "/litert_models"
+
+actual fun getModelCacheDirectory(): String = getDirectory(NSCachesDirectory)
+
+actual fun getAvailableMemoryBytes(): Long = Long.MAX_VALUE // iOS memory management is aggressive; assume it's available and let the OS kill us if needed
+
+actual fun getTotalMemoryBytes(): Long = Long.MAX_VALUE
+
+@OptIn(ExperimentalForeignApi::class, UnsafeNumber::class)
 actual fun getAvailableDiskSpaceBytes(path: String): Long {
-    val attrs = NSFileManager.defaultManager.attributesOfFileSystemForPath(path, null)
-    val free = attrs?.get(NSFileSystemFreeSize) as? NSNumber
-    return free?.longLongValue ?: 0L
+    val fileManager = NSFileManager.defaultManager
+    val attributes = fileManager.attributesOfFileSystemForPath(path, null)
+    return (attributes?.get(platform.Foundation.NSFileSystemFreeSize) as? NSNumber)?.unsignedLongLongValue?.toLong() ?: 0L
 }
 
 // iOS has no foreground-service equivalent. Download progress is surfaced in-app; if a
@@ -49,3 +34,27 @@ actual fun getAvailableDiskSpaceBytes(path: String): Long {
 actual fun startDownloadNotificationService() {}
 actual fun stopDownloadNotificationService() {}
 actual fun updateDownloadNotificationProgress(percent: Int) {}
+
+actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? {
+    return null
+}
+
+actual fun handleImportedSafFile(uriOrPath: String, isGguf: Boolean): String? {
+    return null
+}
+
+@androidx.compose.runtime.Composable
+actual fun rememberSafFilePicker(
+    extensions: List<String>,
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
+): () -> Unit {
+    return {}
+}
+
+actual class PlatformSafHandle
+
+actual fun openSafPath(path: String): PlatformSafHandle? = null
+
+actual fun getSafResolvedPath(handle: PlatformSafHandle): String = ""
+
+actual fun closeSafHandle(handle: PlatformSafHandle) {}

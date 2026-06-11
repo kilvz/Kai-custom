@@ -1090,27 +1090,28 @@ private fun LiteRTSettings(
     Spacer(Modifier.height(12.dp))
 
     var importError by remember { mutableStateOf(false) }
-    val importFilePicker = rememberFilePickerLauncher(
-        type = FileKitType.File(extensions = listOf("litertlm", "gguf")),
-    ) { file ->
-        if (file != null) {
+    val importFilePicker = com.kai.custom.inference.rememberSafFilePicker(
+        extensions = listOf("litertlm", "gguf"),
+    ) { uriOrPath, displayName, sizeBytes ->
+        if (uriOrPath != null) {
             importScope.launch {
                 try {
-                    val isGguf = try { file.name.endsWith(".gguf") } catch (_: Exception) { false }
-                    val id = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                        com.kai.custom.inference.importPlatformFile(file, isGguf)
-                    }
+                    val isGguf = try { displayName?.endsWith(".gguf") == true } catch (_: Exception) { false }
+                    
+                    val id = com.kai.custom.inference.handleImportedSafFile(uriOrPath, isGguf)
+                    
                     if (id != null) {
-                        val displayName = file.name
+                        val cleanDisplayName = (displayName ?: "model")
                             .removeSuffix(".litertlm")
                             .removeSuffix(".gguf")
                             .replace("_", " ").replace("-", " ").trim()
                             .replaceFirstChar { it.uppercase() }
+
                         val model = com.kai.custom.inference.ImportedModel(
                             id = id,
-                            displayName = displayName,
-                            filePath = "", // Path is handled internally by the inference engine based on ID
-                            sizeBytes = 0L,
+                            displayName = cleanDisplayName,
+                            filePath = uriOrPath,
+                            sizeBytes = sizeBytes,
                         )
                         onImportPlatformFileComplete(model)
                         importError = false
@@ -1125,7 +1126,7 @@ private fun LiteRTSettings(
     }
 
     OutlinedButton(
-        onClick = { importFilePicker.launch() },
+        onClick = { importFilePicker() },
         modifier = Modifier.handCursor(),
     ) { Text("Import Model File (.litertlm / .gguf)") }
 

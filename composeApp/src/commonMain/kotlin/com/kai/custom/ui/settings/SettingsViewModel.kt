@@ -270,6 +270,10 @@ class SettingsViewModel(
         onImportPlatformFileComplete = { model ->
             viewModelScope.launch(backgroundDispatcher) {
                 dataRepository.addImportedModel(model)
+                val liteRtInstance = _state.value.configuredServices.find { it.service == com.kai.custom.data.Service.LiteRT }
+                if (liteRtInstance != null) {
+                    checkConnection(liteRtInstance.instanceId, com.kai.custom.data.Service.LiteRT)
+                }
                 refreshServiceList()
             }
         },

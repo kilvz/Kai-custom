@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#include "include/llama.h"
+#include "llama.h"
 
 struct GgufChatMessage {
     std::string role;

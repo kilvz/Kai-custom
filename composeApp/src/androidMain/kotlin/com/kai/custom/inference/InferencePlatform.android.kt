@@ -150,3 +150,101 @@ actual fun importPlatformFile(platformFile: PlatformFile, isGguf: Boolean): Stri
         null
     }
 }
+
+@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+actual fun handleImportedSafFile(uriOrPath: String, isGguf: Boolean): String? {
+    try {
+        var actualIsGguf = isGguf
+        if (uriOrPath.startsWith("content://")) {
+            val uri = android.net.Uri.parse(uriOrPath)
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                val magic = ByteArray(4)
+                if (input.read(magic) == 4) {
+                    val magicStr = String(magic, kotlin.text.Charsets.US_ASCII)
+                    if (magicStr == "GGUF") {
+                        actualIsGguf = true
+                    }
+                }
+            }
+        }
+
+        val baseId = "imported_${kotlin.uuid.Uuid.random().toString().take(8)}"
+        val id = if (actualIsGguf) "gguf_$baseId" else baseId
+        val modelsDir = if (actualIsGguf) {
+            com.kai.custom.inference.GgufInferenceEngine.getGgufModelsDir()
+        } else {
+            File(getModelStorageDirectory())
+        }
+        modelsDir.mkdirs()
+        val modelDir = File(modelsDir, id)
+        modelDir.mkdirs()
+        
+        val extension = if (actualIsGguf) "gguf" else "litertlm"
+        val safFile = File(modelDir, "model.$extension.saf")
+        safFile.writeText(uriOrPath)
+        return id
+    } catch (e: Exception) {
+        return null
+    }
+}
+
+@androidx.compose.runtime.Composable
+actual fun rememberSafFilePicker(
+    extensions: List<String>,
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
+): () -> Unit {
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                // Try to persist permission
+                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                
+                // Get display name and size
+                var displayName = "model"
+                var sizeBytes = 0L
+                context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                        val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                        if (nameIndex >= 0) displayName = cursor.getString(nameIndex)
+                        if (sizeIndex >= 0) sizeBytes = cursor.getLong(sizeIndex)
+                    }
+                }
+                
+                onResult(uri.toString(), displayName, sizeBytes)
+            } catch (e: Exception) {
+                android.util.Log.e("InferencePlatform", "SAF error", e)
+                onResult(null, null, 0L)
+            }
+        } else {
+            onResult(null, null, 0L)
+        }
+    }
+    return { launcher.launch(arrayOf("*/*")) }
+}
+
+actual class PlatformSafHandle(val pfd: android.os.ParcelFileDescriptor?)
+
+actual fun openSafPath(path: String): PlatformSafHandle? {
+    if (!path.startsWith("content://")) return null
+    return try {
+        val uri = Uri.parse(path)
+        val pfd = context.contentResolver.openFileDescriptor(uri, "r")
+        PlatformSafHandle(pfd)
+    } catch(e: Exception) { 
+        android.util.Log.e("InferencePlatform", "Failed to open SAF path", e)
+        null 
+    }
+}
+
+actual fun getSafResolvedPath(handle: PlatformSafHandle): String {
+    return handle.pfd?.let { "/proc/self/fd/${it.fd}" } ?: ""
+}
+
+actual fun closeSafHandle(handle: PlatformSafHandle) {
+    try {
+        handle.pfd?.close()
+    } catch(e: Exception) {}
+}

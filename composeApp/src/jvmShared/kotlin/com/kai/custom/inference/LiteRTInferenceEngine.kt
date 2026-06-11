@@ -41,6 +41,7 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
 
     private var engine: Engine? = null
     private var conversation: com.google.ai.edge.litertlm.Conversation? = null
+    private var activeSafHandle: PlatformSafHandle? = null
     override var currentModelId: String? = null
         private set
     private var currentContextTokens: Int = 0
@@ -103,9 +104,9 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                     throw InsufficientMemoryException()
                 }
 
-                fun initWithBackend(backend: Backend, maxTokens: Int?): Engine {
+                fun initWithBackend(backend: Backend, maxTokens: Int?, path: String): Engine {
                     val config = EngineConfig(
-                        modelPath = model.filePath,
+                        modelPath = path,
                         backend = backend,
                         cacheDir = getModelCacheDirectory(),
                         maxNumTokens = maxTokens,
@@ -117,19 +118,25 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
 
                 val requestedTokens = if (contextTokens > 0) contextTokens else null
                 println("LiteRT: initializing model=${model.id} maxNumTokens=$requestedTokens")
+                
+                var resolvedPath = model.filePath
+                if (resolvedPath.startsWith("content://")) {
+                    activeSafHandle = openSafPath(resolvedPath)
+                    resolvedPath = activeSafHandle?.let { getSafResolvedPath(it) } ?: resolvedPath
+                }
 
                 val newEngine = try {
                     if (useCpuOnly) {
                         println("LiteRT: GPU disabled by crash flag, using CPU")
-                        initWithBackend(Backend.CPU(), requestedTokens)
+                        initWithBackend(Backend.CPU(), requestedTokens, resolvedPath)
                     } else {
                         // Set crash flag before GPU init — if SIGSEGV kills us, flag persists
                         crashFlagFile.createNewFile()
                         try {
-                            initWithBackend(Backend.GPU(), requestedTokens)
+                            initWithBackend(Backend.GPU(), requestedTokens, resolvedPath)
                         } catch (e: Exception) {
                             crashFlagFile.delete()
-                            initWithBackend(Backend.CPU(), requestedTokens)
+                            initWithBackend(Backend.CPU(), requestedTokens, resolvedPath)
                         }
                     }
                 } catch (e: Exception) {
@@ -137,14 +144,14 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                     println("LiteRT: init failed with maxNumTokens=$requestedTokens, falling back to default: ${e.message}")
                     if (requestedTokens != null) {
                         if (useCpuOnly) {
-                            initWithBackend(Backend.CPU(), null)
+                            initWithBackend(Backend.CPU(), null, resolvedPath)
                         } else {
                             crashFlagFile.createNewFile()
                             try {
-                                initWithBackend(Backend.GPU(), null)
+                                initWithBackend(Backend.GPU(), null, resolvedPath)
                             } catch (e2: Exception) {
                                 crashFlagFile.delete()
-                                initWithBackend(Backend.CPU(), null)
+                                initWithBackend(Backend.CPU(), null, resolvedPath)
                             }
                         }
                     } else {
@@ -183,6 +190,8 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
             _engineState.value = EngineState.UNINITIALIZED
             runCatching { convToClose?.close() }
             runCatching { engineToClose?.close() }
+            activeSafHandle?.let { closeSafHandle(it) }
+            activeSafHandle = null
         }
     }
 

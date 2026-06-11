@@ -1,17 +1,39 @@
 package com.kai.custom.inference
 
-actual fun getModelStorageDirectory(): String = ""
+actual fun getModelStorageDirectory(): String = "/models" // Virtual filesystem in browser
 
-actual fun getModelCacheDirectory(): String = ""
+actual fun getModelCacheDirectory(): String = "/tmp"
 
-actual fun getAvailableMemoryBytes(): Long = Long.MAX_VALUE
+actual fun getAvailableMemoryBytes(): Long = Long.MAX_VALUE // Browser handles memory limits
 
 actual fun getTotalMemoryBytes(): Long = Long.MAX_VALUE
 
 actual fun getAvailableDiskSpaceBytes(path: String): Long = 0L
 
 actual fun startDownloadNotificationService() {}
-
 actual fun stopDownloadNotificationService() {}
-
 actual fun updateDownloadNotificationProgress(percent: Int) {}
+
+actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? {
+    return null
+}
+
+actual fun handleImportedSafFile(uriOrPath: String, isGguf: Boolean): String? {
+    return null
+}
+
+@androidx.compose.runtime.Composable
+actual fun rememberSafFilePicker(
+    extensions: List<String>,
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
+): () -> Unit {
+    return {}
+}
+
+actual class PlatformSafHandle
+
+actual fun openSafPath(path: String): PlatformSafHandle? = null
+
+actual fun getSafResolvedPath(handle: PlatformSafHandle): String = ""
+
+actual fun closeSafHandle(handle: PlatformSafHandle) {}
