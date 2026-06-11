@@ -193,6 +193,7 @@ internal object ModelCatalog {
         "grok-2" to CuratedModelInfo("Grok 2", 131_072, "2024-08"),
         "grok-2-latest" to CuratedModelInfo("Grok 2 (Latest)", 131_072, "2024-08"),
         "grok-2-1212" to CuratedModelInfo("Grok 2", 131_072, "2024-12"),
+        "grok-2-2024-08-13" to CuratedModelInfo("Grok 2", 131_072, "2024-08"),
         "grok-2-vision" to CuratedModelInfo("Grok 2 Vision", 32_000, "2024-12"),
         "grok-2-vision-1212" to CuratedModelInfo("Grok 2 Vision", 32_000, "2024-12"),
         "grok-beta" to CuratedModelInfo("Grok Beta", 131_072, "2024-10"),
@@ -335,6 +336,7 @@ internal object ModelCatalog {
         "qwen3-235b-a22b" to CuratedModelInfo("Qwen3 235B", 128_000, "2025-04", "235B"),
         "qwen3-235b" to CuratedModelInfo("Qwen3 235B", 128_000, "2025-04", "235B"),
         "qwen3-235b-a22b-2507" to CuratedModelInfo("Qwen3 235B", 128_000, "2025-07", "235B"),
+        "qwen3-235b-a22b-instruct-2507" to CuratedModelInfo("Qwen3 235B", 128_000, "2025-07", "235B"),
         "qwen3-235b-a22b-thinking-2507" to CuratedModelInfo("Qwen3 235B Thinking", 128_000, "2025-07", "235B"),
         "qwen3-32b" to CuratedModelInfo("Qwen3 32B", 128_000, "2025-04", "32B"),
         "qwen3-14b" to CuratedModelInfo("Qwen3 14B", 128_000, "2025-04", "14B"),
@@ -404,6 +406,7 @@ internal object ModelCatalog {
         "glm-4.5-x" to CuratedModelInfo("GLM-4.5 X", 128_000, "2025-07"),
         "glm-4.5v" to CuratedModelInfo("GLM-4.5V", 64_000, "2025-08"),
         "glm-4-plus" to CuratedModelInfo("GLM-4 Plus", 128_000, "2024-10"),
+        "glm-4-plus-0111" to CuratedModelInfo("GLM-4 Plus", 128_000, "2024-10"),
         "glm-4-air" to CuratedModelInfo("GLM-4 Air", 128_000, "2024-06"),
         "glm-4-airx" to CuratedModelInfo("GLM-4 AirX", 128_000, "2024-06"),
         "glm-4-long" to CuratedModelInfo("GLM-4 Long", 1_000_000, "2024-06"),
@@ -695,6 +698,7 @@ internal object ModelCatalog {
         // Anthropic — additional
         // ==============================================================
         "claude-opus-4-8" to CuratedModelInfo("Claude Opus 4.8", 1_000_000, "2026-06"),
+        "claude-fable-5" to CuratedModelInfo("Claude Fable 5", 1_000_000, "2026-06"),
         "claude-opus-4.8" to CuratedModelInfo("Claude Opus 4.8", 1_000_000, "2026-06"),
         "claude-opus-4-8-thinking" to CuratedModelInfo("Claude Opus 4.8 Thinking", 1_000_000, "2026-06"),
         "claude-opus-4.7" to CuratedModelInfo("Claude Opus 4.7", 1_000_000, "2026-04"),
@@ -777,6 +781,7 @@ internal object ModelCatalog {
         "deepseek-coder-6.7b-instruct" to CuratedModelInfo("DeepSeek Coder 6.7B", 16_000, "2024-01", "6.7B"),
         "deepseek-chat-v3.1" to CuratedModelInfo("DeepSeek Chat V3.1", 128_000, "2025-08", "671B"),
         "deepseek-chat-v3-0324" to CuratedModelInfo("DeepSeek Chat V3", 128_000, "2025-03", "671B"),
+        "deepseek-v3-0324" to CuratedModelInfo("DeepSeek Chat V3", 128_000, "2025-03", "671B"),
         "deepseek-r1t2-chimera" to CuratedModelInfo("DeepSeek R1T2 Chimera", 128_000, "2025-07", "671B"),
         "deepseek-v4-flash" to CuratedModelInfo("DeepSeek V4 Flash", 128_000, "2026-04"),
         "deepseek-v4-flash:free" to CuratedModelInfo("DeepSeek V4 Flash", 128_000, "2026-04"),
@@ -985,6 +990,7 @@ internal object ModelCatalog {
         "qwen3.5-35b-a3b" to CuratedModelInfo("Qwen 3.5 35B", 128_000, "2026-02", "35B"),
         "qwen3.5-27b" to CuratedModelInfo("Qwen 3.5 27B", 128_000, "2026-02", "27B"),
         "qwen3.5-9b" to CuratedModelInfo("Qwen 3.5 9B", 128_000, "2026-02", "9B"),
+        "qwen3.5-flash" to CuratedModelInfo("Qwen 3.5 Flash", 128_000, "2026-02"),
         "qwen3.5-flash-02-23" to CuratedModelInfo("Qwen 3.5 Flash", 128_000, "2026-02"),
         "qwen3.5-plus-02-15" to CuratedModelInfo("Qwen 3.5 Plus", 128_000, "2026-02"),
         "qwen3.5-plus-20260420" to CuratedModelInfo("Qwen 3.5 Plus", 128_000, "2026-04"),
@@ -1009,6 +1015,7 @@ internal object ModelCatalog {
         // MiniMax — additional
         // ==============================================================
         "minimax-m2.1" to CuratedModelInfo("MiniMax M2.1", 1_000_000, "2025-11"),
+        "minimax-m2.1-preview" to CuratedModelInfo("MiniMax M2.1 (Preview)", 1_000_000, "2025-11"),
         "minimax-m2.5" to CuratedModelInfo("MiniMax M2.5", 1_000_000, "2026-02"),
         "minimax-m2.5:free" to CuratedModelInfo("MiniMax M2.5", 1_000_000, "2026-02"),
         "minimax-m2-her" to CuratedModelInfo("MiniMax M2 Her", 1_000_000, "2025-10"),
@@ -1018,12 +1025,16 @@ internal object ModelCatalog {
         // NVIDIA / Nemotron — additional
         // ==============================================================
         "nemotron-3-super" to CuratedModelInfo("Nemotron 3 Super", 128_000, "2025-10", "120B"),
+        "nemotron-3-ultra" to CuratedModelInfo("Nemotron 3 Ultra", 128_000, "2025-10", "550B"),
+        "nemotron-3-ultra-550b-a55b" to CuratedModelInfo("Nemotron 3 Ultra", 128_000, "2025-10", "550B"),
+        "nvidia-nemotron-3-ultra-550b-a55b-nvfp4" to CuratedModelInfo("Nemotron 3 Ultra", 128_000, "2025-10", "550B"),
         "nemotron-3-nano:30b" to CuratedModelInfo("Nemotron 3 Nano", 128_000, "2025-10", "30B"),
         "nemotron-3-nano-30b-a3b" to CuratedModelInfo("Nemotron 3 Nano", 128_000, "2025-10", "30B"),
         "nemotron-3-nano-30b-a3b:free" to CuratedModelInfo("Nemotron 3 Nano", 128_000, "2025-10", "30B"),
         "nemotron-3-nano-omni-30b-a3b-reasoning" to CuratedModelInfo("Nemotron 3 Nano Omni Reasoning", 128_000, "2026-04", "30B"),
         "nemotron-3-nano-omni-30b-a3b-reasoning:free" to CuratedModelInfo("Nemotron 3 Nano Omni Reasoning", 128_000, "2026-04", "30B"),
         "nemotron-3-super-120b-a12b" to CuratedModelInfo("Nemotron 3 Super", 128_000, "2025-10", "120B"),
+        "nvidia-nemotron-3-super-120b-a12b" to CuratedModelInfo("Nemotron 3 Super", 128_000, "2025-10", "120B"),
         "nemotron-3-super-120b-a12b:free" to CuratedModelInfo("Nemotron 3 Super", 128_000, "2025-10", "120B"),
         "nemotron-nano-3-30b-a3b" to CuratedModelInfo("Nemotron Nano 3", 128_000, "2025-10", "30B"),
         "ising-calibration-1-35b-a3b" to CuratedModelInfo("Ising Calibration 1 35B", 128_000, "2026-03", "35B"),
@@ -1204,6 +1215,7 @@ internal object ModelCatalog {
         // Amazon Nova — additional
         // ==============================================================
         "nova-2-lite-v1" to CuratedModelInfo("Nova 2 Lite", 300_000, "2025-11"),
+        "nova-2-lite" to CuratedModelInfo("Nova 2 Lite", 300_000, "2025-11"),
 
         // ==============================================================
         // ByteDance Seed / UI-TARS
