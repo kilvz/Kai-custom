@@ -24,6 +24,8 @@ private class CompositeEngine(
     private var activeGgufModel: String? = null
 
     private fun isGgufModel(modelId: String?): Boolean = modelId?.startsWith("gguf_") == true
+    private fun isGgufModel(modelId: String?, filePath: String?): Boolean =
+        isGgufModel(modelId) || filePath?.endsWith(".gguf") == true
 
     private fun getGgufEngine(): GgufInferenceEngine {
         if (ggufEngine == null) {
@@ -35,8 +37,8 @@ private class CompositeEngine(
         return ggufEngine!!
     }
 
-    private fun selectEngine(modelId: String?): LocalInferenceEngine {
-        return if (isGgufModel(modelId)) {
+    private fun selectEngine(modelId: String?, filePath: String? = null): LocalInferenceEngine {
+        return if (isGgufModel(modelId, filePath)) {
             getGgufEngine()
         } else {
             liteRt
@@ -57,7 +59,7 @@ private class CompositeEngine(
         get() = ggufEngine?.downloadError ?: liteRt.downloadError
 
     override suspend fun initialize(model: DownloadedModel, contextTokens: Int) {
-        if (isGgufModel(model.id)) {
+        if (isGgufModel(model.id, model.filePath)) {
             val engine = getGgufEngine()
             activeGgufModel = model.id
             engine.initialize(model, contextTokens)
@@ -104,12 +106,28 @@ private class CompositeEngine(
         if (!dir.exists()) return emptyList()
         return dir.listFiles()?.filter { it.isDirectory }?.mapNotNull { modelDir ->
             val ggufFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".gguf") }
+            val safFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".saf") }
+            val nameFile = modelDir.listFiles()?.firstOrNull { it.name == "name.txt" }
+
+            val displayName = nameFile?.let { try { it.readText().trim() } catch (_: Exception) { null } }
+                ?: ggufFile?.nameWithoutExtension
+                    ?.replace("_", " ")?.replace("-", " ")?.replace(".", " ")
+                    ?.trim()?.replaceFirstChar { it.uppercase() }
+                ?: modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() }
+
             if (ggufFile != null) {
                 DownloadedModel(
                     id = modelDir.name,
-                    displayName = modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() },
+                    displayName = displayName,
                     filePath = ggufFile.absolutePath,
                     sizeBytes = ggufFile.length(),
+                )
+            } else if (safFile != null) {
+                DownloadedModel(
+                    id = modelDir.name,
+                    displayName = "$displayName (External)",
+                    filePath = safFile.readText().trim(),
+                    sizeBytes = 0L,
                 )
             } else null
         }?.sortedByDescending { it.sizeBytes } ?: emptyList()
@@ -120,7 +138,7 @@ private class CompositeEngine(
     override fun getFreeSpaceBytes(): Long = liteRt.getFreeSpaceBytes()
 
     override fun startDownload(model: LocalModel) {
-        if (isGgufModel(model.id)) {
+        if (isGgufModel(model.id, model.fileName)) {
             getGgufEngine().startDownload(model)
         } else {
             liteRt.startDownload(model)
@@ -132,10 +150,20 @@ private class CompositeEngine(
     }
 
     override suspend fun deleteModel(modelId: String) {
-        if (isGgufModel(modelId)) {
-            ggufEngine?.deleteModel(modelId)
+        val isGguf = isGgufModel(modelId) || isGgufImportedModel(modelId)
+        if (isGguf) {
+            val engine = getGgufEngine()
+            engine?.deleteModel(modelId)
+            // Fallback: delete directory directly if engine didn't handle it
+            val dir = java.io.File(GgufInferenceEngine.getGgufModelsDir(), modelId)
+            if (dir.exists()) dir.deleteRecursively()
         } else {
             liteRt.deleteModel(modelId)
         }
+    }
+
+    private fun isGgufImportedModel(modelId: String): Boolean {
+        val dir = java.io.File(GgufInferenceEngine.getGgufModelsDir(), modelId)
+        return dir.exists()
     }
 }

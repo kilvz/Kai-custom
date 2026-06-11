@@ -764,6 +764,7 @@ class FakeDataRepository : DataRepository {
     override fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> = emptyList()
     override fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {}
     override fun removeImportedModel(modelId: String) {}
+    @Suppress("DEPRECATION")
     override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String = "fake_imported"
     override fun getDefaultCalendarId(): Long = -1L
     override fun setDefaultCalendarId(calendarId: Long) {}

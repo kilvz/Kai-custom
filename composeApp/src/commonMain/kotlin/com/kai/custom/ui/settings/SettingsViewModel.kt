@@ -277,6 +277,7 @@ class SettingsViewModel(
                 }
             }
         },
+        onImportComplete = ::onImportComplete,
         onExportSettings = ::onExportSettings,
         onPrepareExport = ::onPrepareExport,
         onImportSettings = ::onImportSettings,
@@ -530,6 +531,12 @@ class SettingsViewModel(
         val entry = _state.value.configuredServices.find { it.instanceId == instanceId } ?: return
         dataRepository.updateInstanceSelectedModel(instanceId, entry.service, modelId)
         refreshInstanceModels(instanceId)
+    }
+
+    private fun onImportComplete() {
+        viewModelScope.launch(backgroundDispatcher) {
+            refreshServiceList()
+        }
     }
 
     private fun onSaveSoul(text: String) {
@@ -1086,6 +1093,7 @@ class SettingsViewModel(
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun onImportLocalModel(bytes: ByteArray, fileName: String) {
         viewModelScope.launch(backgroundDispatcher) {
             try {

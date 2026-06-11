@@ -310,7 +310,10 @@ class RemoteDataRepository(
             )
         }
         val models = if (selectedModelId.isNotEmpty() && defaultSettingsModels.none { it.id == selectedModelId }) {
-            listOf(SettingsModel(id = selectedModelId, subtitle = "", isSelected = true)) + defaultSettingsModels
+            // Try to find a proper display name from downloaded models
+            val displayName = getLocalDownloadedModels().firstOrNull { it.id == selectedModelId }?.displayName
+                ?: selectedModelId
+            listOf(SettingsModel(id = selectedModelId, subtitle = displayName, isSelected = true)) + defaultSettingsModels
         } else {
             defaultSettingsModels
         }
@@ -319,8 +322,19 @@ class RemoteDataRepository(
 
     override fun updateInstanceSelectedModel(instanceId: String, service: Service, modelId: String) {
         appSettings.setInstanceModelId(instanceId, modelId)
+        // Ensure cache is initialized before updating
+        if (modelsByInstance[instanceId] == null) {
+            getInstanceModels(instanceId, service)
+        }
+        val displayName = getLocalDownloadedModels().firstOrNull { it.id == modelId }?.displayName
         modelsByInstance[instanceId]?.update { models ->
-            models.map { it.copy(isSelected = it.id == modelId) }
+            models.map {
+                if (it.id == modelId) {
+                    it.copy(isSelected = true, subtitle = displayName ?: it.subtitle)
+                } else {
+                    it.copy(isSelected = false)
+                }
+            }
         }
         // Free the previously-loaded on-device model as soon as the user picks a new one.
         // Deferring until the next chat would briefly hold both models' GPU buffers resident
@@ -2660,31 +2674,13 @@ class RemoteDataRepository(
         localInferenceEngine?.cancelDownload()
     }
 
+    @Deprecated("Use SAF-based importSafFile or linkGgufExternal. ByteArray path is unsafe for large models.")
     override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String {
-        val id = "imported_${kotlin.uuid.Uuid.random().toString().take(8)}"
-        val isGguf = fileName.endsWith(".gguf")
-        val displayName = fileName
-            .removeSuffix(".litertlm")
-            .removeSuffix(".gguf")
-            .replace("_", " ").replace("-", " ").trim()
-            .replaceFirstChar { it.uppercase() }
-        val modelsDir = if (isGguf) {
-            java.io.File(com.kai.custom.inference.getModelStorageDirectory()).parent + "/gguf_models"
-        } else {
-            com.kai.custom.inference.getModelStorageDirectory()
-        }
-        val modelDir = java.io.File(modelsDir, id)
-        modelDir.mkdirs()
-        val targetFile = java.io.File(modelDir, fileName)
-        targetFile.writeBytes(bytes)
-        val model = com.kai.custom.inference.ImportedModel(
-            id = id,
-            displayName = displayName,
-            filePath = targetFile.absolutePath,
-            sizeBytes = targetFile.length(),
+        throw kotlin.IllegalStateException(
+            "importLocalModel(ByteArray) is deprecated — use SAF-based import instead. " +
+            "The ByteArray path loads the entire file into memory and is unsafe for large models. " +
+            "Use importSafFile() or linkGgufExternal() via the SAF file picker."
         )
-        appSettings.addImportedModel(model)
-        return id
     }
 
     override suspend fun deleteLocalModel(modelId: String) {

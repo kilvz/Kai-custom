@@ -14,6 +14,11 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
+import kotlinx.serialization.json.contentOrNull
 
 class GgufInferenceEngine(
     private val native: GgufNative?,
@@ -45,13 +50,31 @@ class GgufInferenceEngine(
             _engineState.value = EngineState.INITIALIZING
             try {
                 var resolvedPath = model.filePath
+                // If filePath points to a .saf reference file, read the content URI from it
+                if (resolvedPath.endsWith(".saf")) {
+                    val safFile = java.io.File(resolvedPath)
+                    if (safFile.exists()) {
+                        resolvedPath = safFile.readText().trim()
+                    }
+                }
                 if (resolvedPath.startsWith("content://")) {
-                    activeSafHandle = openSafPath(resolvedPath)
-                    resolvedPath = activeSafHandle?.let { getSafResolvedPath(it) } ?: resolvedPath
+                    // SAF content:// URIs don't support mmap — copy to local on first load
+                    val localFile = java.io.File(
+                        java.io.File(getGgufModelsDir(), model.id), "model.gguf"
+                    )
+                    val copiedPath = resolveSafUriToLocal(resolvedPath, localFile.absolutePath)
+                    if (copiedPath != null) {
+                        resolvedPath = copiedPath
+                    } else {
+                        // Fallback: use fd path (may fail on some devices)
+                        activeSafHandle = openSafPath(resolvedPath)
+                        resolvedPath = activeSafHandle?.let { getSafResolvedPath(it) } ?: resolvedPath
+                    }
                 }
 
                 val ok = native.nativeInit(resolvedPath, contextTokens)
                 if (!ok) throw IllegalStateException("Failed to initialize GGUF model")
+                currentModelId = model.id
                 _engineState.value = EngineState.READY
             } catch (e: Exception) {
                 _engineState.value = EngineState.ERROR
@@ -104,24 +127,71 @@ class GgufInferenceEngine(
         val modelsDir = getGgufModelsDir()
         if (!modelsDir.exists()) return emptyList()
         return modelsDir.listFiles()?.filter { it.isDirectory }?.mapNotNull { modelDir ->
-            val safFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".saf") }
             val ggufFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".gguf") }
-            
+            val safFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".saf") }
+            val metaFile = modelDir.listFiles()?.firstOrNull { it.name == "metadata.json" }
+            val nameFile = modelDir.listFiles()?.firstOrNull { it.name == "name.txt" }
+
+            // Name from name.txt written during import
+            val nameFromFile = nameFile?.let { try { it.readText().trim() } catch (_: Exception) { null } }
+
+            // Cached metadata (written on first header parse)
+            var metaJson: kotlinx.serialization.json.JsonObject? = null
+            if (metaFile != null) {
+                try {
+                    val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                    metaJson = json.parseToJsonElement(metaFile.readText()).jsonObject
+                } catch (_: Exception) {}
+            }
+
+            // If we have a safFile but no metadata.json, try to parse GGUF header now
+            val ggufPath: String?
+            val isExternal: Boolean
             if (safFile != null) {
-                DownloadedModel(
-                    id = modelDir.name,
-                    displayName = modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() },
-                    filePath = safFile.readText().trim(),
-                    sizeBytes = 0L, // Handled dynamically or assume user knows
-                )
+                ggufPath = safFile.readText().trim()
+                isExternal = true
             } else if (ggufFile != null) {
-                DownloadedModel(
-                    id = modelDir.name,
-                    displayName = modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() },
-                    filePath = ggufFile.absolutePath,
-                    sizeBytes = ggufFile.length(),
-                )
-            } else null
+                ggufPath = ggufFile.absolutePath
+                isExternal = false
+            } else {
+                return@mapNotNull null
+            }
+
+            // Parse GGUF header on first discovery if metadata.json is missing
+            if (metaJson == null && native != null) {
+                try {
+                    var resolvePath = ggufPath
+                    if (resolvePath.startsWith("content://")) {
+                        val handle = openSafPath(resolvePath)
+                        if (handle != null) resolvePath = getSafResolvedPath(handle)
+                    }
+                    val raw = native.nativeGetModelInfo(resolvePath)
+                    if (raw != null && !raw.contains("\"error\"")) {
+                        File(modelDir, "metadata.json").writeText(raw)
+                        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+                        metaJson = json.parseToJsonElement(raw).jsonObject
+                    }
+                } catch (_: Exception) {}
+            }
+
+            // Extract display name from metadata
+            val metaName = metaJson?.let { obj ->
+                try { obj["general.name"]?.jsonPrimitive?.contentOrNull } catch (_: Exception) { null }
+            }
+            val baseName = nameFromFile ?: metaName
+                ?: modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() }
+
+            // File size from metadata or filesystem
+            val sizeBytes = metaJson?.let { obj ->
+                try { obj["_total_file_size"]?.jsonPrimitive?.longOrNull } catch (_: Exception) { null }
+            } ?: (ggufFile?.length() ?: 0L)
+
+            DownloadedModel(
+                id = modelDir.name,
+                displayName = if (isExternal) "$baseName (External)" else baseName,
+                filePath = ggufPath,
+                sizeBytes = sizeBytes,
+            )
         }?.sortedByDescending { it.sizeBytes } ?: emptyList()
     }
 
@@ -209,6 +279,25 @@ class GgufInferenceEngine(
             val modelDir = File(getGgufModelsDir(), modelId)
             if (modelDir.exists()) modelDir.deleteRecursively()
         }
+    }
+
+    /** Reads GGUF header metadata from a model path without loading the full model.
+     * Returns a JSON string with keys like general.architecture, general.name,
+     * general.file_type, general.size_label, <arch>.context_length, etc.
+     * Returns null if the native method is unavailable or parsing fails. */
+    fun getModelInfo(modelPath: String): String? {
+        return try {
+            var resolvedPath = modelPath
+            if (resolvedPath.endsWith(".saf")) {
+                val safFile = java.io.File(resolvedPath)
+                if (safFile.exists()) resolvedPath = safFile.readText().trim()
+            }
+            if (resolvedPath.startsWith("content://")) {
+                val handle = openSafPath(resolvedPath)
+                if (handle != null) resolvedPath = getSafResolvedPath(handle)
+            }
+            native?.nativeGetModelInfo(resolvedPath)
+        } catch (e: Exception) { null }
     }
 
     companion object {

@@ -144,3 +144,107 @@ void GgufContext::release() {
     if (ctx) { llama_free(ctx); ctx = nullptr; }
     if (model) { llama_model_free(model); model = nullptr; }
 }
+
+// ---------------------------------------------------------------------------
+// Lightweight GGUF header-only metadata reader
+// Reads only the KV pairs from the GGUF header (first few KB of the file).
+// No model weights are loaded. Returns a JSON string with the metadata.
+// Uses the GGUF value type enum from gguf.h (included via llama headers).
+// ---------------------------------------------------------------------------
+
+#include <cstdint>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
+#include <vector>
+#include "gguf.h"
+
+static std::string read_gguf_string(std::istream& stream) {
+    uint64_t len;
+    stream.read(reinterpret_cast<char*>(&len), sizeof(len));
+    std::string s(len, '\0');
+    if (len > 0) stream.read(&s[0], len);
+    return s;
+}
+
+static std::string gguf_value_to_json(std::istream& stream, uint32_t type) {
+    std::ostringstream out;
+    switch (type) {
+        case GGUF_TYPE_UINT8: { uint8_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << (int)v; break; }
+        case GGUF_TYPE_INT8: { int8_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << (int)v; break; }
+        case GGUF_TYPE_UINT16: { uint16_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << v; break; }
+        case GGUF_TYPE_INT16: { int16_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << v; break; }
+        case GGUF_TYPE_UINT32: { uint32_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << v; break; }
+        case GGUF_TYPE_INT32: { int32_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << v; break; }
+        case GGUF_TYPE_FLOAT32: { float v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << v; break; }
+        case GGUF_TYPE_BOOL: { uint8_t v; stream.read(reinterpret_cast<char*>(&v), sizeof(v)); out << (v ? "true" : "false"); break; }
+        case GGUF_TYPE_STRING: {
+            std::string s = read_gguf_string(stream);
+            out << "\"";
+            for (char c : s) {
+                if (c == '"' || c == '\\') out << '\\';
+                out << c;
+            }
+            out << "\"";
+            break;
+        }
+        case GGUF_TYPE_ARRAY: {
+            uint32_t elemType; stream.read(reinterpret_cast<char*>(&elemType), sizeof(elemType));
+            uint64_t count; stream.read(reinterpret_cast<char*>(&count), sizeof(count));
+            out << "[";
+            for (uint64_t i = 0; i < count; i++) {
+                if (i > 0) out << ",";
+                out << gguf_value_to_json(stream, elemType);
+            }
+            out << "]";
+            break;
+        }
+        default: out << "null"; break;
+    }
+    return out.str();
+}
+
+std::string gguf_read_metadata(const std::string& modelPath) {
+    std::ifstream file(modelPath, std::ios::binary);
+    if (!file.is_open()) {
+        return "{\"error\":\"cannot open file\"}";
+    }
+
+    // Read magic
+    char magic[4];
+    file.read(magic, 4);
+    if (magic[0] != 'G' || magic[1] != 'G' || magic[2] != 'U' || magic[3] != 'F') {
+        return "{\"error\":\"not a GGUF file\"}";
+    }
+
+    // Read version, tensor count, metadata count
+    uint32_t version;   file.read(reinterpret_cast<char*>(&version), sizeof(version));
+    uint64_t tensorCount; file.read(reinterpret_cast<char*>(&tensorCount), sizeof(tensorCount));
+    uint64_t metadataCount; file.read(reinterpret_cast<char*>(&metadataCount), sizeof(metadataCount));
+
+    std::ostringstream json;
+    json << "{";
+    bool first = true;
+
+    for (uint64_t i = 0; i < metadataCount && file.good(); i++) {
+        std::string key = read_gguf_string(file);
+        if (!file.good()) break;
+
+        uint32_t valueType;
+        file.read(reinterpret_cast<char*>(&valueType), sizeof(valueType));
+        if (!file.good()) break;
+
+        if (!first) json << ",";
+        first = false;
+
+        json << "\"" << key << "\":";
+        json << gguf_value_to_json(file, valueType);
+    }
+
+    json << ",\"_file_size\":" << (uint64_t)file.tellg();
+    file.seekg(0, std::ios::end);
+    json << ",\"_total_file_size\":" << (uint64_t)file.tellg();
+    json << "}";
+
+    return json.str();
+}

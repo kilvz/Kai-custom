@@ -18,7 +18,11 @@ actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformF
     return null
 }
 
-actual fun handleImportedSafFile(uriOrPath: String, isGguf: Boolean): String? {
+actual fun resolveSafUriToLocal(uri: String, localPath: String): String? = null
+
+actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? = null
+
+actual fun importSafFile(uriOrPath: String, isGguf: Boolean): String? {
     return null
 }
 
@@ -37,3 +41,5 @@ actual fun openSafPath(path: String): PlatformSafHandle? = null
 actual fun getSafResolvedPath(handle: PlatformSafHandle): String = ""
 
 actual fun closeSafHandle(handle: PlatformSafHandle) {}
+
+

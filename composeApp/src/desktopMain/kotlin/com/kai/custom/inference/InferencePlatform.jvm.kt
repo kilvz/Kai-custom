@@ -36,7 +36,13 @@ actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformF
     return null
 }
 
-actual fun handleImportedSafFile(uriOrPath: String, isGguf: Boolean): String? {
+actual fun resolveSafUriToLocal(uri: String, localPath: String): String? = null
+
+actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? {
+    return importSafFile(uri, true)
+}
+
+actual fun importSafFile(uri: String, isGguf: Boolean): String? {
     // Desktop will just use the file path directly or copy it.
     // For simplicity, we just save the path to the saf file.
     try {
@@ -54,7 +60,7 @@ actual fun handleImportedSafFile(uriOrPath: String, isGguf: Boolean): String? {
         
         val extension = if (isGguf) "gguf" else "litertlm"
         val safFile = java.io.File(modelDir, "model.$extension.saf")
-        safFile.writeText(uriOrPath)
+        safFile.writeText(uri)
         return id
     } catch (e: Exception) {
         return null
@@ -92,3 +98,4 @@ actual fun openSafPath(path: String): PlatformSafHandle? = null
 actual fun getSafResolvedPath(handle: PlatformSafHandle): String = ""
 
 actual fun closeSafHandle(handle: PlatformSafHandle) {}
+

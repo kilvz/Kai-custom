@@ -44,4 +44,9 @@ private:
     static constexpr int N_THREADS = 4;
 };
 
+// Lightweight GGUF header reader — reads only metadata KV pairs from the file header,
+// without loading any model weights. Returns a JSON string.
+// This is a standalone parse; it does NOT use the llama.cpp library.
+std::string gguf_read_metadata(const std::string& modelPath);
+
 #endif // GGUF_CONTEXT_H

@@ -87,4 +87,15 @@ Java_com_kai_custom_inference_GgufNative_nativeRelease(
     }
 }
 
+JNIEXPORT jstring JNICALL
+Java_com_kai_custom_inference_GgufNative_nativeGetModelInfo(
+    JNIEnv* env, jobject /*thiz*/,
+    jstring modelPath
+) {
+    const char* path = env->GetStringUTFChars(modelPath, nullptr);
+    std::string result = gguf_read_metadata(path);
+    env->ReleaseStringUTFChars(modelPath, path);
+    return env->NewStringUTF(result.c_str());
+}
+
 } // extern "C"

@@ -330,6 +330,9 @@ interface DataRepository {
     fun getImportedModels(): List<com.kai.custom.inference.ImportedModel>
     fun addImportedModel(model: com.kai.custom.inference.ImportedModel)
     fun removeImportedModel(modelId: String)
+    /** @deprecated Unsafe ByteArray path — use SAF-based [importSafFile] or [linkGgufExternal] instead.
+     *  This method loads the entire file into memory and will OOM on large GGUF models. */
+    @Deprecated("Use SAF-based importSafFile or linkGgufExternal. ByteArray path is unsafe for large models.")
     suspend fun importLocalModel(bytes: ByteArray, fileName: String): String
     fun getDefaultCalendarId(): Long
     fun setDefaultCalendarId(calendarId: Long)

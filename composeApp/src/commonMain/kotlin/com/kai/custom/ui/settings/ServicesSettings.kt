@@ -272,6 +272,7 @@ internal fun ServicesContent(
                     onChangeModelTopP = onChangeModelTopP,
                     onImportLocalModel = onImportLocalModel,
                     onImportPlatformFileComplete = actions.onImportPlatformFileComplete,
+                    onImportComplete = actions.onImportComplete,
                 )
             }
         }
@@ -556,6 +557,7 @@ private fun ConfiguredServiceCardContent(
     onChangeModelTopP: (String, Float) -> Unit = { _, _ -> },
     onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
     onImportPlatformFileComplete: (com.kai.custom.inference.ImportedModel) -> Unit = {},
+    onImportComplete: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -644,6 +646,7 @@ private fun ConfiguredServiceCardContent(
                         modelContextTokens = modelContextTokens,
                         onImportLocalModel = onImportLocalModel,
                         onImportPlatformFileComplete = onImportPlatformFileComplete,
+                        onImportComplete = onImportComplete,
                     )
                 } else if (entry.service is Service.OpenAICompatible) {
                     OpenAICompatibleSettings(
@@ -912,6 +915,7 @@ private fun LiteRTSettings(
     modelContextTokens: ImmutableMap<String, Int>,
     onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
     onImportPlatformFileComplete: (com.kai.custom.inference.ImportedModel) -> Unit = {},
+    onImportComplete: () -> Unit = {},
 ) {
     val downloadedIds = remember(downloadedModels) { downloadedModels.map { it.id }.toSet() }
     val importScope = rememberCoroutineScope()
@@ -1075,6 +1079,8 @@ private fun LiteRTSettings(
         Spacer(Modifier.height(4.dp))
         customModels.forEach { model ->
             val isSelected = selectedModel?.id == model.id
+            val isExternal = model.subtitle.contains("(External)")
+            val displayName = model.subtitle.replace(" (External)", "")
             Surface(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 shape = RoundedCornerShape(8.dp),
@@ -1091,13 +1097,23 @@ private fun LiteRTSettings(
                         )
                         Spacer(Modifier.width(8.dp))
                         Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = displayName.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                )
+                                if (isExternal) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = "EXTERNAL",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+                            }
                             Text(
-                                text = model.subtitle.substringBefore(" (").replaceFirstChar { it.uppercase() },
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onBackground,
-                            )
-                            Text(
-                                text = model.subtitle.substringAfter(" (").substringBefore(")"),
+                                text = model.description ?: if (isExternal) "Referenced in-place (no copy)" else "Copied to device",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1168,32 +1184,23 @@ private fun LiteRTSettings(
         extensions = listOf("litertlm", "gguf"),
     ) { uriOrPath, displayName, sizeBytes ->
         if (uriOrPath != null) {
-            importScope.launch {
+            importScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                 try {
                     val isGguf = try { displayName?.endsWith(".gguf") == true } catch (_: Exception) { false }
-                    
-                    val id = com.kai.custom.inference.handleImportedSafFile(uriOrPath, isGguf)
-                    
-                    if (id != null) {
-                        val cleanDisplayName = (displayName ?: "model")
-                            .removeSuffix(".litertlm")
-                            .removeSuffix(".gguf")
-                            .replace("_", " ").replace("-", " ").trim()
-                            .replaceFirstChar { it.uppercase() }
-
-                        val model = com.kai.custom.inference.ImportedModel(
-                            id = id,
-                            displayName = cleanDisplayName,
-                            filePath = uriOrPath,
-                            sizeBytes = sizeBytes,
-                        )
-                        onImportPlatformFileComplete(model)
-                        importError = false
-                    } else {
-                        importError = true
+                    val id = com.kai.custom.inference.importSafFile(uriOrPath, isGguf)
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        if (id != null) {
+                            onSelectModel(id)
+                            onImportComplete()
+                            importError = false
+                        } else {
+                            importError = true
+                        }
                     }
                 } catch (_: Exception) {
-                    importError = true
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        importError = true
+                    }
                 }
             }
         }
@@ -1204,10 +1211,62 @@ private fun LiteRTSettings(
         modifier = Modifier.handCursor(),
     ) { Text("Import Model File (.litertlm / .gguf)") }
 
-    if (importError) {
+    Spacer(Modifier.height(8.dp))
+
+    var externalImportError by remember { mutableStateOf(false) }
+    var externalImportSuccessName by remember { mutableStateOf<String?>(null) }
+    val externalFilePicker = com.kai.custom.inference.rememberSafFilePicker(
+        extensions = listOf("gguf"),
+    ) { uriOrPath, displayName, sizeBytes ->
+        if (uriOrPath != null) {
+            importScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                try {
+                    val id = com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", sizeBytes)
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        if (id != null) {
+                            onImportPlatformFileComplete(
+                                com.kai.custom.inference.ImportedModel(
+                                    id = id,
+                                    displayName = (displayName ?: "model").removeSuffix(".gguf"),
+                                    filePath = uriOrPath,
+                                    sizeBytes = sizeBytes,
+                                )
+                            )
+                            onSelectModel(id)
+                            onImportComplete()
+                            externalImportError = false
+                            externalImportSuccessName = displayName
+                        } else {
+                            externalImportError = true
+                        }
+                    }
+                } catch (_: Exception) {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        externalImportError = true
+                    }
+                }
+            }
+        }
+    }
+
+    OutlinedButton(
+        onClick = { externalFilePicker() },
+        modifier = Modifier.handCursor(),
+    ) { Text("Use External GGUF File (no-copy)") }
+
+    if (externalImportSuccessName != null) {
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Import failed — check file format and space.",
+            text = "Linked: $externalImportSuccessName",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+    }
+
+    if (externalImportError) {
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Linking failed.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
