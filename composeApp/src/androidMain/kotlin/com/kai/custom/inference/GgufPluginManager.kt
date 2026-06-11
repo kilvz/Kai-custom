@@ -13,10 +13,18 @@ object GgufPluginManager {
         if (nativeInstance != null) return nativeInstance
 
         return try {
-            try { System.loadLibrary("ggml-base") } catch (_: Throwable) {}
-            try { System.loadLibrary("ggml-cpu") } catch (_: Throwable) {}
-            try { System.loadLibrary("ggml-vulkan") } catch (_: Throwable) {}
-            try { System.loadLibrary("ggml") } catch (_: Throwable) {}
+            try {
+                System.loadLibrary("ggml-base")
+            } catch (_: Throwable) {}
+            try {
+                System.loadLibrary("ggml-cpu")
+            } catch (_: Throwable) {}
+            try {
+                System.loadLibrary("ggml-vulkan")
+            } catch (_: Throwable) {}
+            try {
+                System.loadLibrary("ggml")
+            } catch (_: Throwable) {}
             System.loadLibrary(LIB_LLAMA)
             System.loadLibrary(LIB_GGUF)
             nativeLoaded = true

@@ -927,29 +927,30 @@ class RemoteDataRepository(
         }
     }
 
-    private fun hasImageContent(msgs: List<OpenAICompatibleChatRequestDto.Message>): Boolean {
-        return msgs.any { msg ->
-            val content = msg.content
-            content is JsonArray && content.any { el ->
-                (el as? JsonObject)?.get("type")?.jsonPrimitive?.content == "image_url"
-            }
+    private fun hasImageContent(msgs: List<OpenAICompatibleChatRequestDto.Message>): Boolean = msgs.any { msg ->
+        val content = msg.content
+        content is JsonArray && content.any { el ->
+            (el as? JsonObject)?.get("type")?.jsonPrimitive?.content == "image_url"
         }
     }
 
-    private fun stripImages(msgs: List<OpenAICompatibleChatRequestDto.Message>): List<OpenAICompatibleChatRequestDto.Message> {
-        return msgs.map { msg ->
-            val content = msg.content
-            if (content is JsonArray && content.any {
-                    (it as? JsonObject)?.get("type")?.jsonPrimitive?.content == "image_url"
-                }) {
-                val textParts = content.mapNotNull { el ->
-                    val obj = el as? JsonObject
-                    if (obj?.get("type")?.jsonPrimitive?.content == "text") {
-                        obj["text"]?.jsonPrimitive?.content
-                    } else null
+    private fun stripImages(msgs: List<OpenAICompatibleChatRequestDto.Message>): List<OpenAICompatibleChatRequestDto.Message> = msgs.map { msg ->
+        val content = msg.content
+        if (content is JsonArray && content.any {
+                (it as? JsonObject)?.get("type")?.jsonPrimitive?.content == "image_url"
+            }
+        ) {
+            val textParts = content.mapNotNull { el ->
+                val obj = el as? JsonObject
+                if (obj?.get("type")?.jsonPrimitive?.content == "text") {
+                    obj["text"]?.jsonPrimitive?.content
+                } else {
+                    null
                 }
-                msg.copy(content = JsonPrimitive(textParts.joinToString(" ")))
-            } else msg
+            }
+            msg.copy(content = JsonPrimitive(textParts.joinToString(" ")))
+        } else {
+            msg
         }
     }
 
@@ -976,7 +977,9 @@ class RemoteDataRepository(
                         retryApiCall {
                             requests.openAICompatibleChat(service, credentials, textMsgs, tools).getOrThrow()
                         }
-                    } else throw e
+                    } else {
+                        throw e
+                    }
                 }
                 val message = response.choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
                 var calls = message.toolCalls.orEmpty().map { tc ->
@@ -2475,8 +2478,6 @@ class RemoteDataRepository(
         return askSilentlyWithInstance(entry.instanceId, question, timeoutMs)
     }
 
-
-
     override suspend fun askSilentlyWithInstance(instanceId: String, prompt: String, timeoutMs: Long): String {
         val instance = getConfiguredServiceInstances().find { it.instanceId == instanceId }
             ?: return askSilently(prompt)
@@ -2682,13 +2683,11 @@ class RemoteDataRepository(
     }
 
     @Deprecated("Use SAF-based importSafFile or linkGgufExternal. ByteArray path is unsafe for large models.")
-    override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String {
-        throw kotlin.IllegalStateException(
-            "importLocalModel(ByteArray) is deprecated — use SAF-based import instead. " +
+    override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String = throw kotlin.IllegalStateException(
+        "importLocalModel(ByteArray) is deprecated — use SAF-based import instead. " +
             "The ByteArray path loads the entire file into memory and is unsafe for large models. " +
-            "Use importSafFile() or linkGgufExternal() via the SAF file picker."
-        )
-    }
+            "Use importSafFile() or linkGgufExternal() via the SAF file picker.",
+    )
 
     override suspend fun deleteLocalModel(modelId: String) {
         localInferenceEngine?.deleteModel(modelId)

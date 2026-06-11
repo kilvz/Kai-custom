@@ -26,13 +26,18 @@ private fun getMemoryInfo(): ActivityManager.MemoryInfo {
 actual fun getAvailableMemoryBytes(): Long = getMemoryInfo().availMem
 actual fun getTotalMemoryBytes(): Long = getMemoryInfo().totalMem
 actual fun getAvailableDiskSpaceBytes(path: String): Long {
-    java.io.File(path).mkdirs(); return StatFs(path).availableBytes
+    java.io.File(path).mkdirs()
+    return StatFs(path).availableBytes
 }
 actual fun startDownloadNotificationService() {
-    try { ContextCompat.startForegroundService(context, Intent(context, ModelDownloadService::class.java)) } catch (_: Exception) {}
+    try {
+        ContextCompat.startForegroundService(context, Intent(context, ModelDownloadService::class.java))
+    } catch (_: Exception) {}
 }
 actual fun stopDownloadNotificationService() {
-    try { context.stopService(Intent(context, ModelDownloadService::class.java)) } catch (_: Exception) {}
+    try {
+        context.stopService(Intent(context, ModelDownloadService::class.java))
+    } catch (_: Exception) {}
 }
 actual fun updateDownloadNotificationProgress(percent: Int) {
     try {
@@ -54,7 +59,9 @@ actual fun importPlatformFile(platformFile: PlatformFile, isGguf: Boolean): Stri
         val uri = uriField.get(platformFile) as? Uri ?: return null
         val id = "imported_${kotlin.uuid.Uuid.random().toString().take(8)}"
         val modelsDir = if (isGguf) GgufInferenceEngine.getGgufModelsDir() else File(getModelStorageDirectory())
-        modelsDir.mkdirs(); val modelDir = File(modelsDir, id); modelDir.mkdirs()
+        modelsDir.mkdirs()
+        val modelDir = File(modelsDir, id)
+        modelDir.mkdirs()
         val ext = if (isGguf) "gguf" else "litertlm"
         val targetFile = File(modelDir, "model.$ext")
         val nameFile = File(modelDir, "name.txt")
@@ -65,16 +72,24 @@ actual fun importPlatformFile(platformFile: PlatformFile, isGguf: Boolean): Stri
                     if (nIdx >= 0) nameFile.writeText(cursor.getString(nIdx) ?: id)
                 }
             }
-        } catch (_: Exception) { nameFile.writeText(id) }
+        } catch (_: Exception) {
+            nameFile.writeText(id)
+        }
         context.contentResolver.openInputStream(uri)?.use { input ->
             FileOutputStream(targetFile).use { output ->
-                val buf = ByteArray(65536); var r: Int
+                val buf = ByteArray(65536)
+                var r: Int
                 while (input.read(buf).also { r = it } != -1) output.write(buf, 0, r)
             }
         } ?: return null
-        if (!targetFile.exists() || targetFile.length() < 1000) { modelDir.deleteRecursively(); return null }
+        if (!targetFile.exists() || targetFile.length() < 1000) {
+            modelDir.deleteRecursively()
+            return null
+        }
         id
-    } catch (e: Exception) { null }
+    } catch (e: Exception) {
+        null
+    }
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -86,34 +101,47 @@ actual fun resolveSafUriToLocal(uri: String, localPath: String): String? {
         if (targetFile.exists()) return targetFile.absolutePath
         context.contentResolver.openInputStream(parsedUri)?.use { input ->
             java.io.FileOutputStream(targetFile).use { output ->
-                val buf = ByteArray(65536); var r: Int
+                val buf = ByteArray(65536)
+                var r: Int
                 while (input.read(buf).also { r = it } != -1) output.write(buf, 0, r)
             }
         } ?: return null
-        if (!targetFile.exists() || targetFile.length() < 1000) { targetFile.delete(); return null }
+        if (!targetFile.exists() || targetFile.length() < 1000) {
+            targetFile.delete()
+            return null
+        }
         targetFile.absolutePath
-    } catch (e: Exception) { android.util.Log.e("InfPlat", "resolveSafUriToLocal failed", e); null }
+    } catch (e: Exception) {
+        android.util.Log.e("InfPlat", "resolveSafUriToLocal failed", e)
+        null
+    }
 }
 
-actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? {
-    return try {
-        val parsedUri = Uri.parse(uri)
-        val id = "gguf_ext_" + displayName.removeSuffix(".gguf")
-            .replace(Regex("[^a-zA-Z0-9_\\-]"), "").trim().take(80)
-            .replace(" ", "_").ifEmpty { "external" }
-        val modelsDir = GgufInferenceEngine.getGgufModelsDir()
-        modelsDir.mkdirs()
-        var modelDir = File(modelsDir, id)
-        var suffix = 1
-        while (modelDir.exists()) { modelDir = File(modelsDir, "${id}_$suffix"); suffix++ }
-        modelDir.mkdirs()
-        val safFile = File(modelDir, "$displayName.saf")
-        safFile.writeText(parsedUri.toString())
-        val nameFile = File(modelDir, "name.txt")
-        nameFile.writeText(displayName.removeSuffix(".gguf"))
-        try { context.contentResolver.takePersistableUriPermission(parsedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
-        modelDir.name
-    } catch (e: Exception) { android.util.Log.e("InfPlat", "linkGgufExternal failed", e); null }
+actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? = try {
+    val parsedUri = Uri.parse(uri)
+    val id = "gguf_ext_" + displayName.removeSuffix(".gguf")
+        .replace(Regex("[^a-zA-Z0-9_\\-]"), "").trim().take(80)
+        .replace(" ", "_").ifEmpty { "external" }
+    val modelsDir = GgufInferenceEngine.getGgufModelsDir()
+    modelsDir.mkdirs()
+    var modelDir = File(modelsDir, id)
+    var suffix = 1
+    while (modelDir.exists()) {
+        modelDir = File(modelsDir, "${id}_$suffix")
+        suffix++
+    }
+    modelDir.mkdirs()
+    val safFile = File(modelDir, "$displayName.saf")
+    safFile.writeText(parsedUri.toString())
+    val nameFile = File(modelDir, "name.txt")
+    nameFile.writeText(displayName.removeSuffix(".gguf"))
+    try {
+        context.contentResolver.takePersistableUriPermission(parsedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    } catch (_: Exception) {}
+    modelDir.name
+} catch (e: Exception) {
+    android.util.Log.e("InfPlat", "linkGgufExternal failed", e)
+    null
 }
 
 actual fun importSafFile(uri: String, isGguf: Boolean): String? {
@@ -132,26 +160,39 @@ actual fun importSafFile(uri: String, isGguf: Boolean): String? {
             .replace(Regex("[^a-zA-Z0-9_\\- ]"), "").trim().take(100)
             .replace(" ", "_").ifEmpty { "imported_model" }
         val id = folderName
-        val modelsDir = if (isGguf) GgufInferenceEngine.getGgufModelsDir()
-                        else java.io.File(getModelStorageDirectory())
+        val modelsDir = if (isGguf) {
+            GgufInferenceEngine.getGgufModelsDir()
+        } else {
+            java.io.File(getModelStorageDirectory())
+        }
         modelsDir.mkdirs()
         // If folder already exists, append number
         var modelDir = java.io.File(modelsDir, id)
         var suffix = 1
-        while (modelDir.exists()) { modelDir = java.io.File(modelsDir, "${id}_$suffix"); suffix++ }
+        while (modelDir.exists()) {
+            modelDir = java.io.File(modelsDir, "${id}_$suffix")
+            suffix++
+        }
         modelDir.mkdirs()
 
         val targetFile = java.io.File(modelDir, displayName)
 
         context.contentResolver.openInputStream(parsedUri)?.use { input ->
             java.io.FileOutputStream(targetFile).use { output ->
-                val buf = ByteArray(65536); var r: Int
+                val buf = ByteArray(65536)
+                var r: Int
                 while (input.read(buf).also { r = it } != -1) output.write(buf, 0, r)
             }
         } ?: return null
-        if (!targetFile.exists() || targetFile.length() < 1000) { modelDir.deleteRecursively(); return null }
+        if (!targetFile.exists() || targetFile.length() < 1000) {
+            modelDir.deleteRecursively()
+            return null
+        }
         id
-    } catch (e: Exception) { android.util.Log.e("InfPlat", "importSafFile failed", e); null }
+    } catch (e: Exception) {
+        android.util.Log.e("InfPlat", "importSafFile failed", e)
+        null
+    }
 }
 
 actual class PlatformSafHandle(val pfd: android.os.ParcelFileDescriptor?)
@@ -162,18 +203,25 @@ actual fun openSafPath(path: String): PlatformSafHandle? {
         val uri = Uri.parse(path)
         val pfd = context.contentResolver.openFileDescriptor(uri, "r")
         PlatformSafHandle(pfd)
-    } catch(e: Exception) { android.util.Log.e("InfPlat", "openSafPath failed", e); null }
+    } catch (e: Exception) {
+        android.util.Log.e("InfPlat", "openSafPath failed", e)
+        null
+    }
 }
 actual fun getSafResolvedPath(handle: PlatformSafHandle): String = handle.pfd?.let { "/proc/self/fd/${it.fd}" } ?: ""
-actual fun closeSafHandle(handle: PlatformSafHandle) { try { handle.pfd?.close() } catch(_: Exception) {} }
+actual fun closeSafHandle(handle: PlatformSafHandle) {
+    try {
+        handle.pfd?.close()
+    } catch (_: Exception) {}
+}
 
 @androidx.compose.runtime.Composable
 actual fun rememberSafFilePicker(
     extensions: List<String>,
-    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit,
 ): () -> Unit {
     val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
-        contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+        contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocument(),
     ) { uri ->
         if (uri != null) {
             try {
@@ -189,8 +237,12 @@ actual fun rememberSafFilePicker(
                     }
                 }
                 onResult(uri.toString(), displayName, sizeBytes)
-            } catch (e: Exception) { onResult(null, null, 0L) }
-        } else { onResult(null, null, 0L) }
+            } catch (e: Exception) {
+                onResult(null, null, 0L)
+            }
+        } else {
+            onResult(null, null, 0L)
+        }
     }
     return { launcher.launch(arrayOf("*/*")) }
 }

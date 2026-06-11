@@ -14,25 +14,19 @@ actual fun startDownloadNotificationService() {}
 actual fun stopDownloadNotificationService() {}
 actual fun updateDownloadNotificationProgress(percent: Int) {}
 
-actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? {
-    return null
-}
+actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? = null
 
 actual fun resolveSafUriToLocal(uri: String, localPath: String): String? = null
 
 actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? = null
 
-actual fun importSafFile(uriOrPath: String, isGguf: Boolean): String? {
-    return null
-}
+actual fun importSafFile(uriOrPath: String, isGguf: Boolean): String? = null
 
 @androidx.compose.runtime.Composable
 actual fun rememberSafFilePicker(
     extensions: List<String>,
-    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
-): () -> Unit {
-    return {}
-}
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit,
+): () -> Unit = {}
 
 actual class PlatformSafHandle
 
@@ -41,5 +35,3 @@ actual fun openSafPath(path: String): PlatformSafHandle? = null
 actual fun getSafResolvedPath(handle: PlatformSafHandle): String = ""
 
 actual fun closeSafHandle(handle: PlatformSafHandle) {}
-
-

@@ -473,7 +473,9 @@ class AndroidSandboxController : SandboxController {
                     timeoutSeconds = 15,
                 )
                 (r["stdout"] as? String)?.trim()?.ifEmpty { null }
-            } catch (_: Exception) { null }
+            } catch (_: Exception) {
+                null
+            }
 
             val latestVersion = try {
                 val r = executor.execute(
@@ -481,7 +483,9 @@ class AndroidSandboxController : SandboxController {
                     timeoutSeconds = 30,
                 )
                 (r["stdout"] as? String)?.trim()?.ifEmpty { null }
-            } catch (_: Exception) { null }
+            } catch (_: Exception) {
+                null
+            }
 
             Pair(currentVersion, latestVersion)
         }

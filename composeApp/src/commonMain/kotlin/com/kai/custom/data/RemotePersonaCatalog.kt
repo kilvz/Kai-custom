@@ -99,18 +99,16 @@ class RemotePersonaCatalog {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    suspend fun listPersonas(): List<RemotePersonaEntry> {
-        return try {
-            val client = httpClient()
-            val raw = client.get(INDEX_URL) {
-                header("User-Agent", "Kai-custom/3.20.0")
-            }.bodyAsText()
-            client.close()
-            val idx = json.decodeFromString<PersonaIndex>(raw)
-            idx.personas.ifEmpty { PERSONA_INDEX_CACHE }
-        } catch (_: Exception) {
-            PERSONA_INDEX_CACHE
-        }
+    suspend fun listPersonas(): List<RemotePersonaEntry> = try {
+        val client = httpClient()
+        val raw = client.get(INDEX_URL) {
+            header("User-Agent", "Kai-custom/3.20.0")
+        }.bodyAsText()
+        client.close()
+        val idx = json.decodeFromString<PersonaIndex>(raw)
+        idx.personas.ifEmpty { PERSONA_INDEX_CACHE }
+    } catch (_: Exception) {
+        PERSONA_INDEX_CACHE
     }
 
     private suspend fun fetchUrl(url: String): String? = try {
@@ -120,7 +118,9 @@ class RemotePersonaCatalog {
         }.bodyAsText()
         client.close()
         if (raw.isBlank()) null else raw
-    } catch (_: Exception) { null }
+    } catch (_: Exception) {
+        null
+    }
 
     suspend fun downloadPersona(id: String, format: PersonaFormat = PersonaFormat.CONDENSED, configuredServices: List<ServiceInstance> = emptyList()): PersonaConfig? {
         return try {
@@ -129,8 +129,11 @@ class RemotePersonaCatalog {
                 fetchUrl("$RAW_BASE/$id/synthesized.md")
             } else {
                 val file = FORMAT_TO_FILE[effectiveFormat]
-                if (file != null) fetchUrl("$RAW_BASE/$id/$file") ?: fetchUrl("$RAW_BASE/$id/synthesized.md")
-                else fetchUrl("$RAW_BASE/$id/synthesized.md")
+                if (file != null) {
+                    fetchUrl("$RAW_BASE/$id/$file") ?: fetchUrl("$RAW_BASE/$id/synthesized.md")
+                } else {
+                    fetchUrl("$RAW_BASE/$id/synthesized.md")
+                }
             }
             if (raw == null || raw.isBlank()) return null
             val cleaned = raw.trim().substringAfter("---").trim().ifEmpty { raw.trim() }

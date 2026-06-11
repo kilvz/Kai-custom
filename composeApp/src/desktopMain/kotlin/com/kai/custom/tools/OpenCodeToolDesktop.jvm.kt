@@ -27,14 +27,17 @@ object OpenCodeToolDesktop : Tool {
         return try {
             val whichProc = ProcessBuilder(
                 if (System.getProperty("os.name").lowercase().contains("windows")) "where" else "which",
-                "opencode"
+                "opencode",
             ).redirectErrorStream(true).start()
             val whichDone = whichProc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
             val needsInstall = !whichDone || whichProc.exitValue() != 0
 
             if (needsInstall) {
                 val installProc = ProcessBuilder(
-                    "npm", "install", "-g", "opencode-ai"
+                    "npm",
+                    "install",
+                    "-g",
+                    "opencode-ai",
                 ).redirectErrorStream(true).start()
                 val installDone = installProc.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)
                 if (!installDone || installProc.exitValue() != 0) {
@@ -60,7 +63,7 @@ object OpenCodeToolDesktop : Tool {
         }
 
         val proc = ProcessBuilder(
-            if (System.getProperty("os.name").lowercase().contains("windows")) listOf("cmd.exe", "/c", cmd) else listOf("bash", "-c", cmd)
+            if (System.getProperty("os.name").lowercase().contains("windows")) listOf("cmd.exe", "/c", cmd) else listOf("bash", "-c", cmd),
         ).directory(java.io.File(directory)).redirectErrorStream(true).start()
 
         val completed = proc.waitFor(timeout.toLong(), java.util.concurrent.TimeUnit.SECONDS)

@@ -1,6 +1,5 @@
 package com.kai.custom.ui.settings
 
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -221,7 +221,10 @@ fun PluginSettingsCard() {
                                         timerJob.cancel()
                                     }
 
-                                    if (response.isBlank()) { error = "AI returned empty response."; return@launch }
+                                    if (response.isBlank()) {
+                                        error = "AI returned empty response."
+                                        return@launch
+                                    }
                                     step1Response = response.take(5000)
                                     statusText = "Done (${response.length} chars)"
 

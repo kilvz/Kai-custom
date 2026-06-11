@@ -31,3 +31,6 @@ tools/speech_commands/
 AGENTS.md
 *.jks
 *.b64
+
+# Build artifacts
+.build-gguf/

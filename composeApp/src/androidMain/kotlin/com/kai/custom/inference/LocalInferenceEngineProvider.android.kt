@@ -24,19 +24,20 @@ private class CompositeEngine(
     private var activeGgufModel: String? = null
 
     private fun isGgufModel(modelId: String?): Boolean = modelId?.startsWith("gguf_") == true
-    private fun isGgufModel(modelId: String?, filePath: String?): Boolean =
-        isGgufModel(modelId) || filePath?.endsWith(".gguf") == true
+    private fun isGgufModel(modelId: String?, filePath: String?): Boolean = isGgufModel(modelId) || filePath?.endsWith(".gguf") == true
 
     private fun getGgufEngine(): GgufInferenceEngine {
         if (ggufEngine == null) {
             val native = try {
                 GgufPluginManager.ensureLoaded()
-            } catch (_: Exception) { null }
+            } catch (_: Exception) {
+                null
+            }
             val cpuCount = Runtime.getRuntime().availableProcessors()
             ggufEngine = GgufInferenceEngine(
                 native,
                 GgufEngineConfig(
-                    gpuLayers = 20,         // Offload most layers to GPU (Vulkan)
+                    gpuLayers = 20, // Offload most layers to GPU (Vulkan)
                     threads = cpuCount.coerceIn(2, 8),
                     batchSize = 512,
                 ),
@@ -45,12 +46,10 @@ private class CompositeEngine(
         return ggufEngine!!
     }
 
-    private fun selectEngine(modelId: String?, filePath: String? = null): LocalInferenceEngine {
-        return if (isGgufModel(modelId, filePath)) {
-            getGgufEngine()
-        } else {
-            liteRt
-        }
+    private fun selectEngine(modelId: String?, filePath: String? = null): LocalInferenceEngine = if (isGgufModel(modelId, filePath)) {
+        getGgufEngine()
+    } else {
+        liteRt
     }
 
     override val engineState: StateFlow<EngineState>
@@ -121,7 +120,13 @@ private class CompositeEngine(
             val safFile = modelDir.listFiles()?.firstOrNull { it.name.endsWith(".saf") }
             val nameFile = modelDir.listFiles()?.firstOrNull { it.name == "name.txt" }
 
-            val displayName = nameFile?.let { try { it.readText().trim() } catch (_: Exception) { null } }
+            val displayName = nameFile?.let {
+                try {
+                    it.readText().trim()
+                } catch (_: Exception) {
+                    null
+                }
+            }
                 ?: ggufFile?.nameWithoutExtension
                     ?.replace("_", " ")?.replace("-", " ")?.replace(".", " ")
                     ?.trim()?.replaceFirstChar { it.uppercase() }
@@ -141,7 +146,9 @@ private class CompositeEngine(
                     filePath = safFile.readText().trim(),
                     sizeBytes = 0L,
                 )
-            } else null
+            } else {
+                null
+            }
         }?.sortedByDescending { it.sizeBytes } ?: emptyList()
     }
 
@@ -156,9 +163,9 @@ private class CompositeEngine(
             liteRt.startDownload(model)
         }
     }
-    override fun cancelDownload() { 
+    override fun cancelDownload() {
         ggufEngine?.cancelDownload()
-        liteRt.cancelDownload() 
+        liteRt.cancelDownload()
     }
 
     override suspend fun deleteModel(modelId: String) {

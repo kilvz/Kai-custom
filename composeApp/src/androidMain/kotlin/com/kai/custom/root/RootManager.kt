@@ -11,13 +11,13 @@ object RootManager {
     private const val MAX_OUTPUT_LENGTH = 15_000
 
     private var _isAvailable: Boolean? = null
-    private var _lastCheckMs: Long = 0L
+    private var lastCheckMs: Long = 0L
 
     val isAvailable: Boolean
         get() {
             val now = System.currentTimeMillis()
-            if (_isAvailable == null && now - _lastCheckMs > 10_000L) {
-                _lastCheckMs = now
+            if (_isAvailable == null && now - lastCheckMs > 10_000L) {
+                lastCheckMs = now
                 _isAvailable = try {
                     val process = ProcessBuilder("su", "-c", "id").start()
                     val exited = process.waitFor(3L, java.util.concurrent.TimeUnit.SECONDS)

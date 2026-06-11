@@ -33,9 +33,9 @@ import androidx.core.net.toUri
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailStore
-import com.kai.custom.data.PersonaManager
 import com.kai.custom.data.MemoryStore
 import com.kai.custom.data.NotificationStore
+import com.kai.custom.data.PersonaManager
 import com.kai.custom.data.SmsDraftStore
 import com.kai.custom.data.SmsStore
 import com.kai.custom.data.TaskStore
@@ -804,9 +804,9 @@ actual fun getAvailableTools(): List<Tool> {
                             startLng = longitude,
                             destLat = destLat,
                             destLng = destLng,
-                            speedKmh = speedKmh
+                            speedKmh = speedKmh,
                         )
-                        
+
                         return if (resultMessage.contains("not set as the mock location provider")) {
                             mapOf("success" to false, "error" to resultMessage)
                         } else {
@@ -830,7 +830,7 @@ actual fun getAvailableTools(): List<Tool> {
                         val message = com.kai.custom.tools.MockLocationController.stopMocking(context)
                         return mapOf("success" to true, "message" to message)
                     }
-                }
+                },
             )
         }
 

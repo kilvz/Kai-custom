@@ -32,15 +32,11 @@ actual fun updateDownloadNotificationProgress(percent: Int) {
     // No notification on desktop
 }
 
-actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? {
-    return null
-}
+actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? = null
 
 actual fun resolveSafUriToLocal(uri: String, localPath: String): String? = null
 
-actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? {
-    return importSafFile(uri, true)
-}
+actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): String? = importSafFile(uri, true)
 
 actual fun importSafFile(uri: String, isGguf: Boolean): String? {
     // Desktop will just use the file path directly or copy it.
@@ -57,7 +53,7 @@ actual fun importSafFile(uri: String, isGguf: Boolean): String? {
         modelsDir.mkdirs()
         val modelDir = java.io.File(modelsDir, id)
         modelDir.mkdirs()
-        
+
         val extension = if (isGguf) "gguf" else "litertlm"
         val safFile = java.io.File(modelDir, "model.$extension.saf")
         safFile.writeText(uri)
@@ -70,7 +66,7 @@ actual fun importSafFile(uri: String, isGguf: Boolean): String? {
 @androidx.compose.runtime.Composable
 actual fun rememberSafFilePicker(
     extensions: List<String>,
-    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit,
 ): () -> Unit {
     val filePicker = io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher(
         type = io.github.vinceglb.filekit.dialogs.FileKitType.File(extensions = extensions),
@@ -98,4 +94,3 @@ actual fun openSafPath(path: String): PlatformSafHandle? = null
 actual fun getSafResolvedPath(handle: PlatformSafHandle): String = ""
 
 actual fun closeSafHandle(handle: PlatformSafHandle) {}
-

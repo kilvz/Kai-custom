@@ -18,7 +18,7 @@ object MockLocationController {
         startLng: Double,
         destLat: Double? = null,
         destLng: Double? = null,
-        speedKmh: Double? = null
+        speedKmh: Double? = null,
     ): String {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 

@@ -1,7 +1,7 @@
 package com.kai.custom.testutil
 
-import com.kai.custom.data.Conversation
 import com.kai.custom.data.AskWithToolsResult
+import com.kai.custom.data.Conversation
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailAccount
 import com.kai.custom.data.EmailSyncState
@@ -12,7 +12,6 @@ import com.kai.custom.data.HeartbeatLogEntry
 import com.kai.custom.data.ImportSection
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.PersonaConfig
-
 import com.kai.custom.data.ScheduledTask
 import com.kai.custom.data.Service
 import com.kai.custom.data.ServiceEntry
@@ -766,6 +765,7 @@ class FakeDataRepository : DataRepository {
     override fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> = emptyList()
     override fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {}
     override fun removeImportedModel(modelId: String) {}
+
     @Suppress("DEPRECATION")
     override suspend fun importLocalModel(bytes: ByteArray, fileName: String): String = "fake_imported"
     override fun getDefaultCalendarId(): Long = -1L
@@ -812,11 +812,11 @@ class FakeDataRepository : DataRepository {
     override fun setWakeWordTemplate(template: String) {}
 
 // Language
-override fun getPreferredLanguage(): String = "en"
-override fun setPreferredLanguage(lang: String) {}
+    override fun getPreferredLanguage(): String = "en"
+    override fun setPreferredLanguage(lang: String) {}
 
-override fun getPttTriggerKeyCode(): Int = 0
-override fun setPttTriggerKeyCode(keyCode: Int) {}
+    override fun getPttTriggerKeyCode(): Int = 0
+    override fun setPttTriggerKeyCode(keyCode: Int) {}
 
 // Telegram
     override fun isTelegramEnabled(): Boolean = false
@@ -828,3 +828,4 @@ override fun setPttTriggerKeyCode(keyCode: Int) {}
     override fun getTelegramSyncState(): TelegramSyncState = TelegramSyncState()
     override fun getPendingTelegramCount(): Int = 0
     override suspend fun pollTelegram() {}
+}

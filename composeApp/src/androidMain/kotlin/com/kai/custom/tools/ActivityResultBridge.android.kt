@@ -15,7 +15,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.seconds
 
 actual class ActivityResultBridge actual constructor() {
-    private var _pendingDeferred = CompletableDeferred<ActivityResultData?>()
+    private var pendingDeferred = CompletableDeferred<ActivityResultData?>()
     private val _launchTriggered = MutableStateFlow(false)
     private var _pendingAction: String? = null
     private var _pendingDataUri: String? = null
@@ -40,7 +40,7 @@ actual class ActivityResultBridge actual constructor() {
         mimeType: String?,
         requestCode: Int,
     ): ActivityResultData? {
-        _pendingDeferred = CompletableDeferred()
+        pendingDeferred = CompletableDeferred()
         _pendingAction = action
         _pendingDataUri = dataUri
         _pendingPackage = packageName
@@ -49,17 +49,17 @@ actual class ActivityResultBridge actual constructor() {
         _pendingRequestCode = requestCode
         _launchTriggered.value = true
         return withTimeoutOrNull(60.seconds) {
-            _pendingDeferred.await()
+            pendingDeferred.await()
         }
     }
 
     actual fun onActivityResult(resultCode: Int, dataString: String?) {
-        _pendingDeferred.complete(
+        pendingDeferred.complete(
             ActivityResultData(
                 success = resultCode == android.app.Activity.RESULT_OK,
                 resultCode = resultCode,
                 dataString = dataString,
-            )
+            ),
         )
         _launchTriggered.value = false
         _pendingAction = null
@@ -70,8 +70,8 @@ actual class ActivityResultBridge actual constructor() {
     }
 
     fun cancelPending() {
-        _pendingDeferred.complete(
-            ActivityResultData(success = false, error = "Cancelled")
+        pendingDeferred.complete(
+            ActivityResultData(success = false, error = "Cancelled"),
         )
         _launchTriggered.value = false
     }

@@ -37,13 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.ui.dynamicui.FrozenSubmission
 import com.kai.custom.ui.dynamicui.toSpeakableText
@@ -267,10 +267,10 @@ private fun ReasoningBlockquote(
                                     color = dividerColor,
                                     start = Offset(0f, 0f),
                                     end = Offset(0f, size.height),
-                                    strokeWidth = 2.dp.toPx()
+                                    strokeWidth = 2.dp.toPx(),
                                 )
                             }
-                            .padding(start = 10.dp)
+                            .padding(start = 10.dp),
                     ) {
                         Text(
                             text = segment,

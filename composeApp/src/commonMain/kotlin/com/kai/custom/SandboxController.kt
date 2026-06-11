@@ -118,6 +118,7 @@ interface SandboxController {
     suspend fun stopAltMemory() {}
     suspend fun installAltMemoryPackage(): Boolean = false
     suspend fun updateAltMemoryPackage(): Boolean = false
+
     /** Returns (currentVersion, latestVersion) from pip/PyPI. Both null on failure. */
     suspend fun getAltMemoryVersions(): Pair<String?, String?> = Pair(null, null)
 

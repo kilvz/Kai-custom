@@ -10,15 +10,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.longOrNull
-import kotlinx.serialization.json.contentOrNull
 
 data class GgufEngineConfig(
     val gpuLayers: Int = 0,
@@ -38,7 +38,7 @@ class GgufInferenceEngine(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var downloadJob: Job? = null
-    
+
     private var activeSafHandle: PlatformSafHandle? = null
 
     private val _engineState = MutableStateFlow(EngineState.UNINITIALIZED)
@@ -72,7 +72,8 @@ class GgufInferenceEngine(
                 if (resolvedPath.startsWith("content://")) {
                     // SAF content:// URIs don't support mmap — copy to local on first load
                     val localFile = java.io.File(
-                        java.io.File(getGgufModelsDir(), model.id), "model.gguf"
+                        java.io.File(getGgufModelsDir(), model.id),
+                        "model.gguf",
                     )
                     val copiedPath = resolveSafUriToLocal(resolvedPath, localFile.absolutePath)
                     if (copiedPath != null) {
@@ -146,7 +147,13 @@ class GgufInferenceEngine(
             val nameFile = modelDir.listFiles()?.firstOrNull { it.name == "name.txt" }
 
             // Name from name.txt written during import
-            val nameFromFile = nameFile?.let { try { it.readText().trim() } catch (_: Exception) { null } }
+            val nameFromFile = nameFile?.let {
+                try {
+                    it.readText().trim()
+                } catch (_: Exception) {
+                    null
+                }
+            }
 
             // Cached metadata (written on first header parse)
             var metaJson: kotlinx.serialization.json.JsonObject? = null
@@ -189,14 +196,22 @@ class GgufInferenceEngine(
 
             // Extract display name from metadata
             val metaName = metaJson?.let { obj ->
-                try { obj["general.name"]?.jsonPrimitive?.contentOrNull } catch (_: Exception) { null }
+                try {
+                    obj["general.name"]?.jsonPrimitive?.contentOrNull
+                } catch (_: Exception) {
+                    null
+                }
             }
             val baseName = nameFromFile ?: metaName
                 ?: modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() }
 
             // File size from metadata or filesystem
             val sizeBytes = metaJson?.let { obj ->
-                try { obj["_total_file_size"]?.jsonPrimitive?.longOrNull } catch (_: Exception) { null }
+                try {
+                    obj["_total_file_size"]?.jsonPrimitive?.longOrNull
+                } catch (_: Exception) {
+                    null
+                }
             } ?: (ggufFile?.length() ?: 0L)
 
             DownloadedModel(
@@ -298,19 +313,19 @@ class GgufInferenceEngine(
      * Returns a JSON string with keys like general.architecture, general.name,
      * general.file_type, general.size_label, <arch>.context_length, etc.
      * Returns null if the native method is unavailable or parsing fails. */
-    fun getModelInfo(modelPath: String): String? {
-        return try {
-            var resolvedPath = modelPath
-            if (resolvedPath.endsWith(".saf")) {
-                val safFile = java.io.File(resolvedPath)
-                if (safFile.exists()) resolvedPath = safFile.readText().trim()
-            }
-            if (resolvedPath.startsWith("content://")) {
-                val handle = openSafPath(resolvedPath)
-                if (handle != null) resolvedPath = getSafResolvedPath(handle)
-            }
-            native?.nativeGetModelInfo(resolvedPath)
-        } catch (e: Exception) { null }
+    fun getModelInfo(modelPath: String): String? = try {
+        var resolvedPath = modelPath
+        if (resolvedPath.endsWith(".saf")) {
+            val safFile = java.io.File(resolvedPath)
+            if (safFile.exists()) resolvedPath = safFile.readText().trim()
+        }
+        if (resolvedPath.startsWith("content://")) {
+            val handle = openSafPath(resolvedPath)
+            if (handle != null) resolvedPath = getSafResolvedPath(handle)
+        }
+        native?.nativeGetModelInfo(resolvedPath)
+    } catch (e: Exception) {
+        null
     }
 
     companion object {

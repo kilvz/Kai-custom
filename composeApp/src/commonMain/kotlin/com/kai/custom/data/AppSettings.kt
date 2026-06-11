@@ -989,7 +989,9 @@ class AppSettings(internal val settings: Settings) {
         val raw = settings.getStringOrNull(KEY_IMPORTED_MODELS) ?: return emptyList()
         return try {
             importedModelsJson.decodeFromString(importedModelsSerializer, raw)
-        } catch (_: Exception) { emptyList() }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {

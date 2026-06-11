@@ -38,5 +38,5 @@ expect fun resolveSafUriToLocal(uri: String, localPath: String): String?
 @androidx.compose.runtime.Composable
 expect fun rememberSafFilePicker(
     extensions: List<String>,
-    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit
+    onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit,
 ): () -> Unit

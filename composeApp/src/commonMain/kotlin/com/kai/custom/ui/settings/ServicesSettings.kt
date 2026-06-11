@@ -87,7 +87,6 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
-import kotlinx.coroutines.launch
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_arrow_drop_down
 import kai.composeapp.generated.resources.litert_cancel
@@ -128,6 +127,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import sh.calvin.reorderable.ReorderableColumn
@@ -1198,7 +1198,11 @@ private fun LiteRTSettings(
         if (uriOrPath != null) {
             importScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                 try {
-                    val isGguf = try { displayName?.endsWith(".gguf") == true } catch (_: Exception) { false }
+                    val isGguf = try {
+                        displayName?.endsWith(".gguf") == true
+                    } catch (_: Exception) {
+                        false
+                    }
                     val id = if (isGguf) {
                         com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", sizeBytes)
                     } else {
@@ -1212,7 +1216,7 @@ private fun LiteRTSettings(
                                     displayName = (displayName ?: "model").removeSuffix(".gguf").removeSuffix(".litertlm"),
                                     filePath = uriOrPath,
                                     sizeBytes = sizeBytes,
-                                )
+                                ),
                             )
                             onSelectModel(id)
                             onImportComplete()

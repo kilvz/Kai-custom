@@ -150,12 +150,12 @@ fun stripThinkBlocks(s: String): String {
     } else {
         s
     }
-    
+
     // If generation stopped early inside a <think> block without closing it
     if (fixed.contains("<think>") && !fixed.contains("</think>")) {
         fixed = fixed.substringBefore("<think>").trim()
     }
-    
+
     return THINK_BLOCK_REGEX.replace(fixed, "").trim()
 }
 

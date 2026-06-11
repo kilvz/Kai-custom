@@ -105,12 +105,16 @@ internal class FloatingBallLayout(context: Context) : FrameLayout(context) {
                     dismissOverlay?.visibility = View.GONE
                     layoutParams?.let { lp ->
                         lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        try { windowManager.updateViewLayout(this, lp) } catch (_: Exception) {}
+                        try {
+                            windowManager.updateViewLayout(this, lp)
+                        } catch (_: Exception) {}
                     }
                 } else {
                     layoutParams?.let { lp ->
                         lp.flags = lp.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv()
-                        try { windowManager.updateViewLayout(this, lp) } catch (_: Exception) {}
+                        try {
+                            windowManager.updateViewLayout(this, lp)
+                        } catch (_: Exception) {}
                     }
                     dismissOverlay?.visibility = View.VISIBLE
                 }

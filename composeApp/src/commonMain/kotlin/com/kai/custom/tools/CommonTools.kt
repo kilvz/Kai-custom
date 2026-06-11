@@ -24,8 +24,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_get_local_time_description
 import kai.composeapp.generated.resources.tool_get_local_time_name
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kai.composeapp.generated.resources.tool_get_location_description
 import kai.composeapp.generated.resources.tool_get_location_name
 import kai.composeapp.generated.resources.tool_memory_forget_description
@@ -50,6 +48,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 private data class IpLocationResponse(

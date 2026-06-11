@@ -43,15 +43,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.BehaviorStyle
-import com.kai.custom.data.DataRepository
-import com.kai.custom.data.PersonaFormat
 import com.kai.custom.data.CharacterType
+import com.kai.custom.data.DataRepository
 import com.kai.custom.data.EmailAccount
-import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.EmailSyncState
 import com.kai.custom.data.HeartbeatLogEntry
+import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.PersonaConfig
+import com.kai.custom.data.PersonaFormat
 import com.kai.custom.data.RemotePersonaCatalog
 import com.kai.custom.data.RemotePersonaEntry
 import com.kai.custom.data.RenderMode
@@ -470,10 +470,12 @@ private fun SoulEditor(
                 }
                 if (activePersona != null) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        if (activePersona.languageStyle != LanguageStyle.NONE)
+                        if (activePersona.languageStyle != LanguageStyle.NONE) {
                             TraitBadge(activePersona.languageStyle.displayName)
-                        if (activePersona.characterType != CharacterType.NONE)
+                        }
+                        if (activePersona.characterType != CharacterType.NONE) {
                             TraitBadge(activePersona.characterType.displayName)
+                        }
                         if (activePersona.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
                     }
                 }
@@ -807,10 +809,12 @@ private fun PersonaSelectorDialog(
                                     )
                                 }
                                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    if (p.languageStyle != LanguageStyle.NONE)
+                                    if (p.languageStyle != LanguageStyle.NONE) {
                                         TraitBadge(p.languageStyle.displayName)
-                                    if (p.characterType != CharacterType.NONE)
+                                    }
+                                    if (p.characterType != CharacterType.NONE) {
                                         TraitBadge(p.characterType.displayName)
+                                    }
                                     if (p.renderMode == RenderMode.UPSTREAM_COMPAT) TraitBadge("Compat")
                                 }
                             }
@@ -843,7 +847,10 @@ private fun PersonaSelectorDialog(
                             onDismiss = { showCommunity = false },
                             onSavePersona = onSavePersona,
                             onSwitchPersona = onSwitchPersona,
-                            onCloseAll = { showCommunity = false; onDismiss() },
+                            onCloseAll = {
+                                showCommunity = false
+                                onDismiss()
+                            },
                         )
                     }
                     val activePersona = personas.find { it.id == activePersonaId }
@@ -937,7 +944,10 @@ private fun CreatePersonaDialog(
                         LanguageStyle.entries.forEach { lang ->
                             DropdownMenuItem(
                                 text = { Text(lang.displayName) },
-                                onClick = { selectedLang = lang; expandedLang = false },
+                                onClick = {
+                                    selectedLang = lang
+                                    expandedLang = false
+                                },
                             )
                         }
                     }
@@ -955,7 +965,10 @@ private fun CreatePersonaDialog(
                         CharacterType.entries.forEach { char ->
                             DropdownMenuItem(
                                 text = { Text(char.displayName) },
-                                onClick = { selectedChar = char; expandedChar = false },
+                                onClick = {
+                                    selectedChar = char
+                                    expandedChar = false
+                                },
                             )
                         }
                     }
@@ -1031,9 +1044,13 @@ private fun CommunityPersonaBrowseDialog(
                         }
                     }
                 }
+
                 loading -> Text("Loading...")
+
                 error -> Text("Could not load community personas.")
+
                 personas.isNullOrEmpty() -> Text("No personas available.")
+
                 else -> {
                     Column(
                         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -1060,7 +1077,10 @@ private fun CommunityPersonaBrowseDialog(
                                     PersonaFormat.entries.forEach { fmt ->
                                         DropdownMenuItem(
                                             text = { Text(fmt.displayName) },
-                                            onClick = { selectedFormat = fmt; formatExpanded = false },
+                                            onClick = {
+                                                selectedFormat = fmt
+                                                formatExpanded = false
+                                            },
                                         )
                                     }
                                 }
@@ -1650,6 +1670,4 @@ private fun formatTaskInstant(epochMs: Long): String {
 
 private val nonSemanticEmbedders = setOf("numpy", "spacy")
 
-private fun isKnownSemanticEmbedder(name: String): Boolean {
-    return name.lowercase() !in nonSemanticEmbedders
-}
+private fun isKnownSemanticEmbedder(name: String): Boolean = name.lowercase() !in nonSemanticEmbedders

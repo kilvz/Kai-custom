@@ -118,7 +118,7 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
 
                 val requestedTokens = if (contextTokens > 0) contextTokens else null
                 println("LiteRT: initializing model=${model.id} maxNumTokens=$requestedTokens")
-                
+
                 var resolvedPath = model.filePath
                 if (resolvedPath.startsWith("content://")) {
                     activeSafHandle = openSafPath(resolvedPath)
@@ -207,10 +207,9 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
         temperature: Float,
         topK: Int,
         topP: Float,
-    ): String {
-        return mutex.withLock {
-            withContext(Dispatchers.IO) {
-                idleReleaseJob?.cancel()
+    ): String = mutex.withLock {
+        withContext(Dispatchers.IO) {
+            idleReleaseJob?.cancel()
             try {
                 val currentEngine = engine ?: throw IllegalStateException("Engine not initialized")
 
@@ -253,7 +252,6 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                 scheduleIdleRelease()
             }
         }
-    }
     }
 
     /**
