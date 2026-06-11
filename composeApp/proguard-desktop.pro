@@ -22,6 +22,10 @@
 # supersedes most of them in coverage.
 -keep class !androidx.compose.**,!org.jetbrains.compose.**,** { *; }
 
+# StringResource — kept explicitly despite the !org.jetbrains.compose.** exclusion
+# above, because UiError, ChatUiState and other app classes reference it.
+-keep class org.jetbrains.compose.resources.StringResource { *; }
+
 # Belt-and-braces: disable method specialization globally. Even inside the
 # Compose packages we still shrink, the kotlinx.coroutines async/launch
 # builders are called from Compose code paths and specialization there
