@@ -1064,6 +1064,80 @@ private fun LiteRTSettings(
         }
     }
 
+    val customModels = downloadedModels.filter { downloaded -> availableModels.none { it.id == downloaded.id } }
+    if (customModels.isNotEmpty()) {
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "Imported",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(4.dp))
+        customModels.forEach { model ->
+            val isSelected = selectedModel?.id == model.id
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp),
+                tonalElevation = if (isSelected) 3.dp else 1.dp,
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = { onSelectModel(model.id) },
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = model.subtitle.substringBefore(" (").replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            )
+                            Text(
+                                text = model.subtitle.substringAfter(" (").substringBefore(")"),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        IconButton(
+                            onClick = { onDeleteModel(model.id) },
+                            modifier = Modifier.handCursor(),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    val storedContextTokens = modelContextTokens[model.id] ?: 4096
+                    var contextSliderValue by remember(storedContextTokens) {
+                        mutableStateOf(((storedContextTokens - 1024) / 1024).toFloat().coerceAtLeast(0f))
+                    }
+                    val contextTokens = 1024 + (contextSliderValue.roundToInt() * 1024)
+                    Text(
+                        text = stringResource(Res.string.litert_context_size, "${contextTokens / 1024}K"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    KaiSlider(
+                        value = contextSliderValue,
+                        onValueChange = { contextSliderValue = it },
+                        onValueChangeFinished = {
+                            onChangeModelContextTokens(model.id, contextTokens)
+                        },
+                        valueRange = 0f..7f, // Max 8K (1024 + 7*1024)
+                        steps = 6,
+                    )
+                }
+            }
+        }
+    }
+
     if (downloadError != null) {
         Spacer(Modifier.height(8.dp))
         Text(
