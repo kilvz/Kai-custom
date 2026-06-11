@@ -121,7 +121,7 @@ val GGUF_MODELS = listOf(
         sizeBytes = 1_200_000_000L,
         downloadUrl = "https://huggingface.co/mradermacher/Huihui-Qwen3-1.7B-abliterated-v2-i1-GGUF/resolve/main/Huihui-Qwen3-1.7B-abliterated-v2.i1-Q4_K_M.gguf",
         gpuMemoryMb = 200,
-        defaultContextTokens = 2_048,
+        defaultContextTokens = 4_096,
         maxContextTokens = 32_768,
         kvPerTokenBytes = 25_000,
     ),

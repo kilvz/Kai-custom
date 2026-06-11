@@ -21,11 +21,14 @@ JNIEXPORT jboolean JNICALL
 Java_com_kai_custom_inference_GgufNative_nativeInit(
     JNIEnv* env, jobject thiz,
     jstring modelPath,
-    jint nCtx
+    jint nCtx,
+    jint nGpuLayers,
+    jint nThreads,
+    jint nBatch
 ) {
     const char* path = env->GetStringUTFChars(modelPath, nullptr);
     auto* ctx = new GgufContext();
-    bool ok = ctx->loadModel(path, nCtx);
+    bool ok = ctx->loadModel(path, nCtx, nGpuLayers, nThreads, nBatch);
     env->ReleaseStringUTFChars(modelPath, path);
 
     if (ok) {

@@ -145,6 +145,20 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         entry
     }
 
+    override suspend fun deleteAllMemories(force: Boolean) {
+        val entities = dimension.getAllEntities()
+        entities.forEach { entity ->
+            if (force) {
+                dimension.deleteEntity(entity.id)
+            } else {
+                val entry = entityToEntry(entity)
+                if (entry?.protected != true) {
+                    dimension.deleteEntity(entity.id)
+                }
+            }
+        }
+    }
+
     override suspend fun forget(key: String): Boolean = mutex.withLock {
         val entity = dimension.getEntityByMetadataKey("memory_key", key) ?: return@withLock false
         val entry = entityToEntry(entity)

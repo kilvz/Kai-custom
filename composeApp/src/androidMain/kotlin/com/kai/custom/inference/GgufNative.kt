@@ -3,7 +3,7 @@ package com.kai.custom.inference
 class GgufNative {
     private var nativePtr: Long = 0
 
-    external fun nativeInit(modelPath: String, nCtx: Int): Boolean
+    external fun nativeInit(modelPath: String, nCtx: Int, nGpuLayers: Int = 0, nThreads: Int = 4, nBatch: Int = 512): Boolean
     external fun nativeChat(systemPrompt: String?, messages: Array<String>, topK: Int, topP: Float, temperature: Float, maxTokens: Int): String
     external fun nativeRelease()
 

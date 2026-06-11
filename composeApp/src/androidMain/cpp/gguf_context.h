@@ -17,7 +17,9 @@ public:
     ~GgufContext();
 
     // Load a GGUF model. Returns true on success.
-    bool loadModel(const std::string& modelPath, int nCtx);
+    // nCtx: context window in tokens; nGpuLayers: GPU offload layers (0=CPU);
+    // nThreads: CPU thread count; nBatch: batch size (512 recommended).
+    bool loadModel(const std::string& modelPath, int nCtx, int nGpuLayers = 0, int nThreads = 4, int nBatch = 512);
 
     // Run chat inference. Takes system prompt, message history, and sampling params.
     // Returns the assistant response text.
@@ -41,7 +43,6 @@ private:
     std::mutex mutex;
     bool terminated;
 
-    static constexpr int N_THREADS = 4;
 };
 
 // Lightweight GGUF header reader — reads only metadata KV pairs from the file header,

@@ -10,26 +10,27 @@ GgufContext::GgufContext() : model(nullptr), ctx(nullptr), terminated(false) {}
 
 GgufContext::~GgufContext() { release(); }
 
-bool GgufContext::loadModel(const std::string& modelPath, int nCtx) {
+bool GgufContext::loadModel(const std::string& modelPath, int nCtx, int nGpuLayers, int nThreads, int nBatch) {
     std::lock_guard<std::mutex> lock(mutex);
     if (model) release();
 
     llama_model_params modelParams = llama_model_default_params();
-    modelParams.n_gpu_layers = 0;
+    modelParams.n_gpu_layers = (nGpuLayers > 0) ? nGpuLayers : 0;
 
     model = llama_model_load_from_file(modelPath.c_str(), modelParams);
     if (!model) { LOGE("Failed to load model"); return false; }
 
     llama_context_params ctxParams = llama_context_default_params();
     ctxParams.n_ctx = (nCtx > 0) ? nCtx : 2048;
-    ctxParams.n_batch = ctxParams.n_ctx;
-    ctxParams.n_threads = N_THREADS;
-    ctxParams.n_threads_batch = N_THREADS;
+    ctxParams.n_batch = (nBatch > 0) ? nBatch : 512;
+    ctxParams.n_threads = (nThreads > 0) ? nThreads : 4;
+    ctxParams.n_threads_batch = (nThreads > 0) ? nThreads : 4;
 
     ctx = llama_init_from_model(model, ctxParams);
     if (!ctx) { LOGE("Failed to create context"); llama_model_free(model); model = nullptr; return false; }
 
-    LOGI("Model loaded, n_ctx=%d", ctxParams.n_ctx);
+    LOGI("Model loaded, n_ctx=%d, n_gpu_layers=%d, n_threads=%d, n_batch=%d",
+         ctxParams.n_ctx, modelParams.n_gpu_layers, ctxParams.n_threads, ctxParams.n_batch);
     return true;
 }
 

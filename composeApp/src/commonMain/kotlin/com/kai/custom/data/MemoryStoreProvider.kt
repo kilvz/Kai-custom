@@ -66,6 +66,15 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         return ok
     }
 
+    override suspend fun deleteAllMemories(force: Boolean) {
+        sqliteStore.deleteAllMemories(force)
+        if (isUsingAltMemory) {
+            try {
+                delegate.deleteAllMemories(force)
+            } catch (_: Exception) { }
+        }
+    }
+
     // ── Protected writes: alt-memory only (behavior, summaries), SQL fallback ──
 
     override suspend fun storeProtected(

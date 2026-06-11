@@ -60,6 +60,9 @@ interface MemoryStore {
 
     suspend fun forget(key: String): Boolean
 
+    /** Delete all memories. If [force] is true, protected memories are also deleted. */
+    suspend fun deleteAllMemories(force: Boolean = false)
+
     suspend fun storeProtected(
         key: String,
         content: String,

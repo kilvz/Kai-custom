@@ -32,7 +32,15 @@ private class CompositeEngine(
             val native = try {
                 GgufPluginManager.ensureLoaded()
             } catch (_: Exception) { null }
-            ggufEngine = GgufInferenceEngine(native)
+            val cpuCount = Runtime.getRuntime().availableProcessors()
+            ggufEngine = GgufInferenceEngine(
+                native,
+                GgufEngineConfig(
+                    gpuLayers = 4,          // Offload 4 layers to GPU (Vulkan)
+                    threads = cpuCount.coerceIn(2, 8),
+                    batchSize = 512,
+                ),
+            )
         }
         return ggufEngine!!
     }

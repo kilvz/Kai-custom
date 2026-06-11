@@ -20,8 +20,15 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.contentOrNull
 
+data class GgufEngineConfig(
+    val gpuLayers: Int = 0,
+    val threads: Int = Runtime.getRuntime().availableProcessors().coerceIn(1, 16),
+    val batchSize: Int = 512,
+)
+
 class GgufInferenceEngine(
     private val native: GgufNative?,
+    private val config: GgufEngineConfig = GgufEngineConfig(),
 ) : LocalInferenceEngine {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -72,7 +79,7 @@ class GgufInferenceEngine(
                     }
                 }
 
-                val ok = native.nativeInit(resolvedPath, contextTokens)
+                val ok = native.nativeInit(resolvedPath, contextTokens, config.gpuLayers, config.threads, config.batchSize)
                 if (!ok) throw IllegalStateException("Failed to initialize GGUF model")
                 currentModelId = model.id
                 _engineState.value = EngineState.READY
@@ -107,12 +114,13 @@ class GgufInferenceEngine(
         topP: Float,
     ): String = withContext(Dispatchers.IO) {
         if (native == null) throw IllegalStateException("GGUF native library not loaded")
+        // GGUF/llama.cpp handles all Unicode natively — no need for sanitizeForLiteRt
         val messageStrings = messages.map { msg ->
-            "${msg.role}|||${sanitizeForLiteRt(msg.content) ?: ""}"
+            "${msg.role}|||${msg.content}"
         }.toTypedArray()
 
         val result = native.nativeChat(
-            sanitizeForLiteRt(systemPrompt),
+            systemPrompt,
             messageStrings,
             topK,
             topP,

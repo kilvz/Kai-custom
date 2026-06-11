@@ -240,6 +240,12 @@ class AltMemoryClient(
         }
     }
 
+    override suspend fun deleteAllMemories(force: Boolean) {
+        try {
+            client.callTool("delete_all_entities", buildJsonObject { put("force", JsonPrimitive(force)) })
+        } catch (_: Exception) { }
+    }
+
     override fun getUserMemories(max: Int): List<MemoryEntry> = getAllMemories(max).filter { !it.protected }
 
     override fun getBehaviorMemories(): List<MemoryEntry> = try {

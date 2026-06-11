@@ -32,7 +32,7 @@ class HeartbeatMemoryExtractor(
             var extractedCount = 0
             for (item in items) {
                 if (memoryStore.containsKey(item.key)) continue
-                memoryStore.storeProtected(
+                memoryStore.store(
                     key = item.key,
                     content = item.content,
                     category = item.category,
