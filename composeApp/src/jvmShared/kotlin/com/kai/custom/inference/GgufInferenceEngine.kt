@@ -94,7 +94,7 @@ class GgufInferenceEngine(
             topK,
             topP,
             temperature,
-            maxTokens = 512,
+            maxTokens = 4096,
         )
 
         stripThinkBlocks(result)

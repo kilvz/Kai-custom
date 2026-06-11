@@ -22,9 +22,11 @@ cmake "${BUILD_DIR}/llama" \
     -DCMAKE_C_COMPILER="${TOOLCHAIN}/bin/${TARGET}-clang" \
     -DCMAKE_CXX_COMPILER="${TOOLCHAIN}/bin/${TARGET}-clang++" \
     -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=OFF \
+    -DGGML_OPENMP=OFF -DLLAMA_OPENMP=OFF \
     -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
 echo "=== Building ==="
 make -j$(nproc) gguf_engine
+cp "${BUILD_DIR}/build/bin/"*.so "${OUTPUT_DIR}/"
 cp "${BUILD_DIR}/build/libgguf_engine.so" "${OUTPUT_DIR}/"
 cp "${BUILD_DIR}/build/libgguf_engine.so" "${GGUF_DIR}/"
 echo "=== DONE ==="

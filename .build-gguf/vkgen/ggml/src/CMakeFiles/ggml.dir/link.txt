@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -O3 -DNDEBUG -shared -Wl,--dependency-file=CMakeFiles/ggml.dir/link.d -Wl,-soname,libggml.so.0 -o ../../bin/libggml.so.0.14.0 "CMakeFiles/ggml.dir/ggml-backend-dl.cpp.o" "CMakeFiles/ggml.dir/ggml-backend-reg.cpp.o"  -Wl,-rpath,/mnt/f/Kai/.build-gguf/vkgen/bin: -ldl ../../bin/libggml-cpu.so.0.14.0 ../../bin/libggml-base.so.0.14.0

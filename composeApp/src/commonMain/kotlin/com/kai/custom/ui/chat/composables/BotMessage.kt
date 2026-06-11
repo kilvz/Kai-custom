@@ -42,6 +42,8 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.ui.dynamicui.FrozenSubmission
 import com.kai.custom.ui.dynamicui.toSpeakableText
@@ -257,19 +259,24 @@ private fun ReasoningBlockquote(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 for (segment in segments) {
-                    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                        VerticalDivider(
-                            thickness = 2.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            modifier = Modifier.fillMaxHeight(),
+                    val dividerColor = MaterialTheme.colorScheme.outlineVariant
+                    SelectionContainer(
+                        modifier = Modifier
+                            .drawBehind {
+                                drawLine(
+                                    color = dividerColor,
+                                    start = Offset(0f, 0f),
+                                    end = Offset(0f, size.height),
+                                    strokeWidth = 2.dp.toPx()
+                                )
+                            }
+                            .padding(start = 10.dp)
+                    ) {
+                        Text(
+                            text = segment,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
                         )
-                        SelectionContainer(modifier = Modifier.padding(start = 10.dp)) {
-                            Text(
-                                text = segment,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
                     }
                 }
             }

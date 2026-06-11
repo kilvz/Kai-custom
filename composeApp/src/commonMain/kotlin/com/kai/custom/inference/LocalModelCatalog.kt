@@ -145,11 +145,17 @@ private val THINK_BLOCK_REGEX = Regex("<think>.*?</think>", RegexOption.DOT_MATC
 fun stripThinkBlocks(s: String): String {
     // Qwen3-Thinking sometimes emits </think> without an opening <think> tag;
     // treat everything up to and including </think> as thinking content.
-    val fixed = if (!s.contains("<think>") && s.contains("</think>")) {
+    var fixed = if (!s.contains("<think>") && s.contains("</think>")) {
         s.substringAfter("</think>").trim()
     } else {
         s
     }
+    
+    // If generation stopped early inside a <think> block without closing it
+    if (fixed.contains("<think>") && !fixed.contains("</think>")) {
+        fixed = fixed.substringBefore("<think>").trim()
+    }
+    
     return THINK_BLOCK_REGEX.replace(fixed, "").trim()
 }
 

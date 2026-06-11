@@ -22,6 +22,7 @@ bool GgufContext::loadModel(const std::string& modelPath, int nCtx) {
 
     llama_context_params ctxParams = llama_context_default_params();
     ctxParams.n_ctx = (nCtx > 0) ? nCtx : 2048;
+    ctxParams.n_batch = ctxParams.n_ctx;
     ctxParams.n_threads = N_THREADS;
     ctxParams.n_threads_batch = N_THREADS;
 
@@ -47,32 +48,61 @@ std::string GgufContext::chat(
     const auto* vocab = llama_model_get_vocab(model);
     std::string result;
 
-    // Build prompt
-    std::ostringstream prompt;
+    // Build prompt using built-in template
+    std::vector<llama_chat_message> chat_msgs;
     if (!systemPrompt.empty()) {
-        prompt << "<|im_start|>system\n" << systemPrompt << "<|im_end|>\n";
+        chat_msgs.push_back({"system", systemPrompt.c_str()});
     }
     for (const auto& msg : messages) {
-        if (msg.role == "user") {
-            prompt << "<|im_start|>user\n" << msg.content << "<|im_end|>\n";
-        } else if (msg.role == "assistant") {
-            prompt << "<|im_start|>assistant\n" << msg.content << "<|im_end|>\n";
-        }
+        chat_msgs.push_back({msg.role.c_str(), msg.content.c_str()});
     }
-    prompt << "<|im_start|>assistant\n";
 
-    std::string promptStr = prompt.str();
+    const char * tmpl = llama_model_chat_template(model, nullptr);
+    std::vector<char> formatted(8192);
+    int32_t len = llama_chat_apply_template(tmpl, chat_msgs.data(), chat_msgs.size(), true, formatted.data(), formatted.size());
+    
+    if (len > (int32_t)formatted.size()) {
+        formatted.resize(len);
+        len = llama_chat_apply_template(tmpl, chat_msgs.data(), chat_msgs.size(), true, formatted.data(), formatted.size());
+    }
 
-    // Tokenize
+    std::string promptStr;
+    if (len > 0) {
+        promptStr = std::string(formatted.data(), len);
+    } else {
+        // Fallback if template application fails
+        std::ostringstream prompt;
+        if (!systemPrompt.empty()) {
+            prompt << "<|im_start|>system\n" << systemPrompt << "<|im_end|>\n";
+        }
+        for (const auto& msg : messages) {
+            prompt << "<|im_start|>" << msg.role << "\n" << msg.content << "<|im_end|>\n";
+        }
+        prompt << "<|im_start|>assistant\n";
+        promptStr = prompt.str();
+    }
+
+    // Tokenize, parse_special = true
     int nTokensEst = (promptStr.size() / 2) + 1024;
     std::vector<llama_token> tokens(nTokensEst);
-    int nTokens = llama_tokenize(vocab, promptStr.data(), promptStr.size(), tokens.data(), tokens.size(), true, false);
+    int nTokens = llama_tokenize(vocab, promptStr.data(), promptStr.size(), tokens.data(), tokens.size(), true, true);
     if (nTokens < 0) { LOGE("Tokenization failed"); return ""; }
     tokens.resize(nTokens);
 
-    // Eval prompt
-    llama_batch batch = llama_batch_get_one(tokens.data(), tokens.size());
-    if (llama_decode(ctx, batch)) { LOGE("Prompt eval failed"); return ""; }
+    // Check context bounds
+    uint32_t n_ctx = llama_n_ctx(ctx);
+    if (tokens.size() > n_ctx - 4) {
+        LOGE("Prompt too long for context window");
+        return "Error: Context window exceeded. Please clear chat or increase context size.";
+    }
+
+    // Eval prompt in chunks
+    uint32_t n_batch = llama_n_batch(ctx);
+    for (size_t i = 0; i < tokens.size(); i += n_batch) {
+        size_t chunk = std::min((size_t)n_batch, tokens.size() - i);
+        llama_batch batch = llama_batch_get_one(tokens.data() + i, chunk);
+        if (llama_decode(ctx, batch)) { LOGE("Prompt eval failed at chunk %zu", i); return ""; }
+    }
 
     // Build sampler chain
     auto* smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
