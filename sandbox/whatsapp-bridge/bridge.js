@@ -14,14 +14,14 @@ const QR_BASE64_FILE = '/tmp/whatsapp-qr.txt';
 const UNREAD_FILE = '/tmp/whatsapp-unread.json';
 const PORT = parseInt(process.env.WA_BRIDGE_PORT || '8317', 10);
 
+const logger = pino({ level: 'error' });
+
 let sock = null;
 const store = makeInMemoryStore({ logger });
 let currentQr = null;
 let connected = false;
 let pairingMode = false;
 let consecutiveFailures = 0;
-
-const logger = pino({ level: 'error' });
 const recentlySent = new Set();
 
 // Hardcoded fallback — fetchLatestBaileysVersion() often returns versions

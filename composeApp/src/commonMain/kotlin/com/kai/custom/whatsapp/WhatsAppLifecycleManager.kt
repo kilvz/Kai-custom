@@ -149,7 +149,7 @@ class WhatsAppLifecycleManager(
             val client = mcpServerManager.getClient(SERVER_ID) ?: return
             val resultStr = client.callTool("is_authenticated", buildJsonObject { })
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
-            val authenticated = root["authenticated"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            val authenticated = root["connected"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
             appSettings.setWhatsAppAuthenticated(authenticated)
         } catch (_: Exception) {
         }
@@ -182,12 +182,11 @@ class WhatsAppLifecycleManager(
             val client = mcpServerManager.getClient(SERVER_ID) ?: return
             val resultStr = client.callTool("get_qr_code", buildJsonObject { })
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
-            val available = root["available"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
-            val base64 = root["base64"]?.jsonPrimitive?.content ?: ""
-            if (available && base64.isNotBlank()) {
-                appSettings.setWhatsAppQrCode(base64)
+            val qr = root["qr"]?.jsonPrimitive?.content ?: ""
+            if (qr.isNotBlank()) {
+                appSettings.setWhatsAppQrCode(qr)
             }
-            val authenticated = root["authenticated"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            val authenticated = root["connected"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
             if (authenticated) {
                 appSettings.setWhatsAppAuthenticated(true)
                 appSettings.setWhatsAppQrCode("")
