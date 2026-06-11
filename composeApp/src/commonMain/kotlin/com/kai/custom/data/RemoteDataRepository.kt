@@ -2566,13 +2566,20 @@ class RemoteDataRepository(
 
     override fun getLocalDownloadedModels(): List<DownloadedModel> {
         val engineModels = localInferenceEngine?.getDownloadedModels() ?: emptyList()
-        val imported = appSettings.getImportedModels().map { model ->
-            DownloadedModel(
-                id = model.id,
-                displayName = model.displayName,
-                filePath = model.filePath,
-                sizeBytes = model.sizeBytes,
-            )
+        val imported = appSettings.getImportedModels().mapNotNull { model ->
+            val size = if (model.sizeBytes > 0) model.sizeBytes else java.io.File(model.filePath).length()
+            val isGguf = model.id.startsWith("gguf_") || model.filePath.endsWith(".gguf")
+            val modelsDir = if (isGguf) {
+                java.io.File(java.io.File(com.kai.custom.inference.getModelStorageDirectory()).parent, "gguf_models")
+            } else {
+                java.io.File(com.kai.custom.inference.getModelStorageDirectory())
+            }
+            val modelDir = java.io.File(modelsDir, model.id)
+            if (modelDir.exists()) {
+                DownloadedModel(model.id, model.displayName, model.filePath, size)
+            } else {
+                null
+            }
         }
         return (engineModels + imported).distinctBy { it.id }
     }
