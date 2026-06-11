@@ -18,10 +18,17 @@ internal fun resolveSandboxAbsolute(rootfsPath: String, homePath: String, sandbo
     if (!normalized.startsWith("/")) return null
     val parts = normalized.split("/").filter { it.isNotEmpty() }
     if (parts.any { it == ".." }) return null
-    val (rootDir, remainder) = if (parts.firstOrNull() == "root") {
-        File(homePath) to parts.drop(1)
-    } else {
-        File(rootfsPath) to parts
+    val (rootDir, remainder) = when (parts.firstOrNull()) {
+        "root" -> File(homePath) to parts.drop(1)
+        "sdcard" -> {
+            val host = when {
+                File("/storage/emulated/0").exists() -> "/storage/emulated/0"
+                File("/storage/self/primary").exists() -> "/storage/self/primary"
+                else -> return null
+            }
+            File(host) to parts.drop(1)
+        }
+        else -> File(rootfsPath) to parts
     }
     return safeChild(rootDir, remainder)
 }

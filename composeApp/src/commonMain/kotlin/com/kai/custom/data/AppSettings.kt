@@ -974,6 +974,13 @@ class AppSettings(internal val settings: Settings) {
         settings.putFloat("$KEY_MODEL_TOP_P_PREFIX$modelId", topP.coerceIn(0.0f, 1.0f))
     }
 
+    // GPU layers per model (0 = CPU only, 999 = all layers, default 20)
+    fun getModelGpuLayers(modelId: String): Int = settings.getInt("$KEY_MODEL_GPU_LAYERS_PREFIX$modelId", 20)
+
+    fun setModelGpuLayers(modelId: String, gpuLayers: Int) {
+        settings.putInt("$KEY_MODEL_GPU_LAYERS_PREFIX$modelId", gpuLayers.coerceIn(0, 999))
+    }
+
     // Imported custom models
     private val importedModelsJson = Json { ignoreUnknownKeys = true }
     private val importedModelsSerializer = ListSerializer(com.kai.custom.inference.ImportedModel.serializer())
@@ -1135,6 +1142,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_LOCAL_MODEL_FULL_PROMPT = "local_model_full_prompt"
         const val KEY_MODEL_TOP_K_PREFIX = "model_topk_"
         const val KEY_MODEL_TOP_P_PREFIX = "model_topp_"
+        const val KEY_MODEL_GPU_LAYERS_PREFIX = "model_gpu_layers_"
         const val KEY_IMPORTED_MODELS = "imported_models"
 
         const val KEY_DEFAULT_CALENDAR_ID = "default_calendar_id"

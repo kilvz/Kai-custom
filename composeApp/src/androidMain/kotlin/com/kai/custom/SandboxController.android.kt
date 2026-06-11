@@ -323,6 +323,23 @@ class AndroidSandboxController : SandboxController {
                     ),
                 )
             }
+            val sdcardHost = when {
+                File("/storage/emulated/0").exists() -> "/storage/emulated/0"
+                File("/storage/self/primary").exists() -> "/storage/self/primary"
+                else -> null
+            }
+            if (sdcardHost != null) {
+                val sdcard = File(sdcardHost)
+                children.add(
+                    SandboxFileEntry(
+                        name = "sdcard",
+                        path = "/sdcard",
+                        isDirectory = true,
+                        sizeBytes = 0,
+                        lastModifiedMs = sdcard.lastModified(),
+                    ),
+                )
+            }
         }
         children.sortedWith(
             compareByDescending<SandboxFileEntry> { it.isDirectory }

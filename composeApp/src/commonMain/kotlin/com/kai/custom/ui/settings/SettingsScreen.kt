@@ -591,6 +591,8 @@ fun SettingsScreenContent(
                                     onChangeModelTopK = actions.onChangeModelTopK,
                                     modelTopP = filteredUiState.modelTopP,
                                     onChangeModelTopP = actions.onChangeModelTopP,
+                                    modelGpuLayers = filteredUiState.modelGpuLayers,
+                                    onChangeModelGpuLayers = actions.onChangeModelGpuLayers,
                                     availableServicesToAdd = filteredUiState.availableServicesToAdd,
                                     isFreeFallbackEnabled = filteredUiState.isFreeFallbackEnabled,
                                 )

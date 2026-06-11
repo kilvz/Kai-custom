@@ -761,6 +761,8 @@ class FakeDataRepository : DataRepository {
     override fun setModelTopK(modelId: String, topK: Int) {}
     override fun getModelTopP(modelId: String): Float = 0.95f
     override fun setModelTopP(modelId: String, topP: Float) {}
+    override fun getModelGpuLayers(modelId: String): Int = 0
+    override fun setModelGpuLayers(modelId: String, gpuLayers: Int) {}
     override fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> = emptyList()
     override fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {}
     override fun removeImportedModel(modelId: String) {}

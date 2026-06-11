@@ -36,7 +36,7 @@ private class CompositeEngine(
             ggufEngine = GgufInferenceEngine(
                 native,
                 GgufEngineConfig(
-                    gpuLayers = 4,          // Offload 4 layers to GPU (Vulkan)
+                    gpuLayers = 20,         // Offload most layers to GPU (Vulkan)
                     threads = cpuCount.coerceIn(2, 8),
                     batchSize = 512,
                 ),
@@ -75,6 +75,10 @@ private class CompositeEngine(
             activeGgufModel = null
             liteRt.initialize(model, contextTokens)
         }
+    }
+
+    override fun updateGpuLayers(modelId: String, gpuLayers: Int) {
+        ggufEngine?.updateGpuLayers(modelId, gpuLayers)
     }
 
     override suspend fun release() {

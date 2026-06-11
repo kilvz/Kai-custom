@@ -153,6 +153,7 @@ data class SettingsUiState(
     val localModelFullPrompt: Boolean = false,
     val modelTopK: ImmutableMap<String, Int> = persistentMapOf(),
     val modelTopP: ImmutableMap<String, Float> = persistentMapOf(),
+    val modelGpuLayers: ImmutableMap<String, Int> = persistentMapOf(),
     val currentSponsors: ImmutableList<SponsorsResponseDto.Sponsor> = persistentListOf(),
     val pastSponsors: ImmutableList<SponsorsResponseDto.Sponsor> = persistentListOf(),
     val pendingDeletion: PendingDeletion? = null,

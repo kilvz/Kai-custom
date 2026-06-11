@@ -327,6 +327,8 @@ interface DataRepository {
     fun setModelTopK(modelId: String, topK: Int)
     fun getModelTopP(modelId: String): Float
     fun setModelTopP(modelId: String, topP: Float)
+    fun getModelGpuLayers(modelId: String): Int
+    fun setModelGpuLayers(modelId: String, gpuLayers: Int)
     fun getImportedModels(): List<com.kai.custom.inference.ImportedModel>
     fun addImportedModel(model: com.kai.custom.inference.ImportedModel)
     fun removeImportedModel(modelId: String)

@@ -2646,6 +2646,13 @@ class RemoteDataRepository(
         appSettings.setModelTopP(modelId, topP)
     }
 
+    override fun getModelGpuLayers(modelId: String): Int = appSettings.getModelGpuLayers(modelId)
+
+    override fun setModelGpuLayers(modelId: String, gpuLayers: Int) {
+        appSettings.setModelGpuLayers(modelId, gpuLayers)
+        localInferenceEngine?.updateGpuLayers(modelId, gpuLayers)
+    }
+
     override fun getImportedModels(): List<com.kai.custom.inference.ImportedModel> = appSettings.getImportedModels()
 
     override fun addImportedModel(model: com.kai.custom.inference.ImportedModel) {

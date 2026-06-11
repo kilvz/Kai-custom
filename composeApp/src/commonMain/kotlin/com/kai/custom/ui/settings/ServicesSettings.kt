@@ -218,6 +218,8 @@ internal fun ServicesContent(
     onChangeModelTopK: (String, Int) -> Unit = { _, _ -> },
     modelTopP: ImmutableMap<String, Float> = persistentMapOf(),
     onChangeModelTopP: (String, Float) -> Unit = { _, _ -> },
+    modelGpuLayers: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelGpuLayers: (String, Int) -> Unit = { _, _ -> },
     onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
     availableServicesToAdd: ImmutableList<Service>,
     isFreeFallbackEnabled: Boolean,
@@ -270,6 +272,8 @@ internal fun ServicesContent(
                     onChangeModelTopK = onChangeModelTopK,
                     modelTopP = modelTopP,
                     onChangeModelTopP = onChangeModelTopP,
+                    modelGpuLayers = modelGpuLayers,
+                    onChangeModelGpuLayers = onChangeModelGpuLayers,
                     onImportLocalModel = onImportLocalModel,
                     onImportPlatformFileComplete = actions.onImportPlatformFileComplete,
                     onImportComplete = actions.onImportComplete,
@@ -555,6 +559,8 @@ private fun ConfiguredServiceCardContent(
     onChangeModelTopK: (String, Int) -> Unit = { _, _ -> },
     modelTopP: ImmutableMap<String, Float> = persistentMapOf(),
     onChangeModelTopP: (String, Float) -> Unit = { _, _ -> },
+    modelGpuLayers: ImmutableMap<String, Int> = persistentMapOf(),
+    onChangeModelGpuLayers: (String, Int) -> Unit = { _, _ -> },
     onImportLocalModel: (ByteArray, String) -> Unit = { _, _ -> },
     onImportPlatformFileComplete: (com.kai.custom.inference.ImportedModel) -> Unit = {},
     onImportComplete: () -> Unit = {},
@@ -706,6 +712,11 @@ private fun ConfiguredServiceCardContent(
                             modelId = entry.selectedModel?.id ?: entry.service.id,
                             temperature = modelTemperature[entry.selectedModel?.id ?: entry.service.id] ?: 0.8f,
                             onChangeTemperature = { onChangeModelTemperature(entry.selectedModel?.id ?: entry.service.id, it) },
+                        )
+                        GpuLayersSlider(
+                            modelId = entry.selectedModel?.id ?: entry.service.id,
+                            gpuLayers = modelGpuLayers[entry.selectedModel?.id ?: entry.service.id] ?: 0,
+                            onChangeGpuLayers = { onChangeModelGpuLayers(entry.selectedModel?.id ?: entry.service.id, it) },
                         )
                     }
                     if (entry.service.isOnDevice) {
@@ -1180,6 +1191,7 @@ private fun LiteRTSettings(
     Spacer(Modifier.height(12.dp))
 
     var importError by remember { mutableStateOf(false) }
+    var importSuccessName by remember { mutableStateOf<String?>(null) }
     val importFilePicker = com.kai.custom.inference.rememberSafFilePicker(
         extensions = listOf("litertlm", "gguf"),
     ) { uriOrPath, displayName, sizeBytes ->
@@ -1187,12 +1199,25 @@ private fun LiteRTSettings(
             importScope.launch(kotlinx.coroutines.Dispatchers.IO) {
                 try {
                     val isGguf = try { displayName?.endsWith(".gguf") == true } catch (_: Exception) { false }
-                    val id = com.kai.custom.inference.importSafFile(uriOrPath, isGguf)
+                    val id = if (isGguf) {
+                        com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", sizeBytes)
+                    } else {
+                        com.kai.custom.inference.importSafFile(uriOrPath, false)
+                    }
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         if (id != null) {
+                            onImportPlatformFileComplete(
+                                com.kai.custom.inference.ImportedModel(
+                                    id = id,
+                                    displayName = (displayName ?: "model").removeSuffix(".gguf").removeSuffix(".litertlm"),
+                                    filePath = uriOrPath,
+                                    sizeBytes = sizeBytes,
+                                )
+                            )
                             onSelectModel(id)
                             onImportComplete()
                             importError = false
+                            importSuccessName = displayName
                         } else {
                             importError = true
                         }
@@ -1211,62 +1236,19 @@ private fun LiteRTSettings(
         modifier = Modifier.handCursor(),
     ) { Text("Import Model File (.litertlm / .gguf)") }
 
-    Spacer(Modifier.height(8.dp))
-
-    var externalImportError by remember { mutableStateOf(false) }
-    var externalImportSuccessName by remember { mutableStateOf<String?>(null) }
-    val externalFilePicker = com.kai.custom.inference.rememberSafFilePicker(
-        extensions = listOf("gguf"),
-    ) { uriOrPath, displayName, sizeBytes ->
-        if (uriOrPath != null) {
-            importScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                try {
-                    val id = com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", sizeBytes)
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        if (id != null) {
-                            onImportPlatformFileComplete(
-                                com.kai.custom.inference.ImportedModel(
-                                    id = id,
-                                    displayName = (displayName ?: "model").removeSuffix(".gguf"),
-                                    filePath = uriOrPath,
-                                    sizeBytes = sizeBytes,
-                                )
-                            )
-                            onSelectModel(id)
-                            onImportComplete()
-                            externalImportError = false
-                            externalImportSuccessName = displayName
-                        } else {
-                            externalImportError = true
-                        }
-                    }
-                } catch (_: Exception) {
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        externalImportError = true
-                    }
-                }
-            }
-        }
-    }
-
-    OutlinedButton(
-        onClick = { externalFilePicker() },
-        modifier = Modifier.handCursor(),
-    ) { Text("Use External GGUF File (no-copy)") }
-
-    if (externalImportSuccessName != null) {
+    if (importSuccessName != null) {
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Linked: $externalImportSuccessName",
+            text = "Imported: $importSuccessName",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
         )
     }
 
-    if (externalImportError) {
+    if (importError) {
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Linking failed.",
+            text = "Import failed — check file format and space.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
@@ -1513,6 +1495,70 @@ private fun TemperatureSlider(
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Lower values make output more focused and deterministic. Higher values make it more creative and varied.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun GpuLayersSlider(
+    modelId: String,
+    gpuLayers: Int,
+    onChangeGpuLayers: (Int) -> Unit,
+) {
+    var sliderValue by remember(gpuLayers) { mutableStateOf(gpuLayers.toFloat().coerceIn(0f, 99f)) }
+    val displayValue = if (sliderValue.roundToInt() >= 99) "All (999)" else sliderValue.roundToInt().toString()
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "GPU Layers",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = displayValue,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Slider(
+            value = sliderValue,
+            onValueChange = { sliderValue = it },
+            onValueChangeFinished = {
+                onChangeGpuLayers(if (sliderValue.roundToInt() >= 99) 999 else sliderValue.roundToInt())
+            },
+            valueRange = 0f..99f,
+            steps = 98,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                text = "0 — CPU only",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = "Default: 20",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "All — Max speed",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Offloads transformer layers to GPU (Vulkan). More layers = faster inference, higher memory use.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

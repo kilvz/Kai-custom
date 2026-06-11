@@ -28,8 +28,13 @@ data class GgufEngineConfig(
 
 class GgufInferenceEngine(
     private val native: GgufNative?,
-    private val config: GgufEngineConfig = GgufEngineConfig(),
+    config: GgufEngineConfig = GgufEngineConfig(),
 ) : LocalInferenceEngine {
+    private var config: GgufEngineConfig = config
+
+    override fun updateGpuLayers(modelId: String, gpuLayers: Int) {
+        config = config.copy(gpuLayers = gpuLayers.coerceIn(0, 999))
+    }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var downloadJob: Job? = null

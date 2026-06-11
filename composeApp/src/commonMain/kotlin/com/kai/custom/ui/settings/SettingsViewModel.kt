@@ -185,6 +185,7 @@ class SettingsViewModel(
         localModelFullPrompt = dataRepository.isLocalModelFullPrompt(),
         modelTopK = buildModelTopKMap(),
         modelTopP = buildModelTopPMap(),
+        modelGpuLayers = buildModelGpuLayersMap(),
         installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
         activeSkill = dataRepository.getActiveSkill(),
         schemaResetMessage = dataRepository.getSchemaResetMessage(),
@@ -266,6 +267,7 @@ class SettingsViewModel(
         onChangeLocalModelFullPrompt = ::onChangeLocalModelFullPrompt,
         onChangeModelTopK = ::onChangeModelTopK,
         onChangeModelTopP = ::onChangeModelTopP,
+        onChangeModelGpuLayers = ::onChangeModelGpuLayers,
         onImportLocalModel = ::onImportLocalModel,
         onImportPlatformFileComplete = { model ->
             viewModelScope.launch(backgroundDispatcher) {
@@ -1093,6 +1095,17 @@ class SettingsViewModel(
         }
     }
 
+    private fun onChangeModelGpuLayers(modelId: String, gpuLayers: Int) {
+        if (_state.value.modelGpuLayers[modelId] == gpuLayers) return
+        dataRepository.setModelGpuLayers(modelId, gpuLayers)
+        _state.update {
+            it.copy(modelGpuLayers = it.modelGpuLayers.toMutableMap().apply { put(modelId, gpuLayers) }.toImmutableMap())
+        }
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.releaseLocalEngine()
+        }
+    }
+
     @Suppress("DEPRECATION")
     private fun onImportLocalModel(bytes: ByteArray, fileName: String) {
         viewModelScope.launch(backgroundDispatcher) {
@@ -1111,6 +1124,10 @@ class SettingsViewModel(
 
     private fun buildModelTopPMap() = dataRepository.getLocalAvailableModels().associate { model ->
         model.id to dataRepository.getModelTopP(model.id)
+    }.toImmutableMap()
+
+    private fun buildModelGpuLayersMap() = dataRepository.getLocalAvailableModels().associate { model ->
+        model.id to dataRepository.getModelGpuLayers(model.id)
     }.toImmutableMap()
 
     private fun onDeleteLocalModel(modelId: String) {

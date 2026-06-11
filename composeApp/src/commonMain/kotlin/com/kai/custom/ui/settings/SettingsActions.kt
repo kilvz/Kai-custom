@@ -87,6 +87,7 @@ data class SettingsActions(
     val onChangeLocalModelFullPrompt: (Boolean) -> Unit,
     val onChangeModelTopK: (String, Int) -> Unit,
     val onChangeModelTopP: (String, Float) -> Unit,
+    val onChangeModelGpuLayers: (String, Int) -> Unit = { _, _ -> },
     val onImportLocalModel: (ByteArray, String) -> Unit,
     val onImportPlatformFileComplete: (com.kai.custom.inference.ImportedModel) -> Unit,
     val onImportComplete: () -> Unit,

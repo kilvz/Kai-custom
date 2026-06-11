@@ -131,20 +131,20 @@ actual fun importSafFile(uri: String, isGguf: Boolean): String? {
         val folderName = displayName.removeSuffix(".gguf").removeSuffix(".litertlm")
             .replace(Regex("[^a-zA-Z0-9_\\- ]"), "").trim().take(100)
             .replace(" ", "_").ifEmpty { "imported_model" }
-        val ext = if (isGguf) "gguf" else "litertlm"
         val id = folderName
-        val modelsDir = GgufInferenceEngine.getGgufModelsDir()
+        val modelsDir = if (isGguf) GgufInferenceEngine.getGgufModelsDir()
+                        else java.io.File(getModelStorageDirectory())
         modelsDir.mkdirs()
         // If folder already exists, append number
-        var modelDir = File(modelsDir, id)
+        var modelDir = java.io.File(modelsDir, id)
         var suffix = 1
-        while (modelDir.exists()) { modelDir = File(modelsDir, "${id}_$suffix"); suffix++ }
+        while (modelDir.exists()) { modelDir = java.io.File(modelsDir, "${id}_$suffix"); suffix++ }
         modelDir.mkdirs()
 
-        val targetFile = File(modelDir, displayName)
+        val targetFile = java.io.File(modelDir, displayName)
 
         context.contentResolver.openInputStream(parsedUri)?.use { input ->
-            FileOutputStream(targetFile).use { output ->
+            java.io.FileOutputStream(targetFile).use { output ->
                 val buf = ByteArray(65536); var r: Int
                 while (input.read(buf).also { r = it } != -1) output.write(buf, 0, r)
             }

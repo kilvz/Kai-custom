@@ -116,4 +116,7 @@ interface LocalInferenceEngine {
     fun startDownload(model: LocalModel)
     fun cancelDownload()
     suspend fun deleteModel(modelId: String)
+
+    /** Update GPU offload layers for this engine (no-op if not applicable). */
+    fun updateGpuLayers(modelId: String, gpuLayers: Int) {}
 }
