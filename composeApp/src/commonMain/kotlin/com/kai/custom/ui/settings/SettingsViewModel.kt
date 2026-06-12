@@ -255,6 +255,7 @@ class SettingsViewModel(
         onRemoveMcpServer = ::onRemoveMcpServer,
         onToggleMcpServer = ::onToggleMcpServer,
         onRefreshMcpServer = ::onRefreshMcpServer,
+        onUpdateMcpApiKey = ::onUpdateMcpApiKey,
         onShowAddMcpServerDialog = ::onShowAddMcpServerDialog,
         onAddPopularMcpServer = ::onAddPopularMcpServer,
         onDownloadLocalModel = ::onDownloadLocalModel,
@@ -1205,20 +1206,21 @@ class SettingsViewModel(
     }
 
     // MCP server management
-    private fun buildMcpServerEntries(): List<McpServerUiState> = dataRepository.getMcpServers().map { config ->
-        McpServerUiState(
-            id = config.id,
-            name = config.name,
-            url = config.url,
-            isEnabled = config.isEnabled,
-            connectionStatus = if (dataRepository.isMcpServerConnected(config.id)) {
-                McpConnectionStatus.Connected
-            } else {
-                McpConnectionStatus.Unknown
-            },
-            tools = dataRepository.getMcpToolsForServer(config.id).toImmutableList(),
-        )
-    }
+     private fun buildMcpServerEntries(): List<McpServerUiState> = dataRepository.getMcpServers().map { config ->
+         McpServerUiState(
+             id = config.id,
+             name = config.name,
+             url = config.url,
+             isEnabled = config.isEnabled,
+             connectionStatus = if (dataRepository.isMcpServerConnected(config.id)) {
+                 McpConnectionStatus.Connected
+             } else {
+                 McpConnectionStatus.Unknown
+             },
+             tools = dataRepository.getMcpToolsForServer(config.id).toImmutableList(),
+             apiKey = config.headers["Authorization"]?.removePrefix("Bearer ")?.trim() ?: "",
+         )
+     }
 
     private fun refreshMcpServers() {
         _state.update { current ->
@@ -1278,6 +1280,14 @@ class SettingsViewModel(
 
     private fun onAddPopularMcpServer(server: PopularMcpServer) {
         onAddMcpServer(server.name, server.url, emptyMap())
+    }
+
+    private fun onUpdateMcpApiKey(serverId: String, apiKey: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            dataRepository.updateMcpServerHeaders(serverId, mapOf("Authorization" to "Bearer $apiKey"))
+            connectMcpServerWithStatus(serverId)
+            refreshMcpServers()
+        }
     }
 
     private suspend fun connectMcpServerWithStatus(serverId: String) {

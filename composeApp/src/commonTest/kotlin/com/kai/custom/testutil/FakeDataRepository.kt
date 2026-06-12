@@ -320,6 +320,15 @@ class FakeDataRepository : DataRepository {
 
     override fun getMcpServers(): List<McpServerConfig> = mcpServers.toList()
 
+    override fun updateMcpServerHeaders(serverId: String, headers: Map<String, String>) {
+        val index = mcpServers.indexOfFirst { it.id == serverId }
+        if (index >= 0) {
+            mcpServers[index] = mcpServers[index].copy(headers = headers)
+        }
+        mcpConnected.remove(serverId)
+        mcpTools.remove(serverId)
+    }
+
     override suspend fun addMcpServer(name: String, url: String, headers: Map<String, String>): McpServerConfig {
         val id = name.lowercase().replace(Regex("[^a-z0-9]"), "_").take(30)
         val config = McpServerConfig(id = id, name = name, url = url, headers = headers)

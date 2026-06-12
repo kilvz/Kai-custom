@@ -1816,6 +1816,10 @@ class RemoteDataRepository(
 
     override suspend fun addMcpServer(name: String, url: String, headers: Map<String, String>): McpServerConfig = mcpServerManager.addServer(name, url, headers)
 
+    override fun updateMcpServerHeaders(serverId: String, headers: Map<String, String>) {
+        mcpServerManager.updateServerHeaders(serverId, headers)
+    }
+
     override fun removeMcpServer(serverId: String) {
         mcpServerManager.removeServer(serverId)
     }

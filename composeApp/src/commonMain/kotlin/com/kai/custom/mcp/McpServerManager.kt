@@ -70,6 +70,18 @@ class McpServerManager(private val appSettings: AppSettings) {
         return config
     }
 
+    fun updateServerHeaders(serverId: String, headers: Map<String, String>) {
+        val servers = getServers().toMutableList()
+        val index = servers.indexOfFirst { it.id == serverId }
+        if (index >= 0) {
+            servers[index] = servers[index].copy(headers = headers)
+            saveServers(servers)
+            clients[serverId]?.close()
+            clients.remove(serverId)
+            discoveredTools.remove(serverId)
+        }
+    }
+
     fun removeBuiltInServer(serverId: String) {
         builtInServers.remove(serverId)
         clients[serverId]?.close()

@@ -71,6 +71,7 @@ interface DataRepository {
     // MCP servers
     fun getMcpServers(): List<McpServerConfig>
     suspend fun addMcpServer(name: String, url: String, headers: Map<String, String>): McpServerConfig
+    fun updateMcpServerHeaders(serverId: String, headers: Map<String, String>)
     fun removeMcpServer(serverId: String)
     fun setMcpServerEnabled(serverId: String, enabled: Boolean)
     suspend fun connectMcpServer(serverId: String): Result<List<ToolInfo>>

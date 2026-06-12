@@ -172,6 +172,7 @@ data class McpServerUiState(
     val isEnabled: Boolean,
     val connectionStatus: McpConnectionStatus,
     val tools: ImmutableList<ToolInfo>,
+    val apiKey: String = "",
 )
 
 enum class McpConnectionStatus {

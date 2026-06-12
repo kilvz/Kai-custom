@@ -634,6 +634,7 @@ fun SettingsScreenContent(
                                     onRemoveMcpServer = actions.onRemoveMcpServer,
                                     onToggleMcpServer = actions.onToggleMcpServer,
                                     onRefreshMcpServer = actions.onRefreshMcpServer,
+                                    onUpdateMcpApiKey = actions.onUpdateMcpApiKey,
                                     showAddMcpServerDialog = filteredUiState.showAddMcpServerDialog,
                                     onShowAddMcpServerDialog = actions.onShowAddMcpServerDialog,
                                     onAddPopularMcpServer = actions.onAddPopularMcpServer,
