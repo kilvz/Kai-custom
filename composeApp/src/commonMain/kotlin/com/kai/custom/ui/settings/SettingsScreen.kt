@@ -151,6 +151,8 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.default_soul
 import kai.composeapp.generated.resources.github_mark
 import kai.composeapp.generated.resources.ic_arrow_drop_down
+import kai.composeapp.generated.resources.settings_screen_database_reset
+import kai.composeapp.generated.resources.settings_screen_ok
 import kai.composeapp.generated.resources.litert_cancel
 import kai.composeapp.generated.resources.litert_context_size
 import kai.composeapp.generated.resources.litert_download
@@ -703,11 +705,11 @@ fun SettingsScreenContent(
     if (showSchemaResetDialog && uiState.schemaResetMessage != null) {
         AlertDialog(
             onDismissRequest = { showSchemaResetDialog = false },
-            title = { Text("Database Reset") },
+            title = { Text(stringResource(Res.string.settings_screen_database_reset)) },
             text = { Text(uiState.schemaResetMessage) },
             confirmButton = {
                 Button(onClick = { showSchemaResetDialog = false }) {
-                    Text("OK")
+                    Text(stringResource(Res.string.settings_screen_ok))
                 }
             },
         )

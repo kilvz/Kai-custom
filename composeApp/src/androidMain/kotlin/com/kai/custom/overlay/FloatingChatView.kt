@@ -1,6 +1,7 @@
 package com.kai.custom.overlay
 
 import android.content.Context
+import com.kai.custom.shared.R
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.GradientDrawable
@@ -182,7 +183,7 @@ internal class FloatingChatView(
 
         // ── Empty state ──
         val emptyText = TextView(context).apply {
-            text = "Ask about anything\non your screen"
+            text = context.getString(R.string.floating_chat_empty)
             setTextColor(textSecondary)
             textSize = 14f
             gravity = Gravity.CENTER
@@ -200,7 +201,7 @@ internal class FloatingChatView(
             visibility = View.GONE
         }
         val loadingBubble = TextView(context).apply {
-            text = "Thinking\u2026"
+            text = context.getString(R.string.floating_chat_thinking)
             setTextColor(textSecondary)
             textSize = 12f
             typeface = android.graphics.Typeface.create("sans-serif", android.graphics.Typeface.ITALIC)
@@ -246,7 +247,7 @@ internal class FloatingChatView(
         outerCard.addView(inputContainer)
 
         inputField = EditText(context).apply {
-            hint = "Ask about your screen\u2026"
+            hint = context.getString(R.string.floating_chat_hint)
             setTextColor(textPrimary)
             setHintTextColor(textSecondary)
             textSize = 14f
@@ -323,7 +324,7 @@ internal class FloatingChatView(
         messagesContainer.removeAllViews()
         if (msgs.isEmpty()) {
             val emptyText = TextView(context).apply {
-                text = "Ask about anything\non your screen"
+                text = context.getString(R.string.floating_chat_empty)
                 setTextColor(textSecondary)
                 textSize = 14f
                 gravity = Gravity.CENTER

@@ -44,6 +44,17 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.sandbox_settings_alt_memory
+import kai.composeapp.generated.resources.sandbox_settings_distribution
+import kai.composeapp.generated.resources.sandbox_settings_export
+import kai.composeapp.generated.resources.sandbox_settings_import
+import kai.composeapp.generated.resources.sandbox_settings_reset_dpkg
+import kai.composeapp.generated.resources.sandbox_settings_root_warning
+import kai.composeapp.generated.resources.sandbox_settings_run_as_root
+import kai.composeapp.generated.resources.sandbox_settings_run_as_root_desc
+import kai.composeapp.generated.resources.sandbox_settings_storage_mount
+import kai.composeapp.generated.resources.sandbox_settings_storage_mount_desc
+import kai.composeapp.generated.resources.sandbox_settings_version_info
 import kai.composeapp.generated.resources.settings_sandbox_cancel
 import kai.composeapp.generated.resources.settings_sandbox_description
 import kai.composeapp.generated.resources.settings_sandbox_disk_usage
@@ -157,7 +168,7 @@ internal fun SandboxSettingsCard(
                 } else {
                     if (sandboxState.needsReset) {
                         Button(onClick = { showResetDialog = true }, modifier = Modifier.handCursor()) {
-                            Text("Reset — dpkg broken")
+                            Text(stringResource(Res.string.sandbox_settings_reset_dpkg))
                         }
                     } else if (!sandboxState.sandboxPackagesInstalled) {
                         OutlinedButton(onClick = onInstallPackages, modifier = Modifier.handCursor()) {
@@ -166,7 +177,7 @@ internal fun SandboxSettingsCard(
                     }
                     if (!sandboxState.altMemoryInstalled) {
                         OutlinedButton(onClick = onInstallAltMemory, modifier = Modifier.handCursor()) {
-                            Text("Alt-Memory")
+                            Text(stringResource(Res.string.sandbox_settings_alt_memory))
                         }
                     } else {
                         val cv = sandboxState.altMemoryCurrentVersion
@@ -178,7 +189,7 @@ internal fun SandboxSettingsCard(
                         }
                         if (cv != null && lv != null && !isUpToDate) {
                             Text(
-                                text = "Current: $cv → Latest: $lv",
+                                text = stringResource(Res.string.sandbox_settings_version_info, cv, lv),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(start = 8.dp),
@@ -201,12 +212,12 @@ internal fun SandboxSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "User storage mount (/sdcard)",
+                        text = stringResource(Res.string.sandbox_settings_storage_mount),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
-                        text = "Let the AI access files on your device storage",
+                        text = stringResource(Res.string.sandbox_settings_storage_mount_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -225,12 +236,12 @@ internal fun SandboxSettingsCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Run sandbox as root",
+                        text = stringResource(Res.string.sandbox_settings_run_as_root),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
-                        text = "Real root via su instead of proot-faked root. Bypasses sandbox isolation.",
+                        text = stringResource(Res.string.sandbox_settings_run_as_root_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -268,7 +279,7 @@ internal fun SandboxSettingsCard(
                             modifier = Modifier.padding(end = 8.dp),
                         )
                         Text(
-                            text = "Only enable if you trust the AI. Real root bypasses sandbox isolation and gives full system access.",
+                            text = stringResource(Res.string.sandbox_settings_root_warning),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFF424242),
                         )
@@ -279,10 +290,10 @@ internal fun SandboxSettingsCard(
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = onBackupSandbox, modifier = Modifier.handCursor()) {
-                    Text("Export")
+                    Text(stringResource(Res.string.sandbox_settings_export))
                 }
                 OutlinedButton(onClick = { importFilePicker.launch() }, modifier = Modifier.handCursor()) {
-                    Text("Import")
+                    Text(stringResource(Res.string.sandbox_settings_import))
                 }
             }
         }
@@ -332,7 +343,7 @@ private fun DistroSelector(
             value = distros.first { it.first == distro }.second,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Distribution") },
+            label = { Text(stringResource(Res.string.sandbox_settings_distribution)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)

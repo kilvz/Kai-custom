@@ -20,7 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.ui.handCursor
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.skill_autocomplete_deactivate
+import kai.composeapp.generated.resources.skill_autocomplete_stop
 import kotlinx.collections.immutable.ImmutableList
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun SkillAutocomplete(
@@ -84,13 +88,13 @@ private fun StopRow(onClick: () -> Unit) {
             .padding(horizontal = 12.dp, vertical = 8.dp),
     ) {
         Text(
-            text = "/stop",
+            text = stringResource(Res.string.skill_autocomplete_stop),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.error,
             fontWeight = FontWeight.Medium,
         )
         Text(
-            text = "Deactivate current skill",
+            text = stringResource(Res.string.skill_autocomplete_deactivate),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

@@ -9,4 +9,12 @@
     <string name="wake_word_channel_name">Wake Word Detection</string>
     <string name="wake_word_channel_description">Listening for wake word in the background</string>
     <string name="wake_word_notification_text">Listening for wake word…</string>
+    <string name="floating_chat_empty">Ask about anything\non your screen</string>
+    <string name="floating_chat_thinking">Thinking…</string>
+    <string name="floating_chat_hint">Ask about your screen…</string>
+    <string name="floating_overlay_title">Overlay permission required</string>
+    <string name="floating_overlay_text">Tap to grant overlay permission for the floating assistant</string>
+    <string name="floating_assistant_title">Kai Floating Assistant</string>
+    <string name="floating_open_text">Tap to open Kai</string>
+    <string name="download_progress_percent">%1$d%%</string>
 </resources>

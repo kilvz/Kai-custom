@@ -37,7 +37,29 @@ import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.PersonaManager
 import com.kai.custom.data.RenderMode
 import com.kai.custom.ui.handCursor
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.plugin_persona_generator_description
+import kai.composeapp.generated.resources.plugin_persona_generator_error_empty
+import kai.composeapp.generated.resources.plugin_persona_generator_error_failed
+import kai.composeapp.generated.resources.plugin_persona_generator_generate
+import kai.composeapp.generated.resources.plugin_persona_generator_generate_another
+import kai.composeapp.generated.resources.plugin_persona_generator_generated
+import kai.composeapp.generated.resources.plugin_persona_generator_plugins
+import kai.composeapp.generated.resources.plugin_persona_generator_prompt_label
+import kai.composeapp.generated.resources.plugin_persona_generator_prompt_placeholder
+import kai.composeapp.generated.resources.plugin_persona_generator_raw_response
+import kai.composeapp.generated.resources.plugin_persona_generator_starting
+import kai.composeapp.generated.resources.plugin_persona_generator_status_done
+import kai.composeapp.generated.resources.plugin_persona_generator_status_generating
+import kai.composeapp.generated.resources.plugin_persona_generator_status_generating_seconds
+import kai.composeapp.generated.resources.plugin_persona_generator_switch_condensed
+import kai.composeapp.generated.resources.plugin_persona_generator_switch_full
+import kai.composeapp.generated.resources.plugin_persona_generator_title
+import kai.composeapp.generated.resources.plugin_persona_generator_using
+import kai.composeapp.generated.resources.plugin_persona_generator_using_condensed
+import kai.composeapp.generated.resources.plugin_persona_generator_using_full
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.koin.compose.koinInject
@@ -86,6 +108,13 @@ fun PluginSettingsCard() {
 
     val currentServiceName = remember { dataRepository.currentService().displayName }
 
+    val startingText = stringResource(Res.string.plugin_persona_generator_starting)
+    val generatingText = stringResource(Res.string.plugin_persona_generator_status_generating)
+    val generatingSecondsFormat = stringResource(Res.string.plugin_persona_generator_status_generating_seconds)
+    val errorEmptyText = stringResource(Res.string.plugin_persona_generator_error_empty)
+    val doneFormat = stringResource(Res.string.plugin_persona_generator_status_done)
+    val errorFailedText = stringResource(Res.string.plugin_persona_generator_error_failed)
+
     var prompt by PersonaGeneratorState::prompt
     var generating by PersonaGeneratorState::generating
     var generatedConfig by PersonaGeneratorState::generatedConfig
@@ -101,27 +130,27 @@ fun PluginSettingsCard() {
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Plugins",
+            text = stringResource(Res.string.plugin_persona_generator_plugins),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(Modifier.height(8.dp))
         SettingsCard {
             Text(
-                text = "Persona Generator",
+                text = stringResource(Res.string.plugin_persona_generator_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Describe a personality and the AI will generate it using your default service.",
+                text = stringResource(Res.string.plugin_persona_generator_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Using: $currentServiceName",
+                text = stringResource(Res.string.plugin_persona_generator_using, currentServiceName),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -129,8 +158,8 @@ fun PluginSettingsCard() {
             OutlinedTextField(
                 value = prompt,
                 onValueChange = { prompt = it },
-                label = { Text("Describe the persona") },
-                placeholder = { Text("e.g. A sarcastic noir detective who talks like 1940s film noir") },
+                label = { Text(stringResource(Res.string.plugin_persona_generator_prompt_label)) },
+                placeholder = { Text(stringResource(Res.string.plugin_persona_generator_prompt_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3,
                 maxLines = 6,
@@ -143,7 +172,7 @@ fun PluginSettingsCard() {
                     Button(
                         onClick = { PersonaGeneratorState.reset() },
                         modifier = Modifier.handCursor(),
-                    ) { Text("Generate Another") }
+                    ) { Text(stringResource(Res.string.plugin_persona_generator_generate_another)) }
 
                     Spacer(Modifier.width(12.dp))
 
@@ -162,11 +191,11 @@ fun PluginSettingsCard() {
                             }
                         },
                         modifier = Modifier.handCursor(),
-                    ) { Text(if (usingCondensed) "Switch to Full Profile" else "Switch to Condensed") }
+                    ) { Text(if (usingCondensed) stringResource(Res.string.plugin_persona_generator_switch_full) else stringResource(Res.string.plugin_persona_generator_switch_condensed)) }
 
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = if (usingCondensed) "Using: Condensed version" else "Using: Full profile",
+                        text = if (usingCondensed) stringResource(Res.string.plugin_persona_generator_using_condensed) else stringResource(Res.string.plugin_persona_generator_using_full),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -179,7 +208,7 @@ fun PluginSettingsCard() {
                             generatedConfig = null
                             condensedSoul = ""
                             fullSoul = ""
-                            statusText = "Starting..."
+                            statusText = startingText
                             sentPrompt = ""
                             step1Response = ""
                             step2Response = ""
@@ -203,7 +232,7 @@ fun PluginSettingsCard() {
                                         append("- Then **General Response Guidelines**: bullet points\n\n")
                                         append("Output only the content, no extra section headers or formatting markers like \"=== CONDENSED VERSION ===\".")
                                     }
-                                    statusText = "Generating persona..."
+                                    statusText = generatingText
                                     sentPrompt = personaPrompt
 
                                     val timerJob = launch {
@@ -211,7 +240,7 @@ fun PluginSettingsCard() {
                                         while (true) {
                                             delay(1000)
                                             seconds++
-                                            statusText = "Generating persona... (${seconds}s) — This takes 2-4 minutes."
+                                            statusText = generatingSecondsFormat.format(seconds)
                                         }
                                     }
 
@@ -222,11 +251,11 @@ fun PluginSettingsCard() {
                                     }
 
                                     if (response.isBlank()) {
-                                        error = "AI returned empty response."
+                                        error = errorEmptyText
                                         return@launch
                                     }
                                     step1Response = response.take(5000)
-                                    statusText = "Done (${response.length} chars)"
+                                    statusText = doneFormat.format(response.length)
 
                                     val name = description.split(" ").take(3).joinToString(" ").replaceFirstChar(Char::uppercase)
                                     val id = "persona_${Uuid.random().toString().take(8)}"
@@ -266,7 +295,7 @@ fun PluginSettingsCard() {
                                     generatedConfig = config
                                     usingCondensed = true
                                 } catch (e: Exception) {
-                                    error = e.message ?: "Generation failed."
+                                    error = e.message ?: errorFailedText
                                 } finally {
                                     generating = false
                                 }
@@ -274,7 +303,7 @@ fun PluginSettingsCard() {
                         },
                         enabled = !generating && prompt.isNotBlank(),
                         modifier = Modifier.handCursor(),
-                    ) { Text("Generate Persona") }
+                    ) { Text(stringResource(Res.string.plugin_persona_generator_generate)) }
 
                     Spacer(Modifier.width(12.dp))
                     if (generating) {
@@ -296,12 +325,12 @@ fun PluginSettingsCard() {
                 Spacer(Modifier.height(12.dp))
                 HorizontalDivider()
                 Spacer(Modifier.height(8.dp))
-                Text("Generated: ${generatedConfig!!.name}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(Res.string.plugin_persona_generator_generated, generatedConfig!!.name), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
             }
 
             if (step1Response.isNotBlank()) {
                 Column(modifier = Modifier.padding(top = 8.dp)) {
-                    Text("Raw AI Response:", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(Res.string.plugin_persona_generator_raw_response), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SelectionContainer {
                         Text(
                             text = step1Response,

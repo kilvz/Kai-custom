@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_message_summary_separator
 import kai.composeapp.generated.resources.tools_count
 import kai.composeapp.generated.resources.waiting_brewing
 import kai.composeapp.generated.resources.waiting_content_description
@@ -182,7 +183,7 @@ internal fun PulsingStatusIndicator(
             }
             if (toolSummary != null) {
                 Text(
-                    text = " · $toolSummary",
+                    text = stringResource(Res.string.tool_message_summary_separator, toolSummary),
                     color = textColor,
                     style = textStyle,
                     maxLines = 1,

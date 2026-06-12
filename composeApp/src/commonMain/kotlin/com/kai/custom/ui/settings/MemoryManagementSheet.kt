@@ -36,6 +36,14 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.ui.components.SettingsListItem
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.memory_management_expired
+import kai.composeapp.generated.resources.memory_management_no_kg_facts
+import kai.composeapp.generated.resources.memory_management_no_memories
+import kai.composeapp.generated.resources.memory_management_realms
+import kai.composeapp.generated.resources.memory_management_show_protected
+import kai.composeapp.generated.resources.memory_management_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -72,7 +80,7 @@ fun MemoryManagementSheet(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = "Memory Manager",
+                text = stringResource(Res.string.memory_management_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -109,7 +117,7 @@ private fun StatsTab(entityCount: Long, realms: Map<String, List<String>>) {
         StatRow("Total Entities", entityCount.toString())
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Realms & Domains",
+            text = stringResource(Res.string.memory_management_realms),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -148,7 +156,7 @@ private fun MemoriesTab(
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = "Show protected",
+            text = stringResource(Res.string.memory_management_show_protected),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -157,7 +165,7 @@ private fun MemoriesTab(
 
     if (memories.isEmpty()) {
         Text(
-            text = "No memories stored.",
+            text = stringResource(Res.string.memory_management_no_memories),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -181,7 +189,7 @@ private fun MemoriesTab(
 private fun KgFactsTab(facts: List<KGFact>) {
     if (facts.isEmpty()) {
         Text(
-            text = "No KG facts stored.",
+            text = stringResource(Res.string.memory_management_no_kg_facts),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -209,7 +217,7 @@ private fun KgFactsTab(facts: List<KGFact>) {
                 }
                 if (fact.validTo != null) {
                     Text(
-                        text = "Expired",
+                        text = stringResource(Res.string.memory_management_expired),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error,
                     )

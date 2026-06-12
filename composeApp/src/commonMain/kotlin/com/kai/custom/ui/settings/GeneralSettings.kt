@@ -45,7 +45,17 @@ import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.KaiSlider
 import com.kai.custom.ui.handCursor
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.general_settings_clear
+import kai.composeapp.generated.resources.general_settings_debug_api
+import kai.composeapp.generated.resources.general_settings_debug_endpoint
+import kai.composeapp.generated.resources.general_settings_enroll_voice
+import kai.composeapp.generated.resources.general_settings_floating_ball_description
+import kai.composeapp.generated.resources.general_settings_open_tts
+import kai.composeapp.generated.resources.general_settings_press_button
+import kai.composeapp.generated.resources.general_settings_reenroll
+import kai.composeapp.generated.resources.general_settings_wake_word_phrase
 import kai.composeapp.generated.resources.ic_arrow_drop_down
+import kai.composeapp.generated.resources.settings_floating_ball
 import kai.composeapp.generated.resources.settings_daemon_mode
 import kai.composeapp.generated.resources.settings_daemon_mode_description
 import kai.composeapp.generated.resources.settings_dynamic_ui
@@ -317,7 +327,7 @@ private fun PttTriggerSection(
                     color = MaterialTheme.colorScheme.primary,
                 )
                 OutlinedButton(onClick = onClear) {
-                    Text("Clear")
+                    Text(stringResource(Res.string.general_settings_clear))
                 }
             }
         } else {
@@ -334,7 +344,7 @@ private fun PttTriggerSection(
             modifier = Modifier.fillMaxWidth(),
         ) {
             if (isCapturing) {
-                Text("Press a button on your device...")
+                Text(stringResource(Res.string.general_settings_press_button))
             } else {
                 Text(if (pttTriggerKeyCode != 0) "Change button" else "Capture button")
             }
@@ -446,7 +456,7 @@ private fun TtsSettingsSection(onOpenTtsSettings: () -> Unit) {
         OutlinedButton(
             onClick = onOpenTtsSettings,
         ) {
-            Text("Open TTS Settings")
+            Text(stringResource(Res.string.general_settings_open_tts))
         }
     }
 }
@@ -474,8 +484,8 @@ private fun FloatingBallToggle(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ToggleableHeadline(
-            title = "Floating Assistant",
-            description = "Show a draggable floating ball overlay for quick access. Requires Accessibility Service for screen reading and Shizuku for best results.",
+            title = stringResource(Res.string.settings_floating_ball),
+            description = stringResource(Res.string.general_settings_floating_ball_description),
             checked = isFloatingBallEnabled,
             onCheckedChange = onToggleFloatingBall,
             actions = {
@@ -704,7 +714,7 @@ private fun WakeWordSection(
                 modifier = Modifier.fillMaxWidth(),
                 value = wakeWordPhrase,
                 onValueChange = onChangeWakeWordPhrase,
-                label = { Text("Wake word phrase") },
+                label = { Text(stringResource(Res.string.general_settings_wake_word_phrase)) },
                 singleLine = true,
             )
             Spacer(Modifier.height(8.dp))
@@ -756,7 +766,7 @@ private fun WakeWordSection(
                                     strokeWidth = 2.dp,
                                 )
                             } else {
-                                Text("Re-enroll")
+                                Text(stringResource(Res.string.general_settings_reenroll))
                             }
                         }
                     }
@@ -772,7 +782,7 @@ private fun WakeWordSection(
                                 strokeWidth = 2.dp,
                             )
                         } else {
-                            Text("Enroll your voice")
+                            Text(stringResource(Res.string.general_settings_enroll_voice))
                         }
                     }
                 }
@@ -857,7 +867,7 @@ private fun DebugApiSection(
         if (showAdvanced.value) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 ToggleableHeadline(
-                    title = "Debug API Server",
+                    title = stringResource(Res.string.general_settings_debug_api),
                     description = if (debugApiRunning) {
                         "Running on 127.0.0.1:18500"
                     } else if (debugApiTransitioning) {
@@ -879,7 +889,7 @@ private fun DebugApiSection(
                 }
                 if (isDebugBuild && onToggleDebugEndpoint != null) {
                     ToggleableHeadline(
-                        title = "Debug Endpoint",
+                        title = stringResource(Res.string.general_settings_debug_endpoint),
                         description = if (isDebugEndpointEnabled) "Enabled" else "Debug-only endpoint",
                         checked = isDebugEndpointEnabled,
                         onCheckedChange = onToggleDebugEndpoint,

@@ -16,6 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.edit_message_cancel
+import kai.composeapp.generated.resources.edit_message_fork_warning
+import kai.composeapp.generated.resources.edit_message_save_fork
+import kai.composeapp.generated.resources.edit_message_title
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun EditMessageDialog(
@@ -27,11 +33,11 @@ fun EditMessageDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Message") },
+        title = { Text(stringResource(Res.string.edit_message_title)) },
         text = {
             Column {
                 Text(
-                    text = "Editing this message will fork the conversation. The previous conversation will be saved and stored in memory.",
+                    text = stringResource(Res.string.edit_message_fork_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -50,12 +56,12 @@ fun EditMessageDialog(
                 onClick = { onSave(editedContent.trim()) },
                 enabled = editedContent.isNotBlank(),
             ) {
-                Text("Save & Fork")
+                Text(stringResource(Res.string.edit_message_save_fork))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(Res.string.edit_message_cancel))
             }
         },
     )

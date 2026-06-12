@@ -51,7 +51,10 @@ import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.markdown.MarkdownContent
 import com.kai.custom.ui.markdown.parseMarkdown
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.bot_message_cancel_edit
 import kai.composeapp.generated.resources.bot_message_copy_content_description
+import kai.composeapp.generated.resources.bot_message_edit_submission
+import kai.composeapp.generated.resources.bot_message_fork_conversation
 import kai.composeapp.generated.resources.bot_message_regenerate_content_description
 import kai.composeapp.generated.resources.bot_message_speech_content_description
 import kai.composeapp.generated.resources.bot_message_thinking_expand_content_description
@@ -140,7 +143,7 @@ internal fun BotMessage(
             ) {
                 Icon(
                     imageVector = if (isEditing) Icons.Default.Close else Icons.Default.Edit,
-                    contentDescription = if (isEditing) "Cancel edit" else "Edit submission",
+                    contentDescription = if (isEditing) stringResource(Res.string.bot_message_cancel_edit) else stringResource(Res.string.bot_message_edit_submission),
                     modifier = Modifier.size(16.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -186,7 +189,7 @@ internal fun BotMessage(
         if (onFork != null) {
             SmallIconButton(
                 imageVector = Icons.AutoMirrored.Filled.CallSplit,
-                contentDescription = "Fork conversation",
+                contentDescription = stringResource(Res.string.bot_message_fork_conversation),
                 modifier = Modifier.rotate(180f),
                 onClick = onFork,
             )

@@ -35,7 +35,17 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillRegistry
 import com.kai.custom.ui.handCursor
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.clawhub_browse_button
+import kai.composeapp.generated.resources.clawhub_description
+import kai.composeapp.generated.resources.clawhub_install_button
+import kai.composeapp.generated.resources.clawhub_install_failed
+import kai.composeapp.generated.resources.clawhub_installed
+import kai.composeapp.generated.resources.clawhub_installing
+import kai.composeapp.generated.resources.clawhub_search_placeholder
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun ClawHubSearchSection(
@@ -88,7 +98,7 @@ internal fun ClawHubSearchSection(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Browse and install community skills from ClawHub (clawhub.ai)",
+            text = stringResource(Res.string.clawhub_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -100,7 +110,7 @@ internal fun ClawHubSearchSection(
                 onClick = { isExpanded = true },
                 modifier = Modifier.handCursor(),
             ) {
-                Text("Browse ClawHub Skills")
+                Text(stringResource(Res.string.clawhub_browse_button))
             }
         }
 
@@ -109,7 +119,7 @@ internal fun ClawHubSearchSection(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search skills...") },
+                    placeholder = { Text(stringResource(Res.string.clawhub_search_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
@@ -146,13 +156,13 @@ internal fun ClawHubSearchSection(
                                 val slug = entry.slug ?: entry.id
                                 installingSlug = slug
                                 val label = entry.displayName.ifBlank { entry.id }
-                                statusMessage = "Installing $label..."
+                                statusMessage = getString(Res.string.clawhub_installing, label)
                                 errorMessage = null
                                 val result = dataRepository.installSkillFromClawHub(slug)
                                 result.onSuccess {
-                                    statusMessage = "Installed $label"
+                                    statusMessage = getString(Res.string.clawhub_installed, label)
                                 }.onFailure { e ->
-                                    errorMessage = e.message ?: "Install failed"
+                                    errorMessage = e.message ?: getString(Res.string.clawhub_install_failed)
                                     statusMessage = null
                                 }
                                 installingSlug = null
@@ -226,7 +236,7 @@ private fun ClawHubSkillRow(
                     onClick = onInstall,
                     modifier = Modifier.handCursor(),
                 ) {
-                    Text("Install")
+                    Text(stringResource(Res.string.clawhub_install_button))
                 }
             }
         }

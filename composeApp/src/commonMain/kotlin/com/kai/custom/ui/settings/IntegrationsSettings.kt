@@ -60,11 +60,70 @@ import com.kai.custom.listCalendarAccounts
 import com.kai.custom.ui.handCursor
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.integrations_calendar_auto
+import kai.composeapp.generated.resources.integrations_calendar_description
+import kai.composeapp.generated.resources.integrations_calendar_label
+import kai.composeapp.generated.resources.integrations_calendar_title
+import kai.composeapp.generated.resources.integrations_telegram_authorized_ids
+import kai.composeapp.generated.resources.integrations_telegram_authorized_ids_hint
+import kai.composeapp.generated.resources.integrations_telegram_bot_token
+import kai.composeapp.generated.resources.integrations_telegram_bot_token_hint
+import kai.composeapp.generated.resources.integrations_telegram_description
+import kai.composeapp.generated.resources.integrations_telegram_experimental
+import kai.composeapp.generated.resources.integrations_telegram_experimental_warning
+import kai.composeapp.generated.resources.integrations_telegram_hide
+import kai.composeapp.generated.resources.integrations_telegram_ids_placeholder
+import kai.composeapp.generated.resources.integrations_telegram_ids_saved
+import kai.composeapp.generated.resources.integrations_telegram_last_error
+import kai.composeapp.generated.resources.integrations_telegram_polled
+import kai.composeapp.generated.resources.integrations_telegram_save
+import kai.composeapp.generated.resources.integrations_telegram_show
+import kai.composeapp.generated.resources.integrations_telegram_test_connection
+import kai.composeapp.generated.resources.integrations_telegram_title
+import kai.composeapp.generated.resources.integrations_telegram_token_placeholder
+import kai.composeapp.generated.resources.integrations_telegram_token_saved
+import kai.composeapp.generated.resources.integrations_whatsapp_allowed_contacts
+import kai.composeapp.generated.resources.integrations_whatsapp_bridge_reset_done
+import kai.composeapp.generated.resources.integrations_whatsapp_bridge_running
+import kai.composeapp.generated.resources.integrations_whatsapp_bridge_status
+import kai.composeapp.generated.resources.integrations_whatsapp_bridge_stopped
+import kai.composeapp.generated.resources.integrations_whatsapp_connected
+import kai.composeapp.generated.resources.integrations_whatsapp_description
+import kai.composeapp.generated.resources.integrations_whatsapp_experimental
+import kai.composeapp.generated.resources.integrations_whatsapp_experimental_warning
+import kai.composeapp.generated.resources.integrations_whatsapp_forcing_qr
+import kai.composeapp.generated.resources.integrations_whatsapp_install
+import kai.composeapp.generated.resources.integrations_whatsapp_install_failed
+import kai.composeapp.generated.resources.integrations_whatsapp_installed
+import kai.composeapp.generated.resources.integrations_whatsapp_option_1
+import kai.composeapp.generated.resources.integrations_whatsapp_option_2
+import kai.composeapp.generated.resources.integrations_whatsapp_pairing_code_generated
+import kai.composeapp.generated.resources.integrations_whatsapp_pairing_failed
+import kai.composeapp.generated.resources.integrations_whatsapp_pairing_instructions
+import kai.composeapp.generated.resources.integrations_whatsapp_phone_label
+import kai.composeapp.generated.resources.integrations_whatsapp_phone_placeholder
+import kai.composeapp.generated.resources.integrations_whatsapp_qr_description
+import kai.composeapp.generated.resources.integrations_whatsapp_qr_refreshed
+import kai.composeapp.generated.resources.integrations_whatsapp_read_only
+import kai.composeapp.generated.resources.integrations_whatsapp_read_receipts
+import kai.composeapp.generated.resources.integrations_whatsapp_refresh_qr
+import kai.composeapp.generated.resources.integrations_whatsapp_reply_mode
+import kai.composeapp.generated.resources.integrations_whatsapp_reply_mode_all
+import kai.composeapp.generated.resources.integrations_whatsapp_reply_mode_selected
+import kai.composeapp.generated.resources.integrations_whatsapp_reply_mode_self
+import kai.composeapp.generated.resources.integrations_whatsapp_request_code
+import kai.composeapp.generated.resources.integrations_whatsapp_requesting
+import kai.composeapp.generated.resources.integrations_whatsapp_requires_sandbox
+import kai.composeapp.generated.resources.integrations_whatsapp_reset_bridge
+import kai.composeapp.generated.resources.integrations_whatsapp_resetting
+import kai.composeapp.generated.resources.integrations_whatsapp_sync_history
+import kai.composeapp.generated.resources.integrations_whatsapp_title
 import kai.composeapp.generated.resources.settings_open_github_issue
 import kai.composeapp.generated.resources.settings_request_integration_description
 import kai.composeapp.generated.resources.settings_request_integration_title
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -160,13 +219,13 @@ private fun CalendarSection(dataRepository: DataRepository) {
     }
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Default Calendar",
+            text = stringResource(Res.string.integrations_calendar_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Select which calendar the AI uses for creating events. Defaults to the primary calendar.",
+            text = stringResource(Res.string.integrations_calendar_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -183,9 +242,9 @@ private fun CalendarSection(dataRepository: DataRepository) {
                 ) {
                     Text(
                         text = if (selectedId > 0) {
-                            accounts.find { it.id == selectedId }?.displayName ?: "Calendar $selectedId"
+                            accounts.find { it.id == selectedId }?.displayName ?: stringResource(Res.string.integrations_calendar_label, selectedId)
                         } else {
-                            "Auto (primary calendar)"
+                            stringResource(Res.string.integrations_calendar_auto)
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f),
@@ -201,7 +260,7 @@ private fun CalendarSection(dataRepository: DataRepository) {
                 onDismissRequest = { expanded = false },
             ) {
                 DropdownMenuItem(
-                    text = { Text("Auto (primary calendar)") },
+                    text = { Text(stringResource(Res.string.integrations_calendar_auto)) },
                     onClick = {
                         selectedId = -1L
                         dataRepository.setDefaultCalendarId(-1L)
@@ -237,8 +296,8 @@ private fun WhatsAppSection(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ToggleableHeadline(
-            title = "WhatsApp",
-            description = "Talk to the AI via WhatsApp",
+            title = stringResource(Res.string.integrations_whatsapp_title),
+            description = stringResource(Res.string.integrations_whatsapp_description),
             checked = isEnabled,
             onCheckedChange = {
                 isEnabled = it
@@ -259,21 +318,21 @@ private fun WhatsAppSection(
                     color = MaterialTheme.colorScheme.tertiaryContainer,
                 ) {
                     Text(
-                        text = "Experimental",
+                        text = stringResource(Res.string.integrations_whatsapp_experimental),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }
-            },
+            }
         )
 
         if (isEnabled) {
-            Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(8.dp))
 
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp),
@@ -287,7 +346,7 @@ private fun WhatsAppSection(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "This feature is experimental and may not work reliably.",
+                        text = stringResource(Res.string.integrations_whatsapp_experimental_warning),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -312,7 +371,7 @@ private fun WhatsAppSection(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Requires sandbox — enable the sandbox first in System Settings.",
+                            text = stringResource(Res.string.integrations_whatsapp_requires_sandbox),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -380,46 +439,49 @@ private fun WhatsAppSection(
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(Modifier.width(6.dp))
+                    val bridgeStatusText = if (bridgeRunning) stringResource(Res.string.integrations_whatsapp_bridge_running) else stringResource(Res.string.integrations_whatsapp_bridge_stopped)
                     Text(
-                        text = "Bridge: ${if (bridgeRunning) "Running" else "Stopped"}",
+                        text = stringResource(Res.string.integrations_whatsapp_bridge_status, bridgeStatusText),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Button(
-                    onClick = {
-                        scope.launch {
-                            statusMessage = "Resetting..."
-                            whatsAppLifecycleManager.resetBridge()
-                            statusMessage = "Bridge reset done"
-                        }
-                    },
-                    modifier = Modifier.handCursor().height(28.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                ) {
-                    Text("Reset Bridge", style = MaterialTheme.typography.labelSmall)
-                }
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                statusMessage = getString(Res.string.integrations_whatsapp_resetting)
+                                whatsAppLifecycleManager.resetBridge()
+                                statusMessage = getString(Res.string.integrations_whatsapp_bridge_reset_done)
+                            }
+                        },
+                        modifier = Modifier.handCursor().height(28.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                    ) {
+                        Text(stringResource(Res.string.integrations_whatsapp_reset_bridge), style = MaterialTheme.typography.labelSmall)
+                    }
             }
             Spacer(Modifier.height(8.dp))
 
             // Install / Pairing Code / QR / Connected
             if (!dataRepository.isWhatsAppInstalled() && !whatsAppLifecycleManager.isConnected()) {
+                val installedStr = stringResource(Res.string.integrations_whatsapp_installed)
+                val installFailedStr = stringResource(Res.string.integrations_whatsapp_install_failed)
                 Button(
                     onClick = {
                         scope.launch {
                             val installed = sandboxController.installWhatsAppBridge()
                             if (installed) {
                                 dataRepository.setWhatsAppInstalled(true)
-                                statusMessage = "Installed"
+                                statusMessage = installedStr
                                 whatsAppLifecycleManager.setupAndStart()
                             } else {
-                                statusMessage = "Install failed"
+                                statusMessage = installFailedStr
                             }
                         }
                     },
                     modifier = Modifier.handCursor(),
                 ) {
-                    Text("Install")
+                    Text(stringResource(Res.string.integrations_whatsapp_install))
                 }
             } else if (!dataRepository.isWhatsAppAuthenticated()) {
                 // Pairing code section
@@ -428,7 +490,7 @@ private fun WhatsAppSection(
                 var pairingLoading by remember { mutableStateOf(false) }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Option 1: Enter phone number for pairing code (easier):",
+                    text = stringResource(Res.string.integrations_whatsapp_option_1),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -440,14 +502,18 @@ private fun WhatsAppSection(
                     OutlinedTextField(
                         value = phoneNumber,
                         onValueChange = { phoneNumber = it },
-                        placeholder = { Text("e.g. 628123456789") },
-                        label = { Text("Phone number") },
+                        placeholder = { Text(stringResource(Res.string.integrations_whatsapp_phone_placeholder)) },
+                        label = { Text(stringResource(Res.string.integrations_whatsapp_phone_label)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                         modifier = Modifier.weight(1f).handCursor(),
                         enabled = !pairingLoading,
                     )
                     Spacer(Modifier.width(8.dp))
+                    val pairingGeneratedStr = stringResource(Res.string.integrations_whatsapp_pairing_code_generated)
+                    val pairingFailedStr = stringResource(Res.string.integrations_whatsapp_pairing_failed)
+                    val requestingStr = stringResource(Res.string.integrations_whatsapp_requesting)
+                    val requestCodeStr = stringResource(Res.string.integrations_whatsapp_request_code)
                     Button(
                         onClick = {
                             scope.launch {
@@ -456,9 +522,9 @@ private fun WhatsAppSection(
                                 val code = whatsAppLifecycleManager.requestPairingCode(phoneNumber.trim())
                                 if (!code.isNullOrBlank()) {
                                     pairingCode = code
-                                    statusMessage = "Pairing code generated"
+                                    statusMessage = pairingGeneratedStr
                                 } else {
-                                    statusMessage = "Failed — bridge may not be connected yet. Try Reset Bridge first."
+                                    statusMessage = pairingFailedStr
                                 }
                                 pairingLoading = false
                             }
@@ -466,7 +532,7 @@ private fun WhatsAppSection(
                         modifier = Modifier.handCursor(),
                         enabled = phoneNumber.isNotBlank() && !pairingLoading,
                     ) {
-                        Text(if (pairingLoading) "Requesting..." else "Request Code")
+                        Text(if (pairingLoading) requestingStr else requestCodeStr)
                     }
                 }
                 if (pairingCode.isNotBlank()) {
@@ -477,7 +543,7 @@ private fun WhatsAppSection(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "Enter this code in WhatsApp → Linked Devices → Link a Device:",
+                                text = stringResource(Res.string.integrations_whatsapp_pairing_instructions),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                             )
@@ -492,7 +558,7 @@ private fun WhatsAppSection(
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = "Option 2: Scan QR code with WhatsApp on your phone:",
+                    text = stringResource(Res.string.integrations_whatsapp_option_2),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -509,7 +575,7 @@ private fun WhatsAppSection(
                     if (qrBitmap != null) {
                         Image(
                             bitmap = qrBitmap,
-                            contentDescription = "WhatsApp QR code",
+                            contentDescription = stringResource(Res.string.integrations_whatsapp_qr_description),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(280.dp)
@@ -520,18 +586,20 @@ private fun WhatsAppSection(
                     }
                 }
                 Spacer(Modifier.height(8.dp))
+                val forcingQrStr = stringResource(Res.string.integrations_whatsapp_forcing_qr)
+                val qrRefreshedStr = stringResource(Res.string.integrations_whatsapp_qr_refreshed)
                 OutlinedButton(
                     onClick = {
                         qrUrgent = true
                         scope.launch {
-                            statusMessage = "Forcing new QR..."
+                            statusMessage = forcingQrStr
                             whatsAppLifecycleManager.forceRefreshQr()
-                            statusMessage = "QR refreshed"
+                            statusMessage = qrRefreshedStr
                         }
                     },
                     modifier = Modifier.handCursor(),
                 ) {
-                    Text("Refresh QR")
+                    Text(stringResource(Res.string.integrations_whatsapp_refresh_qr))
                 }
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -543,7 +611,7 @@ private fun WhatsAppSection(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "Connected",
+                        text = stringResource(Res.string.integrations_whatsapp_connected),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
@@ -560,7 +628,7 @@ private fun WhatsAppSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Send read receipts (blue ticks)",
+                    text = stringResource(Res.string.integrations_whatsapp_read_receipts),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -583,7 +651,7 @@ private fun WhatsAppSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Sync full history",
+                    text = stringResource(Res.string.integrations_whatsapp_sync_history),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -605,7 +673,7 @@ private fun WhatsAppSection(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Read only (AI reads but does not reply)",
+                    text = stringResource(Res.string.integrations_whatsapp_read_only),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -622,12 +690,16 @@ private fun WhatsAppSection(
                 Spacer(Modifier.height(8.dp))
 
                 // Reply mode selector
-                val replyModes = listOf("all" to "Reply to all", "self" to "Reply to my messages only", "selected" to "Reply to selected contacts")
+                val replyModes = listOf(
+                    "all" to stringResource(Res.string.integrations_whatsapp_reply_mode_all),
+                    "self" to stringResource(Res.string.integrations_whatsapp_reply_mode_self),
+                    "selected" to stringResource(Res.string.integrations_whatsapp_reply_mode_selected),
+                )
                 var replyMode by remember { mutableStateOf(dataRepository.getWhatsAppReplyMode()) }
                 var expanded by remember { mutableStateOf(false) }
 
                 Text(
-                    text = "Reply mode",
+                    text = stringResource(Res.string.integrations_whatsapp_reply_mode),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -680,7 +752,7 @@ private fun WhatsAppSection(
                             contacts = it
                             dataRepository.setWhatsAppAllowedContacts(it)
                         },
-                        label = { Text("Allowed contacts (comma-separated phone numbers)") },
+                        label = { Text(stringResource(Res.string.integrations_whatsapp_allowed_contacts)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                     )
@@ -711,8 +783,8 @@ private fun TelegramSection(dataRepository: DataRepository) {
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ToggleableHeadline(
-            title = "Telegram Bot",
-            description = "Talk to the AI via Telegram",
+            title = stringResource(Res.string.integrations_telegram_title),
+            description = stringResource(Res.string.integrations_telegram_description),
             checked = isEnabled,
             onCheckedChange = {
                 isEnabled = it
@@ -724,13 +796,13 @@ private fun TelegramSection(dataRepository: DataRepository) {
                     color = MaterialTheme.colorScheme.tertiaryContainer,
                 ) {
                     Text(
-                        text = "Experimental",
+                        text = stringResource(Res.string.integrations_telegram_experimental),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }
-            },
+            }
         )
 
         if (isEnabled) {
@@ -751,7 +823,7 @@ private fun TelegramSection(dataRepository: DataRepository) {
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "This feature is experimental and may not work reliably.",
+                        text = stringResource(Res.string.integrations_telegram_experimental_warning),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -761,95 +833,97 @@ private fun TelegramSection(dataRepository: DataRepository) {
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Bot Token",
+                text = stringResource(Res.string.integrations_telegram_bot_token),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = "Get one from @BotFather on Telegram — create a bot and copy the HTTP API token",
+                text = stringResource(Res.string.integrations_telegram_bot_token_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            val tokenSavedStr = stringResource(Res.string.integrations_telegram_token_saved)
             Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 value = botToken,
                 onValueChange = { botToken = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11") },
+                placeholder = { Text(stringResource(Res.string.integrations_telegram_token_placeholder)) },
                 singleLine = true,
                 visualTransformation = if (showToken) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = {
                     dataRepository.setTelegramBotToken(botToken)
-                    statusMessage = "Token saved"
+                    statusMessage = tokenSavedStr
                 }),
             )
-
             Row {
                 OutlinedButton(
                     onClick = { showToken = !showToken },
                 ) {
-                    Text(if (showToken) "Hide" else "Show")
+                    Text(if (showToken) stringResource(Res.string.integrations_telegram_hide) else stringResource(Res.string.integrations_telegram_show))
                 }
                 Spacer(Modifier.width(8.dp))
                 OutlinedButton(
                     onClick = {
                         dataRepository.setTelegramBotToken(botToken)
-                        statusMessage = "Token saved"
+                        statusMessage = tokenSavedStr
                     },
                 ) {
-                    Text("Save")
+                    Text(stringResource(Res.string.integrations_telegram_save))
                 }
             }
 
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Authorized Chat IDs",
+                text = stringResource(Res.string.integrations_telegram_authorized_ids),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = "Comma-separated Telegram user IDs allowed to talk to this bot. Leave empty to allow all (not recommended). Find your ID by messaging @userinfobot on Telegram.",
+                text = stringResource(Res.string.integrations_telegram_authorized_ids_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            val idsSavedStr = stringResource(Res.string.integrations_telegram_ids_saved)
             Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 value = authorizedIds,
                 onValueChange = { authorizedIds = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("123456789, 987654321") },
+                placeholder = { Text(stringResource(Res.string.integrations_telegram_ids_placeholder)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = {
                     val ids = authorizedIds.split(",").mapNotNull { it.trim().toLongOrNull() }.toSet()
                     dataRepository.setTelegramAuthorizedChatIds(ids)
-                    statusMessage = "Authorized IDs saved"
+                    statusMessage = idsSavedStr
                 }),
             )
             OutlinedButton(
                 onClick = {
                     val ids = authorizedIds.split(",").mapNotNull { it.trim().toLongOrNull() }.toSet()
                     dataRepository.setTelegramAuthorizedChatIds(ids)
-                    statusMessage = "Authorized IDs saved"
+                    statusMessage = idsSavedStr
                 },
             ) {
-                Text("Save")
+                Text(stringResource(Res.string.integrations_telegram_save))
             }
 
             Spacer(Modifier.height(12.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+                val polledStr = stringResource(Res.string.integrations_telegram_polled)
                 OutlinedButton(
                     onClick = {
                         scope.launch {
                             dataRepository.pollTelegram()
-                            statusMessage = "Polled"
+                            statusMessage = polledStr
                         }
                     },
                 ) {
-                    Text("Test Connection")
+                    Text(stringResource(Res.string.integrations_telegram_test_connection))
                 }
                 Spacer(Modifier.width(8.dp))
                 if (statusMessage.isNotEmpty()) {
@@ -864,7 +938,7 @@ private fun TelegramSection(dataRepository: DataRepository) {
             if (syncState.value.lastError != null) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Last error: ${syncState.value.lastError}",
+                    text = stringResource(Res.string.integrations_telegram_last_error, syncState.value.lastError.orEmpty()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )

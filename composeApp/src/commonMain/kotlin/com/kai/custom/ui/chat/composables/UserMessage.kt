@@ -36,9 +36,11 @@ import com.kai.custom.ui.components.LocalShowFullScreenImage
 import com.kai.custom.ui.handCursor
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.ic_file
+import kai.composeapp.generated.resources.user_message_edit
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -127,7 +129,7 @@ internal fun UserMessage(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit message",
+                        contentDescription = stringResource(Res.string.user_message_edit),
                         tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                         modifier = Modifier.size(18.dp),
                     )

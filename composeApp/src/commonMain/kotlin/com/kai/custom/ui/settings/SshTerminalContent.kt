@@ -68,8 +68,20 @@ import com.kai.custom.isBatteryOptimizationDisabled
 import com.kai.custom.openBatteryOptimizationSettings
 import com.kai.custom.ui.handCursor
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.ssh_connect
+import kai.composeapp.generated.resources.ssh_connecting
+import kai.composeapp.generated.resources.ssh_profile_none
+import kai.composeapp.generated.resources.ssh_profile_saved
+import kai.composeapp.generated.resources.ssh_profile_select_placeholder
+import kai.composeapp.generated.resources.ssh_retry
+import kai.composeapp.generated.resources.ssh_terminal_add_server
+import kai.composeapp.generated.resources.ssh_terminal_battery_settings
+import kai.composeapp.generated.resources.ssh_terminal_battery_warning
+import kai.composeapp.generated.resources.ssh_terminal_connect_description
 import kai.composeapp.generated.resources.ssh_terminal_help_text
 import kai.composeapp.generated.resources.ssh_terminal_input_placeholder
+import kai.composeapp.generated.resources.ssh_terminal_no_servers
+import kai.composeapp.generated.resources.ssh_terminal_saved_servers
 import kai.composeapp.generated.resources.ssh_terminal_title
 import kai.composeapp.generated.resources.terminal_run_content_description
 import org.jetbrains.compose.resources.stringResource
@@ -273,13 +285,13 @@ private fun DisconnectedSshContent(
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Text(
-            text = "SSH Terminal",
+            text = stringResource(Res.string.ssh_terminal_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Connect to a remote server to execute commands",
+            text = stringResource(Res.string.ssh_terminal_connect_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -287,7 +299,7 @@ private fun DisconnectedSshContent(
 
         if (state.profiles.isNotEmpty()) {
             Text(
-                text = "Saved Servers",
+                text = stringResource(Res.string.ssh_terminal_saved_servers),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -329,11 +341,11 @@ private fun DisconnectedSshContent(
                         ) {
                             Text(
                                 if (isActive && conn.connecting) {
-                                    "Connecting..."
+                                    stringResource(Res.string.ssh_connecting)
                                 } else if (isActive && conn.error != null) {
-                                    "Retry"
+                                    stringResource(Res.string.ssh_retry)
                                 } else {
-                                    "Connect"
+                                    stringResource(Res.string.ssh_connect)
                                 },
                             )
                         }
@@ -359,7 +371,7 @@ private fun DisconnectedSshContent(
 
         if (state.profiles.isEmpty()) {
             Text(
-                text = "No saved servers. Add one in Settings.",
+                text = stringResource(Res.string.ssh_terminal_no_servers),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -371,14 +383,14 @@ private fun DisconnectedSshContent(
                 onClick = onOpenSettings,
                 modifier = Modifier.fillMaxWidth().handCursor(),
             ) {
-                Text("Add Server")
+                Text(stringResource(Res.string.ssh_terminal_add_server))
             }
             Spacer(Modifier.height(12.dp))
         }
 
         if (!batteryOk) {
             Text(
-                text = "SSH connections may disconnect if battery optimization is enabled.",
+                text = stringResource(Res.string.ssh_terminal_battery_warning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -386,7 +398,7 @@ private fun DisconnectedSshContent(
                 onClick = { openBatteryOptimizationSettings() },
                 modifier = Modifier.handCursor(),
             ) {
-                Text("Battery Optimization Settings", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(Res.string.ssh_terminal_battery_settings), style = MaterialTheme.typography.bodySmall)
             }
 
             if (onOpenSettings != null) {
@@ -407,10 +419,10 @@ private fun TerminalProfileSelector(
     onSelectProfile: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val activeLabel = if (activeProfileName.isNotBlank()) activeProfileName else "Select profile..."
+    val activeLabel = if (activeProfileName.isNotBlank()) activeProfileName else stringResource(Res.string.ssh_profile_select_placeholder)
     Column {
         Text(
-            text = "Saved Profiles",
+            text = stringResource(Res.string.ssh_profile_saved),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -429,7 +441,7 @@ private fun TerminalProfileSelector(
             ) {
                 if (activeProfileName.isNotBlank()) {
                     DropdownMenuItem(
-                        text = { Text("None (manual entry)") },
+                        text = { Text(stringResource(Res.string.ssh_profile_none)) },
                         onClick = {
                             onSelectProfile("")
                             expanded = false

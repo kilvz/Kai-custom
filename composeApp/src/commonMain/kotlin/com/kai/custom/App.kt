@@ -203,11 +203,17 @@ private fun AppContent(
     val sandboxController = koinInject<SandboxController>()
     val sandboxAwareUriHandler = rememberSandboxAwareUriHandler(sandboxController)
 
+    val preferredLanguage by appSettings.preferredLanguageFlow.collectAsStateWithLifecycle()
+    LaunchedEffect(preferredLanguage) {
+        customAppLocale = preferredLanguage
+    }
+
     CompositionLocalProvider(
         LocalDensity provides scaledDensity,
         LocalUriHandler provides sandboxAwareUriHandler,
     ) {
-        Theme(colorScheme = effectiveColorScheme) {
+        AppEnvironment {
+            Theme(colorScheme = effectiveColorScheme) {
             FullScreenImageHost {
                 val chatViewModel: ChatViewModel = koinViewModel()
                 val showTabBar = currentPlatform !is Platform.Mobile
@@ -287,3 +293,5 @@ private fun AppContent(
         }
     }
 }
+}
+

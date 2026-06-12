@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
+import com.kai.custom.shared.R
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
@@ -167,8 +168,8 @@ class FloatingBallService : Service() {
         )
 
         return Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("Overlay permission required")
-            .setContentText("Tap to grant overlay permission for the floating assistant")
+            .setContentTitle(getString(R.string.floating_overlay_title))
+            .setContentText(getString(R.string.floating_overlay_text))
             .setSmallIcon(android.R.drawable.ic_popup_sync)
             .setContentIntent(settingsPendingIntent)
             .setOngoing(true)
@@ -197,8 +198,8 @@ class FloatingBallService : Service() {
         )
 
         return Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("Kai Floating Assistant")
-            .setContentText("Tap to open Kai")
+            .setContentTitle(getString(R.string.floating_assistant_title))
+            .setContentText(getString(R.string.floating_open_text))
             .setSmallIcon(android.R.drawable.ic_popup_sync)
             .setContentIntent(launchPendingIntent)
             .addAction(

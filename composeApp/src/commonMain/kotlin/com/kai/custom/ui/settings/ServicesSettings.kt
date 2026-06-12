@@ -123,6 +123,43 @@ import kai.composeapp.generated.resources.settings_status_error_connection_faile
 import kai.composeapp.generated.resources.settings_status_error_invalid_key
 import kai.composeapp.generated.resources.settings_status_error_quota_exhausted
 import kai.composeapp.generated.resources.settings_status_error_rate_limited
+import kai.composeapp.generated.resources.services_model_advanced
+import kai.composeapp.generated.resources.services_model_default
+import kai.composeapp.generated.resources.services_model_external
+import kai.composeapp.generated.resources.services_model_full_prompt
+import kai.composeapp.generated.resources.services_model_full_prompt_description
+import kai.composeapp.generated.resources.services_model_gpu_layers
+import kai.composeapp.generated.resources.services_model_gpu_layers_default
+import kai.composeapp.generated.resources.services_model_gpu_layers_description
+import kai.composeapp.generated.resources.services_model_gpu_layers_max
+import kai.composeapp.generated.resources.services_model_gpu_layers_min
+import kai.composeapp.generated.resources.services_model_import_failed
+import kai.composeapp.generated.resources.services_model_import_model_file
+import kai.composeapp.generated.resources.services_model_imported_description_external
+import kai.composeapp.generated.resources.services_model_imported_description_local
+import kai.composeapp.generated.resources.services_model_imported_name
+import kai.composeapp.generated.resources.services_model_imported_section
+import kai.composeapp.generated.resources.services_model_max_output_tokens
+import kai.composeapp.generated.resources.services_model_max_output_tokens_description
+import kai.composeapp.generated.resources.services_model_style_instruction
+import kai.composeapp.generated.resources.services_model_style_instruction_description
+import kai.composeapp.generated.resources.services_model_style_instruction_reset
+import kai.composeapp.generated.resources.services_model_temperature
+import kai.composeapp.generated.resources.services_model_temperature_default
+import kai.composeapp.generated.resources.services_model_temperature_description
+import kai.composeapp.generated.resources.services_model_temperature_max
+import kai.composeapp.generated.resources.services_model_temperature_min
+import kai.composeapp.generated.resources.services_model_top_k
+import kai.composeapp.generated.resources.services_model_top_k_default
+import kai.composeapp.generated.resources.services_model_top_k_description
+import kai.composeapp.generated.resources.services_model_top_k_max
+import kai.composeapp.generated.resources.services_model_top_k_min
+import kai.composeapp.generated.resources.services_model_top_p
+import kai.composeapp.generated.resources.services_model_top_p_default
+import kai.composeapp.generated.resources.services_model_top_p_description
+import kai.composeapp.generated.resources.services_model_top_p_max
+import kai.composeapp.generated.resources.services_model_top_p_min
+import kai.composeapp.generated.resources.services_model_uncensored
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -379,7 +416,7 @@ private fun TopKSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Top-K",
+                text = stringResource(Res.string.services_model_top_k),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -403,24 +440,24 @@ private fun TopKSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "1 — Focused",
+                text = stringResource(Res.string.services_model_top_k_min),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Default: 40",
+                text = stringResource(Res.string.services_model_top_k_default),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "100 — Diverse",
+                text = stringResource(Res.string.services_model_top_k_max),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Limits token candidates. Lower = fewer choices, more predictable. Higher = more variety.",
+            text = stringResource(Res.string.services_model_top_k_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -440,7 +477,7 @@ private fun TopPSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Top-P",
+                text = stringResource(Res.string.services_model_top_p),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -464,24 +501,24 @@ private fun TopPSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "0.0 — Precise",
+                text = stringResource(Res.string.services_model_top_p_min),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Default: 0.95",
+                text = stringResource(Res.string.services_model_top_p_default),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "1.0 — Broad",
+                text = stringResource(Res.string.services_model_top_p_max),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Nucleus sampling. Lower = more conservative, higher = more diverse word choices.",
+            text = stringResource(Res.string.services_model_top_p_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -500,12 +537,12 @@ private fun LocalStyleInstructionField(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Local Model Style Instruction",
+                text = stringResource(Res.string.services_model_style_instruction),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             TextButton(onClick = { onValueChange(com.kai.custom.data.AppSettings.DEFAULT_LOCAL_STYLE_INSTRUCTION) }) {
-                Text("Reset", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(Res.string.services_model_style_instruction_reset), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
             }
         }
         Spacer(Modifier.height(4.dp))
@@ -518,7 +555,7 @@ private fun LocalStyleInstructionField(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "This instruction is prepended to the system prompt only when using an on-device model. Use it to override the model's default writing style.",
+            text = stringResource(Res.string.services_model_style_instruction_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -686,7 +723,7 @@ private fun ConfiguredServiceCardContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = if (advancedExpanded) "Advanced ▾" else "Advanced ▸",
+                        text = stringResource(Res.string.services_model_advanced) + if (advancedExpanded) " ▾" else " ▸",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -728,12 +765,12 @@ private fun ConfiguredServiceCardContent(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Full Prompt for Local Models",
+                                    text = stringResource(Res.string.services_model_full_prompt),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onBackground,
                                 )
                                 Text(
-                                    text = "When on, uses the full persona prompt instead of the truncated Identity-only version.",
+                                    text = stringResource(Res.string.services_model_full_prompt_description),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -954,7 +991,7 @@ private fun LiteRTSettings(
             shownUncensoredHeader = true
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Uncensored",
+                text = stringResource(Res.string.services_model_uncensored),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -1083,7 +1120,7 @@ private fun LiteRTSettings(
     if (customModels.isNotEmpty()) {
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "Imported",
+            text = stringResource(Res.string.services_model_imported_section),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1117,14 +1154,14 @@ private fun LiteRTSettings(
                                 if (isExternal) {
                                     Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = "EXTERNAL",
+                                        text = stringResource(Res.string.services_model_external),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
                                 }
                             }
                             Text(
-                                text = model.description ?: if (isExternal) "Referenced in-place (no copy)" else "Copied to device",
+                                text = model.description ?: if (isExternal) stringResource(Res.string.services_model_imported_description_external) else stringResource(Res.string.services_model_imported_description_local),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1238,12 +1275,12 @@ private fun LiteRTSettings(
     OutlinedButton(
         onClick = { importFilePicker() },
         modifier = Modifier.handCursor(),
-    ) { Text("Import Model File (.litertlm / .gguf)") }
+    ) { Text(stringResource(Res.string.services_model_import_model_file)) }
 
     if (importSuccessName != null) {
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Imported: $importSuccessName",
+            text = stringResource(Res.string.services_model_imported_name, importSuccessName.orEmpty()),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -1252,7 +1289,7 @@ private fun LiteRTSettings(
     if (importError) {
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Import failed — check file format and space.",
+            text = stringResource(Res.string.services_model_import_failed),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
@@ -1414,12 +1451,12 @@ private fun MaxTokensSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Max Output Tokens",
+                text = stringResource(Res.string.services_model_max_output_tokens),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = if (sliderValue.roundToInt() <= 512) "Default" else sliderValue.roundToInt().toString(),
+                text = if (sliderValue.roundToInt() <= 512) stringResource(Res.string.services_model_default) else sliderValue.roundToInt().toString(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -1437,7 +1474,7 @@ private fun MaxTokensSlider(
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            text = "Set to 512 for default (provider-specific). Adjust up for longer responses, down for faster responses.",
+            text = stringResource(Res.string.services_model_max_output_tokens_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1457,7 +1494,7 @@ private fun TemperatureSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "Temperature",
+                text = stringResource(Res.string.services_model_temperature),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -1481,24 +1518,24 @@ private fun TemperatureSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "0.0 — Deterministic",
+                text = stringResource(Res.string.services_model_temperature_min),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Default: 0.8",
+                text = stringResource(Res.string.services_model_temperature_default),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "2.0 — Creative",
+                text = stringResource(Res.string.services_model_temperature_max),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Lower values make output more focused and deterministic. Higher values make it more creative and varied.",
+            text = stringResource(Res.string.services_model_temperature_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1519,7 +1556,7 @@ private fun GpuLayersSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "GPU Layers",
+                text = stringResource(Res.string.services_model_gpu_layers),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
@@ -1545,24 +1582,24 @@ private fun GpuLayersSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "0 — CPU only",
+                text = stringResource(Res.string.services_model_gpu_layers_min),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Default: 20",
+                text = stringResource(Res.string.services_model_gpu_layers_default),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = "All — Max speed",
+                text = stringResource(Res.string.services_model_gpu_layers_max),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "Offloads transformer layers to GPU (Vulkan). More layers = faster inference, higher memory use.",
+            text = stringResource(Res.string.services_model_gpu_layers_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

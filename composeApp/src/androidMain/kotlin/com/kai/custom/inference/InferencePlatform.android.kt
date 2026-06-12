@@ -44,7 +44,7 @@ actual fun updateDownloadNotificationProgress(percent: Int) {
         val mgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val n = android.app.Notification.Builder(context, "kai_model_download_channel")
             .setContentTitle(context.getString(com.kai.custom.shared.R.string.app_name))
-            .setContentText("$percent%")
+            .setContentText(context.getString(com.kai.custom.shared.R.string.download_progress_percent, percent))
             .setSmallIcon(android.R.drawable.stat_sys_download)
             .setOngoing(true).setProgress(100, percent, false).build()
         mgr.notify(ModelDownloadService.NOTIFICATION_ID, n)

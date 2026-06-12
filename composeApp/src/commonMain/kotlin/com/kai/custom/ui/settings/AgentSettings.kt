@@ -96,6 +96,75 @@ import kai.composeapp.generated.resources.settings_task_details_schedule
 import kai.composeapp.generated.resources.settings_task_details_scheduled_for
 import kai.composeapp.generated.resources.settings_task_details_status
 import kai.composeapp.generated.resources.settings_task_details_trigger
+import kai.composeapp.generated.resources.agent_settings_active
+import kai.composeapp.generated.resources.agent_settings_alt_memory
+import kai.composeapp.generated.resources.agent_settings_alt_memory_connected
+import kai.composeapp.generated.resources.agent_settings_alt_memory_connecting
+import kai.composeapp.generated.resources.agent_settings_alt_memory_embedder_hint
+import kai.composeapp.generated.resources.agent_settings_alt_memory_needs_sandbox
+import kai.composeapp.generated.resources.agent_settings_alt_memory_not_installed
+import kai.composeapp.generated.resources.agent_settings_alt_memory_vector_desc
+import kai.composeapp.generated.resources.agent_settings_auto_hide_thinking_desc
+import kai.composeapp.generated.resources.agent_settings_backend
+import kai.composeapp.generated.resources.agent_settings_behavior_notes
+import kai.composeapp.generated.resources.agent_settings_behavior_notes_desc
+import kai.composeapp.generated.resources.agent_settings_cancel
+import kai.composeapp.generated.resources.agent_settings_category
+import kai.composeapp.generated.resources.agent_settings_category_assistant
+import kai.composeapp.generated.resources.agent_settings_category_custom
+import kai.composeapp.generated.resources.agent_settings_category_operator
+import kai.composeapp.generated.resources.agent_settings_change
+import kai.composeapp.generated.resources.agent_settings_character_definition
+import kai.composeapp.generated.resources.agent_settings_character_definition_desc_editable
+import kai.composeapp.generated.resources.agent_settings_character_definition_desc_readonly
+import kai.composeapp.generated.resources.agent_settings_character_type
+import kai.composeapp.generated.resources.agent_settings_community
+import kai.composeapp.generated.resources.agent_settings_community_personas
+import kai.composeapp.generated.resources.agent_settings_condensed_active
+import kai.composeapp.generated.resources.agent_settings_create
+import kai.composeapp.generated.resources.agent_settings_create_custom
+import kai.composeapp.generated.resources.agent_settings_create_persona_title
+import kai.composeapp.generated.resources.agent_settings_custom_soul
+import kai.composeapp.generated.resources.agent_settings_custom_soul_desc
+import kai.composeapp.generated.resources.agent_settings_delete
+import kai.composeapp.generated.resources.agent_settings_done
+import kai.composeapp.generated.resources.agent_settings_downloading
+import kai.composeapp.generated.resources.agent_settings_downloading_persona
+import kai.composeapp.generated.resources.agent_settings_embedder
+import kai.composeapp.generated.resources.agent_settings_enter_newline
+import kai.composeapp.generated.resources.agent_settings_enter_sends
+import kai.composeapp.generated.resources.agent_settings_enter_to_send
+import kai.composeapp.generated.resources.agent_settings_expand_thinking
+import kai.composeapp.generated.resources.agent_settings_expand_thinking_desc
+import kai.composeapp.generated.resources.agent_settings_format
+import kai.composeapp.generated.resources.agent_settings_from_repo
+import kai.composeapp.generated.resources.agent_settings_full_profile_active
+import kai.composeapp.generated.resources.agent_settings_full_profile_unavailable
+import kai.composeapp.generated.resources.agent_settings_hide_thinking
+import kai.composeapp.generated.resources.agent_settings_hide_thinking_desc
+import kai.composeapp.generated.resources.agent_settings_import
+import kai.composeapp.generated.resources.agent_settings_import_failed
+import kai.composeapp.generated.resources.agent_settings_imported
+import kai.composeapp.generated.resources.agent_settings_importing_title
+import kai.composeapp.generated.resources.agent_settings_language_style
+import kai.composeapp.generated.resources.agent_settings_load_failed
+import kai.composeapp.generated.resources.agent_settings_loading
+import kai.composeapp.generated.resources.agent_settings_log_fail
+import kai.composeapp.generated.resources.agent_settings_log_ok
+import kai.composeapp.generated.resources.agent_settings_manage
+import kai.composeapp.generated.resources.agent_settings_no_personas
+import kai.composeapp.generated.resources.agent_settings_persona
+import kai.composeapp.generated.resources.agent_settings_persona_added_activated
+import kai.composeapp.generated.resources.agent_settings_persona_name
+import kai.composeapp.generated.resources.agent_settings_reset
+import kai.composeapp.generated.resources.agent_settings_reset_custom_soul_text
+import kai.composeapp.generated.resources.agent_settings_reset_custom_soul_title
+import kai.composeapp.generated.resources.agent_settings_reset_to_empty
+import kai.composeapp.generated.resources.agent_settings_save_character_definition
+import kai.composeapp.generated.resources.agent_settings_save_custom_soul
+import kai.composeapp.generated.resources.agent_settings_select_persona
+import kai.composeapp.generated.resources.agent_settings_switch_condensed
+import kai.composeapp.generated.resources.agent_settings_switch_full_profile
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
@@ -440,7 +509,7 @@ private fun SoulEditor(
     Column(modifier = Modifier.fillMaxWidth()) {
         // ── Active Persona ──
         Text(
-            text = "Persona",
+            text = stringResource(Res.string.agent_settings_persona),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -482,7 +551,7 @@ private fun SoulEditor(
             }
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "Change",
+                text = stringResource(Res.string.agent_settings_change),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -495,9 +564,9 @@ private fun SoulEditor(
         val isCustomBehavior = activePersona?.behaviorStyle != BehaviorStyle.ASSISTANT &&
             activePersona?.behaviorStyle != BehaviorStyle.OPERATOR
         val effectiveHideDesc = if (isCustomBehavior) {
-            "Auto-hidden (non-assistant/operator persona)"
+            stringResource(Res.string.agent_settings_auto_hide_thinking_desc)
         } else {
-            "Hide the AI's chain-of-thought reasoning"
+            stringResource(Res.string.agent_settings_hide_thinking_desc)
         }
         var hideThinking by remember { mutableStateOf(appSettings.getHideThinking()) }
         var expandThinking by remember { mutableStateOf(appSettings.getExpandThinking()) }
@@ -505,7 +574,7 @@ private fun SoulEditor(
             hideThinking = appSettings.getHideThinking()
         }
         ToggleableHeadline(
-            title = "Hide Thinking",
+            title = stringResource(Res.string.agent_settings_hide_thinking),
             description = effectiveHideDesc,
             checked = hideThinking || isCustomBehavior,
             enabled = !isCustomBehavior,
@@ -515,8 +584,8 @@ private fun SoulEditor(
             },
         )
         ToggleableHeadline(
-            title = "Expand Thinking",
-            description = "Always expand the thinking section by default",
+            title = stringResource(Res.string.agent_settings_expand_thinking),
+            description = stringResource(Res.string.agent_settings_expand_thinking_desc),
             checked = expandThinking,
             enabled = !isCustomBehavior && !hideThinking,
             onCheckedChange = {
@@ -526,8 +595,8 @@ private fun SoulEditor(
         )
         val enterToSend = appSettings.isEnterToSend()
         ToggleableHeadline(
-            title = "Enter to Send",
-            description = if (enterToSend) "Enter sends message; Shift+Enter inserts newline" else "Enter inserts newline (desktop: sends without Shift)",
+            title = stringResource(Res.string.agent_settings_enter_to_send),
+            description = if (enterToSend) stringResource(Res.string.agent_settings_enter_sends) else stringResource(Res.string.agent_settings_enter_newline),
             checked = enterToSend,
             onCheckedChange = { appSettings.setEnterToSend(it) },
         )
@@ -543,12 +612,12 @@ private fun SoulEditor(
             }
             val hasDefChanges = editedDefaultSoul != activePersona.defaultSoul
             Text(
-                text = "Character Definition",
+                text = stringResource(Res.string.agent_settings_character_definition),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = if (isCustom) "Define the persona's core personality, behavior, and character." else "Built-in persona — read-only.",
+                text = if (isCustom) stringResource(Res.string.agent_settings_character_definition_desc_editable) else stringResource(Res.string.agent_settings_character_definition_desc_readonly),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -560,7 +629,7 @@ private fun SoulEditor(
                 minLines = 6,
                 maxLines = 8,
                 readOnly = !isCustom,
-                label = { Text("Character Definition") },
+                label = { Text(stringResource(Res.string.agent_settings_character_definition)) },
             )
             Text(
                 text = "${editedDefaultSoul.length}/$maxChars",
@@ -576,7 +645,7 @@ private fun SoulEditor(
                         onSavePersona(activePersona.copy(defaultSoul = editedDefaultSoul.trim()))
                     },
                     modifier = Modifier.align(CenterHorizontally).handCursor(),
-                ) { Text("Save Character Definition") }
+                ) { Text(stringResource(Res.string.agent_settings_save_character_definition)) }
             }
             // Toggle between condensed and full profile
             val fullProfileKey = "persona_full_${activePersona.id}"
@@ -605,11 +674,11 @@ private fun SoulEditor(
                         },
                         modifier = Modifier.handCursor(),
                     ) {
-                        Text(if (isFullProfileActive) "Switch to Condensed" else "Switch to Full Profile")
+                        Text(if (isFullProfileActive) stringResource(Res.string.agent_settings_switch_condensed) else stringResource(Res.string.agent_settings_switch_full_profile))
                     }
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = if (isFullProfileActive) "Full profile active" else "Condensed active",
+                        text = if (isFullProfileActive) stringResource(Res.string.agent_settings_full_profile_active) else stringResource(Res.string.agent_settings_condensed_active),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -620,7 +689,7 @@ private fun SoulEditor(
                     onClick = {},
                     enabled = false,
                     modifier = Modifier.handCursor(),
-                ) { Text("Full profile not available") }
+                ) { Text(stringResource(Res.string.agent_settings_full_profile_unavailable)) }
             }
             Spacer(Modifier.height(16.dp))
             HorizontalDivider()
@@ -629,12 +698,12 @@ private fun SoulEditor(
 
         // ── Custom Soul (Layer 3 — user-specific) ──
         Text(
-            text = "Custom Soul",
+            text = stringResource(Res.string.agent_settings_custom_soul),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Text(
-            text = "Your preferences, dislikes, and personal notes. Not character definition or behavior rules.",
+            text = stringResource(Res.string.agent_settings_custom_soul_desc),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -645,7 +714,7 @@ private fun SoulEditor(
             onValueChange = { if (it.length <= maxChars) editedSoul = it },
             minLines = 6,
             maxLines = 8,
-            label = { Text("Custom Soul") },
+            label = { Text(stringResource(Res.string.agent_settings_custom_soul)) },
         )
         Text(
             text = "${editedSoul.length}/$maxChars",
@@ -659,14 +728,14 @@ private fun SoulEditor(
             Button(
                 onClick = { onSaveSoul(editedSoul.trim()) },
                 modifier = Modifier.align(CenterHorizontally).handCursor(),
-            ) { Text("Save Custom Soul") }
+            ) { Text(stringResource(Res.string.agent_settings_save_custom_soul)) }
         }
         if (soulText.isNotEmpty()) {
             Spacer(Modifier.height(4.dp))
             TextButton(
                 onClick = { showResetDialog = true },
                 modifier = Modifier.handCursor(),
-            ) { Text("Reset to empty") }
+            ) { Text(stringResource(Res.string.agent_settings_reset_to_empty)) }
         }
 
         // ── Behavior Notes (Layer 3 — auto-generated, read-only) ──
@@ -675,12 +744,12 @@ private fun SoulEditor(
             HorizontalDivider()
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Behavior Notes",
+                text = stringResource(Res.string.agent_settings_behavior_notes),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = "Auto-generated behavior patterns (read-only). Updated by the system over time.",
+                text = stringResource(Res.string.agent_settings_behavior_notes_desc),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -696,8 +765,8 @@ private fun SoulEditor(
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset Custom Soul") },
-            text = { Text("Clear your custom soul text? This cannot be undone.") },
+            title = { Text(stringResource(Res.string.agent_settings_reset_custom_soul_title)) },
+            text = { Text(stringResource(Res.string.agent_settings_reset_custom_soul_text)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -706,13 +775,13 @@ private fun SoulEditor(
                         editedSoul = ""
                     },
                     modifier = Modifier.handCursor(),
-                ) { Text("Reset") }
+                ) { Text(stringResource(Res.string.agent_settings_reset)) }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showResetDialog = false },
                     modifier = Modifier.handCursor(),
-                ) { Text("Cancel") }
+                ) { Text(stringResource(Res.string.agent_settings_cancel)) }
             },
         )
     }
@@ -741,16 +810,16 @@ private fun PersonaSelectorDialog(
     onDismiss: () -> Unit,
 ) {
     val categories = listOf(
-        BehaviorStyle.ASSISTANT to "Assistant",
-        BehaviorStyle.OPERATOR to "Operator",
-        BehaviorStyle.CUSTOM to "Custom",
+        BehaviorStyle.ASSISTANT to stringResource(Res.string.agent_settings_category_assistant),
+        BehaviorStyle.OPERATOR to stringResource(Res.string.agent_settings_category_operator),
+        BehaviorStyle.CUSTOM to stringResource(Res.string.agent_settings_category_custom),
     )
     var selectedCategory by remember { mutableStateOf<BehaviorStyle>(BehaviorStyle.ASSISTANT) }
     var showCreateDialog by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Persona") },
+        title = { Text(stringResource(Res.string.agent_settings_select_persona)) },
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // Category tabs (fixed, not scrollable)
@@ -821,7 +890,7 @@ private fun PersonaSelectorDialog(
                             Spacer(Modifier.width(8.dp))
                             if (isActive) {
                                 Text(
-                                    text = "ACTIVE",
+                                    text = stringResource(Res.string.agent_settings_active),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                 )
@@ -836,12 +905,12 @@ private fun PersonaSelectorDialog(
                     OutlinedButton(
                         onClick = { showCreateDialog = true },
                         modifier = Modifier.handCursor(),
-                    ) { Text("+ Custom") }
+                    ) { Text(stringResource(Res.string.agent_settings_create_custom)) }
                     var showCommunity by remember { mutableStateOf(false) }
                     OutlinedButton(
                         onClick = { showCommunity = true },
                         modifier = Modifier.handCursor(),
-                    ) { Text("Community") }
+                    ) { Text(stringResource(Res.string.agent_settings_community)) }
                     if (showCommunity) {
                         CommunityPersonaBrowseDialog(
                             onDismiss = { showCommunity = false },
@@ -861,7 +930,7 @@ private fun PersonaSelectorDialog(
                                 onDismiss()
                             },
                             modifier = Modifier.handCursor(),
-                        ) { Text("Delete") }
+                        ) { Text(stringResource(Res.string.agent_settings_delete)) }
                     }
                 }
             }
@@ -870,7 +939,7 @@ private fun PersonaSelectorDialog(
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.handCursor(),
-            ) { Text("Done") }
+            ) { Text(stringResource(Res.string.agent_settings_done)) }
         },
     )
 
@@ -909,17 +978,17 @@ private fun CreatePersonaDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create Custom Persona") },
+        title = { Text(stringResource(Res.string.agent_settings_create_persona_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 KaiOutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Persona name") },
+                    label = { Text(stringResource(Res.string.agent_settings_persona_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
-                Text("Category", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(Res.string.agent_settings_category), style = MaterialTheme.typography.bodySmall)
                 BehaviorStyle.entries.forEach { style ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         androidx.compose.material3.RadioButton(
@@ -931,7 +1000,7 @@ private fun CreatePersonaDialog(
                     }
                 }
                 Spacer(Modifier.height(4.dp))
-                Text("Language Style", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(Res.string.agent_settings_language_style), style = MaterialTheme.typography.bodySmall)
                 Box {
                     OutlinedButton(
                         onClick = { expandedLang = true },
@@ -952,7 +1021,7 @@ private fun CreatePersonaDialog(
                         }
                     }
                 }
-                Text("Character Type", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(Res.string.agent_settings_character_type), style = MaterialTheme.typography.bodySmall)
                 Box {
                     OutlinedButton(
                         onClick = { expandedChar = true },
@@ -982,13 +1051,13 @@ private fun CreatePersonaDialog(
                 },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.handCursor(),
-            ) { Text("Create") }
+            ) { Text(stringResource(Res.string.agent_settings_create)) }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.handCursor(),
-            ) { Text("Cancel") }
+            ) { Text(stringResource(Res.string.agent_settings_cancel)) }
         },
     )
 }
@@ -1026,30 +1095,30 @@ private fun CommunityPersonaBrowseDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (importing) "Importing" else "Community Personas") },
+        title = { Text(if (importing) stringResource(Res.string.agent_settings_importing_title) else stringResource(Res.string.agent_settings_community_personas)) },
         text = {
             when {
                 importing -> {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                         if (importedSuccess) {
-                            Text("Imported: $importedName")
+                            Text(stringResource(Res.string.agent_settings_imported, importedName))
                             Spacer(Modifier.height(8.dp))
-                            Text("Persona added and activated.", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(Res.string.agent_settings_persona_added_activated), style = MaterialTheme.typography.bodySmall)
                         } else if (importFailed) {
-                            Text("Failed to download persona.")
+                            Text(stringResource(Res.string.agent_settings_import_failed))
                         } else {
                             CircularProgressIndicator()
                             Spacer(Modifier.height(8.dp))
-                            Text("Downloading persona...")
+                            Text(stringResource(Res.string.agent_settings_downloading_persona))
                         }
                     }
                 }
 
-                loading -> Text("Loading...")
+                loading -> Text(stringResource(Res.string.agent_settings_loading))
 
-                error -> Text("Could not load community personas.")
+                error -> Text(stringResource(Res.string.agent_settings_load_failed))
 
-                personas.isNullOrEmpty() -> Text("No personas available.")
+                personas.isNullOrEmpty() -> Text(stringResource(Res.string.agent_settings_no_personas))
 
                 else -> {
                     Column(
@@ -1057,14 +1126,14 @@ private fun CommunityPersonaBrowseDialog(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(
-                            text = "From kilvz/personas",
+                            text = stringResource(Res.string.agent_settings_from_repo),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(Modifier.height(8.dp))
                         // Format selector
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Format: ", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(Res.string.agent_settings_format), style = MaterialTheme.typography.bodySmall)
                             Box {
                                 OutlinedButton(
                                     onClick = { formatExpanded = true },
@@ -1120,9 +1189,9 @@ private fun CommunityPersonaBrowseDialog(
                                     )
                                 }
                                 if (downloading) {
-                                    Text("Downloading...")
+                                    Text(stringResource(Res.string.agent_settings_downloading))
                                 } else {
-                                    Text("Import")
+                                    Text(stringResource(Res.string.agent_settings_import))
                                 }
                             }
                         }
@@ -1135,7 +1204,7 @@ private fun CommunityPersonaBrowseDialog(
                 onClick = { if (importing && (importedSuccess || importFailed)) onCloseAll() else onDismiss() },
                 modifier = Modifier.handCursor(),
                 enabled = !importing || importedSuccess || importFailed,
-            ) { Text("Done") }
+            ) { Text(stringResource(Res.string.agent_settings_done)) }
         },
     )
 }
@@ -1192,13 +1261,13 @@ private fun MemoryList(
         )
         Spacer(Modifier.height(4.dp))
         ToggleableHeadline(
-            title = "Alt-memory",
+            title = stringResource(Res.string.agent_settings_alt_memory),
             description = when {
-                !sandboxReady -> "Requires sandbox to be installed first"
-                !altMemoryInstalled -> "Not installed — tap to install"
-                isAltMemoryEnabled && altMemoryConnected -> "Connected"
-                isAltMemoryEnabled -> "Connecting..."
-                else -> "Vector memory with semantic search"
+                !sandboxReady -> stringResource(Res.string.agent_settings_alt_memory_needs_sandbox)
+                !altMemoryInstalled -> stringResource(Res.string.agent_settings_alt_memory_not_installed)
+                isAltMemoryEnabled && altMemoryConnected -> stringResource(Res.string.agent_settings_alt_memory_connected)
+                isAltMemoryEnabled -> stringResource(Res.string.agent_settings_alt_memory_connecting)
+                else -> stringResource(Res.string.agent_settings_alt_memory_vector_desc)
             },
             checked = isAltMemoryEnabled,
             enabled = sandboxReady,
@@ -1208,8 +1277,8 @@ private fun MemoryList(
             Spacer(Modifier.height(4.dp))
             Text(
                 text = buildList {
-                    altMemoryBackend?.let { add("Backend: $it") }
-                    altMemoryEmbedder?.let { add("Embedder: $it") }
+                    altMemoryBackend?.let { add(stringResource(Res.string.agent_settings_backend, it)) }
+                    altMemoryEmbedder?.let { add(stringResource(Res.string.agent_settings_embedder, it)) }
                 }.joinToString(" · "),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1218,7 +1287,7 @@ private fun MemoryList(
             if (altMemoryEmbedder != null && !isKnownSemanticEmbedder(altMemoryEmbedder)) {
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "Ask your AI to set the default embedder to the best model for semantic search quality.",
+                    text = stringResource(Res.string.agent_settings_alt_memory_embedder_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.padding(start = 16.dp),
@@ -1275,7 +1344,7 @@ private fun MemoryList(
                     onClick = { showMemoryManager = true },
                     modifier = Modifier.handCursor(),
                 ) {
-                    Text("Manage")
+                    Text(stringResource(Res.string.agent_settings_manage))
                 }
             }
             importResult?.let { result ->
@@ -1625,7 +1694,7 @@ private fun ExecutionLogRow(success: Boolean, timestampEpochMs: Long, message: S
         verticalAlignment = Alignment.Top,
     ) {
         Text(
-            text = if (success) "OK" else "FAIL",
+            text = if (success) stringResource(Res.string.agent_settings_log_ok) else stringResource(Res.string.agent_settings_log_fail),
             style = MaterialTheme.typography.labelSmall,
             color = if (success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
             modifier = Modifier.width(36.dp),

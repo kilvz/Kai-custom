@@ -486,10 +486,14 @@ class AppSettings(internal val settings: Settings) {
     }
 
     // Preferred language
-    fun getPreferredLanguage(): String = settings.getString(KEY_PREFERRED_LANGUAGE, getDefaultLanguage())
+    private val _preferredLanguageFlow = MutableStateFlow(settings.getString(KEY_PREFERRED_LANGUAGE, getDefaultLanguage()))
+    val preferredLanguageFlow: StateFlow<String> = _preferredLanguageFlow
+
+    fun getPreferredLanguage(): String = _preferredLanguageFlow.value
 
     fun setPreferredLanguage(lang: String) {
         settings.putString(KEY_PREFERRED_LANGUAGE, lang)
+        _preferredLanguageFlow.value = lang
     }
 
     // Telegram Bot (pure HTTP — works on all platforms)

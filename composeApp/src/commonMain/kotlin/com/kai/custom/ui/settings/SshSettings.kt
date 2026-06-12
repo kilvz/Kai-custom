@@ -1,6 +1,34 @@
 package com.kai.custom.ui.settings
 
 import androidx.compose.foundation.background
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.ssh_auth_password
+import kai.composeapp.generated.resources.ssh_auth_private_key
+import kai.composeapp.generated.resources.ssh_auth_title
+import kai.composeapp.generated.resources.ssh_clear
+import kai.composeapp.generated.resources.ssh_command_log
+import kai.composeapp.generated.resources.ssh_connect
+import kai.composeapp.generated.resources.ssh_connected
+import kai.composeapp.generated.resources.ssh_connecting
+import kai.composeapp.generated.resources.ssh_connection_description
+import kai.composeapp.generated.resources.ssh_connection_title
+import kai.composeapp.generated.resources.ssh_disconnect
+import kai.composeapp.generated.resources.ssh_field_host
+import kai.composeapp.generated.resources.ssh_field_passphrase
+import kai.composeapp.generated.resources.ssh_field_port
+import kai.composeapp.generated.resources.ssh_field_private_key
+import kai.composeapp.generated.resources.ssh_field_username
+import kai.composeapp.generated.resources.ssh_profile_delete
+import kai.composeapp.generated.resources.ssh_profile_name
+import kai.composeapp.generated.resources.ssh_profile_none
+import kai.composeapp.generated.resources.ssh_profile_save
+import kai.composeapp.generated.resources.ssh_profile_save_cancel
+import kai.composeapp.generated.resources.ssh_profile_save_confirm
+import kai.composeapp.generated.resources.ssh_profile_save_title
+import kai.composeapp.generated.resources.ssh_profile_saved
+import kai.composeapp.generated.resources.ssh_profile_select_placeholder
+import kai.composeapp.generated.resources.ssh_retry
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,13 +98,13 @@ internal fun SshSettingsCard(
     SettingsCard {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "SSH Connection",
+                text = stringResource(Res.string.ssh_connection_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Persistent SSH server for the AI to execute commands on",
+                text = stringResource(Res.string.ssh_connection_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -96,7 +124,7 @@ internal fun SshSettingsCard(
             OutlinedTextField(
                 value = sshState.host,
                 onValueChange = onHostChanged,
-                label = { Text("Host") },
+                label = { Text(stringResource(Res.string.ssh_field_host)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -107,7 +135,7 @@ internal fun SshSettingsCard(
                 OutlinedTextField(
                     value = sshState.port,
                     onValueChange = onPortChanged,
-                    label = { Text("Port") },
+                    label = { Text(stringResource(Res.string.ssh_field_port)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.width(120.dp),
@@ -116,7 +144,7 @@ internal fun SshSettingsCard(
                 OutlinedTextField(
                     value = sshState.username,
                     onValueChange = onUsernameChanged,
-                    label = { Text("Username") },
+                    label = { Text(stringResource(Res.string.ssh_field_username)) },
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                 )
@@ -125,19 +153,19 @@ internal fun SshSettingsCard(
             Spacer(Modifier.height(12.dp))
 
             Text(
-                text = "Authentication",
+                text = stringResource(Res.string.ssh_auth_title),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
             Column(Modifier.selectableGroup()) {
                 SshAuthOption(
-                    label = "Password",
+                    label = stringResource(Res.string.ssh_auth_password),
                     selected = sshState.authMethod == SshAuthMethod.PASSWORD,
                     onClick = { onAuthMethodChanged(SshAuthMethod.PASSWORD) },
                 )
                 SshAuthOption(
-                    label = "Private Key",
+                    label = stringResource(Res.string.ssh_auth_private_key),
                     selected = sshState.authMethod == SshAuthMethod.KEY,
                     onClick = { onAuthMethodChanged(SshAuthMethod.KEY) },
                 )
@@ -149,7 +177,7 @@ internal fun SshSettingsCard(
                 OutlinedTextField(
                     value = sshState.password,
                     onValueChange = onPasswordChanged,
-                    label = { Text("Password") },
+                    label = { Text(stringResource(Res.string.ssh_auth_password)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
@@ -158,7 +186,7 @@ internal fun SshSettingsCard(
                 OutlinedTextField(
                     value = sshState.privateKey,
                     onValueChange = onPrivateKeyChanged,
-                    label = { Text("Private Key (PEM, OpenSSH, PPK)") },
+                    label = { Text(stringResource(Res.string.ssh_field_private_key)) },
                     minLines = 4,
                     maxLines = 8,
                     modifier = Modifier.fillMaxWidth(),
@@ -167,7 +195,7 @@ internal fun SshSettingsCard(
                 OutlinedTextField(
                     value = sshState.passphrase,
                     onValueChange = onPassphraseChanged,
-                    label = { Text("Passphrase (optional)") },
+                    label = { Text(stringResource(Res.string.ssh_field_passphrase)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth(),
@@ -184,7 +212,7 @@ internal fun SshSettingsCard(
             ) {
                 if (conn.connected) {
                     OutlinedButton(onClick = onDisconnect, modifier = Modifier.handCursor()) {
-                        Text("Disconnect")
+                        Text(stringResource(Res.string.ssh_disconnect))
                     }
                 } else {
                     Button(
@@ -192,14 +220,14 @@ internal fun SshSettingsCard(
                         enabled = !conn.connecting && sshState.host.isNotBlank() && sshState.username.isNotBlank(),
                         modifier = Modifier.handCursor(),
                     ) {
-                        Text(if (conn.connecting) "Connecting..." else "Connect")
+                        Text(if (conn.connecting) stringResource(Res.string.ssh_connecting) else stringResource(Res.string.ssh_connect))
                     }
                 }
 
                 when {
                     conn.connected -> {
                         Text(
-                            text = "Connected",
+                            text = stringResource(Res.string.ssh_connected),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                         )
@@ -237,14 +265,14 @@ internal fun SshSettingsCard(
                     enabled = sshState.host.isNotBlank() && sshState.username.isNotBlank(),
                     modifier = Modifier.handCursor(),
                 ) {
-                    Text("Save as Profile")
+                    Text(stringResource(Res.string.ssh_profile_save))
                 }
                 if (sshState.activeProfileName.isNotBlank()) {
                     OutlinedButton(
                         onClick = { onDeleteProfile(sshState.activeProfileName) },
                         modifier = Modifier.handCursor(),
                     ) {
-                        Text("Delete Profile")
+                        Text(stringResource(Res.string.ssh_profile_delete))
                     }
                 }
             }
@@ -257,7 +285,7 @@ internal fun SshSettingsCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Command Log",
+                        text = stringResource(Res.string.ssh_command_log),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
@@ -265,7 +293,7 @@ internal fun SshSettingsCard(
                         onClick = onClearTranscript,
                         modifier = Modifier.handCursor(),
                     ) {
-                        Text("Clear", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(Res.string.ssh_clear), style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 Spacer(Modifier.height(4.dp))
@@ -324,10 +352,10 @@ private fun ProfileSelector(
     onDeleteProfile: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val activeLabel = if (activeProfileName.isNotBlank()) activeProfileName else "Select profile..."
+    val activeLabel = if (activeProfileName.isNotBlank()) activeProfileName else stringResource(Res.string.ssh_profile_select_placeholder)
     Column {
         Text(
-            text = "Saved Profiles",
+            text = stringResource(Res.string.ssh_profile_saved),
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -346,7 +374,7 @@ private fun ProfileSelector(
             ) {
                 if (activeProfileName.isNotBlank()) {
                     DropdownMenuItem(
-                        text = { Text("None (manual entry)") },
+                        text = { Text(stringResource(Res.string.ssh_profile_none)) },
                         onClick = {
                             onSelectProfile("")
                             expanded = false
@@ -385,12 +413,12 @@ private fun SaveProfileDialog(
     var name by remember { mutableStateOf(initialName) }
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Save SSH Profile") },
+        title = { Text(stringResource(Res.string.ssh_profile_save_title)) },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Profile name") },
+                label = { Text(stringResource(Res.string.ssh_profile_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -400,11 +428,11 @@ private fun SaveProfileDialog(
                 onClick = { onSave(name.trim()) },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.handCursor(),
-            ) { Text("Save") }
+            ) { Text(stringResource(Res.string.ssh_profile_save_confirm)) }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss, modifier = Modifier.handCursor()) {
-                Text("Cancel")
+                Text(stringResource(Res.string.ssh_profile_save_cancel))
             }
         },
     )

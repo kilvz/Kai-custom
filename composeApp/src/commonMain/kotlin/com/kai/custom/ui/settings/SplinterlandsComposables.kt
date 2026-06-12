@@ -67,6 +67,59 @@ import com.kai.custom.ui.icons.DragIndicator
 import com.kai.custom.ui.icons.Visibility
 import com.kai.custom.ui.icons.VisibilityOff
 import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.splinterlands_add_account
+import kai.composeapp.generated.resources.splinterlands_add_another_service
+import kai.composeapp.generated.resources.splinterlands_add_service
+import kai.composeapp.generated.resources.splinterlands_auto_label
+import kai.composeapp.generated.resources.splinterlands_battle_activity
+import kai.composeapp.generated.resources.splinterlands_cancel
+import kai.composeapp.generated.resources.splinterlands_checking_energy
+import kai.composeapp.generated.resources.splinterlands_clear
+import kai.composeapp.generated.resources.splinterlands_close
+import kai.composeapp.generated.resources.splinterlands_defeat
+import kai.composeapp.generated.resources.splinterlands_description
+import kai.composeapp.generated.resources.splinterlands_error
+import kai.composeapp.generated.resources.splinterlands_fetching_cards
+import kai.composeapp.generated.resources.splinterlands_finished
+import kai.composeapp.generated.resources.splinterlands_finding_match
+import kai.composeapp.generated.resources.splinterlands_hide
+import kai.composeapp.generated.resources.splinterlands_hive_username
+import kai.composeapp.generated.resources.splinterlands_llm_label
+import kai.composeapp.generated.resources.splinterlands_llm_services
+import kai.composeapp.generated.resources.splinterlands_logging_in
+import kai.composeapp.generated.resources.splinterlands_mana
+import kai.composeapp.generated.resources.splinterlands_model_rankings
+import kai.composeapp.generated.resources.splinterlands_none_label
+import kai.composeapp.generated.resources.splinterlands_picking_team
+import kai.composeapp.generated.resources.splinterlands_posting_key
+import kai.composeapp.generated.resources.splinterlands_recent_battles
+import kai.composeapp.generated.resources.splinterlands_remove
+import kai.composeapp.generated.resources.splinterlands_remove_account
+import kai.composeapp.generated.resources.splinterlands_remove_confirm
+import kai.composeapp.generated.resources.splinterlands_reorder
+import kai.composeapp.generated.resources.splinterlands_secure_description
+import kai.composeapp.generated.resources.splinterlands_show
+import kai.composeapp.generated.resources.splinterlands_show_more
+import kai.composeapp.generated.resources.splinterlands_start
+import kai.composeapp.generated.resources.splinterlands_stop
+import kai.composeapp.generated.resources.splinterlands_stopping
+import kai.composeapp.generated.resources.splinterlands_submitting_team
+import kai.composeapp.generated.resources.splinterlands_test_and_add
+import kai.composeapp.generated.resources.splinterlands_testing
+import kai.composeapp.generated.resources.splinterlands_time_1_day
+import kai.composeapp.generated.resources.splinterlands_time_1_hour
+import kai.composeapp.generated.resources.splinterlands_time_1_min
+import kai.composeapp.generated.resources.splinterlands_time_just_now
+import kai.composeapp.generated.resources.splinterlands_time_n_days
+import kai.composeapp.generated.resources.splinterlands_time_n_hours
+import kai.composeapp.generated.resources.splinterlands_time_n_min
+import kai.composeapp.generated.resources.splinterlands_title
+import kai.composeapp.generated.resources.splinterlands_victory
+import kai.composeapp.generated.resources.splinterlands_view_battle
+import kai.composeapp.generated.resources.splinterlands_vs
+import kai.composeapp.generated.resources.splinterlands_waiting_for_opponent
+import kai.composeapp.generated.resources.splinterlands_waiting_for_result
+import kai.composeapp.generated.resources.splinterlands_wins_losses
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -93,8 +146,8 @@ internal fun SplinterlandsSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ToggleableHeadline(
-            title = "Splinterlands",
-            description = "Splinterlands is a blockchain-based trading card game. This experimental feature auto-battles Wild Ranked matches using an LLM to pick teams. Battle outcome heavily depends on the chosen model and its response speed (must respond within 180 seconds). Falls back to a simple greedy picker if the LLM fails.",
+            title = stringResource(Res.string.splinterlands_title),
+            description = stringResource(Res.string.splinterlands_description),
             checked = isEnabled,
             onCheckedChange = onToggle,
         )
@@ -142,7 +195,7 @@ internal fun SplinterlandsSection(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Recent Battles",
+                        text = stringResource(Res.string.splinterlands_recent_battles),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.weight(1f),
@@ -151,7 +204,7 @@ internal fun SplinterlandsSection(
                         onClick = onClearBattleLog,
                         modifier = Modifier.handCursor(),
                     ) {
-                        Text("Clear", style = MaterialTheme.typography.labelSmall)
+                        Text(stringResource(Res.string.splinterlands_clear), style = MaterialTheme.typography.labelSmall)
                     }
                 }
                 var showAll by remember { mutableStateOf(false) }
@@ -164,7 +217,7 @@ internal fun SplinterlandsSection(
                         onClick = { showAll = true },
                         modifier = Modifier.handCursor(),
                     ) {
-                        Text("Show more (${battleLog.size - 5})")
+                        Text(stringResource(Res.string.splinterlands_show_more, battleLog.size - 5))
                     }
                 }
             }
@@ -194,7 +247,7 @@ private fun SplinterlandsServiceList(
 
     if (instanceIds.isNotEmpty()) {
         Text(
-            text = "LLM Services (priority order)",
+            text = stringResource(Res.string.splinterlands_llm_services),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
@@ -220,7 +273,7 @@ private fun SplinterlandsServiceList(
                         if (instanceIds.size >= 2) {
                             Icon(
                                 imageVector = Icons.Rounded.DragIndicator,
-                                contentDescription = "Reorder",
+                                contentDescription = stringResource(Res.string.splinterlands_reorder),
                                 modifier = Modifier.draggableHandle().handCursor(),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -267,7 +320,7 @@ private fun SplinterlandsServiceList(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Remove",
+                                contentDescription = stringResource(Res.string.splinterlands_remove),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -291,7 +344,7 @@ private fun SplinterlandsServiceList(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
-                Text(if (instanceIds.isEmpty()) "Add Service" else "Add Another Service")
+                Text(if (instanceIds.isEmpty()) stringResource(Res.string.splinterlands_add_service) else stringResource(Res.string.splinterlands_add_another_service))
             }
             androidx.compose.material3.DropdownMenu(
                 expanded = showDropdown,
@@ -330,7 +383,7 @@ private fun SplinterlandsServiceList(
 @Composable
 private fun SplinterlandsModelRankings(modelStats: ImmutableList<ModelStats>) {
     Text(
-        text = "Model Rankings",
+        text = stringResource(Res.string.splinterlands_model_rankings),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onBackground,
     )
@@ -379,7 +432,7 @@ private fun SplinterlandsModelRow(rank: Int, stats: ModelStats) {
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = "${stats.wins}W ${stats.losses}L",
+                text = stringResource(Res.string.splinterlands_wins_losses, stats.wins, stats.losses),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -422,13 +475,13 @@ private fun SplinterlandsBattleLogRow(entry: BattleLogEntry) {
             ) {
                 // W/L badge
                 Text(
-                    text = if (entry.won) "Victory" else "Defeat",
+                    text = if (entry.won) stringResource(Res.string.splinterlands_victory) else stringResource(Res.string.splinterlands_defeat),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (entry.won) Color(0xFF4CAF50) else MaterialTheme.colorScheme.error,
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "vs ${entry.opponent}",
+                    text = stringResource(Res.string.splinterlands_vs, entry.opponent),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
@@ -436,10 +489,8 @@ private fun SplinterlandsBattleLogRow(entry: BattleLogEntry) {
                     modifier = Modifier.weight(1f),
                 )
                 if (entry.timestampMs > 0) {
-                    val relTime = remember(entry.timestampMs) {
-                        val nowMs = kotlin.time.Clock.System.now().toEpochMilliseconds()
-                        formatRelativeTime(entry.timestampMs, nowMs)
-                    }
+                    val nowMs = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                    val relTime = formatRelativeTime(entry.timestampMs, nowMs)
                     Text(
                         text = relTime,
                         style = MaterialTheme.typography.bodySmall,
@@ -449,7 +500,7 @@ private fun SplinterlandsBattleLogRow(entry: BattleLogEntry) {
             }
             // Details row
             val details = buildList {
-                if (entry.mana > 0) add("${entry.mana} mana")
+                if (entry.mana > 0) add(stringResource(Res.string.splinterlands_mana, entry.mana))
                 if (entry.rulesets.isNotBlank()) add(entry.rulesets)
             }
             if (details.isNotEmpty() || entry.llmPicked != null || entry.account.isNotBlank()) {
@@ -473,7 +524,7 @@ private fun SplinterlandsBattleLogRow(entry: BattleLogEntry) {
                         Spacer(Modifier.weight(1f))
                     }
                     if (entry.llmPicked != null) {
-                        val label = if (entry.llmPicked) entry.modelName.ifBlank { "LLM" } else "none"
+                        val label = if (entry.llmPicked) entry.modelName.ifBlank { stringResource(Res.string.splinterlands_llm_label) } else stringResource(Res.string.splinterlands_none_label)
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall,
@@ -499,7 +550,7 @@ private fun SplinterlandsActivityDialog(
     val uriHandler = LocalUriHandler.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Battle Activity") },
+        title = { Text(stringResource(Res.string.splinterlands_battle_activity)) },
         text = {
             val activityScrollState = rememberScrollState()
             Box {
@@ -526,29 +577,30 @@ private fun SplinterlandsActivityDialog(
                         uriHandler.openUri("https://splinterlands.com/battle/${entry.battleId}")
                     },
                     modifier = Modifier.handCursor(),
-                ) { Text("View Battle") }
+                ) { Text(stringResource(Res.string.splinterlands_view_battle)) }
             }
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.handCursor(),
-            ) { Text("Close") }
+            ) { Text(stringResource(Res.string.splinterlands_close)) }
         },
     )
 }
 
+@Composable
 private fun formatRelativeTime(timestampMs: Long, nowMs: Long): String {
     val diffMs = nowMs - timestampMs
     val minutes = diffMs / 60_000
     val hours = minutes / 60
     val days = hours / 24
     return when {
-        minutes < 1 -> "just now"
-        minutes == 1L -> "1 min"
-        minutes < 60 -> "$minutes min"
-        hours == 1L -> "1 hour"
-        hours < 24 -> "$hours hours"
-        days == 1L -> "1 day"
-        else -> "$days days"
+        minutes < 1 -> stringResource(Res.string.splinterlands_time_just_now)
+        minutes == 1L -> stringResource(Res.string.splinterlands_time_1_min)
+        minutes < 60 -> stringResource(Res.string.splinterlands_time_n_min, minutes.toInt())
+        hours == 1L -> stringResource(Res.string.splinterlands_time_1_hour)
+        hours < 24 -> stringResource(Res.string.splinterlands_time_n_hours, hours.toInt())
+        days == 1L -> stringResource(Res.string.splinterlands_time_1_day)
+        else -> stringResource(Res.string.splinterlands_time_n_days, days.toInt())
     }
 }
 
@@ -579,11 +631,11 @@ private fun SplinterlandsAddAccountForm(
         ) {
             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(4.dp))
-            Text("Add Account")
+            Text(stringResource(Res.string.splinterlands_add_account))
         }
     } else {
         Text(
-            text = "Your posting key is stored securely on this device and is never sent to the LLM. It is only used to sign battle transactions on the Hive blockchain.",
+            text = stringResource(Res.string.splinterlands_secure_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -591,7 +643,7 @@ private fun SplinterlandsAddAccountForm(
         KaiOutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Hive Username") },
+            label = { Text(stringResource(Res.string.splinterlands_hive_username)) },
             singleLine = true,
             enabled = !isTesting,
             modifier = Modifier.fillMaxWidth(),
@@ -602,7 +654,7 @@ private fun SplinterlandsAddAccountForm(
         KaiOutlinedTextField(
             value = postingKey,
             onValueChange = { postingKey = it },
-            label = { Text("Posting Key") },
+            label = { Text(stringResource(Res.string.splinterlands_posting_key)) },
             singleLine = true,
             enabled = !isTesting,
             visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
@@ -613,7 +665,7 @@ private fun SplinterlandsAddAccountForm(
                 ) {
                     Icon(
                         imageVector = if (showKey) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = if (showKey) "Hide" else "Show",
+                        contentDescription = if (showKey) stringResource(Res.string.splinterlands_hide) else stringResource(Res.string.splinterlands_show),
                     )
                 }
             },
@@ -639,9 +691,9 @@ private fun SplinterlandsAddAccountForm(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("Testing...")
+                    Text(stringResource(Res.string.splinterlands_testing))
                 } else {
-                    Text("Test & Add")
+                    Text(stringResource(Res.string.splinterlands_test_and_add))
                 }
             }
             OutlinedButton(
@@ -653,7 +705,7 @@ private fun SplinterlandsAddAccountForm(
                 modifier = Modifier.handCursor(),
                 enabled = !isTesting,
             ) {
-                Text("Cancel")
+                Text(stringResource(Res.string.splinterlands_cancel))
             }
         }
 
@@ -728,7 +780,7 @@ private fun SplinterlandsAccountRow(
             // Stats if any
             if (bs.wins > 0 || bs.losses > 0) {
                 Text(
-                    text = "${bs.wins}W ${bs.losses}L",
+                    text = stringResource(Res.string.splinterlands_wins_losses, bs.wins, bs.losses),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -737,7 +789,7 @@ private fun SplinterlandsAccountRow(
             // Error indicator
             if (bs.phase == BattlePhase.Error) {
                 Text(
-                    text = "Error",
+                    text = stringResource(Res.string.splinterlands_error),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -752,7 +804,7 @@ private fun SplinterlandsAccountRow(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                 ) {
-                    Text(if (bs.isStopping) "Stopping..." else "Stop", style = MaterialTheme.typography.bodySmall)
+                    Text(if (bs.isStopping) stringResource(Res.string.splinterlands_stopping) else stringResource(Res.string.splinterlands_stop), style = MaterialTheme.typography.bodySmall)
                 }
             } else {
                 Button(
@@ -761,7 +813,7 @@ private fun SplinterlandsAccountRow(
                     enabled = hasServices,
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                 ) {
-                    Text("Start", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(Res.string.splinterlands_start), style = MaterialTheme.typography.bodySmall)
                 }
             }
 
@@ -773,15 +825,15 @@ private fun SplinterlandsAccountRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Remove",
+                    contentDescription = stringResource(Res.string.splinterlands_remove),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (showConfirm) {
                 AlertDialog(
                     onDismissRequest = { showConfirm = false },
-                    title = { Text("Remove Account") },
-                    text = { Text("Remove ${account.username} from Splinterlands?") },
+                    title = { Text(stringResource(Res.string.splinterlands_remove_account)) },
+                    text = { Text(stringResource(Res.string.splinterlands_remove_confirm, account.username)) },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -790,14 +842,14 @@ private fun SplinterlandsAccountRow(
                             },
                             modifier = Modifier.handCursor(),
                         ) {
-                            Text("Remove", color = MaterialTheme.colorScheme.error)
+                            Text(stringResource(Res.string.splinterlands_remove), color = MaterialTheme.colorScheme.error)
                         }
                     },
                     dismissButton = {
                         TextButton(
                             onClick = { showConfirm = false },
                             modifier = Modifier.handCursor(),
-                        ) { Text("Cancel") }
+                        ) { Text(stringResource(Res.string.splinterlands_cancel)) }
                     },
                 )
             }
@@ -806,15 +858,15 @@ private fun SplinterlandsAccountRow(
         // Battle details (below player row)
         if (bs.isRunning) {
             val phaseText = when (bs.phase) {
-                BattlePhase.LoggingIn -> "Logging in..."
-                BattlePhase.CheckingEnergy -> "Checking energy..."
-                BattlePhase.FindingMatch -> "Finding match..."
-                BattlePhase.WaitingForOpponent -> "Waiting for opponent..."
-                BattlePhase.FetchingCollection -> "Fetching cards..."
-                BattlePhase.PickingTeam -> "Picking team..."
-                BattlePhase.SubmittingTeam -> "Submitting team..."
-                BattlePhase.WaitingForResult -> "Waiting for result..."
-                BattlePhase.Finished -> "Done"
+                BattlePhase.LoggingIn -> stringResource(Res.string.splinterlands_logging_in)
+                BattlePhase.CheckingEnergy -> stringResource(Res.string.splinterlands_checking_energy)
+                BattlePhase.FindingMatch -> stringResource(Res.string.splinterlands_finding_match)
+                BattlePhase.WaitingForOpponent -> stringResource(Res.string.splinterlands_waiting_for_opponent)
+                BattlePhase.FetchingCollection -> stringResource(Res.string.splinterlands_fetching_cards)
+                BattlePhase.PickingTeam -> stringResource(Res.string.splinterlands_picking_team)
+                BattlePhase.SubmittingTeam -> stringResource(Res.string.splinterlands_submitting_team)
+                BattlePhase.WaitingForResult -> stringResource(Res.string.splinterlands_waiting_for_result)
+                BattlePhase.Finished -> stringResource(Res.string.splinterlands_finished)
                 else -> ""
             }
 
@@ -827,14 +879,14 @@ private fun SplinterlandsAccountRow(
                 ) {
                     if (bs.currentOpponent.isNotBlank()) {
                         Text(
-                            text = "vs ${bs.currentOpponent}",
+                            text = stringResource(Res.string.splinterlands_vs, bs.currentOpponent),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                     if (bs.currentMana > 0) {
                         Text(
-                            text = "${bs.currentMana} mana",
+                            text = stringResource(Res.string.splinterlands_mana, bs.currentMana),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -868,7 +920,7 @@ private fun SplinterlandsAccountRow(
                     BattlePhase.WaitingForResult,
                 )
                 if (showLlmIndicator) {
-                    val label = if (bs.llmPickedTeam == true) bs.winningServiceName.ifBlank { "LLM" } else "Auto"
+                    val label = if (bs.llmPickedTeam == true) bs.winningServiceName.ifBlank { stringResource(Res.string.splinterlands_llm_label) } else stringResource(Res.string.splinterlands_auto_label)
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
