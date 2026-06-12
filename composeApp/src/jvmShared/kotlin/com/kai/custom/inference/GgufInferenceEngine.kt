@@ -105,6 +105,7 @@ class GgufInferenceEngine(
         }
     }
 
+    @OptIn(kotlinx.coroutines.DelicateCoroutinesApi::class)
     override fun releaseInBackground() {
         kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             release()
@@ -186,7 +187,7 @@ class GgufInferenceEngine(
                         if (handle != null) resolvePath = getSafResolvedPath(handle)
                     }
                     val raw = native.nativeGetModelInfo(resolvePath)
-                    if (raw != null && !raw.contains("\"error\"")) {
+                    if (!raw.contains("\"error\"")) {
                         File(modelDir, "metadata.json").writeText(raw)
                         val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                         metaJson = json.parseToJsonElement(raw).jsonObject

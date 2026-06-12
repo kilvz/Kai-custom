@@ -20,7 +20,7 @@ actual object LocalAppLocale {
         }
         val new = when (value) {
             null -> default!!
-            else -> Locale(value)
+            else -> @Suppress("DEPRECATION") Locale(value)
         }
         Locale.setDefault(new)
         configuration.setLocale(new)

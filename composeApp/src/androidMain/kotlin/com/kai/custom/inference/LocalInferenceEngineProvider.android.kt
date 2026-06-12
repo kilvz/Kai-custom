@@ -172,7 +172,7 @@ private class CompositeEngine(
         val isGguf = isGgufModel(modelId) || isGgufImportedModel(modelId)
         if (isGguf) {
             val engine = getGgufEngine()
-            engine?.deleteModel(modelId)
+            engine.deleteModel(modelId)
             // Fallback: delete directory directly if engine didn't handle it
             val dir = java.io.File(GgufInferenceEngine.getGgufModelsDir(), modelId)
             if (dir.exists()) dir.deleteRecursively()
