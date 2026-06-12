@@ -277,6 +277,8 @@ private fun AddMcpServerDialog(
     var name by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
     val headers = remember { mutableStateListOf(HeaderEntry()) }
+    var pendingApiKeyServer by remember { mutableStateOf<PopularMcpServer?>(null) }
+    var apiKeyText by remember { mutableStateOf("") }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -375,6 +377,50 @@ private fun AddMcpServerDialog(
                     }
                 }
 
+                pendingApiKeyServer?.let { server ->
+                    Spacer(Modifier.height(8.dp))
+                    KaiOutlinedTextField(
+                        value = apiKeyText,
+                        onValueChange = { apiKeyText = it },
+                        label = { Text("API Key") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        TextButton(
+                            onClick = {
+                                pendingApiKeyServer = null
+                                apiKeyText = ""
+                            },
+                            modifier = Modifier.handCursor(),
+                        ) {
+                            Text("Cancel")
+                        }
+                        TextButton(
+                            onClick = {
+                                val key = apiKeyText.trim()
+                                if (key.isNotBlank()) {
+                                    onAdd(
+                                        server.name,
+                                        server.url,
+                                        mapOf("Authorization" to "Bearer $key"),
+                                    )
+                                }
+                                pendingApiKeyServer = null
+                                apiKeyText = ""
+                            },
+                            enabled = apiKeyText.isNotBlank(),
+                            modifier = Modifier.handCursor(),
+                        ) {
+                            Text("Add Server")
+                        }
+                    }
+                }
+
                 if (popularMcpServers.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))
                     Text(
@@ -389,7 +435,12 @@ private fun AddMcpServerDialog(
                                 .fillMaxWidth()
                                 .clip(CardDefaults.shape)
                                 .clickable {
-                                    onAddPopular(server)
+                                    if (server.apiKeyRequired) {
+                                        pendingApiKeyServer = server
+                                        apiKeyText = ""
+                                    } else {
+                                        onAddPopular(server)
+                                    }
                                 }
                                 .handCursor(),
                             colors = CardDefaults.cardColors(

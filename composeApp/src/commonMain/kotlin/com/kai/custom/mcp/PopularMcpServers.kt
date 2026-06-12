@@ -7,6 +7,7 @@ data class PopularMcpServer(
     val name: String,
     val url: String,
     val description: String,
+    val apiKeyRequired: Boolean = false,
 )
 
 val popularMcpServers = listOf(
@@ -54,6 +55,7 @@ val popularMcpServers = listOf(
         name = "Jina AI",
         url = "https://mcp.jina.ai/v1",
         description = "Convert URLs to markdown, web search, image search",
+        apiKeyRequired = true,
     ),
     PopularMcpServer(
         name = "Open-Meteo Weather",
