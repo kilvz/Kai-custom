@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.kai.custom.mcp.PopularMcpServer
+import com.kai.custom.openUrl
 import com.kai.custom.mcp.popularMcpServers
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.VerticalScrollbarForScroll
@@ -138,7 +139,7 @@ private fun McpServerCard(
     onUpdateApiKey: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var apiKeyText by remember(server.id) { mutableStateOf(server.apiKey ?: "") }
+    var apiKeyText by remember(server.id, server.apiKey) { mutableStateOf(server.apiKey ?: "") }
 
     Card(
         onClick = { expanded = !expanded },
@@ -216,6 +217,41 @@ private fun McpServerCard(
                     Spacer(Modifier.height(8.dp))
                 }
 
+                val isJinaAi = server.url.contains("mcp.jina.ai")
+
+                // API key field for Jina AI (below status label)
+                if (isJinaAi) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        KaiOutlinedTextField(
+                            value = apiKeyText,
+                            onValueChange = { apiKeyText = it },
+                            label = { Text("API Key") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        TextButton(
+                            onClick = { onUpdateApiKey(apiKeyText.trim()) },
+                            enabled = apiKeyText.isNotBlank(),
+                            modifier = Modifier.handCursor(),
+                        ) {
+                            Text("Save")
+                        }
+                    }
+                    Text(
+                        text = "Get a free API key at jina.ai",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .clickable { openUrl("https://jina.ai") }
+                            .padding(top = 2.dp),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+
                 // Tools list
                 if (server.tools.isNotEmpty()) {
                     for (tool in server.tools) {
@@ -243,36 +279,14 @@ private fun McpServerCard(
                             )
                         }
                     }
-                } else if (server.connectionStatus == McpConnectionStatus.Connected) {
+                } else if (server.connectionStatus == McpConnectionStatus.Connected
+                    && !isJinaAi
+                ) {
                     Text(
                         text = stringResource(Res.string.settings_mcp_no_tools),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                }
-
-                if (server.connectionStatus == McpConnectionStatus.Error) {
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        KaiOutlinedTextField(
-                            value = apiKeyText,
-                            onValueChange = { apiKeyText = it },
-                            label = { Text("API Key") },
-                            singleLine = true,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        TextButton(
-                            onClick = { onUpdateApiKey(apiKeyText.trim()) },
-                            enabled = apiKeyText.isNotBlank(),
-                            modifier = Modifier.handCursor(),
-                        ) {
-                            Text("Save")
-                        }
-                    }
                 }
 
                 Spacer(Modifier.height(8.dp))
