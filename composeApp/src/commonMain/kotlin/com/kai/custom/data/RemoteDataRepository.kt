@@ -187,6 +187,7 @@ class RemoteDataRepository(
         memoryStore = memoryStore,
         dataRepository = this,
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+        appSettings = appSettings,
     )
 
     private val prettyJson = Json { prettyPrint = true }
@@ -1894,12 +1895,19 @@ class RemoteDataRepository(
     }
 
     override suspend fun switchPersona(personaId: String) {
-        personaManager.setActivePersonaId(personaId)
         val config = personaManager.getPersona(personaId)
+        personaManager.setActivePersonaId(personaId)
         if (config != null) {
             memoryStore.syncPersonaToRemote(config)
         }
         memoryStore.setPersona(personaId)
+        val name = config?.name ?: personaId
+        val switchMsg = "[SYSTEM] Switched to persona: $name."
+        chatHistory.update { current ->
+            val updated = current.toMutableList()
+            updated.add(History(role = History.Role.SYSTEM, content = switchMsg))
+            updated
+        }
     }
 
     override suspend fun getActiveSystemPrompt(variant: SystemPromptVariant, searchQuery: String?): String? {

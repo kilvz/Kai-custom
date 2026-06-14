@@ -144,6 +144,7 @@ class HeartbeatManager(
             )
         }
         val activePersona = personaManager.getActivePersona()
+        val soul = appSettings.getSoulText(activePersona.id)
         val soulUserText = appSettings.getSoulUser(activePersona.id)
         val soulAutoText = appSettings.getSoulAuto(activePersona.id)
         val traitBlock = buildString {
@@ -155,6 +156,10 @@ class HeartbeatManager(
             }
         }
         val heartbeatLead = buildString {
+            if (activePersona.renderMode == RenderMode.CHARACTER && soul.isNotBlank()) {
+                append(soul)
+                append("\n\n")
+            }
             if (soulUserText.isNotBlank()) {
                 append(soulUserText)
                 append("\n\n")

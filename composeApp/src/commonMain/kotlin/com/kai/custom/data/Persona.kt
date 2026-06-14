@@ -89,9 +89,6 @@ class PersonaManager(private val appSettings: AppSettings) {
 
     fun getActivePersona(): PersonaConfig = getPersona(getActivePersonaId()) ?: builtIns.first()
 
-    fun getSoulUserKey(personaId: String): String = "soul_user_$personaId"
-    fun getSoulAutoKey(personaId: String): String = "soul_auto_$personaId"
-
     private fun saveAll(personas: List<PersonaConfig>) {
         appSettings.settings.putString(KEY_PERSONA_LIST, json.encodeToString(personas))
     }

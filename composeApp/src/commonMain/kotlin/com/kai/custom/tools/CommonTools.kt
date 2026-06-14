@@ -3,6 +3,7 @@ package com.kai.custom.tools
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.CharacterType
+import com.kai.custom.data.DataRepository
 import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.MemoryCategory
 import com.kai.custom.data.MemoryEntry
@@ -644,6 +645,7 @@ object CommonTools {
     fun savePersonaTool(
         appSettings: AppSettings,
         personaManager: PersonaManager,
+        memoryStore: MemoryStore,
     ): Tool = object : Tool {
         override val schema = savePersonaToolSchema
         override val timeout: Duration = 30.seconds
@@ -674,6 +676,7 @@ object CommonTools {
                 isBuiltIn = false,
             )
             personaManager.savePersona(config)
+            memoryStore.syncPersonaToRemote(config)
 
             val versions = if (!fullText.isNullOrBlank()) " (condensed + full)" else " (condensed)"
             return mapOf(
@@ -698,7 +701,10 @@ object CommonTools {
         ),
     )
 
-    fun switchPersonaTool(personaManager: PersonaManager): Tool = object : Tool {
+    fun switchPersonaTool(
+        personaManager: PersonaManager,
+        dataRepository: DataRepository,
+    ): Tool = object : Tool {
         override val schema = switchPersonaToolSchema
         override val timeout: Duration = 10.seconds
 
@@ -707,7 +713,7 @@ object CommonTools {
                 ?: return mapOf("success" to false, "error" to "persona_id is required")
             val persona = personaManager.getPersona(personaId)
             if (persona == null) return mapOf("success" to false, "error" to "Persona not found: $personaId")
-            personaManager.setActivePersonaId(personaId)
+            dataRepository.switchPersona(personaId)
             return mapOf("success" to true, "persona_name" to persona.name, "message" to "Switched to '${persona.name}'.")
         }
     }

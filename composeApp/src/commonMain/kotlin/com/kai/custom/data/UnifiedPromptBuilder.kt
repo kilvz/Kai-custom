@@ -77,13 +77,6 @@ internal class SoulIdentitySection : PersonaSection {
     override fun build(context: PromptContext): String = context.soul
 }
 
-internal class CorePersonalitySection(private val defaultSoul: String) : PersonaSection {
-    override fun build(context: PromptContext): String? {
-        if (defaultSoul.isBlank()) return null
-        return defaultSoul
-    }
-}
-
 internal class HonestyRuleSection : PersonaSection {
     override fun build(context: PromptContext): String? = DEFAULT_HONESTY_RULE
 }
@@ -321,13 +314,10 @@ internal class ActiveFileContextAdapter : TaskAdapter {
 
 // ─── Builder ─────────────────────────────────────────────────────
 
-internal class UnifiedPromptBuilder(
-    private val defaultSoul: String = "",
-) {
+internal class UnifiedPromptBuilder {
     private val personaSections: MutableList<PersonaSection> = mutableListOf(
         LocalStyleSection(),
         SoulIdentitySection(),
-        CorePersonalitySection(defaultSoul),
         HonestyRuleSection(),
         LanguageSection(),
     )
@@ -379,7 +369,6 @@ internal class UnifiedPromptBuilder(
     }
 
     private fun buildCustomSoul(context: PromptContext): String? {
-        if (context.renderMode == RenderMode.UPSTREAM_COMPAT) return null
         val user = context.soulUserText
         val auto = context.soulAutoText
         val parts = mutableListOf<String>()

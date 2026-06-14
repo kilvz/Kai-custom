@@ -22,12 +22,17 @@ class AutoMemoryLearner(
     private val memoryStore: MemoryStore,
     private val dataRepository: DataRepository,
     private val scope: CoroutineScope,
+    private val appSettings: AppSettings,
 ) {
     @Volatile
     private var exchangeCount = 0
 
     /** Call after every successful AI response. Triggers extraction when interval reached. */
     fun onExchangeComplete() {
+        if (!appSettings.isMemoryEnabled()) {
+            exchangeCount = 0
+            return
+        }
         exchangeCount++
         if (exchangeCount >= EXTRACTION_INTERVAL) {
             exchangeCount = 0

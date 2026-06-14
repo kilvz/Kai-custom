@@ -151,8 +151,6 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.default_soul
 import kai.composeapp.generated.resources.github_mark
 import kai.composeapp.generated.resources.ic_arrow_drop_down
-import kai.composeapp.generated.resources.settings_screen_database_reset
-import kai.composeapp.generated.resources.settings_screen_ok
 import kai.composeapp.generated.resources.litert_cancel
 import kai.composeapp.generated.resources.litert_context_size
 import kai.composeapp.generated.resources.litert_download
@@ -234,6 +232,8 @@ import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm
 import kai.composeapp.generated.resources.settings_scheduled_tasks
 import kai.composeapp.generated.resources.settings_scheduled_tasks_cancel
 import kai.composeapp.generated.resources.settings_scheduled_tasks_description
+import kai.composeapp.generated.resources.settings_screen_database_reset
+import kai.composeapp.generated.resources.settings_screen_ok
 import kai.composeapp.generated.resources.settings_sign_in_copy_api_key_from
 import kai.composeapp.generated.resources.settings_sms
 import kai.composeapp.generated.resources.settings_soul
@@ -365,6 +365,7 @@ fun SettingsScreen(
         sshViewModel = sshViewModel,
         onNavigateBack = onNavigateBack,
         navigationTabBar = navigationTabBar,
+        onPersonaSelected = { viewModel.refreshPersonaState() },
     )
 }
 
@@ -390,6 +391,7 @@ fun SettingsScreenContent(
     sshViewModel: SshViewModel? = null,
     onNavigateBack: () -> Unit = {},
     navigationTabBar: (@Composable () -> Unit)? = null,
+    onPersonaSelected: () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val undoLabel = stringResource(Res.string.snackbar_undo)
@@ -677,7 +679,7 @@ fun SettingsScreenContent(
                             }
 
                             SettingsTab.Plugins -> {
-                                PluginSettingsCard()
+                                PluginSettingsCard(onSwitchPersona = actions.onSwitchPersona, onPersonaSelected = onPersonaSelected)
                             }
                         }
 

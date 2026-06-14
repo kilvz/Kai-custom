@@ -288,6 +288,10 @@ class AppSettings(internal val settings: Settings) {
         val config = personaManagerSafe?.getPersona(personaId)
         val defaultSoul = config?.defaultSoul
         if (!defaultSoul.isNullOrBlank()) {
+            val firstLine = defaultSoul.lineSequence().firstOrNull()?.trim() ?: ""
+            if (firstLine.startsWith("You are ") || firstLine.startsWith("**Identity**:")) {
+                return defaultSoul
+            }
             if (localModel) {
                 val identity = defaultSoul.lineSequence()
                     .firstOrNull { it.startsWith("**Identity**:") }

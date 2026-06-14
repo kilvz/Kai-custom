@@ -130,8 +130,8 @@ import kai.composeapp.generated.resources.tool_send_notification_name
 import kai.composeapp.generated.resources.tool_set_alarm_description
 import kai.composeapp.generated.resources.tool_set_alarm_name
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.java.KoinJavaComponent.inject
 import kotlin.coroutines.CoroutineContext
@@ -407,8 +407,8 @@ actual fun getAvailableTools(): List<Tool> {
             add(CommonTools.localTimeTool)
         }
         if (appSettings.isToolEnabled(CommonTools.savePersonaToolSchema.name)) {
-            add(CommonTools.savePersonaTool(appSettings, personaManager))
-            add(CommonTools.switchPersonaTool(personaManager))
+            add(CommonTools.savePersonaTool(appSettings, personaManager, memoryStore))
+            add(CommonTools.switchPersonaTool(personaManager, dataRepository))
             add(CommonTools.listPersonasTool(personaManager))
             add(CommonTools.deletePersonaTool(personaManager))
         }
@@ -1101,7 +1101,9 @@ actual fun getAvailableTools(): List<Tool> {
                             val grantedByShizuku = if (ShizukuManager.isAvailable && ShizukuManager.hasPermission) {
                                 val result = ShizukuManager.runCommand("appops set ${context.packageName} android:write_settings allow")
                                 result["exitCode"] as? Int == 0
-                            } else false
+                            } else {
+                                false
+                            }
                             if (!grantedByShizuku) {
                                 val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
                                     data = android.net.Uri.parse("package:${context.packageName}")

@@ -554,16 +554,16 @@ class SettingsViewModel(
 
     private fun onSwitchPersona(personaId: String) {
         val config = dataRepository.getAllPersonas().find { it.id == personaId } ?: return
-        _state.update {
-            it.copy(
-                activePersonaId = personaId,
-                personaName = config.name,
-                soulText = dataRepository.getSoulUser(),
-                soulAuto = dataRepository.getSoulAuto(),
-            )
-        }
         viewModelScope.launch {
             dataRepository.switchPersona(personaId)
+            _state.update {
+                it.copy(
+                    activePersonaId = personaId,
+                    personaName = config.name,
+                    soulText = dataRepository.getSoulUser(),
+                    soulAuto = dataRepository.getSoulAuto(),
+                )
+            }
         }
     }
 
@@ -615,6 +615,19 @@ class SettingsViewModel(
         }
         viewModelScope.launch {
             dataRepository.switchPersona(id)
+        }
+    }
+
+    fun refreshPersonaState() {
+        val active = dataRepository.getActivePersona()
+        _state.update {
+            it.copy(
+                activePersonaId = active.id,
+                personaName = active.name,
+                soulText = dataRepository.getSoulUser(),
+                soulAuto = dataRepository.getSoulAuto(),
+                personas = dataRepository.getAllPersonas().toImmutableList(),
+            )
         }
     }
 
@@ -1206,21 +1219,21 @@ class SettingsViewModel(
     }
 
     // MCP server management
-     private fun buildMcpServerEntries(): List<McpServerUiState> = dataRepository.getMcpServers().map { config ->
-         McpServerUiState(
-             id = config.id,
-             name = config.name,
-             url = config.url,
-             isEnabled = config.isEnabled,
-             connectionStatus = if (dataRepository.isMcpServerConnected(config.id)) {
-                 McpConnectionStatus.Connected
-             } else {
-                 McpConnectionStatus.Unknown
-             },
-             tools = dataRepository.getMcpToolsForServer(config.id).toImmutableList(),
-             apiKey = config.headers["Authorization"]?.removePrefix("Bearer ")?.trim() ?: "",
-         )
-     }
+    private fun buildMcpServerEntries(): List<McpServerUiState> = dataRepository.getMcpServers().map { config ->
+        McpServerUiState(
+            id = config.id,
+            name = config.name,
+            url = config.url,
+            isEnabled = config.isEnabled,
+            connectionStatus = if (dataRepository.isMcpServerConnected(config.id)) {
+                McpConnectionStatus.Connected
+            } else {
+                McpConnectionStatus.Unknown
+            },
+            tools = dataRepository.getMcpToolsForServer(config.id).toImmutableList(),
+            apiKey = config.headers["Authorization"]?.removePrefix("Bearer ")?.trim() ?: "",
+        )
+    }
 
     private fun refreshMcpServers() {
         _state.update { current ->

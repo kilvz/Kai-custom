@@ -104,6 +104,10 @@ class AltMemoryClient(
     private fun buildPersonaSystemPrompt(config: PersonaConfig): String = buildString {
         appendLine("You are ${config.name}, a ${config.behaviorStyle.displayName.lowercase()} persona.")
         appendLine()
+        if (config.defaultSoul.isNotBlank()) {
+            appendLine(config.defaultSoul)
+            appendLine()
+        }
         appendLine("## Character")
         appendLine("- Role: ${config.behaviorStyle.displayName}")
         appendLine("- Style: ${config.languageStyle.displayName}")

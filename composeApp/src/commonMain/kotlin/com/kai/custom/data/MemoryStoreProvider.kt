@@ -8,8 +8,12 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     @Volatile
     private var delegate: MemoryStore = sqliteStore
+    private var appSettings: AppSettings? = null
+    private var personaManager: PersonaManager? = null
 
     fun useAltMemory(client: McpClient, appSettings: AppSettings) {
+        this.appSettings = appSettings
+        this.personaManager = PersonaManager(appSettings)
         delegate = AltMemoryClient(client, appSettings)
     }
 
@@ -19,7 +23,10 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
 
     val isUsingAltMemory: Boolean get() = delegate !is SqliteMemoryStore
 
-    // ── Unprotected writes: SQL + alt-memory dual-write when connected ──
+    private val isCharacterMode: Boolean
+        get() = personaManager?.getActivePersona()?.renderMode == RenderMode.CHARACTER
+
+    // ── Unprotected writes ──
 
     override suspend fun store(
         key: String,
@@ -27,6 +34,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         category: MemoryCategory,
         source: String?,
     ): MemoryEntry {
+        if (isCharacterMode && isUsingAltMemory) {
+            return delegate.store(key, content, category, source)
+        }
         val entry = sqliteStore.store(key, content, category, source)
         if (isUsingAltMemory) {
             try {
@@ -37,6 +47,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override suspend fun updateContent(key: String, content: String): MemoryEntry? {
+        if (isCharacterMode && isUsingAltMemory) {
+            return delegate.updateContent(key, content)
+        }
         val entry = sqliteStore.updateContent(key, content)
         if (isUsingAltMemory && entry != null) {
             try {
@@ -47,6 +60,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override suspend fun reinforceMemory(key: String): MemoryEntry? {
+        if (isCharacterMode && isUsingAltMemory) {
+            return delegate.reinforceMemory(key)
+        }
         val entry = sqliteStore.reinforceMemory(key)
         if (isUsingAltMemory && entry != null) {
             try {
@@ -57,6 +73,9 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override suspend fun forget(key: String): Boolean {
+        if (isCharacterMode && isUsingAltMemory) {
+            return delegate.forget(key)
+        }
         val ok = sqliteStore.forget(key)
         if (isUsingAltMemory) {
             try {
@@ -67,6 +86,10 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override suspend fun deleteAllMemories(force: Boolean) {
+        if (isCharacterMode && isUsingAltMemory) {
+            delegate.deleteAllMemories(force)
+            return
+        }
         sqliteStore.deleteAllMemories(force)
         if (isUsingAltMemory) {
             try {
@@ -75,7 +98,7 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         }
     }
 
-    // ── Protected writes: alt-memory only (behavior, summaries), SQL fallback ──
+    // ── Protected writes ──
 
     override suspend fun storeProtected(
         key: String,
@@ -83,21 +106,50 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         category: MemoryCategory,
         source: String?,
     ): MemoryEntry {
+        if (isCharacterMode && isUsingAltMemory) {
+            return delegate.storeProtected(key, content, category, source)
+        }
         if (isUsingAltMemory) {
             return delegate.storeProtected(key, content, category, source)
         }
         return sqliteStore.storeProtected(key, content, category, source)
     }
 
-    // ── Unprotected reads: SQL only ──
+    // ── Unprotected reads ──
 
-    override fun getUserMemories(max: Int): List<MemoryEntry> = sqliteStore.getUserMemories(max)
+    override fun getUserMemories(max: Int): List<MemoryEntry> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                delegate.getUserMemories(max)
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+        return sqliteStore.getUserMemories(max)
+    }
 
-    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> = sqliteStore.searchMemories(query, limit, mode)
+    override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                delegate.searchMemories(query, limit, mode)
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+        return sqliteStore.searchMemories(query, limit, mode)
+    }
 
-    // ── Protected reads: alt-memory when active, SQL fallback ──
+    // ── Protected reads ──
 
     override fun getBehaviorMemories(): List<MemoryEntry> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                val alt = delegate.getBehaviorMemories()
+                if (alt.isNotEmpty()) alt else sqliteStore.getBehaviorMemories()
+            } catch (_: Exception) {
+                sqliteStore.getBehaviorMemories()
+            }
+        }
         if (!isUsingAltMemory) return sqliteStore.getBehaviorMemories()
         return try {
             val alt = delegate.getBehaviorMemories()
@@ -108,6 +160,14 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                val alt = delegate.getPromotionCandidates(minHits, max)
+                if (alt.isNotEmpty()) alt else sqliteStore.getPromotionCandidates(minHits, max)
+            } catch (_: Exception) {
+                sqliteStore.getPromotionCandidates(minHits, max)
+            }
+        }
         if (!isUsingAltMemory) return sqliteStore.getPromotionCandidates(minHits, max)
         return try {
             val alt = delegate.getPromotionCandidates(minHits, max)
@@ -120,6 +180,16 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     // ── Combined reads ──
 
     override fun getAllMemories(max: Int): List<MemoryEntry> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                val alt = delegate.getAllMemories(max)
+                val altIds = alt.map { it.key }.toSet()
+                val sql = sqliteStore.getAllMemories(max)
+                (alt + sql.filter { it.key !in altIds }).take(max)
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
         if (!isUsingAltMemory) return sqliteStore.getAllMemories(max)
         val sql = sqliteStore.getAllMemories(max)
         return try {
@@ -131,7 +201,7 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         }
     }
 
-    // ── Passthrough: delegate to alt-memory when active ──
+    // ── Passthrough ──
 
     override suspend fun setPersona(personaId: String) {
         try {
@@ -176,9 +246,12 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         sqliteStore.importDimension(data)
     }
 
-    // ── Knowledge graph: SQL + alt-memory (dual-write for resilience) ──
+    // ── Knowledge graph ──
 
     override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact {
+        if (isCharacterMode && isUsingAltMemory) {
+            return delegate.addFact(subject, predicate, `object`)
+        }
         val fact = sqliteStore.addFact(subject, predicate, `object`)
         if (isUsingAltMemory) {
             try {
@@ -189,6 +262,13 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                delegate.queryFacts(entity, relation, limit)
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
         if (!isUsingAltMemory) return sqliteStore.queryFacts(entity, relation, limit)
         return try {
             val alt = delegate.queryFacts(entity, relation, limit)
@@ -199,6 +279,10 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     }
 
     override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {
+        if (isCharacterMode && isUsingAltMemory) {
+            delegate.invalidateFact(subject, predicate, `object`)
+            return
+        }
         sqliteStore.invalidateFact(subject, predicate, `object`)
         if (isUsingAltMemory) {
             try {
@@ -207,9 +291,13 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
         }
     }
 
-    // ── Diary: SQL + alt-memory (dual-write for resilience) ──
+    // ── Diary ──
 
     override suspend fun diaryWrite(agentName: String, content: String, topic: String) {
+        if (isCharacterMode && isUsingAltMemory) {
+            delegate.diaryWrite(agentName, content, topic)
+            return
+        }
         sqliteStore.diaryWrite(agentName, content, topic)
         if (isUsingAltMemory) {
             try {
@@ -221,6 +309,13 @@ class MemoryStoreProvider(private val sqliteStore: SqliteMemoryStore) : MemorySt
     override suspend fun diaryDelete(id: String): Boolean = sqliteStore.diaryDelete(id)
 
     override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> {
+        if (isCharacterMode && isUsingAltMemory) {
+            return try {
+                delegate.diaryRead(agentName, lastN)
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
         if (!isUsingAltMemory) return sqliteStore.diaryRead(agentName, lastN)
         return try {
             val alt = delegate.diaryRead(agentName, lastN)
