@@ -1338,7 +1338,7 @@ internal object ModelCatalog {
         "orpheus-arabic-saudi" to CuratedModelInfo("Orpheus Arabic", 0, "2025-03"),
     )
 
-    // LMArena Elo scores scraped from https://arena.ai/leaderboard (2026-05-31).
+    // LMArena Elo scores scraped from https://arena.ai/leaderboard/text (2026-06-13).
     // To update: run the `update-model-catalog` skill.
     private val arenaScores: Map<String, Int> = mapOf(
         // --- Anthropic ---
@@ -1432,7 +1432,7 @@ internal object ModelCatalog {
         "grok-4-fast" to 1421, "grok-4-fast-chat" to 1421, "grok-4-fast-reasoning" to 1404,
         "grok-3" to 1412, "grok-3-latest" to 1412, "grok-3-beta" to 1412, "grok-3-preview-02-24" to 1412,
         "grok-3-mini" to 1362, "grok-3-mini-latest" to 1362, "grok-3-mini-beta" to 1357, "grok-3-mini-high" to 1362,
-        "grok-2" to 1335, "grok-2-latest" to 1335, "grok-2-1212" to 1335, "grok-2-2024-08-13" to 1335,
+        "grok-2" to 1336, "grok-2-latest" to 1336, "grok-2-1212" to 1336, "grok-2-2024-08-13" to 1336,
         // --- DeepSeek ---
         "deepseek-v4-pro" to 1454, "deepseek-v4-pro:free" to 1454,
         "deepseek-v4-pro-thinking" to 1458, "deepseek-v4-pro-thinking:free" to 1458,
