@@ -13,7 +13,9 @@ import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SessionShell
 import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.resolveSandboxAbsolute
+import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
+import kotlin.io.encoding.Base64
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -300,10 +302,15 @@ class AndroidSandboxController : SandboxController {
     override suspend fun listDirectory(path: String): List<SandboxFileEntry> = withContext(Dispatchers.IO) {
         val dir = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext emptyList()
-        if (!dir.isDirectory) return@withContext emptyList()
 
         val normalized = if (path.endsWith("/")) path.dropLast(1) else path
         val isRoot = normalized.isEmpty() || normalized == "/"
+
+        if (!isRoot && isOnHostStorage(dir)) {
+            return@withContext listHostDirectoryViaSandbox(normalized, dir.absolutePath)
+        }
+
+        if (!dir.isDirectory) return@withContext emptyList()
 
         val children = dir.listFiles().orEmpty()
             .filterNot { isRoot && it.name == "root" }
@@ -347,9 +354,123 @@ class AndroidSandboxController : SandboxController {
         )
     }
 
+    // ── host storage helpers (sandbox shell bypasses scoped storage) ──
+
+    companion object {
+        private val HOST_STORAGE_PREFIXES = arrayOf("/storage/emulated/", "/storage/self/", "/data/media/")
+    }
+
+    private fun isOnHostStorage(file: File): Boolean =
+        HOST_STORAGE_PREFIXES.any { file.absolutePath.startsWith(it) }
+
+    private fun shellEscaped(path: String): String = path.replace("'", "'\\''")
+
+    private suspend fun readHostTextFileViaSandbox(filePath: String, maxBytes: Int): String? {
+        val safe = shellEscaped(filePath)
+        val cmd = "f='$safe'; if [ -f \"\$f\" ] && [ \$(stat -c%s \"\$f\" 2>/dev/null || echo 999999999) -le $maxBytes ] 2>/dev/null; then base64 < \"\$f\" 2>/dev/null; else echo '____KAI_B64_FAIL____'; fi"
+        val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
+        if (result.exitCode != 0 || result.stdout.contains("____KAI_B64_FAIL____")) return null
+        val b64 = result.stdout.replace("\n", "").replace("\r", "")
+        return try {
+            val bytes = Base64.decode(b64)
+            if (bytes.any { it == 0.toByte() }) null else bytes.toString(Charsets.UTF_8)
+        } catch (_: Exception) { null }
+    }
+
+    private suspend fun writeHostTextFileViaSandbox(filePath: String, content: String): Boolean {
+        val safe = shellEscaped(filePath)
+        val b64 = Base64.encode(content.encodeToByteArray())
+        val cmd = "echo '$b64' | base64 -d > '$safe'"
+        val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
+        return result.exitCode == 0
+    }
+
+    private suspend fun writeHostBinaryViaSandbox(filePath: String, data: ByteArray): Boolean {
+        val safe = shellEscaped(filePath)
+        val b64 = Base64.encode(data)
+        val cmd = "echo '$b64' | base64 -d > '$safe'"
+        val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
+        return result.exitCode == 0
+    }
+
+    private suspend fun deleteHostEntryViaSandbox(filePath: String, recursive: Boolean): Boolean {
+        val safe = shellEscaped(filePath)
+        val rm = if (recursive) "rm -rf" else "rm -f"
+        val cmd = "$rm '$safe'"
+        val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
+        return result.exitCode == 0
+    }
+
+    private suspend fun listHostDirectoryViaSandbox(
+        sandboxPath: String,
+        hostPath: String,
+    ): List<SandboxFileEntry> {
+        val safe = shellEscaped(hostPath)
+        val cmd = buildString {
+            append("d='$safe'\n")
+            append("cd \"\$d\" 2>/dev/null || { echo '____KAI_LS_FAIL____'; exit 1; }\n")
+            append("for e in * .*; do\n")
+            append("  [ \"\$e\" = \".\" ] && continue\n")
+            append("  [ \"\$e\" = \"..\" ] && continue\n")
+            append("  [ -e \"\$e\" ] || continue\n")
+            append("  if [ -d \"\$e\" ]; then\n")
+            append("    printf 'D\\0%s\\0%s\\0' \"\$e\" \"\$(stat -c '%Y' \"\$e\" 2>/dev/null || echo 0)\"\n")
+            append("  else\n")
+            append("    printf 'F\\0%s\\0%s\\0%s\\0' \"\$e\" \"\$(stat -c '%s' \"\$e\" 2>/dev/null || echo 0)\" \"\$(stat -c '%Y' \"\$e\" 2>/dev/null || echo 0)\"\n")
+            append("  fi\n")
+            append("done\n")
+        }
+        val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
+        if (result.exitCode != 0 || result.stdout.startsWith("____KAI_LS_FAIL____")) return emptyList()
+
+        val parts = result.stdout.split('\u0000')
+        val entries = mutableListOf<SandboxFileEntry>()
+        val normalized = if (sandboxPath.endsWith("/")) sandboxPath.dropLast(1) else sandboxPath
+
+        var i = 0
+        while (i < parts.size) {
+            when (parts[i]) {
+                "D" -> {
+                    val name = parts.getOrNull(i + 1) ?: break
+                    val mtime = parts.getOrNull(i + 2)?.toLongOrNull() ?: 0L
+                    entries.add(
+                        SandboxFileEntry(
+                            name = name,
+                            path = "$normalized/$name",
+                            isDirectory = true,
+                            sizeBytes = 0,
+                            lastModifiedMs = mtime * 1000L,
+                        ),
+                    )
+                    i += 3
+                }
+                "F" -> {
+                    val name = parts.getOrNull(i + 1) ?: break
+                    val size = parts.getOrNull(i + 2)?.toLongOrNull() ?: 0L
+                    val mtime = parts.getOrNull(i + 3)?.toLongOrNull() ?: 0L
+                    entries.add(
+                        SandboxFileEntry(
+                            name = name,
+                            path = "$normalized/$name",
+                            isDirectory = false,
+                            sizeBytes = size,
+                            lastModifiedMs = mtime * 1000L,
+                        ),
+                    )
+                    i += 4
+                }
+                else -> break
+            }
+        }
+        return entries
+    }
+
     override suspend fun readTextFile(path: String, maxBytes: Int): String? = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext null
+        if (isOnHostStorage(file)) {
+            return@withContext readHostTextFileViaSandbox(file.absolutePath, maxBytes)
+        }
         if (!file.isFile) return@withContext null
         if (file.length() > maxBytes) return@withContext null
         val bytes = try {
@@ -364,6 +485,9 @@ class AndroidSandboxController : SandboxController {
     override suspend fun writeTextFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
+        if (isOnHostStorage(file)) {
+            return@withContext writeHostTextFileViaSandbox(file.absolutePath, content)
+        }
         if (file.exists() && !file.isFile) return@withContext false
         try {
             file.parentFile?.mkdirs()
@@ -377,6 +501,9 @@ class AndroidSandboxController : SandboxController {
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
+        if (isOnHostStorage(file)) {
+            return@withContext writeHostBinaryViaSandbox(file.absolutePath, data)
+        }
         if (file.exists() && !file.isFile) return@withContext false
         try {
             file.parentFile?.mkdirs()
@@ -398,6 +525,9 @@ class AndroidSandboxController : SandboxController {
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
+        if (isOnHostStorage(file)) {
+            return@withContext deleteHostEntryViaSandbox(file.absolutePath, recursive)
+        }
         if (!file.exists()) return@withContext false
         // Refuse to delete the sandbox roots themselves.
         val canonical = file.canonicalPath

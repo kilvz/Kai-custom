@@ -130,6 +130,7 @@ import kai.composeapp.generated.resources.tool_send_notification_name
 import kai.composeapp.generated.resources.tool_set_alarm_description
 import kai.composeapp.generated.resources.tool_set_alarm_name
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.java.KoinJavaComponent.inject
@@ -213,7 +214,7 @@ actual fun getToolPermissionMap(): Map<String, List<String>> = mapOf(
     "send_notification" to listOf(Manifest.permission.POST_NOTIFICATIONS),
     "create_calendar_event" to listOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR),
     "list_media" to listOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO, Manifest.permission.READ_MEDIA_AUDIO),
-    "scan_bluetooth_devices" to listOf(Manifest.permission.BLUETOOTH_CONNECT),
+    "scan_bluetooth_devices" to listOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN),
 )
 
 actual fun keyCodeToName(keyCode: Int): String = android.view.KeyEvent.keyCodeToString(keyCode)
@@ -912,52 +913,55 @@ actual fun getAvailableTools(): List<Tool> {
                             }
                         }
                         val maxDuration = (args["duration_seconds"] as? Number)?.toInt()?.coerceIn(1, 60) ?: 10
-                        val deferred = kotlinx.coroutines.CompletableDeferred<Map<String, Any>>()
-                        val recognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(context)
-                        val listener = object : android.speech.RecognitionListener {
-                            override fun onReadyForSpeech(params: android.os.Bundle?) {}
-                            override fun onBeginningOfSpeech() {}
-                            override fun onRmsChanged(rmsdB: Float) {}
-                            override fun onBufferReceived(buffer: ByteArray?) {}
-                            override fun onEndOfSpeech() { /* will be handled by timeout */ }
-                            override fun onError(error: Int) {
-                                val msg = when (error) {
-                                    android.speech.SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
-                                    android.speech.SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech detected"
-                                    android.speech.SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Speech recognizer is busy"
-                                    else -> "Recognition error: $error"
+                        val result = withContext(Dispatchers.Main) {
+                            val deferred = kotlinx.coroutines.CompletableDeferred<Map<String, Any>>()
+                            val recognizer = android.speech.SpeechRecognizer.createSpeechRecognizer(context)
+                            val listener = object : android.speech.RecognitionListener {
+                                override fun onReadyForSpeech(params: android.os.Bundle?) {}
+                                override fun onBeginningOfSpeech() {}
+                                override fun onRmsChanged(rmsdB: Float) {}
+                                override fun onBufferReceived(buffer: ByteArray?) {}
+                                override fun onEndOfSpeech() {}
+                                override fun onError(error: Int) {
+                                    val msg = when (error) {
+                                        android.speech.SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
+                                        android.speech.SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech detected"
+                                        android.speech.SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Speech recognizer is busy"
+                                        else -> "Recognition error: $error"
+                                    }
+                                    deferred.complete(mapOf("success" to false, "error" to msg))
                                 }
-                                deferred.complete(mapOf("success" to false, "error" to msg))
-                            }
-                            override fun onResults(results: android.os.Bundle?) {
-                                val matches = results?.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION)
-                                val text = matches?.firstOrNull()?.takeIf { it.isNotBlank() }
-                                if (text != null) {
-                                    deferred.complete(
-                                        mapOf(
-                                            "success" to true,
-                                            "transcription" to text,
-                                            "message" to "Heard: $text",
-                                        ),
-                                    )
-                                } else {
-                                    deferred.complete(mapOf("success" to false, "error" to "No speech detected"))
+                                override fun onResults(results: android.os.Bundle?) {
+                                    val matches = results?.getStringArrayList(android.speech.SpeechRecognizer.RESULTS_RECOGNITION)
+                                    val text = matches?.firstOrNull()?.takeIf { it.isNotBlank() }
+                                    if (text != null) {
+                                        deferred.complete(
+                                            mapOf(
+                                                "success" to true,
+                                                "transcription" to text,
+                                                "message" to "Heard: $text",
+                                            ),
+                                        )
+                                    } else {
+                                        deferred.complete(mapOf("success" to false, "error" to "No speech detected"))
+                                    }
                                 }
+                                override fun onPartialResults(partialResults: android.os.Bundle?) {}
+                                override fun onEvent(eventType: Int, params: android.os.Bundle?) {}
                             }
-                            override fun onPartialResults(partialResults: android.os.Bundle?) {}
-                            override fun onEvent(eventType: Int, params: android.os.Bundle?) {}
+                            recognizer.setRecognitionListener(listener)
+                            val intent = Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+                                putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
+                                putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
+                            }
+                            recognizer.startListening(intent)
+                            val timeoutMs = (maxDuration + 5) * 1000L
+                            val speechResult = withTimeoutOrNull(timeoutMs) { deferred.await() }
+                            recognizer.destroy()
+                            speechResult
                         }
-                        recognizer.setRecognitionListener(listener)
-                        val intent = Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                            putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                            putExtra(android.speech.RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-                            putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L)
-                            putExtra(android.speech.RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 1500L)
-                        }
-                        recognizer.startListening(intent)
-                        val timeoutMs = (maxDuration + 5) * 1000L
-                        val result = withTimeoutOrNull(timeoutMs) { deferred.await() }
-                        recognizer.destroy()
                         return result ?: mapOf("success" to false, "error" to "Listening timed out after ${maxDuration}s")
                     }
                 },
@@ -973,26 +977,35 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Capture the current device screen and save it for AI analysis.",
                         parameters = emptyMap(),
                     )
-                    override suspend fun execute(args: Map<String, Any>): Any = try {
+                    override suspend fun execute(args: Map<String, Any>): Any {
                         val tempFile = java.io.File(context.cacheDir, "screenshot_${System.currentTimeMillis()}.png")
-                        val process = Runtime.getRuntime().exec(arrayOf("screencap", "-p", tempFile.absolutePath))
-                        val exitCode = process.waitFor()
-                        if (exitCode == 0 && tempFile.exists() && tempFile.length() > 0) {
-                            val aiDir = java.io.File(context.filesDir, "ai_captures")
-                            aiDir.mkdirs()
-                            val saved = java.io.File(aiDir, "screenshot_${System.currentTimeMillis()}.png")
-                            tempFile.copyTo(saved, overwrite = true)
-                            tempFile.delete()
-                            mapOf(
-                                "success" to true,
-                                "path" to saved.absolutePath,
-                                "message" to "Screenshot saved",
-                            )
-                        } else {
-                            mapOf("success" to false, "error" to "Failed to capture screen (exit code $exitCode). On Android 12+, grant screen capture permission via MediaProjection.")
+                        return try {
+                            val captured = if (ShizukuManager.isAvailable && ShizukuManager.hasPermission) {
+                                val shResult = ShizukuManager.runCommand("screencap -p ${tempFile.absolutePath}")
+                                val exitCode = shResult["exitCode"] as? Int ?: -1
+                                exitCode == 0 && tempFile.exists() && tempFile.length() > 0
+                            } else {
+                                val process = Runtime.getRuntime().exec(arrayOf("screencap", "-p", tempFile.absolutePath))
+                                val exitCode = process.waitFor()
+                                exitCode == 0 && tempFile.exists() && tempFile.length() > 0
+                            }
+                            if (captured) {
+                                val aiDir = java.io.File(context.filesDir, "ai_captures")
+                                aiDir.mkdirs()
+                                val saved = java.io.File(aiDir, "screenshot_${System.currentTimeMillis()}.png")
+                                tempFile.copyTo(saved, overwrite = true)
+                                tempFile.delete()
+                                mapOf(
+                                    "success" to true,
+                                    "path" to saved.absolutePath,
+                                    "message" to "Screenshot saved",
+                                )
+                            } else {
+                                mapOf("success" to false, "error" to "Failed to capture screen. Try using the run_adb tool with: screencap -p /sdcard/screenshot.png")
+                            }
+                        } catch (e: Exception) {
+                            mapOf("success" to false, "error" to "Failed to take screenshot: ${e.message}")
                         }
-                    } catch (e: Exception) {
-                        mapOf("success" to false, "error" to "Failed to take screenshot: ${e.message}")
                     }
                 },
             )
@@ -1072,7 +1085,7 @@ actual fun getAvailableTools(): List<Tool> {
                 object : Tool {
                     override val schema = ToolSchema(
                         name = "modify_settings",
-                        description = "Modify Android system/global/secure settings. Opens WRITE_SETTINGS permission screen if not granted. Namespace: 'system' (default), 'global', or 'secure'.",
+                        description = "Modify Android system/global/secure settings. Grants WRITE_SETTINGS via Shizuku automatically when needed. Namespace: 'system' (default), 'global', or 'secure'.",
                         parameters = mapOf(
                             "key" to ParameterSchema("string", "Setting key (e.g. screen_brightness, wifi_on)", true),
                             "value" to ParameterSchema("string", "Value to set", true),
@@ -1085,15 +1098,21 @@ actual fun getAvailableTools(): List<Tool> {
                         val namespace = args["namespace"]?.toString()?.lowercase() ?: "system"
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.System.canWrite(context)) {
-                            val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                                data = android.net.Uri.parse("package:${context.packageName}")
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            val grantedByShizuku = if (ShizukuManager.isAvailable && ShizukuManager.hasPermission) {
+                                val result = ShizukuManager.runCommand("appops set ${context.packageName} android:write_settings allow")
+                                result["exitCode"] as? Int == 0
+                            } else false
+                            if (!grantedByShizuku) {
+                                val intent = Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                                    data = android.net.Uri.parse("package:${context.packageName}")
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                                return mapOf(
+                                    "success" to false,
+                                    "error" to "WRITE_SETTINGS permission not granted and Shizuku unavailable. Settings screen has been opened — please grant the permission and try again.",
+                                )
                             }
-                            context.startActivity(intent)
-                            return mapOf(
-                                "success" to false,
-                                "error" to "WRITE_SETTINGS permission not granted. Settings screen has been opened — please grant the permission and try again.",
-                            )
                         }
 
                         return try {
@@ -1799,6 +1818,14 @@ actual fun getAvailableTools(): List<Tool> {
 
                     @Suppress("DEPRECATION")
                     override suspend fun execute(args: Map<String, Any>): Any {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                                val granted = toolPermissionBridge.requestPermission(Manifest.permission.BLUETOOTH_CONNECT)
+                                if (!granted) {
+                                    return mapOf("success" to false, "error" to "BLUETOOTH_CONNECT permission not granted. Grant it in Settings > Apps > Kai > Permissions.")
+                                }
+                            }
+                        }
                         return try {
                             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as android.bluetooth.BluetoothManager
                             val btAdapter = bluetoothManager.adapter
@@ -1830,6 +1857,24 @@ actual fun getAvailableTools(): List<Tool> {
                         ),
                     )
                     override suspend fun execute(args: Map<String, Any>): Any {
+                        val permissionsToRequest = mutableListOf<String>()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            val mediaType = args["type"]?.toString()?.lowercase() ?: "all"
+                            if (mediaType == "all" || mediaType == "image") permissionsToRequest.add(Manifest.permission.READ_MEDIA_IMAGES)
+                            if (mediaType == "all" || mediaType == "video") permissionsToRequest.add(Manifest.permission.READ_MEDIA_VIDEO)
+                            if (mediaType == "all" || mediaType == "audio") permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)
+                        }
+                        if (permissionsToRequest.isNotEmpty()) {
+                            val allGranted = permissionsToRequest.all {
+                                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                            }
+                            if (!allGranted) {
+                                val granted = toolPermissionBridge.requestPermission(*permissionsToRequest.toTypedArray())
+                                if (!granted) {
+                                    return mapOf("success" to false, "error" to "Media permissions not granted. Grant them in Settings > Apps > Kai > Permissions.")
+                                }
+                            }
+                        }
                         return try {
                             val mediaType = args["type"]?.toString()?.lowercase() ?: "all"
                             val limit = (args["limit"] as? Number)?.toInt()?.coerceIn(1, 100) ?: 20

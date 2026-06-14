@@ -152,7 +152,7 @@ object PhoneTools {
     val screenshotToolInfo = ToolInfo(
         id = "screenshot",
         name = "Take Screenshot",
-        description = "Capture the current device screen and save it for AI analysis. On Android 12+, requires MediaProjection permission (granted per-session when tool runs).",
+        description = "Capture the current device screen and save it for AI analysis.",
     )
 
     val launchActivityToolInfo = ToolInfo(
@@ -170,7 +170,7 @@ object PhoneTools {
     val modifySettingsToolInfo = ToolInfo(
         id = "modify_settings",
         name = "Modify Settings",
-        description = "Modify Android system/global/secure settings. Requires WRITE_SETTINGS permission (opens settings screen when tool runs if not granted).",
+        description = "Modify Android system/global/secure settings. Grants WRITE_SETTINGS via Shizuku automatically when needed.",
     )
 
     val readScreenTextToolInfo = ToolInfo(

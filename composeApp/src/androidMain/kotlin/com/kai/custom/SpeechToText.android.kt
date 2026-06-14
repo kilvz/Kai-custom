@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -34,63 +36,65 @@ class AndroidSpeechToText : SpeechToText {
             onError("Microphone permission not granted. Grant it in Settings > Apps > Kai > Permissions.")
             return
         }
-        recognizer?.destroy()
-        recognizer = null
-        isListening = true
-        recognizer = SpeechRecognizer.createSpeechRecognizer(context)
-        recognizer?.setRecognitionListener(object : RecognitionListener {
-            private fun cleanup() {
-                isListening = false
-                recognizer?.destroy()
-                recognizer = null
-            }
-
-            override fun onResults(results: Bundle) {
-                val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val text = matches?.firstOrNull()
-                cleanup()
-                if (text != null) {
-                    onFinalResult(text)
-                } else {
-                    onError("No speech recognized")
+        Handler(Looper.getMainLooper()).post {
+            recognizer?.destroy()
+            recognizer = null
+            isListening = true
+            recognizer = SpeechRecognizer.createSpeechRecognizer(context)
+            recognizer?.setRecognitionListener(object : RecognitionListener {
+                private fun cleanup() {
+                    isListening = false
+                    recognizer?.destroy()
+                    recognizer = null
                 }
-            }
 
-            override fun onPartialResults(partialResults: Bundle) {
-                val matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val text = matches?.firstOrNull()
-                if (text != null) onPartialResult(text)
-            }
-
-            override fun onError(error: Int) {
-                cleanup()
-                val message = when (error) {
-                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
-                    SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timed out"
-                    SpeechRecognizer.ERROR_NETWORK -> "Network error"
-                    SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
-                    SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission not granted"
-                    SpeechRecognizer.ERROR_CLIENT -> "Recognition client error"
-                    SpeechRecognizer.ERROR_SERVER -> "Recognition server error"
-                    else -> "Speech recognition error ($error)"
+                override fun onResults(results: Bundle) {
+                    val matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    val text = matches?.firstOrNull()
+                    cleanup()
+                    if (text != null) {
+                        onFinalResult(text)
+                    } else {
+                        onError("No speech recognized")
+                    }
                 }
-                onError(message)
+
+                override fun onPartialResults(partialResults: Bundle) {
+                    val matches = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    val text = matches?.firstOrNull()
+                    if (text != null) onPartialResult(text)
+                }
+
+                override fun onError(error: Int) {
+                    cleanup()
+                    val message = when (error) {
+                        SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected"
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Speech timed out"
+                        SpeechRecognizer.ERROR_NETWORK -> "Network error"
+                        SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
+                        SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission not granted"
+                        SpeechRecognizer.ERROR_CLIENT -> "Recognition client error"
+                        SpeechRecognizer.ERROR_SERVER -> "Recognition server error"
+                        else -> "Speech recognition error ($error)"
+                    }
+                    onError(message)
+                }
+
+                override fun onBeginningOfSpeech() {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+                override fun onEndOfSpeech() {}
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+                override fun onReadyForSpeech(params: Bundle?) {}
+                override fun onRmsChanged(rmsdB: Float) {}
+            })
+
+            val intent = android.content.Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
             }
-
-            override fun onBeginningOfSpeech() {}
-            override fun onBufferReceived(buffer: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onEvent(eventType: Int, params: Bundle?) {}
-            override fun onReadyForSpeech(params: Bundle?) {}
-            override fun onRmsChanged(rmsdB: Float) {}
-        })
-
-        val intent = android.content.Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+            recognizer?.startListening(intent)
         }
-        recognizer?.startListening(intent)
     }
 
     override fun stopListening() {
