@@ -15,6 +15,10 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     private val mutex = Mutex()
 
+    private var cachedAllEntities: List<EntityData>? = null
+
+    private fun invalidateCache() { cachedAllEntities = null }
+
     private fun domainForCategory(category: MemoryCategory): String = when (category) {
         MemoryCategory.GENERAL -> DimensionConfig.DOMAIN_MEMORIES
         MemoryCategory.PREFERENCE -> DimensionConfig.DOMAIN_PREFERENCES
@@ -73,7 +77,11 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         )
     }
 
-    private fun allEntities(max: Int = Int.MAX_VALUE): List<EntityData> = dimension.getAllEntities().let { if (it.size <= max) it else it.take(max) }
+    private fun allEntities(max: Int = Int.MAX_VALUE): List<EntityData> {
+        val cached = cachedAllEntities
+        val all = if (cached != null) cached else dimension.getAllEntities().also { cachedAllEntities = it }
+        return if (all.size <= max) all else all.take(max)
+    }
 
     override suspend fun store(
         key: String,
@@ -96,6 +104,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
             category = category,
             source = source,
         )
+        invalidateCache()
         dimension.putEntity(entryToEntity(entry))
         entry
     }
@@ -103,6 +112,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
     override suspend fun updateContent(key: String, content: String): MemoryEntry? = mutex.withLock {
         val existing = findEntryByKey(key) ?: return@withLock null
         val updated = existing.copy(content = content, updatedAt = Clock.System.now().toEpochMilliseconds())
+        invalidateCache()
         dimension.putEntity(entryToEntity(updated))
         updated
     }
@@ -110,6 +120,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
     override suspend fun reinforceMemory(key: String): MemoryEntry? = mutex.withLock {
         val existing = findEntryByKey(key) ?: return@withLock null
         val updated = existing.copy(hitCount = existing.hitCount + 1, updatedAt = Clock.System.now().toEpochMilliseconds())
+        invalidateCache()
         dimension.putEntity(entryToEntity(updated))
         updated
     }
@@ -141,11 +152,13 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
             source = source,
             protected = true,
         )
+        invalidateCache()
         dimension.putEntity(entryToEntity(entry))
         entry
     }
 
     override suspend fun deleteAllMemories(force: Boolean) {
+        invalidateCache()
         val entities = dimension.getAllEntities()
         entities.forEach { entity ->
             if (force) {
@@ -163,6 +176,7 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
         val entity = dimension.getEntityByMetadataKey("memory_key", key) ?: return@withLock false
         val entry = entityToEntry(entity)
         if (entry?.protected == true) return@withLock false
+        invalidateCache()
         dimension.deleteEntity(entity.id)
         true
     }
@@ -192,7 +206,10 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override fun exportDimension(): ByteArray = dimension.getExportData()
 
-    override fun importDimension(data: ByteArray) = dimension.importFromData(data)
+    override fun importDimension(data: ByteArray) {
+        invalidateCache()
+        dimension.importFromData(data)
+    }
 
     // Knowledge graph
 
@@ -234,11 +251,13 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
             createdAt = now,
             updatedAt = now,
         )
+        invalidateCache()
         dimension.putEntity(entity)
     }
 
     override suspend fun diaryDelete(id: String): Boolean = mutex.withLock {
         val entity = dimension.getEntity(id) ?: return@withLock false
+        invalidateCache()
         dimension.deleteEntity(entity.id)
         true
     }

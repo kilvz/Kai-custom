@@ -60,7 +60,7 @@ class OpenAICompatibleBadRequestException(detail: String? = null) : OpenAICompat
 class ContextWindowExceededException : ApiException(null)
 class UnsupportedFileTypeException : ApiException(null)
 class FileTooLargeException : ApiException(null)
-class AllServicesFailedException : ApiException(null)
+class AllServicesFailedException(detail: String? = null) : ApiException(detail)
 
 sealed interface UiError {
     data class Resource(val resource: StringResource) : UiError
@@ -75,7 +75,9 @@ fun Exception.toUiError(): UiError = when (this) {
 
     is ContextWindowExceededException -> UiError.Resource(Res.string.error_context_window_exceeded)
 
-    is AllServicesFailedException -> UiError.Resource(Res.string.error_all_services_failed)
+    is AllServicesFailedException -> message?.takeIf { it.isNotBlank() }
+        ?.let { UiError.ResourceWithDetail(Res.string.error_all_services_failed, it) }
+        ?: UiError.Resource(Res.string.error_all_services_failed)
 
     is OpenAICompatibleRequestTooLargeException -> UiError.Resource(Res.string.error_image_too_large)
 

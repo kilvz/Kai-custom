@@ -2029,9 +2029,14 @@ actual fun openUrl(url: String): Boolean = try {
             setDataAndType(contentUri, mimeType)
         }
     } else {
-        Intent(Intent.ACTION_VIEW, parsedUri).apply {
+        val viewIntent = Intent(Intent.ACTION_VIEW, parsedUri).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+        val defaultResolve = context.packageManager.resolveActivity(viewIntent, 0)
+        if (defaultResolve != null && defaultResolve.activityInfo.packageName != context.packageName) {
+            viewIntent.setPackage(defaultResolve.activityInfo.packageName)
+        }
+        viewIntent
     }
     context.startActivity(intent)
     true

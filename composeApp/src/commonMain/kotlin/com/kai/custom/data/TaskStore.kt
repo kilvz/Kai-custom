@@ -18,8 +18,17 @@ class TaskStore(private val appSettings: AppSettings) {
 
     private val json = SharedJson
     private val mutex = Mutex()
+    private var cachedTasks: MutableList<ScheduledTask>? = null
 
-    private fun loadTasks(): MutableList<ScheduledTask> = try {
+    private fun invalidateCache() { cachedTasks = null }
+
+    private fun loadTasks(): MutableList<ScheduledTask> {
+        val cached = cachedTasks
+        if (cached != null) return cached
+        return loadTasksFromStorage().also { cachedTasks = it }
+    }
+
+    private fun loadTasksFromStorage(): MutableList<ScheduledTask> = try {
         val decoded = json.decodeFromString<List<ScheduledTask>>(appSettings.getScheduledTasksJson())
         // Migration: tasks persisted before the `trigger` field existed decode with
         // the default (TIME). Upgrade rows that carry a cron expression to CRON so the
@@ -132,4 +141,9 @@ class TaskStore(private val appSettings: AppSettings) {
                 it.status == TaskStatus.PENDING
         }
     }
+
+    /** Next scheduled-at time among all pending (non-heartbeat) tasks, or null. */
+    fun getNextDueTime(): Long? = loadTasks()
+        .filter { it.trigger != TaskTrigger.HEARTBEAT && it.status == TaskStatus.PENDING }
+        .minOfOrNull { it.scheduledAtEpochMs }
 }

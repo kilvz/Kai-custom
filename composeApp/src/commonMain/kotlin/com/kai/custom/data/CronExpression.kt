@@ -69,7 +69,12 @@ class CronExpression(expression: String) {
             }
 
             if (dt.minute !in minutes) {
-                dt = advanceMinute(dt, timeZone)
+                val nextMinute = minutes.filter { it > dt.minute }.minOrNull()
+                dt = if (nextMinute != null) {
+                    LocalDateTime(dt.date, LocalTime(dt.hour, nextMinute, 0, 0))
+                } else {
+                    nextHour(dt, timeZone)
+                }
                 continue
             }
 
