@@ -162,7 +162,7 @@ class Requests {
                     if (responseBody.contains("API_KEY_INVALID", ignoreCase = true)) {
                         throw GeminiInvalidApiKeyException()
                     } else {
-                        throw GeminiGenericException("Chat request failed: ${response.status}")
+                        throw GeminiGenericException("Chat request failed: ${response.status} — $responseBody")
                     }
                 }
             }
