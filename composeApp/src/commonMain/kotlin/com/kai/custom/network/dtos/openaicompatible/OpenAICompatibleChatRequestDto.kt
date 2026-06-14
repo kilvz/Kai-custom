@@ -11,6 +11,7 @@ data class OpenAICompatibleChatRequestDto(
     val tools: List<Tool>? = null,
     @SerialName("max_tokens")
     val maxTokens: Int? = null,
+    val stream: Boolean? = null,
 ) {
     @Serializable
     data class Message(
