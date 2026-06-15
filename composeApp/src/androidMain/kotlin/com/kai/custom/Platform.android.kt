@@ -18,6 +18,21 @@ import android.provider.CalendarContract
 import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.speech.RecognitionListener
+import android.hardware.display.DisplayManager
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.PixelFormat
+import android.os.Handler
+import android.os.Looper
+import android.util.DisplayMetrics
+import android.view.WindowManager
+import java.io.FileOutputStream
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.telephony.TelephonyManager
@@ -53,6 +68,7 @@ import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
 import com.kai.custom.tools.AdbTool
+import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.tools.ApplyPatchTool
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.CalendarRepository
@@ -389,6 +405,7 @@ actual fun getAvailableTools(): List<Tool> {
     val calendarRepository = CalendarRepository(context, calendarPermissionController, appSettings.getDefaultCalendarId())
     val emailStore: EmailStore by inject(EmailStore::class.java)
     val toolPermissionBridge: ToolPermissionBridge by inject(ToolPermissionBridge::class.java)
+    val activityResultBridge: ActivityResultBridge by inject(ActivityResultBridge::class.java)
 
     val dataRepository: DataRepository by inject(DataRepository::class.java)
     val personaManager = PersonaManager(appSettings)
@@ -977,35 +994,79 @@ actual fun getAvailableTools(): List<Tool> {
                         description = "Capture the current device screen and save it for AI analysis.",
                         parameters = emptyMap(),
                     )
+                    override val timeout: Duration = 120.seconds
                     override suspend fun execute(args: Map<String, Any>): Any {
-                        val tempFile = java.io.File(context.cacheDir, "screenshot_${System.currentTimeMillis()}.png")
-                        return try {
-                            val captured = if (ShizukuManager.isAvailable && ShizukuManager.hasPermission) {
-                                val shResult = ShizukuManager.runCommand("screencap -p ${tempFile.absolutePath}")
-                                val exitCode = shResult["exitCode"] as? Int ?: -1
-                                exitCode == 0 && tempFile.exists() && tempFile.length() > 0
-                            } else {
-                                val process = Runtime.getRuntime().exec(arrayOf("screencap", "-p", tempFile.absolutePath))
-                                val exitCode = process.waitFor()
-                                exitCode == 0 && tempFile.exists() && tempFile.length() > 0
-                            }
-                            if (captured) {
-                                val aiDir = java.io.File(context.filesDir, "ai_captures")
-                                aiDir.mkdirs()
-                                val saved = java.io.File(aiDir, "screenshot_${System.currentTimeMillis()}.png")
-                                tempFile.copyTo(saved, overwrite = true)
-                                tempFile.delete()
-                                mapOf(
-                                    "success" to true,
-                                    "path" to saved.absolutePath,
-                                    "message" to "Screenshot saved",
-                                )
-                            } else {
-                                mapOf("success" to false, "error" to "Failed to capture screen. Try using the run_adb tool with: screencap -p /sdcard/screenshot.png")
-                            }
+                        val ts = System.currentTimeMillis()
+                        val aiDir = java.io.File(context.filesDir, "ai_captures")
+                        aiDir.mkdirs()
+                        val outputFile = java.io.File(aiDir, "screenshot_${ts}.png")
+                        val sandboxName = "screenshot_${ts}.png"
+                        val errors = mutableListOf<String>()
+
+                        // Try 1: AccessibilityService (no dialog, needs Screen Reader enabled)
+                        val a11yResult = try {
+                            val bitmap = ScreenReaderService.captureScreenshot()
+                            if (bitmap != null) {
+                                FileOutputStream(outputFile).use { out ->
+                                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                                }
+                                copyScreenshotToSandbox(sandboxController, outputFile, sandboxName)
+                                mapOf("success" to true, "method" to "accessibility", "path" to outputFile.absolutePath)
+                            } else { errors.add("AccessibilityService not connected"); null }
                         } catch (e: Exception) {
-                            mapOf("success" to false, "error" to "Failed to take screenshot: ${e.message}")
+                            errors.add("Accessibility error: ${e.message}")
+                            null
                         }
+                        if (a11yResult != null) return a11yResult
+
+                        // Try 2: Runtime.exec("screencap") directly (works on some devices)
+                        val directResult = try {
+                            val proc = Runtime.getRuntime().exec(arrayOf("screencap", "-p", outputFile.absolutePath))
+                            proc.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)
+                            if (proc.exitValue() == 0 && outputFile.exists() && outputFile.length() > 0) {
+                                copyScreenshotToSandbox(sandboxController, outputFile, sandboxName)
+                                mapOf("success" to true, "method" to "direct", "path" to outputFile.absolutePath)
+                            } else null
+                        } catch (_: Exception) { null }
+                        if (directResult != null) return directResult
+
+                        // Try 3: Shizuku screencap (write to /data/local/tmp, then copy)
+                        val shScrPath = "/data/local/tmp/${sandboxName}"
+                        val shResult = try {
+                            ShizukuManager.runCommand("screencap -p $shScrPath")
+                        } catch (e: Exception) {
+                            errors.add("Shizuku error: ${e.message}")
+                            null
+                        }
+                        if (shResult is Map<*, *>) {
+                            val exitCode = (shResult["exit_code"] as? Int) ?: -1
+                            if (exitCode == 0) {
+                                val tmpFile = java.io.File(shScrPath)
+                                if (tmpFile.exists() && tmpFile.length() > 0) {
+                                    tmpFile.copyTo(outputFile, overwrite = true)
+                                    tmpFile.delete()
+                                    copyScreenshotToSandbox(sandboxController, outputFile, sandboxName)
+                                    return mapOf(
+                                        "success" to true,
+                                        "path" to outputFile.absolutePath,
+                                        "message" to "Screenshot saved (via Shizuku)",
+                                    )
+                                }
+                                errors.add("Shizuku: file missing or empty after capture")
+                            } else {
+                                val shStderr = (shResult["stderr"] as? String)?.take(200) ?: ""
+                                errors.add("Shizuku: ${shResult["error"] ?: "exit=$exitCode"} stderr=$shStderr")
+                            }
+                        }
+
+                        val hint = if (!ScreenReaderService.isConnected()) {
+                            "Enable Kai Screen Reader in Accessibility settings (Settings → Accessibility → Kai Screen Reader), then try again."
+                        } else ""
+                        return mapOf(
+                            "success" to false,
+                            "error" to errors.joinToString("; ").ifEmpty { "All screenshot methods failed." },
+                            "hint" to hint,
+                        )
                     }
                 },
             )
@@ -2189,4 +2250,101 @@ actual fun listCalendarAccounts(): List<CalendarAccount> {
         }
     }
     return accounts
+}
+
+private suspend fun copyScreenshotToSandbox(
+    sandboxController: SandboxController,
+    file: java.io.File,
+    sandboxName: String,
+) {
+    if (!file.exists()) return
+    try {
+        val pngBytes = file.readBytes()
+        sandboxController.writeBinaryFile("/root/$sandboxName", pngBytes)
+    } catch (_: Exception) { }
+}
+
+private suspend fun captureScreenViaMediaProjection(
+    context: Context,
+    bridge: ActivityResultBridge,
+    outputFile: java.io.File,
+): Map<String, Any> {
+    val mediaProjectionManager = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+    val captureIntent = mediaProjectionManager.createScreenCaptureIntent()
+
+    val result = bridge.launchIntentForResult(captureIntent) ?: return mapOf(
+        "success" to false,
+        "error" to "Screen capture request timed out or was cancelled.",
+    )
+    if (!result.success) {
+        return mapOf("success" to false, "error" to "Screen capture permission denied.")
+    }
+
+    val resultIntent = bridge.pendingResultIntent ?: return mapOf(
+        "success" to false,
+        "error" to "No result data from screen capture permission.",
+    )
+
+    val mediaProjection = mediaProjectionManager.getMediaProjection(result.resultCode, resultIntent)
+        ?: return mapOf("success" to false, "error" to "Failed to create MediaProjection.")
+
+    val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    val metrics = DisplayMetrics()
+    wm.defaultDisplay.getRealMetrics(metrics)
+    val width = metrics.widthPixels
+    val height = metrics.heightPixels
+    val density = metrics.densityDpi
+
+    val imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
+    val imageHandler = Handler(Looper.getMainLooper())
+    val frameReady = kotlinx.coroutines.CompletableDeferred<Bitmap?>()
+
+    imageReader.setOnImageAvailableListener({ reader ->
+        val image = reader.acquireLatestImage()
+        if (image != null) {
+            val bitmap = imageToBitmap(image)
+            image.close()
+            frameReady.complete(bitmap)
+        } else {
+            frameReady.complete(null)
+        }
+    }, imageHandler)
+
+    val virtualDisplay = mediaProjection.createVirtualDisplay(
+        "KaiScreenshotCapture",
+        width, height, density,
+        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+        imageReader.surface,
+        null, null,
+    )
+
+    try {
+        val bitmap = withTimeoutOrNull(8000L) { frameReady.await() }
+            ?: return mapOf("success" to false, "error" to "Timed out waiting for screen capture frame.")
+
+        FileOutputStream(outputFile).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
+        outFile@ return mapOf(
+            "success" to true,
+            "path" to outputFile.absolutePath,
+            "message" to "Screenshot saved to ${outputFile.name}",
+        )
+    } finally {
+        virtualDisplay?.release()
+        imageReader.close()
+        mediaProjection.stop()
+    }
+}
+
+private fun imageToBitmap(image: android.media.Image): Bitmap {
+    val planes = image.planes
+    val buffer = planes[0].buffer
+    val pixelStride = planes[0].pixelStride
+    val rowStride = planes[0].rowStride
+    val rowPadding = rowStride - pixelStride * image.width
+
+    val bitmap = Bitmap.createBitmap(image.width + rowPadding / pixelStride, image.height, Bitmap.Config.ARGB_8888)
+    bitmap.copyPixelsFromBuffer(buffer)
+    return Bitmap.createBitmap(bitmap, 0, 0, image.width, image.height)
 }

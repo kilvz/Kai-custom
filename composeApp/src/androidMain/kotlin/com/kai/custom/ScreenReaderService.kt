@@ -2,6 +2,7 @@ package com.kai.custom
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.graphics.Bitmap
 import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
@@ -191,6 +192,19 @@ class ScreenReaderService : AccessibilityService() {
                 eventType = parser.next()
             }
             return sb.toString().trim()
+        }
+
+        fun captureScreenshot(): Bitmap? {
+            val service = instance ?: return null
+            return try {
+                // Use UiAutomation via reflection (works at runtime regardless of compileSdk)
+                val getUiAutomation = service.javaClass.getMethod("getUiAutomation")
+                val uiAutomation = getUiAutomation.invoke(service)
+                val takeScreenshot = uiAutomation.javaClass.getMethod("takeScreenshot")
+                takeScreenshot.invoke(uiAutomation) as Bitmap
+            } catch (_: Exception) {
+                null
+            }
         }
 
         private fun getAttr(parser: XmlPullParser, name: String): String? {
