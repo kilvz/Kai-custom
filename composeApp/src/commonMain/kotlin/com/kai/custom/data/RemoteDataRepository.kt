@@ -1188,6 +1188,9 @@ class RemoteDataRepository(
                 }
                 strategy.trimAfterToolResults(merged, systemPrompt)
             }
+            // Compact history between tool iterations — summarize older exchanges
+            // instead of just dropping them when context is exceeded.
+            compactHistoryIfNeeded()
         }
     }
 
@@ -1382,6 +1385,15 @@ class RemoteDataRepository(
             usedChars += groupChars
         }
 
+        // Ensure at least one user message survives — strict providers (DeepSeek via Zen, etc.)
+        // reject a system-only input with e.g. "Input length = 1".
+        if (kept.none { it.role == "user" }) {
+            val lastUserGroup = groups.lastOrNull { group -> group.any { it.role == "user" } }
+            if (lastUserGroup != null) {
+                kept.addAll(0, lastUserGroup)
+            }
+        }
+
         return systemMessages + kept
     }
 
@@ -1409,6 +1421,11 @@ class RemoteDataRepository(
             if (usedChars + msgChars > availableChars) break
             kept.add(0, msg)
             usedChars += msgChars
+        }
+
+        // Never return empty — Gemini/Anthropic reject empty contents arrays
+        if (kept.isEmpty() && history.isNotEmpty()) {
+            kept.add(history.last())
         }
 
         return kept
