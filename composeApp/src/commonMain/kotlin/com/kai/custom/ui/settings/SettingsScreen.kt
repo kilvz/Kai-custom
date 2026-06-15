@@ -515,6 +515,7 @@ fun SettingsScreenContent(
                                     debugApiTransitioning = filteredUiState.debugApiTransitioning,
                                     isDebugEndpointEnabled = filteredUiState.isDebugEndpointEnabled,
                                     shizukuPermissionGranted = filteredUiState.shizukuPermissionGranted,
+                                    safWorkDir = filteredUiState.safWorkDir,
                                 )
                             }
 

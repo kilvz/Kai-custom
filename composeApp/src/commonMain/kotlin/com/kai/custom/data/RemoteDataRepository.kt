@@ -2757,4 +2757,10 @@ class RemoteDataRepository(
             )
         }
     }
+
+    override fun getSandboxWorkDir(): String = appSettings.getSandboxWorkDir()
+
+    override fun setSandboxWorkDir(uri: String) {
+        appSettings.setSandboxWorkDir(uri)
+    }
 }

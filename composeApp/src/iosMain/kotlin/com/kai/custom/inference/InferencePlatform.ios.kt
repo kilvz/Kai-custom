@@ -49,6 +49,11 @@ actual fun rememberSafFilePicker(
     onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit,
 ): () -> Unit = {}
 
+@androidx.compose.runtime.Composable
+actual fun rememberSafDirectoryPicker(
+    onResult: (uri: String?) -> Unit,
+): () -> Unit = {}
+
 actual class PlatformSafHandle
 
 actual fun openSafPath(path: String): PlatformSafHandle? = null

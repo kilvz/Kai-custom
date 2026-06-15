@@ -246,3 +246,27 @@ actual fun rememberSafFilePicker(
     }
     return { launcher.launch(arrayOf("*/*")) }
 }
+
+@androidx.compose.runtime.Composable
+actual fun rememberSafDirectoryPicker(
+    onResult: (uri: String?) -> Unit,
+): () -> Unit {
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree(),
+    ) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+                onResult(uri.toString())
+            } catch (e: Exception) {
+                onResult(null)
+            }
+        } else {
+            onResult(null)
+        }
+    }
+    return { launcher.launch(null) }
+}

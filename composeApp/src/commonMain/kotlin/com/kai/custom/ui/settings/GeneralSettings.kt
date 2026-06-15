@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kai.custom.PttTriggerManager
 import com.kai.custom.data.ThemeMode
+import com.kai.custom.inference.rememberSafDirectoryPicker
 import com.kai.custom.data.languageOptions
 import com.kai.custom.isDebugBuild
 import com.kai.custom.keyCodeToName
@@ -55,11 +56,11 @@ import kai.composeapp.generated.resources.general_settings_press_button
 import kai.composeapp.generated.resources.general_settings_reenroll
 import kai.composeapp.generated.resources.general_settings_wake_word_phrase
 import kai.composeapp.generated.resources.ic_arrow_drop_down
-import kai.composeapp.generated.resources.settings_floating_ball
 import kai.composeapp.generated.resources.settings_daemon_mode
 import kai.composeapp.generated.resources.settings_daemon_mode_description
 import kai.composeapp.generated.resources.settings_dynamic_ui
 import kai.composeapp.generated.resources.settings_dynamic_ui_description
+import kai.composeapp.generated.resources.settings_floating_ball
 import kai.composeapp.generated.resources.settings_theme
 import kai.composeapp.generated.resources.settings_theme_dark
 import kai.composeapp.generated.resources.settings_theme_description
@@ -70,6 +71,60 @@ import kai.composeapp.generated.resources.settings_ui_scale
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import kotlin.math.roundToInt
+
+@Composable
+internal fun SafWorkDirSection(
+    safWorkDir: String,
+    onPick: () -> Unit,
+    onClear: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "File Transfer Directory",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Text(
+            text = "Pick a folder on your phone (e.g., Download) as the working directory for AI file transfers. " +
+                "The sandbox_file_transfer tool can read/write files here. If not set, the app's private data directory is used.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(8.dp))
+        if (safWorkDir.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = CenterVertically,
+            ) {
+                Text(
+                    text = safWorkDir,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    maxLines = 2,
+                )
+                OutlinedButton(onClick = onClear) {
+                    Text(stringResource(Res.string.general_settings_clear))
+                }
+            }
+        } else {
+            Text(
+                text = "Not set — using app private directory.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedButton(onClick = onPick, modifier = Modifier.weight(1f)) {
+                Text(if (safWorkDir.isNotEmpty()) "Change Directory" else "Pick Directory")
+            }
+        }
+    }
+}
 
 @Composable
 internal fun GeneralContent(
@@ -95,7 +150,11 @@ internal fun GeneralContent(
     debugApiTransitioning: Boolean = false,
     isDebugEndpointEnabled: Boolean = false,
     shizukuPermissionGranted: Boolean = false,
+    safWorkDir: String = "",
 ) {
+    val safDirPicker = rememberSafDirectoryPicker { uri ->
+        if (uri != null) actions.onPickSafWorkDir(uri)
+    }
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
         if (useStaggered) {
@@ -154,6 +213,13 @@ internal fun GeneralContent(
                             onExportSettings = actions.onExportSettings,
                             onPrepareExport = actions.onPrepareExport,
                             onImportSettings = actions.onImportSettings,
+                        )
+                    }
+                    SettingsCard {
+                        SafWorkDirSection(
+                            safWorkDir = safWorkDir,
+                            onPick = { safDirPicker() },
+                            onClear = actions.onClearSafWorkDir,
                         )
                     }
                     SettingsCard {
@@ -247,6 +313,13 @@ internal fun GeneralContent(
                     )
                 }
                 SettingsCard {
+                    SafWorkDirSection(
+                        safWorkDir = safWorkDir,
+                        onPick = { safDirPicker() },
+                        onClear = actions.onClearSafWorkDir,
+                    )
+                }
+                SettingsCard {
                     WakeWordSection(
                         isWakeWordEnabled = isWakeWordEnabled,
                         wakeWordPhrase = wakeWordPhrase,
@@ -286,11 +359,12 @@ internal fun GeneralContent(
                             isDebugEndpointEnabled = isDebugEndpointEnabled,
                             onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
                         )
-                    }
                 }
             }
         }
     }
+}
+
 }
 
 @Composable

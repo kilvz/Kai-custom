@@ -370,6 +370,9 @@ interface DataRepository {
     fun getTelegramSyncState(): TelegramSyncState
     fun getPendingTelegramCount(): Int
     suspend fun pollTelegram()
+
+    fun getSandboxWorkDir(): String
+    fun setSandboxWorkDir(uri: String)
 }
 
 data class AskWithToolsResult(

@@ -188,6 +188,7 @@ class SettingsViewModel(
         modelGpuLayers = buildModelGpuLayersMap(),
         installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
         activeSkill = dataRepository.getActiveSkill(),
+        safWorkDir = dataRepository.getSandboxWorkDir(),
         schemaResetMessage = dataRepository.getSchemaResetMessage(),
     )
 
@@ -291,6 +292,8 @@ class SettingsViewModel(
         onInstallBrowsed = ::onInstallSkillFromBrowsed,
         onUninstallSkill = ::onUninstallSkill,
         onBrowseMarketplaceSkills = ::onBrowseMarketplaceSkills,
+        onPickSafWorkDir = ::onPickSafWorkDir,
+        onClearSafWorkDir = ::onClearSafWorkDir,
     )
 
     private val _state = MutableStateFlow(buildFullState())
@@ -1471,6 +1474,16 @@ class SettingsViewModel(
                 )
             }
         }
+    }
+
+    private fun onPickSafWorkDir(uri: String) {
+        dataRepository.setSandboxWorkDir(uri)
+        _state.update { it.copy(safWorkDir = uri) }
+    }
+
+    private fun onClearSafWorkDir() {
+        dataRepository.setSandboxWorkDir("")
+        _state.update { it.copy(safWorkDir = "") }
     }
 
     private fun checkAllConnections() {

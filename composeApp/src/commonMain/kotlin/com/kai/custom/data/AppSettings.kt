@@ -477,6 +477,12 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_SANDBOX_STORAGE_MOUNT, enabled)
     }
 
+    fun getSandboxWorkDir(): String = settings.getString(KEY_SAF_WORK_DIR, "")
+
+    fun setSandboxWorkDir(uri: String) {
+        settings.putString(KEY_SAF_WORK_DIR, uri)
+    }
+
     fun getSandboxDistro(): String = settings.getString(KEY_SANDBOX_DISTRO, "alpine")
 
     fun setSandboxDistro(distro: String) {
@@ -1159,6 +1165,7 @@ class AppSettings(internal val settings: Settings) {
 
         const val KEY_SANDBOX_ENABLED = "sandbox_enabled"
         const val KEY_SANDBOX_STORAGE_MOUNT = "sandbox_storage_mount"
+        const val KEY_SAF_WORK_DIR = "saf_work_dir"
         const val KEY_SANDBOX_DISTRO = "sandbox_distro"
         const val KEY_WAKE_WORD_ENABLED = "wake_word_enabled"
         const val KEY_WAKE_WORD_PHRASE = "wake_word_phrase"

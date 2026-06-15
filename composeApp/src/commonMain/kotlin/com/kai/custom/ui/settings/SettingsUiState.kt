@@ -79,6 +79,7 @@ data class SettingsUiState(
     val altMemoryBackend: String? = null,
     val altMemoryEmbedder: String? = null,
     val sandboxReady: Boolean = false,
+    val safWorkDir: String = "",
     val memories: ImmutableList<MemoryEntry> = persistentListOf(),
     val isSchedulingEnabled: Boolean = true,
     val scheduledTasks: ImmutableList<ScheduledTask> = persistentListOf(),

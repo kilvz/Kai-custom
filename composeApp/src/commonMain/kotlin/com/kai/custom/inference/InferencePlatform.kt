@@ -40,3 +40,8 @@ expect fun rememberSafFilePicker(
     extensions: List<String>,
     onResult: (uriOrPath: String?, displayName: String?, sizeBytes: Long) -> Unit,
 ): () -> Unit
+
+@androidx.compose.runtime.Composable
+expect fun rememberSafDirectoryPicker(
+    onResult: (uri: String?) -> Unit,
+): () -> Unit
