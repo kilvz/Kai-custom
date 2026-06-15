@@ -1,5 +1,6 @@
 package com.kai.custom.network.dtos.gemini
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
@@ -7,6 +8,7 @@ import kotlinx.serialization.json.JsonElement
 data class GeminiChatRequestDto(
     val contents: List<Content>,
     val tools: List<GeminiTool>? = null,
+    @SerialName("system_instruction")
     val systemInstruction: Content? = null,
 ) {
     @Serializable
@@ -18,6 +20,7 @@ data class GeminiChatRequestDto(
     @Serializable
     data class Part(
         val text: String? = null,
+        @SerialName("inlineData")
         val inline_data: InlineData? = null,
         val functionCall: FunctionCall? = null,
         val functionResponse: FunctionResponse? = null,
@@ -26,6 +29,7 @@ data class GeminiChatRequestDto(
 
     @Serializable
     data class InlineData(
+        @SerialName("mimeType")
         val mime_type: String,
         val data: String,
     )

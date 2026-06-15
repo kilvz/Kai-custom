@@ -96,6 +96,7 @@ class Requests {
 
     suspend fun getGeminiModels(credentials: ServiceCredentials): Result<GeminiModelsResponseDto> = try {
         val apiKey = credentials.apiKey.ifEmpty { throw GeminiInvalidApiKeyException() }
+        if (isDebugBuild) println("[GeminiModels] listing models...")
         val response: HttpResponse =
             defaultClient.get("https://generativelanguage.googleapis.com/v1beta/models") {
                 header("x-goog-api-key", apiKey)
@@ -103,9 +104,15 @@ class Requests {
         if (response.status.isSuccess()) {
             Result.success(response.body())
         } else {
+            val body = response.bodyAsText()
             when (response.status.value) {
-                400, 403 -> throw GeminiInvalidApiKeyException()
-                else -> throw GeminiGenericException("Failed to fetch models: ${response.status}")
+                400, 403 -> {
+                    if (body.contains("FAILED_PRECONDITION")) {
+                        throw GeminiGenericException("Gemini API region blocked or unavailable: $body")
+                    }
+                    throw GeminiInvalidApiKeyException()
+                }
+                else -> throw GeminiGenericException("Failed to fetch models: ${response.status} — $body")
             }
         }
     } catch (e: GeminiApiException) {
@@ -128,6 +135,10 @@ class Requests {
             GeminiChatRequestDto.Content(
                 parts = listOf(GeminiChatRequestDto.Part(text = it)),
             )
+        }
+
+        if (isDebugBuild) {
+            println("[GeminiChat] model=$selectedModelId messages=${messages.size} systemInstruction=${systemInstruction?.take(100)}")
         }
 
         val response: HttpResponse =
@@ -161,6 +172,8 @@ class Requests {
                     val responseBody = response.bodyAsText()
                     if (responseBody.contains("API_KEY_INVALID", ignoreCase = true)) {
                         throw GeminiInvalidApiKeyException()
+                    } else if (responseBody.contains("FAILED_PRECONDITION", ignoreCase = true)) {
+                        throw GeminiGenericException("Gemini API region blocked or unavailable: $responseBody")
                     } else {
                         throw GeminiGenericException("Chat request failed: ${response.status} — $responseBody")
                     }
@@ -168,6 +181,10 @@ class Requests {
             }
         }
     } catch (e: Exception) {
+        if (isDebugBuild) {
+            println("[GeminiChat] ERROR: ${e::class.simpleName} — ${e.message}")
+            e.printStackTrace()
+        }
         Result.failure(e)
     }
 
@@ -518,6 +535,7 @@ class Requests {
                         ?: OpenAICompatibleChatRequestDto.PropertySchema(
                             type = param.type,
                             description = param.description,
+                            items = if (param.type == "array") DEFAULT_OPENAI_STRING_ITEMS else null,
                         )
                 },
                 required = schema.parameters.filter { it.value.required }.keys.toList(),
@@ -534,6 +552,7 @@ class Requests {
                     ?: AnthropicChatRequestDto.PropertySchema(
                         type = param.type,
                         description = param.description,
+                        items = if (param.type == "array") DEFAULT_ANTHROPIC_STRING_ITEMS else null,
                     )
             },
             required = schema.parameters.filter { it.value.required }.keys.toList(),
@@ -551,6 +570,7 @@ class Requests {
                             ?: PropertySchema(
                                 type = param.type,
                                 description = param.description,
+                                items = if (param.type == "array") DEFAULT_GEMINI_STRING_ITEMS else null,
                             )
                     },
                     required = schema.parameters.filter { it.value.required }.keys.toList(),

@@ -15,7 +15,6 @@ import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.resolveSandboxAbsolute
 import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
-import kotlin.io.encoding.Base64
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +27,7 @@ import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.io.encoding.Base64
 
 actual fun createSandboxController(): SandboxController = AndroidSandboxController()
 
@@ -360,8 +360,7 @@ class AndroidSandboxController : SandboxController {
         private val HOST_STORAGE_PREFIXES = arrayOf("/storage/emulated/", "/storage/self/", "/data/media/")
     }
 
-    private fun isOnHostStorage(file: File): Boolean =
-        HOST_STORAGE_PREFIXES.any { file.absolutePath.startsWith(it) }
+    private fun isOnHostStorage(file: File): Boolean = HOST_STORAGE_PREFIXES.any { file.absolutePath.startsWith(it) }
 
     private fun shellEscaped(path: String): String = path.replace("'", "'\\''")
 
@@ -374,13 +373,15 @@ class AndroidSandboxController : SandboxController {
         return try {
             val bytes = Base64.decode(b64)
             if (bytes.any { it == 0.toByte() }) null else bytes.toString(Charsets.UTF_8)
-        } catch (_: Exception) { null }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private suspend fun writeHostTextFileViaSandbox(filePath: String, content: String): Boolean {
         val safe = shellEscaped(filePath)
         val b64 = Base64.encode(content.encodeToByteArray())
-        val cmd = "echo '$b64' | base64 -d > '$safe'"
+        val cmd = "mkdir -p \"\$(dirname '$safe')\" && echo '$b64' | base64 -d > '$safe'"
         val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
         return result.exitCode == 0
     }
@@ -388,7 +389,7 @@ class AndroidSandboxController : SandboxController {
     private suspend fun writeHostBinaryViaSandbox(filePath: String, data: ByteArray): Boolean {
         val safe = shellEscaped(filePath)
         val b64 = Base64.encode(data)
-        val cmd = "echo '$b64' | base64 -d > '$safe'"
+        val cmd = "mkdir -p \"\$(dirname '$safe')\" && echo '$b64' | base64 -d > '$safe'"
         val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
         return result.exitCode == 0
     }
@@ -444,6 +445,7 @@ class AndroidSandboxController : SandboxController {
                     )
                     i += 3
                 }
+
                 "F" -> {
                     val name = parts.getOrNull(i + 1) ?: break
                     val size = parts.getOrNull(i + 2)?.toLongOrNull() ?: 0L
@@ -459,6 +461,7 @@ class AndroidSandboxController : SandboxController {
                     )
                     i += 4
                 }
+
                 else -> break
             }
         }
@@ -468,50 +471,21 @@ class AndroidSandboxController : SandboxController {
     override suspend fun readTextFile(path: String, maxBytes: Int): String? = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext null
-        if (isOnHostStorage(file)) {
-            return@withContext readHostTextFileViaSandbox(file.absolutePath, maxBytes)
-        }
-        if (!file.isFile) return@withContext null
-        if (file.length() > maxBytes) return@withContext null
-        val bytes = try {
-            file.readBytes()
-        } catch (e: IOException) {
-            return@withContext null
-        }
-        if (bytes.any { it == 0.toByte() }) return@withContext null
-        bytes.toString(Charsets.UTF_8)
+        // Rootfs inside proot is owned by root:1078 — the app process
+        // can't access it directly via Java File. Always use sandbox shell.
+        readHostTextFileViaSandbox(file.absolutePath, maxBytes)
     }
 
     override suspend fun writeTextFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
-        if (isOnHostStorage(file)) {
-            return@withContext writeHostTextFileViaSandbox(file.absolutePath, content)
-        }
-        if (file.exists() && !file.isFile) return@withContext false
-        try {
-            file.parentFile?.mkdirs()
-            file.writeBytes(content.toByteArray(Charsets.UTF_8))
-            true
-        } catch (e: IOException) {
-            false
-        }
+        writeHostTextFileViaSandbox(file.absolutePath, content)
     }
 
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
-        if (isOnHostStorage(file)) {
-            return@withContext writeHostBinaryViaSandbox(file.absolutePath, data)
-        }
-        if (file.exists() && !file.isFile) return@withContext false
-        try {
-            file.parentFile?.mkdirs()
-            file.writeBytes(data)
-            true
-        } catch (e: IOException) {
-            false
-        }
+        writeHostBinaryViaSandbox(file.absolutePath, data)
     }
 
     override suspend fun openFile(path: String): Result<Unit> = withContext(Dispatchers.IO) {
