@@ -1236,6 +1236,7 @@ internal object ModelCatalog {
         "mimo-v2-omni" to CuratedModelInfo("Mimo V2 Omni", 128_000, "2025-11"),
         "mimo-v2-pro" to CuratedModelInfo("Mimo V2 Pro", 128_000, "2025-11"),
         "mimo-v2-flash" to CuratedModelInfo("Mimo V2 Flash", 128_000, "2025-11"),
+        "mimo-v2-flash-thinking" to CuratedModelInfo("Mimo V2 Flash (Thinking)", 128_000, "2025-11"),
         "mimo-v2.5" to CuratedModelInfo("Mimo V2.5", 128_000, "2026-04"),
         "mimo-v2.5-pro" to CuratedModelInfo("Mimo V2.5 Pro", 128_000, "2026-04"),
         "kat-coder-pro-v2" to CuratedModelInfo("KAT Coder Pro v2", 128_000, "2025-11"),
