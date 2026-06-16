@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +39,8 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kai.custom.PttTriggerManager
+import com.kai.custom.Version
 import com.kai.custom.data.ThemeMode
-import com.kai.custom.inference.rememberSafDirectoryPicker
 import com.kai.custom.data.languageOptions
 import com.kai.custom.isDebugBuild
 import com.kai.custom.keyCodeToName
@@ -73,60 +75,6 @@ import org.jetbrains.compose.resources.vectorResource
 import kotlin.math.roundToInt
 
 @Composable
-internal fun SafWorkDirSection(
-    safWorkDir: String,
-    onPick: () -> Unit,
-    onClear: () -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "File Transfer Directory",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-        Text(
-            text = "Pick a folder on your phone (e.g., Download) as the working directory for AI file transfers. " +
-                "The sandbox_file_transfer tool can read/write files here. If not set, the app's private data directory is used.",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(8.dp))
-        if (safWorkDir.isNotEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = CenterVertically,
-            ) {
-                Text(
-                    text = safWorkDir,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f).padding(end = 8.dp),
-                    maxLines = 2,
-                )
-                OutlinedButton(onClick = onClear) {
-                    Text(stringResource(Res.string.general_settings_clear))
-                }
-            }
-        } else {
-            Text(
-                text = "Not set — using app private directory.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            OutlinedButton(onClick = onPick, modifier = Modifier.weight(1f)) {
-                Text(if (safWorkDir.isNotEmpty()) "Change Directory" else "Pick Directory")
-            }
-        }
-    }
-}
-
-@Composable
 internal fun GeneralContent(
     actions: SettingsActions,
     showDaemonToggle: Boolean,
@@ -150,11 +98,16 @@ internal fun GeneralContent(
     debugApiTransitioning: Boolean = false,
     isDebugEndpointEnabled: Boolean = false,
     shizukuPermissionGranted: Boolean = false,
-    safWorkDir: String = "",
+    isAutoUpdateEnabled: Boolean = true,
+    isAutoDownloadEnabled: Boolean = false,
+    isAutoInstallEnabled: Boolean = false,
+    updateAvailable: Boolean = false,
+    latestVersion: String = "",
+    isCheckingForUpdate: Boolean = false,
+    isDownloadingUpdate: Boolean = false,
+    downloadProgress: Float = 0f,
+    updateStatusMessage: String = "",
 ) {
-    val safDirPicker = rememberSafDirectoryPicker { uri ->
-        if (uri != null) actions.onPickSafWorkDir(uri)
-    }
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val useStaggered = maxWidth >= 600.dp
         if (useStaggered) {
@@ -216,13 +169,6 @@ internal fun GeneralContent(
                         )
                     }
                     SettingsCard {
-                        SafWorkDirSection(
-                            safWorkDir = safWorkDir,
-                            onPick = { safDirPicker() },
-                            onClear = actions.onClearSafWorkDir,
-                        )
-                    }
-                    SettingsCard {
                         WakeWordSection(
                             isWakeWordEnabled = isWakeWordEnabled,
                             wakeWordPhrase = wakeWordPhrase,
@@ -251,6 +197,25 @@ internal fun GeneralContent(
                     }
                     SettingsCard {
                         TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
+                    }
+                    SettingsCard {
+                        AutoUpdateSection(
+                            isAutoUpdateEnabled = isAutoUpdateEnabled,
+                            isAutoDownloadEnabled = isAutoDownloadEnabled,
+                            isAutoInstallEnabled = isAutoInstallEnabled,
+                            updateAvailable = updateAvailable,
+                            latestVersion = latestVersion,
+                            isChecking = isCheckingForUpdate,
+                            isDownloading = isDownloadingUpdate,
+                            downloadProgress = downloadProgress,
+                            statusMessage = updateStatusMessage,
+                            onToggleAutoUpdate = actions.onToggleAutoUpdate,
+                            onToggleAutoDownload = actions.onToggleAutoDownload,
+                            onToggleAutoInstall = actions.onToggleAutoInstall,
+                            onCheckForUpdate = actions.onCheckForUpdate,
+                            onDownloadUpdate = actions.onDownloadUpdate,
+                            onInstallUpdate = actions.onInstallUpdate,
+                        )
                     }
                     if (showDebugApiSection) {
                         SettingsCard {
@@ -313,13 +278,6 @@ internal fun GeneralContent(
                     )
                 }
                 SettingsCard {
-                    SafWorkDirSection(
-                        safWorkDir = safWorkDir,
-                        onPick = { safDirPicker() },
-                        onClear = actions.onClearSafWorkDir,
-                    )
-                }
-                SettingsCard {
                     WakeWordSection(
                         isWakeWordEnabled = isWakeWordEnabled,
                         wakeWordPhrase = wakeWordPhrase,
@@ -348,6 +306,25 @@ internal fun GeneralContent(
                 }
                 SettingsCard {
                     TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
+                }
+                SettingsCard {
+                    AutoUpdateSection(
+                        isAutoUpdateEnabled = isAutoUpdateEnabled,
+                        isAutoDownloadEnabled = isAutoDownloadEnabled,
+                        isAutoInstallEnabled = isAutoInstallEnabled,
+                        updateAvailable = updateAvailable,
+                        latestVersion = latestVersion,
+                        isChecking = isCheckingForUpdate,
+                        isDownloading = isDownloadingUpdate,
+                        downloadProgress = downloadProgress,
+                        statusMessage = updateStatusMessage,
+                        onToggleAutoUpdate = actions.onToggleAutoUpdate,
+                        onToggleAutoDownload = actions.onToggleAutoDownload,
+                        onToggleAutoInstall = actions.onToggleAutoInstall,
+                        onCheckForUpdate = actions.onCheckForUpdate,
+                        onDownloadUpdate = actions.onDownloadUpdate,
+                        onInstallUpdate = actions.onInstallUpdate,
+                    )
                 }
                 if (showDebugApiSection) {
                     SettingsCard {
@@ -872,7 +849,7 @@ private fun WakeWordSection(
         }
     }
 }
-
+ 
 @Composable
 private fun UiScaleSection(
     uiScale: Float,
@@ -968,6 +945,102 @@ private fun DebugApiSection(
                         checked = isDebugEndpointEnabled,
                         onCheckedChange = onToggleDebugEndpoint,
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AutoUpdateSection(
+    isAutoUpdateEnabled: Boolean,
+    isAutoDownloadEnabled: Boolean,
+    isAutoInstallEnabled: Boolean,
+    updateAvailable: Boolean,
+    latestVersion: String,
+    isChecking: Boolean,
+    isDownloading: Boolean,
+    downloadProgress: Float,
+    statusMessage: String,
+    onToggleAutoUpdate: (Boolean) -> Unit,
+    onToggleAutoDownload: (Boolean) -> Unit,
+    onToggleAutoInstall: (Boolean) -> Unit,
+    onCheckForUpdate: () -> Unit,
+    onDownloadUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ToggleableHeadline(
+            title = "Auto Update",
+            description = "Check for updates and auto-download APK",
+            checked = isAutoUpdateEnabled,
+            onCheckedChange = onToggleAutoUpdate,
+        )
+        if (isAutoUpdateEnabled) {
+            Spacer(Modifier.height(4.dp))
+            Button(
+                onClick = onCheckForUpdate,
+                enabled = !isChecking,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (isChecking) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Text("Check for Update")
+                }
+            }
+            if (statusMessage.isNotEmpty()) {
+                Text(
+                    text = statusMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            if (updateAvailable) {
+                Spacer(Modifier.height(4.dp))
+                ToggleableHeadline(
+                    title = "Auto download",
+                    description = "Automatically download new version",
+                    checked = isAutoDownloadEnabled,
+                    onCheckedChange = onToggleAutoDownload,
+                )
+                ToggleableHeadline(
+                    title = "Auto install",
+                    description = "Automatically install after download",
+                    checked = isAutoInstallEnabled,
+                    onCheckedChange = onToggleAutoInstall,
+                )
+                if (isDownloading) {
+                    Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { downloadProgress },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        text = "Downloading: ${(downloadProgress * 100).toInt()}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Spacer(Modifier.height(4.dp))
+                    Button(
+                        onClick = onDownloadUpdate,
+                        enabled = !isDownloading,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Download v$latestVersion")
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Button(
+                        onClick = onInstallUpdate,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Install Update")
+                    }
                 }
             }
         }

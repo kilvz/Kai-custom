@@ -70,8 +70,6 @@ data class SettingsActions(
     val onEnrollWakeWord: () -> Unit,
     val onCapturePttTrigger: () -> Unit,
     val onClearPttTrigger: () -> Unit,
-    val onPickSafWorkDir: (String) -> Unit,
-    val onClearSafWorkDir: () -> Unit,
     val onChangeUiScale: (Float) -> Unit,
     val onAddMcpServer: (String, String, Map<String, String>) -> Unit,
     val onRemoveMcpServer: (String) -> Unit,
@@ -103,6 +101,12 @@ data class SettingsActions(
     val onInstallGitHub: (String) -> Unit,
     val onInstallBrowsed: (RegistrySkillEntry) -> Unit,
     val onUninstallSkill: (String) -> Unit,
+    val onToggleAutoUpdate: (Boolean) -> Unit,
+    val onToggleAutoDownload: (Boolean) -> Unit,
+    val onToggleAutoInstall: (Boolean) -> Unit,
+    val onCheckForUpdate: () -> Unit,
+    val onDownloadUpdate: () -> Unit,
+    val onInstallUpdate: () -> Unit,
     val onBrowseMarketplaceSkills: () -> Unit,
 ) {
     companion object {
@@ -163,8 +167,6 @@ data class SettingsActions(
             onEnrollWakeWord = {},
             onCapturePttTrigger = {},
             onClearPttTrigger = {},
-            onPickSafWorkDir = {},
-            onClearSafWorkDir = {},
             onChangeUiScale = {},
             onAddMcpServer = { _, _, _ -> },
             onRemoveMcpServer = {},
@@ -195,6 +197,12 @@ data class SettingsActions(
             onInstallGitHub = {},
             onInstallBrowsed = {},
             onUninstallSkill = {},
+            onToggleAutoUpdate = {},
+            onToggleAutoDownload = {},
+            onToggleAutoInstall = {},
+            onCheckForUpdate = {},
+            onDownloadUpdate = {},
+            onInstallUpdate = {},
             onBrowseMarketplaceSkills = {},
         )
     }

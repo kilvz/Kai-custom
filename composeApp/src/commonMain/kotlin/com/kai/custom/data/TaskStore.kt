@@ -20,7 +20,9 @@ class TaskStore(private val appSettings: AppSettings) {
     private val mutex = Mutex()
     private var cachedTasks: MutableList<ScheduledTask>? = null
 
-    private fun invalidateCache() { cachedTasks = null }
+    private fun invalidateCache() {
+        cachedTasks = null
+    }
 
     private fun loadTasks(): MutableList<ScheduledTask> {
         val cached = cachedTasks

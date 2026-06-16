@@ -102,6 +102,7 @@ import com.kai.custom.tools.TodoWriteTool
 import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.tools.WebFetchTool
 import com.kai.custom.tools.WebSearchTool
+import com.kai.custom.tools.SandboxFileTransferTool
 import com.kai.custom.tools.WriteFileTool
 import com.russhwolf.settings.BuildConfig
 import com.russhwolf.settings.Settings
@@ -349,6 +350,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(EditFileTool.toolInfo)
     add(GlobTool.toolInfo)
     add(GrepTool.toolInfo)
+    add(SandboxFileTransferTool.toolInfo)
     add(ApplyPatchTool.toolInfo)
     add(TodoWriteTool.toolInfo)
     add(WebFetchTool.toolInfo)
@@ -622,6 +624,7 @@ actual fun getAvailableTools(): List<Tool> {
             add(GrepTool)
             add(ApplyPatchTool)
             add(TodoWriteTool)
+            add(SandboxFileTransferTool)
             add(WebFetchTool)
             add(InternetSearchTool)
         }

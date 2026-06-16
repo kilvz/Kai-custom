@@ -517,11 +517,20 @@ object CommonTools {
             val relation = args["relation"]?.toString()
             val limit = (args["limit"] as? Number)?.toInt() ?: 20
             val results = memoryStore.queryFacts(entity, relation, limit)
+            val now = Clock.System.now().toEpochMilliseconds()
             return mapOf(
                 "success" to true,
                 "count" to results.size,
                 "facts" to results.map { fact ->
-                    mapOf("id" to fact.id, "subject" to fact.subject, "predicate" to fact.predicate, "object" to fact.`object`, "created_at" to fact.createdAt)
+                    mapOf(
+                        "id" to fact.id,
+                        "subject" to fact.subject,
+                        "predicate" to fact.predicate,
+                        "object" to fact.`object`,
+                        "created_at" to fact.createdAt,
+                        "valid_to" to fact.validTo,
+                        "is_expired" to (fact.validTo != null && fact.validTo <= now),
+                    )
                 },
             )
         }
@@ -547,10 +556,37 @@ object CommonTools {
         }
     }
 
+    fun kgStatsTool(memoryStore: MemoryStore) = object : Tool {
+        override val schema = ToolSchema(
+            name = "kg_stats",
+            description = "Get knowledge graph statistics: total fact count, current (valid) count, and expired count.",
+            parameters = emptyMap(),
+        )
+        override suspend fun execute(args: Map<String, Any>): Any {
+            val allFacts = memoryStore.queryFacts(entity = null, relation = null, limit = Int.MAX_VALUE)
+            val now = Clock.System.now().toEpochMilliseconds()
+            val currentFacts = allFacts.filter { it.validTo == null || it.validTo > now }
+            val expiredFacts = allFacts.filter { it.validTo != null && it.validTo <= now }
+            val distinctSubjects = allFacts.map { it.subject }.distinct().size
+            val distinctPredicates = allFacts.map { it.predicate }.distinct().size
+            val distinctObjects = allFacts.map { it.`object` }.distinct().size
+            return mapOf(
+                "success" to true,
+                "total_facts" to allFacts.size,
+                "current_facts" to currentFacts.size,
+                "expired_facts" to expiredFacts.size,
+                "distinct_subjects" to distinctSubjects,
+                "distinct_predicates" to distinctPredicates,
+                "distinct_objects" to distinctObjects,
+            )
+        }
+    }
+
     fun getKgTools(memoryStore: MemoryStore): List<Tool> = listOf(
         kgAddTool(memoryStore),
         kgQueryTool(memoryStore),
         kgInvalidateTool(memoryStore),
+        kgStatsTool(memoryStore),
     )
 
     // Diary tools

@@ -43,8 +43,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.kai.custom.mcp.PopularMcpServer
-import com.kai.custom.openUrl
 import com.kai.custom.mcp.popularMcpServers
+import com.kai.custom.openUrl
 import com.kai.custom.ui.KaiOutlinedTextField
 import com.kai.custom.ui.components.VerticalScrollbarForScroll
 import com.kai.custom.ui.handCursor
@@ -279,8 +279,8 @@ private fun McpServerCard(
                             )
                         }
                     }
-                } else if (server.connectionStatus == McpConnectionStatus.Connected
-                    && !isJinaAi
+                } else if (server.connectionStatus == McpConnectionStatus.Connected &&
+                    !isJinaAi
                 ) {
                     Text(
                         text = stringResource(Res.string.settings_mcp_no_tools),

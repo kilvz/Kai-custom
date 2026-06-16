@@ -14,6 +14,8 @@ actual fun startDownloadNotificationService() {}
 actual fun stopDownloadNotificationService() {}
 actual fun updateDownloadNotificationProgress(percent: Int) {}
 
+actual fun resolveContentUriSize(uri: String): Long = 0L
+
 actual fun importPlatformFile(platformFile: io.github.vinceglb.filekit.PlatformFile, isGguf: Boolean): String? = null
 
 actual fun resolveSafUriToLocal(uri: String, localPath: String): String? = null

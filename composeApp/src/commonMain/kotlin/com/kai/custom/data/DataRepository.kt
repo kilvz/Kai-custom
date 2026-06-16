@@ -258,6 +258,12 @@ interface DataRepository {
 
     // Notifications (FOSS-only on Android; other platforms return stub values).
     // Per-app filtering is delegated to the system Notification Access "Apps" picker.
+    fun isAutoUpdateEnabled(): Boolean
+    fun setAutoUpdateEnabled(enabled: Boolean)
+    fun isAutoDownloadEnabled(): Boolean
+    fun setAutoDownloadEnabled(enabled: Boolean)
+    fun isAutoInstallEnabled(): Boolean
+    fun setAutoInstallEnabled(enabled: Boolean)
     fun isNotificationsEnabled(): Boolean
     fun setNotificationsEnabled(enabled: Boolean)
     fun isNotificationListenerAccessGranted(): Boolean

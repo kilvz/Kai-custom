@@ -28,9 +28,8 @@ object SandboxFileTransferTool : Tool {
         description = "Copy files between the Linux sandbox and Android phone storage. Use this when standard shell cp/mv commands fail (e.g. permission errors on /sdcard, or cross-filesystem issues). " +
             "This tool uses base64 encoding through the sandbox shell to bypass bind-mount and permission problems. " +
             "It can copy both text and binary files (images, PDFs, zips, etc.). " +
-            "android_path can be an absolute path like /sdcard/Download/report.pdf (copies directly to that location), " +
-            "or if a SAF work directory is configured in Settings, relative to that directory (e.g. \"Download/report.pdf\"). " +
-            "Without SAF work dir, relative paths go to Android/data/com.kai.custom/files/transfer/. " +
+            "android_path can be an absolute path like /sdcard/Download/report.pdf (copies directly to that location). " +
+            "Relative paths go to Android/data/com.kai.custom/files/transfer/. " +
             "Sandbox paths use the standard format: /root/... for sandbox home, /sdcard/... for phone storage.",
         parameters = mapOf(
             "action" to ParameterSchema(

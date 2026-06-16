@@ -80,8 +80,8 @@ import kai.composeapp.generated.resources.splinterlands_defeat
 import kai.composeapp.generated.resources.splinterlands_description
 import kai.composeapp.generated.resources.splinterlands_error
 import kai.composeapp.generated.resources.splinterlands_fetching_cards
-import kai.composeapp.generated.resources.splinterlands_finished
 import kai.composeapp.generated.resources.splinterlands_finding_match
+import kai.composeapp.generated.resources.splinterlands_finished
 import kai.composeapp.generated.resources.splinterlands_hide
 import kai.composeapp.generated.resources.splinterlands_hive_username
 import kai.composeapp.generated.resources.splinterlands_llm_label

@@ -12,7 +12,5 @@ actual object LocalAppLocale {
         @Composable get() = LocalAppLocale.current.toString()
 
     @Composable
-    actual infix fun provides(value: String?): ProvidedValue<*> {
-        return LocalAppLocale.provides(Locale.current)
-    }
+    actual infix fun provides(value: String?): ProvidedValue<*> = LocalAppLocale.provides(Locale.current)
 }

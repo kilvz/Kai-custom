@@ -1,7 +1,6 @@
 package com.kai.custom.overlay
 
 import android.content.Context
-import com.kai.custom.shared.R
 import android.graphics.Color
 import android.graphics.Outline
 import android.graphics.drawable.GradientDrawable
@@ -19,6 +18,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import com.kai.custom.shared.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

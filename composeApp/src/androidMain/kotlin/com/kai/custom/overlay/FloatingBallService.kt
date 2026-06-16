@@ -13,11 +13,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
-import com.kai.custom.shared.R
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import com.kai.custom.data.DataRepository
+import com.kai.custom.shared.R
 import org.koin.android.ext.android.inject
 
 class FloatingBallService : Service() {

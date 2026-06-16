@@ -23,6 +23,8 @@ actual class ActivityResultBridge actual constructor() {
     private var _pendingClass: String? = null
     private var _pendingMimeType: String? = null
     private var _pendingRequestCode: Int = 0
+    private var _pendingIntent: Intent? = null
+    private var _pendingResultIntent: Intent? = null
 
     actual val launchTriggered: StateFlow<Boolean> = _launchTriggered
     actual val pendingAction: String? get() = _pendingAction
@@ -31,6 +33,8 @@ actual class ActivityResultBridge actual constructor() {
     actual val pendingClass: String? get() = _pendingClass
     actual val pendingMimeType: String? get() = _pendingMimeType
     actual val pendingRequestCode: Int get() = _pendingRequestCode
+    val pendingIntent: Intent? get() = _pendingIntent
+    val pendingResultIntent: Intent? get() = _pendingResultIntent
 
     actual suspend fun launchActivityForResult(
         action: String,
@@ -40,6 +44,7 @@ actual class ActivityResultBridge actual constructor() {
         mimeType: String?,
         requestCode: Int,
     ): ActivityResultData? {
+        _pendingIntent = null
         pendingDeferred = CompletableDeferred()
         _pendingAction = action
         _pendingDataUri = dataUri
@@ -51,6 +56,25 @@ actual class ActivityResultBridge actual constructor() {
         return withTimeoutOrNull(60.seconds) {
             pendingDeferred.await()
         }
+    }
+
+    /** Launch a pre-built intent (e.g. MediaProjection screen capture) and return the result. */
+    suspend fun launchIntentForResult(intent: Intent): ActivityResultData? {
+        _pendingAction = null
+        _pendingDataUri = null
+        _pendingPackage = null
+        _pendingClass = null
+        _pendingMimeType = null
+        _pendingResultIntent = null
+        _pendingIntent = intent
+        pendingDeferred = CompletableDeferred()
+        _launchTriggered.value = true
+        val result = withTimeoutOrNull(60.seconds) {
+            pendingDeferred.await()
+        }
+        _pendingIntent = null
+        _launchTriggered.value = false
+        return result
     }
 
     actual fun onActivityResult(resultCode: Int, dataString: String?) {
@@ -67,6 +91,14 @@ actual class ActivityResultBridge actual constructor() {
         _pendingPackage = null
         _pendingClass = null
         _pendingMimeType = null
+        _pendingIntent = null
+    }
+
+    /** Called by the composable handler with the full result Intent */
+    fun onActivityResultWithIntent(resultCode: Int, data: Intent?) {
+        _pendingResultIntent = data
+        val dataString = data?.data?.toString() ?: data?.extras?.getString("data")
+        onActivityResult(resultCode, dataString)
     }
 
     fun cancelPending() {
@@ -74,6 +106,7 @@ actual class ActivityResultBridge actual constructor() {
             ActivityResultData(success = false, error = "Cancelled"),
         )
         _launchTriggered.value = false
+        _pendingIntent = null
     }
 }
 
@@ -83,22 +116,26 @@ actual fun SetupActivityResultHandler(bridge: ActivityResultBridge) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        val dataString = result.data?.data?.toString() ?: result.data?.extras?.getString("data")
-        bridge.onActivityResult(result.resultCode, dataString)
+        bridge.onActivityResultWithIntent(result.resultCode, result.data)
     }
     LaunchedEffect(launchTriggered) {
         if (launchTriggered) {
-            val intent = Intent(bridge.pendingAction ?: Intent.ACTION_VIEW).apply {
-                bridge.pendingDataUri?.let { data = android.net.Uri.parse(it) }
-                val pkg = bridge.pendingPackage
-                val cls = bridge.pendingClass
-                if (pkg != null && cls != null) {
-                    setClassName(pkg, cls)
-                } else {
-                    pkg?.let { `package` = it }
+            val prebuilt = bridge.pendingIntent
+            val intent = if (prebuilt != null) {
+                prebuilt.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            } else {
+                Intent(bridge.pendingAction ?: Intent.ACTION_VIEW).apply {
+                    bridge.pendingDataUri?.let { data = android.net.Uri.parse(it) }
+                    val pkg = bridge.pendingPackage
+                    val cls = bridge.pendingClass
+                    if (pkg != null && cls != null) {
+                        setClassName(pkg, cls)
+                    } else {
+                        pkg?.let { `package` = it }
+                    }
+                    bridge.pendingMimeType?.let { type = it }
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-                bridge.pendingMimeType?.let { type = it }
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             try {
                 launcher.launch(intent)

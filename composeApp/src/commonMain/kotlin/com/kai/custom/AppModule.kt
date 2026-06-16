@@ -38,6 +38,7 @@ import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController
+import com.kai.custom.AutoUpdateManager
 import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.SmsPermissionController
 import com.kai.custom.tools.SmsSendPermissionController
@@ -60,6 +61,7 @@ import org.koin.dsl.module
 val appModule = module {
     single<CalendarPermissionController> { CalendarPermissionController() }
     single<NotificationPermissionController> { NotificationPermissionController() }
+    single<AutoUpdateManager> { AutoUpdateManager() }
     single<SmsPermissionController> { SmsPermissionController() }
     single<SmsSendPermissionController> { SmsSendPermissionController() }
     single<MicrophonePermissionController> { MicrophonePermissionController() }
@@ -202,7 +204,7 @@ val appModule = module {
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>(), get<AutoUpdateManager>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }

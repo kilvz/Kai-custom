@@ -19,6 +19,10 @@ expect fun closeSafHandle(handle: PlatformSafHandle)
 
 expect fun importPlatformFile(platformFile: PlatformFile, isGguf: Boolean): String?
 
+/** Resolves the file size (in bytes) for a content:// URI using platform APIs.
+ * Returns 0L if the size cannot be determined. */
+expect fun resolveContentUriSize(uri: String): Long
+
 /** Opens a SAF file picker and copies the selected file to the model directory.
  * Returns the model ID on success. The actual file content is streamed, not referenced. */
 expect fun importSafFile(uri: String, isGguf: Boolean): String?

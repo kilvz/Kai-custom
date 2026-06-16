@@ -509,13 +509,21 @@ fun SettingsScreenContent(
                                     wakeWordEnrollmentMessage = filteredUiState.wakeWordEnrollmentMessage,
                                     pttTriggerKeyCode = filteredUiState.pttTriggerKeyCode,
                                     preferredLanguage = filteredUiState.preferredLanguage,
+                                    isAutoUpdateEnabled = filteredUiState.isAutoUpdateEnabled,
+                                    isAutoDownloadEnabled = filteredUiState.isAutoDownloadEnabled,
+                                    isAutoInstallEnabled = filteredUiState.isAutoInstallEnabled,
+                                    updateAvailable = filteredUiState.updateAvailable,
+                                    latestVersion = filteredUiState.latestVersion,
+                                    isCheckingForUpdate = filteredUiState.isCheckingForUpdate,
+                                    isDownloadingUpdate = filteredUiState.isDownloadingUpdate,
+                                    downloadProgress = filteredUiState.downloadProgress,
+                                    updateStatusMessage = filteredUiState.updateStatusMessage,
                                     showDebugApiSection = filteredUiState.showDebugApiSection,
                                     isDebugApiEnabled = filteredUiState.isDebugApiEnabled,
                                     debugApiRunning = filteredUiState.debugApiRunning,
                                     debugApiTransitioning = filteredUiState.debugApiTransitioning,
                                     isDebugEndpointEnabled = filteredUiState.isDebugEndpointEnabled,
                                     shizukuPermissionGranted = filteredUiState.shizukuPermissionGranted,
-                                    safWorkDir = filteredUiState.safWorkDir,
                                 )
                             }
 

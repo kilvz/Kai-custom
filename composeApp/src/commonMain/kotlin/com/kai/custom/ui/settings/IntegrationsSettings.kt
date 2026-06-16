@@ -324,15 +324,15 @@ private fun WhatsAppSection(
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }
-            }
+            },
         )
 
         if (isEnabled) {
-                Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
 
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
             ) {
                 Row(
                     modifier = Modifier.padding(12.dp),
@@ -446,19 +446,19 @@ private fun WhatsAppSection(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                statusMessage = getString(Res.string.integrations_whatsapp_resetting)
-                                whatsAppLifecycleManager.resetBridge()
-                                statusMessage = getString(Res.string.integrations_whatsapp_bridge_reset_done)
-                            }
-                        },
-                        modifier = Modifier.handCursor().height(28.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                    ) {
-                        Text(stringResource(Res.string.integrations_whatsapp_reset_bridge), style = MaterialTheme.typography.labelSmall)
-                    }
+                Button(
+                    onClick = {
+                        scope.launch {
+                            statusMessage = getString(Res.string.integrations_whatsapp_resetting)
+                            whatsAppLifecycleManager.resetBridge()
+                            statusMessage = getString(Res.string.integrations_whatsapp_bridge_reset_done)
+                        }
+                    },
+                    modifier = Modifier.handCursor().height(28.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                ) {
+                    Text(stringResource(Res.string.integrations_whatsapp_reset_bridge), style = MaterialTheme.typography.labelSmall)
+                }
             }
             Spacer(Modifier.height(8.dp))
 
@@ -802,7 +802,7 @@ private fun TelegramSection(dataRepository: DataRepository) {
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                     )
                 }
-            }
+            },
         )
 
         if (isEnabled) {

@@ -264,6 +264,8 @@ actual fun getAvailableTools(): List<Tool> {
             if (!mcpServerManager.isConnected("alt_memory")) {
                 addAll(CommonTools.getMemoryTools(memoryStore))
             }
+            addAll(CommonTools.getKgTools(memoryStore))
+            addAll(CommonTools.getDiaryTools(memoryStore))
             addAll(listOf(HeartbeatTools.getPromoteLearningTool(memoryStore, appSettings)))
         }
         if (appSettings.isSchedulingEnabled()) {

@@ -914,6 +914,20 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_DEBUG_ENDPOINT_ENABLED, enabled)
     }
 
+    // Auto-update
+    fun isAutoUpdateEnabled(): Boolean = settings.getBoolean(KEY_AUTO_UPDATE_ENABLED, true)
+    fun setAutoUpdateEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_AUTO_UPDATE_ENABLED, enabled)
+    }
+    fun isAutoDownloadEnabled(): Boolean = settings.getBoolean(KEY_AUTO_DOWNLOAD_ENABLED, false)
+    fun setAutoDownloadEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_AUTO_DOWNLOAD_ENABLED, enabled)
+    }
+    fun isAutoInstallEnabled(): Boolean = settings.getBoolean(KEY_AUTO_INSTALL_ENABLED, false)
+    fun setAutoInstallEnabled(enabled: Boolean) {
+        settings.putBoolean(KEY_AUTO_INSTALL_ENABLED, enabled)
+    }
+
     // Notifications (FOSS-only, Android-only — settings layer is platform-agnostic, feature
     // gate is enforced by the listener service being declared only in foss/AndroidManifest.xml)
     fun isNotificationsEnabled(): Boolean = settings.getBoolean(KEY_NOTIFICATIONS_ENABLED, false)
@@ -1129,6 +1143,9 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_DEBUG_API_ENABLED = "debug_api_enabled"
         const val KEY_DEBUG_ENDPOINT_ENABLED = "debug_endpoint_enabled"
 
+        const val KEY_AUTO_UPDATE_ENABLED = "auto_update_enabled"
+        const val KEY_AUTO_DOWNLOAD_ENABLED = "auto_download_enabled"
+        const val KEY_AUTO_INSTALL_ENABLED = "auto_install_enabled"
         const val KEY_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val KEY_NOTIFICATIONS_PENDING = "notifications_pending"
         const val KEY_NOTIFICATIONS_STORE = "notifications_store"

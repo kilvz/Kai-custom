@@ -12,6 +12,7 @@ var customAppLocale by mutableStateOf<String?>(null)
 
 expect object LocalAppLocale {
     val current: String @Composable get
+
     @Composable infix fun provides(value: String?): ProvidedValue<*>
 }
 

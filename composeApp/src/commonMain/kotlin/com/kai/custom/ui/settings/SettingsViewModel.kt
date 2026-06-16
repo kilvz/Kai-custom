@@ -16,6 +16,10 @@ import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.RenderMode
 import com.kai.custom.data.Service
+import com.kai.custom.AutoUpdateManager
+import com.kai.custom.Version
+import com.kai.custom.DownloadResult
+import com.kai.custom.UpdateCheckResult
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.supportsAgenticFlows
@@ -89,6 +93,7 @@ class SettingsViewModel(
     private val sandboxController: SandboxController,
     private val mcpServerManager: McpServerManager,
     private val toolPermissionBridge: ToolPermissionBridge,
+    private val autoUpdateManager: AutoUpdateManager,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
 ) : ViewModel() {
 
@@ -188,7 +193,9 @@ class SettingsViewModel(
         modelGpuLayers = buildModelGpuLayersMap(),
         installedSkills = dataRepository.getInstalledSkills().toImmutableList(),
         activeSkill = dataRepository.getActiveSkill(),
-        safWorkDir = dataRepository.getSandboxWorkDir(),
+        isAutoUpdateEnabled = dataRepository.isAutoUpdateEnabled(),
+        isAutoDownloadEnabled = dataRepository.isAutoDownloadEnabled(),
+        isAutoInstallEnabled = dataRepository.isAutoInstallEnabled(),
         schemaResetMessage = dataRepository.getSchemaResetMessage(),
     )
 
@@ -291,9 +298,13 @@ class SettingsViewModel(
         onInstallGitHub = ::onInstallSkillFromGitHub,
         onInstallBrowsed = ::onInstallSkillFromBrowsed,
         onUninstallSkill = ::onUninstallSkill,
+        onToggleAutoUpdate = ::onToggleAutoUpdate,
+        onToggleAutoDownload = ::onToggleAutoDownload,
+        onToggleAutoInstall = ::onToggleAutoInstall,
+        onCheckForUpdate = ::onCheckForUpdate,
+        onDownloadUpdate = ::onDownloadUpdate,
+        onInstallUpdate = ::onInstallUpdate,
         onBrowseMarketplaceSkills = ::onBrowseMarketplaceSkills,
-        onPickSafWorkDir = ::onPickSafWorkDir,
-        onClearSafWorkDir = ::onClearSafWorkDir,
     )
 
     private val _state = MutableStateFlow(buildFullState())
@@ -1463,6 +1474,89 @@ class SettingsViewModel(
         _state.update { it.copy(pendingDeletion = PendingDeletion.Skill(id)) }
     }
 
+    private fun onToggleAutoUpdate(enabled: Boolean) {
+        dataRepository.setAutoUpdateEnabled(enabled)
+        _state.update { it.copy(isAutoUpdateEnabled = enabled) }
+    }
+
+    private fun onToggleAutoDownload(enabled: Boolean) {
+        dataRepository.setAutoDownloadEnabled(enabled)
+        _state.update { it.copy(isAutoDownloadEnabled = enabled) }
+    }
+
+    private fun onToggleAutoInstall(enabled: Boolean) {
+        dataRepository.setAutoInstallEnabled(enabled)
+        _state.update { it.copy(isAutoInstallEnabled = enabled) }
+    }
+
+    private fun onCheckForUpdate() {
+        if (_state.value.isCheckingForUpdate) return
+        _state.update { it.copy(isCheckingForUpdate = true, updateStatusMessage = "Checking...") }
+        viewModelScope.launch(backgroundDispatcher) {
+            val result = autoUpdateManager.checkForUpdate()
+            _state.update {
+                it.copy(
+                    isCheckingForUpdate = false,
+                    updateAvailable = result.updateAvailable,
+                    latestVersion = result.latestVersion,
+                    latestVersionUrl = result.downloadUrl ?: "",
+                    updateStatusMessage = when {
+                        result.error != null -> "Check failed: ${result.error}"
+                        result.updateAvailable -> "v${result.latestVersion} available"
+                        else -> "You're up to date (v${Version.appVersion})"
+                    },
+                )
+            }
+            if (result.updateAvailable && _state.value.isAutoDownloadEnabled) {
+                result.downloadUrl?.let { startUpdateDownload(it) }
+            }
+        }
+    }
+
+    private fun onDownloadUpdate() {
+        if (_state.value.isDownloadingUpdate || !_state.value.updateAvailable) return
+        startUpdateDownload(_state.value.latestVersionUrl)
+    }
+
+    private fun startUpdateDownload(downloadUrl: String) {
+        if (downloadUrl.isEmpty()) return
+        _state.update { it.copy(isDownloadingUpdate = true, downloadProgress = 0f, updateStatusMessage = "Downloading...") }
+        viewModelScope.launch(backgroundDispatcher) {
+            val fileName = autoUpdateManager.getApkFileName()
+            val result = autoUpdateManager.downloadApk(downloadUrl, fileName) { progress ->
+                _state.update { it.copy(downloadProgress = progress) }
+            }
+            _state.update {
+                it.copy(
+                    isDownloadingUpdate = false,
+                    downloadProgress = if (result.success) 1f else 0f,
+                    downloadedFilePath = result.filePath ?: "",
+                    updateStatusMessage = if (result.success) {
+                        "Downloaded to ${result.filePath}"
+                    } else {
+                        "Download failed: ${result.error}"
+                    },
+                )
+            }
+            if (result.success && _state.value.isAutoInstallEnabled) {
+                installDownloadedApk(result.filePath!!)
+            }
+        }
+    }
+
+    private fun onInstallUpdate() {
+        val path = _state.value.downloadedFilePath
+        if (path.isEmpty()) return
+        installDownloadedApk(path)
+    }
+
+    private fun installDownloadedApk(filePath: String) {
+        viewModelScope.launch(backgroundDispatcher) {
+            autoUpdateManager.installApk(filePath)
+            _state.update { it.copy(updateStatusMessage = "Installation launched") }
+        }
+    }
+
     private fun onBrowseMarketplaceSkills() {
         _state.update { it.copy(isBrowsingMarketplace = true) }
         viewModelScope.launch {
@@ -1474,16 +1568,6 @@ class SettingsViewModel(
                 )
             }
         }
-    }
-
-    private fun onPickSafWorkDir(uri: String) {
-        dataRepository.setSandboxWorkDir(uri)
-        _state.update { it.copy(safWorkDir = uri) }
-    }
-
-    private fun onClearSafWorkDir() {
-        dataRepository.setSandboxWorkDir("")
-        _state.update { it.copy(safWorkDir = "") }
     }
 
     private fun checkAllConnections() {

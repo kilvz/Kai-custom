@@ -266,8 +266,6 @@ class ChatViewModel(
                 if (_state.value.isInteractiveMode) {
                     retryIfNoValidKaiUi()
                 }
-                // Only remove from pending on success — failed messages stay queued for retry
-                dequeuePending(question)
             } catch (exception: Exception) {
                 // CancellationException must be re-thrown to properly propagate coroutine cancellation
                 if (exception is CancellationException) throw exception
@@ -278,6 +276,13 @@ class ChatViewModel(
                     )
                 }
             } finally {
+                // Always remove from queue to prevent duplicates.
+                // dataRepository.ask() may throw AFTER the response was already
+                // added to chatHistory (e.g. autoMemoryLearner.onExchangeComplete(),
+                // saveCurrentConversation() failures), so this must run in finally
+                // rather than in the try block. For direct (non-queued) messages,
+                // this is a no-op since the question is not in messageQueue.
+                dequeuePending(question)
                 isProcessingFromQueue = false
                 processNextInQueue()
             }

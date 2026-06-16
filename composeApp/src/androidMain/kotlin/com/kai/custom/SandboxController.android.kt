@@ -473,19 +473,23 @@ class AndroidSandboxController : SandboxController {
             ?: return@withContext null
         // Rootfs inside proot is owned by root:1078 — the app process
         // can't access it directly via Java File. Always use sandbox shell.
-        readHostTextFileViaSandbox(file.absolutePath, maxBytes)
+        // Use the SANDBOX path (not host path) — proot translates it correctly
+        // via bind-mounts (e.g. /root → homePath, /sdcard → /storage/emulated/0).
+        readHostTextFileViaSandbox(path, maxBytes)
     }
 
     override suspend fun writeTextFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
-        writeHostTextFileViaSandbox(file.absolutePath, content)
+        // Use sandbox path — proot translates via bind-mounts.
+        writeHostTextFileViaSandbox(path, content)
     }
 
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
             ?: return@withContext false
-        writeHostBinaryViaSandbox(file.absolutePath, data)
+        // Use sandbox path — proot translates via bind-mounts.
+        writeHostBinaryViaSandbox(path, data)
     }
 
     override suspend fun openFile(path: String): Result<Unit> = withContext(Dispatchers.IO) {

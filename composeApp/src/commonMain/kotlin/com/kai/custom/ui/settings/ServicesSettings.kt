@@ -1150,21 +1150,26 @@ private fun LiteRTSettings(
                                     text = displayName.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onBackground,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false),
                                 )
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (isExternal) {
-                                    Spacer(Modifier.width(6.dp))
                                     Text(
                                         text = stringResource(Res.string.services_model_external),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
+                                    Spacer(Modifier.width(8.dp))
                                 }
+                                Text(
+                                    text = model.description ?: model.subtitle.replace(" (External)", ""),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
-                            Text(
-                                text = model.description ?: if (isExternal) stringResource(Res.string.services_model_imported_description_external) else stringResource(Res.string.services_model_imported_description_local),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
                         }
                         IconButton(
                             onClick = { onDeleteModel(model.id) },
@@ -1240,11 +1245,20 @@ private fun LiteRTSettings(
                     } catch (_: Exception) {
                         false
                     }
+                    val resolvedSize = if (sizeBytes <= 0L) {
+                        try { com.kai.custom.inference.resolveContentUriSize(uriOrPath) } catch (_: Exception) { 0L }
+                    } else sizeBytes
                     val id = if (isGguf) {
-                        com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", sizeBytes)
+                        com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", resolvedSize)
                     } else {
                         com.kai.custom.inference.importSafFile(uriOrPath, false)
                     }
+                    val actualSize = if (!isGguf && id != null) {
+                        try {
+                            val modelDir = java.io.File(com.kai.custom.inference.getModelStorageDirectory(), id)
+                            modelDir.listFiles()?.firstOrNull { f -> f.isFile && !f.name.endsWith(".txt") }?.length() ?: resolvedSize
+                        } catch (_: Exception) { resolvedSize }
+                    } else resolvedSize
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         if (id != null) {
                             onImportPlatformFileComplete(
@@ -1252,7 +1266,7 @@ private fun LiteRTSettings(
                                     id = id,
                                     displayName = (displayName ?: "model").removeSuffix(".gguf").removeSuffix(".litertlm"),
                                     filePath = uriOrPath,
-                                    sizeBytes = sizeBytes,
+                                    sizeBytes = actualSize,
                                 ),
                             )
                             onSelectModel(id)

@@ -17,7 +17,9 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     private var cachedAllEntities: List<EntityData>? = null
 
-    private fun invalidateCache() { cachedAllEntities = null }
+    private fun invalidateCache() {
+        cachedAllEntities = null
+    }
 
     private fun domainForCategory(category: MemoryCategory): String = when (category) {
         MemoryCategory.GENERAL -> DimensionConfig.DOMAIN_MEMORIES

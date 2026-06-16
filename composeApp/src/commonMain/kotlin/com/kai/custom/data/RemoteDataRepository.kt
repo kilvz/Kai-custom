@@ -2384,6 +2384,19 @@ class RemoteDataRepository(
         appSettings.setDebugEndpointEnabled(enabled)
     }
 
+    override fun isAutoUpdateEnabled(): Boolean = appSettings.isAutoUpdateEnabled()
+    override fun setAutoUpdateEnabled(enabled: Boolean) {
+        appSettings.setAutoUpdateEnabled(enabled)
+    }
+    override fun isAutoDownloadEnabled(): Boolean = appSettings.isAutoDownloadEnabled()
+    override fun setAutoDownloadEnabled(enabled: Boolean) {
+        appSettings.setAutoDownloadEnabled(enabled)
+    }
+    override fun isAutoInstallEnabled(): Boolean = appSettings.isAutoInstallEnabled()
+    override fun setAutoInstallEnabled(enabled: Boolean) {
+        appSettings.setAutoInstallEnabled(enabled)
+    }
+
     override fun isNotificationsEnabled(): Boolean = appSettings.isNotificationsEnabled()
 
     override fun setNotificationsEnabled(enabled: Boolean) {
