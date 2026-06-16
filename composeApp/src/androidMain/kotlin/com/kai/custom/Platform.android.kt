@@ -2293,7 +2293,14 @@ private suspend fun captureScreenViaMediaProjection(
 
     val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     val metrics = DisplayMetrics()
-    wm.defaultDisplay.getRealMetrics(metrics)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val windowMetrics = wm.currentWindowMetrics
+        metrics.widthPixels = windowMetrics.bounds.width()
+        metrics.heightPixels = windowMetrics.bounds.height()
+    } else {
+        @Suppress("DEPRECATION")
+        wm.defaultDisplay.getRealMetrics(metrics)
+    }
     val width = metrics.widthPixels
     val height = metrics.heightPixels
     val density = metrics.densityDpi

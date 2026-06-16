@@ -107,7 +107,8 @@ actual class AutoUpdateManager actual constructor() {
 
     actual fun getApkFileName(): String {
         val abi = getDeviceAbiSuffix()
-        return "androidApp-foss-$abi-debug.apk"
+        val version = Version.appVersion
+        return "k.ai-$version-android-$abi.apk"
     }
 
     actual fun installApk(filePath: String) {

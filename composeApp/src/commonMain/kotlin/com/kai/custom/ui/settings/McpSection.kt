@@ -139,7 +139,7 @@ private fun McpServerCard(
     onUpdateApiKey: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var apiKeyText by remember(server.id, server.apiKey) { mutableStateOf(server.apiKey ?: "") }
+    var apiKeyText by remember(server.id, server.apiKey) { mutableStateOf(server.apiKey) }
 
     Card(
         onClick = { expanded = !expanded },

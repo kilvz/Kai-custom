@@ -22,6 +22,7 @@ fastlane/play-store-key.json
 fastlane/report.xml
 fastlane/README.md
 .build-native/
+.build-gguf/
 .claude
 .opencode
 .grok/

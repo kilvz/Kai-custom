@@ -1,3 +1,12 @@
+## v3.30.1 — 2026-06-16
+
+### Fixes
+- Fix CI warnings: Node.js 20 actions deprecation, orphaned submodule gitlink
+- Fix auto-update APK filename pattern to match CI naming convention
+- Fix deprecated `defaultDisplay.getRealMetrics` — use `currentWindowMetrics` on API 30+
+- Fix redundant `?: null` and `?: ""` operators
+- Add `.build-gguf/` to `.gitignore`
+
 ## v2.7.1 — 2026-06-15
 
 ### Improvements

@@ -336,7 +336,7 @@ object SandboxFileTransferTool : Tool {
                         input.readBytes().takeIf { it.size.toLong() <= maxBytes }
                     }
                 } else null
-            } ?: null
+            }
         } catch (_: Exception) {
             null
         }
