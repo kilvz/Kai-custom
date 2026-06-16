@@ -987,7 +987,7 @@ class RemoteDataRepository(
                     ToolCallInfo(id = tc.id, name = tc.function.name, arguments = tc.function.arguments)
                 }
                 var textContent = message.effectiveContent ?: ""
-                if (calls.isEmpty() && textContent.contains("<tool_call>")) {
+                if (calls.isEmpty()) {
                     val extracted = extractInlineToolCalls(textContent, tools)
                     if (extracted.calls.isNotEmpty()) {
                         textContent = extracted.cleanedText

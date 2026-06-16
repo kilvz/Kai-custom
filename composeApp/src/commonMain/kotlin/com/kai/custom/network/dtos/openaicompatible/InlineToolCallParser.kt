@@ -38,9 +38,10 @@ private val lenientJson = Json {
  * field. Detect those blocks, convert each one into a synthetic tool call, and
  * return the surrounding natural-language text with the blocks removed.
  *
- * Two block flavors are accepted:
+ * Three block flavors are accepted:
  *  - Hermes / OpenHands XML: `<function=NAME><parameter=KEY>VALUE</parameter>…</function>`
  *  - JSON: `{ "name": "...", "arguments": { … } }`
+ *  - OpenCode agent XML: `<invoke name="NAME"><parameter name="KEY">VALUE</parameter>…</invoke>` inside `<tool_calls>`
  *
  * Parameter values are coerced to JSON primitive types using the tool's schema so
  * `timeout=180` becomes a number rather than the string "180".
@@ -49,8 +50,21 @@ internal fun extractInlineToolCalls(
     content: String,
     tools: List<Tool>,
 ): InlineToolCallExtraction {
-    if (!content.contains(OPEN_TAG)) return InlineToolCallExtraction(content, emptyList())
+    if (content.contains(OPEN_TAG)) {
+        val xmlExtracted = extractXmlToolCalls(content, tools)
+        if (xmlExtracted.calls.isNotEmpty()) return xmlExtracted
+    }
+    if (content.contains(OPENGINE_OPEN_TAG)) {
+        val oeExtracted = extractOpenEngineToolCalls(content, tools)
+        if (oeExtracted.calls.isNotEmpty()) return oeExtracted
+    }
+    return InlineToolCallExtraction(content, emptyList())
+}
 
+private fun extractXmlToolCalls(
+    content: String,
+    tools: List<Tool>,
+): InlineToolCallExtraction {
     val calls = mutableListOf<ParsedInlineToolCall>()
     val cleaned = StringBuilder()
     var pos = 0
@@ -70,7 +84,6 @@ internal fun extractInlineToolCalls(
         if (parsed != null) {
             calls.add(parsed)
         } else {
-            // Couldn't make sense of this block — keep it visible rather than silently dropping it.
             cleaned.append(content, openIdx, blockEnd)
         }
         pos = blockEnd
@@ -141,3 +154,56 @@ private fun parseJsonOrNull(raw: String): kotlinx.serialization.json.JsonElement
 } catch (_: Throwable) {
     null
 }
+
+// ─── OpenCode agent format (<tool_calls><invoke name="...">…) ─────
+
+private const val OPENGINE_OPEN_TAG = "<tool_calls>"
+private const val OPENGINE_CLOSE_TAG = "</tool_calls>"
+private val invokeTagRegex = Regex("<invoke\\s+name\\s*=\\s*\"([\\w.?\\-]+)\">([\\s\\S]*?)</invoke>")
+private val oeParamTagRegex = Regex("<parameter\\s+name\\s*=\\s*\"([\\w.?\\-]+)\">([\\s\\S]*?)</parameter>")
+
+/**
+ * Parses opencode agent-style tool calls wrapped in `<tool_calls>` blocks:
+ * ```
+ * <tool_calls>
+ * <invoke name="glob">
+ * <parameter name="pattern">*android2*</parameter>
+ * </invoke>
+ * </tool_calls>
+ * ```
+ */
+private fun extractOpenEngineToolCalls(content: String, tools: List<Tool>): InlineToolCallExtraction {
+    val calls = mutableListOf<ParsedInlineToolCall>()
+    val cleaned = StringBuilder()
+    var pos = 0
+    while (pos < content.length) {
+        val openIdx = content.indexOf(OPENGINE_OPEN_TAG, pos)
+        if (openIdx < 0) {
+            cleaned.append(content, pos, content.length)
+            break
+        }
+        cleaned.append(content, pos, openIdx)
+        val closeIdx = content.indexOf(OPENGINE_CLOSE_TAG, openIdx + OPENGINE_OPEN_TAG.length)
+        val blockEnd = if (closeIdx >= 0) closeIdx + OPENGINE_CLOSE_TAG.length else content.length
+        val inner = content.substring(openIdx + OPENGINE_OPEN_TAG.length, if (closeIdx >= 0) closeIdx else content.length).trim()
+
+        for (match in invokeTagRegex.findAll(inner)) {
+            val name = match.groupValues[1]
+            val body = match.groupValues[2]
+            val schema = tools.firstOrNull { it.schema.name == name }?.schema
+            val json = buildJsonObject {
+                for (paramMatch in oeParamTagRegex.findAll(body)) {
+                    val key = paramMatch.groupValues[1]
+                    val raw = paramMatch.groupValues[2].trim()
+                    val type = schema?.parameters?.get(key)?.type
+                    put(key, coerceParameterValue(raw, type))
+                }
+            }
+            calls.add(ParsedInlineToolCall(name = name, arguments = json.toString()))
+        }
+        pos = blockEnd
+    }
+    return InlineToolCallExtraction(cleaned.toString().trim(), calls)
+}
+
+

@@ -1,3 +1,8 @@
+## v3.30.2 — 2026-06-16
+
+### Features
+- Add opencode agent `<tool_calls>` inline parser for text-based tool calls from agent models
+
 ## v3.30.1 — 2026-06-16
 
 ### Fixes
