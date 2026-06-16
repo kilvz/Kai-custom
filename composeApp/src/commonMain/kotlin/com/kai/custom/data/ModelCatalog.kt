@@ -1337,6 +1337,19 @@ internal object ModelCatalog {
         "zamba2-7b-instruct" to CuratedModelInfo("Zamba 2 7B", 4_096, "2024-10", "7B"),
         "orpheus-v1-english" to CuratedModelInfo("Orpheus v1 English", 0, "2025-03"),
         "orpheus-arabic-saudi" to CuratedModelInfo("Orpheus Arabic", 0, "2025-03"),
+
+        // ==============================================================
+        // SpAIder (Gemini via local WebView bridge)
+        // ==============================================================
+        "spaider-lite" to CuratedModelInfo("SpAIder Lite", 1_000_000, "2026-01"),
+        "spaider" to CuratedModelInfo("SpAIder", 1_000_000, "2026-05"),
+        "spaider-ext" to CuratedModelInfo("SpAIder Extended", 1_000_000, "2026-05"),
+        "spaider-research" to CuratedModelInfo("SpAIder Research", 1_000_000, "2026-05"),
+        "spaider-ext-research" to CuratedModelInfo("SpAIder Extended Research", 1_000_000, "2026-05"),
+        "spaider-pro" to CuratedModelInfo("SpAIder Pro", 2_000_000, "2025-11"),
+        "spaider-pro-ext" to CuratedModelInfo("SpAIder Pro Extended", 2_000_000, "2025-11"),
+        "spaider-pro-research" to CuratedModelInfo("SpAIder Pro Research", 2_000_000, "2025-11"),
+        "spaider-pro-ext-research" to CuratedModelInfo("SpAIder Pro Extended Research", 2_000_000, "2025-11"),
     )
 
     // LMArena Elo scores scraped from https://arena.ai/leaderboard/text (2026-06-13).

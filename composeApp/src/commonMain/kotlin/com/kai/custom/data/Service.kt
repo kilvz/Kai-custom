@@ -25,6 +25,7 @@ import kai.composeapp.generated.resources.ic_service_openai_compatible
 import kai.composeapp.generated.resources.ic_service_opencode
 import kai.composeapp.generated.resources.ic_service_openrouter
 import kai.composeapp.generated.resources.ic_service_publicai
+import kai.composeapp.generated.resources.ic_service_spaider
 import kai.composeapp.generated.resources.ic_service_together
 import kai.composeapp.generated.resources.ic_service_venice
 import kai.composeapp.generated.resources.ic_service_xai
@@ -464,6 +465,30 @@ sealed class Service(
         apiKeyUrlDisplay = "platform.publicai.co",
     )
 
+    data object SpAIder : Service(
+        id = "spaider",
+        displayName = "SpAIder",
+        icon = Res.drawable.ic_service_spaider,
+        requiresApiKey = false,
+        defaultModel = "spaider",
+        settingsKeyPrefix = "spaider",
+        chatUrl = "http://localhost:8899/v1/chat/completions",
+        modelsUrl = "http://localhost:8899/v1/models",
+        sortModelsById = true,
+        supportsImages = true,
+        defaultModels = listOf(
+            ModelDefinition(id = "spaider-lite", subtitle = "Gemini 3.1 Flash Lite"),
+            ModelDefinition(id = "spaider", subtitle = "Gemini 3.5 Flash"),
+            ModelDefinition(id = "spaider-ext", subtitle = "Gemini 3.5 Flash Extended"),
+            ModelDefinition(id = "spaider-research", subtitle = "Gemini 3.5 Flash Research"),
+            ModelDefinition(id = "spaider-ext-research", subtitle = "Gemini 3.5 Flash Extended Research"),
+            ModelDefinition(id = "spaider-pro", subtitle = "Gemini Pro 3.1"),
+            ModelDefinition(id = "spaider-pro-ext", subtitle = "Gemini Pro 3.1 Extended"),
+            ModelDefinition(id = "spaider-pro-research", subtitle = "Gemini Pro 3.1 Research"),
+            ModelDefinition(id = "spaider-pro-ext-research", subtitle = "Gemini Pro 3.1 Extended Research"),
+        ),
+    )
+
     data object OpenAICompatible : Service(
         id = "openai-compatible",
         displayName = "OpenAI-Compatible API",
@@ -488,7 +513,7 @@ sealed class Service(
     )
 
     companion object {
-        val all: List<Service> get() = listOf(Free, AtlasCloud, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, Nvidia, Cerebras, OllamaCloud, LongCat, Together, HuggingFace, Venice, Moonshot, Zai, ZaiCodingPlan, Minimax, AiHubMix, DeepInfra, FireworksAI, OpenCode, PublicAI, OpenAICompatible, LiteRT)
+        val all: List<Service> get() = listOf(Free, AtlasCloud, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, Nvidia, Cerebras, OllamaCloud, LongCat, Together, HuggingFace, Venice, Moonshot, Zai, ZaiCodingPlan, Minimax, AiHubMix, DeepInfra, FireworksAI, OpenCode, PublicAI, SpAIder, OpenAICompatible, LiteRT)
 
         val DEFAULT_OPENAI_COMPATIBLE_BASE_URL: String get() = com.kai.custom.defaultOpenAICompatibleBaseUrl()
 
