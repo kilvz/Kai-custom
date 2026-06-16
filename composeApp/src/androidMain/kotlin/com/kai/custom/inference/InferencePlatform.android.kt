@@ -135,6 +135,9 @@ actual fun linkGgufExternal(uri: String, displayName: String, sizeBytes: Long): 
     safFile.writeText(parsedUri.toString())
     val nameFile = File(modelDir, "name.txt")
     nameFile.writeText(displayName.removeSuffix(".gguf"))
+    if (sizeBytes > 0L) {
+        File(modelDir, "model.size").writeText(sizeBytes.toString())
+    }
     try {
         context.contentResolver.takePersistableUriPermission(parsedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
     } catch (_: Exception) {}
@@ -215,6 +218,35 @@ actual fun closeSafHandle(handle: PlatformSafHandle) {
     } catch (_: Exception) {}
 }
 
+actual fun resolveContentUriSize(uri: String): Long {
+    return try {
+        val parsedUri = android.net.Uri.parse(uri)
+        var size = 0L
+        // 1. Cursor query
+        context.contentResolver.query(parsedUri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val sIdx = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                if (sIdx >= 0) size = cursor.getLong(sIdx)
+            }
+        }
+        // 2. ParcelFileDescriptor.statSize
+        if (size <= 0L) {
+            context.contentResolver.openFileDescriptor(parsedUri, "r")?.use { pfd ->
+                val stat = pfd.statSize
+                if (stat > 0L) size = stat
+            }
+        }
+        // 3. AssetFileDescriptor.length
+        if (size <= 0L) {
+            context.contentResolver.openAssetFileDescriptor(parsedUri, "r")?.use { afd ->
+                val len = afd.length
+                if (len > 0L && len != android.content.res.AssetFileDescriptor.UNKNOWN_LENGTH) size = len
+            }
+        }
+        size
+    } catch (_: Exception) { 0L }
+}
+
 @androidx.compose.runtime.Composable
 actual fun rememberSafFilePicker(
     extensions: List<String>,
@@ -236,6 +268,14 @@ actual fun rememberSafFilePicker(
                         if (sIdx >= 0) sizeBytes = cursor.getLong(sIdx)
                     }
                 }
+                if (sizeBytes <= 0L) {
+                    try {
+                        context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                            val stat = pfd.statSize
+                            if (stat > 0L) sizeBytes = stat
+                        }
+                    } catch (_: Exception) {}
+                }
                 onResult(uri.toString(), displayName, sizeBytes)
             } catch (e: Exception) {
                 onResult(null, null, 0L)
@@ -244,7 +284,7 @@ actual fun rememberSafFilePicker(
             onResult(null, null, 0L)
         }
     }
-    return { launcher.launch(arrayOf("*/*")) }
+    return { launcher.launch(arrayOf("application/octet-stream")) }
 }
 
 @androidx.compose.runtime.Composable

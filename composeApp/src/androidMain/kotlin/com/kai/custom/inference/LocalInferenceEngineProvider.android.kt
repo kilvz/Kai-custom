@@ -4,6 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 import java.io.File
 
 actual fun createLocalInferenceEngine(): LocalInferenceEngine? {
@@ -140,11 +144,33 @@ private class CompositeEngine(
                     sizeBytes = ggufFile.length(),
                 )
             } else if (safFile != null) {
+                val contentUri = safFile.readText().trim()
+                val sizeFile = modelDir.listFiles()?.firstOrNull { it.name == "model.size" }
+                var actualSize = sizeFile?.let { try { it.readText().trim().toLongOrNull() } catch (_: Exception) { null } } ?: 0L
+                if (actualSize <= 0L) {
+                    try {
+                        val native = GgufPluginManager.ensureLoaded()
+                        if (native != null) {
+                            val handle = openSafPath(contentUri)
+                            if (handle != null) {
+                                val resolvedPath = getSafResolvedPath(handle)
+                                val raw = native.nativeGetModelInfo(resolvedPath)
+                                if (!raw.contains("\"error\"")) {
+                                    val json = Json { ignoreUnknownKeys = true }
+                                    val obj = json.parseToJsonElement(raw).jsonObject
+                                    val totalSize = obj["_total_file_size"]?.jsonPrimitive?.longOrNull
+                                    if (totalSize != null && totalSize > 0L) actualSize = totalSize
+                                }
+                                closeSafHandle(handle)
+                            }
+                        }
+                    } catch (_: Exception) {}
+                }
                 DownloadedModel(
                     id = modelDir.name,
                     displayName = "$displayName (External)",
-                    filePath = safFile.readText().trim(),
-                    sizeBytes = 0L,
+                    filePath = contentUri,
+                    sizeBytes = actualSize,
                 )
             } else {
                 null

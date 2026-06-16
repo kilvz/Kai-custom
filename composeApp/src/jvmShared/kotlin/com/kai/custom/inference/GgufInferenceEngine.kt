@@ -206,14 +206,16 @@ class GgufInferenceEngine(
             val baseName = nameFromFile ?: metaName
                 ?: modelDir.name.replace("_", " ").replaceFirstChar { it.uppercase() }
 
-            // File size from metadata or filesystem
+            // File size from metadata, model.size, or filesystem
             val sizeBytes = metaJson?.let { obj ->
                 try {
                     obj["_total_file_size"]?.jsonPrimitive?.longOrNull
                 } catch (_: Exception) {
                     null
                 }
-            } ?: (ggufFile?.length() ?: 0L)
+            } ?: (modelDir.listFiles()?.firstOrNull { it.name == "model.size" }?.let { f ->
+                try { f.readText().trim().toLongOrNull() } catch (_: Exception) { null }
+            }) ?: (ggufFile?.length() ?: 0L)
 
             DownloadedModel(
                 id = modelDir.name,
