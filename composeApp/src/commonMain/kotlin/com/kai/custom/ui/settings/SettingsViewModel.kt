@@ -429,8 +429,9 @@ class SettingsViewModel(
             .sortedWith(
                 compareBy<Service> {
                     when {
-                        it is Service.OpenAICompatible || it is Service.SpAIder || it.isOnDevice -> 0
+                        it is Service.OpenAICompatible || it.isOnDevice -> 0
                         it is Service.AtlasCloud -> 1
+                        it is Service.SpAIder -> 2
                         else -> 2
                     }
                 }.thenBy { it.displayName },
