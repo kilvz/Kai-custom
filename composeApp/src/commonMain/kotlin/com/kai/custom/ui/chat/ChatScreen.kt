@@ -1054,8 +1054,8 @@ private fun ChatModeScreen(
                                             }
                                         }
                                     }
-                                    uiState.pendingMessages.forEachIndexed { idx, msg ->
-                                        item(key = "pending_$idx") {
+                                    uiState.pendingMessages.forEachIndexed { _, msg ->
+                                        item(key = "pending_${msg.hashCode()}") {
                                             UserMessage(message = msg, attachments = persistentListOf())
                                         }
                                     }

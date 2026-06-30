@@ -292,6 +292,7 @@ class ChatViewModel(
     private var isProcessingFromQueue = false
 
     private fun enqueue(question: String) {
+        if (messageQueue.contains(question) || _state.value.pendingMessages.contains(question)) return
         messageQueue.add(question)
         _state.update {
             it.copy(pendingMessages = (it.pendingMessages + question).toImmutableList())
