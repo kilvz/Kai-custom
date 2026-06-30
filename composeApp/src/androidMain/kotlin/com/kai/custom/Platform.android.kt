@@ -2187,6 +2187,14 @@ actual fun openMockLocationSettings() {
 actual fun isMockLocationConfigured(): Boolean {
     val context: Context by inject(Context::class.java)
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+    val testProviders = locationManager.allProviders.filter {
+        locationManager.getProvider(it)?.let { p -> p.name == android.location.LocationManager.GPS_PROVIDER } == true
+    }
+    // Check if any test provider already exists (from previous startMocking)
+    try {
+        if (locationManager.getProvider(android.location.LocationManager.GPS_PROVIDER) != null) return true
+    } catch (_: Exception) {}
+    // Try to add/remove atomically to check permission
     return try {
         locationManager.addTestProvider(
             android.location.LocationManager.GPS_PROVIDER,
@@ -2199,7 +2207,6 @@ actual fun isMockLocationConfigured(): Boolean {
     } catch (_: SecurityException) {
         false
     } catch (_: IllegalArgumentException) {
-        // Provider already exists from a previous call — that's fine, mock location works
         true
     }
 }

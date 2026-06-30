@@ -1199,7 +1199,6 @@ class SettingsViewModel(
                     if (granted) {
                         if (toolId == "set_gps_location" && !isMockLocationConfigured()) {
                             openMockLocationSettings()
-                            return@launch
                         }
                         dataRepository.setToolEnabled(toolId, true)
                         updateToolEnabledInState(toolId, true)
@@ -1209,7 +1208,6 @@ class SettingsViewModel(
             }
             if (toolId == "set_gps_location" && !isMockLocationConfigured()) {
                 openMockLocationSettings()
-                return
             }
         }
         dataRepository.setToolEnabled(toolId, enabled)
