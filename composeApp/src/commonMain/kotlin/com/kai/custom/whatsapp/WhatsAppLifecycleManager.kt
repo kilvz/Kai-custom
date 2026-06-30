@@ -255,7 +255,7 @@ class WhatsAppLifecycleManager(
                 "browser",
                 buildJsonArray {
                     add(JsonPrimitive(appSettings.getBaileysBrowserName()))
-                    add(JsonPrimitive("Desktop"))
+                    add(JsonPrimitive("Chrome"))
                     add(JsonPrimitive(appSettings.getBaileysBrowserVersion()))
                 },
             )

@@ -45,7 +45,7 @@ jobs:
             ls -la $ANDROID_SDK_ROOT/
             exit 1
           fi
-          yes | $SDKMANAGER "platforms;android-37" "build-tools;36.0.0" 2>&1 | tail -10
+          yes | $SDKMANAGER "platforms;android-36" "build-tools;36.0.0" 2>&1 | tail -10
           yes | $SDKMANAGER --licenses 2>&1 | tail -5 || true
         env:
           ANDROID_SDK_ROOT: ${{ env.ANDROID_SDK_ROOT }}

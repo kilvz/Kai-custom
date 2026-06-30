@@ -144,7 +144,7 @@ async function initBaileys() {
   console.log('[BRIDGE] Using WA version: ' + JSON.stringify(version));
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const cfg = loadConfig();
-  const browser = cfg.browser || Browsers.windows('Desktop');
+  const browser = cfg.browser || Browsers.windows('Chrome');
   const markOnline = cfg.markOnlineOnConnect !== undefined ? cfg.markOnlineOnConnect : true;
   const syncHistory = cfg.syncFullHistory !== undefined ? cfg.syncFullHistory : true;
   const linkPreviews = cfg.generateHighQualityLinkPreview !== undefined ? cfg.generateHighQualityLinkPreview : true;

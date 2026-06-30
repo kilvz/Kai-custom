@@ -409,18 +409,12 @@ private fun WhatsAppSection(
                 }
             }
 
-            // QR poller — keeps the displayed QR in sync with the bridge
-            // Default 20s matches Baileys QR refresh cycle.
-            // Goes aggressive (1s) only after user presses Refresh QR, until QR appears.
-            var qrUrgent by remember { mutableStateOf(false) }
-            LaunchedEffect(isEnabled, bridgeRunning, qrUrgent) {
+            // QR poller — polls every second while the tab is visible and bridge is running
+            LaunchedEffect(isEnabled, bridgeRunning) {
                 while (isEnabled && bridgeRunning) {
-                    delay(if (qrUrgent) 1000L else 20_000L)
+                    delay(1500L)
                     if (!dataRepository.isWhatsAppAuthenticated()) {
                         whatsAppLifecycleManager.refreshQrCode()
-                        if (qrUrgent && dataRepository.getWhatsAppQrCode().isNotBlank()) {
-                            qrUrgent = false
-                        }
                     }
                 }
             }
@@ -590,7 +584,6 @@ private fun WhatsAppSection(
                 val qrRefreshedStr = stringResource(Res.string.integrations_whatsapp_qr_refreshed)
                 OutlinedButton(
                     onClick = {
-                        qrUrgent = true
                         scope.launch {
                             statusMessage = forcingQrStr
                             whatsAppLifecycleManager.forceRefreshQr()
