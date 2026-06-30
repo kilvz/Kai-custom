@@ -503,18 +503,18 @@ app.post('/mcp', async (req, res) => {
         case 'get_qr_code': {
           if (connected) {
             content = [{ type: 'text', text: JSON.stringify({ authenticated: true, qr: null }) }];
-          } else if (pairingMode) {
-            content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: '' }) }];
           } else {
             try {
               if (fs.existsSync(QR_BASE64_FILE)) {
                 const qr = fs.readFileSync(QR_BASE64_FILE, 'utf-8').trim();
-                content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr }) }];
+                content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr, pairingMode }) }];
+              } else if (currentQr) {
+                content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: currentQr, pairingMode }) }];
               } else {
-                content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: currentQr || '' }) }];
+                content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: '', pairingMode }) }];
               }
             } catch (e) {
-              content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: currentQr || '' }) }];
+              content = [{ type: 'text', text: JSON.stringify({ authenticated: false, qr: '', pairingMode }) }];
             }
           }
           break;
