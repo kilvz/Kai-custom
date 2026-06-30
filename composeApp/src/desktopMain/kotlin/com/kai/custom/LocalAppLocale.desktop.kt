@@ -19,7 +19,7 @@ actual object LocalAppLocale {
         }
         val new = when (value) {
             null -> default!!
-            else -> Locale(value)
+            else -> Locale.forLanguageTag(value.replace('_', '-'))
         }
         Locale.setDefault(new)
         return LocalAppLocale.provides(new.toString())
