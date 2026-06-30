@@ -43,6 +43,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
         tools:ignore="MockLocation"/>
 
@@ -90,6 +91,13 @@
             android:name="com.kai.custom.DaemonService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <receiver
+            android:name="com.kai.custom.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <service
             android:name="com.kai.custom.inference.ModelDownloadService"
             android:exported="false"
