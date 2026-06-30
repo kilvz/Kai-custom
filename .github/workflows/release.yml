@@ -86,7 +86,7 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
       - name: Build DMG
-        run: bash ./gradlew packageReleaseDmg --stacktrace --no-daemon --no-configuration-cache
+        run: bash ./gradlew packageReleaseDmg --stacktrace
       - name: Upload DMG Artifact
         uses: actions/upload-artifact@v4
         with:
