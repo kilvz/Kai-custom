@@ -484,7 +484,7 @@ class DockerSandboxController(
         )
         dockerManager.execCommand(
             containerName,
-            "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys @modelcontextprotocol/sdk qrcode pino 2>&1",
+            "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys@^7.0.0-rc13 qrcode pino express 2>&1",
         )
         true
     } catch (_: Exception) {

@@ -607,7 +607,7 @@ class AppSettings(internal val settings: Settings) {
         settings.putBoolean(KEY_BAILEYS_MARK_ONLINE, v)
     }
 
-    fun getBaileysSyncHistory(): Boolean = settings.getBoolean(KEY_BAILEYS_SYNC_HISTORY, false)
+    fun getBaileysSyncHistory(): Boolean = settings.getBoolean(KEY_BAILEYS_SYNC_HISTORY, true)
     fun setBaileysSyncHistory(v: Boolean) {
         settings.putBoolean(KEY_BAILEYS_SYNC_HISTORY, v)
     }

@@ -803,7 +803,7 @@ class AndroidSandboxController : SandboxController {
             logStep("NPM_INSTALL", "starting npm install (timeout 300s)")
 
             val install = executor.execute(
-                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys express qrcode pino 2>&1",
+                "cd /root/whatsapp-bridge && npm init -y 2>/dev/null && npm install --no-bin-links @whiskeysockets/baileys@^7.0.0-rc13 express qrcode pino 2>&1",
                 timeoutSeconds = 300,
             )
 

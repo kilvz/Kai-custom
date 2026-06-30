@@ -987,6 +987,25 @@ class RemoteDataRepository(
                     ToolCallInfo(id = tc.id, name = tc.function.name, arguments = tc.function.arguments)
                 }
                 var textContent = message.effectiveContent ?: ""
+
+                if (calls.isEmpty()) {
+                    val rawContent = message.content?.takeIf { it.isNotBlank() }
+                        ?: message.effectiveReasoning
+                    if (!rawContent.isNullOrBlank()) {
+                        val extracted = extractInlineToolCalls(rawContent, tools)
+                        if (extracted.calls.isNotEmpty()) {
+                            textContent = stripThinkBlocks(extracted.cleanedText)
+                            calls = extracted.calls.map {
+                                ToolCallInfo(
+                                    id = "inline-${Uuid.random()}",
+                                    name = it.name,
+                                    arguments = it.arguments,
+                                )
+                            }
+                        }
+                    }
+                }
+
                 if (calls.isEmpty()) {
                     val extracted = extractInlineToolCalls(textContent, tools)
                     if (extracted.calls.isNotEmpty()) {
@@ -1000,6 +1019,7 @@ class RemoteDataRepository(
                         }
                     }
                 }
+
                 return LoopChatResult(
                     textContent = textContent,
                     reasoningContent = message.reasoningTraceFor(textContent),
@@ -2776,4 +2796,14 @@ class RemoteDataRepository(
     override fun setSandboxWorkDir(uri: String) {
         appSettings.setSandboxWorkDir(uri)
     }
+}
+
+private val thinkBlockTagRegex = Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL)
+
+private fun stripThinkBlocks(text: String): String {
+    var result = text.replace(thinkBlockTagRegex, "").trim()
+    if (result.contains("</think>") && !result.contains("<think>")) {
+        result = result.substringAfter("</think>").trim()
+    }
+    return result
 }

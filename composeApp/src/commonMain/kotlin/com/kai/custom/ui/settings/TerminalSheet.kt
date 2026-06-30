@@ -33,6 +33,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -235,7 +236,9 @@ fun TerminalContent(
             }
         }
 
-        val linesSnapshot = outputLines.toList()
+        val linesSnapshot by remember(outputLines) {
+            derivedStateOf { outputLines.toList() }
+        }
 
         SelectionContainer(
             modifier = Modifier.weight(1f).fillMaxWidth(),

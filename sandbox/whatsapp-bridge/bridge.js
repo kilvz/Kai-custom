@@ -1,10 +1,11 @@
-import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, Browsers, makeInMemoryStore } from '@whiskeysockets/baileys';
+import { makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason, Browsers } from '@whiskeysockets/baileys';
 import express from 'express';
 import pino from 'pino';
 import QRCode from 'qrcode';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import net from 'node:net';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_DIR = path.join(__dirname, 'auth_info');
@@ -16,8 +17,81 @@ const PORT = parseInt(process.env.WA_BRIDGE_PORT || '8317', 10);
 
 const logger = pino({ level: 'error' });
 
+// ── Minimal in-memory store (replacement for removed makeInMemoryStore) ──
+const _chats = new Map();
+const _msgs = new Map();
+const store = {
+  bind(ev) {
+    ev.on('chats.upsert', (chats) => {
+      console.log('[STORE-DEBUG] chats.upsert count=' + chats.length);
+      for (const c of chats) _chats.set(c.id, c);
+    });
+    ev.on('chats.update', (updates) => {
+      console.log('[STORE-DEBUG] chats.update count=' + updates.length);
+      for (const u of updates) {
+        const existing = _chats.get(u.id);
+        if (existing) Object.assign(existing, u);
+      }
+    });
+    ev.on('chats.delete', (ids) => {
+      console.log('[STORE-DEBUG] chats.delete count=' + ids.length);
+      for (const id of ids) _chats.delete(id);
+    });
+    ev.on('messages.upsert', ({ messages }) => {
+      for (const m of messages) {
+        const jid = m.key.remoteJid;
+        if (!jid) continue;
+        if (!_msgs.has(jid)) _msgs.set(jid, []);
+        _msgs.get(jid).push(m);
+      }
+    });
+    ev.on('messages.update', (updates) => {
+      for (const u of updates) {
+        const jid = u.key.remoteJid;
+        if (!jid || !_msgs.has(jid)) continue;
+        const arr = _msgs.get(jid);
+        const idx = arr.findIndex(m => m.key.id === u.key.id);
+        if (idx >= 0) Object.assign(arr[idx], u);
+      }
+    });
+    ev.on('messages.delete', (data) => {
+      if (data.keys) {
+        for (const key of data.keys) {
+          const jid = key.remoteJid;
+          if (!jid || !_msgs.has(jid)) continue;
+          _msgs.set(jid, _msgs.get(jid).filter(m => m.key.id !== key.id));
+        }
+      }
+    });
+    ev.on('messaging-history.set', ({ chats, messages }) => {
+      console.log('[STORE-DEBUG] messaging-history.set chats=' + (chats ? chats.length : 0) + ' messages=' + (messages ? messages.length : 0));
+      if (chats) { for (const c of chats) _chats.set(c.id, c); }
+      if (messages) {
+        for (const m of messages) {
+          const jid = m.key.remoteJid;
+          if (!jid) continue;
+          if (!_msgs.has(jid)) _msgs.set(jid, []);
+          _msgs.get(jid).push(m);
+        }
+      }
+    });
+  },
+  chats: {
+    all() { return Array.from(_chats.values()); },
+  },
+  messages: new Proxy({}, {
+    get(_, jid) {
+      const arr = _msgs.get(jid) || [];
+      return { all: () => arr };
+    },
+  }),
+};
+
+setInterval(() => {
+  console.log('[STORE-STATUS] chats=' + _chats.size + ' messages=' + _msgs.size);
+}, 15000);
+
 let sock = null;
-const store = makeInMemoryStore({ logger });
 let currentQr = null;
 let connected = false;
 let pairingMode = false;
@@ -26,7 +100,7 @@ const recentlySent = new Set();
 
 // Hardcoded fallback — fetchLatestBaileysVersion() often returns versions
 // that WhatsApp servers have already deprecated, causing 405 rejections.
-const FALLBACK_VERSION = [2, 3000, 1017531287];
+const FALLBACK_VERSION = [2, 3000, 1035194821];
 
 async function resolveVersion() {
   try {
@@ -70,11 +144,11 @@ async function initBaileys() {
   console.log('[BRIDGE] Using WA version: ' + JSON.stringify(version));
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const cfg = loadConfig();
-  const browser = cfg.browser || Browsers.windows('Chrome');
+  const browser = cfg.browser || Browsers.windows('Desktop');
   const markOnline = cfg.markOnlineOnConnect !== undefined ? cfg.markOnlineOnConnect : true;
-  const syncHistory = cfg.syncFullHistory !== undefined ? cfg.syncFullHistory : false;
+  const syncHistory = cfg.syncFullHistory !== undefined ? cfg.syncFullHistory : true;
   const linkPreviews = cfg.generateHighQualityLinkPreview !== undefined ? cfg.generateHighQualityLinkPreview : true;
-  const shouldSync = cfg.shouldSyncHistoryMsg !== undefined ? cfg.shouldSyncHistoryMsg : false;
+  const shouldSync = cfg.shouldSyncHistoryMsg !== undefined ? cfg.shouldSyncHistoryMsg : true;
 
   sock = makeWASocket({
     version,
@@ -123,23 +197,16 @@ async function initBaileys() {
       const reason = lastDisconnect?.error?.reason || '';
       console.log('[BRIDGE] Connection closed. statusCode=' + statusCode + ' reason=' + reason + ' msg=' + statusMsg + ' failures=' + consecutiveFailures);
       if (statusCode === DisconnectReason.loggedOut || statusCode === 401) {
-        console.log('[BRIDGE] Logged out / auth rejected. Clearing auth and restarting...');
+        console.log('[BRIDGE] Logged out / auth rejected by server. Clearing auth and restarting...');
         try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
         consecutiveFailures = 0;
         setTimeout(() => initBaileys(), 3000);
-      } else if (statusCode === 405 || statusCode === 403) {
-        // Version mismatch — WhatsApp rejected handshake
+      } else if (statusCode === 405 || statusCode === 403 || statusCode === 411 || statusCode === 440) {
         console.log('[BRIDGE] Version/handshake rejected (HTTP ' + statusCode + '). Retrying in 5s...');
         setTimeout(() => initBaileys(), 5000);
-      } else if (consecutiveFailures >= 5) {
-        // Too many failures — likely stale auth, nuke and restart fresh
-        console.log('[BRIDGE] Too many consecutive failures (' + consecutiveFailures + '). Clearing auth...');
-        try { fs.rmSync(AUTH_DIR, { recursive: true, force: true }); } catch (e) {}
-        consecutiveFailures = 0;
-        setTimeout(() => initBaileys(), 5000);
       } else {
-        // Exponential backoff: 5s, 10s, 20s, 30s (capped)
-        const delay = Math.min(5000 * Math.pow(2, consecutiveFailures - 1), 30000);
+        // Exponential backoff: 5s, 10s, 20s, 30s (capped at 30s)
+        const delay = Math.min(5000 * Math.pow(2, Math.min(consecutiveFailures - 1, 3)), 30000);
         console.log('[BRIDGE] Reconnecting in ' + (delay / 1000) + 's...');
         setTimeout(() => initBaileys(), delay);
       }
@@ -178,8 +245,53 @@ function formatJid(input) {
   return input + '@s.whatsapp.net';
 }
 
+// ── Direct group fetch (bypasses store/history sync) ──
+async function fetchAllGroups(sock) {
+  try {
+    const groups = await sock.groupFetchAllParticipating();
+    return Object.entries(groups || {}).map(([id, g]) => ({
+      id, jid: id,
+      name: g.subject || '(Unnamed Group)',
+      type: 'group',
+      participants: g.participants?.length || 0,
+      unreadCount: g.unreadCount || 0,
+    }));
+  } catch (e) {
+    console.log('[BRIDGE] groupFetchAllParticipating failed: ' + e.message);
+    return [];
+  }
+}
+
+function mergeChats(storeChats, groupChats) {
+  const map = new Map();
+  for (const c of storeChats) map.set(c.id, c);
+  for (const c of groupChats) {
+    const existing = map.get(c.id);
+    if (existing) {
+      existing.name = c.name || existing.name;
+      existing.participants = c.participants || existing.participants;
+      existing.type = c.type || existing.type;
+    } else {
+      map.set(c.id, c);
+    }
+  }
+  return Array.from(map.values());
+}
+
 const app = express();
 app.use(express.json());
+
+// Direct HTTP endpoint — always works, no history sync needed
+app.post('/list-chats-direct', async (req, res) => {
+  try {
+    const storeChats = _chats.size > 0 ? Array.from(_chats.values()) : [];
+    const groupChats = await fetchAllGroups(sock);
+    const merged = mergeChats(storeChats, groupChats);
+    res.json({ success: true, storeSize: _chats.size, groupCount: groupChats.length, total: merged.length, chats: merged });
+  } catch (e) {
+    res.json({ success: false, error: e.message });
+  }
+});
 
 // MCP SSE endpoint
 app.get('/mcp', (req, res) => {
@@ -358,7 +470,7 @@ app.post('/mcp', async (req, res) => {
         }
 
         case 'get_messages': {
-          const msgs = store?.messages?.[args.chat_id]?.all() || [];
+          const msgs = store?.messages?.get(args.chat_id)?.all() || [];
           const sorted = msgs.sort((a, b) => (b.messageTimestamp || 0) - (a.messageTimestamp || 0)).slice(0, args?.limit || 30).map(m => ({
             fromMe: m.key.fromMe,
             text: m.message?.conversation || m.message?.extendedTextMessage?.text || m.message?.imageMessage?.caption || '[non-text message]',
@@ -449,6 +561,22 @@ app.post('/mcp', async (req, res) => {
 });
 
 async function main() {
+  // Duplicate detection: check if port is already in use
+  try {
+    const testConn = await new Promise((resolve, reject) => {
+      const test = net.createConnection(PORT, '127.0.0.1', () => {
+        test.end();
+        resolve(true);
+      });
+      test.on('error', () => resolve(false));
+      setTimeout(() => resolve(false), 2000);
+    });
+    if (testConn) {
+      console.log('[BRIDGE] Port ' + PORT + ' already in use — another instance is running. Exiting.');
+      process.exit(0);
+    }
+  } catch (_) {}
+
   await initBaileys();
   app.listen(PORT, '127.0.0.1', () => {
     logger.info(`WhatsApp bridge listening on http://127.0.0.1:${PORT}/mcp`);

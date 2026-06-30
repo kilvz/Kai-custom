@@ -352,7 +352,7 @@ fun AppSettings.importFromJson(
             setBaileysBrowserName(json["baileys_browser_name"]?.jsonPrimitive?.content ?: "Windows")
             setBaileysBrowserVersion(json["baileys_browser_version"]?.jsonPrimitive?.content ?: "130.0.0.0")
             setBaileysMarkOnline(json["baileys_mark_online"]?.jsonPrimitive?.content?.toBoolean() ?: true)
-            setBaileysSyncHistory(json["baileys_sync_history"]?.jsonPrimitive?.content?.toBoolean() ?: false)
+            setBaileysSyncHistory(json["baileys_sync_history"]?.jsonPrimitive?.content?.toBoolean() ?: true)
             setBaileysLinkPreviews(json["baileys_link_previews"]?.jsonPrimitive?.content?.toBoolean() ?: true)
         } catch (_: Exception) {
             errors++

@@ -6,7 +6,7 @@
   "main": "bridge.js",
   "type": "module",
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.16",
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
     "@modelcontextprotocol/sdk": "^1.9.0",
     "express": "^4.21.0",
     "qrcode": "^1.5.4",
