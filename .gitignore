@@ -25,4 +25,4 @@ fastlane/README.md
 .build-gguf/
 .claude
 .opencode
-.grok/
+.grok/AGENTS.md
