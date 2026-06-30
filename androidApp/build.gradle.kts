@@ -68,9 +68,9 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "../composeApp/proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "../composeApp/proguard-rools.pro")
             signingConfig =
                 if (System.getenv("KEYSTORE_FILE") != null) {
                     signingConfigs.getByName("release")
@@ -91,7 +91,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":composeApp"))
+    implementation(projects.composeApp)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.foundation.android)

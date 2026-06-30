@@ -30,7 +30,7 @@ android {
 
     // Include composeApp's assets (which contain compose resources)
     sourceSets {
-        getByName("main") {
+        named("main") {
             assets.directories.add(
                 project(":composeApp").file("build/generated/assets/copyAndroidMainComposeResourcesToAndroidAssets").path,
             )
@@ -39,8 +39,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":composeApp"))
-    testImplementation(project(":composeApp"))
+    implementation(projects.composeApp)
+    testImplementation(projects.composeApp)
     // Required for types used directly in test code (KMP doesn't expose transitively)
     testImplementation(libs.filekit.core)
     implementation(libs.tts)

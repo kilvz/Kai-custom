@@ -78,11 +78,11 @@ kotlin {
     }
 
     sourceSets {
-        val desktopMain by getting
-        val commonMain by getting {
+        val desktopMain = getByName("desktopMain")
+        val commonMain = getByName("commonMain").apply {
             kotlin.srcDir(layout.buildDirectory.dir("generated/src/commonMain/kotlin"))
         }
-        val commonTest by getting {
+        val commonTest = getByName("commonTest").apply {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.kotlinx.coroutines.test)
@@ -91,7 +91,7 @@ kotlin {
             }
         }
 
-        val androidMain by getting {
+        val androidMain = getByName("androidMain").apply {
             kotlin.srcDir("src/jvmShared/kotlin")
         }
         desktopMain.kotlin.srcDir("src/jvmShared/kotlin")
