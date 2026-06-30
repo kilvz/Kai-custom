@@ -164,6 +164,7 @@ internal object ModelCatalog {
         "gemini-2.0-flash-thinking-exp" to CuratedModelInfo("Gemini 2.0 Flash Thinking", 1_000_000, "2025-01"),
         "gemini-2.0-flash-thinking-exp-01-21" to CuratedModelInfo("Gemini 2.0 Flash Thinking", 1_000_000, "2025-01"),
         "gemini-2.0-flash-thinking-exp-1219" to CuratedModelInfo("Gemini 2.0 Flash Thinking", 1_000_000, "2024-12"),
+        "gemini-advanced-0514" to CuratedModelInfo("Gemini Advanced", 1_000_000, "2024-05"),
         "gemini-1.5-pro" to CuratedModelInfo("Gemini 1.5 Pro", 2_000_000, "2024-05"),
         "gemini-1.5-pro-latest" to CuratedModelInfo("Gemini 1.5 Pro (Latest)", 2_000_000, "2024-05"),
         "gemini-1.5-pro-001" to CuratedModelInfo("Gemini 1.5 Pro", 2_000_000, "2024-05"),
@@ -209,6 +210,8 @@ internal object ModelCatalog {
         "deepseek-v3.2-exp" to CuratedModelInfo("DeepSeek V3.2 Exp", 128_000, "2025-09", "671B"),
         "deepseek-v3.1" to CuratedModelInfo("DeepSeek V3.1", 128_000, "2025-08", "671B"),
         "deepseek-v3-1" to CuratedModelInfo("DeepSeek V3.1", 128_000, "2025-08", "671B"),
+        "deepseek-v2.5" to CuratedModelInfo("DeepSeek V2.5", 128_000, "2024-12", "236B"),
+        "deepseek-v2.5-1210" to CuratedModelInfo("DeepSeek V2.5", 128_000, "2024-12", "236B"),
         "deepseek-v3" to CuratedModelInfo("DeepSeek V3", 128_000, "2024-12", "671B"),
         "deepseek-chat" to CuratedModelInfo("DeepSeek Chat", 128_000, "2024-12", "671B"),
         "deepseek-r1" to CuratedModelInfo("DeepSeek R1", 128_000, "2025-01", "671B"),
@@ -1006,6 +1009,7 @@ internal object ModelCatalog {
         "qwen3.6-plus" to CuratedModelInfo("Qwen 3.6 Plus", 131_072, "2026-03"),
         "qwen3.6-flash" to CuratedModelInfo("Qwen 3.6 Flash", 131_072, "2026-04"),
         "qwen3.7-max-preview" to CuratedModelInfo("Qwen 3.7 Max (Preview)", 262_144, "2026-05"),
+        "qwen3.7-plus" to CuratedModelInfo("Qwen 3.7 Plus", 1_000_000, "2026-06"),
         "qwen3.6-max-preview" to CuratedModelInfo("Qwen 3.6 Max (Preview)", 262_144, "2026-04"),
         "qwen3.6-35b-a3b" to CuratedModelInfo("Qwen 3.6 35B", 131_072, "2026-04", "35B"),
         "qwen3.6-27b" to CuratedModelInfo("Qwen 3.6 27B", 131_072, "2026-04", "27B"),
@@ -1306,6 +1310,7 @@ internal object ModelCatalog {
         "ling-2.6-1t:free" to CuratedModelInfo("Ling 2.6 1T", 128_000, "2026-03", "1T"),
         "ring-2.6-1t" to CuratedModelInfo("Ring 2.6 1T", 128_000, "2026-03", "1T"),
         "ring-2.6-1t:free" to CuratedModelInfo("Ring 2.6 1T", 128_000, "2026-03", "1T"),
+        "ring-flash-2.0" to CuratedModelInfo("Ring Flash 2.0", 128_000, "2025-09"),
         "ling-flash-2.0" to CuratedModelInfo("Ling Flash 2.0", 128_000, "2025-09"),
         "ring-flash-2.0" to CuratedModelInfo("Ring Flash 2.0", 128_000, "2025-09"),
         "laguna-xs.2:free" to CuratedModelInfo("Laguna XS.2", 128_000, "2026-04"),
@@ -1880,11 +1885,6 @@ internal object ModelCatalog {
         "sea-lion-7b-instruct" to 1020, "ai-synthetic-video-detector" to 1200,
     )
 
-    /**
-     * Baked entries — base catalog with [arenaScores] merged in at init
-     * time. Runtime lookup is a single O(1) hash access on this map, no
-     * per-call copy or double lookup.
-     */
     private val entries: Map<String, CuratedModelInfo> = HashMap<String, CuratedModelInfo>(baseEntries.size).apply {
         for ((key, info) in baseEntries) {
             val score = arenaScores[key]
