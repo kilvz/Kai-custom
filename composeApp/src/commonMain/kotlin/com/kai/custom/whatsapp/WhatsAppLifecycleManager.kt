@@ -149,7 +149,9 @@ class WhatsAppLifecycleManager(
             val client = mcpServerManager.getClient(SERVER_ID) ?: return
             val resultStr = client.callTool("is_authenticated", buildJsonObject { })
             val root = SharedJson.parseToJsonElement(resultStr).jsonObject
-            val authenticated = root["connected"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            val connected = root["connected"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            val hasAuth = root["hasAuth"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
+            val authenticated = connected || hasAuth
             appSettings.setWhatsAppAuthenticated(authenticated)
         } catch (_: Exception) {
         }

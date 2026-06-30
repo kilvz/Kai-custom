@@ -409,6 +409,14 @@ private fun WhatsAppSection(
                 }
             }
 
+            // Auth poller — checks every 2s whether we're authenticated (connected or has auth file)
+            LaunchedEffect(isEnabled, bridgeRunning) {
+                while (isEnabled && bridgeRunning) {
+                    delay(2000L)
+                    whatsAppLifecycleManager.refreshAuthState()
+                }
+            }
+
             // QR poller — polls every second while the tab is visible and bridge is running
             LaunchedEffect(isEnabled, bridgeRunning) {
                 while (isEnabled && bridgeRunning) {

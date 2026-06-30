@@ -79,12 +79,12 @@ const store = {
   chats: {
     all() { return Array.from(_chats.values()); },
   },
-  messages: new Proxy({}, {
-    get(_, jid) {
+  messages: {
+    get(jid) {
       const arr = _msgs.get(jid) || [];
       return { all: () => arr };
     },
-  }),
+  },
 };
 
 setInterval(() => {
