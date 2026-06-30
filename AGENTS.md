@@ -1,6 +1,6 @@
 # Agent Handoff — Kai-custom (FOSS)
 
-Public FOSS fork of [Kai](https://github.com/SimonSchubert/Kai). Kotlin Multiplatform (Compose Multiplatform 1.11.1, Kotlin 2.4.0, Gradle 9.5.1, Java 21). **Primary target: Android** (arm64-v8a, armeabi-v7a, x86, x86_64, `foss` product flavor). Desktop (JVM) builds on Win/Linux/Mac but less tested. WasmJs/iOS exist, not tested.
+Public FOSS fork of [Kai](https://github.com/SimonSchubert/Kai). Kotlin Multiplatform (Compose Multiplatform 1.11.1, Kotlin 2.4.0, Gradle 9.6.1, Java 21). **Primary target: Android** (arm64-v8a, armeabi-v7a, x86, x86_64, `foss` product flavor). Desktop (JVM) builds on Win/Linux/Mac but less tested. WasmJs/iOS exist, not tested.
 
 - **Package name**: `com.kai.custom` — `androidApp/` is thin shell, `composeApp/` has all logic
 - **Modules**: `:composeApp` (KMP library) + `:androidApp` (Android application)
