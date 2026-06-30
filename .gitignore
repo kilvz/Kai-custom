@@ -32,3 +32,4 @@ temp_*
 tools/speech_commands/
 tools/speech_commands_v0.02.tar.gz
 hey_kai.tflite
+tmp_*/
