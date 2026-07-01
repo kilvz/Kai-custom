@@ -2592,6 +2592,17 @@ class RemoteDataRepository(
         _openHeartbeatRequested.value = false
     }
 
+    private val _openAssistRequested = MutableStateFlow(false)
+    override val openAssistRequested: StateFlow<Boolean> = _openAssistRequested
+
+    override fun requestOpenAssist() {
+        _openAssistRequested.value = true
+    }
+
+    override fun consumeOpenAssistRequest() {
+        _openAssistRequested.value = false
+    }
+
     override suspend fun addAssistantMessage(content: String) {
         val now = Clock.System.now().toEpochMilliseconds()
 
