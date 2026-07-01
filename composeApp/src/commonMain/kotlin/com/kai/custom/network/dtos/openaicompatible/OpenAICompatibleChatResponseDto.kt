@@ -15,7 +15,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
-private val toolCallMarkerRegex = Regex("<TOOLCALL>[\\s\\S]*?</TOOLCALL>|<TOOLCALL>[\\s\\S]*$|<tool_calls>[\\s\\S]*?</tool_calls>|<tool_call>[\\s\\S]*?</tool_call>|<function=[\\w.\\-]+>[\\s\\S]*?</function>")
+private val toolCallMarkerRegex = Regex("<TOOLCALL>[\\s\\S]*?</TOOLCALL>|<TOOLCALL>[\\s\\S]*$|<tool_calls>[\\s\\S]*?</tool_calls>|<tool_call>[\\s\\S]*?</tool_call>|<function=[\\w.\\-]+>[\\s\\S]*?</function>|<[｜|]DSML[｜|]function_calls>[\\s\\S]*?</[｜|]DSML[｜|]function_calls>")
 private val chatTemplateTokenRegex = Regex("</?assistant>|</?system>|</?user>|<\\|im_start\\||<\\|im_end\\|>|<\\|end_of_turn\\|>|</s>|<\\|eot_id\\|>")
 private val thinkBlockRegex = Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL)
 

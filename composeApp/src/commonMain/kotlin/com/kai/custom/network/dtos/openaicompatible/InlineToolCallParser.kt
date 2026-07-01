@@ -23,6 +23,11 @@ internal data class InlineToolCallExtraction(
 private const val OPEN_TAG = "<tool_call>"
 private const val CLOSE_TAG = "</tool_call>"
 
+// DSML (DeepSeek Markup Language): \uFF5C = "｜" fullwidth vertical bar
+private const val DSML_PIPE = "\uFF5C"
+private const val DSML_FC_OPEN = "<${DSML_PIPE}DSML${DSML_PIPE}function_calls>"
+private const val DSML_FC_CLOSE = "</${DSML_PIPE}DSML${DSML_PIPE}function_calls>"
+
 private val functionTagRegex = Regex("<function=([\\w.\\-]+)>([\\s\\S]*?)</function>")
 private val parameterTagRegex = Regex("<parameter=([\\w.\\-]+)>([\\s\\S]*?)</parameter>")
 
@@ -38,9 +43,10 @@ private val lenientJson = Json {
  * field. Detect those blocks, convert each one into a synthetic tool call, and
  * return the surrounding natural-language text with the blocks removed.
  *
- * Three block flavors are accepted:
+ * Four block flavors are accepted:
  *  - Hermes / OpenHands XML: `<function=NAME><parameter=KEY>VALUE</parameter>…</function>`
  *  - JSON: `{ "name": "...", "arguments": { … } }`
+ *  - DeepSeek DSML: `<｜DSML｜function_calls><｜DSML｜invoke name="…">…</｜DSML｜invoke></｜DSML｜function_calls>`
  *  - OpenCode agent XML: `<invoke name="NAME"><parameter name="KEY">VALUE</parameter>…</invoke>` inside `<tool_calls>`
  *
  * Parameter values are coerced to JSON primitive types using the tool's schema so
@@ -53,6 +59,10 @@ internal fun extractInlineToolCalls(
     if (content.contains(OPEN_TAG)) {
         val xmlExtracted = extractXmlToolCalls(content, tools)
         if (xmlExtracted.calls.isNotEmpty()) return xmlExtracted
+    }
+    if (content.contains(DSML_FC_OPEN)) {
+        val dsmlExtracted = extractDsmlToolCalls(content, tools)
+        if (dsmlExtracted.calls.isNotEmpty()) return dsmlExtracted
     }
     if (content.contains(OPENGINE_OPEN_TAG)) {
         val oeExtracted = extractOpenEngineToolCalls(content, tools)
@@ -193,6 +203,55 @@ private fun extractOpenEngineToolCalls(content: String, tools: List<Tool>): Inli
             val schema = tools.firstOrNull { it.schema.name == name }?.schema
             val json = buildJsonObject {
                 for (paramMatch in oeParamTagRegex.findAll(body)) {
+                    val key = paramMatch.groupValues[1]
+                    val raw = paramMatch.groupValues[2].trim()
+                    val type = schema?.parameters?.get(key)?.type
+                    put(key, coerceParameterValue(raw, type))
+                }
+            }
+            calls.add(ParsedInlineToolCall(name = name, arguments = json.toString()))
+        }
+        pos = blockEnd
+    }
+    return InlineToolCallExtraction(cleaned.toString().trim(), calls)
+}
+
+// ─── DeepSeek DSML format (<｜DSML｜function_calls><｜DSML｜invoke name="...">…) ─────
+
+private val dsmlInvokeRegex = Regex("<${DSML_PIPE}DSML${DSML_PIPE}invoke\\s+name\\s*=\\s*\"([\\w.?\\-]+)\">([\\s\\S]*?)</${DSML_PIPE}DSML${DSML_PIPE}invoke>")
+private val dsmlParamRegex = Regex("<${DSML_PIPE}DSML${DSML_PIPE}parameter\\s+name\\s*=\\s*\"([\\w.?\\-]+)\">([\\s\\S]*?)</${DSML_PIPE}DSML${DSML_PIPE}parameter>")
+
+/**
+ * Parses DeepSeek DSML tool calls:
+ * ```
+ * <｜DSML｜function_calls>
+ * <｜DSML｜invoke name="search">
+ * <｜DSML｜parameter name="query">something</｜DSML｜parameter>
+ * </｜DSML｜invoke>
+ * </｜DSML｜function_calls>
+ * ```
+ */
+private fun extractDsmlToolCalls(content: String, tools: List<Tool>): InlineToolCallExtraction {
+    val calls = mutableListOf<ParsedInlineToolCall>()
+    val cleaned = StringBuilder()
+    var pos = 0
+    while (pos < content.length) {
+        val openIdx = content.indexOf(DSML_FC_OPEN, pos)
+        if (openIdx < 0) {
+            cleaned.append(content, pos, content.length)
+            break
+        }
+        cleaned.append(content, pos, openIdx)
+        val closeIdx = content.indexOf(DSML_FC_CLOSE, openIdx + DSML_FC_OPEN.length)
+        val blockEnd = if (closeIdx >= 0) closeIdx + DSML_FC_CLOSE.length else content.length
+        val inner = content.substring(openIdx + DSML_FC_OPEN.length, if (closeIdx >= 0) closeIdx else content.length).trim()
+
+        for (match in dsmlInvokeRegex.findAll(inner)) {
+            val name = match.groupValues[1]
+            val body = match.groupValues[2]
+            val schema = tools.firstOrNull { it.schema.name == name }?.schema
+            val json = buildJsonObject {
+                for (paramMatch in dsmlParamRegex.findAll(body)) {
                     val key = paramMatch.groupValues[1]
                     val raw = paramMatch.groupValues[2].trim()
                     val type = schema?.parameters?.get(key)?.type
