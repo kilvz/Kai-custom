@@ -1,3 +1,8 @@
+## v3.30.8 — 2026-07-01
+
+### Fixes
+- Fix DeepSeek DSML inline tool calls showing as text on second tool-loop turn
+
 ## v3.30.2 — 2026-06-16
 
 ### Features
