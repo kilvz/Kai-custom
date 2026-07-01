@@ -120,6 +120,7 @@ import com.kai.custom.ui.settings.SandboxUiState
 import com.kai.custom.ui.settings.SandboxViewModel
 import com.kai.custom.ui.settings.SshTerminalContent
 import com.kai.custom.ui.settings.SshViewModel
+import com.kai.custom.ui.components.animatedGradientBorder
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.fallback_answered_by
 import kai.composeapp.generated.resources.fallback_service_failed
@@ -393,6 +394,17 @@ private fun InteractiveModeScreen(
             }
         }
 
+        // Animated gradient frame signals the AI is working, mirroring the
+        // "Start Interactive UI" button's border on the empty state.
+        if (uiState.isLoading) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .animatedGradientBorder(cornerRadius = 28.dp),
+            )
+        }
+
+        // Collapsed pill floats over content at the bottom-end
         if (!showFullInput) {
             val gradientBrush = com.kai.custom.ui.gradientBrush
             Row(

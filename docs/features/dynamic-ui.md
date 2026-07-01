@@ -1,6 +1,6 @@
 ﻿# Dynamic UI (kai-ui)
 
-**Last verified:** 2026-05-14
+**Last verified:** 2026-07-01
 
 AI-generated interactive UI layouts rendered inline in chat messages. The AI produces JSON-based layout definitions wrapped in `kai-ui` code fences. Compose renders them natively with support for forms, buttons, and multi-step flows. Enabled by default; users can disable it in Settings, which removes the instructions from the system prompt. Because the system prompt is rebuilt per request, toggling the setting takes effect on the next message in any conversation. Parsing and rendering stay active regardless so existing messages with kai-ui blocks always render.
 
@@ -59,9 +59,13 @@ Users click "Start Interactive UI" on the empty chat state. This enters interact
 
 Each AI response replaces the previous screen entirely. Only the latest assistant message's kai-ui renders, taking the full available space. A top bar provides back and exit buttons.
 
+### Loading Frame
+
+While an interactive-mode response is in flight, an animated gradient frame (the same rotating purple/violet/magenta border used by the "Start Interactive UI" button) is drawn around the whole screen edge to signal the AI is working. It disappears once the response arrives.
+
 ### Back Button
 
-The back button removes the last exchange (user message + assistant response) from conversation history, making the previous assistant response the active screen again. When only one exchange remains, pressing back clears the history and returns to the initial prompt input â€” interactive mode stays active. To leave interactive mode entirely, the user uses the exit button in the top bar.
+The back button removes the last exchange (user message + assistant response) from conversation history, making the previous assistant response the active screen again. When only one exchange remains, pressing back clears the history and returns to the initial prompt input — interactive mode stays active. To leave interactive mode entirely, the user uses the exit button in the top bar.
 
 ### Auto-Retry on Parse Failure
 
