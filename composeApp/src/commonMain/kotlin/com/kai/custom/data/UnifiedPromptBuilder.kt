@@ -329,8 +329,8 @@ internal class UnifiedPromptBuilder {
         AutomationSection(),
         EmailPolicySection(),
         IntegrationStatusSection(),
-        ContextSection(),
         DynamicUiSection(),
+        ContextSection(),
     )
 
     private val taskAdapters: MutableList<TaskAdapter> = mutableListOf(

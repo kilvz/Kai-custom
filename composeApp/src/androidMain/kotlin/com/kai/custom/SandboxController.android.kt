@@ -170,6 +170,10 @@ class AndroidSandboxController : SandboxController {
         sandboxManager.reset()
     }
 
+    override fun restart() {
+        sandboxManager.restart()
+    }
+
     override fun installPackages() {
         sandboxManager.installPackages()
     }

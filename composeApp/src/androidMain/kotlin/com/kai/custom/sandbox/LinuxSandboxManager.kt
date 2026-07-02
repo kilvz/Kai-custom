@@ -573,6 +573,28 @@ class LinuxSandboxManager(
         }
     }
 
+    /**
+     * Restart the sandbox — close all shells and re-validate the installation.
+     * Unlike [reset], this keeps the rootfs intact (no re-download needed).
+     * Use this to recover from a hung proot without a full device reboot.
+     */
+    fun restart() {
+        scope.launch {
+            closeAllShells()
+            // Kill any leftover proot processes from the app's UID
+            runCatching {
+                Runtime.getRuntime().exec(arrayOf("killall", "-9", "libproot.so")).waitFor()
+            }
+            runCatching {
+                Runtime.getRuntime().exec(arrayOf("killall", "-9", "libtalloc.so.2")).waitFor()
+            }
+            // Give processes time to die
+            delay(500)
+            // Re-validate and mark as ready (rootfs is still intact)
+            checkExistingInstallation()
+        }
+    }
+
     fun getDiskUsageMB(): Long {
         if (!sandboxDir.isDirectory) return 0
         // Manual stack walk instead of walkTopDown(): the latter throws an

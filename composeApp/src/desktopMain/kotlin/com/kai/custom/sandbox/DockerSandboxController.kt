@@ -111,6 +111,11 @@ class DockerSandboxController(
         }
     }
 
+    override fun restart() {
+        // Docker sandbox: just restart the container, keep the image
+        reset()
+    }
+
     override fun installPackages() {
         _status.value = _status.value.copy(working = true, statusText = "Installing packages...")
         scope.launch {

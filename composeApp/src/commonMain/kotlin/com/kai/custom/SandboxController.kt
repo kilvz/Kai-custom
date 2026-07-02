@@ -70,6 +70,8 @@ interface SandboxController {
     fun setup()
     fun cancel()
     fun reset()
+    /** Restart the sandbox — close shells and kill proot processes but keep rootfs intact. */
+    fun restart()
     fun installPackages()
     suspend fun executeCommand(
         command: String,

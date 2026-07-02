@@ -41,6 +41,7 @@ class NoOpSandboxController(
     }
     override fun cancel() {}
     override fun reset() {}
+    override fun restart() {}
     override fun installPackages() {}
     override suspend fun executeCommand(
         command: String,
