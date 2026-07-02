@@ -1,6 +1,7 @@
 package com.kai.custom.data.providers
 
 import com.kai.custom.data.Service
+import com.kai.custom.data.modelSupportsImages
 import com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto
 import com.kai.custom.ui.chat.History
 import com.kai.custom.ui.chat.toGroqMessageDto
@@ -10,7 +11,12 @@ internal fun buildOpenAIMessages(
     service: Service,
     messages: List<History>,
     systemPrompt: String?,
+    modelId: String = "",
+    declaredToolNames: Set<String>? = null,
 ): List<OpenAICompatibleChatRequestDto.Message> = buildList {
+    // Images go through only when both the service and the specific model accept them.
+    // Mixed services (e.g. Z.AI) host text-only and vision models side by side.
+    val supportsImages = service.supportsImages && modelSupportsImages(modelId)
     if (!systemPrompt.isNullOrEmpty()) {
         add(
             OpenAICompatibleChatRequestDto.Message(
@@ -21,7 +27,8 @@ internal fun buildOpenAIMessages(
     }
     addAll(
         sanitizeToolMessages(
-            messages.map { it.toGroqMessageDto(service.reasoningRequestMode, service.supportsImages) },
+            messages.map { it.toGroqMessageDto(service.reasoningRequestMode, supportsImages) },
+            declaredToolNames,
         ),
     )
 }
@@ -46,6 +53,7 @@ internal fun buildOpenAIMessages(
  */
 internal fun sanitizeToolMessages(
     messages: List<OpenAICompatibleChatRequestDto.Message>,
+    declaredToolNames: Set<String>? = null,
 ): List<OpenAICompatibleChatRequestDto.Message> {
     val result = ArrayList<OpenAICompatibleChatRequestDto.Message>(messages.size)
     var i = 0
@@ -60,10 +68,18 @@ internal fun sanitizeToolMessages(
                     following.add(messages[j])
                     j++
                 }
-                val declaredIds = msg.tool_calls.map { it.id }.toSet()
-                val matched = following.filter { it.tool_call_id != null && it.tool_call_id in declaredIds }
+                // Drop tool_calls referencing tools not declared on this request. A null
+                // [declaredToolNames] disables this filter so callers that don't care about
+                // declared-tool cross-checking (legacy tests) keep prior behavior.
+                val callsInDeclaredSet = if (declaredToolNames == null) {
+                    msg.tool_calls
+                } else {
+                    msg.tool_calls.filter { it.function.name in declaredToolNames }
+                }
+                val keptCallIds = callsInDeclaredSet.map { it.id }.toSet()
+                val matched = following.filter { it.tool_call_id != null && it.tool_call_id in keptCallIds }
                 val respondedIds = matched.mapNotNull { it.tool_call_id }.toSet()
-                val keptCalls = msg.tool_calls.filter { it.id in respondedIds }
+                val keptCalls = callsInDeclaredSet.filter { it.id in respondedIds }
                 if (keptCalls.isEmpty()) {
                     // Nothing answered the calls: strip them, keeping the turn only if it still
                     // carries text. An assistant message with neither content nor tool_calls is
