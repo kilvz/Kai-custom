@@ -406,7 +406,7 @@ class ChatViewModel(
     }
 
     private fun cancel() {
-        currentJob?.cancel()
+        runCatching { currentJob?.cancel() }
         currentJob = null
         messageQueue.clear()
         _state.update {
@@ -539,7 +539,7 @@ class ChatViewModel(
     }
 
     private fun loadConversation(id: String) {
-        currentJob?.cancel()
+        runCatching { currentJob?.cancel() }
         currentJob = null
         messageQueue.clear()
         val conversation = dataRepository.savedConversations.value.find { it.id == id }
@@ -605,7 +605,7 @@ class ChatViewModel(
     }
 
     private fun startNewChat() {
-        currentJob?.cancel()
+        runCatching { currentJob?.cancel() }
         currentJob = null
         messageQueue.clear()
         dataRepository.startNewChat()
@@ -625,7 +625,7 @@ class ChatViewModel(
     }
 
     private fun exitInteractiveMode() {
-        currentJob?.cancel()
+        runCatching { currentJob?.cancel() }
         currentJob = null
         dataRepository.startNewChat()
         dataRepository.setInteractiveMode(false)
