@@ -70,7 +70,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "../composeApp/proguard-rools.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "../composeApp/proguard-rules.pro")
             signingConfig =
                 if (System.getenv("KEYSTORE_FILE") != null) {
                     signingConfigs.getByName("release")
