@@ -65,6 +65,16 @@ fun MemoryManagementSheet(
         memories = dataRepository.getMemories()
     }
 
+    // Refresh when a memory is deleted
+    val onDelete = remember(dataRepository) {
+        { key: String ->
+            onDeleteMemory(key)
+            entityCount = dataRepository.countDimensionEntities()
+            kgFacts = dataRepository.queryKgFacts()
+            memories = dataRepository.getMemories()
+        }
+    }
+
     val displayedMemories = if (showProtected) memories else memories.filter { !it.protected }
 
     var selectedTab by remember { mutableStateOf(0) }
@@ -99,7 +109,7 @@ fun MemoryManagementSheet(
 
             when (selectedTab) {
                 0 -> StatsTab(entityCount, realms)
-                1 -> MemoriesTab(displayedMemories, showProtected, onShowProtectedToggle = { showProtected = it }, onDeleteMemory = onDeleteMemory)
+                1 -> MemoriesTab(displayedMemories, showProtected, onShowProtectedToggle = { showProtected = it }, onDeleteMemory = onDelete)
                 2 -> KgFactsTab(kgFacts)
             }
             Spacer(Modifier.height(16.dp))

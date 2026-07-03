@@ -176,8 +176,6 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
 
     override suspend fun forget(key: String): Boolean = mutex.withLock {
         val entity = dimension.getEntityByMetadataKey("memory_key", key) ?: return@withLock false
-        val entry = entityToEntry(entity)
-        if (entry?.protected == true) return@withLock false
         invalidateCache()
         dimension.deleteEntity(entity.id)
         true
@@ -211,6 +209,22 @@ class SqliteMemoryStore(private val dimension: DimensionStore) : MemoryStore {
     override fun importDimension(data: ByteArray) {
         invalidateCache()
         dimension.importFromData(data)
+    }
+
+    /** Prune memories with hitCount < 2 that are older than 30 days. Returns count of pruned entries. */
+    suspend fun compactMemories(): Int = mutex.withLock {
+        val cutoff = Clock.System.now().toEpochMilliseconds() - 30L * 24 * 60 * 60 * 1000
+        val entities = dimension.getAllEntities()
+        var pruned = 0
+        for (entity in entities) {
+            val entry = entityToEntry(entity) ?: continue
+            if (entry.hitCount < 2 && entry.createdAt < cutoff) {
+                dimension.deleteEntity(entity.id)
+                pruned++
+            }
+        }
+        if (pruned > 0) invalidateCache()
+        pruned
     }
 
     // Knowledge graph

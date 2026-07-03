@@ -2473,6 +2473,20 @@ class RemoteDataRepository(
     override fun exportSettingsToJson(sections: Set<ImportSection>): String {
         val toolIds = getPlatformToolDefinitions().map { it.id }
         val jsonObject = appSettings.exportToJson(toolIds, sections)
+        // Include actual memory data (dimension store) in the export
+        if (ImportSection.MEMORY in sections) {
+            val dimensionBytes = memoryStore.exportDimension()
+            if (dimensionBytes.isNotEmpty()) {
+                val memJson = kotlinx.serialization.json.buildJsonObject {
+                    put("dimension_data", kotlinx.serialization.json.JsonPrimitive(
+                        java.util.Base64.getEncoder().encodeToString(dimensionBytes)
+                    ))
+                }
+                val merged = jsonObject.toMutableMap()
+                merged["memory_data"] = memJson
+                return prettyJson.encodeToString(JsonObject.serializer(), JsonObject(merged))
+            }
+        }
         return prettyJson.encodeToString(JsonObject.serializer(), jsonObject)
     }
 
@@ -2485,7 +2499,21 @@ class RemoteDataRepository(
     override fun importSettingsFromJson(json: String, sections: Set<ImportSection>, replace: Boolean): Int {
         val jsonObject = SharedJson.parseToJsonElement(json).jsonObject
         val toolIds = getPlatformToolDefinitions().map { it.id }
-        return appSettings.importFromJson(jsonObject, toolIds, sections, replace)
+        val errors = appSettings.importFromJson(jsonObject, toolIds, sections, replace)
+        // Restore memory data (dimension store) if present in the import
+        if (ImportSection.MEMORY in sections) {
+            try {
+                val memoryData = jsonObject["memory_data"]?.jsonObject
+                val dimB64 = memoryData?.get("dimension_data")?.jsonPrimitive?.content
+                if (dimB64 != null && dimB64.isNotBlank()) {
+                    val dimBytes = java.util.Base64.getDecoder().decode(dimB64)
+                    if (dimBytes.isNotEmpty()) {
+                        memoryStore.importDimension(dimBytes)
+                    }
+                }
+            } catch (_: Exception) { }
+        }
+        return errors
     }
 
     override fun exportDimension(): ByteArray = memoryStore.exportDimension()
