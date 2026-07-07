@@ -1386,12 +1386,12 @@ internal object ModelCatalog {
         "spaider-pro-ext-research" to CuratedModelInfo("SpAIder Pro Extended Research", 2_000_000, "2026-06"),
     )
 
-    // LMArena Elo scores scraped from https://arena.ai/leaderboard/text (2026-07-01).
+    // LMArena Elo scores scraped from https://arena.ai/leaderboard/text (2026-07-07).
     // To update: run the `update-model-catalog` skill.
     private val arenaScores: Map<String, Int> = mapOf(
         // --- Anthropic ---
-        "claude-fable-5" to 1508,
-        "claude-opus-4-6-thinking" to 1503,
+        "claude-fable-5" to 1509,
+        "claude-opus-4-6-thinking" to 1504,
         "claude-opus-4-7-thinking" to 1502,
         "claude-opus-4-6" to 1499, "claude-opus-4.6" to 1499,
         "claude-opus-4-7" to 1494, "claude-opus-4.7" to 1494,
