@@ -107,6 +107,7 @@ sealed class Service(
         modelsUrl = null,
         reasoningRequestMode = ReasoningRequestMode.REASONING_CONTENT,
     )
+    )
 
     data object Groq : Service(
         id = "groqcloud",
@@ -310,7 +311,7 @@ sealed class Service(
         settingsKeyPrefix = "atlascloud",
         chatUrl = "https://api.atlascloud.ai/v1/chat/completions",
         modelsUrl = "https://api.atlascloud.ai/v1/models",
-        apiKeyUrl = "https://www.atlascloud.ai/console/api-keys",
+        apiKeyUrl = "https://www.atlascloud.ai/console/api-keys?utm_source=github&utm_medium=link&utm_campaign=Kai",
         apiKeyUrlDisplay = "atlascloud.ai/console/api-keys",
     )
 
