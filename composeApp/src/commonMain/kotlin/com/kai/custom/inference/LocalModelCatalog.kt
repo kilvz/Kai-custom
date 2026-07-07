@@ -50,6 +50,17 @@ val STANDARD_MODELS = listOf(
         kvPerTokenBytes = 20_000,
     ),
     LocalModel(
+        id = "gemma-4-12b-it",
+        displayName = "Gemma 4 12B IT",
+        fileName = "gemma-4-12B-it.litertlm",
+        sizeBytes = 6_547_589_312L,
+        downloadUrl = "https://huggingface.co/litert-community/gemma-4-12B-it-litert-lm/resolve/main/gemma-4-12B-it.litertlm",
+        gpuMemoryMb = 4000,
+        defaultContextTokens = 8_192,
+        maxContextTokens = 32_768,
+        kvPerTokenBytes = 140_000,
+    ),
+    LocalModel(
         id = "gemma-4-e2b-it",
         displayName = "Gemma 4 E2B IT",
         fileName = "gemma-4-E2B-it.litertlm",
@@ -138,7 +149,7 @@ val GGUF_MODELS = listOf(
     ),
 )
 
-private val THINK_BLOCK_REGEX = Regex("<think>.*?</think>", RegexOption.DOT_MATCHES_ALL)
+private val THINK_BLOCK_REGEX = Regex("(?s)<think>.*?</think>")
 
 // Qwen3 emits <think>…</think> blocks as part of its chat template; strip them before
 // the user sees them. Safe for Gemma 4, which never emits these tags.
