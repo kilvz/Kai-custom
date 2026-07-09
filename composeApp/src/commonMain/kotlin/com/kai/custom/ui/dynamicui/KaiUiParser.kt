@@ -85,7 +85,35 @@ object KaiUiParser {
     /** Fix common LLM JSON syntax errors like `"key=[` instead of `"key":[`. */
     private val brokenKeySyntax = Regex(""""(\w+)=([{\[])""")
 
-    private fun fixJsonSyntax(raw: String): String = brokenKeySyntax.replace(raw) { "\"${it.groupValues[1]}\":${it.groupValues[2]}" }
+    /**
+     * LLMs sometimes write `{"button","label":...}` instead of `{"type":"button","label":...}` —
+     * a bare string key acting as a type discriminator, followed by a comma instead of a colon.
+     */
+    private val bareComponentKey = Regex("""\{\s*"([a-z_]\w+)"\s*,""")
+    private val replaceBareComponentKey: (MatchResult) -> String = { m ->
+        """{"type":"${m.groupValues[1]}","""
+    }
+
+    private fun fixJsonSyntax(raw: String): String {
+        val step1 = brokenKeySyntax.replace(raw) { "\"${it.groupValues[1]}\":${it.groupValues[2]}" }
+        // Only fix `{"name",` at the start of an object to avoid false positives
+        // on regular string values inside nested structures.
+        val step2 = bareComponentKey.replace(step1) { m ->
+            // Verify this is at object-start position: preceded by `{` or `[{`
+            val start = m.range.first
+            if (start > 0) {
+                val prev = step1.substring(0, start).trimEnd()
+                if (prev.endsWith("{") || prev.endsWith("[")) {
+                    replaceBareComponentKey(m)
+                } else {
+                    m.value
+                }
+            } else {
+                replaceBareComponentKey(m)
+            }
+        }
+        return step2
+    }
 
     /**
      * Repair JSON with extra closing braces/brackets using stack-based matching.
