@@ -206,6 +206,10 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_CONVERSATIONS, json)
     }
 
+    fun removeConversationsJson() {
+        settings.remove(KEY_CONVERSATIONS)
+    }
+
     fun getCurrentConversationId(): String? = settings.getStringOrNull(KEY_CURRENT_CONVERSATION_ID)
 
     fun setCurrentConversationId(id: String?) {

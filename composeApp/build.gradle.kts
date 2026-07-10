@@ -9,6 +9,19 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.sqldelight)
+}
+
+sqldelight {
+    databases {
+        create("KaiDatabase") {
+            packageName.set("com.kai.custom.db")
+            // The schema lives on user devices — structural changes need a
+            // numbered .sqm migration file (see conversation.sq header).
+            // This makes the build verify that migrations reproduce the schema.
+            verifyMigrations.set(true)
+        }
+    }
 }
 
 composeCompiler {
@@ -105,6 +118,7 @@ kotlin {
             implementation(libs.material)
             implementation(libs.bouncycastle.provider)
             implementation(libs.litert.lm)
+            implementation(libs.sqldelight.android.driver)
             implementation(libs.tensorflow.lite)
             implementation(libs.tensorflow.lite.task.text)
             implementation("com.google.auto.value:auto-value-annotations:1.10.4")
@@ -158,6 +172,8 @@ kotlin {
             implementation(libs.coil.network.ktor3)
 
             implementation(libs.reorderable)
+
+            implementation(libs.sqldelight.runtime)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -166,6 +182,7 @@ kotlin {
             implementation(libs.bouncycastle.provider)
             implementation(libs.slf4j.nop)
             implementation(libs.litert.lm.jvm)
+            implementation(libs.sqldelight.sqlite.driver)
             implementation(libs.jsch)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.cio)
@@ -177,6 +194,7 @@ kotlin {
             implementation(libs.ktor.client.darwin)
             implementation(libs.ktor.network)
             implementation(libs.ktor.network.tls)
+            implementation(libs.sqldelight.native.driver)
         }
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)

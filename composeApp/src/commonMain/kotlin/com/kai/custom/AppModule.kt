@@ -17,6 +17,7 @@ import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.TaskStore
 import com.kai.custom.data.TelegramStore
 import com.kai.custom.data.ToolExecutor
+import com.kai.custom.data.createConversationPersistence
 import com.kai.custom.data.WhatsAppStore
 import com.kai.custom.data.dimension.DimensionStore
 import com.kai.custom.data.runMigrations
@@ -80,7 +81,7 @@ val appModule = module {
         Requests()
     }
     single<ConversationStorage> {
-        ConversationStorage(get())
+        ConversationStorage(get(), createConversationPersistence(get()))
     }
     single<ToolExecutor> {
         ToolExecutor()

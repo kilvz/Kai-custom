@@ -2497,27 +2497,13 @@ class RemoteDataRepository(
 
     override fun exportSettingsToJson(sections: Set<ImportSection>): String {
         val toolIds = getPlatformToolDefinitions().map { it.id }
-        val jsonObject = appSettings.exportToJson(toolIds, sections)
-        // Include actual memory data (dimension store) in the export
-        if (ImportSection.MEMORY in sections) {
-            val dimensionBytes = memoryStore.exportDimension()
-            if (dimensionBytes.isNotEmpty()) {
-                val memJson = kotlinx.serialization.json.buildJsonObject {
-                    put("dimension_data", kotlinx.serialization.json.JsonPrimitive(
-                        java.util.Base64.getEncoder().encodeToString(dimensionBytes)
-                    ))
-                }
-                val merged = jsonObject.toMutableMap()
-                merged["memory_data"] = memJson
-                return prettyJson.encodeToString(JsonObject.serializer(), JsonObject(merged))
-            }
-        }
+        val jsonObject = appSettings.exportToJson(toolIds, sections, conversationStorage.conversations.value)
         return prettyJson.encodeToString(JsonObject.serializer(), jsonObject)
     }
 
     override fun getExportPreview(): Map<ImportSection, String?> {
         val toolIds = getPlatformToolDefinitions().map { it.id }
-        val jsonObject = appSettings.exportToJson(toolIds)
+        val jsonObject = appSettings.exportToJson(toolIds, conversations = conversationStorage.conversations.value)
         return detectExportableSections(jsonObject)
     }
 
