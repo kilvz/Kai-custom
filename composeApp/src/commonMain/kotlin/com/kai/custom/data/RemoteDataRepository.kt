@@ -150,6 +150,11 @@ private data class AssistantTurn(
 
 private enum class BailoutReason { LIMIT_REACHED, REPEATING }
 
+private fun bailoutPrompt(reason: BailoutReason): String = when (reason) {
+    BailoutReason.LIMIT_REACHED -> "You have reached the tool call limit. Please respond with the best answer you have so far based on the information gathered."
+    BailoutReason.REPEATING -> "You are repeating the same tool calls. Please respond with the best answer you have so far."
+}
+
 private interface ToolLoopStrategy {
     suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult
     suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String
@@ -608,32 +613,44 @@ class RemoteDataRepository(
             }
         }
         val startTime = Clock.System.now().toEpochMilliseconds()
-        val result = try {
-            toolExecutor.executeTool(name, arguments, _currentConversationId.value)
-        } catch (e: Exception) {
-            if (e is kotlinx.coroutines.CancellationException) throw e
-            """{"success": false, "error": "${e.message ?: "Tool execution failed"}"}"""
-        }
-        val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
-        if (elapsed < MIN_TOOL_DISPLAY_MS) {
-            delay(MIN_TOOL_DISPLAY_MS.milliseconds - elapsed.milliseconds)
-        }
-        history.update { h ->
-            buildList(h.size) {
-                for (entry in h) {
-                    if (entry.id != executingId) add(entry)
+        // Prefer an explicit coroutine-context conversation id (set by askWithTools
+        // for heartbeat / scheduled runs) over the globally active chat id, so those
+        // background runs don't leak shell commands into whatever chat is open.
+        val conversationIdForTool = currentConversationIdOrNull() ?: _currentConversationId.value
+        try {
+            val result = try {
+                toolExecutor.executeTool(name, arguments, conversationIdForTool)
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                """{"success": false, "error": "${e.message ?: "Tool execution failed"}"}"""
+            }
+            val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
+            if (elapsed < MIN_TOOL_DISPLAY_MS) {
+                delay(MIN_TOOL_DISPLAY_MS.milliseconds - elapsed.milliseconds)
+            }
+            history.update { h ->
+                buildList(h.size) {
+                    for (entry in h) {
+                        if (entry.id != executingId) add(entry)
+                    }
+                    add(
+                        History(
+                            role = History.Role.TOOL,
+                            content = result,
+                            toolCallId = callId,
+                            toolName = name,
+                        ),
+                    )
                 }
-                add(
-                    History(
-                        role = History.Role.TOOL,
-                        content = result,
-                        toolCallId = callId,
-                        toolName = name,
-                    ),
-                )
+            }
+            return result
+        } finally {
+            // On cancellation the fused update above never ran — drop the stranded
+            // indicator. On the success path this is a no-op (id already removed).
+            history.update { h ->
+                if (h.none { it.id == executingId }) h else h.filter { it.id != executingId }
             }
         }
-        return result
     }
 
     private suspend fun askWithService(
@@ -644,6 +661,8 @@ class RemoteDataRepository(
         history: MutableStateFlow<List<History>> = chatHistory,
     ): AssistantTurn {
         if (service.isOnDevice) {
+            // No retry: local-inference failures are deterministic, and this path mutates
+            // chat history through tool execution, so a replay could re-run tools.
             // Re-fetch the system prompt with the CHAT_LOCAL variant — the caller
             // (`ask()`/`askWithTools()`) pre-fetched a CHAT_REMOTE prompt, but on-device
             // needs the trimmed variant.
@@ -660,7 +679,7 @@ class RemoteDataRepository(
                     handleGeminiChatWithTools(creds, messages, tools, systemPrompt, history)
                 } else {
                     val geminiMessages = messages.map { it.toGeminiMessageDto() }
-                    val response = requests.geminiChat(creds, geminiMessages, systemInstruction = systemPrompt).getOrThrow()
+                    val response = retryApiCall { requests.geminiChat(creds, geminiMessages, systemInstruction = systemPrompt).getOrThrow() }
                     AssistantTurn(response.extractText())
                 }
             }
@@ -671,7 +690,7 @@ class RemoteDataRepository(
                 } else {
                     val anthropicMessages = buildAnthropicMessages(messages)
                     val maxTokens = getModelMaxTokens(creds.modelId).let { if (it > 0) it else null }
-                    val response = requests.anthropicChat(creds, anthropicMessages, systemInstruction = systemPrompt, maxTokens = maxTokens).getOrThrow()
+                    val response = retryApiCall { requests.anthropicChat(creds, anthropicMessages, systemInstruction = systemPrompt, maxTokens = maxTokens).getOrThrow() }
                     AssistantTurn(response.extractText())
                 }
             }
@@ -680,10 +699,12 @@ class RemoteDataRepository(
                 if (tools.isNotEmpty()) {
                     handleOpenAICompatibleChatWithTools(service, creds, messages, tools, systemPrompt, history)
                 } else {
-                    val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt, creds.modelId)
+                    // No tools on this request — strip any historic tool_calls so Groq's strict
+                    // validator doesn't see calls to tools we no longer declare.
+                    val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt, creds.modelId, declaredToolNames = emptySet())
                     val maxTokens = getModelMaxTokens(creds.modelId).let { if (it > 0) it else null }
-                    val message = requests.openAICompatibleChat(service, creds, openAIMessages, maxTokens = maxTokens).getOrThrow()
-                        .choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
+                    val response = retryApiCall { requests.openAICompatibleChat(service, creds, openAIMessages, maxTokens = maxTokens).getOrThrow() }
+                    val message = response.choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
                     val content = message.effectiveContent ?: throw OpenAICompatibleEmptyResponseException()
                     AssistantTurn(content, message.reasoningTraceFor(content))
                 }
@@ -709,7 +730,7 @@ class RemoteDataRepository(
             .filter { !it.service.isOnDevice || hasLocalModels }
         val freeEntry = FallbackEntry(instanceId = "free", service = Service.Free)
         val debugFreeEntry = FallbackEntry(instanceId = "debug_api", service = Service.OpenCode)
-        val base = if (entries.isEmpty()) {
+        val ordered = if (entries.isEmpty()) {
             listOf(freeEntry)
         } else if (appSettings.isFreeServicePrimary()) {
             listOf(freeEntry) + entries
@@ -719,7 +740,12 @@ class RemoteDataRepository(
             entries
         }
         val debugEnabled = isDebugBuild && appSettings.isDebugEndpointEnabled()
-        return if (debugEnabled) base + debugFreeEntry else base
+        val base = if (debugEnabled) ordered + debugFreeEntry else ordered
+        // On-device models are only tried as the primary service, never as a fallback
+        // target — falling into one would silently start a heavy model load the user
+        // didn't ask for (mirrors the guard that keeps on-device errors from silently
+        // falling back to cloud services).
+        return base.filterIndexed { index, entry -> index == 0 || !entry.service.isOnDevice }
     }
 
     override suspend fun ask(question: String?, files: List<PlatformFile>, uiSubmission: UiSubmission?) {
@@ -882,10 +908,11 @@ class RemoteDataRepository(
                     }
                 }
 
+                // No retry wrapper here: each network call retries inside askWithService.
+                // Retrying the whole call would re-enter the tool loop against a chat
+                // history already mutated by the failed attempt.
                 val turn = try {
-                    retryApiCall {
-                        askWithService(entry.service, messages, systemPrompt, entry.instanceId)
-                    }
+                    askWithService(entry.service, messages, systemPrompt, entry.instanceId)
                 } catch (e: Exception) {
                     if (e is kotlinx.coroutines.CancellationException) throw e
                     // On-device services should not silently fall back — surface the error
@@ -1029,8 +1056,9 @@ class RemoteDataRepository(
             }
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
-                val msgs = trimMessagesForContext(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId), contextWindowTokens)
-                return makeFinalCallWithoutTools(service, credentials, msgs)
+                // Bailout sends no tools — strip historic tool_calls to satisfy strict validators.
+                val msgs = trimMessagesForContext(buildOpenAIMessages(service, history, systemPrompt, credentials.modelId, declaredToolNames = emptySet()), contextWindowTokens)
+                return makeFinalCallWithoutTools(service, credentials, msgs, reason)
             }
         }
         return runToolLoop(strategy, systemPrompt, history)
@@ -1072,10 +1100,7 @@ class RemoteDataRepository(
             }
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
-                val prefix = when (reason) {
-                    BailoutReason.LIMIT_REACHED -> "You have reached the tool call limit. Please respond with the best answer you have so far based on the information gathered."
-                    BailoutReason.REPEATING -> "You are repeating the same tool calls. Please respond with the best answer you have so far."
-                }
+                val prefix = bailoutPrompt(reason)
                 val geminiMessages = history.map { it.toGeminiMessageDto() }
                 val bailoutResponse = retryApiCall {
                     requests.geminiChat(
@@ -1125,10 +1150,7 @@ class RemoteDataRepository(
             }
 
             override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
-                val prefix = when (reason) {
-                    BailoutReason.LIMIT_REACHED -> "You have reached the tool call limit. Please respond with the best answer you have so far based on the information gathered."
-                    BailoutReason.REPEATING -> "You are repeating the same tool calls. Please respond with the best answer you have so far."
-                }
+                val prefix = bailoutPrompt(reason)
                 val bailoutResponse = retryApiCall {
                     requests.anthropicChat(
                         credentials = credentials,
@@ -1243,12 +1265,13 @@ class RemoteDataRepository(
         service: Service,
         credentials: ServiceCredentials,
         messages: List<com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message>,
+        reason: BailoutReason,
     ): String {
         val bailoutMessages = messages.toMutableList().apply {
             add(
                 com.kai.custom.network.dtos.openaicompatible.OpenAICompatibleChatRequestDto.Message(
                     role = "user",
-                    content = JsonPrimitive("You have reached the tool call limit. Please respond with the best answer you have so far based on the information gathered."),
+                    content = JsonPrimitive(bailoutPrompt(reason)),
                 ),
             )
         }
@@ -1290,25 +1313,27 @@ class RemoteDataRepository(
         // see a stable value even if the user switches conversations mid-flight.
         val conversationIdSnapshot = _currentConversationId.value
         val startTime = Clock.System.now().toEpochMilliseconds()
-        val results = coroutineScope {
-            toolCalls.map { (callId, name, arguments) ->
-                async {
-                    val result = toolExecutor.executeTool(name, arguments, conversationIdSnapshot)
-                    Triple(callId, name, result)
-                }
-            }.awaitAll()
+        try {
+            val results = coroutineScope {
+                toolCalls.map { (callId, name, arguments) ->
+                    async {
+                        val result = toolExecutor.executeTool(name, arguments, conversationIdSnapshot)
+                        Triple(callId, name, result)
+                    }
+                }.awaitAll()
+            }
+            val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
+            if (elapsed < MIN_TOOL_DISPLAY_MS) {
+                delay((MIN_TOOL_DISPLAY_MS - elapsed).milliseconds)
+            }
+            return results
+        } finally {
+            // Remove all TOOL_EXECUTING indicators — also on cancellation, so stopping a
+            // run doesn't strand spinner rows in the chat. Non-suspending, safe in finally.
+            chatHistory.update { history ->
+                history.filter { h -> h.id !in executingIds }
+            }
         }
-        val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
-        if (elapsed < MIN_TOOL_DISPLAY_MS) {
-            delay((MIN_TOOL_DISPLAY_MS - elapsed).milliseconds)
-        }
-
-        // Remove all TOOL_EXECUTING indicators
-        history.update { h ->
-            h.filter { hh -> hh.id !in executingIds }
-        }
-
-        return results
     }
 
     private fun isNonRetryableException(e: Exception): Boolean = e is AnthropicInsufficientCreditsException || e is OpenAICompatibleQuotaExhaustedException

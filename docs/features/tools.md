@@ -1,6 +1,6 @@
 ﻿# Tools
 
-**Last verified:** 2026-05-26
+**Last verified:** 2026-07-10
 
 Kai's tools feature allows the AI to execute external functions during conversations â€” web search, notifications, calendar events, shell commands, memory operations, and more. Tools are defined with a schema, executed with safety guards, and managed through per-tool toggles in settings.
 
@@ -156,6 +156,8 @@ Output limits: desktop 30,000 chars per stream, Android 15,000 chars per stream.
 6. The updated history (including tool results) is sent back to the AI
 7. The AI may respond with more tool calls â€” repeat from step 1
 8. When the AI responds with no tool calls, the final text is returned to the user
+
+Pressing stop cancels in-flight tool executions and removes the executing indicators from the chat; a cancelled tool is not reported to the AI as a failed result.
 
 The loop supports OpenAI-compatible, Gemini, and Anthropic provider formats, with provider-specific serialization of tool calls and results.
 
