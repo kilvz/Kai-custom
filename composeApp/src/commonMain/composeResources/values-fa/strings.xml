@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">Ø³Ù‡Ù…ÛŒÙ‡ ØªÙ…Ø§Ù… Ø´Ø¯</string>
     <string name="settings_status_error_rate_limited">Ø¨Ù‡ Ø­Ø¯ Ù†Ø±Ø® Ø±Ø³ÛŒØ¯</string>
     <string name="settings_status_error_connection_failed">Ø§ØªØµØ§Ù„ Ù†Ø§Ù…ÙˆÙÙ‚</string>
+    <string name="settings_status_error_local_network">دسترسی به شبکه محلی رد شد. برای دسترسی به سرورهای شبکه خود، آن را در تنظیمات سیستم مجاز کنید.</string>
+
+    <string name="settings_open_app_settings">باز کردن تنظیمات</string>
+
+    <string name="error_local_network_permission">برای دسترسی به سرور خود به دسترسی شبکه محلی نیاز است. آن را در تنظیمات سیستم مجاز کنید و دوباره تلاش کنید.</string>
+
     <string name="settings_openai_compatible_setup_ollama">Ù†Ù…ÙˆÙ†Ù‡ Ù…Ø­Ù„ÛŒ Ollama Ø®ÙˆØ¯ Ø±Ø§ Ø±Ø§Ù‡â€ŒØ§Ù†Ø¯Ø§Ø²ÛŒ Ú©Ù†ÛŒØ¯:</string>
     <string name="settings_openai_compatible_or_other_service">ÛŒØ§ Ù‡Ø± Ø³Ø±ÙˆÛŒØ³ Ø³Ø§Ø²Ú¯Ø§Ø± Ø¯ÛŒÚ¯Ø±ÛŒ:</string>
     <string name="settings_openai_compatible_providers">Ø§Ø±Ø§Ø¦Ù‡â€ŒØ¯Ù‡Ù†Ø¯Ú¯Ø§Ù†</string>

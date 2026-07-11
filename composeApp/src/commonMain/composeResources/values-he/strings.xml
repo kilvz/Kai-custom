@@ -29,6 +29,12 @@
     <string name="settings_status_error_quota_exhausted">×”×ž×›×¡×” × ×•×¦×œ×”</string>
     <string name="settings_status_error_rate_limited">×ž×•×’×‘×œ ×‘×§×¦×‘ ×‘×§×©×•×ª</string>
     <string name="settings_status_error_connection_failed">×”×—×™×‘×•×¨ × ×›×©×œ</string>
+    <string name="settings_status_error_local_network">הגישה לרשת המקומית נדחתה. יש לאפשר אותה בהגדרות המערכת כדי להגיע לשרתים ברשת שלך.</string>
+
+    <string name="settings_open_app_settings">פתח הגדרות</string>
+
+    <string name="error_local_network_permission">נדרשת גישה לרשת המקומית כדי להגיע לשרת שלך. יש לאפשר אותה בהגדרות המערכת ולנסות שוב.</string>
+
     <string name="error_openai_compatible_connection">×œ× × ×™×ª×Ÿ ×œ×”×ª×—×‘×¨ ×œ×©×¨×ª. ×•×“× ×©×”×©×¨×ª ×¤×•×¢×œ.</string>
     <string name="error_openai_compatible_model_not_found">×”×ž×•×“×œ ×œ× × ×ž×¦×. ×‘×—×¨ ×ž×•×“×œ ××—×¨.</string>
     <string name="settings_openai_compatible_setup_ollama">×”×’×“×¨ ××ª ×ž×•×¤×¢ ×”-Ollama ×”×ž×§×•×ž×™ ×©×œ×š:</string>

@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">ÐšÐ²Ð¾Ñ‚Ð° Ð¸ÑÑ‡ÐµÑ€Ð¿Ð°Ð½Ð°</string>
     <string name="settings_status_error_rate_limited">ÐŸÑ€ÐµÐ²Ñ‹ÑˆÐµÐ½ Ð»Ð¸Ð¼Ð¸Ñ‚ Ð·Ð°Ð¿Ñ€Ð¾ÑÐ¾Ð²</string>
     <string name="settings_status_error_connection_failed">ÐžÑˆÐ¸Ð±ÐºÐ° Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ñ</string>
+    <string name="settings_status_error_local_network">Доступ к локальной сети запрещён. Разрешите его в системных настройках, чтобы обращаться к серверам в вашей сети.</string>
+
+    <string name="settings_open_app_settings">Открыть настройки</string>
+
+    <string name="error_local_network_permission">Для подключения к вашему серверу требуется доступ к локальной сети. Разрешите его в системных настройках и попробуйте снова.</string>
+
     <string name="settings_openai_compatible_setup_ollama">ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹Ñ‚Ðµ Ð»Ð¾ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹ ÑÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ Ollama:</string>
     <string name="settings_openai_compatible_or_other_service">Ð¸Ð»Ð¸ Ð»ÑŽÐ±Ð¾Ð¹ Ð´Ñ€ÑƒÐ³Ð¾Ð¹ ÑÐ¾Ð²Ð¼ÐµÑÑ‚Ð¸Ð¼Ñ‹Ð¹ ÑÐµÑ€Ð²Ð¸Ñ:</string>
     <string name="settings_openai_compatible_providers">Ð¿Ñ€Ð¾Ð²Ð°Ð¹Ð´ÐµÑ€Ñ‹</string>

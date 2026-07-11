@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">Ú©ÙˆÙ¹Û Ø®ØªÙ… ÛÙˆ Ú¯ÛŒØ§</string>
     <string name="settings_status_error_rate_limited">Ø´Ø±Ø­ Ú©ÛŒ Ø­Ø¯ ØªÚ© Ù¾ÛÙ†Ú† Ú¯Ø¦ÛŒ</string>
     <string name="settings_status_error_connection_failed">Ú©Ù†Ú©Ø´Ù† Ù†Ø§Ú©Ø§Ù… ÛÙˆ Ú¯ÛŒØ§</string>
+    <string name="settings_status_error_local_network">لوکل نیٹ ورک تک رسائی مسترد کر دی گئی۔ اپنے نیٹ ورک کے سرورز تک پہنچنے کے لیے سسٹم سیٹنگز میں اس کی اجازت دیں۔</string>
+
+    <string name="settings_open_app_settings">سیٹنگز کھولیں</string>
+
+    <string name="error_local_network_permission">آپ کے سرور تک پہنچنے کے لیے لوکل نیٹ ورک تک رسائی درکار ہے۔ سسٹم سیٹنگز میں اس کی اجازت دیں اور دوبارہ کوشش کریں۔</string>
+
     <string name="settings_openai_compatible_setup_ollama">Ø§Ù¾Ù†Ø§ Ù…Ù‚Ø§Ù…ÛŒ Ollama Ø§Ù†Ø³Ù¹ÛŒÙ†Ø³ Ø³ÛŒÙ¹ Ø§Ù¾ Ú©Ø±ÛŒÚº:</string>
     <string name="settings_openai_compatible_or_other_service">ÛŒØ§ Ú©ÙˆØ¦ÛŒ Ø§ÙˆØ± Ù…ÙˆØ§ÙÙ‚ Ø³Ø±ÙˆØ³:</string>
     <string name="settings_openai_compatible_providers">ÙØ±Ø§ÛÙ… Ú©Ù†Ù†Ø¯Ú¯Ø§Ù†</string>

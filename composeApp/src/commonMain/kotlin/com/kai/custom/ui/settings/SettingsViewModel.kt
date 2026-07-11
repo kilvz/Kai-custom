@@ -54,7 +54,9 @@ import com.kai.custom.requestShizukuPermission
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.skills.parseGitHubSkillUrl
+import com.kai.custom.tools.LocalNetworkPermissionController
 import com.kai.custom.tools.NotificationPermissionController
+import com.kai.custom.tools.isLocalNetworkUrl
 import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.wakeword.WakeWordController
 import io.ktor.client.call.body
@@ -99,6 +101,7 @@ class SettingsViewModel(
     private val toolPermissionBridge: ToolPermissionBridge,
     private val autoUpdateManager: AutoUpdateManager,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
+    private val localNetworkPermissionController: LocalNetworkPermissionController = LocalNetworkPermissionController(),
 ) : ViewModel() {
 
     private var connectionCheckJobs: MutableMap<String, Job> = mutableMapOf()
@@ -248,6 +251,8 @@ class SettingsViewModel(
         onToggleNotifications = ::onToggleNotifications,
         onOpenNotificationListenerSettings = ::onOpenNotificationListenerSettings,
         onOpenTtsSettings = ::onOpenTtsSettings,
+        onOpenAppPermissionSettings = ::onOpenAppPermissionSettings,
+        onRecheckLocalNetworkPermission = ::onRecheckLocalNetworkPermission,
         onClearPendingNotifications = ::onClearPendingNotifications,
         onToggleShizuku = ::onToggleShizuku,
         onOpenShizukuPermission = ::onOpenShizukuPermission,
@@ -984,6 +989,21 @@ class SettingsViewModel(
         openTtsSettings()
     }
 
+    private fun onOpenAppPermissionSettings() {
+        localNetworkPermissionController.openAppSettings()
+    }
+
+    /**
+     * Called when the app resumes while a connection sits in the local-network-denied state.
+     * Re-validates only if the permission is now granted — never re-prompts, so a user who
+     * denied and stayed on the screen isn't nagged with another dialog.
+     */
+    private fun onRecheckLocalNetworkPermission(instanceId: String) {
+        if (!localNetworkPermissionController.hasPermission()) return
+        val instance = dataRepository.getConfiguredServiceInstances().firstOrNull { it.instanceId == instanceId } ?: return
+        validateConnectionWithStatus(instanceId, Service.fromId(instance.serviceId))
+    }
+
     private fun onClearPendingNotifications() {
         viewModelScope.launch(backgroundDispatcher) {
             dataRepository.clearPendingNotifications()
@@ -1624,6 +1644,13 @@ class SettingsViewModel(
     private fun validateConnectionWithStatus(instanceId: String, service: Service) {
         updateConnectionStatus(instanceId, ConnectionStatus.Checking)
         viewModelScope.launch(backgroundDispatcher) {
+            // Android 17+ blocks LAN traffic without the local network permission, so ask
+            // before probing — otherwise the check fails with a misleading connection error.
+            val baseUrl = dataRepository.getInstanceBaseUrl(instanceId, service)
+            if (isLocalNetworkUrl(baseUrl) && !localNetworkPermissionController.requestPermission()) {
+                updateConnectionStatus(instanceId, ConnectionStatus.ErrorLocalNetworkDenied)
+                return@launch
+            }
             try {
                 dataRepository.validateConnection(service, instanceId)
                 if (service.isOnDevice && dataRepository.getLocalDownloadedModels().isEmpty()) {

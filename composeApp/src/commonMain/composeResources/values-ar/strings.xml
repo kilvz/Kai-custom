@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">Ù†ÙØ¯Øª Ø§Ù„Ø­ØµØ©</string>
     <string name="settings_status_error_rate_limited">ØªÙ… Ø§Ù„ÙˆØµÙˆÙ„ Ù„Ø­Ø¯ Ø§Ù„Ù…Ø¹Ø¯Ù„</string>
     <string name="settings_status_error_connection_failed">ÙØ´Ù„ Ø§Ù„Ø§ØªØµØ§Ù„</string>
+    <string name="settings_status_error_local_network">تم رفض الوصول إلى الشبكة المحلية. اسمح به في إعدادات النظام للوصول إلى الخوادم على شبكتك.</string>
+
+    <string name="settings_open_app_settings">فتح الإعدادات</string>
+
+    <string name="error_local_network_permission">الوصول إلى الشبكة المحلية مطلوب للوصول إلى الخادم. اسمح به في إعدادات النظام وحاول مرة أخرى.</string>
+
     <string name="settings_openai_compatible_setup_ollama">Ù‚Ù… Ø¨Ø¥Ø¹Ø¯Ø§Ø¯ Ù†Ø³Ø®Ø© Ollama Ø§Ù„Ù…Ø­Ù„ÙŠØ© Ø§Ù„Ø®Ø§ØµØ© Ø¨Ùƒ:</string>
     <string name="settings_openai_compatible_or_other_service">Ø£Ùˆ Ø£ÙŠ Ø®Ø¯Ù…Ø© Ù…ØªÙˆØ§ÙÙ‚Ø© Ø£Ø®Ø±Ù‰:</string>
     <string name="settings_openai_compatible_providers">Ø§Ù„Ù…Ø²ÙˆØ¯ÙˆÙ†</string>

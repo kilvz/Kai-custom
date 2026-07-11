@@ -29,6 +29,12 @@
     <string name="settings_status_error_quota_exhausted">ÐšÐ²Ð¾Ñ‚Ð° Ñ‚Ð°ÑƒÑÑ‹Ð»Ð´Ñ‹</string>
     <string name="settings_status_error_rate_limited">Ð¡Ò±Ñ€Ð°Ñƒ Ð»Ð¸Ð¼Ð¸Ñ‚Ñ– ÑˆÐµÐºÑ‚ÐµÐ»Ð´Ñ–</string>
     <string name="settings_status_error_connection_failed">ÒšÐ¾ÑÑ‹Ð»Ñ‹Ð¼ ÑÓ™Ñ‚ÑÑ–Ð·</string>
+    <string name="settings_status_error_local_network">Жергілікті желіге кіру рұқсаты қабылданбады. Желіңіздегі серверлерге қосылу үшін жүйе параметрлерінде рұқсат етіңіз.</string>
+
+    <string name="settings_open_app_settings">Параметрлерді ашу</string>
+
+    <string name="error_local_network_permission">Серверіңізге қосылу үшін жергілікті желіге кіру рұқсаты қажет. Жүйе параметрлерінде рұқсат етіп, қайталап көріңіз.</string>
+
     <string name="error_openai_compatible_connection">Ð¡ÐµÑ€Ð²ÐµÑ€Ð³Ðµ Ò›Ð¾ÑÑ‹Ð»Ñƒ Ð¼Ò¯Ð¼ÐºÑ–Ð½ ÐµÐ¼ÐµÑ. Ð¡ÐµÑ€Ð²ÐµÑ€Ð´Ñ–Ò£ Ð¶Ò±Ð¼Ñ‹Ñ Ñ–ÑÑ‚ÐµÐ¿ Ñ‚Ò±Ñ€Ò“Ð°Ð½Ñ‹Ð½Ð° ÐºÓ©Ð· Ð¶ÐµÑ‚ÐºÑ–Ð·Ñ–Ò£Ñ–Ð·.</string>
     <string name="error_openai_compatible_model_not_found">ÐœÐ¾Ð´ÐµÐ»ÑŒ Ñ‚Ð°Ð±Ñ‹Ð»Ð¼Ð°Ð´Ñ‹. Ð‘Ð°ÑÒ›Ð° Ð¼Ð¾Ð´ÐµÐ»ÑŒÐ´Ñ– Ñ‚Ð°Ò£Ð´Ð°Ò£Ñ‹Ð·.</string>
     <string name="settings_openai_compatible_setup_ollama">Ð–ÐµÑ€Ð³Ñ–Ð»Ñ–ÐºÑ‚Ñ– Ollama Ð½Ò±ÑÒ›Ð°Ò£Ñ‹Ð·Ð´Ñ‹ Ð¾Ñ€Ð½Ð°Ñ‚Ñ‹Ò£Ñ‹Ð·:</string>

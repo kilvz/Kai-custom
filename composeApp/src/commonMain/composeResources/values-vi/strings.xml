@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">ÄÃ£ háº¿t háº¡n má»©c</string>
     <string name="settings_status_error_rate_limited">Äáº¡t giá»›i háº¡n tá»‘c Ä‘á»™</string>
     <string name="settings_status_error_connection_failed">Káº¿t ná»‘i tháº¥t báº¡i</string>
+    <string name="settings_status_error_local_network">Quyền truy cập mạng cục bộ bị từ chối. Hãy cho phép trong cài đặt hệ thống để kết nối với các máy chủ trong mạng của bạn.</string>
+
+    <string name="settings_open_app_settings">Mở cài đặt</string>
+
+    <string name="error_local_network_permission">Cần quyền truy cập mạng cục bộ để kết nối với máy chủ của bạn. Hãy cho phép trong cài đặt hệ thống và thử lại.</string>
+
     <string name="settings_openai_compatible_setup_ollama">Thiáº¿t láº­p phiÃªn báº£n Ollama cá»¥c bá»™ cá»§a báº¡n:</string>
     <string name="settings_openai_compatible_or_other_service">hoáº·c báº¥t ká»³ dá»‹ch vá»¥ tÆ°Æ¡ng thÃ­ch nÃ o khác:</string>
     <string name="settings_openai_compatible_providers">nhÃ  cung cáº¥p</string>

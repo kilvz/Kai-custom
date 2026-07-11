@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">àª•à«àªµà«‹àªŸàª¾ àª–àª¤àª®</string>
     <string name="settings_status_error_rate_limited">àª¦àª° àª®àª°à«àª¯àª¾àª¦àª¾ àª¸à«àª§à«€ àªªàª¹à«‹àª‚àªšà«àª¯àª¾</string>
     <string name="settings_status_error_connection_failed">àª•àª¨à«‡àª•à«àª¶àª¨ àª¨àª¿àª·à«àª«àª³</string>
+    <string name="settings_status_error_local_network">લોકલ નેટવર્ક ઍક્સેસ નકારવામાં આવ્યો. તમારા નેટવર્ક પરના સર્વર્સ સુધી પહોંચવા માટે સિસ્ટમ સેટિંગ્સમાં તેને મંજૂરી આપો.</string>
+
+    <string name="settings_open_app_settings">સેટિંગ્સ ખોલો</string>
+
+    <string name="error_local_network_permission">તમારા સર્વર સુધી પહોંચવા માટે લોકલ નેટવર્ક ઍક્સેસ જરૂરી છે. સિસ્ટમ સેટિંગ્સમાં તેને મંજૂરી આપો અને ફરી પ્રયાસ કરો.</string>
+
     <string name="settings_openai_compatible_setup_ollama">àª¤àª®àª¾àª°à«€ àª¸à«àª¥àª¾àª¨àª¿àª• Ollama àª‡àª¨à«àª¸à«àªŸàª¨à«àª¸ àª¸à«‡àªŸàª…àªª àª•àª°à«‹:</string>
     <string name="settings_openai_compatible_or_other_service">àª…àª¥àªµàª¾ àª•à«‹àªˆàªªàª£ àª…àª¨à«àª¯ àª¸à«àª¸àª‚àª—àª¤ àª¸à«‡àªµàª¾:</string>
     <string name="settings_openai_compatible_providers">àªªà«àª°àª¦àª¾àª¤àª¾àª“</string>

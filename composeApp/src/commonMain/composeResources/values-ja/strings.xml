@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">ã‚¯ã‚©ãƒ¼ã‚¿è¶…éŽ</string>
     <string name="settings_status_error_rate_limited">ãƒ¬ãƒ¼ãƒˆåˆ¶é™ä¸­</string>
     <string name="settings_status_error_connection_failed">æŽ¥ç¶šå¤±æ•—</string>
+    <string name="settings_status_error_local_network">ローカルネットワークへのアクセスが拒否されました。ネットワーク上のサーバーに接続するには、システム設定で許可してください。</string>
+
+    <string name="settings_open_app_settings">設定を開く</string>
+
+    <string name="error_local_network_permission">サーバーに接続するにはローカルネットワークへのアクセスが必要です。システム設定で許可してから、もう一度お試しください。</string>
+
     <string name="settings_openai_compatible_setup_ollama">ãƒ­ãƒ¼ã‚«ãƒ«ã®Ollamaã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã‚’ã‚»ãƒƒãƒˆã‚¢ãƒƒãƒ—ï¼š</string>
     <string name="settings_openai_compatible_or_other_service">ã¾ãŸã¯ä»–ã®äº’æ›ã‚µãƒ¼ãƒ“ã‚¹ï¼š</string>
     <string name="settings_openai_compatible_providers">ãƒ—ãƒ­ãƒã‚¤ãƒ€ãƒ¼</string>

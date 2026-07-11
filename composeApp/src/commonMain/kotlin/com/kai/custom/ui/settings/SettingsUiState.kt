@@ -44,6 +44,7 @@ enum class ConnectionStatus {
     ErrorQuotaExhausted,
     ErrorRateLimited,
     ErrorConnectionFailed,
+    ErrorLocalNetworkDenied,
     Error,
 }
 

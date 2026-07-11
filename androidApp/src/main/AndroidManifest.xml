@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
    <uses-permission android:name="android.permission.INTERNET"/>
+   <!-- Android 17+ blocks LAN traffic for apps targeting SDK 37+ without this runtime
+        permission; required to reach self-hosted servers (Jan, Ollama, LM Studio, ...). -->
+   <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK"/>
    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>

@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">é…é¢å·²ç”¨å®Œ</string>
     <string name="settings_status_error_rate_limited">è¾¾åˆ°é€ŸçŽ‡é™åˆ¶</string>
     <string name="settings_status_error_connection_failed">è¿žæŽ¥å¤±è´¥</string>
+    <string name="settings_status_error_local_network">本地网络访问被拒绝。请在系统设置中允许，以访问您网络中的服务器。</string>
+
+    <string name="settings_open_app_settings">打开设置</string>
+
+    <string name="error_local_network_permission">需要本地网络访问权限才能连接到您的服务器。请在系统设置中允许后重试。</string>
+
     <string name="settings_openai_compatible_setup_ollama">è®¾ç½®æ‚¨çš„æœ¬åœ° Ollama å®žä¾‹ï¼š</string>
     <string name="settings_openai_compatible_or_other_service">æˆ–å…¶ä»–å…¼å®¹æœåŠ¡ï¼š</string>
     <string name="settings_openai_compatible_providers">æä¾›å•†</string>

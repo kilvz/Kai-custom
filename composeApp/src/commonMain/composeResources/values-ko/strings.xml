@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">í• ë‹¹ëŸ‰ ì†Œì§„</string>
     <string name="settings_status_error_rate_limited">ìš”ì²­ í•œë„ ì´ˆê³¼</string>
     <string name="settings_status_error_connection_failed">ì—°ê²° ì‹¤íŒ¨</string>
+    <string name="settings_status_error_local_network">로컬 네트워크 접근이 거부되었습니다. 네트워크의 서버에 연결하려면 시스템 설정에서 허용하세요.</string>
+
+    <string name="settings_open_app_settings">설정 열기</string>
+
+    <string name="error_local_network_permission">서버에 연결하려면 로컬 네트워크 접근 권한이 필요합니다. 시스템 설정에서 허용한 후 다시 시도하세요.</string>
+
     <string name="settings_openai_compatible_setup_ollama">ë¡œì»¬ Ollama ì¸ìŠ¤í„´ìŠ¤ ì„¤ì •:</string>
     <string name="settings_openai_compatible_or_other_service">ë˜ëŠ” ë‹¤ë¥¸ í˜¸í™˜ ì„œë¹„ìŠ¤:</string>
     <string name="settings_openai_compatible_providers">ì œê³µì—…ì²´</string>

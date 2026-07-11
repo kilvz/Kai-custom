@@ -39,10 +39,12 @@ import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.tools.CalendarPermissionController
+import com.kai.custom.tools.LocalNetworkPermissionController
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.SetupActivityResultHandler
 import com.kai.custom.tools.SetupCalendarPermissionHandler
+import com.kai.custom.tools.SetupLocalNetworkPermissionHandler
 import com.kai.custom.tools.SetupMicrophonePermissionHandler
 import com.kai.custom.tools.SetupNotificationPermissionHandler
 import com.kai.custom.tools.SetupSmsPermissionHandler
@@ -142,6 +144,9 @@ private fun AppContent(
 
     val notificationPermissionController = koinInject<NotificationPermissionController>()
     SetupNotificationPermissionHandler(notificationPermissionController)
+
+    val localNetworkPermissionController = koinInject<LocalNetworkPermissionController>()
+    SetupLocalNetworkPermissionHandler(localNetworkPermissionController)
 
     val smsPermissionController = koinInject<SmsPermissionController>()
     SetupSmsPermissionHandler(smsPermissionController)

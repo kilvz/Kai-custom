@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">à°•à±‹à°Ÿà°¾ à°…à°¯à°¿à°ªà±‹à°¯à°¿à°‚à°¦à°¿</string>
     <string name="settings_status_error_rate_limited">à°°à±‡à°Ÿà± à°ªà°°à°¿à°®à°¿à°¤à°¿ à°šà±‡à°°à±à°•à±à°‚à°¦à°¿</string>
     <string name="settings_status_error_connection_failed">à°•à°¨à±†à°•à±à°·à°¨à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿</string>
+    <string name="settings_status_error_local_network">లోకల్ నెట్‌వర్క్ యాక్సెస్ నిరాకరించబడింది. మీ నెట్‌వర్క్‌లోని సర్వర్‌లను చేరుకోవడానికి సిస్టమ్ సెట్టింగ్‌లలో దాన్ని అనుమతించండి.</string>
+
+    <string name="settings_open_app_settings">సెట్టింగ్‌లను తెరవండి</string>
+
+    <string name="error_local_network_permission">మీ సర్వర్‌ను చేరుకోవడానికి లోకల్ నెట్‌వర్క్ యాక్సెస్ అవసరం. సిస్టమ్ సెట్టింగ్‌లలో దాన్ని అనుమతించి మళ్లీ ప్రయత్నించండి.</string>
+
     <string name="settings_openai_compatible_setup_ollama">à°®à±€ à°¸à±à°¥à°¾à°¨à°¿à°• Ollama à°‡à°¨à±â€Œà°¸à±à°Ÿà±†à°¨à±à°¸à±â€Œà°¨à± à°¸à±†à°Ÿà°ªà± à°šà±‡à°¯à°‚à°¡à°¿:</string>
     <string name="settings_openai_compatible_or_other_service">à°²à±‡à°¦à°¾ à°‡à°¤à°° à°…à°¨à±à°•à±‚à°² à°¸à±‡à°µ:</string>
     <string name="settings_openai_compatible_providers">à°ªà±à°°à±Šà°µà±ˆà°¡à°°à±à°²à±</string>

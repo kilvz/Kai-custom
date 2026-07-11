@@ -29,6 +29,12 @@
     <string name="settings_status_error_quota_exhausted">Î•Î¾Î¬Î½Ï„Î»Î·ÏƒÎ· Î¿ÏÎ¯Î¿Ï…</string>
     <string name="settings_status_error_rate_limited">Î ÎµÏÎ¹Î¿ÏÎ¹ÏƒÎ¼ÏŒÏ‚ Î±Î¹Ï„Î·Î¼Î¬Ï„Ï‰Î½</string>
     <string name="settings_status_error_connection_failed">Î— ÏƒÏÎ½Î´ÎµÏƒÎ· Î±Ï€Î­Ï„Ï…Ï‡Îµ</string>
+    <string name="settings_status_error_local_network">Η πρόσβαση στο τοπικό δίκτυο απορρίφθηκε. Επιτρέψτε την στις ρυθμίσεις συστήματος για να έχετε πρόσβαση σε διακομιστές στο δίκτυό σας.</string>
+
+    <string name="settings_open_app_settings">Άνοιγμα ρυθμίσεων</string>
+
+    <string name="error_local_network_permission">Απαιτείται πρόσβαση στο τοπικό δίκτυο για να συνδεθείτε στον διακομιστή σας. Επιτρέψτε την στις ρυθμίσεις συστήματος και δοκιμάστε ξανά.</string>
+
     <string name="error_openai_compatible_connection">Î”ÎµÎ½ ÎµÎ¯Î½Î±Î¹ Î´Ï…Î½Î±Ï„Î® Î· ÏƒÏÎ½Î´ÎµÏƒÎ· ÏƒÏ„Î¿Î½ Î´Î¹Î±ÎºÎ¿Î¼Î¹ÏƒÏ„Î®. Î’ÎµÎ²Î±Î¹Ï‰Î¸ÎµÎ¯Ï„Îµ ÏŒÏ„Î¹ Î¿ Î´Î¹Î±ÎºÎ¿Î¼Î¹ÏƒÏ„Î®Ï‚ ÎµÎºÏ„ÎµÎ»ÎµÎ¯Ï„Î±Î¹.</string>
     <string name="error_openai_compatible_model_not_found">Î¤Î¿ Î¼Î¿Î½Ï„Î­Î»Î¿ Î´ÎµÎ½ Î²ÏÎ­Î¸Î·ÎºÎµ. Î•Ï€Î¹Î»Î­Î¾Ï„Îµ Î­Î½Î± Î´Î¹Î±Ï†Î¿ÏÎµÏ„Î¹ÎºÏŒ Î¼Î¿Î½Ï„Î­Î»Î¿.</string>
     <string name="settings_openai_compatible_setup_ollama">Î¡Ï…Î¸Î¼Î¯ÏƒÏ„Îµ Ï„Î·Î½ Ï„Î¿Ï€Î¹ÎºÎ® ÏƒÎ±Ï‚ ÎµÎ³ÎºÎ±Ï„Î¬ÏƒÏ„Î±ÏƒÎ· Ollama:</string>

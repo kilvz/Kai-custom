@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">à®’à®¤à¯à®•à¯à®•à¯€à®Ÿà¯ à®¤à¯€à®°à¯à®¨à¯à®¤à®¤à¯</string>
     <string name="settings_status_error_rate_limited">à®µà®¿à®•à®¿à®¤ à®µà®°à®®à¯à®ªà¯ à®Žà®Ÿà¯à®Ÿà®ªà¯à®ªà®Ÿà¯à®Ÿà®¤à¯</string>
     <string name="settings_status_error_connection_failed">à®‡à®£à¯ˆà®ªà¯à®ªà¯ à®¤à¯‹à®²à¯à®µà®¿</string>
+    <string name="settings_status_error_local_network">லோக்கல் நெட்வொர்க் அணுகல் மறுக்கப்பட்டது. உங்கள் நெட்வொர்க்கில் உள்ள சேவையகங்களை அணுக, சிஸ்டம் அமைப்புகளில் அதை அனுமதிக்கவும்.</string>
+
+    <string name="settings_open_app_settings">அமைப்புகளைத் திற</string>
+
+    <string name="error_local_network_permission">உங்கள் சேவையகத்தை அணுக லோக்கல் நெட்வொர்க் அணுகல் தேவை. சிஸ்டம் அமைப்புகளில் அதை அனுமதித்து மீண்டும் முயற்சிக்கவும்.</string>
+
     <string name="settings_openai_compatible_setup_ollama">à®‰à®™à¯à®•à®³à¯ à®‰à®³à¯à®³à¯‚à®°à¯ Ollama à®¨à®¿à®•à®´à¯à®µà¯ˆ à®…à®®à¯ˆà®•à¯à®•à®µà¯à®®à¯:</string>
     <string name="settings_openai_compatible_or_other_service">à®…à®²à¯à®²à®¤à¯ à®µà¯‡à®±à¯ à®‡à®£à®•à¯à®•à®®à®¾à®© à®šà¯‡à®µà¯ˆ:</string>
     <string name="settings_openai_compatible_providers">à®µà®´à®™à¯à®•à¯à®¨à®°à¯à®•à®³à¯</string>

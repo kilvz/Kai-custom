@@ -37,6 +37,7 @@ import com.kai.custom.splinterlands.SplinterlandsStore
 import com.kai.custom.telegram.TelegramPoller
 import com.kai.custom.tools.ActivityResultBridge
 import com.kai.custom.tools.CalendarPermissionController
+import com.kai.custom.tools.LocalNetworkPermissionController
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.AutoUpdateManager
@@ -62,6 +63,7 @@ import org.koin.dsl.module
 val appModule = module {
     single<CalendarPermissionController> { CalendarPermissionController() }
     single<NotificationPermissionController> { NotificationPermissionController() }
+    single<LocalNetworkPermissionController> { LocalNetworkPermissionController() }
     single<AutoUpdateManager> { AutoUpdateManager() }
     single<SmsPermissionController> { SmsPermissionController() }
     single<SmsSendPermissionController> { SmsSendPermissionController() }
@@ -205,12 +207,12 @@ val appModule = module {
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>(), get<AutoUpdateManager>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>(), get<AutoUpdateManager>(), localNetworkPermissionController = get<LocalNetworkPermissionController>()) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
     viewModel { SandboxPackagesViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
-    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>(), get<WakeWordController>()) }
+    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>(), get<WakeWordController>(), localNetworkPermissionController = get<LocalNetworkPermissionController>()) }
 }

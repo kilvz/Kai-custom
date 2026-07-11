@@ -29,6 +29,12 @@
     <string name="settings_status_error_quota_exhausted">áŠ®á‰³ á‰°áˆŸáŒ§áˆ</string>
     <string name="settings_status_error_rate_limited">á‰°áŒ á‰€áˆ™á‰ á‰µ áŒˆá‹°á‰¥ á‰°á‹°áˆ­áˆ·áˆ</string>
     <string name="settings_status_error_connection_failed">áŒáŠ•áŠ™áŠá‰µ áŠ áˆá‰°áˆ³áŠ«áˆ</string>
+    <string name="settings_status_error_local_network">የአካባቢ አውታረ መረብ መዳረሻ ተከልክሏል። በአውታረ መረብዎ ላይ ያሉ አገልጋዮችን ለመድረስ በስርዓት ቅንብሮች ውስጥ ይፍቀዱት።</string>
+
+    <string name="settings_open_app_settings">ቅንብሮችን ክፈት</string>
+
+    <string name="error_local_network_permission">አገልጋይዎን ለመድረስ የአካባቢ አውታረ መረብ መዳረሻ ያስፈልጋል። በስርዓት ቅንብሮች ውስጥ ይፍቀዱት እና እንደገና ይሞክሩ።</string>
+
     <string name="error_openai_compatible_connection">áŠ¨áŠ áŒˆáˆáŒ‹á‹© áŒ‹áˆ­ áˆ˜áŒˆáŠ“áŠ˜á‰µ áŠ áˆá‰°á‰»áˆˆáˆá¢ áŠ áŒˆáˆáŒ‹á‹© áŠ¥á‹¨áˆ°áˆ« áˆ˜áˆ†áŠ‘áŠ• á‹«áˆ¨áŒ‹áŒáŒ¡á¢</string>
     <string name="error_openai_compatible_model_not_found">áˆžá‹´áˆ áŠ áˆá‰°áŒˆáŠ˜áˆá¢ áŠ¥á‰£áŠ­á‹Ž á‹¨á‰°áˆˆá‹¨ áˆžá‹´áˆ á‹­áˆáˆ¨áŒ¡á¢</string>
     <string name="settings_openai_compatible_setup_ollama">á‹¨áŠ áŠ«á‰£á‰¢ Ollama áˆáˆ³áˆŒá‹ŽáŠ• á‹«á‹˜áŒ‹áŒ:</string>

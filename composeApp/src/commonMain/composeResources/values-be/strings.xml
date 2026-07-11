@@ -29,6 +29,12 @@
     <string name="settings_status_error_quota_exhausted">ÐšÐ²Ð¾Ñ‚Ð° Ð²Ñ‹Ñ‡Ð°Ñ€Ð¿Ð°Ð½Ð°</string>
     <string name="settings_status_error_rate_limited">Ð›Ñ–Ð¼Ñ–Ñ‚ Ð·Ð°Ð¿Ñ‹Ñ‚Ð°Ñž Ð´Ð°ÑÑÐ³Ð½ÑƒÑ‚Ñ‹</string>
     <string name="settings_status_error_connection_failed">Ð—Ð»ÑƒÑ‡ÑÐ½Ð½Ðµ Ð½Ðµ ÑžÐ´Ð°Ð»Ð¾ÑÑ</string>
+    <string name="settings_status_error_local_network">Доступ да лакальнай сеткі забаронены. Дазвольце яго ў сістэмных наладах, каб звяртацца да сервераў у вашай сетцы.</string>
+
+    <string name="settings_open_app_settings">Адкрыць налады</string>
+
+    <string name="error_local_network_permission">Для доступу да вашага сервера патрэбны доступ да лакальнай сеткі. Дазвольце яго ў сістэмных наладах і паспрабуйце зноў.</string>
+
     <string name="error_openai_compatible_connection">ÐÐµÐ¼Ð°Ð³Ñ‡Ñ‹Ð¼Ð° Ð·Ð»ÑƒÑ‡Ñ‹Ñ†Ñ†Ð° Ð· ÑÐµÑ€Ð²ÐµÑ€Ð°Ð¼. Ð£Ð¿ÑÑžÐ½Ñ–Ñ†ÐµÑÑ, ÑˆÑ‚Ð¾ ÑÐµÑ€Ð²ÐµÑ€ Ð¿Ñ€Ð°Ñ†ÑƒÐµ.</string>
     <string name="error_openai_compatible_model_not_found">ÐœÐ°Ð´ÑÐ»ÑŒ Ð½Ðµ Ð·Ð½Ð¾Ð¹Ð´Ð·ÐµÐ½Ð°. ÐšÐ°Ð»Ñ– Ð»Ð°ÑÐºÐ°, Ð°Ð±ÑÑ€Ñ‹Ñ†Ðµ Ñ–Ð½ÑˆÑƒÑŽ Ð¼Ð°Ð´ÑÐ»ÑŒ.</string>
     <string name="settings_openai_compatible_setup_ollama">ÐÐ°Ð»Ð°Ð´Ð·ÑŒÑ†Ðµ ÑÐ²Ð¾Ð¹ Ð»Ð°ÐºÐ°Ð»ÑŒÐ½Ñ‹ ÑÐºÐ·ÑÐ¼Ð¿Ð»ÑÑ€ Ollama:</string>

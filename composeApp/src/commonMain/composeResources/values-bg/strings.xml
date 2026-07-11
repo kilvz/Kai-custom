@@ -29,6 +29,12 @@
     <string name="settings_status_error_quota_exhausted">ÐšÐ²Ð¾Ñ‚Ð°Ñ‚Ð° Ðµ Ð¸Ð·Ñ‡ÐµÑ€Ð¿Ð°Ð½Ð°</string>
     <string name="settings_status_error_rate_limited">Ð›Ð¸Ð¼Ð¸Ñ‚ÑŠÑ‚ Ðµ Ð´Ð¾ÑÑ‚Ð¸Ð³Ð½Ð°Ñ‚</string>
     <string name="settings_status_error_connection_failed">Ð’Ñ€ÑŠÐ·ÐºÐ°Ñ‚Ð° Ðµ Ð½ÐµÑƒÑÐ¿ÐµÑˆÐ½Ð°</string>
+    <string name="settings_status_error_local_network">Достъпът до локалната мрежа е отказан. Разрешете го в системните настройки, за да достигате сървъри във вашата мрежа.</string>
+
+    <string name="settings_open_app_settings">Отвори настройките</string>
+
+    <string name="error_local_network_permission">Необходим е достъп до локалната мрежа, за да достигнете вашия сървър. Разрешете го в системните настройки и опитайте отново.</string>
+
     <string name="error_openai_compatible_connection">ÐÐµ Ð¼Ð¾Ð¶Ðµ Ð´Ð° ÑÐµ ÑÐ²ÑŠÑ€Ð¶Ðµ ÑÑŠÑ ÑÑŠÑ€Ð²ÑŠÑ€Ð°. Ð£Ð²ÐµÑ€ÐµÑ‚Ðµ ÑÐµ, Ñ‡Ðµ ÑÑŠÑ€Ð²ÑŠÑ€ÑŠÑ‚ Ñ€Ð°Ð±Ð¾Ñ‚Ð¸.</string>
     <string name="error_openai_compatible_model_not_found">ÐœÐ¾Ð´ÐµÐ»ÑŠÑ‚ Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½. ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€ÐµÑ‚Ðµ Ð´Ñ€ÑƒÐ³ Ð¼Ð¾Ð´ÐµÐ».</string>
     <string name="settings_openai_compatible_setup_ollama">ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹Ñ‚Ðµ Ð»Ð¾ÐºÐ°Ð»Ð½Ð°Ñ‚Ð° ÑÐ¸ Ollama Ð¸Ð½ÑÑ‚Ð°Ð½Ñ†Ð¸Ñ:</string>

@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">à¹‚à¸„à¸§à¸•à¹‰à¸²à¸«à¸¡à¸”</string>
     <string name="settings_status_error_rate_limited">à¸–à¸¶à¸‡à¸‚à¸µà¸”à¸ˆà¸³à¸à¸±à¸”à¸­à¸±à¸•à¸£à¸²</string>
     <string name="settings_status_error_connection_failed">à¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§</string>
+    <string name="settings_status_error_local_network">การเข้าถึงเครือข่ายท้องถิ่นถูกปฏิเสธ อนุญาตในการตั้งค่าระบบเพื่อเข้าถึงเซิร์ฟเวอร์ในเครือข่ายของคุณ</string>
+
+    <string name="settings_open_app_settings">เปิดการตั้งค่า</string>
+
+    <string name="error_local_network_permission">ต้องมีการเข้าถึงเครือข่ายท้องถิ่นเพื่อเชื่อมต่อกับเซิร์ฟเวอร์ของคุณ อนุญาตในการตั้งค่าระบบแล้วลองอีกครั้ง</string>
+
     <string name="settings_openai_compatible_setup_ollama">à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸² Ollama à¹ƒà¸™à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸‚à¸­à¸‡à¸„à¸¸à¸“:</string>
     <string name="settings_openai_compatible_or_other_service">à¸«à¸£à¸·à¸­à¸šà¸£à¸´à¸à¸²à¸£à¸—à¸µà¹ˆà¹€à¸‚à¹‰à¸²à¸à¸±à¸™à¹„à¸”à¹‰à¸­à¸·à¹ˆà¸™à¹†:</string>
     <string name="settings_openai_compatible_providers">à¸œà¸¹à¹‰à¹ƒà¸«à¹‰à¸šà¸£à¸´à¸à¸²à¸£</string>

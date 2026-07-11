@@ -25,6 +25,12 @@
     <string name="settings_status_error_quota_exhausted">é…é¡å·²ç”¨å®Œ</string>
     <string name="settings_status_error_rate_limited">é”åˆ°é€ŸçŽ‡é™åˆ¶</string>
     <string name="settings_status_error_connection_failed">é€£ç·šå¤±æ•—</string>
+    <string name="settings_status_error_local_network">本機網路存取遭拒。請在系統設定中允許，以存取您網路上的伺服器。</string>
+
+    <string name="settings_open_app_settings">開啟設定</string>
+
+    <string name="error_local_network_permission">需要本機網路存取權限才能連線到您的伺服器。請在系統設定中允許後再試一次。</string>
+
     <string name="settings_openai_compatible_setup_ollama">è¨­å®šæ‚¨çš„æœ¬æ©Ÿ Ollama åŸ·è¡Œå€‹é«”ï¼š</string>
     <string name="settings_openai_compatible_or_other_service">æˆ–å…¶ä»–ç›¸å®¹æœå‹™ï¼š</string>
     <string name="settings_openai_compatible_providers">æä¾›è€…</string>
