@@ -794,7 +794,7 @@ private fun ChatModeScreen(
                             LaunchedEffect(uiState.history.size, uiState.wasVoiceInput) {
                                 val history = uiState.history
                                 if (history.isNotEmpty()) {
-                                    listState.scrollToItem(history.lastIndex)
+                                    listState.requestScrollToItem(history.lastIndex)
                                     val lastMessage = history.last()
                                     val shouldSpeak = uiState.isSpeechOutputEnabled || uiState.wasVoiceInput
                                     if (shouldSpeak && lastMessage.role == History.Role.ASSISTANT) {
