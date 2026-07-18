@@ -1,6 +1,6 @@
 ﻿# SMS
 
-**Last verified:** 2026-05-27
+**Last verified:** 2026-07-18
 
 > SMS is **Android-only**. The `foss` flavor declares `READ_SMS` and `SEND_SMS`; iOS, desktop, and wasm return no-op stubs.
 

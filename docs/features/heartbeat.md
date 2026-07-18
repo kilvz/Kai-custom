@@ -1,6 +1,6 @@
 ﻿# Heartbeat
 
-**Last verified:** 2026-05-14
+**Last verified:** 2026-07-18
 
 > Heartbeat is user-controlled (on/off toggle, interval, active hours live in the settings UI). The AI cannot enable, disable, or reschedule it. To customise *what happens on each heartbeat*, the AI creates heartbeat-triggered scheduled tasks via `schedule_task` with `on_heartbeat: true` â€” these are `HEARTBEAT`-trigger tasks (see [tasks.md](tasks.md)) and their prompts are appended to every heartbeat run under `## Heartbeat Additions`. Each addition is a first-class task the user can see, edit, and cancel.
 
@@ -116,13 +116,16 @@ Standing additions to heartbeat behaviour are created with `schedule_task(on_hea
 
 | File | Purpose |
 |---|---|
-| `composeApp/src/commonMain/.../data/HeartbeatManager.kt` | Config, prompt building, log management |
+| `composeApp/src/commonMain/.../data/HeartbeatManager.kt` | Config, log management, wrapper that gathers inputs for the pure prompt builder |
+| `composeApp/src/commonMain/.../data/HeartbeatPromptBuilder.kt` | Pure heartbeat prompt assembly (sections, caps) |
 | `composeApp/src/commonMain/.../tools/HeartbeatTools.kt` | AI tool definitions for heartbeat and promotion |
 | `composeApp/src/commonMain/.../data/TaskScheduler.kt` | Poll loop that triggers heartbeat checks |
 | `composeApp/src/commonMain/.../data/AppSettings.kt` | Persisted heartbeat config, prompt, and log storage |
-| `composeApp/src/commonMain/.../data/RemoteDataRepository.kt` | Heartbeat conversation creation, unread flag management |
+| `composeApp/src/commonMain/.../data/RemoteDataRepository.kt` | Heartbeat conversation creation, unread flag management; default model selection for `askWithTools` |
 | `composeApp/src/commonMain/.../ui/chat/composables/HeartbeatBanner.kt` | Dismissable notification banner UI |
-| `composeApp/src/commonMain/.../ui/settings/SettingsScreen.kt` | Heartbeat settings UI section |
+| `composeApp/src/commonMain/.../ui/settings/HeartbeatSection.kt` | Heartbeat settings UI section |
+| `composeApp/src/commonMain/.../ui/settings/SettingsScreen.kt` | Hosts the Agent tab that includes the heartbeat section |
+| `androidApp/src/main/kotlin/.../KaiApplication.kt` | Tracks foreground via `ProcessLifecycleOwner` and mirrors it to `TaskScheduler.appInForeground` |
 | `composeApp/src/commonMain/.../Platform.kt` | `expect fun sendHeartbeatNotification` â€” push notification for background heartbeat reports |
 | `composeApp/src/androidMain/.../HeartbeatNotifier.android.kt` | Android actual + `EXTRA_OPEN_HEARTBEAT` deep-link constant |
 | `androidApp/src/main/kotlin/.../MainActivity.kt` | Reads `EXTRA_OPEN_HEARTBEAT` in `onCreate`/`onNewIntent` and calls `DataRepository.requestOpenHeartbeat` |

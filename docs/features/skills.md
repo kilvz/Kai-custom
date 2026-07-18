@@ -1,18 +1,19 @@
 ﻿# Skills
 
-**Last verified:** 2026-05-31
+**Last verified:** 2026-07-18
 
 Kai supports installable **skills**: reusable instruction bundles, modeled on Anthropic's [SKILL.md](https://github.com/anthropics/skills) format (now an open standard at [agentskills.io](https://agentskills.io)). A skill packages a name, a description, a body of instructions, and optional bundled files.
 
-Skills are built **entirely around the Linux sandbox**: each installed skill is a folder at `~/skills/<id>/` inside the sandbox (its `SKILL.md` plus any files). The sandbox filesystem is the single source of truth â€” there is no separate copy in app settings. Because of this, the Skills UI is **Android-only** (the only platform with a sandbox) and requires the sandbox to be installed first. The user browses a curated set of skill marketplaces (or installs from any GitHub repo) and triggers a skill in chat by starting a message with its slash command.
+User-installed skills live **in the Linux sandbox**: each is a folder at `~/skills/<id>/` (its `SKILL.md` plus any files). There is no separate copy of those folders in app settings. Because of this, the Skills UI is **Android-only** (the only platform with a sandbox) and requires the sandbox to be installed first. The user browses a curated set of skill marketplaces (or installs from any GitHub repo) and triggers a skill in chat by starting a message with its slash command.
+In addition, Kai ships a small set of **built-in skills** (currently `create-skill`) loaded from app compose resources. Built-ins appear in the Skills list once the sandbox is installed, are labeled as built-in, and are not removable through the UI. If a user installs a sandbox skill with the same id, the sandbox copy takes precedence over the built-in.
 
 ## Concepts
 
 ### Skill
 
-A folder `~/skills/<id>/` in the sandbox containing a `SKILL.md` (and any other files). The `SKILL.md` frontmatter provides a `name` (the slash-command id) and a `description`; the markdown after the frontmatter is the instruction body. `SkillManager` keeps an in-memory cache of what's in `~/skills/` so synchronous callers stay cheap; the cache is reloaded after every install/uninstall and once the sandbox becomes installed. On platforms without a sandbox the file ops are no-ops, so the cache is simply always empty â€” skills never appear off-Android.
+Most skills are a folder `~/skills/<id>/` in the sandbox containing a `SKILL.md` (and any other files). The `SKILL.md` frontmatter provides a `name` (the slash-command id) and a `description`; the markdown after the frontmatter is the instruction body. `SkillManager` keeps an in-memory cache of installed sandbox skills plus any built-ins that are not overridden by a same-id sandbox folder; the cache is reloaded after every install/uninstall and once the sandbox becomes installed. On platforms without a sandbox the file ops are no-ops, so the cache is simply always empty — skills never appear off-Android.
 
-A skill has an id (lowercase letters, digits, and hyphens; â‰¤ 64 chars), a display name derived from the id, the instruction body, and the list of its other top-level file names (surfaced in the prompt). There is no enable/disable state: an installed skill is active, and uninstall deletes its folder.
+A skill has an id (lowercase letters, digits, and hyphens; ≤ 64 chars), a display name derived from the id, the instruction body, and the list of its other top-level file names (surfaced in the prompt). There is no enable/disable state: an installed skill is active. Uninstall deletes the sandbox folder for user-installed skills; built-ins have no remove action.
 
 ### Slash command
 
@@ -42,7 +43,7 @@ Both paths install the same way: a browsed entry carries its full repo coordinat
 
 ## Skill Management
 
-Each skill card shows the slash command (`/<id>`) and the description; expanding it reveals a remove button. Removal is deferred with a snackbar "Undo" option before the folder is deleted.
+Each skill card shows the slash command (`/<id>`) and the description; expanding a **user-installed** skill reveals a remove button. Removal is deferred with a snackbar “Undo” option before the folder is deleted, matching the MCP and service flows. Built-in skills show a Built-in badge and omit the remove action.
 
 ## Chat Autocomplete
 

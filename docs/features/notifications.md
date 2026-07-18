@@ -1,6 +1,6 @@
 ﻿# Notifications
 
-**Last verified:** 2026-05-27 (per-app filtering delegated to system Notification Access "Apps" picker)
+**Last verified:** 2026-07-18
 
 > Reading notifications is **Android-only**. Kai declares `BIND_NOTIFICATION_LISTENER_SERVICE` in the `foss` flavor; iOS, desktop, and wasm return no-op stubs.
 
@@ -19,7 +19,7 @@ The gate is manifest-based: `androidApp/src/foss/AndroidManifest.xml` declares t
 
 - **Read**: list / read / search notifications posted to the system tray since the listener was bound.
 - **Per-app filtering is delegated to the OS.** System Notification Access already exposes an "Apps" picker per listener â€” if the user unchecks an app there, `onNotificationPosted` is never fired for that package. We don't duplicate that UI in Kai; the in-app toggle is just a master switch for the whole feature.
-- **Visible notifications only.** Ongoing/foreground-service notifications (media controls, downloads, navigation) are filtered out â€” they are sticky UI affordances, not events.
+- **Visible notifications only.** Ongoing and foreground-service notifications (media controls, downloads, navigation) are filtered out via `FLAG_ONGOING_EVENT` and `FLAG_FOREGROUND_SERVICE` — they are sticky UI affordances, not events. Posts with a blank title and blank text are also dropped at capture.
 - **No reply, no dismiss, no action invocation in v1.** The listener is read-only.
 - **No content from secure / sensitive flag.** Notifications posted with `Notification.VISIBILITY_SECRET` are skipped. Posts marked sensitive by the system (lockscreen-redacted) are captured but flagged so the AI can choose to elide content.
 
@@ -27,13 +27,13 @@ The gate is manifest-based: `androidApp/src/foss/AndroidManifest.xml` declares t
 
 Notification access is granted via system settings, not a runtime permission dialog â€” there is no `requestPermissions` path for `BIND_NOTIFICATION_LISTENER_SERVICE`.
 
-1. In **Settings â†’ Agent â†’ Notifications â†’ "Read notifications"**, the user flips the toggle on.
+1. In **Settings → Agent → Notifications → “Read notifications”**, the user flips the toggle on. The toggle records **user intent** and stays on even if access is not yet granted.
 2. The app deep-links to **Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS** (or the per-component variant on API 30+) and instructs the user to enable Kai in the list.
-3. On return, the app polls `NotificationManager.isNotificationListenerAccessGranted(â€¦)` (API 27+) or `Settings.Secure.getString("enabled_notification_listeners")`. If granted, the toggle stays on; if not, the toggle resets and an inline hint appears.
-4. Once granted, Android binds `KaiNotificationListenerService`. From then on every `onNotificationPosted` callback that passes the visibility filters writes a record into the pending queue. The user can refine *which* apps Kai sees from the same system Notification Access screen â€” the "Apps" picker per listener is the source of truth.
+3. On return (and whenever the settings screen becomes visible), the app re-reads `NotificationManager.isNotificationListenerAccessGranted(…)` (API 27+) or `Settings.Secure.getString(“enabled_notification_listeners”)`. Access state is shown separately (“Listener active” / inactive, plus an open-access control when intent is on but access is missing). The master toggle does **not** auto-reset when access is denied.
+4. Once granted, Android binds `KaiNotificationListenerService`. From then on every `onNotificationPosted` callback that passes the visibility filters writes a record into the pending queue. Until access is granted, posts are not delivered to the listener. The user can refine *which* apps Kai sees from the same system Notification Access screen — the “Apps” picker per listener is the source of truth.
 5. On the next heartbeat, the queue snapshot is included in the prompt under `## New Notifications`. After the heartbeat run, exactly that snapshot is removed from the queue â€” notifications that arrived during the call survive to the next heartbeat.
 
-If the user later revokes notification access from system settings, `onListenerDisconnected` fires, the support check flips to false, and the read tools stop appearing in the AI's available-tools list until access is re-granted.
+If the user later revokes notification access from system settings, `onListenerDisconnected` fires, access reads as false, and the read tools stop appearing in the AI’s available-tools list until access is re-granted (the intent toggle can remain on).
 
 ## Per-app filtering
 
@@ -72,7 +72,7 @@ Records are persisted in the encrypted app settings store alongside email/SMS pe
 | `category` | `Notification.category` | e.g. `msg`, `email`, `alarm`. |
 | `preview` | First 200 chars of `text` | Shown in `check_notifications` and the heartbeat prompt. |
 
-`MessagingStyle` notifications (group chats with multiple senders) are flattened: `extras["android.messages"]` is parsed and the preview shows the latest sender + text. Full per-message detail is available via `read_notification`.
+Text is taken from `extras[“android.bigText”]` when present, otherwise `extras[“android.text”]`. There is no separate `MessagingStyle` / `android.messages` parse in v1 — group-chat style notifications appear as whatever single title/text the system put on the status-bar notification.
 
 ## AI Tools
 
