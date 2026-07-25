@@ -11,6 +11,7 @@ import com.kai.custom.data.ThemeMode
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.skills.RegistrySkillEntry
+import io.github.vinceglb.filekit.PlatformFile
 
 @Immutable
 data class SettingsActions(
@@ -82,6 +83,8 @@ data class SettingsActions(
     val onAddPopularMcpServer: (PopularMcpServer) -> Unit,
     val onDownloadLocalModel: (LocalModel) -> Unit,
     val onCancelLocalModelDownload: () -> Unit,
+    val onImportLocalModel: (PlatformFile) -> Unit,
+    val onCancelLocalModelImport: () -> Unit,
     val onDeleteLocalModel: (String) -> Unit,
     val onChangeModelContextTokens: (String, Int) -> Unit,
     val onChangeModelMaxTokens: (String, Int) -> Unit,
@@ -181,6 +184,8 @@ data class SettingsActions(
             onAddPopularMcpServer = {},
             onDownloadLocalModel = {},
             onCancelLocalModelDownload = {},
+            onImportLocalModel = {},
+            onCancelLocalModelImport = {},
             onDeleteLocalModel = {},
             onChangeModelContextTokens = { _, _ -> },
             onChangeModelMaxTokens = { _, _ -> },

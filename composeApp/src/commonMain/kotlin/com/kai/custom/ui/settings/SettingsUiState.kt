@@ -13,6 +13,7 @@ import com.kai.custom.data.SmsSyncState
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.LocalModel
+import com.kai.custom.inference.ModelImportError
 import com.kai.custom.network.dtos.SponsorsResponseDto
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.skills.RegistrySkillEntry
@@ -142,11 +143,15 @@ data class SettingsUiState(
     val mcpServers: ImmutableList<McpServerUiState> = persistentListOf(),
     val showAddMcpServerDialog: Boolean = false,
     val localAvailableModels: ImmutableList<LocalModel> = persistentListOf(),
+    val localImportedModels: ImmutableList<LocalModel> = persistentListOf(),
     val totalDeviceMemoryBytes: Long = Long.MAX_VALUE,
     val localFreeSpaceBytes: Long = 0L,
     val localDownloadingModelId: String? = null,
     val localDownloadProgress: Float? = null,
     val localDownloadError: DownloadError? = null,
+    val localImportingFileName: String? = null,
+    val localImportProgress: Float? = null,
+    val localImportError: ModelImportError? = null,
     val modelContextTokens: ImmutableMap<String, Int> = persistentMapOf(),
     val modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
     val modelTemperature: ImmutableMap<String, Float> = persistentMapOf(),

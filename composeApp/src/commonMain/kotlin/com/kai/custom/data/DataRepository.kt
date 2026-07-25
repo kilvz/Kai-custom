@@ -6,6 +6,8 @@ import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
 import com.kai.custom.inference.LocalModel
+import com.kai.custom.inference.ModelImportError
+import com.kai.custom.inference.ModelImportResult
 import com.kai.custom.mcp.McpServerConfig
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.skills.RegistrySkillEntry
@@ -328,6 +330,7 @@ interface DataRepository {
     fun getLocalEngineState(): StateFlow<EngineState>?
     fun getLocalDownloadedModels(): List<DownloadedModel>
     fun getLocalAvailableModels(): List<LocalModel>
+    fun getLocalImportedModels(): List<LocalModel>
     fun getLocalFreeSpaceBytes(): Long
     fun getTotalDeviceMemoryBytes(): Long
     fun getModelContextTokens(modelId: String): Int
@@ -360,8 +363,13 @@ interface DataRepository {
     fun getLocalDownloadingModelId(): StateFlow<String?>?
     fun getLocalDownloadProgress(): StateFlow<Float?>?
     fun getLocalDownloadError(): StateFlow<DownloadError?>?
+    fun getLocalImportingFileName(): StateFlow<String?>?
+    fun getLocalImportProgress(): StateFlow<Float?>?
+    fun getLocalImportError(): StateFlow<ModelImportError?>?
     fun startLocalModelDownload(model: LocalModel)
     fun cancelLocalModelDownload()
+    suspend fun importLocalModel(source: PlatformFile): ModelImportResult
+    fun cancelLocalModelImport()
     suspend fun deleteLocalModel(modelId: String)
 
     // Skills

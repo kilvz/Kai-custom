@@ -19,6 +19,8 @@ import com.kai.custom.inference.InferenceMessage
 import com.kai.custom.inference.LocalInferenceEngine
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.inference.LocalTool
+import com.kai.custom.inference.ModelImportError
+import com.kai.custom.inference.ModelImportResult
 import com.kai.custom.inference.NoModelDownloadedException
 import com.kai.custom.inference.getTotalMemoryBytes
 import com.kai.custom.isDebugBuild
@@ -2719,6 +2721,8 @@ class RemoteDataRepository(
 
     override fun getLocalAvailableModels(): List<LocalModel> = localInferenceEngine?.getAvailableModels() ?: emptyList()
 
+    override fun getLocalImportedModels(): List<LocalModel> = localInferenceEngine?.getImportedLocalModels() ?: emptyList()
+
     override fun getLocalFreeSpaceBytes(): Long = localInferenceEngine?.getFreeSpaceBytes() ?: 0L
 
     override fun getTotalDeviceMemoryBytes(): Long = getTotalMemoryBytes()
@@ -2792,6 +2796,12 @@ class RemoteDataRepository(
         localInferenceEngine?.release()
     }
 
+    override fun getLocalImportingFileName(): StateFlow<String?>? = localInferenceEngine?.importingFileName
+
+    override fun getLocalImportProgress(): StateFlow<Float?>? = localInferenceEngine?.importProgress
+
+    override fun getLocalImportError(): StateFlow<ModelImportError?>? = localInferenceEngine?.importError
+
     override fun startLocalModelDownload(model: LocalModel) {
         localInferenceEngine?.startDownload(model)
     }
@@ -2806,6 +2816,16 @@ class RemoteDataRepository(
             "The ByteArray path loads the entire file into memory and is unsafe for large models. " +
             "Use importSafFile() or linkGgufExternal() via the SAF file picker.",
     )
+
+    override suspend fun importLocalModel(source: PlatformFile): ModelImportResult {
+        val engine = localInferenceEngine
+            ?: return ModelImportResult.Failure(ModelImportError.COPY_FAILED, "On-device inference not available")
+        return engine.importModel(source)
+    }
+
+    override fun cancelLocalModelImport() {
+        localInferenceEngine?.cancelImport()
+    }
 
     override suspend fun deleteLocalModel(modelId: String) {
         localInferenceEngine?.deleteModel(modelId)

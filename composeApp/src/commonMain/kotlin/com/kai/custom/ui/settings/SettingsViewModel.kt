@@ -27,6 +27,7 @@ import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.getToolPermissionMap
 import com.kai.custom.httpClient
 import com.kai.custom.inference.LocalModel
+import com.kai.custom.inference.ModelImportResult
 import com.kai.custom.isEmailSupported
 import com.kai.custom.isMockLocationConfigured
 import com.kai.custom.isNotificationsSupported
@@ -59,6 +60,7 @@ import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.isLocalNetworkUrl
 import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.wakeword.WakeWordController
+import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
@@ -67,6 +69,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.error_unknown
 import kai.composeapp.generated.resources.error_unrecognized_github_repo
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentSet
@@ -186,10 +189,13 @@ class SettingsViewModel(
         showUiScale = currentPlatform is Platform.Desktop,
         mcpServers = buildMcpServerEntries().toImmutableList(),
         localAvailableModels = dataRepository.getLocalAvailableModels().toImmutableList(),
+        localImportedModels = dataRepository.getLocalImportedModels().toImmutableList(),
         totalDeviceMemoryBytes = dataRepository.getTotalDeviceMemoryBytes(),
         localFreeSpaceBytes = dataRepository.getLocalFreeSpaceBytes(),
         localDownloadingModelId = dataRepository.getLocalDownloadingModelId()?.value,
         localDownloadProgress = dataRepository.getLocalDownloadProgress()?.value,
+        localImportingFileName = dataRepository.getLocalImportingFileName()?.value,
+        localImportProgress = dataRepository.getLocalImportProgress()?.value,
         modelContextTokens = buildModelContextTokensMap(),
         modelMaxTokens = buildModelMaxTokensMap(),
         modelTemperature = buildModelTemperatureMap(),
@@ -277,6 +283,8 @@ class SettingsViewModel(
         onAddPopularMcpServer = ::onAddPopularMcpServer,
         onDownloadLocalModel = ::onDownloadLocalModel,
         onCancelLocalModelDownload = ::onCancelLocalModelDownload,
+        onImportLocalModel = ::onImportLocalModel,
+        onCancelLocalModelImport = ::onCancelLocalModelImport,
         onDeleteLocalModel = ::onDeleteLocalModel,
         onChangeModelContextTokens = ::onChangeModelContextTokens,
         onChangeModelMaxTokens = ::onChangeModelMaxTokens,
@@ -343,11 +351,7 @@ class SettingsViewModel(
                 }
                 if (modelId == null && wasDownloading) {
                     // Download finished or cancelled — refresh
-                    _state.update { it.copy(localFreeSpaceBytes = dataRepository.getLocalFreeSpaceBytes()) }
-                    refreshServiceList()
-                    _state.value.configuredServices
-                        .filter { it.service.isOnDevice }
-                        .forEach { checkConnection(it.instanceId, it.service) }
+                    refreshLocalModelsAfterChange()
                 }
             }
         }
@@ -368,6 +372,37 @@ class SettingsViewModel(
                 }
             }
         }
+
+        val importingFlow = dataRepository.getLocalImportingFileName() ?: flowOf(null)
+        val importProgressFlow = dataRepository.getLocalImportProgress() ?: flowOf(null)
+        val importErrorFlow = dataRepository.getLocalImportError() ?: flowOf(null)
+        viewModelScope.launch {
+            combine(importingFlow, importProgressFlow, importErrorFlow) { name, progress, error ->
+                Triple(name, progress, error)
+            }.collect { (name, progress, error) ->
+                _state.update {
+                    it.copy(
+                        localImportingFileName = name,
+                        localImportProgress = progress,
+                        localImportError = error,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun refreshLocalModelsAfterChange() {
+        _state.update {
+            it.copy(
+                localFreeSpaceBytes = dataRepository.getLocalFreeSpaceBytes(),
+                localImportedModels = dataRepository.getLocalImportedModels().toImmutableList(),
+                modelContextTokens = buildModelContextTokensMap(),
+            )
+        }
+        refreshServiceList()
+        _state.value.configuredServices
+            .filter { it.service.isOnDevice }
+            .forEach { checkConnection(it.instanceId, it.service) }
     }
 
     fun onScreenVisible() {
@@ -1074,11 +1109,41 @@ class SettingsViewModel(
     }
 
     private fun onDownloadLocalModel(model: LocalModel) {
+        if (_state.value.localImportingFileName != null) return
         dataRepository.startLocalModelDownload(model)
     }
 
     private fun onCancelLocalModelDownload() {
         dataRepository.cancelLocalModelDownload()
+    }
+
+    private fun onImportLocalModel(file: PlatformFile) {
+        if (_state.value.localDownloadingModelId != null || _state.value.localImportingFileName != null) return
+        viewModelScope.launch(backgroundDispatcher) {
+            when (val result = dataRepository.importLocalModel(file)) {
+                is ModelImportResult.Success -> {
+                    // Auto-select the imported model on every LiteRT instance.
+                    _state.value.configuredServices
+                        .filter { it.service.isOnDevice }
+                        .forEach { entry ->
+                            dataRepository.updateInstanceSelectedModel(
+                                entry.instanceId,
+                                entry.service,
+                                result.modelId,
+                            )
+                        }
+                    refreshLocalModelsAfterChange()
+                }
+                is ModelImportResult.Failure -> {
+                    // importError flow already updated by the engine
+                    _state.update { it.copy(localFreeSpaceBytes = dataRepository.getLocalFreeSpaceBytes()) }
+                }
+            }
+        }
+    }
+
+    private fun onCancelLocalModelImport() {
+        dataRepository.cancelLocalModelImport()
     }
 
     private fun onChangeModelContextTokens(modelId: String, contextTokens: Int) {
@@ -1093,10 +1158,13 @@ class SettingsViewModel(
         }
     }
 
-    private fun buildModelContextTokensMap() = dataRepository.getLocalAvailableModels().associate { model ->
-        val stored = dataRepository.getModelContextTokens(model.id)
-        model.id to if (stored > 0) stored else model.defaultContextTokens
-    }.toImmutableMap()
+    private fun buildModelContextTokensMap(): ImmutableMap<String, Int> {
+        val models = dataRepository.getLocalAvailableModels() + dataRepository.getLocalImportedModels()
+        return models.associate { model ->
+            val stored = dataRepository.getModelContextTokens(model.id)
+            model.id to if (stored > 0) stored else model.defaultContextTokens
+        }.toImmutableMap()
+    }
 
     private fun buildModelMaxTokensMap() = dataRepository.getLocalAvailableModels().associate { model ->
         model.id to dataRepository.getModelMaxTokens(model.id)
@@ -1186,11 +1254,7 @@ class SettingsViewModel(
     private fun onDeleteLocalModel(modelId: String) {
         viewModelScope.launch(backgroundDispatcher) {
             dataRepository.deleteLocalModel(modelId)
-            _state.update { it.copy(localFreeSpaceBytes = dataRepository.getLocalFreeSpaceBytes()) }
-            refreshServiceList()
-            _state.value.configuredServices
-                .filter { it.service.isOnDevice }
-                .forEach { checkConnection(it.instanceId, it.service) }
+            refreshLocalModelsAfterChange()
         }
     }
 

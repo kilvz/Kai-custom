@@ -57,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
@@ -73,6 +74,7 @@ import com.kai.custom.formatFileSize
 import com.kai.custom.inference.DevicePerformance
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.LocalModel
+import com.kai.custom.inference.ModelImportError
 import com.kai.custom.inference.calculateDevicePerformance
 import com.kai.custom.inference.estimateGpuMemoryMb
 import com.kai.custom.ui.KaiClearableTextField
@@ -84,7 +86,10 @@ import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
 import com.kai.custom.ui.kaiAdaptiveCardSurface
 import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
@@ -94,9 +99,16 @@ import kai.composeapp.generated.resources.litert_cancel
 import kai.composeapp.generated.resources.litert_context_size
 import kai.composeapp.generated.resources.litert_download
 import kai.composeapp.generated.resources.litert_error_download_incomplete
+import kai.composeapp.generated.resources.litert_error_import_failed
+import kai.composeapp.generated.resources.litert_error_import_invalid
+import kai.composeapp.generated.resources.litert_error_import_too_small
 import kai.composeapp.generated.resources.litert_error_network
 import kai.composeapp.generated.resources.litert_error_not_enough_disk_space
 import kai.composeapp.generated.resources.litert_free_space
+import kai.composeapp.generated.resources.litert_import
+import kai.composeapp.generated.resources.litert_import_description
+import kai.composeapp.generated.resources.litert_imported
+import kai.composeapp.generated.resources.litert_importing
 import kai.composeapp.generated.resources.litert_on_device_description
 import kai.composeapp.generated.resources.litert_performance_good
 import kai.composeapp.generated.resources.litert_performance_ok
@@ -245,6 +257,10 @@ internal fun ServicesContent(
     localDownloadingModelId: String?,
     localDownloadProgress: Float?,
     localDownloadError: DownloadError?,
+    localImportedModels: ImmutableList<LocalModel> = persistentListOf(),
+    localImportingFileName: String? = null,
+    localImportProgress: Float? = null,
+    localImportError: ModelImportError? = null,
     modelContextTokens: ImmutableMap<String, Int>,
     modelMaxTokens: ImmutableMap<String, Int> = persistentMapOf(),
     onChangeModelMaxTokens: (String, Int) -> Unit = { _, _ -> },
@@ -290,13 +306,19 @@ internal fun ServicesContent(
                     isDragging = isDragging,
                     dragHandleModifier = if (entries.size >= 2) Modifier.draggableHandle() else null,
                     localAvailableModels = localAvailableModels,
+                    localImportedModels = localImportedModels,
                     totalDeviceMemoryBytes = totalDeviceMemoryBytes,
                     localFreeSpaceBytes = localFreeSpaceBytes,
                     localDownloadingModelId = localDownloadingModelId,
                     localDownloadProgress = localDownloadProgress,
                     localDownloadError = localDownloadError,
+                    localImportingFileName = localImportingFileName,
+                    localImportProgress = localImportProgress,
+                    localImportError = localImportError,
                     onDownloadLocalModel = actions.onDownloadLocalModel,
                     onCancelLocalModelDownload = actions.onCancelLocalModelDownload,
+                    onImportLocalModel = actions.onImportLocalModel,
+                    onCancelLocalModelImport = actions.onCancelLocalModelImport,
                     onDeleteLocalModel = actions.onDeleteLocalModel,
                     onChangeModelContextTokens = actions.onChangeModelContextTokens,
                     modelContextTokens = modelContextTokens,
@@ -579,13 +601,19 @@ private fun ConfiguredServiceCardContent(
     isDragging: Boolean = false,
     dragHandleModifier: Modifier? = null,
     localAvailableModels: ImmutableList<LocalModel> = persistentListOf(),
+    localImportedModels: ImmutableList<LocalModel> = persistentListOf(),
     totalDeviceMemoryBytes: Long = Long.MAX_VALUE,
     localFreeSpaceBytes: Long = 0L,
     localDownloadingModelId: String? = null,
     localDownloadProgress: Float? = null,
     localDownloadError: DownloadError? = null,
+    localImportingFileName: String? = null,
+    localImportProgress: Float? = null,
+    localImportError: ModelImportError? = null,
     onDownloadLocalModel: (LocalModel) -> Unit = {},
     onCancelLocalModelDownload: () -> Unit = {},
+    onImportLocalModel: (PlatformFile) -> Unit = {},
+    onCancelLocalModelImport: () -> Unit = {},
     onDeleteLocalModel: (String) -> Unit = {},
     onChangeModelContextTokens: (String, Int) -> Unit = { _, _ -> },
     modelContextTokens: ImmutableMap<String, Int> = persistentMapOf(),
@@ -691,14 +719,20 @@ private fun ConfiguredServiceCardContent(
                         selectedModel = entry.selectedModel,
                         downloadedModels = entry.models,
                         availableModels = localAvailableModels,
+                        importedModels = localImportedModels,
                         totalDeviceMemoryBytes = totalDeviceMemoryBytes,
                         freeSpaceBytes = localFreeSpaceBytes,
                         downloadingModelId = localDownloadingModelId,
                         downloadProgress = localDownloadProgress,
                         downloadError = localDownloadError,
+                        importingFileName = localImportingFileName,
+                        importProgress = localImportProgress,
+                        importError = localImportError,
                         onSelectModel = onSelectModel,
                         onDownloadModel = onDownloadLocalModel,
                         onCancelDownload = onCancelLocalModelDownload,
+                        onImportModel = onImportLocalModel,
+                        onCancelImport = onCancelLocalModelImport,
                         onDeleteModel = onDeleteLocalModel,
                         onChangeModelContextTokens = onChangeModelContextTokens,
                         modelContextTokens = modelContextTokens,
@@ -969,14 +1003,20 @@ private fun LiteRTSettings(
     selectedModel: SettingsModel?,
     downloadedModels: ImmutableList<SettingsModel>,
     availableModels: ImmutableList<LocalModel>,
+    importedModels: ImmutableList<LocalModel>,
     totalDeviceMemoryBytes: Long,
     freeSpaceBytes: Long,
     downloadingModelId: String?,
     downloadProgress: Float?,
     downloadError: DownloadError?,
+    importingFileName: String?,
+    importProgress: Float?,
+    importError: ModelImportError?,
     onSelectModel: (String) -> Unit,
     onDownloadModel: (LocalModel) -> Unit,
     onCancelDownload: () -> Unit,
+    onImportModel: (PlatformFile) -> Unit,
+    onCancelImport: () -> Unit,
     onDeleteModel: (String) -> Unit,
     onChangeModelContextTokens: (String, Int) -> Unit,
     modelContextTokens: ImmutableMap<String, Int>,
@@ -986,6 +1026,18 @@ private fun LiteRTSettings(
 ) {
     val downloadedIds = remember(downloadedModels) { downloadedModels.map { it.id }.toSet() }
     val importScope = rememberCoroutineScope()
+    val isBusy = downloadingModelId != null || importingFileName != null
+    val isPreview = LocalInspectionMode.current
+
+    val filePickerLauncher = if (!isPreview) {
+        rememberFilePickerLauncher(
+            type = FileKitType.File(extensions = listOf("litertlm")),
+        ) { file ->
+            if (file != null) onImportModel(file)
+        }
+    } else {
+        null
+    }
 
     Text(
         text = stringResource(Res.string.litert_on_device_description),
@@ -1003,6 +1055,19 @@ private fun LiteRTSettings(
 
     Spacer(Modifier.height(12.dp))
 
+    Text(
+        text = stringResource(Res.string.litert_import_description),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Spacer(Modifier.height(8.dp))
+    OutlinedButton(
+        onClick = { filePickerLauncher?.launch() },
+        modifier = Modifier.handCursor(),
+        enabled = !isBusy && filePickerLauncher != null,
+    ) {
+        Text(stringResource(Res.string.litert_import))
+    }
     var shownUncensoredHeader by remember { mutableStateOf(false) }
     availableModels.forEach { model ->
         val isUncensored = model.id.startsWith("uncensored-")
@@ -1028,110 +1093,109 @@ private fun LiteRTSettings(
         val estimatedMemoryMb = estimateGpuMemoryMb(model, contextTokens)
         val performance = calculateDevicePerformance(totalDeviceMemoryBytes, estimatedMemoryMb)
 
-        Surface(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            tonalElevation = if (isSelected) 3.dp else 1.dp,
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (isDownloaded) {
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = { onSelectModel(model.id) },
-                            modifier = Modifier.size(20.dp),
-                        )
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (model.isRecommended) {
-                                "${model.displayName} (${stringResource(Res.string.litert_recommended)})"
-                            } else {
-                                model.displayName
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = formatFileSize(model.sizeBytes),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            DevicePerformanceLabel(performance)
-                        }
-                    }
-                    if (isDownloaded) {
-                        IconButton(
-                            onClick = { onDeleteModel(model.id) },
-                            modifier = Modifier.handCursor(),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    } else if (!isDownloading) {
-                        TextButton(
-                            onClick = { onDownloadModel(model) },
-                            modifier = Modifier.handCursor(),
-                            enabled = downloadingModelId == null,
-                        ) {
-                            Text(stringResource(Res.string.litert_download))
-                        }
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
+    if (importingFileName != null) {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(Res.string.litert_importing) + " $importingFileName",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (importProgress != null) {
+            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(
+                progress = { importProgress },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text(
-                    text = stringResource(Res.string.litert_context_size, "${contextTokens / 1024}K"),
+                    text = "${(importProgress * 100).toInt()}%",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                KaiSlider(
-                    value = contextSliderValue,
-                    onValueChange = { contextSliderValue = it },
-                    onValueChangeFinished = {
-                        onChangeModelContextTokens(model.id, contextTokens)
-                    },
-                    valueRange = 0f..steps.toFloat(),
-                    steps = steps - 1,
-                )
-                if (isDownloading && downloadProgress != null) {
-                    Spacer(Modifier.height(8.dp))
-                    LinearProgressIndicator(
-                        progress = { downloadProgress },
-                        modifier = Modifier.fillMaxWidth(),
+                TextButton(
+                    onClick = onCancelImport,
+                    modifier = Modifier.handCursor(),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.litert_cancel),
+                        style = MaterialTheme.typography.labelSmall,
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = "${(downloadProgress * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        TextButton(
-                            onClick = onCancelDownload,
-                            modifier = Modifier.handCursor(),
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.litert_cancel),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        }
-                    }
                 }
             }
+        } else {
+            Spacer(Modifier.height(4.dp))
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+    }
+
+    if (importError != null && importingFileName == null) {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(
+                when (importError) {
+                    ModelImportError.INVALID_EXTENSION -> Res.string.litert_error_import_invalid
+                    ModelImportError.NOT_ENOUGH_DISK_SPACE -> Res.string.litert_error_not_enough_disk_space
+                    ModelImportError.FILE_TOO_SMALL -> Res.string.litert_error_import_too_small
+                    ModelImportError.COPY_FAILED -> Res.string.litert_error_import_failed
+                    ModelImportError.CANCELLED -> Res.string.litert_error_import_failed
+                },
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
+
+    Spacer(Modifier.height(12.dp))
+
+    availableModels.forEach { model ->
+        LocalModelCard(
+            model = model,
+            isDownloaded = model.id in downloadedIds,
+            isSelected = selectedModel?.id == model.id,
+            isDownloading = downloadingModelId == model.id,
+            downloadProgress = downloadProgress,
+            isBusy = isBusy,
+            totalDeviceMemoryBytes = totalDeviceMemoryBytes,
+            modelContextTokens = modelContextTokens,
+            onSelectModel = onSelectModel,
+            onDownloadModel = onDownloadModel,
+            onCancelDownload = onCancelDownload,
+            onDeleteModel = onDeleteModel,
+            onChangeModelContextTokens = onChangeModelContextTokens,
+            showImportedBadge = false,
+        )
+    }
+
+    if (importedModels.isNotEmpty()) {
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(Res.string.litert_imported),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(4.dp))
+        importedModels.forEach { model ->
+            LocalModelCard(
+                model = model,
+                isDownloaded = true,
+                isSelected = selectedModel?.id == model.id,
+                isDownloading = false,
+                downloadProgress = null,
+                isBusy = isBusy,
+                totalDeviceMemoryBytes = totalDeviceMemoryBytes,
+                modelContextTokens = modelContextTokens,
+                onSelectModel = onSelectModel,
+                onDownloadModel = onDownloadModel,
+                onCancelDownload = onCancelDownload,
+                onDeleteModel = onDeleteModel,
+                onChangeModelContextTokens = onChangeModelContextTokens,
+                showImportedBadge = true,
+            )
         }
     }
 
@@ -1326,6 +1390,142 @@ private fun LiteRTSettings(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
+    }
+}
+
+@Composable
+private fun LocalModelCard(
+    model: LocalModel,
+    isDownloaded: Boolean,
+    isSelected: Boolean,
+    isDownloading: Boolean,
+    downloadProgress: Float?,
+    isBusy: Boolean,
+    totalDeviceMemoryBytes: Long,
+    modelContextTokens: ImmutableMap<String, Int>,
+    onSelectModel: (String) -> Unit,
+    onDownloadModel: (LocalModel) -> Unit,
+    onCancelDownload: () -> Unit,
+    onDeleteModel: (String) -> Unit,
+    onChangeModelContextTokens: (String, Int) -> Unit,
+    showImportedBadge: Boolean,
+) {
+    val steps = (model.maxContextTokens - model.defaultContextTokens) / 1024
+    val storedContextTokens = modelContextTokens[model.id] ?: model.defaultContextTokens
+    var contextSliderValue by remember(storedContextTokens) {
+        mutableStateOf(((storedContextTokens - model.defaultContextTokens) / 1024).toFloat())
+    }
+    val contextTokens = model.defaultContextTokens + (contextSliderValue.roundToInt() * 1024)
+    val estimatedMemoryMb = estimateGpuMemoryMb(model, contextTokens)
+    val performance = calculateDevicePerformance(totalDeviceMemoryBytes, estimatedMemoryMb)
+
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp),
+        tonalElevation = if (isSelected) 3.dp else 1.dp,
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (isDownloaded) {
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = { onSelectModel(model.id) },
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = when {
+                            model.isRecommended ->
+                                "${model.displayName} (${stringResource(Res.string.litert_recommended)})"
+                            showImportedBadge ->
+                                "${model.displayName} (${stringResource(Res.string.litert_imported)})"
+                            else -> model.displayName
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = formatFileSize(model.sizeBytes),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        DevicePerformanceLabel(performance)
+                    }
+                }
+                if (isDownloaded) {
+                    IconButton(
+                        onClick = { onDeleteModel(model.id) },
+                        modifier = Modifier.handCursor(),
+                        enabled = !isBusy,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else if (!isDownloading) {
+                    TextButton(
+                        onClick = { onDownloadModel(model) },
+                        modifier = Modifier.handCursor(),
+                        enabled = !isBusy,
+                    ) {
+                        Text(stringResource(Res.string.litert_download))
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(Res.string.litert_context_size, "${contextTokens / 1024}K"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            KaiSlider(
+                value = contextSliderValue,
+                onValueChange = { contextSliderValue = it },
+                onValueChangeFinished = {
+                    onChangeModelContextTokens(model.id, contextTokens)
+                },
+                valueRange = 0f..steps.toFloat().coerceAtLeast(0f),
+                steps = (steps - 1).coerceAtLeast(0),
+            )
+            if (isDownloading && downloadProgress != null) {
+                Spacer(Modifier.height(8.dp))
+                LinearProgressIndicator(
+                    progress = { downloadProgress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "${(downloadProgress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    TextButton(
+                        onClick = onCancelDownload,
+                        modifier = Modifier.handCursor(),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.litert_cancel),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
