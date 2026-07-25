@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">ÐŸÐ¾ÑÑ‚Ð°Ð²Ð¸Ñ‚Ðµ Ð¿Ð¸Ñ‚Ð°ÑšÐµ</string>
     <string name="error_invalid_api_key">ÐÐµÐ²Ð°Ð¶ÐµÑ›Ð¸ API ÐºÑ™ÑƒÑ‡. ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚Ðµ Ð¿Ð¾Ð´ÐµÑˆÐ°Ð²Ð°ÑšÐ°.</string>
     <string name="error_rate_limit_exceeded">ÐžÐ³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÑšÐµ Ð·Ð°Ñ…Ñ‚ÐµÐ²Ð° Ñ˜Ðµ Ð¿Ñ€ÐµÐ¼Ð°ÑˆÐµÐ½Ð¾. ÐŸÐ¾ÐºÑƒÑˆÐ°Ñ˜Ñ‚Ðµ Ð¿Ð¾Ð½Ð¾Ð²Ð¾ ÐºÐ°ÑÐ½Ð¸Ñ˜Ðµ.</string>
+    <string name="error_free_limit_title">Достигнуто је ограничење бесплатног нивоа</string>
+    <string name="error_free_limit_body">Free FAST и Free EXPERT имају ограничење брзине. Направите бесплатан API кључ код једног од ових провајдера за виша ограничења, затим га додајте у Подешавања → Услуге.</string>
     <string name="error_unknown">Ð”Ð¾ÑˆÐ»Ð¾ Ñ˜Ðµ Ð´Ð¾ Ð½ÐµÐ¿Ð¾Ð·Ð½Ð°Ñ‚Ðµ Ð³Ñ€ÐµÑˆÐºÐµ.</string>
     <string name="settings_ai_mistakes_warning">ÐÐ˜ Ð¿Ñ€Ð°Ð²Ð¸ Ð³Ñ€ÐµÑˆÐºÐµ, Ð¿Ñ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚Ðµ Ð´Ð²Ð°Ð¿ÑƒÑ‚ Ð¸ Ð½Ðµ Ð´ÐµÐ»Ð¸Ñ‚Ðµ Ð¾ÑÐµÑ‚Ñ™Ð¸Ð²Ðµ Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ˜Ðµ.</string>
     <string name="settings_version">Ð’ÐµÑ€Ð·Ð¸Ñ˜Ð°: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">Ð”Ð°Ñ‚ÑƒÐ¼</string>
     <string name="model_sort_score">Ð ÐµÐ·ÑƒÐ»Ñ‚Ð°Ñ‚</string>
     <string name="model_sort_context">ÐšÐ¾Ð½Ñ‚ÐµÐºÑÑ‚</string>
+    <string name="model_free_badge">Бесплатно</string>
+    <string name="model_filter_free">Бесплатно</string>
+    <string name="model_free_empty">Нема модела бесплатног нивоа за ову услугу.</string>
     <string name="tool_check_sms_name">ÐŸÑ€Ð¾Ð²ÐµÑ€Ð° SMS-Ð°</string>
     <string name="tool_check_sms_description">ÐŸÑ€Ð¸ÐºÐ°Ð¶Ð¸ Ð½ÐµÐ´Ð°Ð²Ð½Ðµ Ð½ÐµÐ¿Ñ€Ð¾Ñ‡Ð¸Ñ‚Ð°Ð½Ðµ SMS Ð¿Ð¾Ñ€ÑƒÐºÐµ</string>
     <string name="tool_read_sms_name">Ð§Ð¸Ñ‚Ð°ÑšÐµ SMS-Ð°</string>

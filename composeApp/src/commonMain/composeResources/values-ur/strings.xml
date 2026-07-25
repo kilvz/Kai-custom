@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Ø³ÙˆØ§Ù„ Ù¾ÙˆÚ†Ú¾ÛŒÚº</string>
     <string name="error_invalid_api_key">ØºÙ„Ø· API Ú©Ù„ÛŒØ¯Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø§Ù¾Ù†ÛŒ ØªØ±ØªÛŒØ¨Ø§Øª Ú†ÛŒÚ© Ú©Ø±ÛŒÚºÛ”</string>
     <string name="error_rate_limit_exceeded">Ø´Ø±Ø­ Ú©ÛŒ Ø­Ø¯ Ø³Û’ ØªØ¬Ø§ÙˆØ² ÛÙˆ Ú¯ÛŒØ§Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¨Ø¹Ø¯ Ù…ÛŒÚº Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”</string>
+    <string name="error_free_limit_title">مفت درجے کی حد پوری ہو گئی</string>
+    <string name="error_free_limit_body">Free FAST اور Free EXPERT شرح محدود ہیں۔ اعلیٰ حدود کے لیے ان فراہم کنندگان میں سے کسی ایک کے ساتھ مفت API کلید بنائیں، پھر ترتیبات → خدمات میں شامل کریں۔</string>
     <string name="error_unknown">Ù†Ø§Ù…Ø¹Ù„ÙˆÙ… Ø®Ø±Ø§Ø¨ÛŒ Ù¾ÛŒØ´ Ø¢Ø¦ÛŒÛ”</string>
     <string name="settings_ai_mistakes_warning">AI ØºÙ„Ø·ÛŒØ§Úº Ú©Ø± Ø³Ú©ØªØ§ ÛÛ’ØŒ Ø¯ÙˆØ¨Ø§Ø±Û Ø¬Ø§Ù†Ú† Ú©Ø±ÛŒÚº Ø§ÙˆØ± Ø­Ø³Ø§Ø³ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø´ÛŒØ¦Ø± Ù†Û Ú©Ø±ÛŒÚºÛ”</string>
     <string name="settings_version">ÙˆØ±Ú˜Ù†: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">ØªØ§Ø±ÛŒØ®</string>
     <string name="model_sort_score">Ø§Ø³Ú©ÙˆØ±</string>
     <string name="model_sort_context">Ø³ÛŒØ§Ù‚</string>
+    <string name="model_free_badge">مفت</string>
+    <string name="model_filter_free">مفت</string>
+    <string name="model_free_empty">اس سروس کے لیے کوئی مفت-درجہ ماڈل نہیں ہیں۔</string>
     <string name="tool_check_sms_name">SMS Ú†ÛŒÚ© Ú©Ø±ÛŒÚº</string>
     <string name="tool_check_sms_description">Ø­Ø§Ù„ÛŒÛ Ù†Û Ù¾Ú‘Ú¾Û’ Ú¯Ø¦Û’ SMS Ù¾ÛŒØºØ§Ù…Ø§Øª Ú©ÛŒ ÙÛØ±Ø³Øª Ø¯ÛŒÚº</string>
     <string name="tool_read_sms_name">SMS Ù¾Ú‘Ú¾ÛŒÚº</string>

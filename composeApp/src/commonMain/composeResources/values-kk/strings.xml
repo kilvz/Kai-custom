@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Ð¡Ò±Ñ€Ð°Ò› Ò›Ð¾Ð¹Ñ‹Ò£Ñ‹Ð·</string>
     <string name="error_invalid_api_key">Ð–Ð°Ñ€Ð°Ð¼ÑÑ‹Ð· API ÐºÑ–Ð»Ñ‚Ñ–. ÐŸÐ°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð»ÐµÑ€Ð´Ñ– Ñ‚ÐµÐºÑÐµÑ€Ñ–Ò£Ñ–Ð·.</string>
     <string name="error_rate_limit_exceeded">Ð¡Ò±Ñ€Ð°Ñƒ Ð»Ð¸Ð¼Ð¸Ñ‚Ñ–Ð½ÐµÐ½ Ð°ÑÑ‹Ð¿ ÐºÐµÑ‚Ñ‚Ñ–. ÐšÐµÐ¹Ñ–Ð½Ñ–Ñ€ÐµÐº Ò›Ð°Ð¹Ñ‚Ð°Ð»Ð°Ò£Ñ‹Ð·.</string>
+    <string name="error_free_limit_title">Тегін деңгей шегіне жетті</string>
+    <string name="error_free_limit_body">Free FAST және Free EXPERT жылдамдықпен шектелген. Жоғары шектер үшін осы провайдерлердің бірінде тегін API кілтін жасап, оны Параметрлер → Қызметтер бөліміне қосыңыз.</string>
     <string name="error_unknown">Ð‘ÐµÐ»Ð³Ñ–ÑÑ–Ð· Ò›Ð°Ñ‚Ðµ Ð¾Ñ€Ñ‹Ð½ Ð°Ð»Ð´Ñ‹.</string>
     <string name="settings_ai_mistakes_warning">AI Ò›Ð°Ñ‚ÐµÐ»ÐµÑÑƒÑ– Ð¼Ò¯Ð¼ÐºÑ–Ð½, Ò›Ð°Ð¹Ñ‚Ð° Ñ‚ÐµÐºÑÐµÑ€Ñ–Ò£Ñ–Ð· Ð¶Ó™Ð½Ðµ Ò›Ò±Ð¿Ð¸Ñ Ð°Ò›Ð¿Ð°Ñ€Ð°Ñ‚Ñ‚Ñ‹ Ð±Ó©Ð»Ñ–ÑÐ¿ÐµÒ£Ñ–Ð·.</string>
     <string name="settings_version">ÐÒ±ÑÒ›Ð°: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">ÐšÒ¯Ð½Ñ–</string>
     <string name="model_sort_score">Ò°Ð¿Ð°Ð¹</string>
     <string name="model_sort_context">ÐšÐ¾Ð½Ñ‚ÐµÐºÑÑ‚</string>
+    <string name="model_free_badge">Тегін</string>
+    <string name="model_filter_free">Тегін</string>
+    <string name="model_free_empty">Бұл қызмет үшін тегін деңгей модельдері жоқ.</string>
     <string name="tool_check_sms_name">SMS Ñ‚ÐµÐºÑÐµÑ€Ñƒ</string>
     <string name="tool_check_sms_description">ÐžÒ›Ñ‹Ð»Ð¼Ð°Ò“Ð°Ð½ ÑÐ¾Ò£Ò“Ñ‹ SMS Ñ…Ð°Ð±Ð°Ñ€Ð»Ð°Ñ€Ñ‹Ð½ Ñ‚Ñ–Ð·Ñ–Ð¼Ð´ÐµÑƒ</string>
     <string name="tool_read_sms_name">SMS Ð¾Ò›Ñƒ</string>

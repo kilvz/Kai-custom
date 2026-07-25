@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">è³ªå•ã™ã‚‹</string>
     <string name="error_invalid_api_key">ç„¡åŠ¹ãªAPIã‚­ãƒ¼ã§ã™ã€‚è¨­å®šã‚’ã”ç¢ºèªãã ã•ã„ã€‚</string>
     <string name="error_rate_limit_exceeded">ãƒ¬ãƒ¼ãƒˆåˆ¶é™ã‚’è¶…ãˆã¾ã—ãŸã€‚å¾Œã§ã‚‚ã†ä¸€åº¦ãŠè©¦ã—ãã ã•ã„ã€‚</string>
+    <string name="error_free_limit_title">無料枠の上限に達しました</string>
+    <string name="error_free_limit_body">Free FAST と Free EXPERT にはレート制限があります。上限を上げるには、これらのプロバイダーのいずれかで無料の API キーを作成し、設定 → サービス で追加してください。</string>
     <string name="error_unknown">ä¸æ˜Žãªã‚¨ãƒ©ãƒ¼ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚</string>
     <string name="settings_ai_mistakes_warning">AIã¯é–“é•ãˆã‚‹ã“ã¨ãŒã‚ã‚Šã¾ã™ã€‚å¿…ãšå†ç¢ºèªã—ã€æ©Ÿå¯†æƒ…å ±ã¯å…±æœ‰ã—ãªã„ã§ãã ã•ã„ã€‚</string>
     <string name="settings_version">ãƒãƒ¼ã‚¸ãƒ§ãƒ³ï¼š%1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">æ—¥ä»˜</string>
     <string name="model_sort_score">ã‚¹ã‚³ã‚¢</string>
     <string name="model_sort_context">ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ</string>
+    <string name="model_free_badge">無料</string>
+    <string name="model_filter_free">無料</string>
+    <string name="model_free_empty">このサービスには無料枠のモデルがありません。</string>
     <string name="tool_check_sms_name">SMSã‚’ç¢ºèª</string>
     <string name="tool_check_sms_description">æœ€è¿‘ã®æœªèª­SMSã‚’ä¸€è¦§è¡¨ç¤º</string>
     <string name="tool_read_sms_name">SMSã‚’èª­ã‚€</string>

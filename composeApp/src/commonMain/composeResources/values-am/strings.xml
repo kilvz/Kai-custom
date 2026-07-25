@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">áŒ¥á‹«á‰„ á‹­áŒ á‹­á‰</string>
     <string name="error_invalid_api_key">áˆáŠ­ á‹«áˆáˆ†áŠ API á‰áˆáá¢ áŠ¥á‰£áŠ­á‹Ž á‰…áŠ•á‰¥áˆ®á‰½á‹ŽáŠ• á‹«áˆ¨áŒ‹áŒáŒ¡á¢</string>
     <string name="error_rate_limit_exceeded">á‹¨á‰°áŒ á‰€áˆ™á‰ á‰µ áŒˆá‹°á‰¥ áŠ áˆááˆá¢ áŠ¥á‰£áŠ­á‹Ž á‰†á‹­á‰°á‹ á‹­áˆžáŠ­áˆ©á¢</string>
+    <string name="error_free_limit_title">ነጻ የደረጃ ገደብ ደርሷል</string>
+    <string name="error_free_limit_body">ነጻ FAST እና ነጻ EXPERT በፍጥነት ገደብ ተደርገዋል። ከፍተኛ ገደቦች ለማግኘት ከእነዚህ አቅራቢዎች አንዱ ጋር ነጻ API ቁልፍ ይፍጠሩ፣ ከዚያ በቅንብሮች → አገልግሎቶች ስር ያክሉት።</string>
     <string name="error_unknown">á‹«áˆá‰³á‹ˆá‰€ áˆµáˆ…á‰°á‰µ á‰°áŠ¨áˆ°á‰°á¢</string>
     <string name="settings_ai_mistakes_warning">AI áˆµáˆ…á‰°á‰¶á‰½áŠ• á‹­áˆ°áˆ«áˆá£ á‹°áŒáˆ˜á‹ á‹«áˆ¨áŒ‹áŒáŒ¡ áŠ¥áŠ“ áˆšáˆµáŒ¥áˆ«á‹Š áˆ˜áˆ¨áŒƒ áŠ á‹«áŒ‹áˆ©á¢</string>
     <string name="settings_version">áˆµáˆªá‰µ: %1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">á‰€áŠ•</string>
     <string name="model_sort_score">áŠáŒ¥á‰¥</string>
     <string name="model_sort_context">áŠ á‹á‹µ</string>
+    <string name="model_free_badge">ነጻ</string>
+    <string name="model_filter_free">ነጻ</string>
+    <string name="model_free_empty">ለዚህ አገልግሎት የነጻ ደረጃ ሞዴሎች የሉም።</string>
 
     <string name="tool_check_sms_name">SMS á‹­áˆá‰µáˆ¹</string>
     <string name="tool_check_sms_description">á‹¨á‰…áˆ­á‰¥ áŒŠá‹œ á‹«áˆá‰°áŠá‰ á‰¡ SMS áˆ˜áˆá‹•áŠ­á‰¶á‰½áŠ• á‹­á‹˜áˆ­á‹áˆ©</string>

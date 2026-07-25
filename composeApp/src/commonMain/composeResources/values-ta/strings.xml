@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">à®•à¯‡à®³à¯à®µà®¿ à®•à¯‡à®³à¯à®™à¯à®•à®³à¯</string>
     <string name="error_invalid_api_key">à®¤à®µà®±à®¾à®© API à®µà®¿à®šà¯ˆ. à®‰à®™à¯à®•à®³à¯ à®…à®®à¯ˆà®ªà¯à®ªà¯à®•à®³à¯ˆà®šà¯ à®šà®°à®¿à®ªà®¾à®°à¯à®•à¯à®•à®µà¯à®®à¯.</string>
     <string name="error_rate_limit_exceeded">à®µà®¿à®•à®¿à®¤ à®µà®°à®®à¯à®ªà¯ à®®à¯€à®±à®ªà¯à®ªà®Ÿà¯à®Ÿà®¤à¯. à®ªà®¿à®©à¯à®©à®°à¯ à®®à¯€à®£à¯à®Ÿà¯à®®à¯ à®®à¯à®¯à®±à¯à®šà®¿à®•à¯à®•à®µà¯à®®à¯.</string>
+    <string name="error_free_limit_title">இலவச அடுக்கு வரம்பு அடைந்தது</string>
+    <string name="error_free_limit_body">Free FAST மற்றும் Free EXPERT விகித வரம்புடையவை. அதிக வரம்புகளுக்கு இந்த வழங்குநர்களில் ஒருவரிடம் இலவச API விசையை உருவாக்கி, பின்னர் அமைப்புகள் → சேவைகளில் சேர்க்கவும்.</string>
     <string name="error_unknown">à®…à®±à®¿à®¯à®ªà¯à®ªà®Ÿà®¾à®¤ à®ªà®¿à®´à¯ˆ à®à®±à¯à®ªà®Ÿà¯à®Ÿà®¤à¯.</string>
     <string name="settings_ai_mistakes_warning">AI à®¤à®µà®±à¯à®•à®³à¯ à®šà¯†à®¯à¯à®¯à¯à®®à¯, à®®à¯€à®£à¯à®Ÿà¯à®®à¯ à®šà®°à®¿à®ªà®¾à®°à¯à®¤à¯à®¤à¯ à®®à¯à®•à¯à®•à®¿à®¯à®®à®¾à®© à®¤à®•à®µà®²à¯à®•à®³à¯ˆà®ªà¯ à®ªà®•à®¿à®° à®µà¯‡à®£à¯à®Ÿà®¾à®®à¯.</string>
     <string name="settings_version">à®ªà®¤à®¿à®ªà¯à®ªà¯: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">à®¤à¯‡à®¤à®¿</string>
     <string name="model_sort_score">à®®à®¤à®¿à®ªà¯à®ªà¯†à®£à¯</string>
     <string name="model_sort_context">à®šà¯‚à®´à®²à¯</string>
+    <string name="model_free_badge">இலவசம்</string>
+    <string name="model_filter_free">இலவசம்</string>
+    <string name="model_free_empty">இந்த சேவைக்கு இலவச அடுக்கு மாதிரிகள் இல்லை.</string>
     <string name="tool_check_sms_name">SMS à®šà®°à®¿à®ªà®¾à®°à¯</string>
     <string name="tool_check_sms_description">à®šà®®à¯€à®ªà®¤à¯à®¤à®¿à®¯ à®ªà®Ÿà®¿à®•à¯à®•à®ªà¯à®ªà®Ÿà®¾à®¤ SMS à®šà¯†à®¯à¯à®¤à®¿à®•à®³à¯ˆ à®ªà®Ÿà¯à®Ÿà®¿à®¯à®²à®¿à®Ÿà¯</string>
     <string name="tool_read_sms_name">SMS à®ªà®Ÿà®¿</string>

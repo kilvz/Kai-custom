@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">à°ªà±à°°à°¶à±à°¨ à°…à°¡à°—à°‚à°¡à°¿</string>
     <string name="error_invalid_api_key">à°šà±†à°²à±à°²à°¨à°¿ API à°•à±€. à°¦à°¯à°šà±‡à°¸à°¿ à°®à±€ à°¸à±†à°Ÿà±à°Ÿà°¿à°‚à°—à±â€Œà°²à°¨à± à°¤à°¨à°¿à°–à±€ à°šà±‡à°¯à°‚à°¡à°¿.</string>
     <string name="error_rate_limit_exceeded">à°°à±‡à°Ÿà± à°ªà°°à°¿à°®à°¿à°¤à°¿ à°®à°¿à°‚à°šà°¿à°ªà±‹à°¯à°¿à°‚à°¦à°¿. à°¦à°¯à°šà±‡à°¸à°¿ à°¤à°°à±à°µà°¾à°¤ à°®à°³à±à°³à±€ à°ªà±à°°à°¯à°¤à±à°¨à°¿à°‚à°šà°‚à°¡à°¿.</string>
+    <string name="error_free_limit_title">ఉచిత స్థాయి పరిమితి చేరుకుంది</string>
+    <string name="error_free_limit_body">Free FAST మరియు Free EXPERT రేట్-పరిమితం. ఎక్కువ పరిమితుల కోసం ఈ ప్రదాతలలో ఒకరితో ఉచిత API కీని సృష్టించి, ఆపై సెట్టింగ్‌లు → సేవలలో జోడించండి.</string>
     <string name="error_unknown">à°¤à±†à°²à°¿à°¯à°¨à°¿ à°²à±‹à°ªà°‚ à°¸à°‚à°­à°µà°¿à°‚à°šà°¿à°‚à°¦à°¿.</string>
     <string name="settings_ai_mistakes_warning">AI à°¤à°ªà±à°ªà±à°²à± à°šà±‡à°¸à±à°¤à±à°‚à°¦à°¿, à°®à°³à±à°³à±€ à°¤à°¨à°¿à°–à±€ à°šà±‡à°¯à°‚à°¡à°¿ à°®à°°à°¿à°¯à± à°¸à±à°¨à±à°¨à°¿à°¤à°®à±ˆà°¨ à°¸à°®à°¾à°šà°¾à°°à°¾à°¨à±à°¨à°¿ à°­à°¾à°—à°¸à±à°µà°¾à°®à±à°¯à°‚ à°šà±‡à°¯à°•à°‚à°¡à°¿.</string>
     <string name="settings_version">à°µà±†à°°à±à°·à°¨à±: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">à°¤à±‡à°¦à±€</string>
     <string name="model_sort_score">à°¸à±à°•à±‹à°°à±</string>
     <string name="model_sort_context">à°¸à°‚à°¦à°°à±à°­à°‚</string>
+    <string name="model_free_badge">ఉచితం</string>
+    <string name="model_filter_free">ఉచితం</string>
+    <string name="model_free_empty">ఈ సేవకు ఉచిత-స్థాయి మోడల్‌లు లేవు.</string>
     <string name="tool_check_sms_name">SMS à°¤à°¨à°¿à°–à±€ à°šà±‡à°¯à°¿</string>
     <string name="tool_check_sms_description">à°‡à°Ÿà±€à°µà°²à°¿ à°šà°¦à°µà°¨à°¿ SMS à°¸à°‚à°¦à±‡à°¶à°¾à°²à°¨à± à°œà°¾à°¬à°¿à°¤à°¾ à°šà±‡à°¯à°¿</string>
     <string name="tool_read_sms_name">SMS à°šà°¦à°µà±</string>

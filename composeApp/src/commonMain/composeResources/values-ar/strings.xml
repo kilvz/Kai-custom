@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Ø§Ø·Ø±Ø­ Ø³Ø¤Ø§Ù„Ù‹Ø§</string>
     <string name="error_invalid_api_key">Ù…ÙØªØ§Ø­ API ØºÙŠØ± ØµØ§Ù„Ø­. ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø¥Ø¹Ø¯Ø§Ø¯Ø§ØªÙƒ.</string>
     <string name="error_rate_limit_exceeded">ØªÙ… ØªØ¬Ø§ÙˆØ² Ø­Ø¯ Ø§Ù„Ù…Ø¹Ø¯Ù„. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù„Ø§Ø­Ù‚Ù‹Ø§.</string>
+    <string name="error_free_limit_title">تم الوصول إلى حد الطبقة المجانية</string>
+    <string name="error_free_limit_body">Free FAST و Free EXPERT محدودان بالمعدل. أنشئ مفتاح API مجانيًا لدى أحد هؤلاء الموفرين لحدود أعلى، ثم أضفه من الإعدادات ← الخدمات.</string>
     <string name="error_unknown">Ø­Ø¯Ø« Ø®Ø·Ø£ ØºÙŠØ± Ù…Ø¹Ø±ÙˆÙ.</string>
     <string name="settings_ai_mistakes_warning">Ø§Ù„Ø°ÙƒØ§Ø¡ Ø§Ù„Ø§ØµØ·Ù†Ø§Ø¹ÙŠ Ù‚Ø¯ ÙŠØ±ØªÙƒØ¨ Ø£Ø®Ø·Ø§Ø¡ØŒ ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø¥Ø¬Ø§Ø¨Ø§Øª ÙˆÙ„Ø§ ØªØ´Ø§Ø±Ùƒ Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø­Ø³Ø§Ø³Ø©.</string>
     <string name="settings_version">Ø§Ù„Ø¥ØµØ¯Ø§Ø±: %1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">Ø§Ù„ØªØ§Ø±ÙŠØ®</string>
     <string name="model_sort_score">Ø§Ù„Ù†ØªÙŠØ¬Ø©</string>
     <string name="model_sort_context">Ø§Ù„Ø³ÙŠØ§Ù‚</string>
+    <string name="model_free_badge">مجاني</string>
+    <string name="model_filter_free">مجاني</string>
+    <string name="model_free_empty">لا توجد نماذج مجانية لهذه الخدمة.</string>
 
     <string name="tool_check_sms_name">Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ Ø§Ù„Ù‚ØµÙŠØ±Ø©</string>
     <string name="tool_check_sms_description">Ø¹Ø±Ø¶ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„ Ø§Ù„Ù‚ØµÙŠØ±Ø© Ø§Ù„Ø£Ø®ÙŠØ±Ø© ØºÙŠØ± Ø§Ù„Ù…Ù‚Ø±ÙˆØ¡Ø©</string>

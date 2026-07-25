@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">à¨¸à¨µà¨¾à¨² à¨ªà©à©±à¨›à©‹</string>
     <string name="error_invalid_api_key">à¨…à¨µà©ˆà¨§ API à¨•à©à©°à¨œà©€à¥¤ à¨•à¨¿à¨°à¨ªà¨¾ à¨•à¨°à¨•à©‡ à¨†à¨ªà¨£à©€à¨†à¨‚ à¨¸à©ˆà¨Ÿà¨¿à©°à¨—à¨¾à¨‚ à¨šà©ˆà©±à¨• à¨•à¨°à©‹à¥¤</string>
     <string name="error_rate_limit_exceeded">à¨¦à¨° à¨¸à©€à¨®à¨¾ à¨ªà¨¾à¨° à¨¹à©‹ à¨—à¨ˆà¥¤ à¨•à¨¿à¨°à¨ªà¨¾ à¨•à¨°à¨•à©‡ à¨¬à¨¾à¨…à¨¦ à¨µà¨¿à©±à¨š à¨¦à©à¨¬à¨¾à¨°à¨¾ à¨•à©‹à¨¸à¨¼à¨¿à¨¸à¨¼ à¨•à¨°à©‹à¥¤</string>
+    <string name="error_free_limit_title">ਮੁਫ਼ਤ ਪੱਧਰ ਦੀ ਸੀਮਾ ਪੂਰੀ ਹੋਈ</string>
+    <string name="error_free_limit_body">Free FAST ਅਤੇ Free EXPERT ਦਰ-ਸੀਮਿਤ ਹਨ। ਉੱਚ ਸੀਮਾਵਾਂ ਲਈ ਇਹਨਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ਇੱਕ ਨਾਲ ਮੁਫ਼ਤ API ਕੁੰਜੀ ਬਣਾਓ, ਫਿਰ ਸੈਟਿੰਗਾਂ → ਸੇਵਾਵਾਂ ਵਿੱਚ ਜੋੜੋ।</string>
     <string name="error_unknown">à¨…à¨£à¨œà¨¾à¨£ à¨—à¨²à¨¤à©€ à¨¹à©‹à¨ˆà¥¤</string>
     <string name="settings_ai_mistakes_warning">AI à¨—à¨²à¨¤à©€à¨†à¨‚ à¨•à¨°à¨¦à¨¾ à¨¹à©ˆ, à¨¦à©à¨¬à¨¾à¨°à¨¾ à¨œà¨¾à¨‚à¨š à¨•à¨°à©‹ à¨…à¨¤à©‡ à¨¸à©°à¨µà©‡à¨¦à¨¨à¨¸à¨¼à©€à¨² à¨œà¨¾à¨£à¨•à¨¾à¨°à©€ à¨¸à¨¾à¨‚à¨à©€ à¨¨à¨¾ à¨•à¨°à©‹à¥¤</string>
     <string name="settings_version">à¨¸à©°à¨¸à¨•à¨°à¨£: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">à¨¤à¨¾à¨°à©€à¨–</string>
     <string name="model_sort_score">à¨¸à¨•à©‹à¨°</string>
     <string name="model_sort_context">à¨¸à©°à¨¦à¨°à¨­</string>
+    <string name="model_free_badge">ਮੁਫ਼ਤ</string>
+    <string name="model_filter_free">ਮੁਫ਼ਤ</string>
+    <string name="model_free_empty">ਇਸ ਸੇਵਾ ਲਈ ਕੋਈ ਮੁਫ਼ਤ-ਪੱਧਰੀ ਮਾਡਲ ਨਹੀਂ ਹਨ।</string>
     <string name="tool_check_sms_name">SMS à¨šà©ˆà©±à¨• à¨•à¨°à©‹</string>
     <string name="tool_check_sms_description">à¨¹à¨¾à¨²à©€à¨† à¨¨à¨¾ à¨ªà©œà©à¨¹à©‡ SMS à¨¸à©à¨¨à©‡à¨¹à©‡ à¨¸à©‚à¨šà©€à¨¬à©±à¨§ à¨•à¨°à©‹</string>
     <string name="tool_read_sms_name">SMS à¨ªà©œà©à¨¹à©‹</string>

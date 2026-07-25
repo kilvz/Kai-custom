@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Äáº·t cÃ¢u há»i</string>
     <string name="error_invalid_api_key">KhÃ³a API khÃ´ng há»£p lá»‡. Vui lÃ²ng kiá»ƒm tra cÃ i Ä‘áº·t cá»§a báº¡n.</string>
     <string name="error_rate_limit_exceeded">ÄÃ£ vÆ°á»£t quá giá»›i háº¡n tá»‘c Ä‘á»™. Vui lÃ²ng thá»­ láº¡i sau.</string>
+    <string name="error_free_limit_title">Đã đạt giới hạn bậc miễn phí</string>
+    <string name="error_free_limit_body">Free FAST và Free EXPERT bị giới hạn tốc độ. Tạo khóa API miễn phí với một trong các nhà cung cấp này để có giới hạn cao hơn, rồi thêm vào Cài đặt → Dịch vụ.</string>
     <string name="error_unknown">ÄÃ£ xáº£y ra lá»—i khÃ´ng xác Ä‘á»‹nh.</string>
     <string name="settings_ai_mistakes_warning">AI cÃ³ thá»ƒ máº¯c lá»—i, hÃ£y kiá»ƒm tra ká»¹ vÃ  khÃ´ng chia sáº» thÃ´ng tin nháº¡y cáº£m.</string>
     <string name="settings_version">PhiÃªn báº£n: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">NgÃ y</string>
     <string name="model_sort_score">Äiá»ƒm</string>
     <string name="model_sort_context">Ngá»¯ cáº£nh</string>
+    <string name="model_free_badge">Miễn phí</string>
+    <string name="model_filter_free">Miễn phí</string>
+    <string name="model_free_empty">Không có mô hình bậc miễn phí cho dịch vụ này.</string>
     <string name="tool_check_sms_name">Kiá»ƒm tra SMS</string>
     <string name="tool_check_sms_description">Liá»‡t kÃª các tin nháº¯n SMS chÆ°a Ä‘á»c gáº§n Ä‘Ã¢y</string>
     <string name="tool_read_sms_name">Äá»c SMS</string>

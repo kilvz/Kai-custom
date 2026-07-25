@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Pune o Ã®ntrebare</string>
     <string name="error_invalid_api_key">Cheie API invalidÄƒ. VÄƒ rugÄƒm sÄƒ verificaÈ›i setÄƒrile.</string>
     <string name="error_rate_limit_exceeded">Limita de solicitÄƒri a fost depÄƒÈ™itÄƒ. VÄƒ rugÄƒm sÄƒ Ã®ncercaÈ›i din nou mai tÃ¢rziu.</string>
+    <string name="error_free_limit_title">Limita nivelului gratuit a fost atinsă</string>
+    <string name="error_free_limit_body">Free FAST și Free EXPERT au limită de rată. Creează o cheie API gratuită la unul dintre acești furnizori pentru limite mai mari, apoi adaug-o în Setări → Servicii.</string>
     <string name="error_unknown">A apÄƒrut o eroare necunoscutÄƒ.</string>
     <string name="settings_ai_mistakes_warning">InteligenÈ›a artificialÄƒ poate greÈ™i, verificaÈ›i de douÄƒ ori È™i nu partajaÈ›i informaÈ›ii sensibile.</string>
     <string name="settings_version">Versiune: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">DatÄƒ</string>
     <string name="model_sort_score">Scor</string>
     <string name="model_sort_context">Context</string>
+    <string name="model_free_badge">Gratuit</string>
+    <string name="model_filter_free">Gratuit</string>
+    <string name="model_free_empty">Nu există modele de nivel gratuit pentru acest serviciu.</string>
     <string name="tool_check_sms_name">Verificare SMS</string>
     <string name="tool_check_sms_description">ListeazÄƒ mesajele SMS recente necitite</string>
     <string name="tool_read_sms_name">Citire SMS</string>

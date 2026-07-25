@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Ð—Ð°Ð´Ð°Ñ‚Ð¸ Ð¿Ð¸Ñ‚Ð°Ð½Ð½Ñ</string>
     <string name="error_invalid_api_key">ÐÐµÐ´Ñ–Ð¹ÑÐ½Ð¸Ð¹ ÐºÐ»ÑŽÑ‡ API. Ð‘ÑƒÐ´ÑŒ Ð»Ð°ÑÐºÐ°, Ð¿ÐµÑ€ÐµÐ²Ñ–Ñ€Ñ‚Ðµ Ð½Ð°Ð»Ð°ÑˆÑ‚ÑƒÐ²Ð°Ð½Ð½Ñ.</string>
     <string name="error_rate_limit_exceeded">ÐŸÐµÑ€ÐµÐ²Ð¸Ñ‰ÐµÐ½Ð¾ Ð»Ñ–Ð¼Ñ–Ñ‚ Ð·Ð°Ð¿Ð¸Ñ‚Ñ–Ð². Ð‘ÑƒÐ´ÑŒ Ð»Ð°ÑÐºÐ°, ÑÐ¿Ñ€Ð¾Ð±ÑƒÐ¹Ñ‚Ðµ Ð¿Ñ–Ð·Ð½Ñ–ÑˆÐµ.</string>
+    <string name="error_free_limit_title">Досягнуто ліміту безкоштовного рівня</string>
+    <string name="error_free_limit_body">Free FAST і Free EXPERT мають обмеження швидкості. Створіть безкоштовний API-ключ у одного з цих постачальників для вищих лімітів, потім додайте його в Налаштування → Сервіси.</string>
     <string name="error_unknown">Ð¡Ñ‚Ð°Ð»Ð°ÑÑ Ð½ÐµÐ²Ñ–Ð´Ð¾Ð¼Ð° Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ°.</string>
     <string name="settings_ai_mistakes_warning">Ð¨Ð† Ð¼Ð¾Ð¶Ðµ Ð¿Ð¾Ð¼Ð¸Ð»ÑÑ‚Ð¸ÑÑ, Ð¿ÐµÑ€ÐµÐ²Ñ–Ñ€ÑÐ¹Ñ‚Ðµ Ð´Ð²Ñ–Ñ‡Ñ– Ñ‚Ð° Ð½Ðµ Ð´Ñ–Ð»Ñ–Ñ‚ÑŒÑÑ ÐºÐ¾Ð½Ñ„Ñ–Ð´ÐµÐ½Ñ†Ñ–Ð¹Ð½Ð¾ÑŽ Ñ–Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ñ–Ñ”ÑŽ.</string>
     <string name="settings_version">Ð’ÐµÑ€ÑÑ–Ñ: %1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">Ð”Ð°Ñ‚Ð°</string>
     <string name="model_sort_score">ÐžÑ†Ñ–Ð½ÐºÐ°</string>
     <string name="model_sort_context">ÐšÐ¾Ð½Ñ‚ÐµÐºÑÑ‚</string>
+    <string name="model_free_badge">Безкоштовно</string>
+    <string name="model_filter_free">Безкоштовно</string>
+    <string name="model_free_empty">Немає моделей безкоштовного рівня для цього сервісу.</string>
     <string name="tool_check_sms_name">ÐŸÐµÑ€ÐµÐ²Ñ–Ñ€Ð¸Ñ‚Ð¸ SMS</string>
     <string name="tool_check_sms_description">ÐŸÐ¾ÐºÐ°Ð·Ð°Ñ‚Ð¸ Ð¾ÑÑ‚Ð°Ð½Ð½Ñ– Ð½ÐµÐ¿Ñ€Ð¾Ñ‡Ð¸Ñ‚Ð°Ð½Ñ– SMS</string>
     <string name="tool_read_sms_name">ÐŸÑ€Ð¾Ñ‡Ð¸Ñ‚Ð°Ñ‚Ð¸ SMS</string>

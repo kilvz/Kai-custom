@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">à¤à¤• à¤¸à¤µà¤¾à¤² à¤ªà¥‚à¤›à¥‡à¤‚</string>
     <string name="error_invalid_api_key">à¤…à¤®à¤¾à¤¨à¥à¤¯ API à¤•à¥à¤‚à¤œà¥€à¥¤ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤…à¤ªà¤¨à¥€ à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸ à¤œà¤¾à¤à¤šà¥‡à¤‚à¥¤</string>
     <string name="error_rate_limit_exceeded">à¤¦à¤° à¤¸à¥€à¤®à¤¾ à¤ªà¤¾à¤° à¤¹à¥‹ à¤—à¤ˆà¥¤ à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¬à¤¾à¤¦ à¤®à¥‡à¤‚ à¤«à¤¿à¤° à¤¸à¥‡ à¤ªà¥à¤°à¤¯à¤¾à¤¸ à¤•à¤°à¥‡à¤‚à¥¤</string>
+    <string name="error_free_limit_title">मुफ़्त स्तर की सीमा पूरी हुई</string>
+    <string name="error_free_limit_body">Free FAST और Free EXPERT दर-सीमित हैं। अधिक सीमाओं के लिए इनमें से किसी प्रदाता के साथ मुफ़्त API कुंजी बनाएँ, फिर सेटिंग्स → सेवाएँ में जोड़ें।</string>
     <string name="error_unknown">à¤à¤• à¤…à¤œà¥à¤žà¤¾à¤¤ à¤¤à¥à¤°à¥à¤Ÿà¤¿ à¤¹à¥à¤ˆà¥¤</string>
     <string name="settings_ai_mistakes_warning">AI à¤—à¤²à¤¤à¤¿à¤¯à¤¾à¤ à¤•à¤° à¤¸à¤•à¤¤à¥€ à¤¹à¥ˆ, à¤œà¤µà¤¾à¤¬à¥‹à¤‚ à¤•à¥€ à¤¦à¥‹à¤¬à¤¾à¤°à¤¾ à¤œà¤¾à¤à¤š à¤•à¤°à¥‡à¤‚ à¤”à¤° à¤¸à¤‚à¤µà¥‡à¤¦à¤¨à¤¶à¥€à¤² à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤¸à¤¾à¤à¤¾ à¤¨ à¤•à¤°à¥‡à¤‚à¥¤</string>
     <string name="settings_version">à¤¸à¤‚à¤¸à¥à¤•à¤°à¤£: %1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">à¤¤à¤¾à¤°à¥€à¤–</string>
     <string name="model_sort_score">à¤¸à¥à¤•à¥‹à¤°</string>
     <string name="model_sort_context">à¤¸à¤‚à¤¦à¤°à¥à¤­</string>
+    <string name="model_free_badge">मुफ़्त</string>
+    <string name="model_filter_free">मुफ़्त</string>
+    <string name="model_free_empty">इस सेवा के लिए कोई मुफ़्त-स्तरीय मॉडल नहीं हैं।</string>
     <string name="tool_check_sms_name">SMS à¤œà¤¾à¤à¤šà¥‡à¤‚</string>
     <string name="tool_check_sms_description">à¤¹à¤¾à¤² à¤•à¥‡ à¤…à¤ªà¤ à¤¿à¤¤ SMS à¤¸à¤‚à¤¦à¥‡à¤¶à¥‹à¤‚ à¤•à¥€ à¤¸à¥‚à¤šà¥€ à¤¬à¤¨à¤¾à¤à¤‚</string>
     <string name="tool_read_sms_name">SMS à¤ªà¤¢à¤¼à¥‡à¤‚</string>

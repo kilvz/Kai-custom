@@ -98,6 +98,7 @@ import com.kai.custom.ui.chat.composables.ChatHistorySheet
 import com.kai.custom.ui.chat.composables.CircleIconButton
 import com.kai.custom.ui.chat.composables.EmptyState
 import com.kai.custom.ui.chat.composables.ErrorMessage
+import com.kai.custom.ui.chat.composables.FreeProviderSuggestionsPanel
 import com.kai.custom.ui.chat.composables.HeartbeatBanner
 import com.kai.custom.ui.chat.composables.PendingSmsBanners
 import com.kai.custom.ui.chat.composables.QuestionInput
@@ -557,7 +558,14 @@ private fun InteractiveModeContent(
         // Error state
         uiState.error?.let { error ->
             Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                ErrorMessage(error = error, retry = uiState.actions.retry)
+                if (uiState.showFreeProviderSuggestions) {
+                    FreeProviderSuggestionsPanel(
+                        error = error,
+                        retry = uiState.actions.retry,
+                    )
+                } else {
+                    ErrorMessage(error = error, retry = uiState.actions.retry)
+                }
             }
         }
     }
@@ -1062,7 +1070,14 @@ private fun ChatModeScreen(
                                     }
                                     uiState.error?.let { error ->
                                         item(key = "error") {
-                                            ErrorMessage(error = error, retry = uiState.actions.retry)
+                                            if (uiState.showFreeProviderSuggestions) {
+                                                FreeProviderSuggestionsPanel(
+                                                    error = error,
+                                                    retry = uiState.actions.retry,
+                                                )
+                                            } else {
+                                                ErrorMessage(error = error, retry = uiState.actions.retry)
+                                            }
                                         }
                                     }
                                 }

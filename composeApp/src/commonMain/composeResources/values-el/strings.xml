@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">ÎšÎ¬Î½Ï„Îµ Î¼Î¹Î± ÎµÏÏŽÏ„Î·ÏƒÎ·</string>
     <string name="error_invalid_api_key">ÎœÎ· Î­Î³ÎºÏ…ÏÎ¿ ÎºÎ»ÎµÎ¹Î´Î¯ API. Î•Î»Î­Î³Î¾Ï„Îµ Ï„Î¹Ï‚ ÏÏ…Î¸Î¼Î¯ÏƒÎµÎ¹Ï‚ ÏƒÎ±Ï‚.</string>
     <string name="error_rate_limit_exceeded">Î¥Ï€Î­ÏÎ²Î±ÏƒÎ· Î¿ÏÎ¯Î¿Ï… Î±Î¹Ï„Î·Î¼Î¬Ï„Ï‰Î½. Î”Î¿ÎºÎ¹Î¼Î¬ÏƒÏ„Îµ Î¾Î±Î½Î¬ Î±ÏÎ³ÏŒÏ„ÎµÏÎ±.</string>
+    <string name="error_free_limit_title">Συμπληρώθηκε το όριο δωρεάν επιπέδου</string>
+    <string name="error_free_limit_body">Τα Free FAST και Free EXPERT έχουν περιορισμό ρυθμού. Δημιουργήστε ένα δωρεάν κλειδί API σε έναν από αυτούς τους παρόχους για υψηλότερα όρια και, στη συνέχεια, προσθέστε το στις Ρυθμίσεις → Υπηρεσίες.</string>
     <string name="error_unknown">Î Î±ÏÎ¿Ï…ÏƒÎ¹Î¬ÏƒÏ„Î·ÎºÎµ Î¬Î³Î½Ï‰ÏƒÏ„Î¿ ÏƒÏ†Î¬Î»Î¼Î±.</string>
     <string name="settings_ai_mistakes_warning">Î— Ï„ÎµÏ‡Î½Î·Ï„Î® Î½Î¿Î·Î¼Î¿ÏƒÏÎ½Î· ÎºÎ¬Î½ÎµÎ¹ Î»Î¬Î¸Î·, ÎµÎ»Î­Î³Î¾Ï„Îµ Î¾Î±Î½Î¬ ÎºÎ±Î¹ Î¼Î·Î½ Î¼Î¿Î¹ÏÎ¬Î¶ÎµÏƒÏ„Îµ ÎµÏ…Î±Î¯ÏƒÎ¸Î·Ï„ÎµÏ‚ Ï€Î»Î·ÏÎ¿Ï†Î¿ÏÎ¯ÎµÏ‚.</string>
     <string name="settings_version">ÎˆÎºÎ´Î¿ÏƒÎ·: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">Î—Î¼ÎµÏÎ¿Î¼Î·Î½Î¯Î±</string>
     <string name="model_sort_score">Î’Î±Î¸Î¼Î¿Î»Î¿Î³Î¯Î±</string>
     <string name="model_sort_context">Î Î»Î±Î¯ÏƒÎ¹Î¿</string>
+    <string name="model_free_badge">Δωρεάν</string>
+    <string name="model_filter_free">Δωρεάν</string>
+    <string name="model_free_empty">Δεν υπάρχουν μοντέλα δωρεάν επιπέδου για αυτήν την υπηρεσία.</string>
 
     <string name="tool_check_sms_name">ÎˆÎ»ÎµÎ³Ï‡Î¿Ï‚ SMS</string>
     <string name="tool_check_sms_description">Î•Î¼Ï†Î¬Î½Î¹ÏƒÎ· Ï€ÏÏŒÏƒÏ†Î±Ï„Ï‰Î½ Î±Î´Î¹Î¬Î²Î±ÏƒÏ„Ï‰Î½ SMS</string>

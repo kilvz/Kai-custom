@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Postavite pitanje</string>
     <string name="error_invalid_api_key">NevaÅ¾eÄ‡i API kljuÄ. Provjerite svoje postavke.</string>
     <string name="error_rate_limit_exceeded">PremaÅ¡eno ograniÄenje zahtjeva. PokuÅ¡ajte ponovno kasnije.</string>
+    <string name="error_free_limit_title">Dosegnuto je ograničenje besplatne razine</string>
+    <string name="error_free_limit_body">Free FAST i Free EXPERT imaju ograničenje brzine. Izradite besplatan API ključ kod jednog od ovih pružatelja za veća ograničenja, zatim ga dodajte u Postavke → Usluge.</string>
     <string name="error_unknown">DoÅ¡lo je do nepoznate greÅ¡ke.</string>
     <string name="settings_ai_mistakes_warning">AI grijeÅ¡i, provjerite dvaput i nemojte dijeliti osjetljive informacije.</string>
     <string name="settings_version">Verzija: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">Datum</string>
     <string name="model_sort_score">Rezultat</string>
     <string name="model_sort_context">Kontekst</string>
+    <string name="model_free_badge">Besplatno</string>
+    <string name="model_filter_free">Besplatno</string>
+    <string name="model_free_empty">Nema modela besplatne razine za ovu uslugu.</string>
     <string name="tool_check_sms_name">Provjeri SMS</string>
     <string name="tool_check_sms_description">Popis nedavnih neproÄitanih SMS poruka</string>
     <string name="tool_read_sms_name">ProÄitaj SMS</string>

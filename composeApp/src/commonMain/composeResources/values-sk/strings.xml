@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">PoloÅ¾te otázku</string>
     <string name="error_invalid_api_key">NeplatnÃ½ API kÄ¾ÃºÄ. Skontrolujte si nastavenia.</string>
     <string name="error_rate_limit_exceeded">Limit poÅ¾iadaviek bol prekroÄenÃ½. SkÃºste to neskÃ´r.</string>
+    <string name="error_free_limit_title">Dosiahnutý limit bezplatnej úrovne</string>
+    <string name="error_free_limit_body">Free FAST a Free EXPERT majú obmedzenie rýchlosti. Vytvorte si bezplatný API kľúč u jedného z týchto poskytovateľov pre vyššie limity a potom ho pridajte v Nastaveniach → Služby.</string>
     <string name="error_unknown">Vyskytla sa neznáma chyba.</string>
     <string name="settings_ai_mistakes_warning">AI robÃ­ chyby, overte si informácie a nezdieÄ¾ajte citlivé Ãºdaje.</string>
     <string name="settings_version">Verzia: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">Dátum</string>
     <string name="model_sort_score">SkÃ³re</string>
     <string name="model_sort_context">Kontext</string>
+    <string name="model_free_badge">Zadarmo</string>
+    <string name="model_filter_free">Zadarmo</string>
+    <string name="model_free_empty">Pre túto službu nie sú žiadne modely bezplatnej úrovne.</string>
     <string name="tool_check_sms_name">SkontrolovaÅ¥ SMS</string>
     <string name="tool_check_sms_description">ZobraziÅ¥ zoznam nedávnych nepreÄÃ­tanÃ½ch SMS správ</string>
     <string name="tool_read_sms_name">PreÄÃ­taÅ¥ SMS</string>

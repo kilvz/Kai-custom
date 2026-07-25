@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">à¸–à¸²à¸¡à¸„à¸³à¸–à¸²à¸¡</string>
     <string name="error_invalid_api_key">à¸„à¸µà¸¢à¹Œ API à¹„à¸¡à¹ˆà¸–à¸¹à¸à¸•à¹‰à¸­à¸‡ à¸à¸£à¸¸à¸“à¸²à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸à¸²à¸£à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸‚à¸­à¸‡à¸„à¸¸à¸“</string>
     <string name="error_rate_limit_exceeded">à¹€à¸à¸´à¸™à¸‚à¸µà¸”à¸ˆà¸³à¸à¸±à¸”à¸­à¸±à¸•à¸£à¸² à¸à¸£à¸¸à¸“à¸²à¸¥à¸­à¸‡à¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡à¹ƒà¸™à¸ à¸²à¸¢à¸«à¸¥à¸±à¸‡</string>
+    <string name="error_free_limit_title">ถึงขีดจำกัดระดับฟรีแล้ว</string>
+    <string name="error_free_limit_body">Free FAST และ Free EXPERT ถูกจำกัดอัตรา สร้างคีย์ API ฟรีกับผู้ให้บริการเหล่านี้เพื่อขีดจำกัดที่สูงขึ้น จากนั้นเพิ่มใน การตั้งค่า → บริการ</string>
     <string name="error_unknown">à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¸—à¸£à¸²à¸šà¸ªà¸²à¹€à¸«à¸•à¸¸</string>
     <string name="settings_ai_mistakes_warning">AI à¸­à¸²à¸ˆà¸—à¸³à¸œà¸´à¸”à¸žà¸¥à¸²à¸” à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡à¹à¸¥à¸°à¸­à¸¢à¹ˆà¸²à¹à¸Šà¸£à¹Œà¸‚à¹‰à¸­à¸¡à¸¹à¸¥à¸—à¸µà¹ˆà¸¥à¸°à¹€à¸­à¸µà¸¢à¸”à¸­à¹ˆà¸­à¸™</string>
     <string name="settings_version">à¹€à¸§à¸­à¸£à¹Œà¸Šà¸±à¸™: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">à¸§à¸±à¸™à¸—à¸µà¹ˆ</string>
     <string name="model_sort_score">à¸„à¸°à¹à¸™à¸™</string>
     <string name="model_sort_context">à¸šà¸£à¸´à¸šà¸—</string>
+    <string name="model_free_badge">ฟรี</string>
+    <string name="model_filter_free">ฟรี</string>
+    <string name="model_free_empty">ไม่มีโมเดลระดับฟรีสำหรับบริการนี้</string>
     <string name="tool_check_sms_name">à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸š SMS</string>
     <string name="tool_check_sms_description">à¹à¸ªà¸”à¸‡à¸£à¸²à¸¢à¸à¸²à¸£à¸‚à¹‰à¸­à¸„à¸§à¸²à¸¡ SMS à¸—à¸µà¹ˆà¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸­à¹ˆà¸²à¸™à¸¥à¹ˆà¸²à¸ªà¸¸à¸”</string>
     <string name="tool_read_sms_name">à¸­à¹ˆà¸²à¸™ SMS</string>

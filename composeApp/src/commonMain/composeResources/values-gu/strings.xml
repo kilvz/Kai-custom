@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">àªªà«àª°àª¶à«àª¨ àªªà«‚àª›à«‹</string>
     <string name="error_invalid_api_key">àª…àª®àª¾àª¨à«àª¯ API àª•à«€. àª•à«ƒàªªàª¾ àª•àª°à«€àª¨à«‡ àª¤àª®àª¾àª°à«€ àª¸à«‡àªŸàª¿àª‚àª—à«àª¸ àª¤àªªàª¾àª¸à«‹.</string>
     <string name="error_rate_limit_exceeded">àª¦àª° àª®àª°à«àª¯àª¾àª¦àª¾ àªµàªŸàª¾àªµà«€ àª—àªˆ. àª•à«ƒàªªàª¾ àª•àª°à«€àª¨à«‡ àªªàª›à«€ àª«àª°à«€ àªªà«àª°àª¯àª¾àª¸ àª•àª°à«‹.</string>
+    <string name="error_free_limit_title">મફત સ્તરની મર્યાદા પહોંચી</string>
+    <string name="error_free_limit_body">Free FAST અને Free EXPERT રેટ-મર્યાદિત છે. વધુ મર્યાદા માટે આ પ્રદાતાઓમાંથી એક પાસે મફત API કી બનાવો, પછી સેટિંગ્સ → સેવાઓ હેઠળ ઉમેરો.</string>
     <string name="error_unknown">àª…àªœàª¾àª£à«€ àª­à«‚àª² àª¥àªˆ.</string>
     <string name="settings_ai_mistakes_warning">AI àª­à«‚àª²à«‹ àª•àª°à«€ àª¶àª•à«‡ àª›à«‡, àª«àª°à«€àª¥à«€ àª¤àªªàª¾àª¸à«‹ àª…àª¨à«‡ àª¸àª‚àªµà«‡àª¦àª¨àª¶à«€àª² àª®àª¾àª¹àª¿àª¤à«€ àª¶à«‡àª° àª¨ àª•àª°à«‹.</string>
     <string name="settings_version">àªµàª°à«àªàª¨: %1$s</string>
@@ -267,6 +269,9 @@
     <string name="model_sort_date">àª¤àª¾àª°à«€àª–</string>
     <string name="model_sort_score">àª¸à«àª•à«‹àª°</string>
     <string name="model_sort_context">àª¸àª‚àª¦àª°à«àª­</string>
+    <string name="model_free_badge">મફત</string>
+    <string name="model_filter_free">મફત</string>
+    <string name="model_free_empty">આ સેવા માટે કોઈ મફત-સ્તરના મોડલ નથી.</string>
     <string name="tool_check_sms_name">SMS àª¤àªªàª¾àª¸à«‹</string>
     <string name="tool_check_sms_description">àª¤àª¾àªœà«‡àª¤àª°àª¨àª¾ àª¨ àªµàª¾àª‚àªšà«‡àª²àª¾ SMS àª¸àª‚àª¦à«‡àª¶àª¾àª“àª¨à«€ àª¯àª¾àª¦à«€ àª†àªªà«‹</string>
     <string name="tool_read_sms_name">SMS àªµàª¾àª‚àªšà«‹</string>

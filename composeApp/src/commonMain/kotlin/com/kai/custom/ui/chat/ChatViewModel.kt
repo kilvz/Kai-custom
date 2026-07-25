@@ -12,6 +12,7 @@ import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.UiSubmission
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.network.UiError
+import com.kai.custom.network.shouldShowFreeProviderSuggestions
 import com.kai.custom.network.toUiError
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.tools.LocalNetworkPermissionController
@@ -270,6 +271,7 @@ class ChatViewModel(
                 it.copy(
                     isLoading = true,
                     error = null,
+                    showFreeProviderSuggestions = false,
                     files = persistentListOf(),
                 )
             }
@@ -279,6 +281,7 @@ class ChatViewModel(
                 _state.update {
                     it.copy(
                         error = UiError.Resource(Res.string.error_local_network_permission),
+                        showFreeProviderSuggestions = false,
                         isLoading = false,
                     )
                 }
@@ -295,9 +298,15 @@ class ChatViewModel(
                 // CancellationException must be re-thrown to properly propagate coroutine cancellation
                 if (exception is CancellationException) throw exception
 
+                val showUpsell = shouldShowFreeProviderSuggestions(
+                    noConfiguredServices = dataRepository.getConfiguredServiceInstances().isEmpty(),
+                    exception = exception,
+                )
                 _state.update {
                     it.copy(
                         error = exception.toUiError(),
+                        showFreeProviderSuggestions = showUpsell,
+                        isLoading = false,
                     )
                 }
             } finally {
@@ -380,7 +389,7 @@ class ChatViewModel(
     private fun clearHistory() {
         dataRepository.clearHistory()
         _state.update {
-            it.copy(error = null)
+            it.copy(error = null, showFreeProviderSuggestions = false)
         }
     }
 
@@ -574,7 +583,13 @@ class ChatViewModel(
         dataRepository.setInteractiveMode(isInteractive)
         dataRepository.loadConversation(id)
         _state.update {
-            it.copy(error = null, isInteractiveMode = isInteractive, isLoading = false, pendingMessages = persistentListOf())
+            it.copy(
+                error = null,
+                showFreeProviderSuggestions = false,
+                isInteractiveMode = isInteractive,
+                isLoading = false,
+                pendingMessages = persistentListOf(),
+            )
         }
     }
 
@@ -638,7 +653,13 @@ class ChatViewModel(
         dataRepository.startNewChat()
         dataRepository.setInteractiveMode(false)
         _state.update {
-            it.copy(error = null, isInteractiveMode = false, isLoading = false, pendingMessages = persistentListOf())
+            it.copy(
+                error = null,
+                showFreeProviderSuggestions = false,
+                isInteractiveMode = false,
+                isLoading = false,
+                pendingMessages = persistentListOf(),
+            )
         }
     }
 
@@ -647,7 +668,12 @@ class ChatViewModel(
         dataRepository.startNewChat()
         dataRepository.setInteractiveMode(true)
         _state.update {
-            it.copy(isInteractiveMode = true, error = null, pendingMessages = persistentListOf())
+            it.copy(
+                isInteractiveMode = true,
+                error = null,
+                showFreeProviderSuggestions = false,
+                pendingMessages = persistentListOf(),
+            )
         }
     }
 
@@ -657,7 +683,12 @@ class ChatViewModel(
         dataRepository.startNewChat()
         dataRepository.setInteractiveMode(false)
         _state.update {
-            it.copy(isInteractiveMode = false, isLoading = false, error = null)
+            it.copy(
+                isInteractiveMode = false,
+                isLoading = false,
+                error = null,
+                showFreeProviderSuggestions = false,
+            )
         }
     }
 

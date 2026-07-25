@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">Zadaj pytanie</string>
     <string name="error_invalid_api_key">NieprawidÅ‚owy klucz API. SprawdÅº ustawienia.</string>
     <string name="error_rate_limit_exceeded">Przekroczono limit Å¼Ä…daÅ„. SprÃ³buj ponownie pÃ³Åºniej.</string>
+    <string name="error_free_limit_title">Osiągnięto limit darmowego poziomu</string>
+    <string name="error_free_limit_body">Free FAST i Free EXPERT mają ograniczenie szybkości. Utwórz darmowy klucz API u jednego z tych dostawców, aby uzyskać wyższe limity, a następnie dodaj go w Ustawienia → Usługi.</string>
     <string name="error_unknown">WystÄ…piÅ‚ nieznany bÅ‚Ä…d.</string>
     <string name="settings_ai_mistakes_warning">AI moÅ¼e popeÅ‚niaÄ‡ bÅ‚Ä™dy, sprawdzaj dwukrotnie i nie udostÄ™pniaj wraÅ¼liwych informacji.</string>
     <string name="settings_version">Wersja: %1$s</string>
@@ -268,6 +270,9 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="model_sort_date">Data</string>
     <string name="model_sort_score">Wynik</string>
     <string name="model_sort_context">Kontekst</string>
+    <string name="model_free_badge">Darmowe</string>
+    <string name="model_filter_free">Darmowe</string>
+    <string name="model_free_empty">Brak modeli darmowego poziomu dla tej usługi.</string>
     <string name="tool_check_sms_name">SprawdÅº SMS</string>
     <string name="tool_check_sms_description">WyÅ›wietl listÄ™ ostatnich nieprzeczytanych wiadomoÅ›ci SMS</string>
     <string name="tool_read_sms_name">Odczytaj SMS</string>

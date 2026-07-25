@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">ì§ˆë¬¸í•˜ê¸°</string>
     <string name="error_invalid_api_key">ìœ íš¨í•˜ì§€ ì•Šì€ API í‚¤ìž…ë‹ˆë‹¤. ì„¤ì •ì„ í™•ì¸í•˜ì„¸ìš”.</string>
     <string name="error_rate_limit_exceeded">ìš”ì²­ í•œë„ë¥¼ ì´ˆê³¼í–ˆìŠµë‹ˆë‹¤. ë‚˜ì¤‘ì— ë‹¤ì‹œ ì‹œë„í•˜ì„¸ìš”.</string>
+    <string name="error_free_limit_title">무료 티어 한도에 도달했습니다</string>
+    <string name="error_free_limit_body">Free FAST와 Free EXPERT는 요청 한도가 있습니다. 더 높은 한도를 위해 다음 제공업체 중 하나에서 무료 API 키를 만든 다음 설정 → 서비스에 추가하세요.</string>
     <string name="error_unknown">ì•Œ ìˆ˜ ì—†ëŠ” ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤.</string>
     <string name="settings_ai_mistakes_warning">AIëŠ” ì‹¤ìˆ˜í•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ë‹¤ì‹œ í™•ì¸í•˜ê³  ë¯¼ê°í•œ ì •ë³´ë¥¼ ê³µìœ í•˜ì§€ ë§ˆì„¸ìš”.</string>
     <string name="settings_version">ë²„ì „: %1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">ë‚ ì§œ</string>
     <string name="model_sort_score">ì ìˆ˜</string>
     <string name="model_sort_context">ì»¨í…ìŠ¤íŠ¸</string>
+    <string name="model_free_badge">무료</string>
+    <string name="model_filter_free">무료</string>
+    <string name="model_free_empty">이 서비스에는 무료 티어 모델이 없습니다.</string>
     <string name="tool_check_sms_name">SMS í™•ì¸</string>
     <string name="tool_check_sms_description">ìµœê·¼ ì½ì§€ ì•Šì€ SMS ë©”ì‹œì§€ ëª©ë¡</string>
     <string name="tool_read_sms_name">SMS ì½ê¸°</string>

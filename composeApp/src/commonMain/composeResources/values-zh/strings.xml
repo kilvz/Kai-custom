@@ -3,6 +3,8 @@
     <string name="prompt_ask_question">æé—®</string>
     <string name="error_invalid_api_key">API å¯†é’¥æ— æ•ˆã€‚è¯·æ£€æŸ¥æ‚¨çš„è®¾ç½®ã€‚</string>
     <string name="error_rate_limit_exceeded">è¶…å‡ºé€ŸçŽ‡é™åˆ¶ã€‚è¯·ç¨åŽé‡è¯•ã€‚</string>
+    <string name="error_free_limit_title">已达免费额度上限</string>
+    <string name="error_free_limit_body">Free FAST 和 Free EXPERT 有速率限制。请在下列提供商之一创建免费 API 密钥以获得更高限额，然后在 设置 → 服务 中添加。</string>
     <string name="error_unknown">å‘ç”ŸæœªçŸ¥é”™è¯¯ã€‚</string>
     <string name="settings_ai_mistakes_warning">AI å¯èƒ½ä¼šå‡ºé”™ï¼Œè¯·ä»”ç»†æ ¸å¯¹ï¼Œä¸è¦åˆ†äº«æ•æ„Ÿä¿¡æ¯ã€‚</string>
     <string name="settings_version">ç‰ˆæœ¬ï¼š%1$s</string>
@@ -268,6 +270,9 @@
     <string name="model_sort_date">æ—¥æœŸ</string>
     <string name="model_sort_score">è¯„åˆ†</string>
     <string name="model_sort_context">ä¸Šä¸‹æ–‡</string>
+    <string name="model_free_badge">免费</string>
+    <string name="model_filter_free">免费</string>
+    <string name="model_free_empty">此服务没有免费额度模型。</string>
     <string name="tool_check_sms_name">æ£€æŸ¥çŸ­ä¿¡</string>
     <string name="tool_check_sms_description">åˆ—å‡ºæœ€è¿‘æœªè¯»çš„çŸ­ä¿¡</string>
     <string name="tool_read_sms_name">é˜…è¯»çŸ­ä¿¡</string>
