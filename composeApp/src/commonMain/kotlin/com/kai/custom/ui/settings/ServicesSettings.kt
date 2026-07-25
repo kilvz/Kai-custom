@@ -1441,8 +1441,10 @@ private fun LocalModelCard(
                         text = when {
                             model.isRecommended ->
                                 "${model.displayName} (${stringResource(Res.string.litert_recommended)})"
+
                             showImportedBadge ->
                                 "${model.displayName} (${stringResource(Res.string.litert_imported)})"
+
                             else -> model.displayName
                         },
                         style = MaterialTheme.typography.bodyLarge,

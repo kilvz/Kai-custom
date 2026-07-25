@@ -1134,6 +1134,7 @@ class SettingsViewModel(
                         }
                     refreshLocalModelsAfterChange()
                 }
+
                 is ModelImportResult.Failure -> {
                     // importError flow already updated by the engine
                     _state.update { it.copy(localFreeSpaceBytes = dataRepository.getLocalFreeSpaceBytes()) }
