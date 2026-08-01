@@ -72,7 +72,7 @@ data class ExecResult(
     val error: String? = null,
 )
 
-interface SandboxController {
+interface SandboxController : FileBrowserSource {
     val status: StateFlow<SandboxStatus>
 
     /** Active shell-session ids (in-memory only, not persisted). */
@@ -117,14 +117,8 @@ interface SandboxController {
     /** Wipe the transcript for [sessionId]. Idempotent. */
     fun clearTranscript(sessionId: String) {}
 
-    suspend fun listDirectory(path: String): List<SandboxFileEntry>
-    suspend fun readTextFile(path: String, maxBytes: Int = 512_000): String?
-    suspend fun writeTextFile(path: String, content: String): Boolean
     suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean
-    suspend fun openFile(path: String): Result<Unit>
-    suspend fun deleteEntry(path: String, recursive: Boolean): Boolean
 
-    suspend fun renameEntry(path: String, newName: String): Result<String>
 
     suspend fun startAltMemory() {}
     suspend fun stopAltMemory() {}

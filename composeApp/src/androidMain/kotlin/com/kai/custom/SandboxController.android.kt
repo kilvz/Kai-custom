@@ -13,6 +13,7 @@ import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SessionShell
 import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.resolveSandboxAbsolute
+import com.kai.custom.sandbox.toFileEntry
 import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kotlinx.coroutines.CompletableDeferred
@@ -318,7 +319,7 @@ class AndroidSandboxController : SandboxController {
 
         val children = dir.listFiles().orEmpty()
             .filterNot { isRoot && it.name == "root" }
-            .map { it.toEntry(parent = if (isRoot) "" else normalized) }
+            .map { it.toFileEntry(parent = if (isRoot) "" else normalized) }
             .toMutableList()
 
         if (isRoot) {

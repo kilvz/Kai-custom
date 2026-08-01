@@ -52,13 +52,18 @@ import com.kai.custom.ui.sandbox.SandboxSessionViewModel
 import com.kai.custom.ui.settings.SandboxViewModel
 import com.kai.custom.ui.settings.SettingsViewModel
 import com.kai.custom.ui.settings.SplinterlandsViewModel
+import com.kai.custom.ui.build.KaiBuildViewModel
 import com.kai.custom.ui.settings.SshViewModel
 import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.wakeword.createWakeWordController
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import com.kai.custom.whatsapp.WhatsAppPoller
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+
+/** Picks the file browser bound to Kai Build's Debian rather than the chat sandbox. */
+val KAI_BUILD_FILES = named("kaiBuildFiles")
 
 val appModule = module {
     single<CalendarPermissionController> { CalendarPermissionController() }
@@ -204,6 +209,7 @@ val appModule = module {
     single<DaemonController> { createDaemonController() }
     single<DebugApiController> { createDebugApiController() }
     single<SandboxController> { createSandboxController() }
+    single<KaiBuildController> { createKaiBuildController() }
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
@@ -213,6 +219,9 @@ val appModule = module {
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
     viewModel { SandboxPackagesViewModel(get<SandboxController>(), get<DataRepository>()) }
     viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }
+    viewModel { KaiBuildViewModel(get<KaiBuildController>()) }
+    // Same browser, second environment: Kai Build's Debian instead of the chat sandbox.
+    viewModel(KAI_BUILD_FILES) { SandboxFileBrowserViewModel(get<KaiBuildController>().files) }
     viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
     viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>(), get<WakeWordController>(), localNetworkPermissionController = get<LocalNetworkPermissionController>()) }
 }
