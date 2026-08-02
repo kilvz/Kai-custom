@@ -381,7 +381,6 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="sandbox_files_open_failed">Nie moÅ¼na otworzyÄ‡ zewnÄ™trznie</string>
     <string name="sandbox_files_empty_directory">Pusty katalog</string>
     <string name="sandbox_files_editor_binary_warning">Plik binarny lub zbyt duÅ¼y, aby wyÅ›wietliÄ‡ jako tekst.</string>
-    <string name="sandbox_files_editor_open_in_app">OtwÃ³rz w aplikacji</string>
     <string name="sandbox_files_editor_force_open_as_text">WymuÅ› otwarcie jako tekst</string>
     <string name="sandbox_files_editor_save">Zapisz</string>
     <string name="kai_ui_render_failed">Nie udaÅ‚o siÄ™ wyrenderowaÄ‡ interfejsu</string>

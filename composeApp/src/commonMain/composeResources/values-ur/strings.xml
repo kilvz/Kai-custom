@@ -380,7 +380,6 @@
     <string name="sandbox_files_open_failed">Ø¨ÛŒØ±ÙˆÙ†ÛŒ Ø·ÙˆØ± Ù¾Ø± Ù†ÛÛŒÚº Ú©Ú¾ÙˆÙ„Ø§ Ø¬Ø§ Ø³Ú©Ø§</string>
     <string name="sandbox_files_empty_directory">Ø®Ø§Ù„ÛŒ ÚˆØ§Ø¦Ø±ÛŒÚ©Ù¹Ø±ÛŒ</string>
     <string name="sandbox_files_editor_binary_warning">Ø¨Ø§Ø¦Ù†Ø±ÛŒ ÛŒØ§ Ù…ØªÙ† Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ù¾ÛŒØ´ Ù†Ø¸Ø§Ø±Û Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ Ø¨ÛØª Ø¨Ú‘Ø§Û”</string>
-    <string name="sandbox_files_editor_open_in_app">Ø§ÛŒÙ¾ Ù…ÛŒÚº Ú©Ú¾ÙˆÙ„ÛŒÚº</string>
     <string name="sandbox_files_editor_force_open_as_text">Ù…ØªÙ† Ú©Û’ Ø·ÙˆØ± Ù¾Ø± Ø²Ø¨Ø±Ø¯Ø³ØªÛŒ Ú©Ú¾ÙˆÙ„ÛŒÚº</string>
     <string name="sandbox_files_editor_save">Ù…Ø­ÙÙˆØ¸ Ú©Ø±ÛŒÚº</string>
     <string name="kai_ui_render_failed">UI Ø±ÛŒÙ†ÚˆØ± Ú©Ø±Ù†Û’ Ù…ÛŒÚº Ù†Ø§Ú©Ø§Ù…ÛŒ</string>

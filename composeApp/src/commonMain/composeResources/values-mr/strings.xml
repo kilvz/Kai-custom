@@ -380,7 +380,6 @@
     <string name="sandbox_files_open_failed">à¤¬à¤¾à¤¹à¥‡à¤°à¥‚à¤¨ à¤‰à¤˜à¤¡à¤¤à¤¾ à¤†à¤²à¥‡ à¤¨à¤¾à¤¹à¥€</string>
     <string name="sandbox_files_empty_directory">à¤°à¤¿à¤•à¤¾à¤®à¥€ à¤¨à¤¿à¤°à¥à¤¦à¥‡à¤¶à¤¿à¤•à¤¾</string>
     <string name="sandbox_files_editor_binary_warning">à¤¬à¤¾à¤¯à¤¨à¤°à¥€ à¤•à¤¿à¤‚à¤µà¤¾ à¤®à¤œà¤•à¥‚à¤° à¤®à¥à¤¹à¤£à¥‚à¤¨ à¤ªà¥‚à¤°à¥à¤µà¤¾à¤µà¤²à¥‹à¤•à¤¨ à¤•à¤°à¤£à¥à¤¯à¤¾à¤¸à¤¾à¤ à¥€ à¤–à¥‚à¤ª à¤®à¥‹à¤ à¥€ à¤†à¤¹à¥‡.</string>
-    <string name="sandbox_files_editor_open_in_app">à¤…à¥…à¤ªà¤®à¤§à¥à¤¯à¥‡ à¤‰à¤˜à¤¡à¤¾</string>
     <string name="sandbox_files_editor_force_open_as_text">à¤®à¤œà¤•à¥‚à¤° à¤®à¥à¤¹à¤£à¥‚à¤¨ à¤œà¤¬à¤°à¤¦à¤¸à¥à¤¤à¥€à¤¨à¥‡ à¤‰à¤˜à¤¡à¤¾</string>
     <string name="sandbox_files_editor_save">à¤œà¤¤à¤¨ à¤•à¤°à¤¾</string>
     <string name="kai_ui_render_failed">UI à¤°à¥‡à¤‚à¤¡à¤° à¤•à¤°à¤£à¥à¤¯à¤¾à¤¤ à¤…à¤¯à¤¶à¤¸à¥à¤µà¥€</string>

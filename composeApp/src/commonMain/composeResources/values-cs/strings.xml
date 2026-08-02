@@ -378,7 +378,6 @@
     <string name="sandbox_files_open_failed">Nelze otevÅ™Ã­t externÄ›</string>
     <string name="sandbox_files_empty_directory">PrázdnÃ½ adresáÅ™</string>
     <string name="sandbox_files_editor_binary_warning">BinárnÃ­ nebo pÅ™Ã­liÅ¡ velké pro náhled jako text.</string>
-    <string name="sandbox_files_editor_open_in_app">OtevÅ™Ã­t v aplikaci</string>
     <string name="sandbox_files_editor_force_open_as_text">Vynutit otevÅ™enÃ­ jako text</string>
     <string name="sandbox_files_editor_save">UloÅ¾it</string>
     <string name="kai_ui_render_failed">VykreslenÃ­ UI selhalo</string>

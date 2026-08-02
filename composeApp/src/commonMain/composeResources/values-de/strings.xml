@@ -379,7 +379,6 @@ Wenn etwas Aufmerksamkeit erfordert (veraltete Erinnerungen, fÃ¤llige Aufgaben
     <string name="sandbox_files_open_failed">Konnte nicht extern geöffnet werden</string>
     <string name="sandbox_files_empty_directory">Leeres Verzeichnis</string>
     <string name="sandbox_files_editor_binary_warning">BinÃ¤r oder zu groÃŸ für die Textvorschau.</string>
-    <string name="sandbox_files_editor_open_in_app">Mit App öffnen</string>
     <string name="sandbox_files_editor_force_open_as_text">Als Text öffnen erzwingen</string>
     <string name="sandbox_files_editor_save">Speichern</string>
     <string name="kai_ui_render_failed">UI konnte nicht gerendert werden</string>

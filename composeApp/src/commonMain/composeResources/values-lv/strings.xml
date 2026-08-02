@@ -380,7 +380,6 @@
     <string name="sandbox_files_open_failed">NevarÄ“ja atvÄ“rt ÄrÄ“ji</string>
     <string name="sandbox_files_empty_directory">TukÅ¡a mape</string>
     <string name="sandbox_files_editor_binary_warning">BinÄrs vai pÄrÄk liels, lai priekÅ¡skatÄ«tu kÄ tekstu.</string>
-    <string name="sandbox_files_editor_open_in_app">AtvÄ“rt lietotnÄ“</string>
     <string name="sandbox_files_editor_force_open_as_text">Piespiedu kÄrtÄ atvÄ“rt kÄ tekstu</string>
     <string name="sandbox_files_editor_save">SaglabÄt</string>
     <string name="kai_ui_render_failed">NeizdevÄs renderÄ“t saskarni</string>

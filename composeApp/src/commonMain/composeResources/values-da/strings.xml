@@ -382,7 +382,6 @@ Hvis noget krÃ¦ver opmÃ¦rksomhed (forÃ¦ldede erindringer, forfaldne opgave
     <string name="sandbox_files_open_failed">Kunne ikke Ã¥bne eksternt</string>
     <string name="sandbox_files_empty_directory">Tom mappe</string>
     <string name="sandbox_files_editor_binary_warning">BinÃ¦r eller for stor til at forhÃ¥ndsvise som tekst.</string>
-    <string name="sandbox_files_editor_open_in_app">Ã…bn med app</string>
     <string name="sandbox_files_editor_force_open_as_text">Tving Ã¥bning som tekst</string>
     <string name="sandbox_files_editor_save">Gem</string>
     <string name="kai_ui_render_failed">Kunne ikke gengive UI</string>

@@ -381,7 +381,6 @@ Hvis noe trenger oppmerksomhet (utdaterte minner, forfalte oppgaver, brukeroppf�
     <string name="sandbox_files_open_failed">Kunne ikke Ã¥pne eksternt</string>
     <string name="sandbox_files_empty_directory">Tom mappe</string>
     <string name="sandbox_files_editor_binary_warning">BinÃ¦r eller for stor til Ã¥ forhÃ¥ndsvises som tekst.</string>
-    <string name="sandbox_files_editor_open_in_app">Ã…pne i app</string>
     <string name="sandbox_files_editor_force_open_as_text">Tving Ã¥pning som tekst</string>
     <string name="sandbox_files_editor_save">Lagre</string>
     <string name="kai_ui_render_failed">Kunne ikke vise grensesnittet</string>

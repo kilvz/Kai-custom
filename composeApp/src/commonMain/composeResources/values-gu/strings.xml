@@ -380,7 +380,6 @@
     <string name="sandbox_files_open_failed">àª¬àª¾àª¹à«àª¯ àª°à«€àª¤à«‡ àª–à«‹àª²à«€ àª¶àª•àª¾àª¯à«àª‚ àª¨àª¥à«€</string>
     <string name="sandbox_files_empty_directory">àª–àª¾àª²à«€ àª¡àª¿àª°à«‡àª•à«àªŸàª°à«€</string>
     <string name="sandbox_files_editor_binary_warning">àª¬àª¾àªˆàª¨àª°à«€ àª…àª¥àªµàª¾ àªŸà«‡àª•à«àª¸à«àªŸ àª¤àª°à«€àª•à«‡ àªªà«‚àª°à«àªµàª¾àªµàª²à«‹àª•àª¨ àª•àª°àªµàª¾ àª®àª¾àªŸà«‡ àª–à«‚àª¬ àª®à«‹àªŸà«àª‚.</string>
-    <string name="sandbox_files_editor_open_in_app">àªàªªàª®àª¾àª‚ àª–à«‹àª²à«‹</string>
     <string name="sandbox_files_editor_force_open_as_text">àªŸà«‡àª•à«àª¸à«àªŸ àª¤àª°à«€àª•à«‡ àª–à«‹àª²àªµàª¾ àª®àª¾àªŸà«‡ àª¦àª¬àª¾àª£ àª•àª°à«‹</string>
     <string name="sandbox_files_editor_save">àª¸àª¾àªšàªµà«‹</string>
     <string name="kai_ui_render_failed">UI àª°à«‡àª¨à«àª¡àª° àª•àª°àªµàª¾àª®àª¾àª‚ àª¨àª¿àª·à«àª«àª³</string>

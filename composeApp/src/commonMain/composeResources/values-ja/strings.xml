@@ -381,7 +381,6 @@
     <string name="sandbox_files_open_failed">å¤–éƒ¨ã§é–‹ã‘ã¾ã›ã‚“ã§ã—ãŸ</string>
     <string name="sandbox_files_empty_directory">ç©ºã®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª</string>
     <string name="sandbox_files_editor_binary_warning">ãƒã‚¤ãƒŠãƒªã¾ãŸã¯ã‚µã‚¤ã‚ºãŒå¤§ãã™ãŽã¦ãƒ†ã‚­ã‚¹ãƒˆã¨ã—ã¦ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã§ãã¾ã›ã‚“ã€‚</string>
-    <string name="sandbox_files_editor_open_in_app">ã‚¢ãƒ—ãƒªã§é–‹ã</string>
     <string name="sandbox_files_editor_force_open_as_text">å¼·åˆ¶çš„ã«ãƒ†ã‚­ã‚¹ãƒˆã¨ã—ã¦é–‹ã</string>
     <string name="sandbox_files_editor_save">ä¿å­˜</string>
     <string name="kai_ui_render_failed">UIã®æç”»ã«å¤±æ•—ã—ã¾ã—ãŸ</string>

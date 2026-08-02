@@ -381,7 +381,6 @@ Bir ÅŸey dikkat gerektiriyorsa (eski anÄ±lar, vadesi geÃ§miÅŸ görevler,
     <string name="sandbox_files_open_failed">Harici olarak aÃ§Ä±lamadÄ±</string>
     <string name="sandbox_files_empty_directory">BoÅŸ dizin</string>
     <string name="sandbox_files_editor_binary_warning">Ä°kili dosya veya metin olarak önizlenemeyecek kadar büyük.</string>
-    <string name="sandbox_files_editor_open_in_app">Uygulamada aÃ§</string>
     <string name="sandbox_files_editor_force_open_as_text">Metin olarak aÃ§maya zorla</string>
     <string name="sandbox_files_editor_save">Kaydet</string>
     <string name="kai_ui_render_failed">Arayüz oluÅŸturulamadÄ±</string>

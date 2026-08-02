@@ -380,7 +380,6 @@
     <string name="sandbox_files_open_failed">Nem sikerült külsÅ‘leg megnyitni</string>
     <string name="sandbox_files_empty_directory">Ãœres mappa</string>
     <string name="sandbox_files_editor_binary_warning">Bináris vagy tÃºl nagy a szöveges elÅ‘nézethez.</string>
-    <string name="sandbox_files_editor_open_in_app">Megnyitás alkalmazásban</string>
     <string name="sandbox_files_editor_force_open_as_text">Megnyitás szövegként kényszerÃ­tve</string>
     <string name="sandbox_files_editor_save">Mentés</string>
     <string name="kai_ui_render_failed">A felhasználÃ³i felület megjelenÃ­tése sikertelen</string>

@@ -380,7 +380,6 @@
     <string name="sandbox_files_open_failed">Nepodarilo sa otvoriÅ¥ externe</string>
     <string name="sandbox_files_empty_directory">Prázdny prieÄinok</string>
     <string name="sandbox_files_editor_binary_warning">Binárny sÃºbor alebo prÃ­liÅ¡ veÄ¾kÃ½ na zobrazenie ako text.</string>
-    <string name="sandbox_files_editor_open_in_app">OtvoriÅ¥ v aplikácii</string>
     <string name="sandbox_files_editor_force_open_as_text">VynÃºtiÅ¥ otvorenie ako text</string>
     <string name="sandbox_files_editor_save">UloÅ¾iÅ¥</string>
     <string name="kai_ui_render_failed">Vykreslenie rozhrania zlyhalo</string>

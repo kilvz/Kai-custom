@@ -381,7 +381,6 @@
     <string name="sandbox_files_open_failed">Î”ÎµÎ½ Î®Ï„Î±Î½ Î´Ï…Î½Î±Ï„ÏŒ Ï„Î¿ ÎµÎ¾Ï‰Ï„ÎµÏÎ¹ÎºÏŒ Î¬Î½Î¿Î¹Î³Î¼Î±</string>
     <string name="sandbox_files_empty_directory">ÎšÎµÎ½ÏŒÏ‚ ÎºÎ±Ï„Î¬Î»Î¿Î³Î¿Ï‚</string>
     <string name="sandbox_files_editor_binary_warning">Î”Ï…Î±Î´Î¹ÎºÏŒ Î® Ï€Î¿Î»Ï Î¼ÎµÎ³Î¬Î»Î¿ Î³Î¹Î± Ï€ÏÎ¿ÎµÏ€Î¹ÏƒÎºÏŒÏ€Î·ÏƒÎ· Ï‰Ï‚ ÎºÎµÎ¯Î¼ÎµÎ½Î¿.</string>
-    <string name="sandbox_files_editor_open_in_app">Î†Î½Î¿Î¹Î³Î¼Î± ÏƒÎµ ÎµÏ†Î±ÏÎ¼Î¿Î³Î®</string>
     <string name="sandbox_files_editor_force_open_as_text">Î•Î¾Î±Î½Î±Î³ÎºÎ±ÏƒÎ¼ÏŒÏ‚ Î±Î½Î¿Î¯Î³Î¼Î±Ï„Î¿Ï‚ Ï‰Ï‚ ÎºÎµÎ¯Î¼ÎµÎ½Î¿</string>
     <string name="sandbox_files_editor_save">Î‘Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ·</string>
     <string name="kai_ui_render_failed">Î‘Ï€Î¿Ï„Ï…Ï‡Î¯Î± Î±Ï€ÏŒÎ´Î¿ÏƒÎ·Ï‚ UI</string>
