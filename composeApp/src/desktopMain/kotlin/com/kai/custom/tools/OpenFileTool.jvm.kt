@@ -1,6 +1,7 @@
 package com.kai.custom.tools
 
 import com.kai.custom.SandboxController
+import com.kai.custom.TextFileResult
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
@@ -52,7 +53,7 @@ object OpenFileTool : Tool {
         }
 
         return try {
-            val content = sandboxController.readTextFile("root/$path")
+            val content = (sandboxController.readTextFile("root/$path") as? TextFileResult.Text)?.content
                 ?: return mapOf("success" to false, "error" to "File not found: $path")
 
             val tempFile = File.createTempFile("kai_open_", path.substringAfterLast('.').let { ".$it" })

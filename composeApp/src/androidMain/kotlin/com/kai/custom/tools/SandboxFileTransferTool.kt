@@ -8,6 +8,7 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import com.kai.custom.SandboxController
+import com.kai.custom.TextFileResult
 import com.kai.custom.data.AppSettings
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
@@ -178,7 +179,7 @@ object SandboxFileTransferTool : Tool {
                 }
             }
             "to_android" -> {
-                val content = sandboxController.readTextFile(sandboxPath, maxBytes)
+                val content = (sandboxController.readTextFile(sandboxPath, maxBytes) as? TextFileResult.Text)?.content
                 if (content == null) {
                     return mapOf("success" to false, "error" to "File not found in sandbox: $sandboxPath")
                 }
@@ -374,7 +375,7 @@ object SandboxFileTransferTool : Tool {
                 }
             }
             "to_android" -> {
-                val content = sandboxController.readTextFile(sandboxPath, maxBytes)
+                val content = (sandboxController.readTextFile(sandboxPath, maxBytes) as? TextFileResult.Text)?.content
                 if (content == null) {
                     return mapOf("success" to false, "error" to "File not found in sandbox: $sandboxPath")
                 }
@@ -457,7 +458,7 @@ object SandboxFileTransferTool : Tool {
             }
             "to_android" -> {
                 androidFile.parentFile?.mkdirs()
-                val content = sandboxController.readTextFile(sandboxPath, maxBytes)
+                val content = (sandboxController.readTextFile(sandboxPath, maxBytes) as? TextFileResult.Text)?.content
                 if (content == null) {
                     mapOf("success" to false, "error" to "File not found in sandbox: $sandboxPath")
                 } else {

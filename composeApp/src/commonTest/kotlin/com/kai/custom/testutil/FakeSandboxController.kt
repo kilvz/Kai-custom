@@ -1,6 +1,7 @@
 package com.kai.custom.testutil
 
 import com.kai.custom.*
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -41,12 +42,14 @@ class FakeSandboxController(installed: Boolean = true) : SandboxController {
         return emptyList()
     }
 
-    override suspend fun readTextFile(path: String, maxBytes: Int): String? = "file content"
+    override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = TextFileResult.Text("file content")
     override suspend fun writeTextFile(path: String, content: String): Boolean = true
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = true
     override suspend fun openFile(path: String): Result<Unit> = Result.success(Unit)
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = true
     override suspend fun renameEntry(path: String, newName: String): Result<String> = Result.success(newName)
+
+    override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = Result.failure(UnsupportedOperationException("Not needed by tests"))
 
     override fun closeSession(sessionId: String) {}
     override fun transcriptFor(sessionId: String): SnapshotStateList<TerminalLine> = SnapshotStateList()

@@ -8,6 +8,7 @@ import com.kai.custom.SandboxController
 import com.kai.custom.SandboxFileEntry
 import com.kai.custom.SandboxStatus
 import com.kai.custom.TerminalLine
+import com.kai.custom.TextFileResult
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.DataRepository
 import com.kai.custom.data.MemoryCategory
@@ -15,10 +16,18 @@ import com.kai.custom.data.MemoryStoreProvider
 import com.kai.custom.data.PersonaManager
 import com.kai.custom.data.dimension.DimensionConfig
 import com.kai.custom.mcp.McpServerManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.name
+import io.github.vinceglb.filekit.source
+import io.github.vinceglb.filekit.withScopedAccess
+import kotlinx.io.Buffer
+import kotlinx.io.asSink
+import kotlinx.io.buffered
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -27,6 +36,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
@@ -265,12 +275,67 @@ class DockerSandboxController(
         }
     }
 
-    override suspend fun readTextFile(path: String, maxBytes: Int): String? = withContext(Dispatchers.IO) {
+    // docker exec returns decoded text, so binary is detected by a NUL in the
+    // decoded output rather than on raw bytes; an empty file reads as blank and
+    // stays Unreadable, matching the old null-on-blank behaviour.
+    override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = withContext(Dispatchers.IO) {
         try {
+            val sizeOut = dockerManager.execCommand(containerName, "if [ -f '$path' ]; then stat -c%s '$path' 2>/dev/null || echo -1; else echo -1; fi")
+            val size = sizeOut.trim().toLongOrNull() ?: -1
+            if (size < 0) return@withContext TextFileResult.Unreadable
+            if (size > maxBytes) return@withContext TextFileResult.TooLarge(size)
             val output = dockerManager.execCommand(containerName, "head -c $maxBytes '$path' 2>/dev/null")
-            output.ifBlank { null }
+            if (output.isBlank()) return@withContext TextFileResult.Unreadable
+            if (output.any { it == '\u0000' }) {
+                return@withContext if (force) TextFileResult.Text(output, editable = false) else TextFileResult.Binary
+            }
+            TextFileResult.Text(output, editable = true)
         } catch (_: Exception) {
-            null
+            TextFileResult.Unreadable
+        }
+    }
+
+    override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val dirOk = dockerManager.execCommand(containerName, "test -d '$directoryPath' && echo ok || echo no").trim() == "ok"
+            if (!dirOk) return@withContext Result.failure(IOException("Not a directory: $directoryPath"))
+            val safe = source.name.substringAfterLast('/').substringAfterLast('\\')
+                .let { if (it.isBlank() || it == "." || it == "..") "imported" else it }
+            val base = safe.substringBeforeLast('.', safe)
+            val ext = safe.substringAfterLast('.', "")
+            var candidate = safe
+            var index = 1
+            while (dockerManager.execCommand(containerName, "test -e '$directoryPath/$candidate' && echo yes || echo no").trim() == "yes") {
+                candidate = if (ext.isEmpty()) "$base-$index" else "$base-$index.$ext"
+                index++
+            }
+            val target = "$directoryPath/$candidate"
+            val tempFile = File.createTempFile("kai_docker_import", ".bin")
+            try {
+                source.withScopedAccess {
+                    tempFile.outputStream().asSink().buffered().use { sink ->
+                        source.source().use { raw ->
+                            val buffer = Buffer()
+                            while (true) {
+                                val read = raw.readAtMostTo(buffer, 64L * 1024)
+                                if (read == -1L) break
+                                sink.write(buffer, read)
+                            }
+                            sink.flush()
+                        }
+                    }
+                }
+                if (!dockerManager.copyIn(containerName, tempFile.absolutePath, target)) {
+                    return@withContext Result.failure(IOException("docker cp failed for $target"))
+                }
+                Result.success(target)
+            } finally {
+                tempFile.delete()
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

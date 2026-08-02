@@ -6,8 +6,10 @@ import com.kai.custom.NoOpCommandHandle
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxFileEntry
 import com.kai.custom.SandboxStatus
+import com.kai.custom.TextFileResult
 import com.kai.custom.TerminalLine
 import com.kai.custom.SandboxSessions
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonArray
@@ -66,12 +68,13 @@ class SandboxViewModelTest {
         ): CommandHandle = NoOpCommandHandle
 
         override suspend fun listDirectory(path: String): List<SandboxFileEntry> = emptyList()
-        override suspend fun readTextFile(path: String, maxBytes: Int): String? = null
+        override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = TextFileResult.Unreadable
         override suspend fun writeTextFile(path: String, content: String): Boolean = false
         override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = false
         override suspend fun openFile(path: String): Result<Unit> = Result.failure(Exception("No sandbox"))
         override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = false
         override suspend fun renameEntry(path: String, newName: String): Result<String> = Result.failure(Exception("No sandbox"))
+        override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = Result.failure(Exception("No sandbox"))
         override fun closeSession(sessionId: String) {}
         override fun transcriptFor(sessionId: String): SnapshotStateList<TerminalLine> = SnapshotStateList()
         override fun clearTranscript(sessionId: String) {}

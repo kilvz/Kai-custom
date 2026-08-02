@@ -1,6 +1,7 @@
 package com.kai.custom.tools
 
 import com.kai.custom.SandboxController
+import com.kai.custom.TextFileResult
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
@@ -54,7 +55,7 @@ object ReadFileTool : Tool {
 
         return try {
             val resolvedPath = resolvePath(path)
-            val content = sandboxController.readTextFile(resolvedPath, maxBytes)
+            val content = (sandboxController.readTextFile(resolvedPath, maxBytes) as? TextFileResult.Text)?.content
             if (content != null) {
                 mapOf("success" to true, "path" to path, "content" to content, "bytes" to content.length)
             } else {
@@ -165,7 +166,7 @@ object EditFileTool : Tool {
             val resolvedPath = resolvePath(path)
 
             if (oldString == null) {
-                val existing = sandboxController.readTextFile(resolvedPath) ?: ""
+                val existing = (sandboxController.readTextFile(resolvedPath) as? TextFileResult.Text)?.content ?: ""
                 val ok = sandboxController.writeTextFile(resolvedPath, existing + newString)
                 if (ok) {
                     mapOf("success" to true, "path" to path, "action" to "append", "bytes_written" to newString.length)
@@ -173,7 +174,7 @@ object EditFileTool : Tool {
                     mapOf("success" to false, "error" to "Failed to append to file: $path")
                 }
             } else {
-                val existing = sandboxController.readTextFile(resolvedPath)
+                val existing = (sandboxController.readTextFile(resolvedPath) as? TextFileResult.Text)?.content
                     ?: return mapOf("success" to false, "error" to "File not found: $path")
 
                 if (!existing.contains(oldString)) {

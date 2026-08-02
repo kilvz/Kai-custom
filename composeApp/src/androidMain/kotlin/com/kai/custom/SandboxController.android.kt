@@ -14,8 +14,12 @@ import com.kai.custom.sandbox.SessionShell
 import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.resolveSandboxAbsolute
 import com.kai.custom.sandbox.toFileEntry
+import com.kai.custom.sandbox.decodeUtf8Strict
+import com.kai.custom.sandbox.importFileInto
 import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
+import io.github.vinceglb.filekit.PlatformFile
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -369,18 +373,32 @@ class AndroidSandboxController : SandboxController {
 
     private fun shellEscaped(path: String): String = path.replace("'", "'\\''")
 
-    private suspend fun readHostTextFileViaSandbox(filePath: String, maxBytes: Int): String? {
+    // Shell mirror of readFileAsText: same TextFileResult distinctions, but through
+    // the sandbox shell because the app process cannot read root-owned rootfs files
+    // directly via java.io.File.
+    private suspend fun readHostTextFileViaSandbox(filePath: String, maxBytes: Int, force: Boolean): TextFileResult {
         val safe = shellEscaped(filePath)
-        val cmd = "f='$safe'; if [ -f \"\$f\" ] && [ \$(stat -c%s \"\$f\" 2>/dev/null || echo 999999999) -le $maxBytes ] 2>/dev/null; then base64 < \"\$f\" 2>/dev/null; else echo '____KAI_B64_FAIL____'; fi"
-        val result = executeCommandStructured(cmd, useRoot = true, timeoutSeconds = 30)
-        if (result.exitCode != 0 || result.stdout.contains("____KAI_B64_FAIL____")) return null
-        val b64 = result.stdout.replace("\n", "").replace("\r", "")
-        return try {
-            val bytes = Base64.decode(b64)
-            if (bytes.any { it == 0.toByte() }) null else bytes.toString(Charsets.UTF_8)
+        // Size first: stat reports -1 for a missing path or a non-regular file.
+        val sizeResult = executeCommandStructured(
+            "f='$safe'; if [ -f \"\$f\" ]; then stat -c%s \"\$f\" 2>/dev/null || echo -1; else echo -1; fi",
+            useRoot = true,
+            timeoutSeconds = 30,
+        )
+        val size = sizeResult.stdout.trim().toLongOrNull() ?: -1
+        if (size < 0) return TextFileResult.Unreadable
+        if (size > maxBytes) return TextFileResult.TooLarge(size)
+        val result = executeCommandStructured("base64 < '$safe' 2>/dev/null", useRoot = true, timeoutSeconds = 30)
+        if (result.exitCode != 0) return TextFileResult.Unreadable
+        val bytes = try {
+            Base64.decode(result.stdout.replace("\n", "").replace("\r", ""))
         } catch (_: Exception) {
-            null
+            return TextFileResult.Unreadable
         }
+        val strict = if (bytes.any { it == 0.toByte() }) null else decodeUtf8Strict(bytes)
+        if (strict != null) return TextFileResult.Text(strict, editable = true)
+        if (!force) return TextFileResult.Binary
+        // Forced: decode lossily so the user can at least look at it. Not editable.
+        return TextFileResult.Text(bytes.toString(Charsets.UTF_8), editable = false)
     }
 
     private suspend fun writeHostTextFileViaSandbox(filePath: String, content: String): Boolean {
@@ -473,14 +491,14 @@ class AndroidSandboxController : SandboxController {
         return entries
     }
 
-    override suspend fun readTextFile(path: String, maxBytes: Int): String? = withContext(Dispatchers.IO) {
+    override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = withContext(Dispatchers.IO) {
         val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
-            ?: return@withContext null
+            ?: return@withContext TextFileResult.Unreadable
         // Rootfs inside proot is owned by root:1078 — the app process
         // can't access it directly via Java File. Always use sandbox shell.
         // Use the SANDBOX path (not host path) — proot translates it correctly
         // via bind-mounts (e.g. /root → homePath, /sdcard → /storage/emulated/0).
-        readHostTextFileViaSandbox(path, maxBytes)
+        readHostTextFileViaSandbox(path, maxBytes, force)
     }
 
     override suspend fun writeTextFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
@@ -525,6 +543,20 @@ class AndroidSandboxController : SandboxController {
             file.isDirectory -> file.deleteRecursively()
 
             else -> file.delete()
+        }
+    }
+
+    override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = withContext(Dispatchers.IO) {
+        val dir = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, directoryPath)
+            ?: return@withContext Result.failure(IllegalArgumentException("Invalid path: $directoryPath"))
+        try {
+            val created = importFileInto(dir, source)
+            val parent = directoryPath.trimEnd('/')
+            Result.success(if (parent.isEmpty()) "/${created.name}" else "$parent/${created.name}")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
