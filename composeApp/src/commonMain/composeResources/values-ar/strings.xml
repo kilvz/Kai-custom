@@ -305,6 +305,8 @@
     <string name="sms_draft_banner_failed">ÙØ´Ù„: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ø¥ØºÙ„Ø§Ù‚</string>
     <string name="litert_error_download_incomplete">Ø§Ù„ØªÙ†Ø²ÙŠÙ„ ØºÙŠØ± Ù…ÙƒØªÙ…Ù„. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.</string>
+    <string name="litert_error_checksum_mismatch">فشل التنزيل في فحص السلامة وتم تجاهله. يرجى المحاولة مرة أخرى.</string>
+    <string name="litert_error_model_integrity">فشل هذا النموذج في فحص السلامة ولم يتم تحميله. احذفه من الإعدادات ونزله مرة أخرى.</string>
     <string name="litert_error_network">ÙØ´Ù„ Ø§Ù„ØªÙ†Ø²ÙŠÙ„. ØªØ­Ù‚Ù‚ Ù…Ù† Ø§ØªØµØ§Ù„ Ø§Ù„Ø´Ø¨ÙƒØ© ÙˆØ­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.</string>
     <string name="settings_task_details_consecutive_failures">Ø¥Ø®ÙØ§Ù‚Ø§Øª Ù…ØªØªØ§Ù„ÙŠØ©</string>
     <string name="settings_task_details_created">ØªÙ… Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡</string>

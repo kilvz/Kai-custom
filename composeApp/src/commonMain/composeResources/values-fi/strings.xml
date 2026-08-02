@@ -302,6 +302,8 @@ Jos jokin vaatii huomiota (vanhentuneet muistot, erÃ¤Ã¤ntyneet tehtÃ¤vÃ¤
     <string name="sms_draft_banner_failed">EpÃ¤onnistui: %1$s</string>
     <string name="sms_draft_banner_dismiss">Sulje</string>
     <string name="litert_error_download_incomplete">Lataus jÃ¤i kesken. YritÃ¤ uudelleen.</string>
+    <string name="litert_error_checksum_mismatch">Lataus ei läpäissyt eheystarkistusta ja se hylättiin. Yritä uudelleen.</string>
+    <string name="litert_error_model_integrity">Tämä malli ei läpäissyt eheystarkistusta eikä sitä ladattu. Poista se asetuksista ja lataa uudelleen.</string>
     <string name="litert_error_network">Lataus epÃ¤onnistui. Tarkista verkkoyhteys ja yritÃ¤ uudelleen.</string>
     <string name="settings_task_details_consecutive_failures">PerÃ¤kkÃ¤iset epÃ¤onnistumiset</string>
     <string name="settings_task_details_created">Luotu</string>

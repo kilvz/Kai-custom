@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">Ù†Ø§Ù…ÙˆÙÙ‚: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ø¨Ø³ØªÙ†</string>
     <string name="litert_error_download_incomplete">Ø¯Ø§Ù†Ù„ÙˆØ¯ Ù†Ø§Ù‚Øµ Ø§Ø³Øª. Ù„Ø·ÙØ§Ù‹ Ø¯ÙˆØ¨Ø§Ø±Ù‡ ØªÙ„Ø§Ø´ Ú©Ù†ÛŒØ¯.</string>
+    <string name="litert_error_checksum_mismatch">دانلود بررسی صحت را با موفقیت پشت سر نگذاشت و کنار گذاشته شد. لطفاً دوباره تلاش کنید.</string>
+    <string name="litert_error_model_integrity">این مدل بررسی صحت را با موفقیت پشت سر نگذاشت و بارگذاری نشد. آن را در تنظیمات حذف کنید و دوباره دانلود کنید.</string>
     <string name="litert_error_network">Ø¯Ø§Ù†Ù„ÙˆØ¯ Ù†Ø§Ù…ÙˆÙÙ‚ Ø¨ÙˆØ¯. Ø§ØªØµØ§Ù„ Ø´Ø¨Ú©Ù‡ Ø±Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ø±Ø¯Ù‡ Ùˆ Ø¯ÙˆØ¨Ø§Ø±Ù‡ ØªÙ„Ø§Ø´ Ú©Ù†ÛŒØ¯.</string>
     <string name="settings_task_details_consecutive_failures">Ø´Ú©Ø³Øªâ€ŒÙ‡Ø§ÛŒ Ù…ØªÙˆØ§Ù„ÛŒ</string>
     <string name="settings_task_details_created">Ø§ÛŒØ¬Ø§Ø¯ Ø´Ø¯</string>

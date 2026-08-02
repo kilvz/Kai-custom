@@ -304,6 +304,8 @@ Bir ÅŸey dikkat gerektiriyorsa (eski anÄ±lar, vadesi geÃ§miÅŸ görevler,
     <string name="sms_draft_banner_failed">BaÅŸarÄ±sÄ±z: %1$s</string>
     <string name="sms_draft_banner_dismiss">Kapat</string>
     <string name="litert_error_download_incomplete">Ä°ndirme tamamlanmadÄ±. Lütfen tekrar deneyin.</string>
+    <string name="litert_error_checksum_mismatch">İndirme bütünlük kontrolünden geçemedi ve atıldı. Lütfen tekrar deneyin.</string>
+    <string name="litert_error_model_integrity">Bu model bütünlük kontrolünden geçemedi ve yüklenmedi. Ayarlar bölümünden silip tekrar indirin.</string>
     <string name="litert_error_network">Ä°ndirme baÅŸarÄ±sÄ±z oldu. AÄŸ baÄŸlantÄ±nÄ±zÄ± kontrol edip tekrar deneyin.</string>
     <string name="settings_task_details_consecutive_failures">ArdÄ±ÅŸÄ±k baÅŸarÄ±sÄ±zlÄ±klar</string>
     <string name="settings_task_details_created">OluÅŸturuldu</string>

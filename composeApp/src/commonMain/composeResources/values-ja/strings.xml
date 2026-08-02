@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">å¤±æ•—: %1$s</string>
     <string name="sms_draft_banner_dismiss">é–‰ã˜ã‚‹</string>
     <string name="litert_error_download_incomplete">ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ãŒä¸å®Œå…¨ã§ã™ã€‚ã‚‚ã†ä¸€åº¦ãŠè©¦ã—ãã ã•ã„ã€‚</string>
+    <string name="litert_error_checksum_mismatch">ダウンロードの整合性チェックに失敗したため、破棄されました。もう一度お試しください。</string>
+    <string name="litert_error_model_integrity">このモデルは整合性チェックに失敗したため、読み込まれませんでした。設定で削除して、もう一度ダウンロードしてください。</string>
     <string name="litert_error_network">ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã«å¤±æ•—ã—ã¾ã—ãŸã€‚ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯æŽ¥ç¶šã‚’ç¢ºèªã—ã¦ã‚‚ã†ä¸€åº¦ãŠè©¦ã—ãã ã•ã„ã€‚</string>
     <string name="settings_task_details_consecutive_failures">é€£ç¶šå¤±æ•—å›žæ•°</string>
     <string name="settings_task_details_created">ä½œæˆæ—¥</string>

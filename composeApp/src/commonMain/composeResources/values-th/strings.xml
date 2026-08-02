@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">à¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§: %1$s</string>
     <string name="sms_draft_banner_dismiss">à¸›à¸´à¸”</string>
     <string name="litert_error_download_incomplete">à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¹„à¸¡à¹ˆà¸ªà¸¡à¸šà¸¹à¸£à¸“à¹Œ à¹‚à¸›à¸£à¸”à¸¥à¸­à¸‡à¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡</string>
+    <string name="litert_error_checksum_mismatch">การดาวน์โหลดไม่ผ่านการตรวจสอบความสมบูรณ์และถูกยกเลิกแล้ว โปรดลองอีกครั้ง</string>
+    <string name="litert_error_model_integrity">โมเดลนี้ไม่ผ่านการตรวจสอบความสมบูรณ์จึงไม่ถูกโหลด โปรดลบในการตั้งค่าแล้วดาวน์โหลดอีกครั้ง</string>
     <string name="litert_error_network">à¸”à¸²à¸§à¸™à¹Œà¹‚à¸«à¸¥à¸”à¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§ à¸•à¸£à¸§à¸ˆà¸ªà¸­à¸šà¸à¸²à¸£à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­à¹€à¸„à¸£à¸·à¸­à¸‚à¹ˆà¸²à¸¢à¸‚à¸­à¸‡à¸„à¸¸à¸“à¹à¸¥à¹‰à¸§à¸¥à¸­à¸‡à¸­à¸µà¸à¸„à¸£à¸±à¹‰à¸‡</string>
     <string name="settings_task_details_consecutive_failures">à¸„à¸§à¸²à¸¡à¸¥à¹‰à¸¡à¹€à¸«à¸¥à¸§à¸•à¹ˆà¸­à¹€à¸™à¸·à¹ˆà¸­à¸‡</string>
     <string name="settings_task_details_created">à¸ªà¸£à¹‰à¸²à¸‡à¹€à¸¡à¸·à¹ˆà¸­</string>

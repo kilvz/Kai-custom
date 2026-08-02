@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">à¦¬à§à¦¯à¦°à§à¦¥: %1$s</string>
     <string name="sms_draft_banner_dismiss">à¦¬à¦¨à§à¦§ à¦•à¦°à§à¦¨</string>
     <string name="litert_error_download_incomplete">à¦¡à¦¾à¦‰à¦¨à¦²à§‹à¦¡ à¦…à¦¸à¦®à§à¦ªà§‚à¦°à§à¦£à¥¤ à¦…à¦¨à§à¦—à§à¦°à¦¹ à¦•à¦°à§‡ à¦†à¦¬à¦¾à¦° à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤</string>
+    <string name="litert_error_checksum_mismatch">ডাউনলোডটি অখণ্ডতা যাচাইয়ে ব্যর্থ হয়েছে এবং বাতিল করা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
+    <string name="litert_error_model_integrity">এই মডেলটি অখণ্ডতা যাচাইয়ে ব্যর্থ হয়েছে এবং লোড করা হয়নি। সেটিংসে এটি মুছুন এবং আবার ডাউনলোড করুন।</string>
     <string name="litert_error_network">à¦¡à¦¾à¦‰à¦¨à¦²à§‹à¦¡ à¦¬à§à¦¯à¦°à§à¦¥ à¦¹à¦¯à¦¼à§‡à¦›à§‡à¥¤ à¦†à¦ªà¦¨à¦¾à¦° à¦¨à§‡à¦Ÿà¦“à¦¯à¦¼à¦¾à¦°à§à¦• à¦¸à¦‚à¦¯à§‹à¦— à¦ªà¦°à§€à¦•à§à¦·à¦¾ à¦•à¦°à§‡ à¦†à¦¬à¦¾à¦° à¦šà§‡à¦·à§à¦Ÿà¦¾ à¦•à¦°à§à¦¨à¥¤</string>
     <string name="settings_task_details_consecutive_failures">à¦ªà¦°à¦ªà¦° à¦¬à§à¦¯à¦°à§à¦¥à¦¤à¦¾</string>
     <string name="settings_task_details_created">à¦¤à§ˆà¦°à¦¿ à¦¹à¦¯à¦¼à§‡à¦›à§‡</string>

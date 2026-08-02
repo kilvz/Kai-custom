@@ -305,6 +305,8 @@ Hvis noget krÃ¦ver opmÃ¦rksomhed (forÃ¦ldede erindringer, forfaldne opgave
     <string name="sms_draft_banner_failed">Mislykkedes: %1$s</string>
     <string name="sms_draft_banner_dismiss">Luk</string>
     <string name="litert_error_download_incomplete">Download er ufuldstÃ¦ndig. PrÃ¸v venligst igen.</string>
+    <string name="litert_error_checksum_mismatch">Downloaden bestod ikke integritetskontrollen og blev kasseret. Prøv igen.</string>
+    <string name="litert_error_model_integrity">Denne model bestod ikke integritetskontrollen og blev ikke indlæst. Slet den i Indstillinger, og download den igen.</string>
     <string name="litert_error_network">Download mislykkedes. Tjek din netvÃ¦rksforbindelse og prÃ¸v igen.</string>
     <string name="settings_task_details_consecutive_failures">Fejl i trÃ¦k</string>
     <string name="settings_task_details_created">Oprettet</string>

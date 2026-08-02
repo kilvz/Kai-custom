@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">EÈ™uat: %1$s</string>
     <string name="sms_draft_banner_dismiss">ÃŽnchide</string>
     <string name="litert_error_download_incomplete">DescÄƒrcare incompletÄƒ. VÄƒ rugÄƒm sÄƒ Ã®ncercaÈ›i din nou.</string>
+    <string name="litert_error_checksum_mismatch">Descărcarea nu a trecut verificarea de integritate și a fost respinsă. Te rugăm să încerci din nou.</string>
+    <string name="litert_error_model_integrity">Acest model nu a trecut verificarea de integritate și nu a fost încărcat. Șterge-l din Setări și descarcă-l din nou.</string>
     <string name="litert_error_network">DescÄƒrcarea a eÈ™uat. VerificaÈ›i conexiunea la reÈ›ea È™i Ã®ncercaÈ›i din nou.</string>
     <string name="settings_task_details_consecutive_failures">EÈ™ecuri consecutive</string>
     <string name="settings_task_details_created">CreatÄƒ</string>

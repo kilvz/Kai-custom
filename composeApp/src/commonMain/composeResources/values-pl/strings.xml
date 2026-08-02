@@ -304,6 +304,8 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="sms_draft_banner_failed">Nie udaÅ‚o siÄ™: %1$s</string>
     <string name="sms_draft_banner_dismiss">Zamknij</string>
     <string name="litert_error_download_incomplete">Pobieranie niekompletne. SprÃ³buj ponownie.</string>
+    <string name="litert_error_checksum_mismatch">Pobieranie nie przeszło kontroli integralności i zostało odrzucone. Spróbuj ponownie.</string>
+    <string name="litert_error_model_integrity">Ten model nie przeszedł kontroli integralności i nie został wczytany. Usuń go w Ustawieniach i pobierz ponownie.</string>
     <string name="litert_error_network">Pobieranie nie powiodÅ‚o siÄ™. SprawdÅº poÅ‚Ä…czenie sieciowe i sprÃ³buj ponownie.</string>
     <string name="settings_task_details_consecutive_failures">Kolejne niepowodzenia</string>
     <string name="settings_task_details_created">Utworzono</string>

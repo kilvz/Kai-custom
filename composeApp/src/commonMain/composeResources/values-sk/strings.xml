@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">Zlyhalo: %1$s</string>
     <string name="sms_draft_banner_dismiss">ZavrieÅ¥</string>
     <string name="litert_error_download_incomplete">SÅ¥ahovanie nedokonÄené. SkÃºste to znova.</string>
+    <string name="litert_error_checksum_mismatch">Sťahovanie neprešlo kontrolou integrity a bolo zahodené. Skúste to prosím znova.</string>
+    <string name="litert_error_model_integrity">Tento model neprešiel kontrolou integrity a nebol načítaný. Odstráňte ho v Nastaveniach a stiahnite znova.</string>
     <string name="litert_error_network">SÅ¥ahovanie zlyhalo. Skontrolujte sieÅ¥ové pripojenie a skÃºste to znova.</string>
     <string name="settings_task_details_consecutive_failures">Zlyhania po sebe</string>
     <string name="settings_task_details_created">Vytvorené</string>

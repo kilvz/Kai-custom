@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿: %1$s</string>
     <string name="sms_draft_banner_dismiss">à°®à±‚à°¸à°¿à°µà±‡à°¯à°¿</string>
     <string name="litert_error_download_incomplete">à°¡à±Œà°¨à±â€Œà°²à±‹à°¡à± à°…à°¸à°‚à°ªà±‚à°°à±à°£à°‚. à°¦à°¯à°šà±‡à°¸à°¿ à°®à°³à±à°³à±€ à°ªà±à°°à°¯à°¤à±à°¨à°¿à°‚à°šà°‚à°¡à°¿.</string>
+    <string name="litert_error_checksum_mismatch">డౌన్‌లోడ్ సమగ్రత తనిఖీలో విఫలమైంది మరియు విస్మరించబడింది. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="litert_error_model_integrity">ఈ మోడల్ సమగ్రత తనిఖీలో విఫలమైంది మరియు లోడ్ కాలేదు. సెట్టింగ్‌లలో దీన్ని తొలగించి మళ్లీ డౌన్‌లోడ్ చేయండి.</string>
     <string name="litert_error_network">à°¡à±Œà°¨à±â€Œà°²à±‹à°¡à± à°µà°¿à°«à°²à°®à±ˆà°‚à°¦à°¿. à°®à±€ à°¨à±†à°Ÿà±â€Œà°µà°°à±à°•à± à°•à°¨à±†à°•à±à°·à°¨à±â€Œà°¨à°¿ à°¤à°¨à°¿à°–à±€ à°šà±‡à°¸à°¿ à°®à°³à±à°³à±€ à°ªà±à°°à°¯à°¤à±à°¨à°¿à°‚à°šà°‚à°¡à°¿.</string>
     <string name="settings_task_details_consecutive_failures">à°µà°°à±à°¸ à°µà±ˆà°«à°²à±à°¯à°¾à°²à±</string>
     <string name="settings_task_details_created">à°¸à±ƒà°·à±à°Ÿà°¿à°‚à°šà°¬à°¡à°¿à°‚à°¦à°¿</string>

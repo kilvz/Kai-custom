@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">à¨…à¨¸à¨«à¨²: %1$s</string>
     <string name="sms_draft_banner_dismiss">à¨°à©±à¨¦ à¨•à¨°à©‹</string>
     <string name="litert_error_download_incomplete">à¨¡à¨¾à¨Šà¨¨à¨²à©‹à¨¡ à¨…à¨§à©‚à¨°à¨¾ à¨¹à©ˆà¥¤ à¨•à¨¿à¨°à¨ªà¨¾ à¨•à¨°à¨•à©‡ à¨¦à©à¨¬à¨¾à¨°à¨¾ à¨•à©‹à¨¸à¨¼à¨¿à¨¸à¨¼ à¨•à¨°à©‹à¥¤</string>
+    <string name="litert_error_checksum_mismatch">ਡਾਊਨਲੋਡ ਇਕਸਾਰਤਾ ਜਾਂਚ ਵਿੱਚ ਅਸਫਲ ਰਿਹਾ ਅਤੇ ਰੱਦ ਕਰ ਦਿੱਤਾ ਗਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="litert_error_model_integrity">ਇਹ ਮਾਡਲ ਇਕਸਾਰਤਾ ਜਾਂਚ ਵਿੱਚ ਅਸਫਲ ਰਿਹਾ ਅਤੇ ਲੋਡ ਨਹੀਂ ਹੋਇਆ। ਇਸਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਮਿਟਾਓ ਅਤੇ ਦੁਬਾਰਾ ਡਾਊਨਲੋਡ ਕਰੋ।</string>
     <string name="litert_error_network">à¨¡à¨¾à¨Šà¨¨à¨²à©‹à¨¡ à¨…à¨¸à¨«à¨² à¨¹à©‹à¨‡à¨†à¥¤ à¨†à¨ªà¨£à¨¾ à¨¨à©ˆà©±à¨Ÿà¨µà¨°à¨• à¨•à¨¨à©ˆà¨•à¨¸à¨¼à¨¨ à¨œà¨¾à¨‚à¨šà©‹ à¨…à¨¤à©‡ à¨¦à©à¨¬à¨¾à¨°à¨¾ à¨•à©‹à¨¸à¨¼à¨¿à¨¸à¨¼ à¨•à¨°à©‹à¥¤</string>
     <string name="settings_task_details_consecutive_failures">à¨²à¨—à¨¾à¨¤à¨¾à¨° à¨…à¨¸à¨«à¨²à¨¤à¨¾à¨µà¨¾à¨‚</string>
     <string name="settings_task_details_created">à¨¬à¨£à¨¾à¨‡à¨† à¨—à¨¿à¨†</string>

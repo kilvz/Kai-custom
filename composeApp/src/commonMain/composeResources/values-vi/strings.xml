@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">Tháº¥t báº¡i: %1$s</string>
     <string name="sms_draft_banner_dismiss">ÄÃ³ng</string>
     <string name="litert_error_download_incomplete">Táº£i xuá»‘ng chÆ°a hoÃ n táº¥t. Vui lÃ²ng thá»­ láº¡i.</string>
+    <string name="litert_error_checksum_mismatch">Bản tải xuống không vượt qua kiểm tra tính toàn vẹn và đã bị loại bỏ. Vui lòng thử lại.</string>
+    <string name="litert_error_model_integrity">Mô hình này không vượt qua kiểm tra tính toàn vẹn nên không được tải. Hãy xóa trong Cài đặt và tải xuống lại.</string>
     <string name="litert_error_network">Táº£i xuá»‘ng tháº¥t báº¡i. Kiá»ƒm tra káº¿t ná»‘i máº¡ng vÃ  thá»­ láº¡i.</string>
     <string name="settings_task_details_consecutive_failures">Sá»‘ láº§n tháº¥t báº¡i liÃªn tiáº¿p</string>
     <string name="settings_task_details_created">ÄÃ£ táº¡o</string>

@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">NeizdevÄs: %1$s</string>
     <string name="sms_draft_banner_dismiss">AizvÄ“rt</string>
     <string name="litert_error_download_incomplete">LejupielÄde nav pabeigta. MÄ“Ä£iniet vÄ“lreiz.</string>
+    <string name="litert_error_checksum_mismatch">Lejupielāde neizturēja integritātes pārbaudi un tika atmesta. Lūdzu, mēģiniet vēlreiz.</string>
+    <string name="litert_error_model_integrity">Šis modelis neizturēja integritātes pārbaudi un netika ielādēts. Izdzēsiet to iestatījumos un lejupielādējiet vēlreiz.</string>
     <string name="litert_error_network">LejupielÄde neizdevÄs. PÄrbaudiet tÄ«kla savienojumu un mÄ“Ä£iniet vÄ“lreiz.</string>
     <string name="settings_task_details_consecutive_failures">SecÄ«gas neveiksmes</string>
     <string name="settings_task_details_created">Izveidots</string>

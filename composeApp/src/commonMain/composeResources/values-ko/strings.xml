@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">ì‹¤íŒ¨: %1$s</string>
     <string name="sms_draft_banner_dismiss">ë‹«ê¸°</string>
     <string name="litert_error_download_incomplete">ë‹¤ìš´ë¡œë“œê°€ ì™„ë£Œë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹œë„í•´ ì£¼ì„¸ìš”.</string>
+    <string name="litert_error_checksum_mismatch">다운로드가 무결성 검사에 실패하여 폐기되었습니다. 다시 시도해 주세요.</string>
+    <string name="litert_error_model_integrity">이 모델은 무결성 검사에 실패하여 불러오지 못했습니다. 설정에서 삭제한 후 다시 다운로드해 주세요.</string>
     <string name="litert_error_network">ë‹¤ìš´ë¡œë“œì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. ë„¤íŠ¸ì›Œí¬ ì—°ê²°ì„ í™•ì¸í•˜ê³  ë‹¤ì‹œ ì‹œë„í•´ ì£¼ì„¸ìš”.</string>
     <string name="settings_task_details_consecutive_failures">ì—°ì† ì‹¤íŒ¨ íšŸìˆ˜</string>
     <string name="settings_task_details_created">ìƒì„±ë¨</string>

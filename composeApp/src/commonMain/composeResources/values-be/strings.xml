@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">ÐŸÐ°Ð¼Ñ‹Ð»ÐºÐ°: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ð—Ð°ÐºÑ€Ñ‹Ñ†ÑŒ</string>
     <string name="litert_error_download_incomplete">Ð¡Ð¿Ð°Ð¼Ð¿Ð¾ÑžÐºÐ° Ð½Ðµ Ð·Ð°Ð²ÐµÑ€ÑˆÐ°Ð½Ð°. ÐŸÐ°ÑÐ¿Ñ€Ð°Ð±ÑƒÐ¹Ñ†Ðµ ÑÑˆÑ‡Ñ Ñ€Ð°Ð·.</string>
+    <string name="litert_error_checksum_mismatch">Спампоўка не прайшла праверку цэласнасці і была адхілена. Калі ласка, паспрабуйце яшчэ раз.</string>
+    <string name="litert_error_model_integrity">Гэтая мадэль не прайшла праверку цэласнасці і не была загружана. Выдаліце яе ў наладах і спампуйце зноў.</string>
     <string name="litert_error_network">Ð¡Ð¿Ð°Ð¼Ð¿Ð¾ÑžÐºÐ° Ð½Ðµ Ð°Ñ‚Ñ€Ñ‹Ð¼Ð°Ð»Ð°ÑÑ. ÐŸÑ€Ð°Ð²ÐµÑ€Ñ†Ðµ Ð¿Ð°Ð´ÐºÐ»ÑŽÑ‡ÑÐ½Ð½Ðµ Ð´Ð° ÑÐµÑ‚ÐºÑ– Ñ– Ð¿Ð°ÑÐ¿Ñ€Ð°Ð±ÑƒÐ¹Ñ†Ðµ Ð·Ð½Ð¾Ñž.</string>
     <string name="settings_task_details_consecutive_failures">Ð—Ð±Ð¾ÑÑž Ð·Ð°Ð¿Ð°Ñ€</string>
     <string name="settings_task_details_created">Ð¡Ñ‚Ð²Ð¾Ñ€Ð°Ð½Ð°</string>

@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">Nepavyko: %1$s</string>
     <string name="sms_draft_banner_dismiss">UÅ¾daryti</string>
     <string name="litert_error_download_incomplete">Atsisiuntimas nebaigtas. Bandykite dar kartÄ….</string>
+    <string name="litert_error_checksum_mismatch">Atsisiuntimas neišlaikė vientisumo patikros ir buvo atmestas. Bandykite dar kartą.</string>
+    <string name="litert_error_model_integrity">Šis modelis neišlaikė vientisumo patikros ir nebuvo įkeltas. Ištrinkite jį nustatymuose ir atsisiųskite iš naujo.</string>
     <string name="litert_error_network">AtsisiÅ³sti nepavyko. Patikrinkite tinklo ryÅ¡Ä¯ ir bandykite dar kartÄ….</string>
     <string name="settings_task_details_consecutive_failures">NesÄ—kmiÅ³ iÅ¡ eilÄ—s</string>
     <string name="settings_task_details_created">Sukurta</string>

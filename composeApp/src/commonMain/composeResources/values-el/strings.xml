@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">Î‘Ï€Î­Ï„Ï…Ï‡Îµ: %1$s</string>
     <string name="sms_draft_banner_dismiss">ÎšÎ»ÎµÎ¯ÏƒÎ¹Î¼Î¿</string>
     <string name="litert_error_download_incomplete">Î— Î»Î®ÏˆÎ· Î´ÎµÎ½ Î¿Î»Î¿ÎºÎ»Î·ÏÏŽÎ¸Î·ÎºÎµ. Î”Î¿ÎºÎ¹Î¼Î¬ÏƒÏ„Îµ Î¾Î±Î½Î¬.</string>
+    <string name="litert_error_checksum_mismatch">Η λήψη απέτυχε στον έλεγχο ακεραιότητας και απορρίφθηκε. Δοκιμάστε ξανά.</string>
+    <string name="litert_error_model_integrity">Αυτό το μοντέλο απέτυχε στον έλεγχο ακεραιότητας και δεν φορτώθηκε. Διαγράψτε το στις Ρυθμίσεις και κατεβάστε το ξανά.</string>
     <string name="litert_error_network">Î— Î»Î®ÏˆÎ· Î±Ï€Î­Ï„Ï…Ï‡Îµ. Î•Î»Î­Î³Î¾Ï„Îµ Ï„Î· ÏƒÏÎ½Î´ÎµÏƒÎ· Î´Î¹ÎºÏ„ÏÎ¿Ï… ÎºÎ±Î¹ Î´Î¿ÎºÎ¹Î¼Î¬ÏƒÏ„Îµ Î¾Î±Î½Î¬.</string>
     <string name="settings_task_details_consecutive_failures">Î”Î¹Î±Î´Î¿Ï‡Î¹ÎºÎ­Ï‚ Î±Ï€Î¿Ï„Ï…Ï‡Î¯ÎµÏ‚</string>
     <string name="settings_task_details_created">Î”Î·Î¼Î¹Î¿Ï…ÏÎ³Î®Î¸Î·ÎºÎµ</string>

@@ -304,6 +304,8 @@
     <string name="sms_draft_banner_failed">ÐžÑˆÐ¸Ð±ÐºÐ°: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ</string>
     <string name="litert_error_download_incomplete">Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð½Ðµ Ð·Ð°Ð²ÐµÑ€ÑˆÐµÐ½Ð°. ÐŸÐ¾Ð¿Ñ€Ð¾Ð±ÑƒÐ¹Ñ‚Ðµ ÐµÑ‰Ñ‘ Ñ€Ð°Ð·.</string>
+    <string name="litert_error_checksum_mismatch">Загрузка не прошла проверку целостности и была отклонена. Пожалуйста, попробуйте ещё раз.</string>
+    <string name="litert_error_model_integrity">Эта модель не прошла проверку целостности и не была загружена. Удалите её в настройках и скачайте заново.</string>
     <string name="litert_error_network">Ð—Ð°Ð³Ñ€ÑƒÐ·ÐºÐ° Ð½Ðµ ÑƒÐ´Ð°Ð»Ð°ÑÑŒ. ÐŸÑ€Ð¾Ð²ÐµÑ€ÑŒÑ‚Ðµ Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ Ðº ÑÐµÑ‚Ð¸ Ð¸ Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð¸Ñ‚Ðµ Ð¿Ð¾Ð¿Ñ‹Ñ‚ÐºÑƒ.</string>
     <string name="settings_task_details_consecutive_failures">Ð¡Ð±Ð¾ÐµÐ² Ð¿Ð¾Ð´Ñ€ÑÐ´</string>
     <string name="settings_task_details_created">Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¾</string>

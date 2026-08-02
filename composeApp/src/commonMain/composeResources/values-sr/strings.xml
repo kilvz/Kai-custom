@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">ÐÐµÑƒÑÐ¿ÐµÐ»Ð¾: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ð—Ð°Ñ‚Ð²Ð¾Ñ€Ð¸</string>
     <string name="litert_error_download_incomplete">ÐŸÑ€ÐµÑƒÐ·Ð¸Ð¼Ð°ÑšÐµ Ð½Ð¸Ñ˜Ðµ Ð·Ð°Ð²Ñ€ÑˆÐµÐ½Ð¾. ÐŸÐ¾ÐºÑƒÑˆÐ°Ñ˜Ñ‚Ðµ Ð¿Ð¾Ð½Ð¾Ð²Ð¾.</string>
+    <string name="litert_error_checksum_mismatch">Преузимање није прошло проверу интегритета и одбачено је. Молимо покушајте поново.</string>
+    <string name="litert_error_model_integrity">Овај модел није прошао проверу интегритета и није учитан. Обришите га у подешавањима и преузмите поново.</string>
     <string name="litert_error_network">ÐŸÑ€ÐµÑƒÐ·Ð¸Ð¼Ð°ÑšÐµ Ð½Ð¸Ñ˜Ðµ ÑƒÑÐ¿ÐµÐ»Ð¾. ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚Ðµ Ð¼Ñ€ÐµÐ¶Ð½Ñƒ Ð²ÐµÐ·Ñƒ Ð¸ Ð¿Ð¾ÐºÑƒÑˆÐ°Ñ˜Ñ‚Ðµ Ð¿Ð¾Ð½Ð¾Ð²Ð¾.</string>
     <string name="settings_task_details_consecutive_failures">Ð£Ð·Ð°ÑÑ‚Ð¾Ð¿Ð½Ð¸ Ð½ÐµÑƒÑÐ¿ÐµÑÐ¸</string>
     <string name="settings_task_details_created">ÐšÑ€ÐµÐ¸Ñ€Ð°Ð½Ð¾</string>

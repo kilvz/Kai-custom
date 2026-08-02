@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">Ù†Ø§Ú©Ø§Ù…: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ø¨Ø±Ø®Ø§Ø³Øª Ú©Ø±ÛŒÚº</string>
     <string name="litert_error_download_incomplete">ÚˆØ§Ø¤Ù† Ù„ÙˆÚˆ Ù†Ø§Ù…Ú©Ù…Ù„ ÛÛ’Û” Ø¨Ø±Ø§Û Ú©Ø±Ù… Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”</string>
+    <string name="litert_error_checksum_mismatch">ڈاؤن لوڈ سالمیت کی جانچ میں ناکام رہا اور اسے رد کر دیا گیا۔ براہ کرم دوبارہ کوشش کریں۔</string>
+    <string name="litert_error_model_integrity">یہ ماڈل سالمیت کی جانچ میں ناکام رہا اور لوڈ نہیں ہوا۔ اسے ترتیبات میں حذف کریں اور دوبارہ ڈاؤن لوڈ کریں۔</string>
     <string name="litert_error_network">ÚˆØ§Ø¤Ù† Ù„ÙˆÚˆ Ù†Ø§Ú©Ø§Ù… ÛÙˆ Ú¯ÛŒØ§Û” Ø§Ù¾Ù†Ø§ Ù†ÛŒÙ¹ ÙˆØ±Ú© Ú©Ù†Ú©Ø´Ù† Ú†ÛŒÚ© Ú©Ø±ÛŒÚº Ø§ÙˆØ± Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ Ú©Ø±ÛŒÚºÛ”</string>
     <string name="settings_task_details_consecutive_failures">Ù…Ø³Ù„Ø³Ù„ Ù†Ø§Ú©Ø§Ù…ÛŒØ§Úº</string>
     <string name="settings_task_details_created">Ø¨Ù†Ø§ÛŒØ§ Ú¯ÛŒØ§</string>

@@ -305,6 +305,8 @@
     <string name="sms_draft_banner_failed">áŠ áˆá‰°áˆ³áŠ«áˆ: %1$s</string>
     <string name="sms_draft_banner_dismiss">á‹áŒ‹</string>
     <string name="litert_error_download_incomplete">áˆ›á‹áˆ¨á‹µ áŠ áˆá‰°áŒ áŠ“á‰€á‰€áˆá¢ áŠ¥á‰£áŠ­á‹Ž áŠ¥áŠ•á‹°áŒˆáŠ“ á‹­áˆžáŠ­áˆ©á¢</string>
+    <string name="litert_error_checksum_mismatch">ማውረዱ የታማኝነት ምርመራውን አላለፈም እና ተጥሏል። እባክዎ እንደገና ይሞክሩ።</string>
+    <string name="litert_error_model_integrity">ይህ ሞዴል የታማኝነት ምርመራውን አላለፈም እና አልተጫነም። በቅንብሮች ውስጥ ይሰርዙት እና እንደገና ያውርዱት።</string>
     <string name="litert_error_network">áˆ›á‹áˆ¨á‹µ áŠ áˆá‰°áˆ³áŠ«áˆá¢ á‹¨áŠ á‹á‰³áˆ¨ áˆ˜áˆ¨á‰¥ áŒáŠ•áŠ™áŠá‰µá‹ŽáŠ• á‹­áˆá‰µáˆ¹ áŠ¥áŠ“ áŠ¥áŠ•á‹°áŒˆáŠ“ á‹­áˆžáŠ­áˆ©á¢</string>
     <string name="settings_task_details_consecutive_failures">á‰°áŠ¨á‰³á‰³á‹­ á‹á‹µá‰€á‰¶á‰½</string>
     <string name="settings_task_details_created">á‰°áˆáŒ áˆ¨</string>

@@ -303,6 +303,8 @@
     <string name="sms_draft_banner_failed">Ð¡Ó™Ñ‚ÑÑ–Ð·: %1$s</string>
     <string name="sms_draft_banner_dismiss">Ð–Ð°Ð±Ñƒ</string>
     <string name="litert_error_download_incomplete">Ð–Ò¯ÐºÑ‚ÐµÑƒ Ð°ÑÒ›Ñ‚Ð°Ð»Ð¼Ð°Ð´Ñ‹. ÒšÐ°Ð¹Ñ‚Ð°Ð»Ð°Ð¿ ÐºÓ©Ñ€Ñ–Ò£Ñ–Ð·.</string>
+    <string name="litert_error_checksum_mismatch">Жүктеу тұтастық тексерісінен өтпеді және жойылды. Қайталап көріңіз.</string>
+    <string name="litert_error_model_integrity">Бұл модель тұтастық тексерісінен өтпеді және жүктелмеді. Оны параметрлерден жойып, қайта жүктеп алыңыз.</string>
     <string name="litert_error_network">Ð–Ò¯ÐºÑ‚ÐµÑƒ ÑÓ™Ñ‚ÑÑ–Ð· Ð±Ð¾Ð»Ð´Ñ‹. Ð–ÐµÐ»Ñ– Ò›Ð¾ÑÑ‹Ð»Ñ‹Ð¼Ñ‹Ð½ Ñ‚ÐµÐºÑÐµÑ€Ñ–Ð¿, Ò›Ð°Ð¹Ñ‚Ð°Ð»Ð°Ð¿ ÐºÓ©Ñ€Ñ–Ò£Ñ–Ð·.</string>
     <string name="settings_task_details_consecutive_failures">ÒšÐ°Ñ‚Ð°Ñ€Ñ‹Ð½Ð°Ð½ ÑÓ™Ñ‚ÑÑ–Ð·Ð´Ñ–ÐºÑ‚ÐµÑ€</string>
     <string name="settings_task_details_created">Ð–Ð°ÑÐ°Ð»Ð´Ñ‹</string>
