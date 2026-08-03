@@ -1,6 +1,6 @@
 ﻿# Notifications
 
-**Last verified:** 2026-07-18
+**Last verified:** 2026-08-03
 
 > Reading notifications is **Android-only**. Kai declares `BIND_NOTIFICATION_LISTENER_SERVICE` in the `foss` flavor; iOS, desktop, and wasm return no-op stubs.
 
@@ -122,6 +122,7 @@ There is **no poll interval slider** â€” the listener is push-driven.
 | `androidApp/src/foss/AndroidManifest.xml` | Declares `BIND_NOTIFICATION_LISTENER_SERVICE` and registers `KaiNotificationListenerService` |
 | `composeApp/src/commonMain/.../data/NotificationModels.kt` | `NotificationRecord`, `NotificationSyncState` data classes |
 | `composeApp/src/commonMain/.../data/NotificationStore.kt` | Pending queue + broader store + retention sweeps |
+| `composeApp/src/commonMain/.../data/SettingsJson.kt` | Shared settings-backed JSON persistence: decode-or-default, encode-and-write, locked read-modify-write |
 | `composeApp/src/commonMain/.../notifications/NotificationReader.kt` | Expect interface for `getById`, `search`, `currentRecords` |
 | `composeApp/src/androidMain/.../notifications/NotificationReader.android.kt` | Reads from the in-memory + persisted listener store |
 | `composeApp/src/androidMain/.../notifications/KaiNotificationListenerService.kt` | `NotificationListenerService` subclass; visibility/hard-block filter + write to `NotificationStore` |

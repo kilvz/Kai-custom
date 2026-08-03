@@ -1,6 +1,7 @@
 package com.kai.custom.mcp
 
 import com.kai.custom.data.AppSettings
+import com.kai.custom.data.SettingsJsonList
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import kotlinx.coroutines.async
@@ -25,8 +26,15 @@ class McpServerManager(private val appSettings: AppSettings) {
     private val clients = mutableMapOf<String, McpClient>()
     private val discoveredTools = mutableMapOf<String, List<McpToolMetadata>>()
 
-    private var cachedServersJson: String? = null
-    private var cachedServers: List<McpServerConfig> = emptyList()
+    // NOTE: the mutators below are read-modify-write without a lock. Making them safe means making
+    // them suspend, which ripples through DataRepository and the settings UI — tracked separately.
+    private val servers = SettingsJsonList(
+        read = appSettings::getMcpServersJson,
+        write = appSettings::setMcpServersJson,
+        itemSerializer = McpServerConfig.serializer(),
+        label = "McpServerManager",
+        json = json,
+    )
 
     /** Servers managed internally (not persisted to settings, not user-removable). */
     private val builtInServers = mutableMapOf<String, McpServerConfig>()
@@ -37,29 +45,12 @@ class McpServerManager(private val appSettings: AppSettings) {
     }
 
     /** User-configured servers from AppSettings (excludes built-in). */
-    fun getServers(): List<McpServerConfig> {
-        val jsonStr = appSettings.getMcpServersJson()
-        if (jsonStr.isBlank()) return emptyList()
-        if (jsonStr == cachedServersJson) return cachedServers
-        return try {
-            json.decodeFromString<List<McpServerConfig>>(jsonStr).also {
-                cachedServersJson = jsonStr
-                cachedServers = it
-            }
-        } catch (_: Exception) {
-            emptyList()
-        }
-    }
+    fun getServers(): List<McpServerConfig> = servers.get()
 
     /** All servers including built-in. */
     private fun getAllServers(): List<McpServerConfig> = getServers() + builtInServers.values.toList()
 
-    private fun saveServers(servers: List<McpServerConfig>) {
-        val jsonStr = json.encodeToString(kotlinx.serialization.builtins.ListSerializer(McpServerConfig.serializer()), servers)
-        appSettings.setMcpServersJson(jsonStr)
-        cachedServersJson = jsonStr
-        cachedServers = servers
-    }
+    private fun saveServers(servers: List<McpServerConfig>) = this.servers.set(servers)
 
     fun addServer(name: String, url: String, headers: Map<String, String>): McpServerConfig {
         val servers = getServers().toMutableList()
