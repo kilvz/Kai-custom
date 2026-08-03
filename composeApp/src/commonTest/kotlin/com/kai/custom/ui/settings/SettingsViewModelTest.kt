@@ -6,19 +6,20 @@ import com.kai.custom.data.Service
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.testutil.FakeDataRepository
 import com.kai.custom.testutil.TestWakeWordController
-import com.kai.custom.tools.NotificationPermissionController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import com.kai.custom.tools.AppPermission
+import com.kai.custom.tools.PermissionController
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -30,8 +31,7 @@ class SettingsViewModelTest {
         override fun start() {}
         override fun stop() {}
     }
-    private val fakeNotificationPermissionController = NotificationPermissionController()
-    private val fakeWakeWordController = TestWakeWordController()
+    private val fakeNotificationPermissionController = PermissionController(AppPermission.POST_NOTIFICATIONS)
 
     @BeforeTest
     fun setup() {

@@ -28,6 +28,7 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.timeout
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -40,6 +41,8 @@ import io.ktor.http.content.TextContent
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -48,8 +51,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlin.time.Duration.Companion.seconds
-import kotlin.random.Random
 
 private fun openCodeMeta(service: Service): Map<String, String> {
     if (service != Service.OpenCode) return emptyMap()
@@ -68,6 +69,35 @@ data class ServiceCredentials(
     val modelId: String = "",
     val baseUrl: String = "",
 )
+
+/** Applies a per-request override of the client-wide timeouts, when the caller supplied one. */
+private fun HttpRequestBuilder.applyTimeout(requestTimeoutMs: Long?) {
+    requestTimeoutMs ?: return
+    timeout {
+        requestTimeoutMillis = requestTimeoutMs
+        socketTimeoutMillis = requestTimeoutMs
+    }
+}
+
+/**
+ * Converts declared tools into a provider's request shape, dropping any whose schema can't be
+ * represented rather than failing the whole request, and returning null for an empty list so the
+ * field is omitted from the payload entirely.
+ */
+private fun <T> List<Tool>.toRequestTools(convert: (Tool) -> T): List<T>? = mapNotNull { runCatching { convert(it) }.getOrNull() }.ifEmpty { null }
+
+/**
+ * Shared failure mapping for the OpenAI-compatible endpoints that have no bespoke error handling:
+ * API exceptions propagate as-is, anything else (I/O, serialization) becomes a connection error.
+ * Kept separate from [Requests.openAICompatibleChat], which additionally distinguishes timeouts.
+ */
+private inline fun <T> openAICompatibleResult(block: () -> Result<T>): Result<T> = try {
+    block()
+} catch (e: OpenAICompatibleApiException) {
+    Result.failure(e)
+} catch (e: Exception) {
+    Result.failure(OpenAICompatibleConnectionException())
+}
 
 class Requests {
 
@@ -159,18 +189,12 @@ class Requests {
         val response: HttpResponse =
             defaultClient.post("${Service.Gemini.chatUrl}$selectedModelId:generateContent") {
                 header("x-goog-api-key", apiKey)
-                requestTimeoutMs?.let {
-                    timeout {
-                        requestTimeoutMillis = it
-                        socketTimeoutMillis = it
-                    }
-                }
+                applyTimeout(requestTimeoutMs)
                 contentType(ContentType.Application.Json)
                 setBody(
                     GeminiChatRequestDto(
                         contents = messages,
-                        tools = tools.mapNotNull { runCatching { it.toGeminiTool() }.getOrNull() }
-                            .ifEmpty { null },
+                        tools = tools.toRequestTools { it.toGeminiTool() },
                         systemInstruction = systemContent,
                     ),
                 )
@@ -221,12 +245,7 @@ class Requests {
         val url = resolveUrl(service, credentials, service.chatUrl)
         val response: HttpResponse =
             defaultClient.post(url) {
-                requestTimeoutMs?.let {
-                    timeout {
-                        requestTimeoutMillis = it
-                        socketTimeoutMillis = it
-                    }
-                }
+                applyTimeout(requestTimeoutMs)
                 contentType(ContentType.Application.Json)
                 apiKey?.let { bearerAuth(it) }
                 customHeaders.forEach { (k, v) -> header(k, v) }
@@ -235,8 +254,7 @@ class Requests {
                     OpenAICompatibleChatRequestDto(
                         messages = messages,
                         model = model,
-                        tools = tools.mapNotNull { runCatching { it.toRequestTool() }.getOrNull() }
-                            .ifEmpty { null },
+                        tools = tools.toRequestTools { it.toRequestTool() },
                         maxTokens = maxTokens,
                     ),
                 )
@@ -257,7 +275,7 @@ class Requests {
     suspend fun getOpenAICompatibleModels(
         service: Service,
         credentials: ServiceCredentials,
-    ): Result<OpenAICompatibleModelResponseDto> = try {
+    ): Result<OpenAICompatibleModelResponseDto> = openAICompatibleResult {
         val modelsUrl = service.modelsUrl
             ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for ${service.displayName}"))
         val url = resolveUrl(service, credentials, modelsUrl)
@@ -276,13 +294,9 @@ class Requests {
         } else {
             handleOpenAICompatibleError(service, credentials, response)
         }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
     }
 
-    suspend fun validateOpenRouterApiKey(credentials: ServiceCredentials): Result<Unit> = try {
+    suspend fun validateOpenRouterApiKey(credentials: ServiceCredentials): Result<Unit> = openAICompatibleResult {
         val apiKey = credentials.apiKey.ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
         val response: HttpResponse = defaultClient.get("https://openrouter.ai/api/v1/auth/key") {
             bearerAuth(apiKey)
@@ -295,10 +309,6 @@ class Requests {
                 else -> throw OpenAICompatibleGenericException("Failed to validate OpenRouter API key: ${response.status}")
             }
         }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
     }
 
     /**
@@ -307,7 +317,7 @@ class Requests {
      * invalid keys return 401/403; a valid key typically yields 400/422 on the empty messages
      * array — which we treat as connected without spending tokens on a real completion.
      */
-    suspend fun validatePerplexityApiKey(credentials: ServiceCredentials): Result<Unit> = try {
+    suspend fun validatePerplexityApiKey(credentials: ServiceCredentials): Result<Unit> = openAICompatibleResult {
         val apiKey = credentials.apiKey.ifEmpty { throw OpenAICompatibleInvalidApiKeyException() }
         val response: HttpResponse = defaultClient.post(Service.Perplexity.chatUrl) {
             bearerAuth(apiKey)
@@ -319,10 +329,6 @@ class Requests {
             in 200..499 -> Result.success(Unit)
             else -> throw OpenAICompatibleGenericException("Failed to validate Perplexity API key: ${response.status}")
         }
-    } catch (e: OpenAICompatibleApiException) {
-        Result.failure(e)
-    } catch (e: Exception) {
-        Result.failure(OpenAICompatibleConnectionException())
     }
 
     // endregion
@@ -365,12 +371,7 @@ class Requests {
         val apiKey = credentials.apiKey.ifEmpty { throw AnthropicInvalidApiKeyException() }
         val response: HttpResponse =
             defaultClient.post(Service.Anthropic.chatUrl) {
-                requestTimeoutMs?.let {
-                    timeout {
-                        requestTimeoutMillis = it
-                        socketTimeoutMillis = it
-                    }
-                }
+                applyTimeout(requestTimeoutMs)
                 contentType(ContentType.Application.Json)
                 header("x-api-key", apiKey)
                 header("anthropic-version", "2023-06-01")
@@ -380,8 +381,7 @@ class Requests {
                         messages = messages,
                         max_tokens = maxTokens ?: 8192,
                         system = systemInstruction,
-                        tools = tools.mapNotNull { runCatching { it.toAnthropicTool() }.getOrNull() }
-                            .ifEmpty { null },
+                        tools = tools.toRequestTools { it.toAnthropicTool() },
                     ),
                 )
             }

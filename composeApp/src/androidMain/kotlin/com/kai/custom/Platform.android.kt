@@ -7,35 +7,32 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.PixelFormat
+import android.hardware.display.DisplayManager
+import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.provider.ContactsContract
 import android.provider.MediaStore
 import android.speech.RecognitionListener
-import android.hardware.display.DisplayManager
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
-import android.hardware.display.VirtualDisplay
-import android.media.ImageReader
-import android.media.projection.MediaProjection
-import android.media.projection.MediaProjectionManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.PixelFormat
-import android.os.Handler
-import android.os.Looper
-import android.util.DisplayMetrics
-import android.view.WindowManager
-import java.io.FileOutputStream
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.telephony.TelephonyManager
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.draganddrop.DragAndDropEvent
@@ -67,10 +64,10 @@ import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSender
 import com.kai.custom.sms.declaresReadSms
-import com.kai.custom.tools.AdbTool
 import com.kai.custom.tools.ActivityResultBridge
+import com.kai.custom.tools.AdbTool
+import com.kai.custom.tools.AppPermission
 import com.kai.custom.tools.ApplyPatchTool
-import com.kai.custom.tools.CalendarPermissionController
 import com.kai.custom.tools.CalendarRepository
 import com.kai.custom.tools.CalendarResult
 import com.kai.custom.tools.CommonTools
@@ -81,15 +78,16 @@ import com.kai.custom.tools.GrepTool
 import com.kai.custom.tools.HeartbeatTools
 import com.kai.custom.tools.InternetSearchTool
 import com.kai.custom.tools.NotificationHelper
-import com.kai.custom.tools.NotificationPermissionController
 import com.kai.custom.tools.NotificationResult
 import com.kai.custom.tools.NotificationTools
 import com.kai.custom.tools.OpenCodeTool
 import com.kai.custom.tools.OpenFileTool
+import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.PhoneTools
 import com.kai.custom.tools.ProcessManagerTool
 import com.kai.custom.tools.ReadFileTool
 import com.kai.custom.tools.RootTool
+import com.kai.custom.tools.SandboxFileTransferTool
 import com.kai.custom.tools.SchedulingTools
 import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SmsTools
@@ -102,7 +100,6 @@ import com.kai.custom.tools.TodoWriteTool
 import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.tools.WebFetchTool
 import com.kai.custom.tools.WebSearchTool
-import com.kai.custom.tools.SandboxFileTransferTool
 import com.kai.custom.tools.WriteFileTool
 import com.russhwolf.settings.BuildConfig
 import com.russhwolf.settings.Settings
@@ -121,6 +118,7 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.readAvailable
+import java.io.FileOutputStream
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_create_calendar_event_description
 import kai.composeapp.generated.resources.tool_create_calendar_event_name
@@ -146,12 +144,15 @@ import kai.composeapp.generated.resources.tool_send_notification_description
 import kai.composeapp.generated.resources.tool_send_notification_name
 import kai.composeapp.generated.resources.tool_set_alarm_description
 import kai.composeapp.generated.resources.tool_set_alarm_name
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.java.KoinJavaComponent
 import org.koin.java.KoinJavaComponent.inject
-import kotlin.coroutines.CoroutineContext
 
 actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(OkHttp) {
     config(this)
@@ -314,7 +315,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             description = "Send a push notification to the device",
             nameRes = Res.string.tool_send_notification_name,
             descriptionRes = Res.string.tool_send_notification_description,
-            isEnabled = NotificationPermissionController().hasPermission(),
+            isEnabled = PermissionController(AppPermission.POST_NOTIFICATIONS).hasPermission(),
         ),
     )
     add(
@@ -324,7 +325,7 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
             description = "Create a calendar event on the user's device",
             nameRes = Res.string.tool_create_calendar_event_name,
             descriptionRes = Res.string.tool_create_calendar_event_description,
-            isEnabled = CalendarPermissionController().hasPermission(),
+            isEnabled = PermissionController(AppPermission.CALENDAR).hasPermission(),
         ),
     )
     add(
@@ -403,7 +404,8 @@ actual fun getAvailableTools(): List<Tool> {
     val sandboxController: SandboxController by inject(SandboxController::class.java)
     val mcpServerManager: McpServerManager by inject(McpServerManager::class.java)
     val taskStore: TaskStore by inject(TaskStore::class.java)
-    val calendarPermissionController: CalendarPermissionController by inject(CalendarPermissionController::class.java)
+    val calendarPermissionController: PermissionController =
+        KoinJavaComponent.get(PermissionController::class.java, permissionQualifier(AppPermission.CALENDAR))
     val calendarRepository = CalendarRepository(context, calendarPermissionController, appSettings.getDefaultCalendarId())
     val emailStore: EmailStore by inject(EmailStore::class.java)
     val toolPermissionBridge: ToolPermissionBridge by inject(ToolPermissionBridge::class.java)
@@ -441,7 +443,8 @@ actual fun getAvailableTools(): List<Tool> {
         }
 
         if (appSettings.isToolEnabled("send_notification")) {
-            val notificationPermissionController: NotificationPermissionController by inject(NotificationPermissionController::class.java)
+            val notificationPermissionController: PermissionController =
+                KoinJavaComponent.get(PermissionController::class.java, permissionQualifier(AppPermission.POST_NOTIFICATIONS))
             val notificationHelper = NotificationHelper(context, notificationPermissionController)
 
             add(

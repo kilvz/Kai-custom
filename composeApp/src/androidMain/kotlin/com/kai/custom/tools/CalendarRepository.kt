@@ -24,8 +24,7 @@ sealed class CalendarResult {
 
 class CalendarRepository(
     private val context: Context,
-    private val permissionController: CalendarPermissionController,
-    private val defaultCalendarId: Long = -1L,
+    private val permissionController: PermissionController,
 ) {
 
     fun hasCalendarPermission(): Boolean {

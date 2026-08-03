@@ -1,5 +1,6 @@
 package com.kai.custom
 
+import com.kai.custom.AutoUpdateManager
 import com.kai.custom.SpeechToText
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ConversationStorage
@@ -17,8 +18,8 @@ import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.TaskStore
 import com.kai.custom.data.TelegramStore
 import com.kai.custom.data.ToolExecutor
-import com.kai.custom.data.createConversationPersistence
 import com.kai.custom.data.WhatsAppStore
+import com.kai.custom.data.createConversationPersistence
 import com.kai.custom.data.dimension.DimensionStore
 import com.kai.custom.data.runMigrations
 import com.kai.custom.email.EmailPoller
@@ -36,15 +37,12 @@ import com.kai.custom.splinterlands.SplinterlandsBattleRunner
 import com.kai.custom.splinterlands.SplinterlandsStore
 import com.kai.custom.telegram.TelegramPoller
 import com.kai.custom.tools.ActivityResultBridge
-import com.kai.custom.tools.CalendarPermissionController
-import com.kai.custom.tools.LocalNetworkPermissionController
+import com.kai.custom.tools.AppPermission
 import com.kai.custom.tools.MicrophonePermissionController
 import com.kai.custom.tools.NotificationListenerController
-import com.kai.custom.AutoUpdateManager
-import com.kai.custom.tools.NotificationPermissionController
-import com.kai.custom.tools.SmsPermissionController
-import com.kai.custom.tools.SmsSendPermissionController
+import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.ToolPermissionBridge
+import com.kai.custom.ui.build.KaiBuildViewModel
 import com.kai.custom.ui.chat.ChatViewModel
 import com.kai.custom.ui.sandbox.SandboxFileBrowserViewModel
 import com.kai.custom.ui.sandbox.SandboxPackagesViewModel
@@ -52,7 +50,6 @@ import com.kai.custom.ui.sandbox.SandboxSessionViewModel
 import com.kai.custom.ui.settings.SandboxViewModel
 import com.kai.custom.ui.settings.SettingsViewModel
 import com.kai.custom.ui.settings.SplinterlandsViewModel
-import com.kai.custom.ui.build.KaiBuildViewModel
 import com.kai.custom.ui.settings.SshViewModel
 import com.kai.custom.wakeword.WakeWordController
 import com.kai.custom.wakeword.createWakeWordController
@@ -65,13 +62,14 @@ import org.koin.dsl.module
 /** Picks the file browser bound to Kai Build's Debian rather than the chat sandbox. */
 val KAI_BUILD_FILES = named("kaiBuildFiles")
 
+/** Qualifier for the [PermissionController] singleton handling [permission]. */
+fun permissionQualifier(permission: AppPermission) = named(permission.name)
+
 val appModule = module {
-    single<CalendarPermissionController> { CalendarPermissionController() }
-    single<NotificationPermissionController> { NotificationPermissionController() }
-    single<LocalNetworkPermissionController> { LocalNetworkPermissionController() }
+    AppPermission.entries.forEach { permission ->
+        single(permissionQualifier(permission)) { PermissionController(permission) }
+    }
     single<AutoUpdateManager> { AutoUpdateManager() }
-    single<SmsPermissionController> { SmsPermissionController() }
-    single<SmsSendPermissionController> { SmsSendPermissionController() }
     single<MicrophonePermissionController> { MicrophonePermissionController() }
     single<ToolPermissionBridge> { ToolPermissionBridge() }
     single<ActivityResultBridge> { ActivityResultBridge() }
@@ -170,8 +168,8 @@ val appModule = module {
             smsStore = get(),
             smsPoller = get(),
             smsReader = get(),
-            smsPermissionController = get(),
-            smsSendPermissionController = get(),
+            smsPermissionController = get(permissionQualifier(AppPermission.READ_SMS)),
+            smsSendPermissionController = get(permissionQualifier(AppPermission.SEND_SMS)),
             smsSender = get(),
             smsDraftStore = get(),
             notificationStore = get(),
@@ -213,7 +211,7 @@ val appModule = module {
     single<SpeechToText> { createSpeechToText() }
     single<WakeWordController> { createWakeWordController() }
     single<SshConnectionManager> { createSshConnectionManager() }
-    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get<NotificationPermissionController>(), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>(), get<AutoUpdateManager>(), localNetworkPermissionController = get<LocalNetworkPermissionController>()) }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get<DebugApiController>(), get(permissionQualifier(AppPermission.POST_NOTIFICATIONS)), get<TaskScheduler>(), get<WakeWordController>(), get<SandboxController>(), get<McpServerManager>(), get<ToolPermissionBridge>(), get<AutoUpdateManager>(), localNetworkPermissionController = get(permissionQualifier(AppPermission.LOCAL_NETWORK))) }
     viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
     viewModel { SshViewModel(get<AppSettings>(), get<SshConnectionManager>()) }
     viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
@@ -223,5 +221,5 @@ val appModule = module {
     // Same browser, second environment: Kai Build's Debian instead of the chat sandbox.
     viewModel(KAI_BUILD_FILES) { SandboxFileBrowserViewModel(get<KaiBuildController>().files) }
     viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
-    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>(), get<WakeWordController>(), localNetworkPermissionController = get<LocalNetworkPermissionController>()) }
+    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), get<SpeechToText>(), get<MicrophonePermissionController>(), get<WakeWordController>(), localNetworkPermissionController = get(permissionQualifier(AppPermission.LOCAL_NETWORK))) }
 }

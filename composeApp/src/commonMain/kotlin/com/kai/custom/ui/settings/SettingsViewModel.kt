@@ -2,11 +2,15 @@ package com.kai.custom.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kai.custom.AutoUpdateManager
 import com.kai.custom.DaemonController
 import com.kai.custom.DebugApiController
+import com.kai.custom.DownloadResult
 import com.kai.custom.Platform
 import com.kai.custom.PttTriggerManager
 import com.kai.custom.SandboxController
+import com.kai.custom.UpdateCheckResult
+import com.kai.custom.Version
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.BehaviorStyle
 import com.kai.custom.data.CharacterType
@@ -16,10 +20,6 @@ import com.kai.custom.data.LanguageStyle
 import com.kai.custom.data.PersonaConfig
 import com.kai.custom.data.RenderMode
 import com.kai.custom.data.Service
-import com.kai.custom.AutoUpdateManager
-import com.kai.custom.Version
-import com.kai.custom.DownloadResult
-import com.kai.custom.UpdateCheckResult
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.supportsAgenticFlows
@@ -55,10 +55,10 @@ import com.kai.custom.requestShizukuPermission
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.skills.parseGitHubSkillUrl
-import com.kai.custom.tools.LocalNetworkPermissionController
-import com.kai.custom.tools.NotificationPermissionController
-import com.kai.custom.tools.isLocalNetworkUrl
+import com.kai.custom.tools.AppPermission
+import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.ToolPermissionBridge
+import com.kai.custom.tools.isLocalNetworkUrl
 import com.kai.custom.wakeword.WakeWordController
 import io.github.vinceglb.filekit.PlatformFile
 import io.ktor.client.call.body
@@ -69,6 +69,9 @@ import io.ktor.serialization.kotlinx.json.json
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.error_unknown
 import kai.composeapp.generated.resources.error_unrecognized_github_repo
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -88,15 +91,11 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.getString
-import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 
 class SettingsViewModel(
     private val dataRepository: DataRepository,
     private val daemonController: DaemonController,
-    private val debugApiController: DebugApiController,
-    private val notificationPermissionController: NotificationPermissionController,
+    private val notificationPermissionController: PermissionController,
     private val taskScheduler: TaskScheduler,
     private val wakeWordController: WakeWordController,
     private val sandboxController: SandboxController,
@@ -104,7 +103,7 @@ class SettingsViewModel(
     private val toolPermissionBridge: ToolPermissionBridge,
     private val autoUpdateManager: AutoUpdateManager,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
-    private val localNetworkPermissionController: LocalNetworkPermissionController = LocalNetworkPermissionController(),
+    private val localNetworkPermissionController: PermissionController = PermissionController(AppPermission.LOCAL_NETWORK),
 ) : ViewModel() {
 
     private var connectionCheckJobs: MutableMap<String, Job> = mutableMapOf()

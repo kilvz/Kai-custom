@@ -15,8 +15,9 @@ import com.kai.custom.network.UiError
 import com.kai.custom.network.shouldShowFreeProviderSuggestions
 import com.kai.custom.network.toUiError
 import com.kai.custom.skills.SkillManifest
-import com.kai.custom.tools.LocalNetworkPermissionController
+import com.kai.custom.tools.AppPermission
 import com.kai.custom.tools.MicrophonePermissionController
+import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.isLocalNetworkUrl
 import com.kai.custom.ui.markdown.KaiUiBlock
 import com.kai.custom.ui.markdown.KaiUiError
@@ -31,6 +32,8 @@ import kai.composeapp.generated.resources.error_local_network_permission
 import kai.composeapp.generated.resources.error_unsupported_file_type
 import kai.composeapp.generated.resources.litert_no_model_warning
 import kai.composeapp.generated.resources.microphone_permission_required
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
@@ -48,8 +51,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
-import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration.Companion.seconds
 
 class ChatViewModel(
     private val dataRepository: DataRepository,
@@ -58,7 +59,7 @@ class ChatViewModel(
     private val microphonePermissionController: MicrophonePermissionController,
     private val wakeWordController: WakeWordController,
     private val backgroundDispatcher: CoroutineContext = getBackgroundDispatcher(),
-    private val localNetworkPermissionController: LocalNetworkPermissionController = LocalNetworkPermissionController(),
+    private val localNetworkPermissionController: PermissionController = PermissionController(AppPermission.LOCAL_NETWORK),
 ) : ViewModel() {
 
     private val actions = ChatActions(

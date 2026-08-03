@@ -38,20 +38,13 @@ import coil3.svg.SvgDecoder
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.tools.ActivityResultBridge
-import com.kai.custom.tools.CalendarPermissionController
-import com.kai.custom.tools.LocalNetworkPermissionController
+import com.kai.custom.tools.AppPermission
 import com.kai.custom.tools.MicrophonePermissionController
-import com.kai.custom.tools.NotificationPermissionController
+import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.SetupActivityResultHandler
-import com.kai.custom.tools.SetupCalendarPermissionHandler
-import com.kai.custom.tools.SetupLocalNetworkPermissionHandler
 import com.kai.custom.tools.SetupMicrophonePermissionHandler
-import com.kai.custom.tools.SetupNotificationPermissionHandler
-import com.kai.custom.tools.SetupSmsPermissionHandler
-import com.kai.custom.tools.SetupSmsSendPermissionHandler
+import com.kai.custom.tools.SetupPermissionHandler
 import com.kai.custom.tools.SetupToolPermissionHandler
-import com.kai.custom.tools.SmsPermissionController
-import com.kai.custom.tools.SmsSendPermissionController
 import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.ui.DarkColorScheme
 import com.kai.custom.ui.LightColorScheme
@@ -139,20 +132,9 @@ private fun AppContent(
     }
 
     // Set up permission handlers
-    val calendarPermissionController = koinInject<CalendarPermissionController>()
-    SetupCalendarPermissionHandler(calendarPermissionController)
-
-    val notificationPermissionController = koinInject<NotificationPermissionController>()
-    SetupNotificationPermissionHandler(notificationPermissionController)
-
-    val localNetworkPermissionController = koinInject<LocalNetworkPermissionController>()
-    SetupLocalNetworkPermissionHandler(localNetworkPermissionController)
-
-    val smsPermissionController = koinInject<SmsPermissionController>()
-    SetupSmsPermissionHandler(smsPermissionController)
-
-    val smsSendPermissionController = koinInject<SmsSendPermissionController>()
-    SetupSmsSendPermissionHandler(smsSendPermissionController)
+    AppPermission.entries.forEach { permission ->
+        SetupPermissionHandler(koinInject<PermissionController>(permissionQualifier(permission)))
+    }
 
     val microphonePermissionController = koinInject<MicrophonePermissionController>()
     SetupMicrophonePermissionHandler(microphonePermissionController)
