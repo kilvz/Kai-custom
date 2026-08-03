@@ -160,7 +160,13 @@ private fun bailoutPrompt(reason: BailoutReason): String = when (reason) {
 private interface ToolLoopStrategy {
     suspend fun chat(history: List<History>, systemPrompt: String?): LoopChatResult
     suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String
-    fun trimAfterToolResults(history: List<History>, systemPrompt: String?): List<History> = history
+
+    /**
+     * Context budget used to trim raw history between tool rounds. Providers that send the
+     * history as-is (Gemini, Anthropic) declare their window here; the OpenAI-compatible
+     * strategy trims the built message list inside [chat] instead and leaves this null.
+     */
+    val historyContextWindowTokens: Int? get() = null
 }
 
 class RemoteDataRepository(
@@ -681,41 +687,78 @@ class RemoteDataRepository(
         val creds = instanceCredentials(instanceId, service)
         val tools = if (supportsTools(creds.modelId)) getAvailableTools() else emptyList()
 
+        if (tools.isEmpty()) {
+            return plainChat(service, creds, messages, systemPrompt, strictEmptyResponse = true)
+        }
+
+        return when (service) {
+            Service.Gemini -> handleGeminiChatWithTools(creds, messages, tools, systemPrompt, history)
+            Service.Anthropic -> handleAnthropicChatWithTools(creds, messages, tools, systemPrompt, history)
+            else -> handleOpenAICompatibleChatWithTools(service, creds, messages, tools, systemPrompt, history)
+        }
+    }
+
+    /**
+     * One assistant turn with no tools declared, dispatched to whichever API [service] speaks.
+     * The three providers differ only in message shape and text extraction, so every caller
+     * needing a plain completion — the no-tools path above, the silent asks, and the
+     * Gemini/Anthropic tool-loop bailouts — funnels through here.
+     *
+     * [retry] wraps the call in [retryApiCall]; silent callers skip it because they run on a
+     * caller-supplied deadline. [strictEmptyResponse] turns a missing OpenAI-compatible message
+     * or content into [OpenAICompatibleEmptyResponseException] — the visible chat path wants that
+     * error surfaced, silent callers prefer empty text.
+     */
+    private suspend fun plainChat(
+        service: Service,
+        credentials: ServiceCredentials,
+        messages: List<History>,
+        systemPrompt: String?,
+        requestTimeoutMs: Long? = null,
+        retry: Boolean = true,
+        strictEmptyResponse: Boolean = false,
+    ): AssistantTurn {
+        suspend fun <T> call(block: suspend () -> T): T = if (retry) retryApiCall(block) else block()
+
         return when (service) {
             Service.Gemini -> {
-                if (tools.isNotEmpty()) {
-                    handleGeminiChatWithTools(creds, messages, tools, systemPrompt, history)
-                } else {
-                    val geminiMessages = messages.map { it.toGeminiMessageDto() }
-                    val response = retryApiCall { requests.geminiChat(creds, geminiMessages, systemInstruction = systemPrompt).getOrThrow() }
-                    AssistantTurn(response.extractText())
+                val response = call {
+                    requests.geminiChat(
+                        credentials = credentials,
+                        messages = messages.map { it.toGeminiMessageDto() },
+                        systemInstruction = systemPrompt,
+                        requestTimeoutMs = requestTimeoutMs,
+                    ).getOrThrow()
                 }
+                AssistantTurn(response.extractText())
             }
 
             Service.Anthropic -> {
-                if (tools.isNotEmpty()) {
-                    handleAnthropicChatWithTools(creds, messages, tools, systemPrompt, history)
-                } else {
-                    val anthropicMessages = buildAnthropicMessages(messages)
-                    val maxTokens = getModelMaxTokens(creds.modelId).let { if (it > 0) it else null }
-                    val response = retryApiCall { requests.anthropicChat(creds, anthropicMessages, systemInstruction = systemPrompt, maxTokens = maxTokens).getOrThrow() }
-                    AssistantTurn(response.extractText())
+                val maxTokens = getModelMaxTokens(credentials.modelId).let { if (it > 0) it else null }
+                val response = call {
+                    requests.anthropicChat(
+                        credentials = credentials,
+                        messages = buildAnthropicMessages(messages),
+                        systemInstruction = systemPrompt,
+                        requestTimeoutMs = requestTimeoutMs,
+                        maxTokens = maxTokens,
+                    ).getOrThrow()
                 }
+                AssistantTurn(response.extractText())
             }
 
             else -> {
-                if (tools.isNotEmpty()) {
-                    handleOpenAICompatibleChatWithTools(service, creds, messages, tools, systemPrompt, history)
-                } else {
-                    // No tools on this request — strip any historic tool_calls so Groq's strict
-                    // validator doesn't see calls to tools we no longer declare.
-                    val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt, creds.modelId, declaredToolNames = emptySet())
-                    val maxTokens = getModelMaxTokens(creds.modelId).let { if (it > 0) it else null }
-                    val response = retryApiCall { requests.openAICompatibleChat(service, creds, openAIMessages, maxTokens = maxTokens).getOrThrow() }
-                    val message = response.choices.firstOrNull()?.message ?: throw OpenAICompatibleEmptyResponseException()
-                    val content = message.effectiveContent ?: throw OpenAICompatibleEmptyResponseException()
-                    AssistantTurn(content, message.reasoningTraceFor(content))
+                // No tools on this request — strip any historic tool_calls so Groq's strict
+                // validator doesn't see calls to tools we no longer declare.
+                val openAIMessages = buildOpenAIMessages(service, messages, systemPrompt, credentials.modelId, declaredToolNames = emptySet())
+                val maxTokens = getModelMaxTokens(credentials.modelId).let { if (it > 0) it else null }
+                val response = call {
+                    requests.openAICompatibleChat(service, credentials, openAIMessages, requestTimeoutMs = requestTimeoutMs, maxTokens = maxTokens).getOrThrow()
                 }
+                val message = response.choices.firstOrNull()?.message
+                val content = message?.effectiveContent
+                if (content == null && strictEmptyResponse) throw OpenAICompatibleEmptyResponseException()
+                AssistantTurn(content.orEmpty(), message?.reasoningTraceFor(content))
             }
         }
     }
@@ -1107,20 +1150,9 @@ class RemoteDataRepository(
                 return LoopChatResult(textContent = textContent, toolCalls = toolCallInfos)
             }
 
-            override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
-                val prefix = bailoutPrompt(reason)
-                val geminiMessages = history.map { it.toGeminiMessageDto() }
-                val bailoutResponse = retryApiCall {
-                    requests.geminiChat(
-                        credentials = credentials,
-                        messages = geminiMessages,
-                        systemInstruction = "$prefix $systemPrompt",
-                    ).getOrThrow()
-                }
-                return bailoutResponse.extractText()
-            }
+            override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String = plainChat(Service.Gemini, credentials, history, "${bailoutPrompt(reason)} $systemPrompt").content
 
-            override fun trimAfterToolResults(history: List<History>, systemPrompt: String?): List<History> = trimHistoryForContext(history, systemPrompt?.length ?: 0, contextWindowTokens)
+            override val historyContextWindowTokens = contextWindowTokens
         }
         return runToolLoop(strategy, systemPrompt, history)
     }
@@ -1157,19 +1189,9 @@ class RemoteDataRepository(
                 return LoopChatResult(textContent = textContent, toolCalls = toolCallInfos)
             }
 
-            override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String {
-                val prefix = bailoutPrompt(reason)
-                val bailoutResponse = retryApiCall {
-                    requests.anthropicChat(
-                        credentials = credentials,
-                        messages = buildAnthropicMessages(history),
-                        systemInstruction = "$prefix $systemPrompt",
-                    ).getOrThrow()
-                }
-                return bailoutResponse.extractText()
-            }
+            override suspend fun bailout(history: List<History>, systemPrompt: String?, reason: BailoutReason): String = plainChat(Service.Anthropic, credentials, history, "${bailoutPrompt(reason)} $systemPrompt").content
 
-            override fun trimAfterToolResults(history: List<History>, systemPrompt: String?): List<History> = trimHistoryForContext(history, systemPrompt?.length ?: 0, contextWindowTokens)
+            override val historyContextWindowTokens = contextWindowTokens
         }
         return runToolLoop(strategy, systemPrompt, history)
     }
@@ -1236,7 +1258,9 @@ class RemoteDataRepository(
                         )
                     }
                 }
-                strategy.trimAfterToolResults(merged, systemPrompt)
+                strategy.historyContextWindowTokens
+                    ?.let { trimHistoryForContext(merged, systemPrompt?.length ?: 0, it) }
+                    ?: merged
             }
             // Compact history between tool iterations — summarize older exchanges
             // instead of just dropping them when context is exceeded.
@@ -2598,27 +2622,15 @@ class RemoteDataRepository(
         }
 
         val creds = instanceCredentials(instanceId, service)
-        val reqTimeout = if (timeoutMs > 0) timeoutMs else null
 
-        return when (service) {
-            Service.Gemini -> {
-                val geminiMessages = messages.map { it.toGeminiMessageDto() }
-                val response = requests.geminiChat(creds, geminiMessages, requestTimeoutMs = reqTimeout).getOrThrow()
-                response.extractText()
-            }
-
-            Service.Anthropic -> {
-                val anthropicMessages = buildAnthropicMessages(messages)
-                val response = requests.anthropicChat(creds, anthropicMessages, requestTimeoutMs = reqTimeout).getOrThrow()
-                response.extractText()
-            }
-
-            else -> {
-                val openAIMessages = buildOpenAIMessages(service, messages, null, creds.modelId)
-                val response = requests.openAICompatibleChat(service, creds, openAIMessages, requestTimeoutMs = reqTimeout).getOrThrow()
-                response.choices.firstOrNull()?.message?.effectiveContent ?: ""
-            }
-        }
+        return plainChat(
+            service = service,
+            credentials = creds,
+            messages = messages,
+            systemPrompt = null,
+            requestTimeoutMs = timeoutMs.takeIf { it > 0 },
+            retry = false,
+        ).content
     }
 
     private val _hasUnreadHeartbeat = MutableStateFlow(false)
