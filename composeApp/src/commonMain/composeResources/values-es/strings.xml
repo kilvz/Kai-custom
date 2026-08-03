@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Ejecutar un comando shell en el sandbox de Linux</string>
     <string name="settings_dynamic_ui">UI dinámica</string>
     <string name="settings_dynamic_ui_description">Permitir a la IA crear elementos de interfaz interactivos como botones, formularios y tarjetas en las respuestas. El cambio se aplica a las conversaciones nuevas.</string>
-    <string name="settings_oled_mode">Modo OLED</string>
-    <string name="settings_oled_mode_description">Usar fondos negros puros en modo oscuro para ahorrar energÃ­a en pantallas OLED.</string>
     <string name="settings_memories">Memorias</string>
     <string name="settings_memories_description">Memorias almacenadas por la IA durante las conversaciones. Se incluyen en cada mensaje para proporcionar contexto.</string>
     <string name="settings_memories_delete">Eliminar memoria</string>
@@ -241,8 +239,6 @@ Si algo necesita atenciÃ³n (memorias obsoletas, tareas vencidas, seguimientos 
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Salir del modo interactivo</string>
     <string name="interactive_ui_parsing_failed">Error al analizar la UI, reintentando…</string>
-    <string name="settings_sponsors_monthly">Patrocinadores mensuales</string>
-    <string name="settings_sponsors_past">Patrocinadores anteriores</string>
     <string name="snackbar_undo">Deshacer</string>
     <string name="snackbar_memory_deleted">Recuerdo eliminado</string>
     <string name="snackbar_task_cancelled">Tarea cancelada</string>

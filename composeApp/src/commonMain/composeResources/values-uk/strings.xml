@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Ð’Ð¸ÐºÐ¾Ð½Ð°Ñ‚Ð¸ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒ Ð¾Ð±Ð¾Ð»Ð¾Ð½ÐºÐ¸ Ð² Ð¿Ñ–ÑÐ¾Ñ‡Ð½Ð¸Ñ†Ñ– Linux</string>
     <string name="settings_dynamic_ui">Ð”Ð¸Ð½Ð°Ð¼Ñ–Ñ‡Ð½Ð¸Ð¹ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹Ñ</string>
     <string name="settings_dynamic_ui_description">Ð”Ð¾Ð·Ð²Ð¾Ð»Ð¸Ñ‚Ð¸ Ð¨Ð† ÑÑ‚Ð²Ð¾Ñ€ÑŽÐ²Ð°Ñ‚Ð¸ Ñ–Ð½Ñ‚ÐµÑ€Ð°ÐºÑ‚Ð¸Ð²Ð½Ñ– ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¸ Ñ–Ð½Ñ‚ÐµÑ€Ñ„ÐµÐ¹ÑÑƒ, Ñ‚Ð°ÐºÑ– ÑÐº ÐºÐ½Ð¾Ð¿ÐºÐ¸, Ñ„Ð¾Ñ€Ð¼Ð¸ Ñ‚Ð° ÐºÐ°Ñ€Ñ‚ÐºÐ¸ Ñƒ Ð²Ñ–Ð´Ð¿Ð¾Ð²Ñ–Ð´ÑÑ…. Ð—Ð¼Ñ–Ð½Ð° Ð·Ð°ÑÑ‚Ð¾ÑÐ¾Ð²ÑƒÑ”Ñ‚ÑŒÑÑ Ð´Ð¾ Ð½Ð¾Ð²Ð¸Ñ… Ñ€Ð¾Ð·Ð¼Ð¾Ð².</string>
-    <string name="settings_oled_mode">Ð ÐµÐ¶Ð¸Ð¼ OLED</string>
-    <string name="settings_oled_mode_description">Ð’Ð¸ÐºÐ¾Ñ€Ð¸ÑÑ‚Ð¾Ð²ÑƒÐ¹Ñ‚Ðµ Ñ‡Ð¸ÑÑ‚Ð¾ Ñ‡Ð¾Ñ€Ð½Ð¸Ð¹ Ñ„Ð¾Ð½ Ñƒ Ñ‚ÐµÐ¼Ð½Ð¾Ð¼Ñƒ Ñ€ÐµÐ¶Ð¸Ð¼Ñ– Ð´Ð»Ñ ÐµÐºÐ¾Ð½Ð¾Ð¼Ñ–Ñ— ÐµÐ½ÐµÑ€Ð³Ñ–Ñ— Ð½Ð° OLED-ÐµÐºÑ€Ð°Ð½Ð°Ñ….</string>
     <string name="settings_memories">Ð¡Ð¿Ð¾Ð³Ð°Ð´Ð¸</string>
     <string name="settings_memories_description">Ð¡Ð¿Ð¾Ð³Ð°Ð´Ð¸, Ð·Ð±ÐµÑ€ÐµÐ¶ÐµÐ½Ñ– Ð¨Ð† Ð¿Ñ–Ð´ Ñ‡Ð°Ñ Ñ€Ð¾Ð·Ð¼Ð¾Ð². Ð’Ð¾Ð½Ð¸ Ð²ÐºÐ»ÑŽÑ‡Ð°ÑŽÑ‚ÑŒÑÑ Ð² ÐºÐ¾Ð¶Ð½Ðµ Ð¿Ð¾Ð²Ñ–Ð´Ð¾Ð¼Ð»ÐµÐ½Ð½Ñ Ð´Ð»Ñ Ð½Ð°Ð´Ð°Ð½Ð½Ñ ÐºÐ¾Ð½Ñ‚ÐµÐºÑÑ‚Ñƒ.</string>
     <string name="settings_memories_delete">Ð’Ð¸Ð´Ð°Ð»Ð¸Ñ‚Ð¸ ÑÐ¿Ð¾Ð³Ð°Ð´</string>
@@ -241,8 +239,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Ð’Ð¸Ð¹Ñ‚Ð¸ Ð· Ñ–Ð½Ñ‚ÐµÑ€Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¾Ð³Ð¾ Ñ€ÐµÐ¶Ð¸Ð¼Ñƒ</string>
     <string name="interactive_ui_parsing_failed">ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ñ€Ð¾Ð·Ñ–Ð±Ñ€Ð°Ñ‚Ð¸ UI, Ð¿Ð¾Ð²Ñ‚Ð¾Ñ€Ð½Ð° ÑÐ¿Ñ€Ð¾Ð±Ð°…</string>
-    <string name="settings_sponsors_monthly">Ð©Ð¾Ð¼Ñ–ÑÑÑ‡Ð½Ñ– ÑÐ¿Ð¾Ð½ÑÐ¾Ñ€Ð¸</string>
-    <string name="settings_sponsors_past">ÐŸÐ¾Ð¿ÐµÑ€ÐµÐ´Ð½Ñ– ÑÐ¿Ð¾Ð½ÑÐ¾Ñ€Ð¸</string>
     <string name="snackbar_undo">Ð¡ÐºÐ°ÑÑƒÐ²Ð°Ñ‚Ð¸</string>
     <string name="snackbar_memory_deleted">Ð¡Ð¿Ð¾Ð³Ð°Ð´ Ð²Ð¸Ð´Ð°Ð»ÐµÐ½Ð¾</string>
     <string name="snackbar_task_cancelled">Ð—Ð°Ð²Ð´Ð°Ð½Ð½Ñ ÑÐºÐ°ÑÐ¾Ð²Ð°Ð½Ð¾</string>

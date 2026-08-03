@@ -2,7 +2,6 @@ package com.kai.custom.inference
 
 import com.kai.custom.getAppFilesDirectory
 import java.io.File
-import java.lang.management.ManagementFactory
 
 actual fun getModelStorageDirectory(): String = getAppFilesDirectory() + "/litert_models"
 

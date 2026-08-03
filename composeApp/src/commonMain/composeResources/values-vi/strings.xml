@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Thá»±c thi lá»‡nh shell trong há»™p cát Linux</string>
     <string name="settings_dynamic_ui">Giao diá»‡n Ä‘á»™ng</string>
     <string name="settings_dynamic_ui_description">Cho phép AI táº¡o các thÃ nh pháº§n giao diá»‡n tÆ°Æ¡ng tác nhÆ° nÃºt, biá»ƒu máº«u vÃ  tháº» trong pháº£n há»“i. Thay Ä‘á»•i áp dá»¥ng cho các cuá»™c trÃ² chuyá»‡n má»›i.</string>
-    <string name="settings_oled_mode">Cháº¿ Ä‘á»™ OLED</string>
-    <string name="settings_oled_mode_description">Sá»­ dá»¥ng ná»n Ä‘en thuáº§n trong cháº¿ Ä‘á»™ tá»‘i Ä‘á»ƒ tiáº¿t kiá»‡m nÄƒng lÆ°á»£ng trÃªn mÃ n hÃ¬nh OLED.</string>
     <string name="settings_memories">KÃ½ á»©c</string>
     <string name="settings_memories_description">KÃ½ á»©c Ä‘Æ°á»£c AI lÆ°u trong các cuá»™c trÃ² chuyá»‡n. ChÃºng Ä‘Æ°á»£c Ä‘Æ°a vÃ o má»—i tin nháº¯n Ä‘á»ƒ cung cáº¥p bá»‘i cáº£nh.</string>
     <string name="settings_memories_delete">XÃ³a kÃ½ á»©c</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Thoát cháº¿ Ä‘á»™ tÆ°Æ¡ng tác</string>
     <string name="interactive_ui_parsing_failed">PhÃ¢n tÃ­ch UI tháº¥t báº¡i, Ä‘ang thá»­ láº¡i…</string>
-    <string name="settings_sponsors_monthly">NhÃ  tÃ i trá»£ hÃ ng tháng</string>
-    <string name="settings_sponsors_past">NhÃ  tÃ i trá»£ trÆ°á»›c Ä‘Ã¢y</string>
     <string name="snackbar_undo">HoÃ n tác</string>
     <string name="snackbar_memory_deleted">KÃ½ á»©c Ä‘Ã£ xÃ³a</string>
     <string name="snackbar_task_cancelled">Tác vá»¥ Ä‘Ã£ há»§y</string>

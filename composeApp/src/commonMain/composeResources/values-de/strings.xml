@@ -66,8 +66,6 @@
     <string name="tool_execute_shell_command_description">Einen Shell-Befehl in der Linux-Sandbox ausführen</string>
     <string name="settings_dynamic_ui">Dynamische UI</string>
     <string name="settings_dynamic_ui_description">Der KI erlauben, interaktive UI-Elemente wie SchaltflÃ¤chen, Formulare und Karten in Antworten zu erstellen. Ã„nderung gilt für neue GesprÃ¤che.</string>
-    <string name="settings_oled_mode">OLED-Modus</string>
-    <string name="settings_oled_mode_description">Verwende reine schwarze Hintergründe im Dunkelmodus, um Strom auf OLED-Displays zu sparen.</string>
     <string name="settings_memories">Erinnerungen</string>
     <string name="settings_memories_description">Erinnerungen, die die KI wÃ¤hrend GesprÃ¤chen gespeichert hat. Diese werden in jede Nachricht einbezogen, um Kontext bereitzustellen.</string>
     <string name="settings_memories_delete">Erinnerung löschen</string>
@@ -238,8 +236,6 @@ Wenn etwas Aufmerksamkeit erfordert (veraltete Erinnerungen, fÃ¤llige Aufgaben
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Interaktiven Modus verlassen</string>
     <string name="interactive_ui_parsing_failed">UI-Analyse fehlgeschlagen, erneuter Versuch…</string>
-    <string name="settings_sponsors_monthly">Monatliche Sponsoren</string>
-    <string name="settings_sponsors_past">Frühere Sponsoren</string>
     <string name="snackbar_undo">RückgÃ¤ngig</string>
     <string name="snackbar_memory_deleted">Erinnerung gelöscht</string>
     <string name="snackbar_task_cancelled">Aufgabe abgebrochen</string>

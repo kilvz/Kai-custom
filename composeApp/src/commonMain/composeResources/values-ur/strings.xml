@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Linux Ø³ÛŒÙ†ÚˆØ¨Ø§Ú©Ø³ Ù…ÛŒÚº Ø´ÛŒÙ„ Ú©Ù…Ø§Ù†Úˆ Ú†Ù„Ø§Ø¦ÛŒÚº</string>
     <string name="settings_dynamic_ui">Ù…ØªØ­Ø±Ú© UI</string>
     <string name="settings_dynamic_ui_description">AI Ú©Ùˆ Ø¬ÙˆØ§Ø¨Ø§Øª Ù…ÛŒÚº Ø¨Ù¹Ù†ØŒ ÙØ§Ø±Ù… Ø§ÙˆØ± Ú©Ø§Ø±Úˆ Ø¬ÛŒØ³Û’ Ø§Ù†Ù¹Ø±Ø§ÛŒÚ©Ù¹Ùˆ UI Ø¹Ù†Ø§ØµØ± Ø¨Ù†Ø§Ù†Û’ Ú©ÛŒ Ø§Ø¬Ø§Ø²Øª Ø¯ÛŒÚºÛ” ØªØ¨Ø¯ÛŒÙ„ÛŒ Ù†Ø¦ÛŒ Ú¯ÙØªÚ¯Ùˆ Ù¾Ø± Ù„Ø§Ú¯Ùˆ ÛÙˆØªÛŒ ÛÛ’Û”</string>
-    <string name="settings_oled_mode">OLED Ù…ÙˆÚˆ</string>
-    <string name="settings_oled_mode_description">OLED Ø§Ø³Ú©Ø±ÛŒÙ†ÙˆÚº Ù¾Ø± Ø¨Ø¬Ù„ÛŒ Ø¨Ú†Ø§Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ÚˆØ§Ø±Ú© Ù…ÙˆÚˆ Ù…ÛŒÚº Ø®Ø§Ù„Øµ Ø³ÛŒØ§Û Ø¨ÛŒÚ© Ú¯Ø±Ø§Ø¤Ù†Úˆ Ø§Ø³ØªØ¹Ù…Ø§Ù„ Ú©Ø±ÛŒÚºÛ”</string>
     <string name="settings_memories">ÛŒØ§Ø¯ÛŒÚº</string>
     <string name="settings_memories_description">Ú¯ÙØªÚ¯Ùˆ Ú©Û’ Ø¯ÙˆØ±Ø§Ù† AI Ú©ÛŒ Ù…Ø­ÙÙˆØ¸ Ú©Ø±Ø¯Û ÛŒØ§Ø¯ÛŒÚºÛ” ÛŒÛ Ø³ÛŒØ§Ù‚ Ùˆ Ø³Ø¨Ø§Ù‚ ÙØ±Ø§ÛÙ… Ú©Ø±Ù†Û’ Ú©Û’ Ù„ÛŒÛ’ ÛØ± Ù¾ÛŒØºØ§Ù… Ù…ÛŒÚº Ø´Ø§Ù…Ù„ Ú©ÛŒ Ø¬Ø§ØªÛŒ ÛÛŒÚºÛ”</string>
     <string name="settings_memories_delete">ÛŒØ§Ø¯ Ø­Ø°Ù Ú©Ø±ÛŒÚº</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Ø§Ù†Ù¹Ø±Ø§ÛŒÚ©Ù¹Ùˆ Ù…ÙˆÚˆ Ø³Û’ Ø¨Ø§ÛØ± Ù†Ú©Ù„ÛŒÚº</string>
     <string name="interactive_ui_parsing_failed">UI ØªØ¬Ø²ÛŒÛ Ù†Ø§Ú©Ø§Ù…ØŒ Ø¯ÙˆØ¨Ø§Ø±Û Ú©ÙˆØ´Ø´ ÛÙˆ Ø±ÛÛŒ ÛÛ’…</string>
-    <string name="settings_sponsors_monthly">Ù…Ø§ÛØ§Ù†Û Ø³Ù¾Ø§Ù†Ø³Ø±Ø²</string>
-    <string name="settings_sponsors_past">Ø³Ø§Ø¨Ù‚Û Ø³Ù¾Ø§Ù†Ø³Ø±Ø²</string>
     <string name="snackbar_undo">ÙˆØ§Ù¾Ø³ Ú©Ø±ÛŒÚº</string>
     <string name="snackbar_memory_deleted">ÛŒØ§Ø¯Ø¯Ø§Ø´Øª Ø­Ø°Ù ÛÙˆ Ú¯Ø¦ÛŒ</string>
     <string name="snackbar_task_cancelled">Ù¹Ø§Ø³Ú© Ù…Ù†Ø³ÙˆØ® ÛÙˆ Ú¯ÛŒØ§</string>

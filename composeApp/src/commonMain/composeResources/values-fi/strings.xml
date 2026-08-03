@@ -66,8 +66,6 @@
     <string name="tool_execute_shell_command_description">Suorita komentorivikomento Linux-hiekkalaatikossa</string>
     <string name="settings_dynamic_ui">Dynaaminen kÃ¤yttöliittymÃ¤</string>
     <string name="settings_dynamic_ui_description">Salli tekoÃ¤lyn luoda interaktiivisia kÃ¤yttöliittymÃ¤elementtejÃ¤ kuten painikkeita, lomakkeita ja kortteja vastauksissa. Muutos koskee uusia keskusteluja.</string>
-    <string name="settings_oled_mode">OLED-tila</string>
-    <string name="settings_oled_mode_description">KÃ¤ytÃ¤ tÃ¤ysin mustia taustoja tummassa tilassa sÃ¤Ã¤stÃ¤Ã¤ksesi virtaa OLED-nÃ¤ytöissÃ¤.</string>
     <string name="settings_memories">Muistot</string>
     <string name="settings_memories_description">TekoÃ¤lyn keskustelujen aikana tallentamat muistot. Ne sisÃ¤llytetÃ¤Ã¤n jokaiseen viestiin kontekstin tarjoamiseksi.</string>
     <string name="settings_memories_delete">Poista muisto</string>
@@ -238,8 +236,6 @@ Jos jokin vaatii huomiota (vanhentuneet muistot, erÃ¤Ã¤ntyneet tehtÃ¤vÃ¤
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Poistu vuorovaikutustilasta</string>
     <string name="interactive_ui_parsing_failed">KÃ¤yttöliittymÃ¤n jÃ¤sennys epÃ¤onnistui, yritetÃ¤Ã¤n uudelleen…</string>
-    <string name="settings_sponsors_monthly">Kuukausittaiset sponsorit</string>
-    <string name="settings_sponsors_past">Aiemmat sponsorit</string>
     <string name="snackbar_undo">Kumoa</string>
     <string name="snackbar_memory_deleted">Muisto poistettu</string>
     <string name="snackbar_task_cancelled">TehtÃ¤vÃ¤ peruutettu</string>

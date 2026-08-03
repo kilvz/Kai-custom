@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">IzvrÅ¡iti naredbu ljuske u Linux sanduÄiÄ‡u</string>
     <string name="settings_dynamic_ui">DinamiÄko korisniÄko suÄelje</string>
     <string name="settings_dynamic_ui_description">Dopustite AI-u stvaranje interaktivnih elemenata suÄelja poput gumba, obrazaca i kartica u odgovorima. Promjena se primjenjuje na nove razgovore.</string>
-    <string name="settings_oled_mode">OLED naÄin</string>
-    <string name="settings_oled_mode_description">Koristite Äisto crne pozadine u tamnom naÄinu za uÅ¡tedu energije na OLED zaslonima.</string>
     <string name="settings_memories">SjeÄ‡anja</string>
     <string name="settings_memories_description">SjeÄ‡anja koja je AI pohranio tijekom razgovora. UkljuÄena su u svaku poruku radi pruÅ¾anja konteksta.</string>
     <string name="settings_memories_delete">ObriÅ¡i sjeÄ‡anje</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">IzaÄ‘i iz interaktivnog naÄina</string>
     <string name="interactive_ui_parsing_failed">RaÅ¡Älamba korisniÄkog suÄelja nije uspjela, pokuÅ¡avam ponovo…</string>
-    <string name="settings_sponsors_monthly">MjeseÄni sponzori</string>
-    <string name="settings_sponsors_past">Prethodni sponzori</string>
     <string name="snackbar_undo">PoniÅ¡ti</string>
     <string name="snackbar_memory_deleted">SjeÄ‡anje obrisano</string>
     <string name="snackbar_task_cancelled">Zadatak otkazan</string>

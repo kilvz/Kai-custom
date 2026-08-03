@@ -66,8 +66,6 @@
     <string name="tool_execute_shell_command_description">Voer 'n dopopdrag uit in die Linux-sandbox</string>
     <string name="settings_dynamic_ui">Dinamiese UI</string>
     <string name="settings_dynamic_ui_description">Laat die KI toe om interaktiewe UI-elemente soos knoppies, vorms en kaarte in antwoorde te skep. Verandering geld vir nuwe gesprekke.</string>
-    <string name="settings_oled_mode">OLED-modus</string>
-    <string name="settings_oled_mode_description">Gebruik suiwer swart agtergronde in donker modus om krag op OLED-skerms te bespaar.</string>
     <string name="settings_memories">Geheuens</string>
     <string name="settings_memories_description">Geheuens wat deur die KI tydens gesprekke gestoor is. Hierdie word in elke boodskap ingesluit om konteks te verskaf.</string>
     <string name="settings_memories_delete">Verwyder geheue</string>
@@ -238,8 +236,6 @@ As iets aandag nodig het (verouderde herinneringe, verskuldigde take, gebruiker-
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Verlaat interaktiewe modus</string>
     <string name="interactive_ui_parsing_failed">UI-ontleding het misluk, probeer weer…</string>
-    <string name="settings_sponsors_monthly">Maandelikse borge</string>
-    <string name="settings_sponsors_past">Vorige borge</string>
     <string name="snackbar_undo">Ontdoen</string>
     <string name="snackbar_memory_deleted">Herinnering verwyder</string>
     <string name="snackbar_task_cancelled">Taak gekanselleer</string>

@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Zagnati ukaz lupine v peskovniku Linux</string>
     <string name="settings_dynamic_ui">DinamiÄni vmesnik</string>
     <string name="settings_dynamic_ui_description">Dovolite UI ustvarjati interaktivne elemente vmesnika, kot so gumbi, obrazci in kartice v odgovorih. Sprememba velja za nove pogovore.</string>
-    <string name="settings_oled_mode">NaÄin OLED</string>
-    <string name="settings_oled_mode_description">Uporabljajte povsem Ärna ozadja v temnem naÄinu za varÄevanje z energijo na OLED zaslonih.</string>
     <string name="settings_memories">Spomini</string>
     <string name="settings_memories_description">Spomini, ki jih je UI shranila med pogovori. Ti so vkljuÄeni v vsako sporoÄilo za zagotavljanje konteksta.</string>
     <string name="settings_memories_delete">IzbriÅ¡i spomin</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Zapusti interaktivni naÄin</string>
     <string name="interactive_ui_parsing_failed">RazÄlenjevanje UI ni uspelo, poskuÅ¡am znova…</string>
-    <string name="settings_sponsors_monthly">MeseÄni sponzorji</string>
-    <string name="settings_sponsors_past">PrejÅ¡nji sponzorji</string>
     <string name="snackbar_undo">Razveljavi</string>
     <string name="snackbar_memory_deleted">Spomin izbrisan</string>
     <string name="snackbar_task_cancelled">Naloga preklicana</string>

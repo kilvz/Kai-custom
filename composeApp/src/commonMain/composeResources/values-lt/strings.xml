@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Vykdyti apvalkalo komandÄ… â€žLinux" smÄ—lio dÄ—Å¾Ä—je</string>
     <string name="settings_dynamic_ui">DinaminÄ— sÄ…saja</string>
     <string name="settings_dynamic_ui_description">Leisti DI kurti interaktyvius sÄ…sajos elementus, tokius kaip mygtukai, formos ir kortelÄ—s atsakymuose. Pakeitimas taikomas naujiems pokalbiams.</string>
-    <string name="settings_oled_mode">OLED reÅ¾imas</string>
-    <string name="settings_oled_mode_description">Naudoti grynÄ… juodÄ… fonÄ… tamsiuoju reÅ¾imu, kad bÅ«tÅ³ taupoma energija OLED ekranuose.</string>
     <string name="settings_memories">Prisiminimai</string>
     <string name="settings_memories_description">AI pokalbiÅ³ metu iÅ¡saugoti prisiminimai. Jie Ä¯traukiami Ä¯ kiekvienÄ… Å¾inutÄ™ kontekstui teikti.</string>
     <string name="settings_memories_delete">IÅ¡trinti prisiminimÄ…</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">IÅ¡eiti iÅ¡ interaktyvaus reÅ¾imo</string>
     <string name="interactive_ui_parsing_failed">UI analizÄ— nepavyko, bandoma iÅ¡ naujo…</string>
-    <string name="settings_sponsors_monthly">MÄ—nesiniai rÄ—mÄ—jai</string>
-    <string name="settings_sponsors_past">Ankstesni rÄ—mÄ—jai</string>
     <string name="snackbar_undo">Anuliuoti</string>
     <string name="snackbar_memory_deleted">Prisiminimas iÅ¡trintas</string>
     <string name="snackbar_task_cancelled">UÅ¾duotis atÅ¡aukta</string>

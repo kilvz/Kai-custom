@@ -101,7 +101,6 @@ import com.kai.custom.tools.ToolPermissionBridge
 import com.kai.custom.tools.WebFetchTool
 import com.kai.custom.tools.WebSearchTool
 import com.kai.custom.tools.WriteFileTool
-import com.russhwolf.settings.BuildConfig
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import dev.spght.encryptedprefs.EncryptedSharedPreferences

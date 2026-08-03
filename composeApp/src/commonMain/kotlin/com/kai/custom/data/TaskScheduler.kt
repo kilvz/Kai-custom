@@ -3,7 +3,6 @@ package com.kai.custom.data
 import com.kai.custom.email.EmailPoller
 import com.kai.custom.getBackgroundDispatcher
 import com.kai.custom.isEmailSupported
-import com.kai.custom.isNotificationsSupported
 import com.kai.custom.isSmsSupported
 import com.kai.custom.sendHeartbeatNotification
 import com.kai.custom.sms.SmsPoller

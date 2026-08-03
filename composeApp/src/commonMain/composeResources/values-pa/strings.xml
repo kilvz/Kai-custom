@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Linux à¨¸à©ˆà¨‚à¨¡à¨¬à¨¾à¨•à¨¸ à¨µà¨¿à©±à¨š à¨¸à¨¼à©ˆà©±à¨² à¨•à¨®à¨¾à¨‚à¨¡ à¨šà¨²à¨¾à¨“</string>
     <string name="settings_dynamic_ui">à¨¡à¨¾à¨‡à¨¨à¨¾à¨®à¨¿à¨• UI</string>
     <string name="settings_dynamic_ui_description">AI à¨¨à©‚à©° à¨œà¨µà¨¾à¨¬à¨¾à¨‚ à¨µà¨¿à©±à¨š à¨¬à¨Ÿà¨¨, à¨«à¨¾à¨°à¨® à¨…à¨¤à©‡ à¨•à¨¾à¨°à¨¡ à¨µà¨°à¨—à©‡ à¨‡à©°à¨Ÿà¨°à©ˆà¨•à¨Ÿà¨¿à¨µ UI à¨¤à©±à¨¤ à¨¬à¨£à¨¾à¨‰à¨£ à¨¦à©€ à¨†à¨—à¨¿à¨† à¨¦à¨¿à¨“à¥¤ à¨¤à¨¬à¨¦à©€à¨²à©€ à¨¨à¨µà©€à¨†à¨‚ à¨—à©±à¨²à¨¬à¨¾à¨¤à¨¾à¨‚ 'à¨¤à©‡ à¨²à¨¾à¨—à©‚ à¨¹à©à©°à¨¦à©€ à¨¹à©ˆà¥¤</string>
-    <string name="settings_oled_mode">OLED à¨®à©‹à¨¡</string>
-    <string name="settings_oled_mode_description">OLED à¨¸à¨•à©à¨°à©€à¨¨à¨¾à¨‚ à¨¤à©‡ à¨ªà¨¾à¨µà¨° à¨¬à¨šà¨¾à¨‰à¨£ à¨²à¨ˆ à¨¡à¨¾à¨°à¨• à¨®à©‹à¨¡ à¨µà¨¿à©±à¨š à¨¸à¨¼à©à©±à¨§ à¨•à¨¾à¨²à©‡ à¨¬à©ˆà¨•à¨—à©à¨°à¨¾à¨Šà¨‚à¨¡ à¨¦à©€ à¨µà¨°à¨¤à©‹à¨‚ à¨•à¨°à©‹à¥¤</string>
     <string name="settings_memories">à¨¯à¨¾à¨¦à¨¾à¨‚</string>
     <string name="settings_memories_description">AI à¨¦à©à¨†à¨°à¨¾ à¨—à©±à¨²à¨¬à¨¾à¨¤ à¨¦à©Œà¨°à¨¾à¨¨ à¨¸à¨Ÿà©‹à¨° à¨•à©€à¨¤à©€à¨†à¨‚ à¨¯à¨¾à¨¦à¨¾à¨‚à¥¤ à¨‡à¨¹ à¨¸à©°à¨¦à¨°à¨­ à¨ªà©à¨°à¨¦à¨¾à¨¨ à¨•à¨°à¨¨ à¨²à¨ˆ à¨¹à¨° à¨¸à©à¨¨à©‡à¨¹à©‡ à¨µà¨¿à©±à¨š à¨¸à¨¼à¨¾à¨®à¨² à¨•à©€à¨¤à©€à¨†à¨‚ à¨œà¨¾à¨‚à¨¦à©€à¨†à¨‚ à¨¹à¨¨à¥¤</string>
     <string name="settings_memories_delete">à¨¯à¨¾à¨¦ à¨®à¨¿à¨Ÿà¨¾à¨“</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">à¨‡à©°à¨Ÿà¨°à©ˆà¨•à¨Ÿà¨¿à¨µ à¨®à©‹à¨¡ à¨¤à©‹à¨‚ à¨¬à¨¾à¨¹à¨° à¨¨à¨¿à¨•à¨²à©‹</string>
     <string name="interactive_ui_parsing_failed">UI à¨ªà¨¾à¨°à¨¸à¨¿à©°à¨— à¨…à¨¸à¨«à¨², à¨¦à©à¨¬à¨¾à¨°à¨¾ à¨•à©‹à¨¸à¨¼à¨¿à¨¸à¨¼ à¨•à©€à¨¤à©€ à¨œà¨¾ à¨°à¨¹à©€ à¨¹à©ˆ…</string>
-    <string name="settings_sponsors_monthly">à¨®à¨¹à©€à¨¨à¨¾à¨µà¨¾à¨° à¨¸à¨ªà¨¾à¨‚à¨¸à¨°</string>
-    <string name="settings_sponsors_past">à¨ªà¨¿à¨›à¨²à©‡ à¨¸à¨ªà¨¾à¨‚à¨¸à¨°</string>
     <string name="snackbar_undo">à¨µà¨¾à¨ªà¨¸ à¨•à¨°à©‹</string>
     <string name="snackbar_memory_deleted">à¨¯à¨¾à¨¦ à¨®à¨¿à¨Ÿà¨¾à¨ˆ à¨—à¨ˆ</string>
     <string name="snackbar_task_cancelled">à¨•à©°à¨® à¨°à©±à¨¦ à¨•à©€à¨¤à¨¾ à¨—à¨¿à¨†</string>

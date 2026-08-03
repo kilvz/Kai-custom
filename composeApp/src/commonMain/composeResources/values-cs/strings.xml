@@ -66,8 +66,6 @@
     <string name="tool_execute_shell_command_description">Spustit pÅ™Ã­kaz shellu v linuxovém sandboxu</string>
     <string name="settings_dynamic_ui">Dynamické UI</string>
     <string name="settings_dynamic_ui_description">UmoÅ¾nit AI vytváÅ™et interaktivnÃ­ prvky UI jako tlaÄÃ­tka, formuláÅ™e a karty v odpovÄ›dÃ­ch. ZmÄ›na se projevÃ­ v novÃ½ch konverzacÃ­ch.</string>
-    <string name="settings_oled_mode">ReÅ¾im OLED</string>
-    <string name="settings_oled_mode_description">V tmavém reÅ¾imu pouÅ¾Ã­vat ÄistÄ› Äerné pozadÃ­ pro Ãºsporu energie na OLED displejÃ­ch.</string>
     <string name="settings_memories">VzpomÃ­nky</string>
     <string name="settings_memories_description">VzpomÃ­nky uloÅ¾ené AI bÄ›hem konverzacÃ­. Jsou zahrnuty v kaÅ¾dé zprávÄ› pro poskytnutÃ­ kontextu.</string>
     <string name="settings_memories_delete">Smazat vzpomÃ­nku</string>
@@ -237,8 +235,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">UkonÄit interaktivnÃ­ reÅ¾im</string>
     <string name="interactive_ui_parsing_failed">ParsovánÃ­ UI selhalo, zkouÅ¡Ã­m znovu…</string>
-    <string name="settings_sponsors_monthly">MÄ›sÃ­ÄnÃ­ sponzoÅ™i</string>
-    <string name="settings_sponsors_past">PÅ™edchozÃ­ sponzoÅ™i</string>
     <string name="snackbar_undo">ZpÄ›t</string>
     <string name="snackbar_memory_deleted">VzpomÃ­nka smazána</string>
     <string name="snackbar_task_cancelled">Ãšloha zruÅ¡ena</string>

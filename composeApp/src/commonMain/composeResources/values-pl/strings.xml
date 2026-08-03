@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Wykonaj polecenie powÅ‚oki w piaskownicy Linux</string>
     <string name="settings_dynamic_ui">Dynamiczny interfejs</string>
     <string name="settings_dynamic_ui_description">ZezwÃ³l AI na tworzenie interaktywnych elementÃ³w interfejsu, takich jak przyciski, formularze i karty w odpowiedziach. Zmiana dotyczy nowych rozmÃ³w.</string>
-    <string name="settings_oled_mode">Tryb OLED</string>
-    <string name="settings_oled_mode_description">UÅ¼ywaj czystego czarnego tÅ‚a w trybie ciemnym, aby oszczÄ™dzaÄ‡ energiÄ™ na ekranach OLED.</string>
     <string name="settings_memories">Wspomnienia</string>
     <string name="settings_memories_description">Wspomnienia zapisane przez AI podczas rozmÃ³w. SÄ… one doÅ‚Ä…czane do kaÅ¼dej wiadomoÅ›ci w celu zapewnienia kontekstu.</string>
     <string name="settings_memories_delete">UsuÅ„ wspomnienie</string>
@@ -241,8 +239,6 @@ JeÅ›li coÅ› wymaga uwagi (przestarzaÅ‚e wspomnienia, zalegÅ‚e zadani
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">WyjdÅº z trybu interaktywnego</string>
     <string name="interactive_ui_parsing_failed">Analiza UI nie powiodÅ‚a siÄ™, ponawiam prÃ³bÄ™…</string>
-    <string name="settings_sponsors_monthly">MiesiÄ™czni sponsorzy</string>
-    <string name="settings_sponsors_past">Poprzedni sponsorzy</string>
     <string name="snackbar_undo">Cofnij</string>
     <string name="snackbar_memory_deleted">Wspomnienie usuniÄ™te</string>
     <string name="snackbar_task_cancelled">Zadanie anulowane</string>

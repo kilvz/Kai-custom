@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Shell parancs futtatása a Linux homokozÃ³ban</string>
     <string name="settings_dynamic_ui">Dinamikus felhasználÃ³i felület</string>
     <string name="settings_dynamic_ui_description">Engedélyezze a mesterséges intelligenciának, hogy interaktÃ­v felületi elemeket hozzon létre, mint gombok, Å±rlapok és kártyák a válaszokban. A változás az Ãºj beszélgetésekre vonatkozik.</string>
-    <string name="settings_oled_mode">OLED mÃ³d</string>
-    <string name="settings_oled_mode_description">Tiszta fekete háttér használata sötét mÃ³dban az OLED kijelzÅ‘k energiatakarékosságához.</string>
     <string name="settings_memories">Emlékek</string>
     <string name="settings_memories_description">A mesterséges intelligencia által a beszélgetések során mentett emlékek. Ezeket minden üzenetbe belefoglalják a kontextus biztosÃ­tása érdekében.</string>
     <string name="settings_memories_delete">Emlékezet törlése</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Kilépés az interaktÃ­v mÃ³dbÃ³l</string>
     <string name="interactive_ui_parsing_failed">A felhasználÃ³i felület elemzése sikertelen, ÃºjraprÃ³bálás…</string>
-    <string name="settings_sponsors_monthly">Havi szponzorok</string>
-    <string name="settings_sponsors_past">Korábbi szponzorok</string>
     <string name="snackbar_undo">Visszavonás</string>
     <string name="snackbar_memory_deleted">Emlék törölve</string>
     <string name="snackbar_task_cancelled">Feladat visszavonva</string>

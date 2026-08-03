@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">SpustiÅ¥ prÃ­kaz shellu v linuxovom sandboxe</string>
     <string name="settings_dynamic_ui">Dynamické rozhranie</string>
     <string name="settings_dynamic_ui_description">UmoÅ¾niÅ¥ AI vytváraÅ¥ interaktÃ­vne prvky rozhrania ako tlaÄidlá, formuláre a karty v odpovediach. Zmena sa prejavÃ­ v novÃ½ch konverzáciách.</string>
-    <string name="settings_oled_mode">ReÅ¾im OLED</string>
-    <string name="settings_oled_mode_description">V tmavom reÅ¾ime pouÅ¾Ã­vaÅ¥ Äisto Äierne pozadie na Ãºsporu energie na OLED displejoch.</string>
     <string name="settings_memories">Spomienky</string>
     <string name="settings_memories_description">Spomienky uloÅ¾ené AI poÄas konverzáciÃ­. SÃº zahrnuté v kaÅ¾dej správe na poskytnutie kontextu.</string>
     <string name="settings_memories_delete">OdstrániÅ¥ spomienku</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">UkonÄiÅ¥ interaktÃ­vny reÅ¾im</string>
     <string name="interactive_ui_parsing_failed">AnalÃ½za pouÅ¾Ã­vateÄ¾ského rozhrania zlyhala, skÃºÅ¡am znova…</string>
-    <string name="settings_sponsors_monthly">MesaÄnÃ­ sponzori</string>
-    <string name="settings_sponsors_past">PredchádzajÃºci sponzori</string>
     <string name="snackbar_undo">SpÃ¤Å¥</string>
     <string name="snackbar_memory_deleted">Spomienka vymazaná</string>
     <string name="snackbar_task_cancelled">Ãšloha zruÅ¡ená</string>

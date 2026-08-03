@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Executarea unei comenzi shell Ã®n sandbox-ul Linux</string>
     <string name="settings_dynamic_ui">InterfaÈ›Äƒ dinamicÄƒ</string>
     <string name="settings_dynamic_ui_description">PermiteÈ›i AI-ului sÄƒ creeze elemente de interfaÈ›Äƒ interactive precum butoane, formulare È™i carduri Ã®n rÄƒspunsuri. Modificarea se aplicÄƒ conversaÈ›iilor noi.</string>
-    <string name="settings_oled_mode">Mod OLED</string>
-    <string name="settings_oled_mode_description">FoloseÈ™te fundaluri negre pure Ã®n modul Ã®ntunecat pentru a economisi energia pe ecranele OLED.</string>
     <string name="settings_memories">Amintiri</string>
     <string name="settings_memories_description">Amintiri salvate de IA Ã®n timpul conversaÈ›iilor. Acestea sunt incluse Ã®n fiecare mesaj pentru a oferi context.</string>
     <string name="settings_memories_delete">È˜terge amintire</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">IeÈ™ire din modul interactiv</string>
     <string name="interactive_ui_parsing_failed">Analiza UI a eÈ™uat, se Ã®ncearcÄƒ din nou…</string>
-    <string name="settings_sponsors_monthly">Sponsori lunari</string>
-    <string name="settings_sponsors_past">Sponsori anteriori</string>
     <string name="snackbar_undo">Anulare</string>
     <string name="snackbar_memory_deleted">Amintire È™tearsÄƒ</string>
     <string name="snackbar_task_cancelled">SarcinÄƒ anulatÄƒ</string>

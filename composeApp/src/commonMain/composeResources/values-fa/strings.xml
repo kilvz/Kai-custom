@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Ø§Ø¬Ø±Ø§ÛŒ Ø¯Ø³ØªÙˆØ± Ø´Ù„ Ø¯Ø± Ø¬Ø¹Ø¨Ù‡ Ø´Ù†ÛŒ Ù„ÛŒÙ†ÙˆÚ©Ø³</string>
     <string name="settings_dynamic_ui">Ø±Ø§Ø¨Ø· Ú©Ø§Ø±Ø¨Ø±ÛŒ Ù¾ÙˆÛŒØ§</string>
     <string name="settings_dynamic_ui_description">Ø§Ø¬Ø§Ø²Ù‡ Ø¯Ù‡ÛŒØ¯ Ù‡ÙˆØ´ Ù…ØµÙ†ÙˆØ¹ÛŒ Ø¹Ù†Ø§ØµØ± Ø±Ø§Ø¨Ø· Ú©Ø§Ø±Ø¨Ø±ÛŒ ØªØ¹Ø§Ù…Ù„ÛŒ Ù…Ø§Ù†Ù†Ø¯ Ø¯Ú©Ù…Ù‡â€ŒÙ‡Ø§ØŒ ÙØ±Ù…â€ŒÙ‡Ø§ Ùˆ Ú©Ø§Ø±Øªâ€ŒÙ‡Ø§ Ø±Ø§ Ø¯Ø± Ù¾Ø§Ø³Ø®â€ŒÙ‡Ø§ Ø§ÛŒØ¬Ø§Ø¯ Ú©Ù†Ø¯. ØªØºÛŒÛŒØ± Ø¨Ø±Ø§ÛŒ Ù…Ú©Ø§Ù„Ù…Ø§Øª Ø¬Ø¯ÛŒØ¯ Ø§Ø¹Ù…Ø§Ù„ Ù…ÛŒâ€ŒØ´ÙˆØ¯.</string>
-    <string name="settings_oled_mode">Ø­Ø§Ù„Øª OLED</string>
-    <string name="settings_oled_mode_description">Ø§Ø² Ù¾Ø³â€ŒØ²Ù…ÛŒÙ†Ù‡â€ŒÙ‡Ø§ÛŒ Ú©Ø§Ù…Ù„Ø§Ù‹ Ø³ÛŒØ§Ù‡ Ø¯Ø± Ø­Ø§Ù„Øª ØªØ§Ø±ÛŒÚ© Ø¨Ø±Ø§ÛŒ ØµØ±ÙÙ‡â€ŒØ¬ÙˆÛŒÛŒ Ø¯Ø± Ù…ØµØ±Ù Ø§Ù†Ø±Ú˜ÛŒ Ø¯Ø± ØµÙØ­Ù‡â€ŒÙ†Ù…Ø§ÛŒØ´â€ŒÙ‡Ø§ÛŒ OLED Ø§Ø³ØªÙØ§Ø¯Ù‡ Ú©Ù†ÛŒØ¯.</string>
     <string name="settings_memories">Ø®Ø§Ø·Ø±Ø§Øª</string>
     <string name="settings_memories_description">Ø®Ø§Ø·Ø±Ø§ØªÛŒ Ú©Ù‡ Ù‡ÙˆØ´ Ù…ØµÙ†ÙˆØ¹ÛŒ Ø¯Ø± Ø·ÙˆÙ„ Ù…Ú©Ø§Ù„Ù…Ø§Øª Ø°Ø®ÛŒØ±Ù‡ Ú©Ø±Ø¯Ù‡ Ø§Ø³Øª. Ø§ÛŒÙ†Ù‡Ø§ Ø¨Ø±Ø§ÛŒ Ø§Ø±Ø§Ø¦Ù‡ Ø²Ù…ÛŒÙ†Ù‡ Ø¯Ø± Ù‡Ø± Ù¾ÛŒØ§Ù… Ú¯Ù†Ø¬Ø§Ù†Ø¯Ù‡ Ù…ÛŒâ€ŒØ´ÙˆÙ†Ø¯.</string>
     <string name="settings_memories_delete">Ø­Ø°Ù Ø®Ø§Ø·Ø±Ù‡</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Ø®Ø±ÙˆØ¬ Ø§Ø² Ø­Ø§Ù„Øª ØªØ¹Ø§Ù…Ù„ÛŒ</string>
     <string name="interactive_ui_parsing_failed">ØªØ¬Ø²ÛŒÙ‡ Ø±Ø§Ø¨Ø· Ú©Ø§Ø±Ø¨Ø±ÛŒ Ù†Ø§Ù…ÙˆÙÙ‚ Ø¨ÙˆØ¯ØŒ ØªÙ„Ø§Ø´ Ù…Ø¬Ø¯Ø¯…</string>
-    <string name="settings_sponsors_monthly">Ø­Ø§Ù…ÛŒØ§Ù† Ù…Ø§Ù‡Ø§Ù†Ù‡</string>
-    <string name="settings_sponsors_past">Ø­Ø§Ù…ÛŒØ§Ù† Ù‚Ø¨Ù„ÛŒ</string>
     <string name="snackbar_undo">Ø¨Ø§Ø²Ú¯Ø±Ø¯Ø§Ù†ÛŒ</string>
     <string name="snackbar_memory_deleted">Ø®Ø§Ø·Ø±Ù‡ Ø­Ø°Ù Ø´Ø¯</string>
     <string name="snackbar_task_cancelled">ÙˆØ¸ÛŒÙÙ‡ Ù„ØºÙˆ Ø´Ø¯</string>

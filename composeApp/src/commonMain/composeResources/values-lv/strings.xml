@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">IzpildÄ«t Äaulas komandu Linux smilÅ¡kastÄ“</string>
     <string name="settings_dynamic_ui">DinamiskÄ lietotÄja saskarne</string>
     <string name="settings_dynamic_ui_description">Ä»aut MI izveidot interaktÄ«vus saskarnes elementus, piemÄ“ram, pogas, veidlapas un kartÄ«tes atbildÄ“s. IzmaiÅ†as attiecas uz jaunÄm sarunÄm.</string>
-    <string name="settings_oled_mode">OLED reÅ¾Ä«ms</string>
-    <string name="settings_oled_mode_description">Izmantot tÄ«ri melnus fonus tumÅ¡ajÄ reÅ¾Ä«mÄ, lai ietaupÄ«tu enerÄ£iju OLED ekrÄnos.</string>
     <string name="settings_memories">AtmiÅ†as</string>
     <string name="settings_memories_description">AtmiÅ†as, ko AI saglabÄjis sarunu laikÄ. TÄs tiek iekÄ¼autas katrÄ ziÅ†ojumÄ, lai nodroÅ¡inÄtu kontekstu.</string>
     <string name="settings_memories_delete">DzÄ“st atmiÅ†u</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">Iziet no interaktÄ«vÄ reÅ¾Ä«ma</string>
     <string name="interactive_ui_parsing_failed">UI analÄ«ze neizdevÄs, mÄ“Ä£inu vÄ“lreiz…</string>
-    <string name="settings_sponsors_monthly">IkmÄ“neÅ¡a sponsori</string>
-    <string name="settings_sponsors_past">IepriekÅ¡Ä“jie sponsori</string>
     <string name="snackbar_undo">Atsaukt</string>
     <string name="snackbar_memory_deleted">AtmiÅ†a dzÄ“sta</string>
     <string name="snackbar_task_cancelled">Uzdevums atcelts</string>

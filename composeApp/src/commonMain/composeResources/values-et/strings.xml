@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">KÃ¤ivita shellikÃ¤sk Linuxi liivakastis</string>
     <string name="settings_dynamic_ui">Dünaamiline UI</string>
     <string name="settings_dynamic_ui_description">Luba tehisintellektil luua vastustes interaktiivseid kasutajaliidese elemente nagu nupud, vormid ja kaardid. Muudatus kehtib uute vestluste kohta.</string>
-    <string name="settings_oled_mode">OLED-reÅ¾iim</string>
-    <string name="settings_oled_mode_description">Kasutage tumedas reÅ¾iimis puhtalt musti taustu, et sÃ¤Ã¤sta energiat OLED-ekraanidel.</string>
     <string name="settings_memories">MÃ¤lestused</string>
     <string name="settings_memories_description">MÃ¤lestused, mille AI on vestluste ajal salvestanud. Need lisatakse igasse sÃµnumisse konteksti pakkumiseks.</string>
     <string name="settings_memories_delete">Kustuta mÃ¤lestus</string>
@@ -240,8 +238,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">VÃ¤lju interaktiivsest reÅ¾iimist</string>
     <string name="interactive_ui_parsing_failed">UI analüüs ebaÃµnnestus, proovin uuesti…</string>
-    <string name="settings_sponsors_monthly">Igakuised sponsorid</string>
-    <string name="settings_sponsors_past">Varasemad sponsorid</string>
     <string name="snackbar_undo">VÃµta tagasi</string>
     <string name="snackbar_memory_deleted">MÃ¤lestus kustutatud</string>
     <string name="snackbar_task_cancelled">Ãœlesanne tühistatud</string>

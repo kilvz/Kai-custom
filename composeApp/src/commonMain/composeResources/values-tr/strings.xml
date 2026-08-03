@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">Linux korumalÄ± alanÄ±nda kabuk komutu Ã§alÄ±ÅŸtÄ±r</string>
     <string name="settings_dynamic_ui">Dinamik Arayüz</string>
     <string name="settings_dynamic_ui_description">Yapay zekanÄ±n yanÄ±tlarda düÄŸmeler, formlar ve kartlar gibi etkileÅŸimli arayüz öÄŸeleri oluÅŸturmasÄ±na izin verin. DeÄŸiÅŸiklik yeni konuÅŸmalar iÃ§in geÃ§erlidir.</string>
-    <string name="settings_oled_mode">OLED modu</string>
-    <string name="settings_oled_mode_description">OLED ekranlarda enerji tasarrufu yapmak iÃ§in karanlÄ±k modda saf siyah arka planlar kullanÄ±n.</string>
     <string name="settings_memories">AnÄ±lar</string>
     <string name="settings_memories_description">KonuÅŸmalar sÄ±rasÄ±nda AI tarafÄ±ndan kaydedilen anÄ±lar. BaÄŸlam saÄŸlamak iÃ§in her mesaja dahil edilir.</string>
     <string name="settings_memories_delete">AnÄ±yÄ± sil</string>
@@ -241,8 +239,6 @@ Bir ÅŸey dikkat gerektiriyorsa (eski anÄ±lar, vadesi geÃ§miÅŸ görevler,
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">EtkileÅŸimli moddan Ã§Ä±k</string>
     <string name="interactive_ui_parsing_failed">UI ayrÄ±ÅŸtÄ±rma baÅŸarÄ±sÄ±z oldu, tekrar deneniyor…</string>
-    <string name="settings_sponsors_monthly">AylÄ±k Sponsorlar</string>
-    <string name="settings_sponsors_past">Ã–nceki Sponsorlar</string>
     <string name="snackbar_undo">Geri al</string>
     <string name="snackbar_memory_deleted">AnÄ± silindi</string>
     <string name="snackbar_task_cancelled">Görev iptal edildi</string>

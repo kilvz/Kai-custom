@@ -66,8 +66,6 @@
     <string name="tool_execute_shell_command_description">Kör ett skalkommando i Linux-sandlÃ¥dan</string>
     <string name="settings_dynamic_ui">Dynamiskt grÃ¤nssnitt</string>
     <string name="settings_dynamic_ui_description">TillÃ¥t AI att skapa interaktiva grÃ¤nssnittselement som knappar, formulÃ¤r och kort i svar. Ã„ndringen gÃ¤ller för nya konversationer.</string>
-    <string name="settings_oled_mode">OLED-lÃ¤ge</string>
-    <string name="settings_oled_mode_description">AnvÃ¤nd rena svarta bakgrunder i mörkt lÃ¤ge för att spara ström pÃ¥ OLED-skÃ¤rmar.</string>
     <string name="settings_memories">Minnen</string>
     <string name="settings_memories_description">Minnen sparade av AI under konversationer. Dessa inkluderas i varje meddelande för att ge sammanhang.</string>
     <string name="settings_memories_delete">Ta bort minne</string>
@@ -238,8 +236,6 @@ Om nÃ¥got behöver uppmÃ¤rksamhet (förÃ¥ldrade minnen, förfallna uppgift
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">LÃ¤mna interaktivt lÃ¤ge</string>
     <string name="interactive_ui_parsing_failed">UI-analys misslyckades, försöker igen…</string>
-    <string name="settings_sponsors_monthly">MÃ¥natliga sponsorer</string>
-    <string name="settings_sponsors_past">Tidigare sponsorer</string>
     <string name="snackbar_undo">Ã…ngra</string>
     <string name="snackbar_memory_deleted">Minne raderat</string>
     <string name="snackbar_task_cancelled">Uppgift avbruten</string>

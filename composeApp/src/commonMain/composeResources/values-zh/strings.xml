@@ -69,8 +69,6 @@
     <string name="tool_execute_shell_command_description">åœ¨ Linux æ²™ç›’ä¸­æ‰§è¡Œ Shell å‘½ä»¤</string>
     <string name="settings_dynamic_ui">åŠ¨æ€ç•Œé¢</string>
     <string name="settings_dynamic_ui_description">å…è®¸AIåœ¨å›žå¤ä¸­åˆ›å»ºäº¤äº’å¼ç•Œé¢å…ƒç´ ï¼Œå¦‚æŒ‰é’®ã€è¡¨å•å’Œå¡ç‰‡ã€‚æ›´æ”¹é€‚ç”¨äºŽæ–°å¯¹è¯ã€‚</string>
-    <string name="settings_oled_mode">OLED æ¨¡å¼</string>
-    <string name="settings_oled_mode_description">åœ¨æ·±è‰²æ¨¡å¼ä¸‹ä½¿ç”¨çº¯é»‘èƒŒæ™¯ï¼Œä»¥ä¾¿åœ¨ OLED å±å¹•ä¸ŠèŠ‚çœç”µé‡ã€‚</string>
     <string name="settings_memories">è®°å¿†</string>
     <string name="settings_memories_description">AI åœ¨å¯¹è¯æœŸé—´å­˜å‚¨çš„è®°å¿†ã€‚è¿™äº›è®°å¿†åŒ…å«åœ¨æ¯æ¡æ¶ˆæ¯ä¸­ä»¥æä¾›ä¸Šä¸‹æ–‡ã€‚</string>
     <string name="settings_memories_delete">åˆ é™¤è®°å¿†</string>
@@ -241,8 +239,6 @@
     <string name="interactive_title">K.Ai</string>
     <string name="interactive_exit_content_description">é€€å‡ºäº¤äº’æ¨¡å¼</string>
     <string name="interactive_ui_parsing_failed">UI è§£æžå¤±è´¥ï¼Œæ­£åœ¨é‡è¯•…</string>
-    <string name="settings_sponsors_monthly">æœˆåº¦èµžåŠ©è€…</string>
-    <string name="settings_sponsors_past">å¾€æœŸèµžåŠ©è€…</string>
     <string name="snackbar_undo">æ’¤é”€</string>
     <string name="snackbar_memory_deleted">è®°å¿†å·²åˆ é™¤</string>
     <string name="snackbar_task_cancelled">ä»»åŠ¡å·²å–æ¶ˆ</string>
