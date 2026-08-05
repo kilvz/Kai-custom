@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Стрелица доле</string>
     <string name="kai_build_terminal_key_right_content_description">Стрелица десно</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Прилагођени модел</string>
+    <string name="settings_custom_model_hint">Унесите ID модела који ваш сервер подржава, чак и ако није наведен изнад.</string>
 </resources>

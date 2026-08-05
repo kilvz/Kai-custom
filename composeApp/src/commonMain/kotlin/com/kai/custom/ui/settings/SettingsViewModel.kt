@@ -222,6 +222,8 @@ class SettingsViewModel(
         onChangeApiKey = ::onChangeApiKey,
         onChangeBaseUrl = ::onChangeBaseUrl,
         onSelectModel = ::onSelectModel,
+        onToggleUseCustomModel = ::onToggleUseCustomModel,
+        onChangeCustomModelId = ::onChangeCustomModelId,
         onToggleTool = ::onToggleTool,
         onSaveSoul = ::onSaveSoul,
         onChangePersonaName = ::onChangePersonaName,
@@ -458,6 +460,8 @@ class SettingsViewModel(
             baseUrl = dataRepository.getInstanceBaseUrl(instance.instanceId, service),
             selectedModel = models.firstOrNull { it.isSelected },
             models = models.toImmutableList(),
+            useCustomModel = dataRepository.getInstanceUseCustomModel(instance.instanceId),
+            customModelId = dataRepository.getInstanceCustomModelId(instance.instanceId),
         )
     }
 
@@ -597,6 +601,36 @@ class SettingsViewModel(
     private fun onImportComplete() {
         viewModelScope.launch(backgroundDispatcher) {
             refreshServiceList()
+        }
+    }
+
+
+    private fun onToggleUseCustomModel(instanceId: String, useCustom: Boolean) {
+        dataRepository.updateInstanceUseCustomModel(instanceId, useCustom)
+        _state.update { state ->
+            state.copy(
+                configuredServices = state.configuredServices.map { e ->
+                    if (e.instanceId != instanceId) {
+                        e
+                    } else {
+                        e.copy(
+                            useCustomModel = useCustom,
+                            customModelId = dataRepository.getInstanceCustomModelId(instanceId),
+                        )
+                    }
+                }.toImmutableList(),
+            )
+        }
+    }
+
+    private fun onChangeCustomModelId(instanceId: String, modelId: String) {
+        dataRepository.updateInstanceCustomModelId(instanceId, modelId)
+        _state.update { state ->
+            state.copy(
+                configuredServices = state.configuredServices.map { e ->
+                    if (e.instanceId == instanceId) e.copy(customModelId = modelId) else e
+                }.toImmutableList(),
+            )
         }
     }
 

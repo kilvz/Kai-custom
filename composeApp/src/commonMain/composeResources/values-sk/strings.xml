@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Šípka dole</string>
     <string name="kai_build_terminal_key_right_content_description">Šípka doprava</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Vlastný model</string>
+    <string name="settings_custom_model_hint">Zadajte ID modelu, ktoré váš server podporuje, aj keď nie je v zozname vyššie.</string>
 </resources>

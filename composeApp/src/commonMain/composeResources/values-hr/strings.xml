@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Strelica dolje</string>
     <string name="kai_build_terminal_key_right_content_description">Strelica desno</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Prilagođeni model</string>
+    <string name="settings_custom_model_hint">Unesite ID modela koji vaš poslužitelj podržava, čak i ako nije naveden iznad.</string>
 </resources>

@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">નીચે તીર</string>
     <string name="kai_build_terminal_key_right_content_description">જમણું તીર</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">કસ્ટમ મોડેલ</string>
+    <string name="settings_custom_model_hint">તમારા સર્વર દ્વારા સમર્થિત મોડેલ ID દાખલ કરો, ભલે તે ઉપર યાદીમાં ન હોય.</string>
 </resources>

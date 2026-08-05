@@ -222,7 +222,7 @@ class RemoteDataRepository(
         modelId = if (service == Service.Free) {
             appSettings.getFreeMode().modelId
         } else {
-            appSettings.getInstanceModelId(instanceId).ifEmpty { appSettings.getSelectedModelId(service) }
+            appSettings.getInstanceEffectiveModelId(instanceId).ifEmpty { appSettings.getSelectedModelId(service) }
         },
         baseUrl = getInstanceBaseUrl(instanceId, service),
     )
@@ -266,7 +266,7 @@ class RemoteDataRepository(
 
     override fun getServiceEntries(): List<ServiceEntry> = getConfiguredServiceInstances().map { instance ->
         val service = Service.fromId(instance.serviceId)
-        val modelId = appSettings.getInstanceModelId(instance.instanceId).ifEmpty {
+        val modelId = appSettings.getInstanceEffectiveModelId(instance.instanceId).ifEmpty {
             appSettings.getSelectedModelId(service)
         }
         ServiceEntry(
@@ -326,7 +326,7 @@ class RemoteDataRepository(
             // Try to find a proper display name from downloaded models
             val displayName = getLocalDownloadedModels().firstOrNull { it.id == selectedModelId }?.displayName
                 ?: selectedModelId
-            listOf(SettingsModel(id = selectedModelId, subtitle = displayName, isSelected = true)) + defaultSettingsModels
+            listOf(SettingsModel(id = selectedModelId, subtitle = displayName, isSelected = true, isManualEntry = true)) + defaultSettingsModels
         } else {
             defaultSettingsModels
         }
@@ -341,12 +341,8 @@ class RemoteDataRepository(
         }
         val displayName = getLocalDownloadedModels().firstOrNull { it.id == modelId }?.displayName
         modelsByInstance[instanceId]?.update { models ->
-            models.map {
-                if (it.id == modelId) {
-                    it.copy(isSelected = true, subtitle = displayName ?: it.subtitle)
-                } else {
-                    it.copy(isSelected = false)
-                }
+            ensureSelectedModelPresent(models, modelId).map {
+                if (it.id == modelId) it.copy(subtitle = displayName ?: it.subtitle) else it
             }
         }
         // Free the previously-loaded on-device model as soon as the user picks a new one.
@@ -355,6 +351,25 @@ class RemoteDataRepository(
         if (service.isOnDevice && localInferenceEngine?.currentModelId?.let { it != modelId } == true) {
             localInferenceEngine.releaseInBackground()
         }
+    }
+
+    override fun getInstanceUseCustomModel(instanceId: String): Boolean = appSettings.getInstanceUseCustomModel(instanceId)
+
+    override fun updateInstanceUseCustomModel(instanceId: String, useCustom: Boolean) {
+        if (useCustom && appSettings.getInstanceCustomModelId(instanceId).isBlank()) {
+            // Prefill from list selection so the field is not empty when the checkbox is first enabled.
+            val listModelId = appSettings.getInstanceModelId(instanceId)
+            if (listModelId.isNotBlank()) {
+                appSettings.setInstanceCustomModelId(instanceId, listModelId)
+            }
+        }
+        appSettings.setInstanceUseCustomModel(instanceId, useCustom)
+    }
+
+    override fun getInstanceCustomModelId(instanceId: String): String = appSettings.getInstanceCustomModelId(instanceId)
+
+    override fun updateInstanceCustomModelId(instanceId: String, modelId: String) {
+        appSettings.setInstanceCustomModelId(instanceId, modelId)
     }
 
     override fun clearInstanceModels(instanceId: String, service: Service) {
@@ -452,10 +467,13 @@ class RemoteDataRepository(
     }
 
     private fun updateModelsForInstance(instanceId: String, models: List<SettingsModel>, service: Service? = null) {
+        val selectedModelId = appSettings.getInstanceModelId(instanceId)
+        val withSelected = ensureSelectedModelPresent(models, selectedModelId)
         val flow = modelsByInstance.getOrPut(instanceId) { MutableStateFlow(emptyList()) }
-        flow.update { models }
-        if (models.isNotEmpty() && models.none { it.isSelected }) {
-            val default = pickDefaultModel(models, service)
+        flow.update { withSelected }
+        // Only auto-pick when nothing is stored yet — never overwrite a custom / unlisted model id.
+        if (withSelected.isNotEmpty() && withSelected.none { it.isSelected }) {
+            val default = pickDefaultModel(withSelected, service)
             if (default != null) {
                 appSettings.setInstanceModelId(instanceId, default.id)
                 flow.update { m -> m.map { it.copy(isSelected = it.id == default.id) } }

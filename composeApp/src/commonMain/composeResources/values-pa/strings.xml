@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">ਹੇਠਾਂ ਤੀਰ</string>
     <string name="kai_build_terminal_key_right_content_description">ਸੱਜਾ ਤੀਰ</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">ਕਸਟਮ ਮਾਡਲ</string>
+    <string name="settings_custom_model_hint">ਆਪਣੇ ਸਰਵਰ ਵੱਲੋਂ ਸਮਰਥਿਤ ਮਾਡਲ ID ਦਰਜ ਕਰੋ, ਭਾਵੇਂ ਇਹ ਉੱਪਰ ਸੂਚੀਬੱਧ ਨਾ ਹੋਵੇ।</string>
 </resources>

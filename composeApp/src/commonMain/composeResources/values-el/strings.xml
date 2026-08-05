@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">Βέλος κάτω</string>
     <string name="kai_build_terminal_key_right_content_description">Βέλος δεξιά</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Προσαρμοσμένο μοντέλο</string>
+    <string name="settings_custom_model_hint">Εισαγάγετε ένα αναγνωριστικό μοντέλου που υποστηρίζει ο διακομιστής σας, ακόμα κι αν δεν εμφανίζεται παραπάνω.</string>
 </resources>

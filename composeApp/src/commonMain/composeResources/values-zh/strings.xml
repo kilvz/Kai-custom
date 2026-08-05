@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">下箭头</string>
     <string name="kai_build_terminal_key_right_content_description">右箭头</string>
     <string name="kai_build_terminal_key_enter_content_description">回车</string>
+    <string name="settings_custom_model_label">自定义模型</string>
+    <string name="settings_custom_model_hint">输入服务器支持的模型 ID，即使它未出现在上方列表中。</string>
 </resources>

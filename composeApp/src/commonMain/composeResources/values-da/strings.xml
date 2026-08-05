@@ -840,4 +840,6 @@ Hvis noget krÃ¦ver opmÃ¦rksomhed (forÃ¦ldede erindringer, forfaldne opgave
     <string name="kai_build_terminal_key_down_content_description">Pil ned</string>
     <string name="kai_build_terminal_key_right_content_description">Pil højre</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Brugerdefineret model</string>
+    <string name="settings_custom_model_hint">Angiv et model-id, som din server understøtter, også selvom det ikke er på listen ovenfor.</string>
 </resources>

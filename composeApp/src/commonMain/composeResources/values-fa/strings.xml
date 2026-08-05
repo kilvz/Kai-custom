@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">پیکان پایین</string>
     <string name="kai_build_terminal_key_right_content_description">پیکان راست</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">مدل سفارشی</string>
+    <string name="settings_custom_model_hint">شناسه مدلی را که سرور شما پشتیبانی می‌کند وارد کنید، حتی اگر در فهرست بالا نباشد.</string>
 </resources>

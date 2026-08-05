@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">아래쪽 화살표</string>
     <string name="kai_build_terminal_key_right_content_description">오른쪽 화살표</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">사용자 지정 모델</string>
+    <string name="settings_custom_model_hint">위에 목록에 없어도 서버가 지원하는 모델 ID를 입력하세요.</string>
 </resources>

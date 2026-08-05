@@ -840,4 +840,6 @@
     <string name="kai_build_terminal_key_down_content_description">سهم لأسفل</string>
     <string name="kai_build_terminal_key_right_content_description">سهم لليمين</string>
     <string name="kai_build_terminal_key_enter_content_description">إدخال</string>
+    <string name="settings_custom_model_label">نموذج مخصص</string>
+    <string name="settings_custom_model_hint">أدخل معرّف نموذج يدعمه خادمك، حتى إن لم يكن مدرجًا أعلاه.</string>
 </resources>

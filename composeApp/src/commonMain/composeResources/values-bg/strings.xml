@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">Стрелка надолу</string>
     <string name="kai_build_terminal_key_right_content_description">Стрелка надясно</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Персонализиран модел</string>
+    <string name="settings_custom_model_hint">Въведете идентификатор на модел, поддържан от сървъра ви, дори ако не е в списъка по-горе.</string>
 </resources>

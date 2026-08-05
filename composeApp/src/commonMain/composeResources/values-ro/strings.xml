@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Săgeată jos</string>
     <string name="kai_build_terminal_key_right_content_description">Săgeată dreapta</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Model personalizat</string>
+    <string name="settings_custom_model_hint">Introdu un id de model acceptat de serverul tău, chiar dacă nu apare în lista de mai sus.</string>
 </resources>

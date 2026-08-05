@@ -836,4 +836,6 @@ Om nÃ¥got behöver uppmÃ¤rksamhet (förÃ¥ldrade minnen, förfallna uppgift
     <string name="kai_build_terminal_key_down_content_description">Pil ner</string>
     <string name="kai_build_terminal_key_right_content_description">Pil höger</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Anpassad modell</string>
+    <string name="settings_custom_model_hint">Ange ett modell-id som din server stöder, även om det inte finns i listan ovan.</string>
 </resources>

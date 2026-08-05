@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">खालचा बाण</string>
     <string name="kai_build_terminal_key_right_content_description">उजवा बाण</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">सानुकूल मॉडेल</string>
+    <string name="settings_custom_model_hint">तुमच्या सर्व्हरने समर्थित मॉडेल ID प्रविष्ट करा, जरी ते वर सूचीबद्ध नसले तरी.</string>
 </resources>

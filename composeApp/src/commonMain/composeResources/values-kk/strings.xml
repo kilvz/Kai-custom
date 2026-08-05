@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Төмен көрсеткі</string>
     <string name="kai_build_terminal_key_right_content_description">Оң жақ көрсеткі</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Арнаулы модель</string>
+    <string name="settings_custom_model_hint">Жоғарыда тізімде болмаса да, серверіңіз қолдайтын модель идентификаторын енгізіңіз.</string>
 </resources>

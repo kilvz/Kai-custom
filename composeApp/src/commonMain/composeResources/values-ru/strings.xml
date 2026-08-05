@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">Стрелка вниз</string>
     <string name="kai_build_terminal_key_right_content_description">Стрелка вправо</string>
     <string name="kai_build_terminal_key_enter_content_description">Ввод</string>
+    <string name="settings_custom_model_label">Своя модель</string>
+    <string name="settings_custom_model_hint">Введите идентификатор модели, который поддерживает ваш сервер, даже если его нет в списке выше.</string>
 </resources>

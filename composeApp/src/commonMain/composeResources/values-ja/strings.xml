@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">下矢印</string>
     <string name="kai_build_terminal_key_right_content_description">右矢印</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">カスタムモデル</string>
+    <string name="settings_custom_model_hint">上に表示されていなくても、サーバーが対応するモデル ID を入力してください。</string>
 </resources>

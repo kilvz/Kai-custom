@@ -22,6 +22,7 @@ import com.kai.custom.data.SystemPromptVariant
 import com.kai.custom.data.TelegramSyncState
 import com.kai.custom.data.ThemeMode
 import com.kai.custom.data.dimension.KGFact
+import com.kai.custom.data.ensureSelectedModelPresent
 import com.kai.custom.inference.DownloadError
 import com.kai.custom.inference.DownloadedModel
 import com.kai.custom.inference.EngineState
@@ -157,8 +158,27 @@ class FakeDataRepository : DataRepository {
 
     override fun updateInstanceSelectedModel(instanceId: String, service: Service, modelId: String) {
         instanceModels[instanceId]?.update { models ->
-            models.map { it.copy(isSelected = it.id == modelId) }
+            ensureSelectedModelPresent(models, modelId)
         }
+    }
+
+    private val instanceUseCustomModel = mutableMapOf<String, Boolean>()
+    private val instanceCustomModelIds = mutableMapOf<String, String>()
+
+    override fun getInstanceUseCustomModel(instanceId: String): Boolean = instanceUseCustomModel[instanceId] ?: false
+
+    override fun updateInstanceUseCustomModel(instanceId: String, useCustom: Boolean) {
+        if (useCustom && instanceCustomModelIds[instanceId].isNullOrBlank()) {
+            // Prefill is handled by callers via updateInstanceCustomModelId in production;
+            // tests rarely need it — leave blank unless set.
+        }
+        instanceUseCustomModel[instanceId] = useCustom
+    }
+
+    override fun getInstanceCustomModelId(instanceId: String): String = instanceCustomModelIds[instanceId] ?: ""
+
+    override fun updateInstanceCustomModelId(instanceId: String, modelId: String) {
+        instanceCustomModelIds[instanceId] = modelId
     }
 
     override fun clearInstanceModels(instanceId: String, service: Service) {

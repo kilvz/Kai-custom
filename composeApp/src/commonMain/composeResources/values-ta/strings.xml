@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">கீழ் அம்பு</string>
     <string name="kai_build_terminal_key_right_content_description">வலது அம்பு</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">தனிப்பயன் மாடல்</string>
+    <string name="settings_custom_model_hint">மேலே பட்டியலிடப்படாவிட்டாலும் உங்கள் சேவையகம் ஆதரிக்கும் மாடல் ஐடியை உள்ளிடவும்.</string>
 </resources>

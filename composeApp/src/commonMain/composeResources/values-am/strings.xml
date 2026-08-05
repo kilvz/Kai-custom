@@ -840,4 +840,6 @@
     <string name="kai_build_terminal_key_down_content_description">ቀስት ታች</string>
     <string name="kai_build_terminal_key_right_content_description">ቀስት ቀኝ</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">ብጁ ሞዴል</string>
+    <string name="settings_custom_model_hint">ከላይ ባይዘረዘርም በሰርቨርዎ የሚደገፍ የሞዴል መለያ ያስገቡ።</string>
 </resources>

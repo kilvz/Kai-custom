@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">Nool alla</string>
     <string name="kai_build_terminal_key_right_content_description">Nool paremale</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Kohandatud mudel</string>
+    <string name="settings_custom_model_hint">Sisesta mudeli ID, mida sinu server toetab, isegi kui seda ülal ei loetleta.</string>
 </resources>

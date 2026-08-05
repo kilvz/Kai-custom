@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">ลูกศรลง</string>
     <string name="kai_build_terminal_key_right_content_description">ลูกศรขวา</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">โมเดลที่กำหนดเอง</string>
+    <string name="settings_custom_model_hint">ป้อนรหัสโมเดลที่เซิร์ฟเวอร์ของคุณรองรับ แม้จะไม่อยู่ในรายการด้านบน</string>
 </resources>

@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">نیچے تیر</string>
     <string name="kai_build_terminal_key_right_content_description">دائیں تیر</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">حسبِ ضرورت ماڈل</string>
+    <string name="settings_custom_model_hint">اپنے سرور کی معاونت یافتہ ماڈل آئی ڈی درج کریں، چاہے وہ اوپر فہرست میں نہ ہو۔</string>
 </resources>

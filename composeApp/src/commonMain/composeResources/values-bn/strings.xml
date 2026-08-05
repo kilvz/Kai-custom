@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">নিচের তীর</string>
     <string name="kai_build_terminal_key_right_content_description">ডান তীর</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">কাস্টম মডেল</string>
+    <string name="settings_custom_model_hint">আপনার সার্ভার যে মডেল আইডি সমর্থন করে তা লিখুন, উপরে তালিকাভুক্ত না থাকলেও।</string>
 </resources>

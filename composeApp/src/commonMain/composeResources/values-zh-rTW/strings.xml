@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">下方向鍵</string>
     <string name="kai_build_terminal_key_right_content_description">右方向鍵</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">自訂模型</string>
+    <string name="settings_custom_model_hint">輸入伺服器支援的模型 ID，即使它未出現在上方列表中。</string>
 </resources>

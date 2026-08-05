@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">కింది బాణం</string>
     <string name="kai_build_terminal_key_right_content_description">కుడి బాణం</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">అనుకూల మోడల్</string>
+    <string name="settings_custom_model_hint">పైన జాబితా చేయకపోయినా మీ సర్వర్ మద్దతు ఇచ్చే మోడల్ IDని నమోదు చేయండి.</string>
 </resources>

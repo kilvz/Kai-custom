@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">नीचे तीर</string>
     <string name="kai_build_terminal_key_right_content_description">दायाँ तीर</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">कस्टम मॉडल</string>
+    <string name="settings_custom_model_hint">अपने सर्वर द्वारा समर्थित मॉडल ID दर्ज करें, भले ही वह ऊपर सूचीबद्ध न हो।</string>
 </resources>

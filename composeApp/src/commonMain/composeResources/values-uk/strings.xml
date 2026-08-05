@@ -839,4 +839,6 @@
     <string name="kai_build_terminal_key_down_content_description">Стрілка вниз</string>
     <string name="kai_build_terminal_key_right_content_description">Стрілка вправо</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Власна модель</string>
+    <string name="settings_custom_model_hint">Введіть ідентифікатор моделі, який підтримує ваш сервер, навіть якщо його немає в списку вище.</string>
 </resources>

@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Mũi tên xuống</string>
     <string name="kai_build_terminal_key_right_content_description">Mũi tên phải</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Mô hình tùy chỉnh</string>
+    <string name="settings_custom_model_hint">Nhập id mô hình mà máy chủ của bạn hỗ trợ, ngay cả khi nó không có trong danh sách ở trên.</string>
 </resources>

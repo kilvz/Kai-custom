@@ -839,4 +839,6 @@ Bir ÅŸey dikkat gerektiriyorsa (eski anÄ±lar, vadesi geÃ§miÅŸ görevler,
     <string name="kai_build_terminal_key_down_content_description">Aşağı ok</string>
     <string name="kai_build_terminal_key_right_content_description">Sağ ok</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Özel model</string>
+    <string name="settings_custom_model_hint">Yukarıda listelenmese bile sunucunuzun desteklediği bir model kimliği girin.</string>
 </resources>

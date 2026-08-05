@@ -838,4 +838,6 @@
     <string name="kai_build_terminal_key_down_content_description">Rodyklė žemyn</string>
     <string name="kai_build_terminal_key_right_content_description">Rodyklė dešinėn</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_custom_model_label">Pasirinktinis modelis</string>
+    <string name="settings_custom_model_hint">Įveskite modelio ID, kurį palaiko jūsų serveris, net jei jo nėra aukščiau esančiame sąraše.</string>
 </resources>
