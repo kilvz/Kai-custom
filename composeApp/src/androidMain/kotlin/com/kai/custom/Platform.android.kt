@@ -71,6 +71,7 @@ import com.kai.custom.tools.ApplyPatchTool
 import com.kai.custom.tools.CalendarRepository
 import com.kai.custom.tools.CalendarResult
 import com.kai.custom.tools.CommonTools
+import com.kai.custom.tools.CreateCalendarEventTool
 import com.kai.custom.tools.EditFileTool
 import com.kai.custom.tools.EmailTools
 import com.kai.custom.tools.GlobTool
@@ -89,6 +90,8 @@ import com.kai.custom.tools.ReadFileTool
 import com.kai.custom.tools.RootTool
 import com.kai.custom.tools.SandboxFileTransferTool
 import com.kai.custom.tools.SchedulingTools
+import com.kai.custom.tools.SendNotificationTool
+import com.kai.custom.tools.SetAlarmTool
 import com.kai.custom.tools.ShellCommandTool
 import com.kai.custom.tools.SmsTools
 import com.kai.custom.tools.SpeakTextTool
@@ -299,52 +302,23 @@ actual fun createLegacySettings(): Settings? = try {
     null
 }
 
-actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnectionManager()
-
+// Tool definitions for Android platform. Every tool Android can execute is listed, including the
+// ones no per-tool switch controls — chat resolves display names from here, and an omission shows
+// the raw tool id instead. Tools driven by a master toggle carry `userToggleable = false`, which
+// is what keeps them out of the Tools tab.
 actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     val context: Context by inject(Context::class.java)
 
     fun hasPermission(permission: String): Boolean = ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
     addAll(CommonTools.commonToolDefinitions)
-    add(
-        ToolInfo(
-            id = "send_notification",
-            name = "Send Notification",
-            description = "Send a push notification to the device",
-            nameRes = Res.string.tool_send_notification_name,
-            descriptionRes = Res.string.tool_send_notification_description,
-            isEnabled = PermissionController(AppPermission.POST_NOTIFICATIONS).hasPermission(),
-        ),
-    )
-    add(
-        ToolInfo(
-            id = "create_calendar_event",
-            name = "Create Calendar Event",
-            description = "Create a calendar event on the user's device",
-            nameRes = Res.string.tool_create_calendar_event_name,
-            descriptionRes = Res.string.tool_create_calendar_event_description,
-            isEnabled = PermissionController(AppPermission.CALENDAR).hasPermission(),
-        ),
-    )
-    add(
-        ToolInfo(
-            id = "set_alarm",
-            name = "Set Alarm",
-            description = "Set an alarm or countdown timer on the device",
-            nameRes = Res.string.tool_set_alarm_name,
-            descriptionRes = Res.string.tool_set_alarm_description,
-        ),
-    )
-    add(
-        ToolInfo(
-            id = "open_file",
-            name = "Open File",
-            description = "Open sandbox files in your default Android app",
-            nameRes = Res.string.tool_open_file_name,
-            descriptionRes = Res.string.tool_open_file_description,
-        ),
-    )
+    add(SendNotificationTool.toolInfo.copy(isEnabled = PermissionController(AppPermission.POST_NOTIFICATIONS).hasPermission()))
+    add(CreateCalendarEventTool.toolInfo.copy(isEnabled = PermissionController(AppPermission.CALENDAR).hasPermission()))
+    add(SetAlarmTool.toolInfo)
+    add(OpenFileTool.toolInfo)
+    add(ShellCommandTool.toolInfo)
+    add(ProcessManagerTool.toolInfo)
+    add(SshConfigureHostTool.toolInfo)
     add(ReadFileTool.toolInfo)
     add(WriteFileTool.toolInfo)
     add(EditFileTool.toolInfo)
@@ -356,7 +330,6 @@ actual fun getPlatformToolDefinitions(): List<ToolInfo> = buildList {
     add(WebFetchTool.toolInfo)
     add(InternetSearchTool.toolInfo)
     add(SshCommandTool.toolInfo)
-    add(SshConfigureHostTool.toolInfo)
     add(SshConnectTool.toolInfo)
     add(SshDisconnectTool.toolInfo)
     // Telegram tools
@@ -479,131 +452,14 @@ actual fun getAvailableTools(): List<Tool> {
             )
         }
 
-        if (appSettings.isToolEnabled("create_calendar_event")) {
-            add(
-                object : Tool {
-                    override val schema = ToolSchema(
-                        "create_calendar_event",
-                        "Create a calendar event on the user's device",
-                        mapOf(
-                            "title" to ParameterSchema("string", "Event title", true),
-                            "start_time" to ParameterSchema("string", "Start time as ISO 8601, e.g. '2024-03-15T14:30:00+02:00'. Naive (no offset) is treated as user's local time.", true),
-                            "end_time" to ParameterSchema("string", "End time, same format as start_time. Defaults to 1 hour after start.", false),
-                            "description" to ParameterSchema("string", "Event notes or description", false),
-                            "location" to ParameterSchema("string", "Event location", false),
-                            "all_day" to ParameterSchema("boolean", "Whether this is an all-day event", false),
-                            "reminder_minutes" to ParameterSchema("integer", "Minutes before event to send reminder (default: 15)", false),
-                        ),
-                    )
-
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        val title = args["title"] as? String
-                            ?: return mapOf("success" to false, "error" to "Title is required")
-                        val startTime = args["start_time"] as? String
-                            ?: return mapOf("success" to false, "error" to "Start time is required")
-                        val endTime = args["end_time"] as? String
-                        val description = args["description"] as? String
-                        val location = args["location"] as? String
-                        val allDay = (args["all_day"] as? Boolean) ?: false
-                        val reminderMinutes = (args["reminder_minutes"] as? Number)?.toInt() ?: 15
-
-                        return when (
-                            val result = calendarRepository.createEvent(
-                                title = title,
-                                startTimeIso = startTime,
-                                endTimeIso = endTime,
-                                description = description,
-                                location = location,
-                                allDay = allDay,
-                                reminderMinutes = reminderMinutes,
-                            )
-                        ) {
-                            is CalendarResult.Success -> mapOf(
-                                "success" to true,
-                                "event_id" to result.eventId,
-                                "title" to result.title,
-                                "scheduled_for" to result.startTime,
-                                "message" to "Event '${result.title}' created successfully for ${result.startTime}",
-                            )
-
-                            is CalendarResult.Error -> mapOf(
-                                "success" to false,
-                                "error" to result.message,
-                            )
-                        }
-                    }
-                },
-            )
+        if (appSettings.isToolEnabled(CreateCalendarEventTool.ID)) {
+            val calendarPermissionController: PermissionController =
+                KoinJavaComponent.get(PermissionController::class.java, permissionQualifier(AppPermission.CALENDAR))
+            add(CreateCalendarEventTool.create(calendarRepository))
         }
 
-        if (appSettings.isToolEnabled("set_alarm")) {
-            add(
-                object : Tool {
-                    override val schema = ToolSchema(
-                        "set_alarm",
-                        "Set an alarm or countdown timer on the device. For alarms provide hour and minutes. For countdown timers provide duration_seconds.",
-                        mapOf(
-                            "hour" to ParameterSchema("integer", "Hour of the alarm in 24-hour format (0-23)", false),
-                            "minutes" to ParameterSchema("integer", "Minutes of the alarm (0-59)", false),
-                            "label" to ParameterSchema("string", "Label for the alarm or timer", false),
-                            "duration_seconds" to ParameterSchema("integer", "Duration in seconds for a countdown timer", false),
-                        ),
-                    )
-
-                    override suspend fun execute(args: Map<String, Any>): Any {
-                        val hour = (args["hour"] as? Number)?.toInt()
-                        val minutes = (args["minutes"] as? Number)?.toInt()
-                        val label = args["label"] as? String
-                        val durationSeconds = (args["duration_seconds"] as? Number)?.toInt()
-
-                        val intent = if (durationSeconds != null) {
-                            Intent(AlarmClock.ACTION_SET_TIMER).apply {
-                                putExtra(AlarmClock.EXTRA_LENGTH, durationSeconds)
-                                if (label != null) putExtra(AlarmClock.EXTRA_MESSAGE, label)
-                                putExtra(AlarmClock.EXTRA_SKIP_UI, true)
-                            }
-                        } else if (hour != null && minutes != null) {
-                            Intent(AlarmClock.ACTION_SET_ALARM).apply {
-                                putExtra(AlarmClock.EXTRA_HOUR, hour)
-                                putExtra(AlarmClock.EXTRA_MINUTES, minutes)
-                                if (label != null) putExtra(AlarmClock.EXTRA_MESSAGE, label)
-                                putExtra(AlarmClock.EXTRA_SKIP_UI, true)
-                            }
-                        } else {
-                            return mapOf(
-                                "success" to false,
-                                "error" to "Provide either hour+minutes for an alarm or duration_seconds for a timer",
-                            )
-                        }
-
-                        return try {
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(intent)
-                            if (durationSeconds != null) {
-                                mapOf(
-                                    "success" to true,
-                                    "type" to "timer",
-                                    "duration_seconds" to durationSeconds,
-                                    "message" to "Timer set for $durationSeconds seconds",
-                                )
-                            } else {
-                                mapOf(
-                                    "success" to true,
-                                    "type" to "alarm",
-                                    "hour" to hour!!,
-                                    "minutes" to minutes!!,
-                                    "message" to "Alarm set for %02d:%02d".format(hour, minutes),
-                                )
-                            }
-                        } catch (e: Exception) {
-                            mapOf(
-                                "success" to false,
-                                "error" to (e.message ?: "Failed to set alarm"),
-                            )
-                        }
-                    }
-                },
-            )
+        if (appSettings.isToolEnabled(SetAlarmTool.ID)) {
+            add(SetAlarmTool.create(context))
         }
 
         if (appSettings.isToolEnabled(CommonTools.openUrlTool.schema.name)) {
@@ -652,10 +508,6 @@ actual fun getAvailableTools(): List<Tool> {
 
         if (appSettings.isRootEnabled() && RootManager.isAvailable) {
             add(RootTool)
-        }
-
-        if (appSettings.isEmailEnabled()) {
-            addAll(EmailTools.getEmailTools(emailStore))
         }
 
         // SMS read tools: triple-gated. `isSmsSupported` is only true on FOSS builds

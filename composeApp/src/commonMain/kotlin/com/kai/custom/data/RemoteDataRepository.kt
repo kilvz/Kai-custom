@@ -53,7 +53,6 @@ import com.kai.custom.sms.SmsPoller
 import com.kai.custom.sms.SmsReader
 import com.kai.custom.sms.SmsSendResult
 import com.kai.custom.sms.SmsSender
-import com.kai.custom.tools.CommonTools
 import com.kai.custom.tools.NotificationListenerController
 import com.kai.custom.tools.PermissionController
 import com.kai.custom.ui.chat.History
@@ -1917,7 +1916,7 @@ class RemoteDataRepository(
 
     // Tool management
     override fun getToolDefinitions(): List<ToolInfo> = getPlatformToolDefinitions()
-        .filter { it.id !in CommonTools.masterToggleControlledToolIds }
+        .filter { it.userToggleable }
         .map { it.copy(isEnabled = appSettings.isToolEnabled(it.id, defaultEnabled = it.isEnabled)) }
 
     override fun setToolEnabled(toolId: String, enabled: Boolean) {

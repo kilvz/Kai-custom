@@ -189,6 +189,7 @@ object CommonTools {
         description = "Store or update a memory with a descriptive key",
         nameRes = Res.string.tool_memory_store_name,
         descriptionRes = Res.string.tool_memory_store_description,
+        userToggleable = false,
     )
 
     val memoryForgetToolInfo = ToolInfo(
@@ -197,6 +198,7 @@ object CommonTools {
         description = "Delete a stored memory by its key",
         nameRes = Res.string.tool_memory_forget_name,
         descriptionRes = Res.string.tool_memory_forget_description,
+        userToggleable = false,
     )
 
     val memoryLearnToolInfo = ToolInfo(
@@ -205,6 +207,7 @@ object CommonTools {
         description = "Store a categorized learning, error resolution, or preference",
         nameRes = Res.string.tool_memory_learn_name,
         descriptionRes = Res.string.tool_memory_learn_description,
+        userToggleable = false,
     )
 
     val memoryReinforceToolInfo = ToolInfo(
@@ -213,6 +216,7 @@ object CommonTools {
         description = "Reinforce a memory that produced a good outcome",
         nameRes = Res.string.tool_memory_reinforce_name,
         descriptionRes = Res.string.tool_memory_reinforce_description,
+        userToggleable = false,
     )
 
     val searchMemoriesToolInfo = ToolInfo(
@@ -278,6 +282,11 @@ object CommonTools {
         descriptionRes = Res.string.tool_open_url_description,
     )
 
+    // Every tool the chat UI may have to name, on every platform. Entries whose availability is
+    // decided by a master toggle in Settings → Agent (memory / scheduling / email / SMS /
+    // notifications) or by a platform capability are marked `userToggleable = false` at their
+    // declaration, so the Tools tab skips them instead of drawing a switch nothing reads.
+    // They still belong here: without a definition, chat falls back to showing the raw tool id.
     val commonToolDefinitions = listOf(
         WebSearchTool.toolInfo,
         localTimeToolInfo,
@@ -292,23 +301,8 @@ object CommonTools {
         SchedulingTools.schedulingToolDefinitions +
         HeartbeatTools.heartbeatToolDefinitions +
         EmailTools.emailToolDefinitions +
-        SmsTools.smsToolDefinitions
-
-    // Tool IDs gated by master toggles in Settings → Agent (isMemoryEnabled / isSchedulingEnabled /
-    // isEmailEnabled / isSmsEnabled / isSmsSendEnabled). They stay in `commonToolDefinitions` so the
-    // chat UI can resolve their display names, but the Tools tab filters them out — toggling them
-    // individually would have no effect, since `getAvailableTools()` only consults the master toggle
-    // (heartbeat tools are bundled with scheduling under the same switch).
-    val masterToggleControlledToolIds: Set<String> = setOf(
-        memoryStoreToolInfo.id,
-        memoryForgetToolInfo.id,
-        memoryLearnToolInfo.id,
-        memoryReinforceToolInfo.id,
-        searchMemoriesToolInfo.id,
-    ) + SchedulingTools.schedulingToolDefinitions.map { it.id }.toSet() +
-        HeartbeatTools.heartbeatToolDefinitions.map { it.id }.toSet() +
-        EmailTools.emailToolDefinitions.map { it.id }.toSet() +
-        SmsTools.smsToolDefinitions.map { it.id }.toSet()
+        SmsTools.smsToolDefinitions +
+        NotificationTools.notificationToolDefinitions
 
     fun getCommonTools(appSettings: AppSettings): List<Tool> = buildList {
         if (appSettings.isToolEnabled(localTimeTool.schema.name)) {

@@ -1,6 +1,6 @@
 ﻿# Notifications
 
-**Last verified:** 2026-08-03
+**Last verified:** 2026-08-08
 
 > Reading notifications is **Android-only**. Kai declares `BIND_NOTIFICATION_LISTENER_SERVICE` in the `foss` flavor; iOS, desktop, and wasm return no-op stubs.
 
@@ -85,6 +85,7 @@ Registered in `getAvailableTools()` on Android only, gated on `isNotificationsSu
 | `search_notifications` | Full-text search over `app_label` + `title` + `text`, newest first, capped at 20. Optional `package_name` filter. |
 
 The pattern intentionally mirrors the SMS read triplet so the AI can transfer mental model: "check for new things, read a specific one, or search by text."
+All three also carry a display definition, so chat shows their names ("Check Notifications") rather than raw tool ids while they run. As with SMS, the definitions are marked non-toggleable â€” the "Read notifications" master switch is the only control â€” so they do not appear in the Tools tab.
 
 ## Heartbeat surface
 
