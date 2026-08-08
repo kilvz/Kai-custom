@@ -16,11 +16,11 @@ actual fun createSandboxController(): SandboxController {
     return if (info.available) {
         DockerSandboxController(dockerManager)
     } else {
-        NoOpSandboxController(dockerManager)
+        DockerUnavailableSandboxController(dockerManager)
     }
 }
 
-class NoOpSandboxController(
+class DockerUnavailableSandboxController(
     private val dockerManager: DockerManager,
 ) : SandboxController {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

@@ -19,6 +19,13 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import java.time.Instant
 
+/*
+ * Hive/Graphene transaction signing, shared by Android and desktop. Both reach the same
+ * BouncyCastle secp256k1 primitives through plain JVM APIs, and a signature that differs
+ * between the two builds is by definition a bug — so there is one implementation, not one
+ * per source set. iOS and wasm have no Hive support and stub the expects instead.
+ */
+
 private val curveSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
 private val ecDomain = ECDomainParameters(curveSpec.curve, curveSpec.g, curveSpec.n, curveSpec.h)
 
@@ -75,15 +82,18 @@ internal fun ecdsaSign(hash: ByteArray, privKeyBytes: ByteArray): String {
 
     var nonce = 0
     while (true) {
+        // Generate k using RFC 6979, with nonce counter mixed in for retries
         val kCalc = HMacDSAKCalculator(SHA256Digest())
         val hashForK = if (nonce == 0) hash else sha256(hash + ByteArray(4) { ((nonce shr (it * 8)) and 0xFF).toByte() })
         kCalc.init(ecDomain.n, privKey, hashForK)
         val k = kCalc.nextK()
 
+        // Compute R = k*G to get recovery ID
         val rPoint = ecDomain.g.multiply(k).normalize()
         val r = rPoint.xCoord.toBigInteger().mod(ecDomain.n)
         var s = k.modInverse(ecDomain.n).multiply(BigInteger(1, hash).add(privKey.multiply(r))).mod(ecDomain.n)
 
+        // BIP-62 low-S normalization
         val sNegated = s > halfN
         if (sNegated) s = ecDomain.n.subtract(s)
 
@@ -96,6 +106,7 @@ internal fun ecdsaSign(hash: ByteArray, privKeyBytes: ByteArray): String {
             continue
         }
 
+        // Recovery ID: bit 0 = y parity of R, adjusted for s-negation
         var recId = if (rPoint.yCoord.toBigInteger().testBit(0)) 1 else 0
         if (sNegated) recId = recId xor 1
 

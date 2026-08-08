@@ -1,6 +1,6 @@
 ﻿# Daemon Mode
 
-**Last verified:** 2026-07-18
+**Last verified:** 2026-08-09
 
 Kai's daemon mode keeps the app running in the background on Android so that scheduled tasks, heartbeat checks, and email polling continue to execute even when the app is not in the foreground. On other platforms (desktop, iOS, web), daemon mode is a no-op.
 
@@ -31,10 +31,10 @@ Every time the main activity is brought to the foreground, if daemon mode is ena
 
 The daemon's task scheduler polls every 60 seconds and handles four types of background work:
 
-- **Scheduled tasks** â€” executes due tasks by sending their prompts through the AI pipeline
-- **Heartbeat checks** â€” periodic self-checks during active hours (see heartbeat doc)
-- **Email polling** â€” fetches new emails from configured accounts on a configurable interval
-- **SMS polling** â€” checks for new incoming SMS messages on a configurable interval
+- **Scheduled tasks** Ã¢â‚¬” executes due tasks by sending their prompts through the AI pipeline
+- **Heartbeat checks** Ã¢â‚¬” periodic self-checks during active hours (see heartbeat doc)
+- **Email polling** Ã¢â‚¬” fetches new emails from configured accounts on a configurable interval
+- **SMS polling** Ã¢â‚¬” checks for new incoming SMS messages on a configurable interval
 
 
 
@@ -49,8 +49,8 @@ The daemon's task scheduler polls every 60 seconds and handles four types of bac
 
 The app declares two permissions in the Android manifest:
 
-- `FOREGROUND_SERVICE` â€” required for all foreground services
-- `FOREGROUND_SERVICE_DATA_SYNC` â€” required for the `dataSync` service type
+- `FOREGROUND_SERVICE` Ã¢â‚¬” required for all foreground services
+- `FOREGROUND_SERVICE_DATA_SYNC` Ã¢â‚¬” required for the `dataSync` service type
 
 No wake locks or battery optimization exemptions are requested. The service relies on Android's standard process management with `START_STICKY` for restart behavior.
 
@@ -62,7 +62,7 @@ A toggle labeled "Daemon Mode" appears in the General tab of settings, only on A
 
 | File | Purpose |
 |---|---|
-| `composeApp/src/commonMain/.../DaemonController.kt` | Platform-independent interface |
+| `composeApp/src/commonMain/.../DaemonController.kt` | Platform-independent interface, plus the `NoOpDaemonController` every non-Android target returns |
 | `composeApp/src/androidMain/.../DaemonController.android.kt` | Android implementation, start/stop/auto-start logic |
 | `composeApp/src/androidMain/.../DaemonService.kt` | Android foreground service, notification, task scheduler startup |
 | `androidApp/src/main/.../MainActivity.kt` | Auto-start (and recovery) on every foreground transition via `onStart` |

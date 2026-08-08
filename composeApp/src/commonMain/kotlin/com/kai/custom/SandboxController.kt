@@ -3,6 +3,8 @@ package com.kai.custom
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.inspiredandroid.kai.linux.LinuxDistro
+import io.github.vinceglb.filekit.PlatformFile
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 data class SandboxStatus(
@@ -140,6 +142,33 @@ interface SandboxController : FileBrowserSource {
 
     /** Install Docker Desktop on the host (desktop only). No-op on Android. */
     suspend fun installDocker(): Boolean = false
+}
+
+/** The sandbox is Android-only; every other target gets this. */
+class NoOpSandboxController : SandboxController {
+    override val status: StateFlow<SandboxStatus> = MutableStateFlow(SandboxStatus())
+    override val sessions: StateFlow<List<String>> = MutableStateFlow(emptyList())
+    override fun setup() {}
+    override fun cancel() {}
+    override fun reset() {}
+    override fun restart() {}
+    override fun installPackages() {}
+    override suspend fun executeCommand(command: String, sessionId: String): String = ""
+    override suspend fun executeCommandStreaming(
+        command: String,
+        onStdout: (String) -> Unit,
+        onStderr: (String) -> Unit,
+        sessionId: String,
+    ): CommandHandle = NoOpCommandHandle
+
+    override suspend fun listDirectory(path: String): List<SandboxFileEntry> = emptyList()
+    override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = TextFileResult.Unreadable
+    override suspend fun writeTextFile(path: String, content: String): Boolean = false
+    override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = false
+    override suspend fun openFile(path: String): Result<Unit> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
+    override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = false
+    override suspend fun renameEntry(path: String, newName: String): Result<String> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
+    override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = Result.failure(UnsupportedOperationException("Sandbox file browser is Android-only"))
 }
 
 expect fun createSandboxController(): SandboxController

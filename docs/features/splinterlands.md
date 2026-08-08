@@ -1,6 +1,6 @@
 ﻿# Splinterlands Auto-Battle
 
-**Last verified:** 2026-08-03
+**Last verified:** 2026-08-09
 
 ## Overview
 
@@ -42,7 +42,7 @@ The Start button is disabled when no services are configured.
 
 The battle loop runs in its own long-lived coroutine scope (tied to the Koin singleton lifetime, not the ViewModel). This means battles survive navigation away from the Settings screen and continue running in the background. On Android, starting a battle also activates the foreground service (via DaemonController) to keep the process alive.
 
-The Stop button behavior depends on the current phase. Before a match is committed (Idle, LoggingIn, CheckingEnergy, FindingMatch, WaitingForOpponent) pressing Stop cancels immediately and signs `sm_cancel_match` if needed. During mid-battle phases (FetchingCollection, PickingTeam, SubmittingTeam, WaitingForResult) pressing Stop sets a graceful stop flag â€” the current battle finishes normally, then the loop exits. The button shows "Stopping..." while waiting for the battle to complete. The battle loop also auto-stops after 5 consecutive errors or when energy reaches zero.
+The Stop button behavior depends on the current phase. Before a match is committed (Idle, LoggingIn, CheckingEnergy, FindingMatch, WaitingForOpponent) pressing Stop cancels immediately and signs `sm_cancel_match` if needed. During mid-battle phases (FetchingCollection, PickingTeam, SubmittingTeam, WaitingForResult) pressing Stop sets a graceful stop flag Ã¢â‚¬” the current battle finishes normally, then the loop exits. The button shows "Stopping..." while waiting for the battle to complete. The battle loop also auto-stops after 5 consecutive errors or when energy reaches zero.
 
 ## Team Picking
 
@@ -112,8 +112,7 @@ Recent Battles log shows up to 500 entries (5 visible by default, expandable): V
 | `splinterlands/SplinterlandsTeamPicker.kt` | Ruleset filtering, card scoring, LLM prompt building, response parsing, validation, silent fixes |
 | `splinterlands/SplinterlandsBattleRunner.kt` | Battle loop with `queryServicesInParallel()` for parallel multi-service LLM querying |
 | `splinterlands/HiveCrypto.kt` | Expect declarations for Hive signing |
-| `splinterlands/HiveCrypto.jvm.kt` | BouncyCastle secp256k1 ECDSA (Desktop) |
-| `splinterlands/HiveCrypto.android.kt` | BouncyCastle secp256k1 ECDSA (Android) |
+| `jvmShared/.../splinterlands/HiveCrypto.jvmShared.kt` | BouncyCastle secp256k1 ECDSA, shared by Android and Desktop â€” one implementation, so the two builds cannot sign differently |
 | `splinterlands/HiveCrypto.ios.kt` | Stub/unsupported implementation (iOS) |
 | `splinterlands/HiveCrypto.wasmJs.kt` | Stub/unsupported implementation (Web) |
 | `splinterlands/HiveCryptoTest.kt` | Signing + recovery round-trip tests (desktopTest) |
