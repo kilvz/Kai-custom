@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -108,239 +107,117 @@ internal fun GeneralContent(
     downloadProgress: Float = 0f,
     updateStatusMessage: String = "",
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val useStaggered = maxWidth >= 600.dp
-        if (useStaggered) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    if (showDaemonToggle) {
-                        SettingsCard {
-                            DaemonModeToggle(
-                                isDaemonEnabled = isDaemonEnabled,
-                                onToggleDaemon = actions.onToggleDaemon,
-                            )
-                        }
-                    }
-                    if (showDaemonToggle) {
-                        SettingsCard {
-                            FloatingBallToggle(
-                                isFloatingBallEnabled = isFloatingBallEnabled,
-                                onToggleFloatingBall = actions.onToggleFloatingBall,
-                                shizukuPermissionGranted = shizukuPermissionGranted,
-                            )
-                        }
-                    }
-                    SettingsCard {
-                        DynamicUiToggle(
-                            isDynamicUiEnabled = isDynamicUiEnabled,
-                            onToggleDynamicUi = actions.onToggleDynamicUi,
-                        )
-                    }
-                    SettingsCard {
-                        ThemeModePicker(
-                            themeMode = themeMode,
-                            onChangeThemeMode = actions.onChangeThemeMode,
-                        )
-                    }
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    if (showUiScale) {
-                        SettingsCard {
-                            UiScaleSection(
-                                uiScale = uiScale,
-                                onChangeUiScale = actions.onChangeUiScale,
-                            )
-                        }
-                    }
-                    SettingsCard {
-                        ExportImportSection(
-                            onExportSettings = actions.onExportSettings,
-                            onPrepareExport = actions.onPrepareExport,
-                            onImportSettings = actions.onImportSettings,
-                        )
-                    }
-                    SettingsCard {
-                        WakeWordSection(
-                            isWakeWordEnabled = isWakeWordEnabled,
-                            wakeWordPhrase = wakeWordPhrase,
-                            wakeWordMode = wakeWordMode,
-                            wakeWordEnrolled = wakeWordEnrolled,
-                            isEnrolling = isEnrolling,
-                            wakeWordEnrollmentMessage = wakeWordEnrollmentMessage,
-                            onToggleWakeWord = actions.onToggleWakeWord,
-                            onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
-                            onChangeWakeWordMode = actions.onChangeWakeWordMode,
-                            onEnrollWakeWord = actions.onEnrollWakeWord,
-                        )
-                    }
-                    SettingsCard {
-                        PttTriggerSection(
-                            pttTriggerKeyCode = pttTriggerKeyCode,
-                            onCapture = actions.onCapturePttTrigger,
-                            onClear = actions.onClearPttTrigger,
-                        )
-                    }
-                    SettingsCard {
-                        LanguageSection(
-                            preferredLanguage = preferredLanguage,
-                            onChangePreferredLanguage = actions.onChangePreferredLanguage,
-                        )
-                    }
-                    SettingsCard {
-                        TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
-                    }
-                    SettingsCard {
-                        AutoUpdateSection(
-                            isAutoUpdateEnabled = isAutoUpdateEnabled,
-                            isAutoDownloadEnabled = isAutoDownloadEnabled,
-                            isAutoInstallEnabled = isAutoInstallEnabled,
-                            updateAvailable = updateAvailable,
-                            latestVersion = latestVersion,
-                            isChecking = isCheckingForUpdate,
-                            isDownloading = isDownloadingUpdate,
-                            downloadProgress = downloadProgress,
-                            statusMessage = updateStatusMessage,
-                            onToggleAutoUpdate = actions.onToggleAutoUpdate,
-                            onToggleAutoDownload = actions.onToggleAutoDownload,
-                            onToggleAutoInstall = actions.onToggleAutoInstall,
-                            onCheckForUpdate = actions.onCheckForUpdate,
-                            onDownloadUpdate = actions.onDownloadUpdate,
-                            onInstallUpdate = actions.onInstallUpdate,
-                        )
-                    }
-                    if (showDebugApiSection) {
-                        SettingsCard {
-                            DebugApiSection(
-                                isDebugApiEnabled = isDebugApiEnabled,
-                                debugApiRunning = debugApiRunning,
-                                debugApiTransitioning = debugApiTransitioning,
-                                onToggleDebugApi = actions.onToggleDebugApi,
-                                isDebugEndpointEnabled = isDebugEndpointEnabled,
-                                onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
-                            )
-                        }
-                    }
-                } // end second column staggered
-            }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (showDaemonToggle) {
-                    SettingsCard {
-                        DaemonModeToggle(
-                            isDaemonEnabled = isDaemonEnabled,
-                            onToggleDaemon = actions.onToggleDaemon,
-                        )
-                    }
-                }
-                if (showDaemonToggle) {
-                    SettingsCard {
-                        FloatingBallToggle(
-                            isFloatingBallEnabled = isFloatingBallEnabled,
-                            onToggleFloatingBall = actions.onToggleFloatingBall,
-                            shizukuPermissionGranted = shizukuPermissionGranted,
-                        )
-                    }
-                }
+    StaggeredSettingsColumns(
+        start = {
+            if (showDaemonToggle) {
                 SettingsCard {
-                    DynamicUiToggle(
-                        isDynamicUiEnabled = isDynamicUiEnabled,
-                        onToggleDynamicUi = actions.onToggleDynamicUi,
+                    DaemonModeToggle(
+                        isDaemonEnabled = isDaemonEnabled,
+                        onToggleDaemon = actions.onToggleDaemon,
                     )
-                }
-                SettingsCard {
-                    ThemeModePicker(
-                        themeMode = themeMode,
-                        onChangeThemeMode = actions.onChangeThemeMode,
-                    )
-                }
-                if (showUiScale) {
-                    SettingsCard {
-                        UiScaleSection(
-                            uiScale = uiScale,
-                            onChangeUiScale = actions.onChangeUiScale,
-                        )
-                    }
-                }
-                SettingsCard {
-                    ExportImportSection(
-                        onExportSettings = actions.onExportSettings,
-                        onPrepareExport = actions.onPrepareExport,
-                        onImportSettings = actions.onImportSettings,
-                    )
-                }
-                SettingsCard {
-                    WakeWordSection(
-                        isWakeWordEnabled = isWakeWordEnabled,
-                        wakeWordPhrase = wakeWordPhrase,
-                        wakeWordMode = wakeWordMode,
-                        wakeWordEnrolled = wakeWordEnrolled,
-                        isEnrolling = isEnrolling,
-                        wakeWordEnrollmentMessage = wakeWordEnrollmentMessage,
-                        onToggleWakeWord = actions.onToggleWakeWord,
-                        onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
-                        onChangeWakeWordMode = actions.onChangeWakeWordMode,
-                        onEnrollWakeWord = actions.onEnrollWakeWord,
-                    )
-                }
-                SettingsCard {
-                    PttTriggerSection(
-                        pttTriggerKeyCode = pttTriggerKeyCode,
-                        onCapture = actions.onCapturePttTrigger,
-                        onClear = actions.onClearPttTrigger,
-                    )
-                }
-                SettingsCard {
-                    LanguageSection(
-                        preferredLanguage = preferredLanguage,
-                        onChangePreferredLanguage = actions.onChangePreferredLanguage,
-                    )
-                }
-                SettingsCard {
-                    TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
-                }
-                SettingsCard {
-                    AutoUpdateSection(
-                        isAutoUpdateEnabled = isAutoUpdateEnabled,
-                        isAutoDownloadEnabled = isAutoDownloadEnabled,
-                        isAutoInstallEnabled = isAutoInstallEnabled,
-                        updateAvailable = updateAvailable,
-                        latestVersion = latestVersion,
-                        isChecking = isCheckingForUpdate,
-                        isDownloading = isDownloadingUpdate,
-                        downloadProgress = downloadProgress,
-                        statusMessage = updateStatusMessage,
-                        onToggleAutoUpdate = actions.onToggleAutoUpdate,
-                        onToggleAutoDownload = actions.onToggleAutoDownload,
-                        onToggleAutoInstall = actions.onToggleAutoInstall,
-                        onCheckForUpdate = actions.onCheckForUpdate,
-                        onDownloadUpdate = actions.onDownloadUpdate,
-                        onInstallUpdate = actions.onInstallUpdate,
-                    )
-                }
-                if (showDebugApiSection) {
-                    SettingsCard {
-                        DebugApiSection(
-                            isDebugApiEnabled = isDebugApiEnabled,
-                            debugApiRunning = debugApiRunning,
-                            debugApiTransitioning = debugApiTransitioning,
-                            onToggleDebugApi = actions.onToggleDebugApi,
-                            isDebugEndpointEnabled = isDebugEndpointEnabled,
-                            onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
-                        )
                 }
             }
-        }
-    }
-}
+            if (showDaemonToggle) {
+                SettingsCard {
+                    FloatingBallToggle(
+                        isFloatingBallEnabled = isFloatingBallEnabled,
+                        onToggleFloatingBall = actions.onToggleFloatingBall,
+                        shizukuPermissionGranted = shizukuPermissionGranted,
+                    )
+                }
+            }
+            SettingsCard {
+                DynamicUiToggle(
+                    isDynamicUiEnabled = isDynamicUiEnabled,
+                    onToggleDynamicUi = actions.onToggleDynamicUi,
+                )
+            }
+            SettingsCard {
+                ThemeModePicker(
+                    themeMode = themeMode,
+                    onChangeThemeMode = actions.onChangeThemeMode,
+                )
+            }
+        },
+        end = {
+            if (showUiScale) {
+                SettingsCard {
+                    UiScaleSection(
+                        uiScale = uiScale,
+                        onChangeUiScale = actions.onChangeUiScale,
+                    )
+                }
+            }
+            SettingsCard {
+                ExportImportSection(
+                    onExportSettings = actions.onExportSettings,
+                    onPrepareExport = actions.onPrepareExport,
+                    onImportSettings = actions.onImportSettings,
+                )
+            }
+            SettingsCard {
+                WakeWordSection(
+                    isWakeWordEnabled = isWakeWordEnabled,
+                    wakeWordPhrase = wakeWordPhrase,
+                    wakeWordMode = wakeWordMode,
+                    wakeWordEnrolled = wakeWordEnrolled,
+                    isEnrolling = isEnrolling,
+                    wakeWordEnrollmentMessage = wakeWordEnrollmentMessage,
+                    onToggleWakeWord = actions.onToggleWakeWord,
+                    onChangeWakeWordPhrase = actions.onChangeWakeWordPhrase,
+                    onChangeWakeWordMode = actions.onChangeWakeWordMode,
+                    onEnrollWakeWord = actions.onEnrollWakeWord,
+                )
+            }
+            SettingsCard {
+                PttTriggerSection(
+                    pttTriggerKeyCode = pttTriggerKeyCode,
+                    onCapture = actions.onCapturePttTrigger,
+                    onClear = actions.onClearPttTrigger,
+                )
+            }
+            SettingsCard {
+                LanguageSection(
+                    preferredLanguage = preferredLanguage,
+                    onChangePreferredLanguage = actions.onChangePreferredLanguage,
+                )
+            }
+            SettingsCard {
+                TtsSettingsSection(onOpenTtsSettings = actions.onOpenTtsSettings)
+            }
+            SettingsCard {
+                AutoUpdateSection(
+                    isAutoUpdateEnabled = isAutoUpdateEnabled,
+                    isAutoDownloadEnabled = isAutoDownloadEnabled,
+                    isAutoInstallEnabled = isAutoInstallEnabled,
+                    updateAvailable = updateAvailable,
+                    latestVersion = latestVersion,
+                    isChecking = isCheckingForUpdate,
+                    isDownloading = isDownloadingUpdate,
+                    downloadProgress = downloadProgress,
+                    statusMessage = updateStatusMessage,
+                    onToggleAutoUpdate = actions.onToggleAutoUpdate,
+                    onToggleAutoDownload = actions.onToggleAutoDownload,
+                    onToggleAutoInstall = actions.onToggleAutoInstall,
+                    onCheckForUpdate = actions.onCheckForUpdate,
+                    onDownloadUpdate = actions.onDownloadUpdate,
+                    onInstallUpdate = actions.onInstallUpdate,
+                )
+            }
+            if (showDebugApiSection) {
+                SettingsCard {
+                    DebugApiSection(
+                        isDebugApiEnabled = isDebugApiEnabled,
+                        debugApiRunning = debugApiRunning,
+                        debugApiTransitioning = debugApiTransitioning,
+                        onToggleDebugApi = actions.onToggleDebugApi,
+                        isDebugEndpointEnabled = isDebugEndpointEnabled,
+                        onToggleDebugEndpoint = actions.onToggleDebugEndpoint,
+                    )
+                }
+            }
+        },
+    )
 
 }
 

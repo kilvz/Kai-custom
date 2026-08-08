@@ -4,7 +4,6 @@ package com.kai.custom.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -231,256 +230,130 @@ internal fun AgentContent(
     isShizukuEnabled: Boolean,
     shizukuPermissionGranted: Boolean,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val useStaggered = maxWidth >= 600.dp
-        if (useStaggered) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    SettingsCard {
-                        SoulEditor(
-                            soulText = soulText,
-                            soulAuto = soulAuto,
-                            personaName = personaName,
-                            onSaveSoul = actions.onSaveSoul,
-                            onChangePersonaName = actions.onChangePersonaName,
-                            personas = personas,
-                            activePersonaId = activePersonaId,
-                            onSwitchPersona = actions.onSwitchPersona,
-                            onSavePersona = actions.onSavePersona,
-                            onDeletePersona = actions.onDeletePersona,
-                            onCreatePersona = actions.onCreatePersona,
-                        )
-                    }
-                    SettingsCard {
-                        MemoryList(
-                            memories = memories,
-                            onDeleteMemory = actions.onDeleteMemory,
-                            onUpdateMemory = actions.onUpdateMemory,
-                            isMemoryEnabled = isMemoryEnabled,
-                            isAltMemoryEnabled = isAltMemoryEnabled,
-                            altMemoryInstalled = altMemoryInstalled,
-                            altMemoryConnected = altMemoryConnected,
-                            altMemoryBackend = altMemoryBackend,
-                            altMemoryEmbedder = altMemoryEmbedder,
-                            sandboxReady = sandboxReady,
-                            onToggleMemory = actions.onToggleMemory,
-                            onToggleAltMemory = onToggleAltMemory,
-                            onExportDimension = actions.onExportDimension,
-                            onImportDimension = actions.onImportDimension,
-                        )
-                    }
-                    SettingsCard {
-                        ScheduledTaskList(
-                            tasks = scheduledTasks,
-                            heartbeatLog = heartbeatLog,
-                            onCancelTask = actions.onCancelTask,
-                            isSchedulingEnabled = isSchedulingEnabled,
-                            onToggleScheduling = actions.onToggleScheduling,
-                        )
-                    }
-                }
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    SettingsCard {
-                        HeartbeatSection(
-                            isHeartbeatEnabled = isHeartbeatEnabled,
-                            heartbeatIntervalMinutes = heartbeatIntervalMinutes,
-                            activeHoursStart = heartbeatActiveHoursStart,
-                            activeHoursEnd = heartbeatActiveHoursEnd,
-                            heartbeatPrompt = heartbeatPrompt,
-                            heartbeatLog = heartbeatLog,
-                            heartbeatServiceEntries = heartbeatServiceEntries,
-                            heartbeatSelectedInstanceId = heartbeatSelectedInstanceId,
-                            isRefreshing = isRefreshingHeartbeat,
-                            onToggleHeartbeat = actions.onToggleHeartbeat,
-                            onChangeInterval = actions.onChangeHeartbeatInterval,
-                            onChangeActiveHours = actions.onChangeHeartbeatActiveHours,
-                            onSaveHeartbeatPrompt = actions.onSaveHeartbeatPrompt,
-                            onChangeHeartbeatService = actions.onChangeHeartbeatService,
-                            onRefresh = actions.onRefreshHeartbeat,
-                        )
-                    }
-                    if (showEmailToggle) {
-                        SettingsCard {
-                            EmailSection(
-                                isEmailEnabled = isEmailEnabled,
-                                emailAccounts = emailAccounts,
-                                pollIntervalMinutes = emailPollIntervalMinutes,
-                                pendingCount = emailPendingCount,
-                                syncStates = emailSyncStates,
-                                refreshingAccountIds = refreshingEmailAccountIds,
-                                onToggleEmail = actions.onToggleEmail,
-                                onRemoveAccount = actions.onRemoveEmailAccount,
-                                onChangePollInterval = actions.onChangeEmailPollInterval,
-                                onRefreshAccount = actions.onRefreshEmailAccount,
-                            )
-                        }
-                    }
-                    if (showSmsSection) {
-                        SettingsCard {
-                            SmsSection(
-                                isSmsEnabled = isSmsEnabled,
-                                permissionGranted = smsPermissionGranted,
-                                pollIntervalMinutes = smsPollIntervalMinutes,
-                                pendingCount = smsPendingCount,
-                                syncState = smsSyncState,
-                                isRefreshing = isRefreshingSms,
-                                isSmsSendEnabled = isSmsSendEnabled,
-                                sendPermissionGranted = smsSendPermissionGranted,
-                                onToggleSms = actions.onToggleSms,
-                                onChangePollInterval = actions.onChangeSmsPollInterval,
-                                onRefresh = actions.onRefreshSms,
-                                onToggleSmsSend = actions.onToggleSmsSend,
-                            )
-                        }
-                    }
-                    if (showNotificationsSection) {
-                        SettingsCard {
-                            NotificationsSection(
-                                isEnabled = isNotificationsEnabled,
-                                accessGranted = notificationListenerAccessGranted,
-                                listenerBound = notificationListenerBound,
-                                pendingCount = notificationPendingCount,
-                                onToggle = actions.onToggleNotifications,
-                                onOpenAccessSettings = actions.onOpenNotificationListenerSettings,
-                                onClearPending = actions.onClearPendingNotifications,
-                            )
-                        }
-                    }
-                    if (showShizukuSection) {
-                        SettingsCard {
-                            ShizukuSection(
-                                isEnabled = isShizukuEnabled,
-                                permissionGranted = shizukuPermissionGranted,
-                                onToggle = actions.onToggleShizuku,
-                                onOpenPermission = actions.onOpenShizukuPermission,
-                            )
-                        }
-                    }
+    StaggeredSettingsColumns(
+        start = {
+            SettingsCard {
+                SoulEditor(
+                    soulText = soulText,
+                    soulAuto = soulAuto,
+                    personaName = personaName,
+                    onSaveSoul = actions.onSaveSoul,
+                    onChangePersonaName = actions.onChangePersonaName,
+                    personas = personas,
+                    activePersonaId = activePersonaId,
+                    onSwitchPersona = actions.onSwitchPersona,
+                    onSavePersona = actions.onSavePersona,
+                    onDeletePersona = actions.onDeletePersona,
+                    onCreatePersona = actions.onCreatePersona,
+                )
+            }
+            SettingsCard {
+                MemoryList(
+                    memories = memories,
+                    onDeleteMemory = actions.onDeleteMemory,
+                    onUpdateMemory = actions.onUpdateMemory,
+                    isMemoryEnabled = isMemoryEnabled,
+                    isAltMemoryEnabled = isAltMemoryEnabled,
+                    altMemoryInstalled = altMemoryInstalled,
+                    altMemoryConnected = altMemoryConnected,
+                    altMemoryBackend = altMemoryBackend,
+                    altMemoryEmbedder = altMemoryEmbedder,
+                    sandboxReady = sandboxReady,
+                    onToggleMemory = actions.onToggleMemory,
+                    onToggleAltMemory = onToggleAltMemory,
+                    onExportDimension = actions.onExportDimension,
+                    onImportDimension = actions.onImportDimension,
+                )
+            }
+            SettingsCard {
+                ScheduledTaskList(
+                    tasks = scheduledTasks,
+                    heartbeatLog = heartbeatLog,
+                    onCancelTask = actions.onCancelTask,
+                    isSchedulingEnabled = isSchedulingEnabled,
+                    onToggleScheduling = actions.onToggleScheduling,
+                )
+            }
+        },
+        end = {
+            SettingsCard {
+                HeartbeatSection(
+                    isHeartbeatEnabled = isHeartbeatEnabled,
+                    heartbeatIntervalMinutes = heartbeatIntervalMinutes,
+                    activeHoursStart = heartbeatActiveHoursStart,
+                    activeHoursEnd = heartbeatActiveHoursEnd,
+                    heartbeatPrompt = heartbeatPrompt,
+                    heartbeatLog = heartbeatLog,
+                    heartbeatServiceEntries = heartbeatServiceEntries,
+                    heartbeatSelectedInstanceId = heartbeatSelectedInstanceId,
+                    isRefreshing = isRefreshingHeartbeat,
+                    onToggleHeartbeat = actions.onToggleHeartbeat,
+                    onChangeInterval = actions.onChangeHeartbeatInterval,
+                    onChangeActiveHours = actions.onChangeHeartbeatActiveHours,
+                    onSaveHeartbeatPrompt = actions.onSaveHeartbeatPrompt,
+                    onChangeHeartbeatService = actions.onChangeHeartbeatService,
+                    onRefresh = actions.onRefreshHeartbeat,
+                )
+            }
+            if (showEmailToggle) {
+                SettingsCard {
+                    EmailSection(
+                        isEmailEnabled = isEmailEnabled,
+                        emailAccounts = emailAccounts,
+                        pollIntervalMinutes = emailPollIntervalMinutes,
+                        pendingCount = emailPendingCount,
+                        syncStates = emailSyncStates,
+                        refreshingAccountIds = refreshingEmailAccountIds,
+                        onToggleEmail = actions.onToggleEmail,
+                        onRemoveAccount = actions.onRemoveEmailAccount,
+                        onChangePollInterval = actions.onChangeEmailPollInterval,
+                        onRefreshAccount = actions.onRefreshEmailAccount,
+                    )
                 }
             }
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            if (showSmsSection) {
                 SettingsCard {
-                    SoulEditor(
-                        soulText = soulText,
-                        soulAuto = soulAuto,
-                        personaName = personaName,
-                        onSaveSoul = actions.onSaveSoul,
-                        onChangePersonaName = actions.onChangePersonaName,
-                        personas = personas,
-                        activePersonaId = activePersonaId,
-                        onSwitchPersona = actions.onSwitchPersona,
-                        onSavePersona = actions.onSavePersona,
-                        onDeletePersona = actions.onDeletePersona,
-                        onCreatePersona = actions.onCreatePersona,
+                    SmsSection(
+                        isSmsEnabled = isSmsEnabled,
+                        permissionGranted = smsPermissionGranted,
+                        pollIntervalMinutes = smsPollIntervalMinutes,
+                        pendingCount = smsPendingCount,
+                        syncState = smsSyncState,
+                        isRefreshing = isRefreshingSms,
+                        isSmsSendEnabled = isSmsSendEnabled,
+                        sendPermissionGranted = smsSendPermissionGranted,
+                        onToggleSms = actions.onToggleSms,
+                        onChangePollInterval = actions.onChangeSmsPollInterval,
+                        onRefresh = actions.onRefreshSms,
+                        onToggleSmsSend = actions.onToggleSmsSend,
                     )
-                }
-                SettingsCard {
-                    MemoryList(
-                        memories = memories,
-                        onDeleteMemory = actions.onDeleteMemory,
-                        onUpdateMemory = actions.onUpdateMemory,
-                        isMemoryEnabled = isMemoryEnabled,
-                        isAltMemoryEnabled = isAltMemoryEnabled,
-                        altMemoryInstalled = altMemoryInstalled,
-                        altMemoryConnected = altMemoryConnected,
-                        altMemoryBackend = altMemoryBackend,
-                        altMemoryEmbedder = altMemoryEmbedder,
-                        sandboxReady = sandboxReady,
-                        onToggleMemory = actions.onToggleMemory,
-                        onToggleAltMemory = onToggleAltMemory,
-                        onExportDimension = actions.onExportDimension,
-                        onImportDimension = actions.onImportDimension,
-                    )
-                }
-                SettingsCard {
-                    HeartbeatSection(
-                        isHeartbeatEnabled = isHeartbeatEnabled,
-                        heartbeatIntervalMinutes = heartbeatIntervalMinutes,
-                        activeHoursStart = heartbeatActiveHoursStart,
-                        activeHoursEnd = heartbeatActiveHoursEnd,
-                        heartbeatPrompt = heartbeatPrompt,
-                        heartbeatLog = heartbeatLog,
-                        heartbeatServiceEntries = heartbeatServiceEntries,
-                        heartbeatSelectedInstanceId = heartbeatSelectedInstanceId,
-                        isRefreshing = isRefreshingHeartbeat,
-                        onToggleHeartbeat = actions.onToggleHeartbeat,
-                        onChangeInterval = actions.onChangeHeartbeatInterval,
-                        onChangeActiveHours = actions.onChangeHeartbeatActiveHours,
-                        onSaveHeartbeatPrompt = actions.onSaveHeartbeatPrompt,
-                        onChangeHeartbeatService = actions.onChangeHeartbeatService,
-                        onRefresh = actions.onRefreshHeartbeat,
-                    )
-                }
-                if (showEmailToggle) {
-                    SettingsCard {
-                        EmailSection(
-                            isEmailEnabled = isEmailEnabled,
-                            emailAccounts = emailAccounts,
-                            pollIntervalMinutes = emailPollIntervalMinutes,
-                            pendingCount = emailPendingCount,
-                            syncStates = emailSyncStates,
-                            refreshingAccountIds = refreshingEmailAccountIds,
-                            onToggleEmail = actions.onToggleEmail,
-                            onRemoveAccount = actions.onRemoveEmailAccount,
-                            onChangePollInterval = actions.onChangeEmailPollInterval,
-                            onRefreshAccount = actions.onRefreshEmailAccount,
-                        )
-                    }
-                }
-                if (showSmsSection) {
-                    SettingsCard {
-                        SmsSection(
-                            isSmsEnabled = isSmsEnabled,
-                            permissionGranted = smsPermissionGranted,
-                            pollIntervalMinutes = smsPollIntervalMinutes,
-                            pendingCount = smsPendingCount,
-                            syncState = smsSyncState,
-                            isRefreshing = isRefreshingSms,
-                            isSmsSendEnabled = isSmsSendEnabled,
-                            sendPermissionGranted = smsSendPermissionGranted,
-                            onToggleSms = actions.onToggleSms,
-                            onChangePollInterval = actions.onChangeSmsPollInterval,
-                            onRefresh = actions.onRefreshSms,
-                            onToggleSmsSend = actions.onToggleSmsSend,
-                        )
-                    }
-                }
-                if (showNotificationsSection) {
-                    SettingsCard {
-                        NotificationsSection(
-                            isEnabled = isNotificationsEnabled,
-                            accessGranted = notificationListenerAccessGranted,
-                            listenerBound = notificationListenerBound,
-                            pendingCount = notificationPendingCount,
-                            onToggle = actions.onToggleNotifications,
-                            onOpenAccessSettings = actions.onOpenNotificationListenerSettings,
-                            onClearPending = actions.onClearPendingNotifications,
-                        )
-                    }
-                }
-                if (showShizukuSection) {
-                    SettingsCard {
-                        ShizukuSection(
-                            isEnabled = isShizukuEnabled,
-                            permissionGranted = shizukuPermissionGranted,
-                            onToggle = actions.onToggleShizuku,
-                            onOpenPermission = actions.onOpenShizukuPermission,
-                        )
-                    }
                 }
             }
-        }
-    }
+            if (showNotificationsSection) {
+                SettingsCard {
+                    NotificationsSection(
+                        isEnabled = isNotificationsEnabled,
+                        accessGranted = notificationListenerAccessGranted,
+                        listenerBound = notificationListenerBound,
+                        pendingCount = notificationPendingCount,
+                        onToggle = actions.onToggleNotifications,
+                        onOpenAccessSettings = actions.onOpenNotificationListenerSettings,
+                        onClearPending = actions.onClearPendingNotifications,
+                    )
+                }
+            }
+            if (showShizukuSection) {
+                SettingsCard {
+                    ShizukuSection(
+                        isEnabled = isShizukuEnabled,
+                        permissionGranted = shizukuPermissionGranted,
+                        onToggle = actions.onToggleShizuku,
+                        onOpenPermission = actions.onOpenShizukuPermission,
+                    )
+                }
+            }
+        },
+    )
 }
 
 @Composable
