@@ -1433,9 +1433,9 @@ class SettingsViewModel(
     private fun onAddPopularMcpServer(server: PopularMcpServer) {
         if (server.name == "Jina AI") {
             _state.update { it.copy(showAddMcpServerDialog = false) }
-            onAddMcpServer(server.name, server.url, emptyMap())
+            onAddMcpServer(server.name, server.url, server.headers)
         } else {
-            onAddMcpServer(server.name, server.url, emptyMap())
+            onAddMcpServer(server.name, server.url, server.headers)
         }
     }
 

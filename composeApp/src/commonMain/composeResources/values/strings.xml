@@ -854,4 +854,6 @@
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
     <string name="settings_custom_model_label">Custom model</string>
     <string name="settings_custom_model_hint">Enter a model id supported by your server, even if it is not listed above.</string>
+    <string name="settings_mcp_api_key">API Key (optional)</string>
+    <string name="settings_mcp_api_key_help">Optional. Search tools need a free key from jina.ai; other tools work without one.</string>
 </resources>
