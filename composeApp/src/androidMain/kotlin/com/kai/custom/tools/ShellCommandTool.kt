@@ -1,7 +1,6 @@
 package com.kai.custom.tools
 
 import com.kai.custom.SandboxSessions
-import com.kai.custom.data.AppSettings
 import com.kai.custom.data.currentConversationIdOrNull
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
@@ -9,23 +8,56 @@ import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.SandboxState
+import com.kai.custom.linux.LinuxDistro
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_execute_shell_command_description
 import kai.composeapp.generated.resources.tool_execute_shell_command_name
 import org.koin.java.KoinJavaComponent.inject
 
+/**
+ * Built per distro rather than patched afterwards: the package manager and the
+ * distro's name appear in several places, and a model that is told "Alpine" and
+ * then handed a Debian rootfs wastes turns on `apk` commands that do not exist.
+ */
+private fun toolDescription(distro: LinuxDistro): String {
+    val install = distro.packageManager.installCommand("<package>")
+    return """Execute a shell command in a ${distro.displayName} sandbox and return stdout, stderr, exit code, and current working directory. The environment is a full ${distro.displayName} system running via proot.
+
+Shell session is PERSISTENT across calls within THIS conversation: cwd, exported environment variables, and any in-shell state carry from one call to the next, just like a normal terminal. So "cd /tmp" in one call, then "pwd" in the next, returns "/tmp". You do NOT need to chain "cd dir && command" unless you want directory changes to be one-shot. Other conversations and the in-app Terminal tab each have their own isolated shells; the rootfs and /root are still shared on disk, so files persist across all of them.
+
+Pre-installed: ${distro.basePackages.joinToString(", ")}. Optional bundle (installed from Settings): ${distro.optionalPackages.joinToString(", ")} — that covers remote-server tools ssh, scp, sftp, lftp (FTP/FTPS) and rsync. Use them directly, e.g. "ssh user@host 'remote command'", "sftp user@host", "lftp -c 'open ftp://...; put file'". Authentication state (~/.ssh keys, known_hosts) persists.
+
+For SSH workflows: prefer the ssh_configure_host tool once per remote — it writes ~/.ssh/config so subsequent calls don't have to repeat host/user/port/identity flags. After registering, invoke ssh BY THE ALIAS: `ssh myalias 'cmd'`, `scp file myalias:`, `sftp myalias`. The whole point of the config is to feed the alias; bypassing it with `user@host` discards every setting the tool just wrote.
+
+Note: SSH multiplexing (ControlMaster) is intentionally NOT enabled — Android's kernel-level link() restriction prevents openssh from creating its control socket inside this sandbox. Each ssh call does a full TCP+auth handshake. That is the correct, expected behavior here; do not try to force it back on with -o ControlMaster=auto or by writing your own ControlPath — it will produce a muxserver_listen Permission denied error.
+
+Password-only servers (no key auth): this shell can't answer interactive password prompts directly (no PTY, ssh reads from /dev/tty). Heredoc stdin will NOT deliver a password. Install sshpass once with `${distro.packageManager.installCommand("sshpass")}`, then drive the connection as `sshpass -p '<password>' ssh <alias> '<remote-cmd>'` — or `sshpass -f <password-file> ssh <alias>` to keep the password off the command line. sshpass fakes a PTY internally, which is the only path that actually works.
+
+Limits and behavior:
+- Output is capped at 15000 characters per stream; for large output, pipe through head/tail.
+- Default timeout: 30s, max: 60s. Long-running interactive commands (e.g. ssh sessions held across messages) work because the shell is persistent — but a SINGLE call still hits the timeout if it doesn't return.
+- Fullscreen TUIs (top, htop, vim, less, nano, anything ncurses) WILL NOT WORK — the sandbox has no PTY. Use non-interactive variants: "top -bn1" for a one-shot snapshot, "ps aux" for processes, redirect editor output, etc.
+- Set background=true to run a long-lived process detached from the shell (writes to its own session_id). Use manage_process to check on it.
+- Set fresh=true to run in a one-shot isolated shell that doesn't share state with the persistent session. Useful when you specifically want isolation; rarely needed.
+
+Install extra packages with: $install
+
+To show a file you produced in /root to the user, call open_file with the path relative to /root (e.g. open_file path="page.html"). File needs to be self-contained."""
+}
+
 object ShellCommandTool : Tool {
     private val sandboxManager: LinuxSandboxManager by inject(LinuxSandboxManager::class.java)
-    private val appSettings: AppSettings by inject(AppSettings::class.java)
 
-    private fun distroName(): String = if (appSettings.getSandboxDistro() == "ubuntu") "Ubuntu" else "Alpine Linux"
-    private fun pkgManager(): String = if (appSettings.getSandboxDistro() == "ubuntu") "apt" else "apk"
-    private fun installCmd(): String = if (appSettings.getSandboxDistro() == "ubuntu") "apt-get install -y" else "apk add"
+    /**
+     * Kept from the fork's own description: the sandbox is a Linux rootfs, not
+     * the Android shell — Android system commands do not exist in it.
+     */
+    private const val ANDROID_WARNING = "\n\nIMPORTANT \u2014 Android system commands (pm, am, dumpsys, settings, wm, input, device_config, content, appops, cmd, and anything under /system, /vendor, /apex) do NOT exist in this sandbox. It is NOT the Android shell. For ADB-level system commands, use the separate run_adb tool instead \u2014 that tool goes through Shizuku and can access all Android system services."
 
     override val schema: ToolSchema
         get() = ToolSchema(
             name = "execute_shell_command",
-            description = buildDescription(),
+            description = toolDescription(sandboxManager.distro) + ANDROID_WARNING,
             parameters = mapOf(
                 "command" to ParameterSchema("string", "The shell command to execute", true),
                 "timeout" to ParameterSchema("integer", "Timeout in seconds (default 30, max 60)", false),
@@ -36,29 +68,7 @@ object ShellCommandTool : Tool {
             ),
         )
 
-    private fun buildDescription(): String = buildString {
-        appendLine("Execute a shell command in a ${distroName()} sandbox and return stdout, stderr, exit code, and current working directory. The environment is a full ${distroName()} system running via proot.")
-        appendLine()
-        appendLine("IMPORTANT — Android system commands (pm, am, dumpsys, settings, wm, input, device_config, content, appops, cmd, and anything under /system, /vendor, /apex) do NOT exist in this sandbox. It is NOT the Android shell. For ADB-level system commands, use the separate run_adb tool instead — that tool goes through Shizuku and can access all Android system services.")
-        appendLine()
-        appendLine("Shell session is PERSISTENT across calls within THIS conversation: cwd, exported environment variables, and any in-shell state carry from one call to the next, just like a normal terminal. So \"cd /tmp\" in one call, then \"pwd\" in the next, returns \"/tmp\". You do NOT need to chain \"cd dir && command\" unless you want directory changes to be one-shot. Other conversations and the in-app Terminal tab each have their own isolated shells; the rootfs and /root are still shared on disk, so files persist across all of them.")
-        appendLine()
-        appendLine("This sandbox is for: running Python/Node scripts, git operations, curl/wget HTTP requests, file manipulation, ${pkgManager()} package management, and general Linux command-line work. For remote server access, use the dedicated ssh_connect/ssh_execute_command/ssh_disconnect tools instead.")
-        appendLine()
-        appendLine("Pre-installed: bash, python3 (pip), nodejs, git, curl, wget, jq, lftp (FTP/FTPS), rsync.")
-        appendLine()
-        appendLine("Limits and behavior:")
-        appendLine("- Output is capped at 15000 characters per stream; for large output, pipe through head/tail.")
-        appendLine("- Default timeout: 30s, max: 60s. Long-running interactive commands (e.g. ssh sessions held across messages) work because the shell is persistent — but a SINGLE call still hits the timeout if it doesn't return.")
-        appendLine("- Fullscreen TUIs (top, htop, vim, less, nano, anything ncurses) WILL NOT WORK — the sandbox has no PTY. Use non-interactive variants: \"top -bn1\" for a one-shot snapshot, \"ps aux\" for processes, redirect editor output, etc.")
-        appendLine("- Set background=true to run a long-lived process detached from the shell (writes to its own session_id). Use manage_process to check on it.")
-        appendLine("- Set fresh=true to run in a one-shot isolated shell that doesn't share state with the persistent session. Useful when you specifically want isolation; rarely needed.")
-        appendLine()
-        append("Install extra packages with: ${installCmd()} <package>")
-        appendLine()
-        appendLine()
-        append("To show a file you produced in /root to the user, call open_file with the path relative to /root (e.g. open_file path=\"page.html\"). File needs to be self-contained.")
-    }
+
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(args: Map<String, Any>): Any {

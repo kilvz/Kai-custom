@@ -3,6 +3,7 @@ package com.kai.custom.data
 import com.kai.custom.SshProfile
 import com.kai.custom.data.getDefaultLanguage
 import com.kai.custom.defaultUiScale
+import com.kai.custom.linux.LinuxDistro
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -481,11 +482,17 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_SAF_WORK_DIR, uri)
     }
 
-    fun getSandboxDistro(): String = settings.getString(KEY_SANDBOX_DISTRO, "alpine")
+    /**
+     * What a *fresh* sandbox install becomes. An install already on disk records
+     * its own distro, and that recording wins — changing this setting never
+     * touches an existing rootfs.
+     */
+    fun getSandboxDistro(): LinuxDistro = LinuxDistro.fromId(settings.getStringOrNull(KEY_SANDBOX_DISTRO))
 
-    fun setSandboxDistro(distro: String) {
-        settings.putString(KEY_SANDBOX_DISTRO, distro)
+    fun setSandboxDistro(distro: LinuxDistro) {
+        settings.putString(KEY_SANDBOX_DISTRO, distro.id)
     }
+
 
     fun isAltMemoryMigrationComplete(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_MIGRATION_COMPLETE, false)
 
@@ -1183,6 +1190,17 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_SANDBOX_STORAGE_MOUNT = "sandbox_storage_mount"
         const val KEY_SAF_WORK_DIR = "saf_work_dir"
         const val KEY_SANDBOX_DISTRO = "sandbox_distro"
+
+        // Basic memory guidance shared by every chat variant. The advanced `## Structured
+        // Learning` block lives in `ChatSystemPromptBuilder.DEFAULT_STRUCTURED_LEARNING_SECTION`
+        // and is composed in only for the remote variant.
+        const val DEFAULT_MEMORY_INSTRUCTIONS =
+            "You have persistent memory across conversations. " +
+                "All your stored memories are listed in the system prompt grouped by category.\n\n" +
+                "When you learn important information about the user (name, preferences, projects, goals, etc.), " +
+                "proactively use the memory_store tool to save it.\n" +
+                "Use the memory_forget tool to remove outdated or incorrect memories.\n" +
+                "Do not store trivial or transient information."
         const val KEY_WAKE_WORD_ENABLED = "wake_word_enabled"
         const val KEY_WAKE_WORD_PHRASE = "wake_word_phrase"
         const val KEY_WAKE_WORD_MODE = "wake_word_mode"

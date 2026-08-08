@@ -70,6 +70,7 @@ import com.kai.custom.ui.components.VerticalScrollbarForScroll
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
+import com.kai.custom.linux.LinuxDistro
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.github_mark
 import kai.composeapp.generated.resources.settings_ai_mistakes_warning
@@ -146,13 +147,13 @@ fun SettingsScreen(
         onToggleSandbox = sandboxViewModel::onToggleSandbox,
         onToggleStorageMount = sandboxViewModel::onToggleStorageMount,
         onToggleSandboxRoot = sandboxViewModel::onToggleSandboxRoot,
+        onSelectDistro = sandboxViewModel::onSelectDistro,
         onSetupSandbox = sandboxViewModel::onSetupSandbox,
         onCancelSandbox = sandboxViewModel::onCancelSandbox,
         onResetSandbox = sandboxViewModel::onResetSandbox,
         onInstallPackages = sandboxViewModel::onInstallPackages,
         onInstallAltMemory = sandboxViewModel::onInstallAltMemory,
         onUpdateAltMemory = sandboxViewModel::onUpdateAltMemory,
-        onDistroChanged = sandboxViewModel::onDistroChanged,
         onBackupSandbox = sandboxViewModel::onBackupSandbox,
         onImportSandbox = sandboxViewModel::onImportSandbox,
         onExportSaved = sandboxViewModel::onExportSaved,
@@ -172,13 +173,13 @@ fun SettingsScreenContent(
     onToggleSandbox: (Boolean) -> Unit = {},
     onToggleStorageMount: (Boolean) -> Unit = {},
     onToggleSandboxRoot: (Boolean) -> Unit = {},
+    onSelectDistro: (LinuxDistro) -> Unit = {},
     onSetupSandbox: () -> Unit = {},
     onCancelSandbox: () -> Unit = {},
     onResetSandbox: () -> Unit = {},
     onInstallPackages: () -> Unit = {},
     onInstallAltMemory: () -> Unit = {},
     onUpdateAltMemory: () -> Unit = {},
-    onDistroChanged: (String) -> Unit = {},
     onBackupSandbox: () -> Unit = {},
     onImportSandbox: (ByteArray) -> Unit = {},
     onExportSaved: () -> Unit = {},
@@ -473,13 +474,13 @@ fun SettingsScreenContent(
                                     onToggleSandbox = onToggleSandbox,
                                     onToggleStorageMount = onToggleStorageMount,
                                     onToggleSandboxRoot = onToggleSandboxRoot,
+                                    onSelectDistro = onSelectDistro,
                                     onSetupSandbox = onSetupSandbox,
                                     onCancelSandbox = onCancelSandbox,
                                     onResetSandbox = onResetSandbox,
                                     onInstallPackages = onInstallPackages,
                                     onInstallAltMemory = onInstallAltMemory,
                                     onUpdateAltMemory = onUpdateAltMemory,
-                                    onDistroChanged = onDistroChanged,
                                     onBackupSandbox = onBackupSandbox,
                                     onImportSandbox = onImportSandbox,
                                     onExportSaved = onExportSaved,

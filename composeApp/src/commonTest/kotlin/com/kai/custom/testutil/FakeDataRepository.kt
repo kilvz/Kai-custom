@@ -36,6 +36,7 @@ import com.kai.custom.skills.SkillManifest
 import com.kai.custom.tools.CommonTools
 import com.kai.custom.ui.chat.History
 import com.kai.custom.ui.settings.SettingsModel
+import com.kai.custom.linux.LinuxDistro
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -588,6 +589,14 @@ class FakeDataRepository : DataRepository {
     override fun getSandboxDistro(): String = "alpine"
 
     override fun setSandboxDistro(distro: String) {
+    }
+
+    var storedSandboxDistro: LinuxDistro = LinuxDistro.DEFAULT
+
+    override fun getSandboxDistro(): LinuxDistro = storedSandboxDistro
+
+    override fun setSandboxDistro(distro: LinuxDistro) {
+        storedSandboxDistro = distro
     }
 
     override fun getHeartbeatConfig(): HeartbeatConfig = HeartbeatConfig()

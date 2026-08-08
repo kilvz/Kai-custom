@@ -10,6 +10,7 @@ import com.kai.custom.SandboxStatus
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
 import com.kai.custom.isRootAvailable
+import com.kai.custom.linux.LinuxDistro
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -27,7 +28,12 @@ data class SandboxUiState(
     val isSandboxEnabled: Boolean = true,
     val isSandboxStorageMountEnabled: Boolean = false,
     val isSandboxRootEnabled: Boolean = false,
-    val sandboxDistro: String = "alpine",
+    /**
+     * The installed distro once [sandboxInstalled], the pending choice before
+     * that. The controller reports both through the same field because nothing
+     * downstream should ever prefer the setting over what is on disk.
+     */
+    val distro: LinuxDistro = LinuxDistro.DEFAULT,
     val isWorking: Boolean = false,
     val hasError: Boolean = false,
     val rootErrorMessage: String? = null,
@@ -56,7 +62,7 @@ class SandboxViewModel(
                 isSandboxEnabled = dataRepository.isSandboxEnabled(),
                 isSandboxStorageMountEnabled = dataRepository.isSandboxStorageMountEnabled(),
                 isSandboxRootEnabled = dataRepository.isSandboxRootEnabled(),
-                sandboxDistro = dataRepository.getSandboxDistro(),
+                distro = dataRepository.getSandboxDistro(),
                 altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
             ),
         ),
@@ -84,7 +90,7 @@ class SandboxViewModel(
         sandboxPackagesInstalled = status.packagesInstalled,
         isWorking = status.working,
         hasError = status.error,
-        sandboxDistro = dataRepository.getSandboxDistro(),
+        distro = status.distro,
         altMemoryInstalled = dataRepository.isAltMemoryInstalled(),
         needsReset = status.needsReset,
     )
@@ -108,6 +114,16 @@ class SandboxViewModel(
         }
         dataRepository.setSandboxRootEnabled(enabled)
         _state.update { it.copy(isSandboxRootEnabled = enabled, rootErrorMessage = null) }
+    }
+
+    /**
+     * Only meaningful before an install: the card hides the picker afterwards,
+     * because an existing rootfs keeps whatever it was built as.
+     */
+    fun onSelectDistro(distro: LinuxDistro) {
+        if (_state.value.sandboxInstalled) return
+        dataRepository.setSandboxDistro(distro)
+        _state.update { it.copy(distro = distro) }
     }
 
     fun onSetupSandbox() {
@@ -156,11 +172,6 @@ class SandboxViewModel(
                 )
             }
         }
-    }
-
-    fun onDistroChanged(distro: String) {
-        dataRepository.setSandboxDistro(distro)
-        _state.update { it.copy(sandboxDistro = distro) }
     }
 
     fun onBackupSandbox() {

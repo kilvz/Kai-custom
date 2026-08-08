@@ -9,6 +9,19 @@ import com.kai.custom.SandboxStatus
 import com.kai.custom.TextFileResult
 import com.kai.custom.TerminalLine
 import com.kai.custom.SandboxSessions
+import app.cash.turbine.test
+import com.kai.custom.linux.LinuxDistro
+import com.kai.custom.testutil.FakeDataRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +33,12 @@ import kotlin.test.assertEquals
 import kotlinx.collections.immutable.persistentListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SandboxViewModelTest {
+
+    private val testDispatcher = StandardTestDispatcher()
+    private lateinit var fakeRepository: FakeDataRepository
+    private lateinit var fakeSandboxController: FakeSandboxController
 
     private class FakeSandboxController : SandboxController {
         override val status = MutableStateFlow(SandboxStatus())
@@ -80,6 +98,18 @@ class SandboxViewModelTest {
         override fun clearTranscript(sessionId: String) {}
     }
 
+    @BeforeTest
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+        fakeRepository = FakeDataRepository()
+        fakeSandboxController = FakeSandboxController()
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     @Test
     fun `test sandbox setup`() {
         val controller = FakeSandboxController()
@@ -113,5 +143,107 @@ class SandboxViewModelTest {
         val controller = FakeSandboxController()
         controller.installPackages()
         assertEquals(1, controller.installPackagesCalls)
+    fun `controller status updates flow into state`() = runTest {
+        val viewModel = SandboxViewModel(fakeRepository, fakeSandboxController)
+
+        viewModel.state.test {
+            val initial = awaitItem()
+            assertFalse(initial.sandboxReady)
+
+            fakeSandboxController.status.value = SandboxStatus(
+                installed = true,
+                ready = true,
+                working = false,
+                progress = 1.0f,
+                statusText = "Done",
+                diskUsageMB = 250L,
+                packagesInstalled = true,
+                error = false,
+            )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val updated = awaitItem()
+            assertTrue(updated.sandboxInstalled)
+            assertTrue(updated.sandboxReady)
+            assertEquals(1.0f, updated.sandboxProgress)
+            assertEquals("Done", updated.sandboxStatusText)
+            assertEquals(250L, updated.sandboxDiskUsageMB)
+            assertTrue(updated.sandboxPackagesInstalled)
+            assertFalse(updated.isWorking)
+            assertFalse(updated.hasError)
+        }
+    }
+
+    @Test
+    fun `onSelectDistro persists the choice before anything is installed`() = runTest {
+        val viewModel = SandboxViewModel(fakeRepository, fakeSandboxController)
+
+        viewModel.state.test {
+            assertEquals(LinuxDistro.DEBIAN, awaitItem().distro)
+
+            viewModel.onSelectDistro(LinuxDistro.ALPINE)
+
+            assertEquals(LinuxDistro.ALPINE, awaitItem().distro)
+            assertEquals(LinuxDistro.ALPINE, fakeRepository.getSandboxDistro())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onSelectDistro is ignored once a rootfs exists`() = runTest {
+        val viewModel = SandboxViewModel(fakeRepository, fakeSandboxController)
+
+        viewModel.state.test {
+            skipItems(1)
+            // An installed rootfs keeps whatever it was built as; switching means
+            // uninstall and reinstall, which the card enforces by hiding the picker.
+            fakeSandboxController.status.value = SandboxStatus(
+                installed = true,
+                ready = true,
+                distro = LinuxDistro.DEBIAN,
+            )
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertTrue(awaitItem().sandboxInstalled)
+
+            viewModel.onSelectDistro(LinuxDistro.ALPINE)
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            expectNoEvents()
+            assertEquals(LinuxDistro.DEBIAN, fakeRepository.getSandboxDistro())
+        }
+    }
+
+    @Test
+    fun `installed distro from the controller wins over the stored setting`() = runTest {
+        // Legacy installs are Alpine no matter what the setting defaults to.
+        val viewModel = SandboxViewModel(fakeRepository, fakeSandboxController)
+
+        viewModel.state.test {
+            skipItems(1)
+            fakeSandboxController.status.value = SandboxStatus(
+                installed = true,
+                ready = true,
+                distro = LinuxDistro.ALPINE,
+            )
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            assertEquals(LinuxDistro.ALPINE, awaitItem().distro)
+            assertEquals(LinuxDistro.DEBIAN, fakeRepository.getSandboxDistro())
+        }
+    }
+
+    @Test
+    fun `controller error status flows into hasError`() = runTest {
+        val viewModel = SandboxViewModel(fakeRepository, fakeSandboxController)
+
+        viewModel.state.test {
+            skipItems(1)
+            fakeSandboxController.status.value = SandboxStatus(error = true, statusText = "Failed")
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val updated = awaitItem()
+            assertTrue(updated.hasError)
+            assertEquals("Failed", updated.sandboxStatusText)
+        }
     }
 }

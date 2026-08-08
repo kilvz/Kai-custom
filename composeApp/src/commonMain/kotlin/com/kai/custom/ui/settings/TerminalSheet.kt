@@ -59,6 +59,7 @@ import com.kai.custom.SandboxSessions
 import com.kai.custom.TerminalLine
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.sandbox.SandboxSessionViewModel
+import com.kai.custom.linux.LinuxDistro
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.terminal_help_text
 import kai.composeapp.generated.resources.terminal_input_placeholder
@@ -159,6 +160,10 @@ fun TerminalContent(
     val activeHandle: CommandHandle? = sessionActiveHandle ?: localActiveHandle
 
     val colors = terminalColors(darkBackground)
+    // Which Linux the user is actually typing into — the header used to say
+    // "Alpine Linux" unconditionally.
+    val distroName = sandboxController?.status?.collectAsStateWithLifecycle()?.value?.distro?.displayName
+        ?: LinuxDistro.DEFAULT.displayName
     val focusRequester = remember { FocusRequester() }
     val canSubmit = sandboxController != null && inputText.isNotBlank()
     val canCancel = isRunning && activeHandle != null && inputText.isBlank()
@@ -230,7 +235,7 @@ fun TerminalContent(
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = "Alpine Linux",
+                    text = distroName,
                     style = monoStyle(12.sp, colors.text.copy(alpha = 0.5f)),
                 )
             }

@@ -2,6 +2,7 @@ package com.kai.custom.tools
 
 import com.kai.custom.SandboxController
 import com.kai.custom.data.AppSettings
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
@@ -14,7 +15,10 @@ object SshConfigureHostTool : Tool {
     private val sandboxController: SandboxController by inject(SandboxController::class.java)
     private val appSettings: AppSettings by inject(AppSettings::class.java)
 
-    private fun installCmd(): String = if (appSettings.getSandboxDistro() == "ubuntu") "apt-get install -y" else "apk add"
+    private fun installCmd(): String = when (appSettings.getSandboxDistro()) {
+        LinuxDistro.ALPINE -> "apk add"
+        else -> "apt-get install -y"
+    }
 
     override val schema: ToolSchema
         get() = ToolSchema(

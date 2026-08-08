@@ -1,8 +1,8 @@
 ﻿# Tools
 
-**Last verified:** 2026-08-08
+**Last verified:** 2026-08-09
 
-Kai's tools feature allows the AI to execute external functions during conversations — web search, notifications, calendar events, shell commands, memory operations, and more. Tools are defined with a schema, executed with safety guards, and managed through per-tool toggles in settings.
+Kai's tools feature allows the AI to execute external functions during conversations â€” web search, notifications, calendar events, shell commands, memory operations, and more. Tools are defined with a schema, executed with safety guards, and managed through per-tool toggles in settings.
 
 ## Concepts
 
@@ -18,7 +18,7 @@ The machine-readable definition sent to the AI provider so it knows which tools 
 
 Display metadata used in the settings UI. Contains an id, human-readable name and description (with optional localized string resources), the current enabled state, and a flag for whether the tool gets its own switch in the Tools tab. Returned by the platform layer for all tools regardless of whether they are currently enabled.
 
-Every tool a platform can execute must have a definition, including tools no per-tool switch controls. Chat resolves a tool's display name by looking its id up in this list, so a missing definition surfaces the raw id (`check_notifications`) instead of a name. Tools whose availability is decided elsewhere â€” a master toggle in Settings â†’ Agent, or a platform capability â€” are marked as not user-toggleable at their declaration, which is what keeps them out of the Tools tab without hiding them from the name lookup.
+Every tool a platform can execute must have a definition, including tools no per-tool switch controls. Chat resolves a tool's display name by looking its id up in this list, so a missing definition surfaces the raw id (`check_notifications`) instead of a name. Tools whose availability is decided elsewhere Ã¢â‚¬” a master toggle in Settings Ã¢â€ â€™ Agent, or a platform capability Ã¢â‚¬” are marked as not user-toggleable at their declaration, which is what keeps them out of the Tools tab without hiding them from the name lookup.
 
 ### Tool Executor
 
@@ -41,10 +41,10 @@ The component that looks up a tool by name, parses JSON arguments into a typed m
 
 The `open_url` tool accepts both web URLs and `file://` URIs. Each platform opens URLs using its native mechanism:
 
-- **Android** â€” Uses `ACTION_VIEW` intents. For `file://` URIs, converts to `content://` via FileProvider with MIME type detection so the file opens in the appropriate app (e.g. `.html` files open in the browser).
-- **Desktop** â€” Uses `java.awt.Desktop.browse()`.
-- **iOS** â€” Uses `UIApplication.openURL()`.
-- **Web** â€” Uses `window.open()` with `_blank` target.
+- **Android** Ã¢â‚¬” Uses `ACTION_VIEW` intents. For `file://` URIs, converts to `content://` via FileProvider with MIME type detection so the file opens in the appropriate app (e.g. `.html` files open in the browser).
+- **Desktop** Ã¢â‚¬” Uses `java.awt.Desktop.browse()`.
+- **iOS** Ã¢â‚¬” Uses `UIApplication.openURL()`.
+- **Web** Ã¢â‚¬” Uses `window.open()` with `_blank` target.
 
 ### Memory (always on)
 
@@ -65,10 +65,10 @@ Scheduling tools and heartbeat tools are available when the scheduling feature i
 
 Email tools are available when the email feature is enabled and accounts are configured.
 
-Tools that operate on a specific account accept either the internal account ID or the account’s email address, and the account reference can be omitted entirely when only one account is connected. When a reference doesn’t match any connected account, the error lists the connected accounts so the assistant can correct itself instead of concluding that no account is set up.
+Tools that operate on a specific account accept either the internal account ID or the accountâ€™s email address, and the account reference can be omitted entirely when only one account is connected. When a reference doesnâ€™t match any connected account, the error lists the connected accounts so the assistant can correct itself instead of concluding that no account is set up.
 
 
-After a reply or a newly composed email is sent, a copy of the outgoing message is saved to the account’s Sent folder on the mail server so sent mail stays auditable from any mail client. The folder is resolved in order: the folder configured during account setup, the Sent mailbox the server itself advertises (which also covers localized folder names), then common Sent folder names. If none exists — typical for freshly created mailboxes — the folder is created and the copy saved there. Gmail accounts are skipped because Gmail stores sent messages itself. Saving the copy is best-effort — if it fails, the send still succeeds and the tool result carries a warning instead.
+After a reply or a newly composed email is sent, a copy of the outgoing message is saved to the accountâ€™s Sent folder on the mail server so sent mail stays auditable from any mail client. The folder is resolved in order: the folder configured during account setup, the Sent mailbox the server itself advertises (which also covers localized folder names), then common Sent folder names. If none exists â€” typical for freshly created mailboxes â€” the folder is created and the copy saved there. Gmail accounts are skipped because Gmail stores sent messages itself. Saving the copy is best-effort â€” if it fails, the send still succeeds and the tool result carries a warning instead.
 
 
 ### Platform-specific (Android)
@@ -79,33 +79,35 @@ After a reply or a newly composed email is sent, a copy of the outgoing message 
 | `create_calendar_event` | Create a calendar event on the device | Enabled |
 | `set_alarm` | Set an alarm or countdown timer | Enabled |
 | `execute_shell_command` | Execute a shell command on the device | Disabled |
-| `ssh_configure_host` | Register a named SSH host alias for the Linux sandbox so subsequent shell calls can use `ssh <alias>`. Rides along whenever the sandbox is installed and enabled. SSH multiplexing (ControlMaster) is intentionally not enabled â€” Android blocks the `link()` syscall OpenSSH uses for control sockets, so every `ssh` call does a full TCP and authentication handshake. | Disabled |
+| `ssh_configure_host` | Register a named SSH host alias for the Linux sandbox so subsequent shell calls can use `ssh <alias>`. Rides along whenever the sandbox is installed and enabled. SSH multiplexing (ControlMaster) is intentionally not enabled Ã¢â‚¬” Android blocks the `link()` syscall OpenSSH uses for control sockets, so every `ssh` call does a full TCP and authentication handshake. | Disabled |
 | `open_file` | Open a file from the sandbox in an Android app (browser, image viewer, etc.) | Enabled |
 
 #### Linux Sandbox (Android)
 
-When the Linux Sandbox is set up and enabled, `execute_shell_command` routes commands through proot into an Alpine Linux rootfs instead of running them in Android's native shell. This provides:
+When the Linux Sandbox is set up and enabled, `execute_shell_command` routes commands through proot into a Debian or Alpine rootfs instead of running them in Android's native shell. This provides:
 
 - A full Linux userland with bash, coreutils, and standard utilities
-- Package management via `apk` (Alpine's package manager)
-- Optional Python installation (`python3`, `pip`)
+- Package management via `apt` (Debian) or `apk` (Alpine)
+- Optional Python installation (`python3`, pip)
 - Network access (shares the host network stack)
 
-**Setup flow:** The sandbox requires a one-time setup that downloads the Alpine Linux minirootfs (~3 MB). Proot is bundled in the APK as a native library. After setup, users can optionally install Python (~25 MB additional).
+The tool's description is composed per distribution, so the model is told the right package manager, the right distribution name and the right pre-installed set. Handing it "Alpine" and an `apk add` example while a Debian rootfs is mounted costs turns on commands that do not exist.
 
-**Mirror fallback:** The downloader tries the primary Alpine CDN first, then falls back through a list of official mirrors (kernel.org, RWTH Aachen, ETH ZÃ¼rich, Waterloo, Tsinghua) so setup succeeds in regions where the primary CDN is unreachable. The same mirror list is also used to pick `/etc/apk/repositories` during setup â€” `apk update` is retried against each mirror until one succeeds, so later `apk add` calls resolve through a reachable mirror.
+**Setup flow:** The sandbox requires a one-time setup that downloads a rootfs â€” Debian (~150 MB, the default and the one Kai Build shares) or Alpine (~4 MB). Proot is bundled in the APK as a native library. After setup, users can optionally install the extra package bundle.
 
-**Architecture:** Proot is a user-space chroot implementation that intercepts syscalls via ptrace. No root access is required. The Alpine rootfs and tmp directory live in the app's internal files directory under `linux-sandbox/`. The sandbox `/root` (home) is bind-mounted from the externally-visible app directory at `Android/data/com.inspiredandroid.kai/files/sandbox-home/` so files produced by the agent can be opened in Android apps via FileProvider Intents (`open_file`). On first run after upgrade, content from the legacy internal home is migrated automatically.
+**Mirror fallback (Alpine):** The downloader tries the primary Alpine CDN first, then falls back through a list of official mirrors (kernel.org, RWTH Aachen, ETH ZÃ¼rich, Waterloo, Tsinghua) so setup succeeds in regions where the primary CDN is unreachable. The same mirror list is also used to pick `/etc/apk/repositories` during setup â€” `apk update` is retried against each mirror until one succeeds, so later `apk add` calls resolve through a reachable mirror. Debian resolves a single architecture-matched URL from the Linux Containers image index.
 
-**Settings:** The sandbox section appears in Settings > Linux Sandbox on Android and contains a single Alpine Linux card with the install / install-basic-packages / uninstall actions and the "use sandbox vs native shell" toggle. Day-to-day usage (terminal, file browser, packages) is **not** in Settings — it lives behind the chat-bar shortcut.
+**Architecture:** Proot is a user-space chroot implementation that intercepts syscalls via ptrace. No root access is required. The rootfs and tmp directory live in the app's internal files directory under `linux-sandbox/`, and `/root` is part of that rootfs so binaries installed into the home directory can actually be executed. `/root/projects` is bind-mounted from the externally-visible app directory. FileProvider is configured for both areas, so `open_file` works anywhere in the tree. Sandboxes installed before the Debian option existed keep their older layout, with the whole of `/root` bound in from external storage.
 
-**Chat-bar toggle:** A terminal icon next to the new-chat button in the chat top bar (Android only) toggles the chat body between the conversation view and the inline sandbox view — no navigation, no separate screen. The icon adopts a primary-tinted "selected" pill while the sandbox is open, and the message-input bar is hidden so the terminal/file browser have full vertical space. The other top-bar buttons (settings, history, +, TTS) stay visible and operational; tapping **+** or selecting a saved chat from the history sheet auto-collapses the sandbox view so the user lands on the chat they just chose. When the sandbox is ready the inline view hosts three sub-tabs — **Terminal** (interactive shell, default), **Files** (built-in file browser starting at `/root` — tap files to open in the user's default Android app via the same FileProvider/Intent path as `open_file`, or fall back to a built-in editable text editor with a Save action; the listing refreshes on its own each time the tab becomes visible, so files the assistant created or changed through the shell show up without any user action); an import action copies a file from device storage into the directory on screen, which is the only way to get a file into the sandbox without going through the agent, and **Packages** (apk search / install / uninstall / upgrade — see the sandbox doc for the search ranking rules). When the sandbox isn't installed yet, the inline view shows the install button so users don't have to dive into Settings before they can start.
+**Settings:** The sandbox section appears in Settings > Linux Sandbox on Android and contains a single card â€” titled with the installed distribution, or the one about to be installed â€” with a distribution picker (before install only), the install / install-basic-packages / uninstall actions and the "use sandbox vs native shell" toggle. Day-to-day usage (terminal, file browser, packages) is **not** in Settings â€” it lives behind the chat-bar shortcut.
+
+**Chat-bar toggle:** A terminal icon next to the new-chat button in the chat top bar (Android only) toggles the chat body between the conversation view and the inline sandbox view â€” no navigation, no separate screen. The icon adopts a primary-tinted "selected" pill while the sandbox is open, and the message-input bar is hidden so the terminal/file browser have full vertical space. The other top-bar buttons (settings, history, +, TTS) stay visible and operational; tapping **+** or selecting a saved chat from the history sheet auto-collapses the sandbox view so the user lands on the chat they just chose. When the sandbox is ready the inline view hosts three sub-tabs â€” **Terminal** (interactive shell, default), **Files** (built-in file browser starting at `/root` â€” tap files to open in the user's default Android app via the same FileProvider/Intent path as `open_file`, or fall back to a built-in editable text editor with a Save action; the listing refreshes on its own each time the tab becomes visible, so files the assistant created or changed through the shell show up without any user action; an import action copies a file from device storage into the directory on screen, which is the only way to get a file into the sandbox without going through the agent), and **Packages** (search / install / uninstall / upgrade through whichever package manager is installed â€” see the sandbox doc for the search ranking rules). When the sandbox isn't installed yet, the inline view shows the install button so users don't have to dive into Settings before they can start.
 
 #### Open File (Android)
 
 The `open_file` tool fires an `ACTION_VIEW` Intent for a single file at `path` (relative to `/root`). Browser opens HTML, image viewer opens PNG/JPG, PDF viewer opens PDF, etc. Uses the existing FileProvider declared in the main manifest. Path is rejected if it contains a leading slash or `..` segments; the resolved path is canonicalized and verified to stay under the sandbox home root before the Intent is fired.
 
-The Intent's MIME type is resolved from the file extension. Android's built-in extension table is the primary source, but it is overridden where it is wrong or absent for a Linux sandbox: `.apk` has no entry at all (so the intent used to go out as a wildcard and the package installer never appeared in the chooser), and `.ts` resolves to an MPEG transport stream when in this context it is nearly always TypeScript. Source and config extensions that Android does not know â€” the bulk of what the sandbox produces â€” fall back to plain text so a viewer is offered instead of an empty chooser.
+The Intent's MIME type is resolved from the file extension. Android's built-in extension table is the primary source, but it is overridden where it is wrong or absent for a Linux sandbox: `.apk` has no entry at all (so the intent used to go out as a wildcard and the package installer never appeared in the chooser), and `.ts` resolves to an MPEG transport stream when in this context it is nearly always TypeScript. Source and config extensions that Android does not know Ã¢â‚¬” the bulk of what the sandbox produces Ã¢â‚¬” fall back to plain text so a viewer is offered instead of an empty chooser.
 
 Handing an `.apk` to the system package installer additionally requires the "install unknown apps" permission, which Play Store policy restricts to app stores, file managers and browsers. It is therefore declared in the FOSS flavor only, matching how SMS and notification reading are handled. On the Play Store build, opening an apk reports that the build cannot install apps rather than launching an installer that would refuse anyway. On the FOSS build the user still grants the permission once through the system prompt.
 
@@ -128,7 +130,7 @@ When `background=true`, the command starts asynchronously and returns a `session
 
 #### Persistent bash session (Android)
 
-On Android, each conversation gets its own persistent bash session inside the Linux sandbox. This is the default execution mode for `execute_shell_command`: `cd`, environment variable exports, shell functions, and other in-shell state carry across calls within the same conversation, so the AI can build up working context the same way a human terminal user does. Passing `fresh: true` opts out of the persistent session for a single call â€” that command runs in a one-shot proot invocation with no shared state, useful when the AI wants a clean environment without disturbing the ongoing session.
+On Android, each conversation gets its own persistent bash session inside the Linux sandbox. This is the default execution mode for `execute_shell_command`: `cd`, environment variable exports, shell functions, and other in-shell state carry across calls within the same conversation, so the AI can build up working context the same way a human terminal user does. Passing `fresh: true` opts out of the persistent session for a single call Ã¢â‚¬” that command runs in a one-shot proot invocation with no shared state, useful when the AI wants a clean environment without disturbing the ongoing session.
 
 The desktop tool dynamically includes the detected OS (macOS/Linux/Windows) and shell in its description so the AI knows the execution context.
 
@@ -166,7 +168,7 @@ Output limits: desktop 30,000 chars per stream, Android 15,000 chars per stream.
 4. Each execution goes through the tool executor: find tool by name, parse arguments, run with timeout, truncate result
 5. TOOL_EXECUTING entries are removed and replaced with TOOL result entries (tool call id, tool name, result string)
 6. The updated history (including tool results) is sent back to the AI
-7. The AI may respond with more tool calls â€” repeat from step 1
+7. The AI may respond with more tool calls Ã¢â‚¬” repeat from step 1
 8. When the AI responds with no tool calls, the final text is returned to the user
 
 Pressing stop cancels in-flight tool executions and removes the executing indicators from the chat; a cancelled tool is not reported to the AI as a failed result.
@@ -175,11 +177,11 @@ The loop supports OpenAI-compatible, Gemini, and Anthropic provider formats, wit
 
 ### Shizuku ADB (Android)
 
-The `run_adb` tool uses Shizuku's `UserService` mechanism to run shell commands with ADB-level (shell UID) privileges. It is independent of the Linux Sandbox â€” commands go through `Runtime.getRuntime().exec()` in a persistent Shizuku-hosted process rather than through proot.
+The `run_adb` tool uses Shizuku's `UserService` mechanism to run shell commands with ADB-level (shell UID) privileges. It is independent of the Linux Sandbox Ã¢â‚¬” commands go through `Runtime.getRuntime().exec()` in a persistent Shizuku-hosted process rather than through proot.
 
 **Setup requirement:** The user must install [Shizuku](https://shizuku.rikka.app) and grant the app permission. Permission is requested on first use via the system Shizuku permission dialog.
 
-**Lifecycle:** The UserService is bound on first `run_adb` call with `daemon(false)`, kept alive for the session, and torn down via `stopService()` on app destruction. With `daemon(false)` the process exits naturally on unbind â€” no `System.exit(0)` needed. The service process identity (version code) is derived from the calling app's UID hash.
+**Lifecycle:** The UserService is bound on first `run_adb` call with `daemon(false)`, kept alive for the session, and torn down via `stopService()` on app destruction. With `daemon(false)` the process exits naturally on unbind Ã¢â‚¬” no `System.exit(0)` needed. The service process identity (version code) is derived from the calling app's UID hash.
 
 **Architecture:** Communication is over Android Binder IPC. The client (`ShizukuManager`) sends `runCommand` requests to the server (`CommandService`) via a custom `ICommandService` interface using raw `Parcel` transactions. Results are serialized as JSON `CommandResultDto` objects.
 
@@ -201,7 +203,7 @@ Tool results longer than 20,000 characters are truncated with a note indicating 
 
 ### Context trimming
 
-Between tool loop iterations, the message history is trimmed to fit within the model's context window. All three providers (OpenAI-compatible, Gemini, Anthropic) perform inter-iteration trimming. Context window sizes are estimated per model (e.g. Gemini 2.5 = 1M tokens, Claude = 200K, GPT-4o = 128K, small local models = 8â€“32K) and oldest messages are dropped first while preserving the system prompt.
+Between tool loop iterations, the message history is trimmed to fit within the model's context window. All three providers (OpenAI-compatible, Gemini, Anthropic) perform inter-iteration trimming. Context window sizes are estimated per model (e.g. Gemini 2.5 = 1M tokens, Claude = 200K, GPT-4o = 128K, small local models = 8Ã¢â‚¬â€œ32K) and oldest messages are dropped first while preserving the system prompt.
 
 Trimming preserves the tool-call pairing required by strict OpenAI-compatible providers (e.g. DeepSeek via OpenCode Zen): an assistant turn that requested tool calls is dropped together with the tool responses that answer it, never split. A trailing tool result is never kept without the assistant message that requested it.
 
@@ -225,12 +227,12 @@ See [mcp.md](mcp.md) for the full MCP feature spec.
 
 Tool availability is controlled at multiple levels:
 
-- **Feature-level gates** â€” memory tools require memory enabled, scheduling/heartbeat tools require scheduling enabled, email tools require email enabled
-- **Sandbox toggle gate (Android)** â€” `execute_shell_command`, `manage_process`, and `ssh_configure_host` are surfaced when the sandbox toggle in Settings > Linux Sandbox is on. The toggle is always visible regardless of install state. When the sandbox is not installed, executing these tools returns an error guiding the user to set it up
-- **Per-tool toggles** â€” individual tools can be enabled or disabled in settings, persisted with a `tool_enabled_` key prefix
-- **Default state** â€” most tools default to enabled; `execute_shell_command` defaults to disabled
-**Master-toggle-only** â€” memory, scheduling, heartbeat, email, SMS, and notification tools have no individual per-tool toggle; they are on whenever their master switch in Settings â†’ Agent is on (heartbeat is bundled with the scheduling switch). The Android sandbox tools and desktop's `manage_process` are gated the same way â€” by the sandbox switch and the shell switch respectively â€” and likewise carry no switch of their own
-- **On-device (LiteRT) allowlist** â€” when the active model is an on-device LiteRT model, only a small allowlist of tools is exposed regardless of which other tools are enabled. The current allowlist is: `get_local_time`, `get_location_from_ip`, `web_search`, `open_url`, `memory_store`, `memory_forget`, `memory_reinforce`, and `execute_shell_command`. Memory tools beyond the three listed, email tools, scheduling tools, and heartbeat tools are not surfaced to local models even when their master switches are on.
+- **Feature-level gates** Ã¢â‚¬” memory tools require memory enabled, scheduling/heartbeat tools require scheduling enabled, email tools require email enabled
+- **Sandbox toggle gate (Android)** Ã¢â‚¬” `execute_shell_command`, `manage_process`, and `ssh_configure_host` are surfaced when the sandbox toggle in Settings > Linux Sandbox is on. The toggle is always visible regardless of install state. When the sandbox is not installed, executing these tools returns an error guiding the user to set it up
+- **Per-tool toggles** Ã¢â‚¬” individual tools can be enabled or disabled in settings, persisted with a `tool_enabled_` key prefix
+- **Default state** Ã¢â‚¬” most tools default to enabled; `execute_shell_command` defaults to disabled
+**Master-toggle-only** Ã¢â‚¬” memory, scheduling, heartbeat, email, SMS, and notification tools have no individual per-tool toggle; they are on whenever their master switch in Settings Ã¢â€ â€™ Agent is on (heartbeat is bundled with the scheduling switch). The Android sandbox tools and desktop's `manage_process` are gated the same way Ã¢â‚¬” by the sandbox switch and the shell switch respectively Ã¢â‚¬” and likewise carry no switch of their own
+- **On-device (LiteRT) allowlist** Ã¢â‚¬” when the active model is an on-device LiteRT model, only a small allowlist of tools is exposed regardless of which other tools are enabled. The current allowlist is: `get_local_time`, `get_location_from_ip`, `web_search`, `open_url`, `memory_store`, `memory_forget`, `memory_reinforce`, and `execute_shell_command`. Memory tools beyond the three listed, email tools, scheduling tools, and heartbeat tools are not surfaced to local models even when their master switches are on.
 
 The platform layer assembles the final list of available tools by checking all gates and per-tool settings, and only enabled tools are sent to the AI provider.
 
@@ -244,18 +246,18 @@ The tools tab in settings displays a responsive grid of toggle cards:
 
 Each card shows the tool name, a short description, and a toggle switch. Clicking anywhere on the card toggles the tool. Cards use a semi-transparent surface variant background.
 
-Only individually toggleable tools appear in the grid. Tools whose only control is a master toggle in Settings â†’ Agent (memory, scheduling, heartbeat, email, SMS, notifications) are not listed here â€” they appear and disappear with their feature switch. The same applies to tools gated by a capability rather than a setting: the Android sandbox tools follow the sandbox switch, and desktop's `manage_process` follows the shell switch.
+Only individually toggleable tools appear in the grid. Tools whose only control is a master toggle in Settings Ã¢â€ â€™ Agent (memory, scheduling, heartbeat, email, SMS, notifications) are not listed here Ã¢â‚¬” they appear and disappear with their feature switch. The same applies to tools gated by a capability rather than a setting: the Android sandbox tools follow the sandbox switch, and desktop's `manage_process` follows the shell switch.
 
 ## Chat UI
 
 ### Shared pulsing status indicator
 
 The standard chat uses a `PulsingStatusIndicator` composable that shows:
-- A pulsing dot (scale 0.6â†’1.0, alpha 0.4â†’1.0, 800ms reverse animation)
-- Cycling status text ("Thinkingâ€¦", "Workingâ€¦", "Brewingâ€¦" rotating every 3 seconds with AnimatedContent fade)
-- An optional inline tool summary separated by " Â· ":
-  - **1 tool executing**: shows the tool's display name (e.g., "Thinkingâ€¦ Â· Learn Memory")
-  - **Multiple tools executing**: shows a grouped count (e.g., "Workingâ€¦ Â· 2 Tools")
+- A pulsing dot (scale 0.6Ã¢â€ â€™1.0, alpha 0.4Ã¢â€ â€™1.0, 800ms reverse animation)
+- Cycling status text ("ThinkingÃ¢â‚¬Â¦", "WorkingÃ¢â‚¬Â¦", "BrewingÃ¢â‚¬Â¦" rotating every 3 seconds with AnimatedContent fade)
+- An optional inline tool summary separated by " Ã‚Â· ":
+  - **1 tool executing**: shows the tool's display name (e.g., "ThinkingÃ¢â‚¬Â¦ Ã‚Â· Learn Memory")
+  - **Multiple tools executing**: shows a grouped count (e.g., "WorkingÃ¢â‚¬Â¦ Ã‚Â· 2 Tools")
   - **No tools**: shows only the cycling status text
 
 The indicator accepts styling parameters (dot size, colors, text style).
@@ -266,7 +268,7 @@ When loading, a chip appears at the bottom of the chat list containing the `Puls
 
 ### Interactive mode loading feedback
 
-The interactive-mode top bar shows only the static title — loading is surfaced closer to the user's point of action instead:
+The interactive-mode top bar shows only the static title â€” loading is surfaced closer to the user's point of action instead:
 - **Clicking a kai-ui action button**: the clicked button keeps its label and pulses (scale/alpha animation) until the response arrives; other buttons in the same message become disabled.
 - **First load** (no assistant response yet): a centered waiting row is shown.
 - **Typed-and-sent input**: the trailing send icon swaps to a stop icon in the input, as in standard chat.
@@ -294,22 +296,23 @@ The interactive-mode top bar shows only the static title — loading is surfaced
 | `composeApp/src/androidMain/.../tools/SetAlarmTool.kt` | Android alarm / countdown-timer tool |
 | `composeApp/src/androidMain/.../sandbox/LinuxSandboxManager.kt` | Sandbox lifecycle, setup, proot management |
 | `composeApp/src/androidMain/.../sandbox/ProotExecutor.kt` | Proot command building and execution |
-| `composeApp/src/androidMain/.../sandbox/RootfsDownloader.kt` | Alpine rootfs download and extraction |
+| `composeApp/src/androidMain/.../linux/` | Shared Linux runtime: distro specs, rootfs download and extraction, installer, proot launcher, guest-path resolution |
+| `composeApp/src/commonMain/.../linux/LinuxDistro.kt` | The distributions, their package sets, and their package-manager commands and parsers |
 | `composeApp/src/jvmShared/.../tools/ProcessManagerTool.kt` | Process management tool shared by Android and desktop |
 | `composeApp/src/desktopMain/.../tools/ProcessManager.kt` | Desktop background process tracking (host processes) |
 | `composeApp/src/androidMain/.../tools/ProcessManager.kt` | Android background process tracking (proot sandbox) |
 | `composeApp/src/androidMain/.../tools/OpenFileTool.kt` | Open sandbox file in an Android app via FileProvider Intent |
-| `composeApp/src/androidMain/.../sandbox/SandboxFiles.kt` | Path translation, MIME resolution, text-vs-binary reads, streamed imports, and the FileProvider open helper â€” all shared with the file browser |
+| `composeApp/src/androidMain/.../sandbox/SandboxFiles.kt` | Path translation, MIME resolution, text-vs-binary reads, streamed imports, and the FileProvider open helper Ã¢â‚¬” all shared with the file browser |
 | `androidApp/src/main/res/xml/file_paths.xml` | FileProvider path config (includes `sandbox-home/`) |
 | `composeApp/src/commonMain/.../SandboxController.kt` | Cross-platform sandbox interface |
 | `composeApp/src/commonMain/.../ui/sandbox/SandboxTabsContent.kt` | Terminal/Files/Packages sub-tab UI rendered inline inside the chat screen body |
-| `composeApp/src/commonMain/.../ui/sandbox/SandboxFileBrowserScreen.kt` | User-facing file browser UI for the Alpine sandbox |
+| `composeApp/src/commonMain/.../ui/sandbox/SandboxFileBrowserScreen.kt` | User-facing file browser UI, pointed at either Linux environment |
 | `composeApp/src/commonMain/.../ui/sandbox/SandboxFileBrowserViewModel.kt` | State for browsing and editing sandbox files |
 | `composeApp/src/commonMain/.../ui/settings/SettingsScreen.kt` | ToolsContent, ToolItem, LinuxSandboxSection composables |
 | `composeApp/src/commonMain/.../ui/chat/composables/ToolMessage.kt` | Executing/completed UI indicators |
 | `composeApp/src/commonMain/.../data/AppSettings.kt` | Tool enabled state persistence |
-| `composeApp/src/androidMain/.../shizuku/ShizukuManager.kt` | Shizuku UserService client â€” bind, run commands, lifecycle |
+| `composeApp/src/androidMain/.../shizuku/ShizukuManager.kt` | Shizuku UserService client Ã¢â‚¬” bind, run commands, lifecycle |
 | `composeApp/src/androidMain/.../shizuku/ICommandService.kt` | Binder interface for Shizuku IPC (execute, destroy) |
-| `composeApp/src/androidMain/.../shizuku/CommandService.kt` | Shizuku UserService â€” receives commands, runs Runtime.exec() |
+| `composeApp/src/androidMain/.../shizuku/CommandService.kt` | Shizuku UserService Ã¢â‚¬” receives commands, runs Runtime.exec() |
 | `composeApp/src/androidMain/.../shizuku/CommandResultDto.kt` | Serializable IPC result (stdout, stderr, exit code) |
-| `composeApp/src/androidMain/.../tools/AdbTool.kt` | run_adb tool definition â€” calls ShizukuManager |
+| `composeApp/src/androidMain/.../tools/AdbTool.kt` | run_adb tool definition Ã¢â‚¬” calls ShizukuManager |

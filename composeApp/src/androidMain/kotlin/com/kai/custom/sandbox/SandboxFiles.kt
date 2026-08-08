@@ -10,6 +10,7 @@ import com.kai.custom.SandboxFileEntry
 import com.kai.custom.TextFileResult
 import com.kai.custom.data.FileCategory
 import com.kai.custom.data.classifyFile
+import com.kai.custom.linux.safeChild
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.source
@@ -30,37 +31,6 @@ internal fun resolveSandboxFile(homeRoot: String, rel: String): File? {
     val parts = rel.split("/", "\\").filter { it.isNotEmpty() }
     if (parts.any { it == ".." }) return null
     return safeChild(File(homeRoot), parts)
-}
-
-internal fun resolveSandboxAbsolute(rootfsPath: String, homePath: String, sandboxPath: String): File? {
-    val normalized = sandboxPath.trim().ifEmpty { "/" }
-    if (!normalized.startsWith("/")) return null
-    val parts = normalized.split("/").filter { it.isNotEmpty() }
-    if (parts.any { it == ".." }) return null
-    val (rootDir, remainder) = when (parts.firstOrNull()) {
-        "root" -> File(homePath) to parts.drop(1)
-
-        "sdcard" -> {
-            val host = when {
-                File("/storage/emulated/0").exists() -> "/storage/emulated/0"
-                File("/storage/self/primary").exists() -> "/storage/self/primary"
-                else -> return null
-            }
-            File(host) to parts.drop(1)
-        }
-
-        else -> File(rootfsPath) to parts
-    }
-    return safeChild(rootDir, remainder)
-}
-
-/** Blocks path traversal: the resolved child must stay under [root]. */
-internal fun safeChild(root: File, parts: List<String>): File? {
-    val candidate = if (parts.isEmpty()) root else File(root, parts.joinToString(File.separator))
-    val rootCanon = root.canonicalPath
-    val candidateCanon = candidate.canonicalPath
-    if (candidateCanon != rootCanon && !candidateCanon.startsWith(rootCanon + File.separator)) return null
-    return candidate
 }
 
 /** One row of a directory listing, with the guest path built from [parent]. */

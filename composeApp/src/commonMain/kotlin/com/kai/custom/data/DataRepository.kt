@@ -14,6 +14,7 @@ import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.ui.chat.History
 import com.kai.custom.ui.settings.SettingsModel
+import com.kai.custom.linux.LinuxDistro
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.StateFlow
 
@@ -203,6 +204,10 @@ interface DataRepository {
     fun setSandboxStorageMountEnabled(enabled: Boolean)
     fun getSandboxDistro(): String
     fun setSandboxDistro(distro: String)
+
+    /** Distro a fresh sandbox install would use. An existing install keeps its own. */
+    fun getSandboxDistro(): LinuxDistro
+    fun setSandboxDistro(distro: LinuxDistro)
 
     // Heartbeat
     fun getHeartbeatConfig(): HeartbeatConfig

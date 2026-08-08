@@ -12,7 +12,6 @@ import com.kai.custom.sandbox.ProotExecutor
 import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SessionShell
 import com.kai.custom.sandbox.openFileWithIntent
-import com.kai.custom.sandbox.resolveSandboxAbsolute
 import com.kai.custom.sandbox.toFileEntry
 import com.kai.custom.sandbox.decodeUtf8Strict
 import com.kai.custom.sandbox.importFileInto
@@ -66,6 +65,7 @@ class AndroidSandboxController : SandboxController {
         val initial = sandboxManager.state.value
         _status.value = if (initial is SandboxState.Ready) {
             SandboxStatus(
+                distro = sandboxManager.distro,
                 installed = true,
                 ready = true,
                 statusText = "Ready",
@@ -98,6 +98,7 @@ class AndroidSandboxController : SandboxController {
                 } catch (e: Throwable) {
                     android.util.Log.e("SandboxController", "mapState failed for $state", e)
                     _status.value = SandboxStatus(
+                        distro = sandboxManager.distro,
                         error = true,
                         statusText = "Sandbox status error: ${e.message ?: e::class.simpleName}",
                     )
@@ -109,16 +110,19 @@ class AndroidSandboxController : SandboxController {
 
     private fun mapState(state: SandboxState): SandboxStatus = when (state) {
         is SandboxState.NotInstalled -> SandboxStatus(
+            distro = sandboxManager.distro,
             statusText = "Not installed",
         )
 
         is SandboxState.Downloading -> SandboxStatus(
+            distro = sandboxManager.distro,
             working = true,
             progress = state.progress,
             statusText = "Downloading rootfs...",
         )
 
         is SandboxState.Extracting -> SandboxStatus(
+            distro = sandboxManager.distro,
             working = true,
             statusText = "Extracting...",
         )
@@ -126,6 +130,7 @@ class AndroidSandboxController : SandboxController {
         is SandboxState.Installing -> {
             val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
             SandboxStatus(
+                distro = sandboxManager.distro,
                 installed = rootfsExists,
                 working = true,
                 statusText = state.detail.ifEmpty { "Installing..." },
@@ -138,6 +143,7 @@ class AndroidSandboxController : SandboxController {
                 cachedDiskUsageMB = sandboxManager.getDiskUsageMB()
             }
             SandboxStatus(
+                distro = sandboxManager.distro,
                 installed = true,
                 ready = true,
                 statusText = "Ready",
@@ -150,6 +156,7 @@ class AndroidSandboxController : SandboxController {
             val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
             val msg = state.message
             SandboxStatus(
+                distro = sandboxManager.distro,
                 installed = rootfsExists,
                 ready = rootfsExists,
                 error = true,
@@ -309,11 +316,14 @@ class AndroidSandboxController : SandboxController {
     }
 
     override suspend fun listDirectory(path: String): List<SandboxFileEntry> = withContext(Dispatchers.IO) {
-        val dir = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val dir = sandboxManager.fileMap().resolve(path)
             ?: return@withContext emptyList()
 
         val normalized = if (path.endsWith("/")) path.dropLast(1) else path
         val isRoot = normalized.isEmpty() || normalized == "/"
+        // On a legacy install /root is bound in from external storage, so the
+        // rootfs listing shows an empty mount point — swap it for the real thing.
+        val homeIsSeparate = isRoot && !sandboxManager.homeOnRootfs
 
         if (!isRoot && isOnHostStorage(dir)) {
             return@withContext listHostDirectoryViaSandbox(normalized, dir.absolutePath)
@@ -322,11 +332,11 @@ class AndroidSandboxController : SandboxController {
         if (!dir.isDirectory) return@withContext emptyList()
 
         val children = dir.listFiles().orEmpty()
-            .filterNot { isRoot && it.name == "root" }
+            .filterNot { homeIsSeparate && it.name == "root" }
             .map { it.toFileEntry(parent = if (isRoot) "" else normalized) }
             .toMutableList()
 
-        if (isRoot) {
+        if (homeIsSeparate) {
             val home = File(sandboxManager.homePath)
             if (home.isDirectory) {
                 children.add(
@@ -492,7 +502,7 @@ class AndroidSandboxController : SandboxController {
     }
 
     override suspend fun readTextFile(path: String, maxBytes: Int, force: Boolean): TextFileResult = withContext(Dispatchers.IO) {
-        val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val file = sandboxManager.fileMap().resolve(path)
             ?: return@withContext TextFileResult.Unreadable
         // Rootfs inside proot is owned by root:1078 — the app process
         // can't access it directly via Java File. Always use sandbox shell.
@@ -502,21 +512,21 @@ class AndroidSandboxController : SandboxController {
     }
 
     override suspend fun writeTextFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
-        val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val file = sandboxManager.fileMap().resolve(path)
             ?: return@withContext false
         // Use sandbox path — proot translates via bind-mounts.
         writeHostTextFileViaSandbox(path, content)
     }
 
     override suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean = withContext(Dispatchers.IO) {
-        val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val file = sandboxManager.fileMap().resolve(path)
             ?: return@withContext false
         // Use sandbox path — proot translates via bind-mounts.
         writeHostBinaryViaSandbox(path, data)
     }
 
     override suspend fun openFile(path: String): Result<Unit> = withContext(Dispatchers.IO) {
-        val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val file = sandboxManager.fileMap().resolve(path)
             ?: return@withContext Result.failure(IllegalArgumentException("Invalid path: $path"))
         if (!file.isFile) return@withContext Result.failure(IllegalArgumentException("Not a file: $path"))
         val result = openFileWithIntent(context, file)
@@ -524,16 +534,14 @@ class AndroidSandboxController : SandboxController {
     }
 
     override suspend fun deleteEntry(path: String, recursive: Boolean): Boolean = withContext(Dispatchers.IO) {
-        val file = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val file = sandboxManager.fileMap().resolve(path)
             ?: return@withContext false
         if (isOnHostStorage(file)) {
             return@withContext deleteHostEntryViaSandbox(file.absolutePath, recursive)
         }
         if (!file.exists()) return@withContext false
-        // Refuse to delete the sandbox roots themselves.
-        val canonical = file.canonicalPath
-        if (canonical == File(sandboxManager.homePath).canonicalPath) return@withContext false
-        if (canonical == File(sandboxManager.rootfsPath).canonicalPath) return@withContext false
+        // Refuse to delete the bind roots themselves.
+        if (sandboxManager.fileMap().isRoot(file)) return@withContext false
         when {
             file.isDirectory && !recursive -> {
                 val empty = file.list()?.isEmpty() != false
@@ -547,7 +555,7 @@ class AndroidSandboxController : SandboxController {
     }
 
     override suspend fun importFile(directoryPath: String, source: PlatformFile): Result<String> = withContext(Dispatchers.IO) {
-        val dir = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, directoryPath)
+        val dir = sandboxManager.fileMap().resolve(directoryPath)
             ?: return@withContext Result.failure(IllegalArgumentException("Invalid path: $directoryPath"))
         try {
             val created = importFileInto(dir, source)
@@ -566,19 +574,15 @@ class AndroidSandboxController : SandboxController {
         ) {
             return@withContext Result.failure(IllegalArgumentException("Invalid name"))
         }
-        val src = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, path)
+        val src = sandboxManager.fileMap().resolve(path)
             ?: return@withContext Result.failure(IllegalArgumentException("Invalid path"))
         if (!src.exists()) return@withContext Result.failure(IllegalArgumentException("Not found"))
-        val canonical = src.canonicalPath
-        if (canonical == File(sandboxManager.homePath).canonicalPath) {
-            return@withContext Result.failure(IllegalArgumentException("Cannot rename sandbox root"))
-        }
-        if (canonical == File(sandboxManager.rootfsPath).canonicalPath) {
+        if (sandboxManager.fileMap().isRoot(src)) {
             return@withContext Result.failure(IllegalArgumentException("Cannot rename sandbox root"))
         }
         val parentSandbox = path.substringBeforeLast('/', "")
         val newSandboxPath = if (parentSandbox.isEmpty()) "/$newName" else "$parentSandbox/$newName"
-        val dest = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, newSandboxPath)
+        val dest = sandboxManager.fileMap().resolve(newSandboxPath)
             ?: return@withContext Result.failure(IllegalArgumentException("Invalid destination"))
         if (dest.exists()) return@withContext Result.failure(IllegalStateException("collision"))
         if (src.renameTo(dest)) {

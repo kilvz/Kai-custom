@@ -182,7 +182,7 @@ class DebugServerDesktop(
                                 put("wake_word_template", JsonPrimitive(dataRepository.getWakeWordTemplate()))
                                 put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
                                 put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
-                                put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
+                                put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro().id))
                                 put("sandbox_root_enabled", JsonPrimitive(dataRepository.isSandboxRootEnabled()))
                                 put("heartbeat_enabled", JsonPrimitive(cfg.enabled))
                                 put("heartbeat_interval_minutes", JsonPrimitive(cfg.intervalMinutes))
@@ -1366,7 +1366,7 @@ class DebugServerDesktop(
                                 put("statusText", JsonPrimitive(s.statusText))
                                 put("error", JsonPrimitive(s.error))
                                 put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
-                                put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro()))
+                                put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro().id))
                                 put("sandbox_storage_mount", JsonPrimitive(dataRepository.isSandboxStorageMountEnabled()))
                                 put("sandbox_root_enabled", JsonPrimitive(dataRepository.isSandboxRootEnabled()))
                             },

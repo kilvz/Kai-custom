@@ -12,7 +12,6 @@ import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.SandboxState
-import com.kai.custom.sandbox.resolveSandboxAbsolute
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
@@ -102,7 +101,7 @@ object SpeakTextTool : Tool {
             )
         }
 
-        val hostFile = resolveSandboxAbsolute(sandboxManager.rootfsPath, sandboxManager.homePath, outputFile)
+        val hostFile = sandboxManager.fileMap().resolve(outputFile)
         if (hostFile == null || !hostFile.exists()) {
             return mapOf(
                 "success" to true,

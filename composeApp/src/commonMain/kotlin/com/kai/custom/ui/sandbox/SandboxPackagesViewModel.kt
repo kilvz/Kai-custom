@@ -3,10 +3,10 @@ package com.kai.custom.ui.sandbox
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.custom.SandboxController
-import com.kai.custom.SandboxRequiredPackages
-import com.kai.custom.SandboxSessions
-import com.kai.custom.data.DataRepository
+import com.inspiredandroid.kai.SandboxController
+import com.inspiredandroid.kai.SandboxSessions
+import com.inspiredandroid.kai.linux.PackageEntry
+import com.inspiredandroid.kai.linux.PackageManagerSpec
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.sandbox_packages_install_failed
 import kai.composeapp.generated.resources.sandbox_packages_install_success
@@ -32,13 +32,6 @@ import org.jetbrains.compose.resources.StringResource
 import kotlin.time.Duration.Companion.milliseconds
 
 @Immutable
-data class PackageEntry(
-    val name: String,
-    val version: String,
-    val description: String? = null,
-)
-
-@Immutable
 data class PackagesUiState(
     val installed: ImmutableList<PackageEntry> = persistentListOf(),
     val installedNames: ImmutableSet<String> = persistentSetOf(),
@@ -50,6 +43,8 @@ data class PackagesUiState(
     val pendingUninstall: PackageEntry? = null,
     val upgrading: Boolean = false,
     val snackbarMessage: SnackbarMessage? = null,
+    /** Base packages of the installed distro — these get no uninstall action. */
+    val protectedPackages: ImmutableSet<String> = persistentSetOf(),
 )
 
 @Immutable
@@ -57,7 +52,7 @@ data class SnackbarMessage(val resource: StringResource, val arg: String? = null
 
 private const val SEARCH_DEBOUNCE_MS = 300L
 
-/** How many apk hits to pull before ranking — high enough that prefix matches
+/** How many hits to pull before ranking — high enough that prefix matches
  *  aren't lost to alphabetical `head` truncation of description hits. */
 private const val SEARCH_FETCH_LIMIT = 2000
 
@@ -93,21 +88,36 @@ internal fun rankSearchResults(results: List<PackageEntry>, query: String): List
     )
 }
 
-private val ALPINE_REVISION_SUFFIX = Regex("-r\\d+$")
-
-private val UPGRADE_PROGRESS_LINE = Regex("""^\(\d+/\d+\)\s+Upgrading\s""")
-
 class SandboxPackagesViewModel(
     private val sandboxController: SandboxController,
     private val dataRepository: DataRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(PackagesUiState())
+    private val _state = MutableStateFlow(
+        PackagesUiState(
+            protectedPackages = sandboxController.status.value.distro.protectedPackages.toImmutableSet(),
+        ),
+    )
     val state = _state.asStateFlow()
 
     private var searchJob: Job? = null
 
-    private fun isUbuntu(): Boolean = dataRepository.getSandboxDistro() == "ubuntu"
+    init {
+        // An uninstall/reinstall can swap the distro under a live Packages tab.
+        viewModelScope.launch {
+            sandboxController.status.collect { status ->
+                _state.update { it.copy(protectedPackages = status.distro.protectedPackages.toImmutableSet()) }
+            }
+        }
+    }
+
+    /**
+     * Read per call rather than captured: the installed distro is only known once
+     * the sandbox reports its status, and an uninstall/reinstall can change it
+     * while this ViewModel is alive.
+     */
+    private val packageManager: PackageManagerSpec
+        get() = sandboxController.status.value.distro.packageManager
 
     fun start() {
         val current = _state.value
@@ -125,14 +135,11 @@ class SandboxPackagesViewModel(
     }
 
     private suspend fun loadInstalled(): List<PackageEntry> {
-        val cmd = if (isUbuntu()) {
-            "dpkg-query --show -f '${'$'}{Package} ${'$'}{Version}\\n' 2>/dev/null | sort"
-        } else {
-            "apk info -v | sort"
-        }
+        val manager = packageManager
+        val cmd = manager.listInstalledCommand
         val output = sandboxController.executeCommand(cmd, SandboxSessions.SYSTEM)
         log("loadInstalled", cmd, output)
-        return if (isUbuntu()) parseDpkgLines(output) else parseApkInfoLines(output)
+        return manager.parseInstalled(output)
     }
 
     private fun applyInstalled(parsed: List<PackageEntry>) {
@@ -160,23 +167,15 @@ class SandboxPackagesViewModel(
 
     private suspend fun runSearch(query: String) {
         // Fetch a large alphabetical pool, then re-rank so name-prefix hits surface
-        // first — apk returns matches (name + description) A–Z, so a bare `head`
-        // would bury "fast*" under earlier description hits like "abseil-…".
-        val cmd = if (isUbuntu()) {
-            "apt-cache search ${shellQuote(query)} | head -n $SEARCH_RESULT_LIMIT"
-        } else {
-            "apk search -v ${shellQuote(query)} | head -n $SEARCH_FETCH_LIMIT"
-        }
+        // first — both package managers return matches (name + description) A–Z, so
+        // a bare `head` would bury "fast*" under earlier description hits.
+        val manager = packageManager
+        val cmd = manager.searchCommand(query, SEARCH_FETCH_LIMIT)
         val output = sandboxController.executeCommand(cmd, SandboxSessions.SYSTEM)
         log("runSearch($query)", cmd, output)
-        val results = rankSearchResults(
-            if (isUbuntu()) {
-                parseAptSearchLines(output)
-            } else {
-                parseApkSearchLines(output)
-            },
-            query,
-        ).take(SEARCH_RESULT_LIMIT).toImmutableList()
+        val results = rankSearchResults(manager.parseSearch(output), query)
+            .take(SEARCH_RESULT_LIMIT)
+            .toImmutableList()
         _state.update {
             if (it.searchQuery == query) {
                 it.copy(searchResults = results, searching = false)
@@ -187,14 +186,9 @@ class SandboxPackagesViewModel(
     }
 
     fun install(pkg: PackageEntry) {
-        val cmd = if (isUbuntu()) {
-            "DEBIAN_FRONTEND=noninteractive apt-get install -y ${shellQuote(pkg.name)}"
-        } else {
-            "apk add --no-cache ${shellQuote(pkg.name)}"
-        }
         mutateInstalled(
             pkg = pkg,
-            cmd = cmd,
+            cmd = packageManager.installCommand(pkg.name),
             successWhenInstalled = true,
             successRes = Res.string.sandbox_packages_install_success,
             failureRes = Res.string.sandbox_packages_install_failed,
@@ -202,10 +196,9 @@ class SandboxPackagesViewModel(
     }
 
     fun requestUninstall(pkg: PackageEntry) {
-        // bash and friends back the sandbox's own shell sessions (see
-        // SandboxRequiredPackages) — never offer to remove them, this is the
-        // only entry point that sets pendingUninstall.
-        if (pkg.name in SandboxRequiredPackages.NAMES) return
+        // The base packages back the sandbox's own shell sessions — never offer to
+        // remove them; this is the only entry point that sets pendingUninstall.
+        if (pkg.name in sandboxController.status.value.distro.protectedPackages) return
         _state.update { it.copy(pendingUninstall = pkg) }
     }
 
@@ -216,20 +209,18 @@ class SandboxPackagesViewModel(
     fun confirmUninstall() {
         val pkg = _state.value.pendingUninstall ?: return
         _state.update { it.copy(pendingUninstall = null) }
-        val cmd = if (isUbuntu()) {
-            "DEBIAN_FRONTEND=noninteractive apt-get remove -y ${shellQuote(pkg.name)}"
-        } else {
-            "apk del ${shellQuote(pkg.name)}"
-        }
         mutateInstalled(
             pkg = pkg,
-            cmd = cmd,
+            cmd = packageManager.removeCommand(pkg.name),
             successWhenInstalled = false,
             successRes = Res.string.sandbox_packages_uninstall_success,
             failureRes = Res.string.sandbox_packages_uninstall_failed,
         )
     }
 
+    // Package-manager exit codes don't mean what they normally do under proot, so
+    // we verify success by re-reading the installed list and checking the
+    // package's presence (install) or absence (uninstall) instead.
     private fun mutateInstalled(
         pkg: PackageEntry,
         cmd: String,
@@ -258,9 +249,9 @@ class SandboxPackagesViewModel(
         if (_state.value.upgrading) return
         _state.update { it.copy(upgrading = true) }
         viewModelScope.launch {
-            val updateCmd = if (isUbuntu()) "apt-get update" else "apk update"
-            val updateResult = runAndCapture(updateCmd)
-            if (updateResult.hasPackageErrors()) {
+            val manager = packageManager
+            val updateResult = runAndCapture(manager.updateCommand)
+            if (updateResult.hasErrors(manager)) {
                 _state.update {
                     it.copy(
                         upgrading = false,
@@ -272,18 +263,13 @@ class SandboxPackagesViewModel(
                 }
                 return@launch
             }
-            val upgradeCmd = if (isUbuntu()) {
-                "DEBIAN_FRONTEND=noninteractive apt-get upgrade -y"
-            } else {
-                "apk upgrade"
-            }
-            val upgradeResult = runAndCapture(upgradeCmd)
+            val upgradeResult = runAndCapture(manager.upgradeCommand)
             applyInstalled(loadInstalled())
             _state.update {
-                val msg = if (upgradeResult.hasPackageErrors()) {
+                val msg = if (upgradeResult.hasErrors(manager)) {
                     SnackbarMessage(Res.string.sandbox_packages_upgrade_failed, upgradeResult.errorSummary())
                 } else {
-                    val count = if (isUbuntu()) countAptUpgraded(upgradeResult.stdout) else countApkUpgraded(upgradeResult.stdout)
+                    val count = manager.countUpgraded(upgradeResult.stdout)
                     if (count == 0) {
                         SnackbarMessage(Res.string.sandbox_packages_up_to_date)
                     } else {
@@ -315,9 +301,7 @@ class SandboxPackagesViewModel(
             return tail.take(ERROR_SUMMARY_MAX_CHARS)
         }
 
-        fun hasPackageErrors(): Boolean = stdout.lineSequence().any { it.startsWith("ERROR:") } ||
-            stderr.lineSequence().any { it.startsWith("E:") } ||
-            stderr.lineSequence().any { it.startsWith("ERROR:") }
+        fun hasErrors(manager: PackageManagerSpec): Boolean = manager.hasErrors(stdout, stderr)
     }
 
     private suspend fun runAndCapture(cmd: String): CommandResult {
@@ -354,89 +338,4 @@ class SandboxPackagesViewModel(
             if (line.isNotEmpty()) println("$LOG_TAG [$label] $line")
         }
     }
-
-    private fun countApkUpgraded(stdout: String): Int = stdout.lineSequence()
-        .count { UPGRADE_PROGRESS_LINE.containsMatchIn(it) }
-
-    private fun countAptUpgraded(stdout: String): Int {
-        val upgraded = mutableSetOf<String>()
-        for (line in stdout.lineSequence()) {
-            val trimmed = line.trimStart()
-            if (trimmed.startsWith("Unpacking ") && trimmed.endsWith("(...)")) {
-                val pkg = trimmed.removePrefix("Unpacking ").removeSuffix(" (...)")
-                upgraded.add(pkg)
-            } else if (trimmed.startsWith("Setting up ")) {
-                val pkg = trimmed.removePrefix("Setting up ").substringBefore(" (")
-                upgraded.add(pkg)
-            }
-        }
-        return upgraded.size
-    }
-
-    private fun parseApkInfoLines(raw: String): List<PackageEntry> = raw.lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() && !it.startsWith("WARNING:") && !it.startsWith("ERROR:") }
-        .mapNotNull { line -> parseApkNameVersion(line)?.let { PackageEntry(it.first, it.second) } }
-        .distinctBy { "${it.name}@${it.version}" }
-        .toList()
-
-    private fun parseApkSearchLines(raw: String): List<PackageEntry> = raw.lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() && !it.startsWith("WARNING:") && !it.startsWith("ERROR:") }
-        .mapNotNull { line ->
-            val sepIdx = line.indexOf(" - ")
-            val nameVer = if (sepIdx >= 0) line.substring(0, sepIdx) else line
-            val description = if (sepIdx >= 0) line.substring(sepIdx + 3).trim() else null
-            parseApkNameVersion(nameVer)?.let { (n, v) -> PackageEntry(n, v, description?.takeIf { it.isNotEmpty() }) }
-        }
-        .distinctBy { "${it.name}@${it.version}" }
-        .toList()
-
-    private fun parseApkNameVersion(s: String): Pair<String, String>? {
-        if (s.isEmpty()) return null
-        val revision = ALPINE_REVISION_SUFFIX.find(s)?.value.orEmpty()
-        val withoutRev = if (revision.isNotEmpty()) s.dropLast(revision.length) else s
-        var splitAt = -1
-        for (i in withoutRev.length - 1 downTo 1) {
-            if (withoutRev[i - 1] == '-' && withoutRev[i].isDigit()) {
-                splitAt = i - 1
-                break
-            }
-        }
-        if (splitAt < 0) {
-            return if (revision.isNotEmpty()) withoutRev to revision.trimStart('-') else s to ""
-        }
-        val name = withoutRev.substring(0, splitAt)
-        val version = withoutRev.substring(splitAt + 1) + revision
-        if (name.isEmpty()) return null
-        return name to version
-    }
-
-    private fun parseDpkgLines(raw: String): List<PackageEntry> = raw.lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .mapNotNull { line ->
-            val spaceIdx = line.indexOf(' ')
-            if (spaceIdx < 0) return@mapNotNull null
-            val name = line.substring(0, spaceIdx).trim()
-            val version = line.substring(spaceIdx + 1).trim()
-            if (name.isEmpty()) null else PackageEntry(name, version)
-        }
-        .distinctBy { "${it.name}@${it.version}" }
-        .toList()
-
-    private fun parseAptSearchLines(raw: String): List<PackageEntry> = raw.lineSequence()
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .mapNotNull { line ->
-            val sepIdx = line.indexOf(" - ")
-            if (sepIdx < 0) return@mapNotNull null
-            val name = line.substring(0, sepIdx).trim()
-            val description = line.substring(sepIdx + 3).trim()
-            PackageEntry(name, "", description.takeIf { it.isNotEmpty() })
-        }
-        .distinctBy { it.name }
-        .toList()
-
-    private fun shellQuote(s: String): String = "'" + s.replace("'", "'\\''") + "'"
 }

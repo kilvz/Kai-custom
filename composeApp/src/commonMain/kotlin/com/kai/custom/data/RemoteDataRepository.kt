@@ -61,6 +61,7 @@ import com.kai.custom.ui.chat.toAnthropicContentBlocks
 import com.kai.custom.ui.chat.toGeminiMessageDto
 import com.kai.custom.ui.chat.toGroqMessageDto
 import com.kai.custom.ui.settings.SettingsModel
+import com.kai.custom.linux.LinuxDistro
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.mimeType
 import io.github.vinceglb.filekit.name
@@ -2288,11 +2289,12 @@ class RemoteDataRepository(
         appSettings.setSandboxStorageMountEnabled(enabled)
     }
 
-    override fun getSandboxDistro(): String = appSettings.getSandboxDistro()
+    override fun getSandboxDistro(): LinuxDistro = appSettings.getSandboxDistro()
 
-    override fun setSandboxDistro(distro: String) {
+    override fun setSandboxDistro(distro: LinuxDistro) {
         appSettings.setSandboxDistro(distro)
     }
+
 
     // Wake word
     override fun isWakeWordEnabled(): Boolean = appSettings.isWakeWordEnabled()

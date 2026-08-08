@@ -7,8 +7,9 @@ import com.kai.custom.TextFileResult
 import com.kai.custom.sandbox.importFileInto
 import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.readFileAsText
-import com.kai.custom.sandbox.safeChild
 import com.kai.custom.sandbox.toFileEntry
+import com.kai.custom.linux.GuestFileMap
+import com.kai.custom.linux.LinuxPaths
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -23,36 +24,24 @@ import java.io.IOException
  */
 class BuildFileBrowser(
     private val context: Context,
-    private val paths: BuildPaths,
+    private val paths: LinuxPaths,
 ) : FileBrowserSource {
 
     /**
      * Guest path to host file, following the same binds proot is started with:
-     * `/root/projects` and `/tmp` are bind-mounted, everything else is the rootfs.
-     * Returns null for anything that would escape its root.
+     * `/root/projects` and `/tmp` are bind-mounted, everything else — including
+     * `/root` itself — is the rootfs.
      */
-    private fun resolve(guestPath: String): File? {
-        val normalized = guestPath.trim().ifEmpty { "/" }
-        if (!normalized.startsWith("/")) return null
-        val parts = normalized.split("/").filter { it.isNotEmpty() }
-        if (parts.any { it == ".." }) return null
-        return when {
-            parts.size >= 2 && parts[0] == "root" && parts[1] == "projects" ->
-                safeChild(paths.projectsDir, parts.drop(2))
+    private val files = GuestFileMap(
+        rootfsDir = paths.rootfsDir,
+        homeDir = File(paths.rootfsDir, "root"),
+        projectsDir = paths.projectsDir,
+        tmpDir = paths.tmpDir,
+    )
 
-            parts.firstOrNull() == "tmp" -> safeChild(paths.tmpDir, parts.drop(1))
+    private fun resolve(guestPath: String): File? = files.resolve(guestPath)
 
-            else -> safeChild(paths.rootfsDir, parts)
-        }
-    }
-
-    /** The roots themselves are structure, not content: they can never be renamed or deleted. */
-    private fun isRoot(file: File): Boolean {
-        val canonical = file.canonicalPath
-        return canonical == paths.projectsDir.canonicalPath ||
-            canonical == paths.rootfsDir.canonicalPath ||
-            canonical == paths.tmpDir.canonicalPath
-    }
+    private fun isRoot(file: File): Boolean = files.isRoot(file)
 
     override suspend fun listDirectory(path: String): List<SandboxFileEntry> = withContext(Dispatchers.IO) {
         val dir = resolve(path) ?: return@withContext emptyList()

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -23,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kai.custom.saveFileToDevice
 import com.kai.custom.ui.handCursor
@@ -43,6 +47,7 @@ import com.kai.custom.ui.sandbox.SandboxProgressRow
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
+import com.kai.custom.linux.LinuxDistro
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.sandbox_settings_alt_memory
 import kai.composeapp.generated.resources.sandbox_settings_distribution
@@ -58,11 +63,17 @@ import kai.composeapp.generated.resources.sandbox_settings_version_info
 import kai.composeapp.generated.resources.settings_sandbox_cancel
 import kai.composeapp.generated.resources.settings_sandbox_description
 import kai.composeapp.generated.resources.settings_sandbox_disk_usage
+import kai.composeapp.generated.resources.settings_sandbox_distro_alpine
+import kai.composeapp.generated.resources.settings_sandbox_distro_alpine_detail
+import kai.composeapp.generated.resources.settings_sandbox_distro_debian
+import kai.composeapp.generated.resources.settings_sandbox_distro_debian_detail
+import kai.composeapp.generated.resources.settings_sandbox_distro_title
 import kai.composeapp.generated.resources.settings_sandbox_install
 import kai.composeapp.generated.resources.settings_sandbox_install_packages
 import kai.composeapp.generated.resources.settings_sandbox_uninstall
 import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm
 import kotlinx.coroutines.launch
+import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm_shared
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,6 +83,7 @@ internal fun SandboxSettingsCard(
     onToggleSandbox: (Boolean) -> Unit,
     onToggleStorageMount: (Boolean) -> Unit,
     onToggleSandboxRoot: (Boolean) -> Unit = {},
+    onSelectDistro: (LinuxDistro) -> Unit,
     onSetupSandbox: () -> Unit,
     onCancelSandbox: () -> Unit,
     onResetSandbox: () -> Unit,
@@ -81,7 +93,6 @@ internal fun SandboxSettingsCard(
     onBackupSandbox: () -> Unit = {},
     onImportSandbox: (ByteArray) -> Unit = {},
     onExportSaved: () -> Unit = {},
-    onDistroChanged: (String) -> Unit = {},
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -108,7 +119,8 @@ internal fun SandboxSettingsCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = sandboxState.sandboxDistro.replaceFirstChar { it.uppercase() },
+                    // Before install this names what would be installed; after, what is.
+                    text = sandboxState.distro.displayName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -137,6 +149,12 @@ internal fun SandboxSettingsCard(
             }
         }
 
+        // Only offered before there is a rootfs: switching afterwards means a
+        // different Linux, which is an uninstall and a fresh install.
+        if (!sandboxState.sandboxInstalled && !sandboxState.isWorking) {
+            DistroPicker(selected = sandboxState.distro, onSelect = onSelectDistro)
+        }
+
         if (sandboxState.sandboxProgress != null) {
             SandboxProgressRow(sandboxState.sandboxProgress, sandboxState.sandboxStatusText, onCancelSandbox)
         } else if (sandboxState.isWorking) {
@@ -147,14 +165,6 @@ internal fun SandboxSettingsCard(
                 text = sandboxState.sandboxStatusText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
-            )
-        }
-
-        if (!sandboxState.sandboxInstalled && !sandboxState.isWorking) {
-            Spacer(Modifier.height(8.dp))
-            DistroSelector(
-                distro = sandboxState.sandboxDistro,
-                onDistroChanged = onDistroChanged,
             )
         }
 
@@ -303,7 +313,16 @@ internal fun SandboxSettingsCard(
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
             title = { Text(stringResource(Res.string.settings_sandbox_uninstall)) },
-            text = { Text(stringResource(Res.string.settings_sandbox_uninstall_confirm)) },
+            text = {
+                // A Debian sandbox is the same install Kai Build works in, so
+                // uninstalling here takes Kai Build's Linux with it.
+                val confirm = if (sandboxState.distro == LinuxDistro.DEBIAN) {
+                    Res.string.settings_sandbox_uninstall_confirm_shared
+                } else {
+                    Res.string.settings_sandbox_uninstall_confirm
+                }
+                Text(stringResource(confirm))
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -327,42 +346,73 @@ internal fun SandboxSettingsCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DistroSelector(
-    distro: String,
-    onDistroChanged: (String) -> Unit,
+private fun DistroPicker(
+    selected: LinuxDistro,
+    onSelect: (LinuxDistro) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val distros = listOf("alpine" to "Alpine Linux", "ubuntu" to "Ubuntu")
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            value = distros.first { it.first == distro }.second,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(Res.string.sandbox_settings_distribution)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .width(240.dp)
-                .handCursor(),
+    Spacer(Modifier.height(12.dp))
+    Text(
+        text = stringResource(Res.string.settings_sandbox_distro_title),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    Column(Modifier.selectableGroup()) {
+        DistroOption(
+            distro = LinuxDistro.DEBIAN,
+            title = stringResource(Res.string.settings_sandbox_distro_debian),
+            detail = stringResource(Res.string.settings_sandbox_distro_debian_detail),
+            selected = selected == LinuxDistro.DEBIAN,
+            onSelect = onSelect,
         )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            distros.forEach { (value, label) ->
-                DropdownMenuItem(
-                    text = { Text(label) },
-                    onClick = {
-                        onDistroChanged(value)
-                        expanded = false
-                    },
-                )
-            }
+        DistroOption(
+            distro = LinuxDistro.ALPINE,
+            title = stringResource(Res.string.settings_sandbox_distro_alpine),
+            detail = stringResource(Res.string.settings_sandbox_distro_alpine_detail),
+            selected = selected == LinuxDistro.ALPINE,
+            onSelect = onSelect,
+        )
+        DistroOption(
+            distro = LinuxDistro.UBUNTU,
+            title = stringResource(Res.string.settings_sandbox_distro_ubuntu),
+            detail = stringResource(Res.string.settings_sandbox_distro_ubuntu_detail),
+            selected = selected == LinuxDistro.UBUNTU,
+            onSelect = onSelect,
+        )
+    }
+}
+
+@Composable
+private fun DistroOption(
+    distro: LinuxDistro,
+    title: String,
+    detail: String,
+    selected: Boolean,
+    onSelect: (LinuxDistro) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = selected,
+                role = Role.RadioButton,
+                onClick = { onSelect(distro) },
+            )
+            .handCursor(),
+        verticalAlignment = CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
