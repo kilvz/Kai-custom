@@ -1,0 +1,168 @@
+package com.inspiredandroid.kai
+
+import com.inspiredandroid.kai.data.AppSettings
+import com.inspiredandroid.kai.data.ConversationStorage
+import com.inspiredandroid.kai.data.DataRepository
+import com.inspiredandroid.kai.data.EmailStore
+import com.inspiredandroid.kai.data.HeartbeatManager
+import com.inspiredandroid.kai.data.MemoryStore
+import com.inspiredandroid.kai.data.NotificationStore
+import com.inspiredandroid.kai.data.RemoteDataRepository
+import com.inspiredandroid.kai.data.SmsDraftStore
+import com.inspiredandroid.kai.data.SmsStore
+import com.inspiredandroid.kai.data.TaskScheduler
+import com.inspiredandroid.kai.data.TaskStore
+import com.inspiredandroid.kai.data.ToolExecutor
+import com.inspiredandroid.kai.data.createConversationPersistence
+import com.inspiredandroid.kai.data.runMigrations
+import com.inspiredandroid.kai.email.EmailPoller
+import com.inspiredandroid.kai.inference.createLocalInferenceEngine
+import com.inspiredandroid.kai.mcp.McpServerManager
+import com.inspiredandroid.kai.network.Requests
+import com.inspiredandroid.kai.notifications.NotificationReader
+import com.inspiredandroid.kai.skills.SkillManager
+import com.inspiredandroid.kai.sms.SmsPoller
+import com.inspiredandroid.kai.sms.SmsReader
+import com.inspiredandroid.kai.sms.SmsSender
+import com.inspiredandroid.kai.splinterlands.SplinterlandsApi
+import com.inspiredandroid.kai.splinterlands.SplinterlandsBattleRunner
+import com.inspiredandroid.kai.splinterlands.SplinterlandsStore
+import com.inspiredandroid.kai.tools.AppPermission
+import com.inspiredandroid.kai.tools.NotificationListenerController
+import com.inspiredandroid.kai.tools.PermissionController
+import com.inspiredandroid.kai.ui.build.KaiBuildViewModel
+import com.inspiredandroid.kai.ui.chat.ChatViewModel
+import com.inspiredandroid.kai.ui.sandbox.SandboxFileBrowserViewModel
+import com.inspiredandroid.kai.ui.sandbox.SandboxPackagesViewModel
+import com.inspiredandroid.kai.ui.sandbox.SandboxSessionViewModel
+import com.inspiredandroid.kai.ui.settings.SandboxViewModel
+import com.inspiredandroid.kai.ui.settings.SettingsViewModel
+import com.inspiredandroid.kai.ui.settings.SplinterlandsViewModel
+import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
+
+/** Picks the file browser bound to Kai Build's Debian rather than the chat sandbox. */
+val KAI_BUILD_FILES = named("kaiBuildFiles")
+
+/** Qualifier for the [PermissionController] singleton handling [permission]. */
+fun permissionQualifier(permission: AppPermission) = named(permission.name)
+
+val appModule = module {
+    AppPermission.entries.forEach { permission ->
+        single(permissionQualifier(permission)) { PermissionController(permission) }
+    }
+    single<SmsReader> { SmsReader() }
+    single<SmsSender> { SmsSender() }
+    single<NotificationListenerController> { NotificationListenerController() }
+    single<NotificationReader> { NotificationReader() }
+    single<AppSettings> {
+        AppSettings(createSecureSettings()).also {
+            it.runMigrations(createLegacySettings())
+        }
+    }
+    single<Requests> {
+        Requests()
+    }
+    single<ConversationStorage> {
+        ConversationStorage(get(), createConversationPersistence(get()))
+    }
+    single<ToolExecutor> {
+        ToolExecutor()
+    }
+    single<MemoryStore> {
+        MemoryStore(get())
+    }
+    single<TaskStore> {
+        TaskStore(get())
+    }
+    single<EmailStore> {
+        EmailStore(get())
+    }
+    single<EmailPoller> {
+        EmailPoller(get<EmailStore>())
+    }
+    single<SmsStore> {
+        SmsStore(get())
+    }
+    single<SmsPoller> {
+        SmsPoller(get<SmsStore>(), get<SmsReader>())
+    }
+    single<SmsDraftStore> {
+        SmsDraftStore(get())
+    }
+    single<NotificationStore> {
+        NotificationStore(get())
+    }
+    single<SplinterlandsStore> {
+        SplinterlandsStore(get())
+    }
+    single<SplinterlandsApi> {
+        SplinterlandsApi()
+    }
+    single<HeartbeatManager> {
+        HeartbeatManager(get(), get(), get(), get())
+    }
+    single<McpServerManager> {
+        McpServerManager(get())
+    }
+    single<SkillManager> {
+        SkillManager(get<SandboxController>())
+    }
+    single<RemoteDataRepository> {
+        RemoteDataRepository(
+            requests = get(),
+            appSettings = get(),
+            conversationStorage = get(),
+            toolExecutor = get(),
+            memoryStore = get(),
+            taskStore = get(),
+            heartbeatManager = get(),
+            emailStore = get(),
+            emailPoller = get(),
+            smsStore = get(),
+            smsPoller = get(),
+            smsReader = get(),
+            smsPermissionController = get(permissionQualifier(AppPermission.READ_SMS)),
+            smsSendPermissionController = get(permissionQualifier(AppPermission.SEND_SMS)),
+            smsSender = get(),
+            smsDraftStore = get(),
+            notificationStore = get(),
+            notificationListenerController = get(),
+            mcpServerManager = get(),
+            skillManager = get(),
+            sandboxController = get(),
+            localInferenceEngine = createLocalInferenceEngine(),
+        )
+    }
+    single<DataRepository> { get<RemoteDataRepository>() }
+    single<SplinterlandsBattleRunner> {
+        SplinterlandsBattleRunner(get(), get(), get<DataRepository>(), get<DaemonController>())
+    }
+    single<TaskScheduler> {
+        TaskScheduler(
+            get<DataRepository>(),
+            get(),
+            get(),
+            get(),
+            get(),
+            get<EmailPoller>(),
+            get<SmsStore>(),
+            get<SmsPoller>(),
+            get<NotificationStore>(),
+        )
+    }
+    single<DaemonController> { createDaemonController() }
+    single<SandboxController> { createSandboxController() }
+    single<KaiBuildController> { createKaiBuildController() }
+    viewModel { SettingsViewModel(get<DataRepository>(), get<DaemonController>(), get(permissionQualifier(AppPermission.POST_NOTIFICATIONS)), get<TaskScheduler>(), localNetworkPermissionController = get(permissionQualifier(AppPermission.LOCAL_NETWORK))) }
+    viewModel { SandboxViewModel(get<DataRepository>(), get<SandboxController>()) }
+    viewModel { SandboxFileBrowserViewModel(get<SandboxController>()) }
+    viewModel { SandboxPackagesViewModel(get<SandboxController>()) }
+    viewModel { SandboxSessionViewModel(get<SandboxController>(), get<DataRepository>()) }
+    viewModel { KaiBuildViewModel(get<KaiBuildController>(), get<DataRepository>()) }
+    // Same browser, second environment: Kai Build's Debian instead of the chat sandbox.
+    viewModel(KAI_BUILD_FILES) { SandboxFileBrowserViewModel(get<KaiBuildController>().files) }
+    viewModel { SplinterlandsViewModel(get<DataRepository>(), get(), get(), get<SplinterlandsApi>()) }
+    viewModel { ChatViewModel(get<DataRepository>(), get<TaskScheduler>(), localNetworkPermissionController = get(permissionQualifier(AppPermission.LOCAL_NETWORK))) }
+}

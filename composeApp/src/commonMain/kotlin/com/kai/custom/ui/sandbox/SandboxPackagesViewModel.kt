@@ -3,10 +3,10 @@ package com.kai.custom.ui.sandbox
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.inspiredandroid.kai.SandboxController
-import com.inspiredandroid.kai.SandboxSessions
-import com.inspiredandroid.kai.linux.PackageEntry
-import com.inspiredandroid.kai.linux.PackageManagerSpec
+import com.kai.custom.SandboxController
+import com.kai.custom.SandboxSessions
+import com.kai.custom.linux.PackageEntry
+import com.kai.custom.linux.PackageManagerSpec
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.sandbox_packages_install_failed
 import kai.composeapp.generated.resources.sandbox_packages_install_success

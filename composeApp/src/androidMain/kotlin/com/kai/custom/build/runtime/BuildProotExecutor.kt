@@ -1,8 +1,8 @@
 package com.kai.custom.build.runtime
 
-import com.inspiredandroid.kai.linux.ProotHandle
-import com.inspiredandroid.kai.linux.ProotLauncher
-import com.inspiredandroid.kai.linux.ProotResult
+import com.kai.custom.linux.ProotHandle
+import com.kai.custom.linux.ProotLauncher
+import com.kai.custom.linux.ProotResult
 import java.io.File
 import java.io.IOException
 import java.util.Base64

@@ -4,6 +4,7 @@ import com.kai.custom.TerminalLine
 import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.Service
 import com.kai.custom.getPlatformToolDefinitions
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.ui.chat.ChatActions
 import com.kai.custom.ui.chat.ChatUiState
 import com.kai.custom.ui.chat.History
@@ -182,6 +183,7 @@ object ScreenshotTestData {
         sandboxDiskUsageMB = 578,
         sandboxPackagesInstalled = true,
         isSandboxEnabled = true,
+        installedDistros = setOf(LinuxDistro.DEBIAN),
     )
 
     private val fastfetchOutput =

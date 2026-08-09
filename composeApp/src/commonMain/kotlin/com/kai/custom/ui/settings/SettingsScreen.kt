@@ -161,6 +161,7 @@ fun SettingsScreen(
         onExportSaved = sandboxViewModel::onExportSaved,
         sshState = sshState,
         sshViewModel = sshViewModel,
+        onMigrateHome = sandboxViewModel::onMigrateHome,
         onNavigateBack = onNavigateBack,
         navigationTabBar = navigationTabBar,
         onPersonaSelected = { viewModel.refreshPersonaState() },
@@ -187,6 +188,7 @@ fun SettingsScreenContent(
     onExportSaved: () -> Unit = {},
     sshState: SshUiState = SshUiState(),
     sshViewModel: SshViewModel? = null,
+    onMigrateHome: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
     navigationTabBar: (@Composable () -> Unit)? = null,
     onPersonaSelected: () -> Unit = {},
@@ -486,6 +488,7 @@ fun SettingsScreenContent(
                                     onBackupSandbox = onBackupSandbox,
                                     onImportSandbox = onImportSandbox,
                                     onExportSaved = onExportSaved,
+                                    onMigrateHome = onMigrateHome,
                                 )
                             }
 

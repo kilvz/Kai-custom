@@ -2332,6 +2332,12 @@ class RemoteDataRepository(
         appSettings.setPttTriggerKeyCode(keyCode)
     }
 
+    override fun getKaiBuildLaunchAgent(): String? = appSettings.getKaiBuildLaunchAgent()
+
+    override fun setKaiBuildLaunchAgent(agentId: String?) {
+        appSettings.setKaiBuildLaunchAgent(agentId)
+    }
+
     override fun getHeartbeatConfig(): HeartbeatConfig = heartbeatManager.getConfig()
 
     override fun setHeartbeatEnabled(enabled: Boolean) {

@@ -1,6 +1,6 @@
 package com.kai.custom.ui.sandbox
 
-import com.inspiredandroid.kai.linux.PackageEntry
+import com.kai.custom.linux.PackageEntry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
