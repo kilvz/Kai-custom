@@ -220,7 +220,7 @@
     <string name="notification_channel_name">Î•Î¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÎ¹Ï‚ AI</string>
     <string name="notification_channel_description">Î•Î¹Î´Î¿Ï€Î¿Î¹Î®ÏƒÎµÎ¹Ï‚ Ï€Î¿Ï… Î±Ï€Î¿ÏƒÏ„Î­Î»Î»Î¿Î½Ï„Î±Î¹ Î±Ï€ÏŒ Ï„Î¿Î½ Î²Î¿Î·Î¸ÏŒ AI</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">Î•Î³ÎºÎ±Ï„Î±ÏƒÏ„Î®ÏƒÏ„Îµ Î­Î½Î± Ï€ÎµÏÎ¹Î²Î¬Î»Î»Î¿Î½ Linux ÏŽÏƒÏ„Îµ Î· AI Î½Î± Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎºÏ„ÎµÎ»ÎµÎ¯ ÎµÎ½Ï„Î¿Î»Î­Ï‚ ÎºÎµÎ»ÏÏ†Î¿Ï…Ï‚, ÏƒÎµÎ½Î¬ÏÎ¹Î± ÎºÎ±Î¹ ÎµÏÎ³Î±Î»ÎµÎ¯Î± Î³Î¹Î± Î»Î¿Î³Î±ÏÎ¹Î±ÏƒÎ¼ÏŒ ÏƒÎ±Ï‚. Î•ÎºÏ„ÎµÎ»ÎµÎ¯Ï„Î±Î¹ Î¼Îµ Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î± Î¼Î­ÏƒÎ± ÏƒÏ„Î·Î½ ÎµÏ†Î±ÏÎ¼Î¿Î³Î®. ~3 MB Î»Î®ÏˆÎ·.</string>
+    <string name="settings_sandbox_description">Î•Î³ÎºÎ±Ï„Î±ÏƒÏ„Î®ÏƒÏ„Îµ Î­Î½Î± Ï€ÎµÏÎ¹Î²Î¬Î»Î»Î¿Î½ Linux ÏŽÏƒÏ„Îµ Î· AI Î½Î± Î¼Ï€Î¿ÏÎµÎ¯ Î½Î± ÎµÎºÏ„ÎµÎ»ÎµÎ¯ ÎµÎ½Ï„Î¿Î»Î­Ï‚ ÎºÎµÎ»ÏÏ†Î¿Ï…Ï‚, ÏƒÎµÎ½Î¬ÏÎ¹Î± ÎºÎ±Î¹ ÎµÏÎ³Î±Î»ÎµÎ¯Î± Î³Î¹Î± Î»Î¿Î³Î±ÏÎ¹Î±ÏƒÎ¼ÏŒ ÏƒÎ±Ï‚. Î•ÎºÏ„ÎµÎ»ÎµÎ¯Ï„Î±Î¹ Î¼Îµ Î±ÏƒÏ†Î¬Î»ÎµÎ¹Î± Î¼Î­ÏƒÎ± ÏƒÏ„Î·Î½ ÎµÏ†Î±ÏÎ¼Î¿Î³Î®.</string>
     <string name="settings_sandbox_install">Î•Î³ÎºÎ±Ï„Î¬ÏƒÏ„Î±ÏƒÎ·</string>
     <string name="settings_sandbox_install_packages">Î•Î³ÎºÎ±Ï„Î¬ÏƒÏ„Î±ÏƒÎ· Î²Î±ÏƒÎ¹ÎºÏŽÎ½ Ï€Î±ÎºÎ­Ï„Ï‰Î½</string>
     <string name="settings_sandbox_uninstall">Î‘Ï€ÎµÎ³ÎºÎ±Ï„Î¬ÏƒÏ„Î±ÏƒÎ·</string>
@@ -839,6 +839,19 @@
     <string name="kai_build_terminal_key_down_content_description">Βέλος κάτω</string>
     <string name="kai_build_terminal_key_right_content_description">Βέλος δεξιά</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">Κλειδί API (προαιρετικό)</string>
+    <string name="settings_mcp_api_key_help">Προαιρετικό. Τα εργαλεία αναζήτησης χρειάζονται ένα δωρεάν κλειδί από το jina.ai· τα υπόλοιπα εργαλεία λειτουργούν χωρίς αυτό.</string>
+    <string name="settings_sandbox_distro_title">Διανομή</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">Προτείνεται · ~150 MB · κοινόχρηστο με το Kai Build</string>
+    <string name="settings_sandbox_distro_debian_installed">Εγκατεστημένο · κοινόχρηστο με το Kai Build</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">Μικρότερο · ~4 MB · το Kai Build εγκαθιστά το δικό του Debian</string>
+    <string name="settings_sandbox_distro_alpine_installed">Εγκατεστημένο · το Kai Build εγκαθιστά το δικό του Debian</string>
+    <string name="settings_sandbox_migrate_title">Μεταφέρετε τα αρχεία σας από το %1$s</string>
+    <string name="settings_sandbox_migrate_detail">%1$d αρχεία · %2$s στον αρχικό του φάκελο δεν είναι ακόμη εδώ. Η αντιγραφή διατηρεί όλα όσα υπάρχουν ήδη εδώ και αφήνει το άλλο σύστημα ανέπαφο, ώστε να μπορείτε να το απεγκαταστήσετε αργότερα.</string>
+    <string name="settings_sandbox_migrate_action">Αντιγραφή αρχείων</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Όλα τα δεδομένα στο sandbox Linux θα χαθούν, και το Kai Build χάνει και αυτό το Linux του — χρησιμοποιεί το ίδιο. Τα έργα σας διατηρούνται. Είστε βέβαιοι ότι θέλετε να απεγκαταστήσετε;</string>
     <string name="settings_custom_model_label">Προσαρμοσμένο μοντέλο</string>
     <string name="settings_custom_model_hint">Εισαγάγετε ένα αναγνωριστικό μοντέλου που υποστηρίζει ο διακομιστής σας, ακόμα κι αν δεν εμφανίζεται παραπάνω.</string>
 </resources>

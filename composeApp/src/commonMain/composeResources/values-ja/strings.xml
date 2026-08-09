@@ -221,7 +221,7 @@
     <string name="notification_channel_name">AIé€šçŸ¥</string>
     <string name="notification_channel_description">AIã‚¢ã‚·ã‚¹ã‚¿ãƒ³ãƒˆã‹ã‚‰é€ä¿¡ã•ã‚ŒãŸé€šçŸ¥</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">Linuxç’°å¢ƒã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã™ã‚‹ã¨ã€AIãŒã‚ãªãŸã®ä»£ã‚ã‚Šã«ã‚·ã‚§ãƒ«ã‚³ãƒžãƒ³ãƒ‰ã€ã‚¹ã‚¯ãƒªãƒ—ãƒˆã€ãƒ„ãƒ¼ãƒ«ã‚’å®Ÿè¡Œã§ãã¾ã™ã€‚ã‚¢ãƒ—ãƒªå†…ã§å®‰å…¨ã«å‹•ä½œã—ã¾ã™ã€‚ç´„3 MBã®ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰ã€‚</string>
+    <string name="settings_sandbox_description">Linuxç’°å¢ƒã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã™ã‚‹ã¨ã€AIãŒã‚ãªãŸã®ä»£ã‚ã‚Šã«ã‚·ã‚§ãƒ«ã‚³ãƒžãƒ³ãƒ‰ã€ã‚¹ã‚¯ãƒªãƒ—ãƒˆã€ãƒ„ãƒ¼ãƒ«ã‚’å®Ÿè¡Œã§ãã¾ã™ã€‚ã‚¢ãƒ—ãƒªå†…ã§å®‰å…¨ã«å‹•ä½œã—ã¾ã™ã€‚</string>
     <string name="settings_sandbox_install">ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«</string>
     <string name="settings_sandbox_install_packages">åŸºæœ¬ãƒ‘ãƒƒã‚±ãƒ¼ã‚¸ã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«</string>
     <string name="settings_sandbox_uninstall">ã‚¢ãƒ³ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«</string>
@@ -839,6 +839,19 @@
     <string name="kai_build_terminal_key_down_content_description">下矢印</string>
     <string name="kai_build_terminal_key_right_content_description">右矢印</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">APIキー（任意）</string>
+    <string name="settings_mcp_api_key_help">任意です。検索ツールにはjina.aiの無料キーが必要です。その他のツールはキーなしで動作します。</string>
+    <string name="settings_sandbox_distro_title">ディストリビューション</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">推奨 · ~150 MB · Kai Build と共有</string>
+    <string name="settings_sandbox_distro_debian_installed">インストール済み · Kai Build と共有</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">より小さい · ~4 MB · Kai Build は独自の Debian をインストール</string>
+    <string name="settings_sandbox_distro_alpine_installed">インストール済み · Kai Build は独自の Debian をインストール</string>
+    <string name="settings_sandbox_migrate_title">%1$s からファイルを移行</string>
+    <string name="settings_sandbox_migrate_detail">ホームフォルダにある %1$d ファイル · %2$s がまだここにありません。コピーしても既存のファイルはそのまま残り、もう一方のシステムには影響しないため、後でアンインストールできます。</string>
+    <string name="settings_sandbox_migrate_action">ファイルをコピー</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Linuxサンドボックス内のすべてのデータが失われます。Kai Buildも同じLinuxを使用しているため、そのLinuxも失われます。プロジェクトは保持されます。本当にアンインストールしますか？</string>
     <string name="settings_custom_model_label">カスタムモデル</string>
     <string name="settings_custom_model_hint">上に表示されていなくても、サーバーが対応するモデル ID を入力してください。</string>
 </resources>

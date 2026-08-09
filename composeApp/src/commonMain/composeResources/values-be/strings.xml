@@ -220,7 +220,7 @@
     <string name="notification_channel_name">ÐÐ¿Ð°Ð²ÑÑˆÑ‡ÑÐ½Ð½Ñ– AI</string>
     <string name="notification_channel_description">ÐÐ¿Ð°Ð²ÑÑˆÑ‡ÑÐ½Ð½Ñ–, Ð°Ð´Ð¿Ñ€Ð°ÑžÐ»ÐµÐ½Ñ‹Ñ AI-Ð¿Ð°Ð¼Ð¾Ñ‡Ð½Ñ–ÐºÐ°Ð¼</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">Ð£ÑÑ‚Ð°Ð»ÑŽÐ¹Ñ†Ðµ Ð°ÑÑÑ€Ð¾Ð´Ð´Ð·Ðµ Linux, ÐºÐ°Ð± Ð¨Ð† Ð¼Ð¾Ð³ Ð²Ñ‹ÐºÐ¾Ð½Ð²Ð°Ñ†ÑŒ ÐºÐ°Ð¼Ð°Ð½Ð´Ñ‹ Ð°Ð±Ð°Ð»Ð¾Ð½ÐºÑ–, ÑÐºÑ€Ñ‹Ð¿Ñ‚Ñ‹ Ñ– Ñ–Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ñ‹ Ð°Ð´ Ð²Ð°ÑˆÐ°Ð³Ð° Ñ–Ð¼Ñ. ÐŸÑ€Ð°Ñ†ÑƒÐµ Ð±ÑÑÐ¿ÐµÑ‡Ð½Ð° ÑžÐ½ÑƒÑ‚Ñ€Ñ‹ Ð¿Ñ€Ð°Ð³Ñ€Ð°Ð¼Ñ‹. ~3 ÐœÐ‘ ÑÐ¿Ð°Ð¼Ð¿Ð¾ÑžÐºÐ°.</string>
+    <string name="settings_sandbox_description">Ð£ÑÑ‚Ð°Ð»ÑŽÐ¹Ñ†Ðµ Ð°ÑÑÑ€Ð¾Ð´Ð´Ð·Ðµ Linux, ÐºÐ°Ð± Ð¨Ð† Ð¼Ð¾Ð³ Ð²Ñ‹ÐºÐ¾Ð½Ð²Ð°Ñ†ÑŒ ÐºÐ°Ð¼Ð°Ð½Ð´Ñ‹ Ð°Ð±Ð°Ð»Ð¾Ð½ÐºÑ–, ÑÐºÑ€Ñ‹Ð¿Ñ‚Ñ‹ Ñ– Ñ–Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ñ‹ Ð°Ð´ Ð²Ð°ÑˆÐ°Ð³Ð° Ñ–Ð¼Ñ. ÐŸÑ€Ð°Ñ†ÑƒÐµ Ð±ÑÑÐ¿ÐµÑ‡Ð½Ð° ÑžÐ½ÑƒÑ‚Ñ€Ñ‹ Ð¿Ñ€Ð°Ð³Ñ€Ð°Ð¼Ñ‹.</string>
     <string name="settings_sandbox_install">Ð£ÑÑ‚Ð°Ð»ÑÐ²Ð°Ñ†ÑŒ</string>
     <string name="settings_sandbox_install_packages">Ð£ÑÑ‚Ð°Ð»ÑÐ²Ð°Ñ†ÑŒ Ð±Ð°Ð·Ð°Ð²Ñ‹Ñ Ð¿Ð°ÐºÐµÑ‚Ñ‹</string>
     <string name="settings_sandbox_uninstall">Ð’Ñ‹Ð´Ð°Ð»Ñ–Ñ†ÑŒ</string>
@@ -839,6 +839,19 @@
     <string name="kai_build_terminal_key_down_content_description">Стрэлка ўніз</string>
     <string name="kai_build_terminal_key_right_content_description">Стрэлка ўправа</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">Ключ API (неабавязкова)</string>
+    <string name="settings_mcp_api_key_help">Неабавязкова. Для інструментаў пошуку патрэбны бясплатны ключ з jina.ai; іншыя інструменты працуюць без яго.</string>
+    <string name="settings_sandbox_distro_title">Дыстрыбутыў</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">Рэкамендавана · ~150 МБ · агульны з Kai Build</string>
+    <string name="settings_sandbox_distro_debian_installed">Усталявана · агульны з Kai Build</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">Меншы · ~4 МБ · Kai Build усталёўвае свой уласны Debian</string>
+    <string name="settings_sandbox_distro_alpine_installed">Усталявана · Kai Build усталёўвае свой уласны Debian</string>
+    <string name="settings_sandbox_migrate_title">Перанесці свае файлы з %1$s</string>
+    <string name="settings_sandbox_migrate_detail">%1$d файлаў · %2$s у яго хатняй папцы яшчэ няма тут. Капіяванне захоўвае ўсё, што ўжо ёсць тут, і не закранае іншую сістэму, таму пазней яе можна будзе выдаліць.</string>
+    <string name="settings_sandbox_migrate_action">Капіяваць файлы</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Усе даныя ў пясочніцы Linux будуць страчаны, а Kai Build страціць свой Linux — ён выкарыстоўвае той жа самы. Вашы праекты будуць захаваны. Вы ўпэўнены, што жадаеце выдаліць?</string>
     <string name="settings_custom_model_label">Уласная мадэль</string>
     <string name="settings_custom_model_hint">Увядзіце ідэнтыфікатар мадэлі, які падтрымлівае ваш сервер, нават калі ён не ў спісе вышэй.</string>
 </resources>

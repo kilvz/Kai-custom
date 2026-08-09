@@ -221,7 +221,7 @@
     <string name="notification_channel_name">AI é€šçŸ¥</string>
     <string name="notification_channel_description">ç”± AI åŠ©ç†å‚³é€çš„é€šçŸ¥</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">å®‰è£ Linux ç’°å¢ƒï¼Œè®“ AI å¯ä»¥ä»£æ‚¨åŸ·è¡Œ shell æŒ‡ä»¤ã€è…³æœ¬å’Œå·¥å…·ã€‚åœ¨æ‡‰ç”¨ç¨‹å¼å…§å®‰å…¨åŸ·è¡Œã€‚ç´„ 3 MB ä¸‹è¼‰ã€‚</string>
+    <string name="settings_sandbox_description">å®‰è£ Linux ç’°å¢ƒï¼Œè®“ AI å¯ä»¥ä»£æ‚¨åŸ·è¡Œ shell æŒ‡ä»¤ã€è…³æœ¬å’Œå·¥å…·ã€‚åœ¨æ‡‰ç”¨ç¨‹å¼å…§å®‰å…¨åŸ·è¡Œã€‚</string>
     <string name="settings_sandbox_install">å®‰è£</string>
     <string name="settings_sandbox_install_packages">å®‰è£åŸºæœ¬å¥—ä»¶</string>
     <string name="settings_sandbox_uninstall">è§£é™¤å®‰è£</string>
@@ -839,6 +839,19 @@
     <string name="kai_build_terminal_key_down_content_description">下方向鍵</string>
     <string name="kai_build_terminal_key_right_content_description">右方向鍵</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">API 金鑰（可選）</string>
+    <string name="settings_mcp_api_key_help">可選。搜尋工具需要從 jina.ai 取得免費金鑰；其他工具無需金鑰即可使用。</string>
+    <string name="settings_sandbox_distro_title">發行版</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">推薦 · ~150 MB · 與 Kai Build 共用</string>
+    <string name="settings_sandbox_distro_debian_installed">已安裝 · 與 Kai Build 共用</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">較小 · ~4 MB · Kai Build 會安裝自己的 Debian</string>
+    <string name="settings_sandbox_distro_alpine_installed">已安裝 · Kai Build 會安裝自己的 Debian</string>
+    <string name="settings_sandbox_migrate_title">從 %1$s 遷移您的檔案</string>
+    <string name="settings_sandbox_migrate_detail">主目錄中還有 %1$d 個檔案 · %2$s 尚未移動到這裡。複製不會刪除任何內容，另一個系統也不受影響，之後您可以將其解除安裝。</string>
+    <string name="settings_sandbox_migrate_action">複製檔案</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Linux 沙盒中的所有資料都會遺失，Kai Build 也會失去它的 Linux——因為兩者共用同一個。您的專案會保留。確定要解除安裝嗎？</string>
     <string name="settings_custom_model_label">自訂模型</string>
     <string name="settings_custom_model_hint">輸入伺服器支援的模型 ID，即使它未出現在上方列表中。</string>
 </resources>

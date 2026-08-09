@@ -220,7 +220,7 @@
     <string name="notification_channel_name">MI paziÅ†ojumi</string>
     <string name="notification_channel_description">PaziÅ†ojumi, ko nosÅ«ta MI asistents</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">InstalÄ“jiet Linux vidi, lai MI varÄ“tu jÅ«su vÄrdÄ palaist Äaulas komandas, skriptus un rÄ«kus. Darbojas droÅ¡i lietotnes iekÅ¡ienÄ“. ~3 MB lejupielÄde.</string>
+    <string name="settings_sandbox_description">InstalÄ“jiet Linux vidi, lai MI varÄ“tu jÅ«su vÄrdÄ palaist Äaulas komandas, skriptus un rÄ«kus. Darbojas droÅ¡i lietotnes iekÅ¡ienÄ“.</string>
     <string name="settings_sandbox_install">InstalÄ“t</string>
     <string name="settings_sandbox_install_packages">InstalÄ“t pamata pakotnes</string>
     <string name="settings_sandbox_uninstall">AtinstalÄ“t</string>
@@ -838,6 +838,19 @@
     <string name="kai_build_terminal_key_down_content_description">Bultiņa uz leju</string>
     <string name="kai_build_terminal_key_right_content_description">Bultiņa pa labi</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">API atslēga (neobligāta)</string>
+    <string name="settings_mcp_api_key_help">Neobligāti. Meklēšanas rīkiem nepieciešama bezmaksas atslēga no jina.ai; citi rīki darbojas arī bez tās.</string>
+    <string name="settings_sandbox_distro_title">Distribūcija</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">Ieteicama · ~150 MB · koplietota ar Kai Build</string>
+    <string name="settings_sandbox_distro_debian_installed">Instalēta · koplietota ar Kai Build</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">Mazāka · ~4 MB · Kai Build instalē savu Debian</string>
+    <string name="settings_sandbox_distro_alpine_installed">Instalēta · Kai Build instalē savu Debian</string>
+    <string name="settings_sandbox_migrate_title">Pārnesiet savus failus no %1$s</string>
+    <string name="settings_sandbox_migrate_detail">%1$d faili · %2$s tā mājas mapē vēl nav šeit. Kopēšana saglabā visu, kas jau ir šeit, un atstāj otru sistēmu neskartu, tāpēc varat to vēlāk atinstalēt.</string>
+    <string name="settings_sandbox_migrate_action">Kopēt failus</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Visi dati Linux smilškastē tiks zaudēti, un arī Kai Build zaudēs savu Linux — tie izmanto to pašu. Jūsu projekti tiks saglabāti. Vai tiešām vēlaties atinstalēt?</string>
     <string name="settings_custom_model_label">Pielāgots modelis</string>
     <string name="settings_custom_model_hint">Ievadiet modeļa ID, ko atbalsta jūsu serveris, pat ja tas nav norādīts iepriekš.</string>
 </resources>

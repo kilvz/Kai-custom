@@ -220,7 +220,7 @@
     <string name="notification_channel_name">Upozornenia AI</string>
     <string name="notification_channel_description">Upozornenia odoslané AI asistentom</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">NainÅ¡talujte prostredie Linux, aby AI mohla vo vaÅ¡om mene spÃºÅ¡Å¥aÅ¥ prÃ­kazy shellu, skripty a nástroje. BeÅ¾Ã­ bezpeÄne vnÃºtri aplikácie. ~3 MB na stiahnutie.</string>
+    <string name="settings_sandbox_description">NainÅ¡talujte prostredie Linux, aby AI mohla vo vaÅ¡om mene spÃºÅ¡Å¥aÅ¥ prÃ­kazy shellu, skripty a nástroje. BeÅ¾Ã­ bezpeÄne vnÃºtri aplikácie.</string>
     <string name="settings_sandbox_install">NainÅ¡talovaÅ¥</string>
     <string name="settings_sandbox_install_packages">NainÅ¡talovaÅ¥ základné balÃ­ky</string>
     <string name="settings_sandbox_uninstall">OdinÅ¡talovaÅ¥</string>
@@ -838,6 +838,19 @@
     <string name="kai_build_terminal_key_down_content_description">Šípka dole</string>
     <string name="kai_build_terminal_key_right_content_description">Šípka doprava</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">API kľúč (voliteľný)</string>
+    <string name="settings_mcp_api_key_help">Voliteľné. Vyhľadávacie nástroje potrebujú bezplatný kľúč z jina.ai, ostatné nástroje fungujú aj bez neho.</string>
+    <string name="settings_sandbox_distro_title">Distribúcia</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">Odporúčané · ~150 MB · zdieľané s Kai Build</string>
+    <string name="settings_sandbox_distro_debian_installed">Nainštalované · zdieľané s Kai Build</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">Menšie · ~4 MB · Kai Build si nainštaluje vlastný Debian</string>
+    <string name="settings_sandbox_distro_alpine_installed">Nainštalované · Kai Build si nainštaluje vlastný Debian</string>
+    <string name="settings_sandbox_migrate_title">Preniesť svoje súbory z %1$s</string>
+    <string name="settings_sandbox_migrate_detail">%1$d súborov · %2$s v jeho domovskom priečinku tu ešte nie je. Kopírovanie zachová všetko, čo je už tu, a druhý systém nijako nezmení, takže ho neskôr môžete odinštalovať.</string>
+    <string name="settings_sandbox_migrate_action">Kopírovať súbory</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Všetky údaje v sandboxe Linuxu budú stratené a Kai Build príde o svoj Linux — používa ten istý. Vaše projekty zostanú zachované. Naozaj chcete odinštalovať?</string>
     <string name="settings_custom_model_label">Vlastný model</string>
     <string name="settings_custom_model_hint">Zadajte ID modelu, ktoré váš server podporuje, aj keď nie je v zozname vyššie.</string>
 </resources>

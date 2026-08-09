@@ -220,7 +220,7 @@
     <string name="notification_channel_name">AI Ø§Ø·Ù„Ø§Ø¹Ø§Øª</string>
     <string name="notification_channel_description">AI Ø§Ø³Ø³Ù¹Ù†Ù¹ Ú©ÛŒ Ø·Ø±Ù Ø³Û’ Ø¨Ú¾ÛŒØ¬ÛŒ Ú¯Ø¦ÛŒ Ø§Ø·Ù„Ø§Ø¹Ø§Øª</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">Ø§ÛŒÚ© Linux Ù…Ø§Ø­ÙˆÙ„ Ø§Ù†Ø³Ù¹Ø§Ù„ Ú©Ø±ÛŒÚº ØªØ§Ú©Û AI Ø¢Ù¾ Ú©ÛŒ Ø¬Ø§Ù†Ø¨ Ø³Û’ Ø´ÛŒÙ„ Ú©Ù…Ø§Ù†ÚˆØ²ØŒ Ø§Ø³Ú©Ø±Ù¾Ù¹Ø³ Ø§ÙˆØ± Ù¹ÙˆÙ„Ø² Ú†Ù„Ø§ Ø³Ú©Û’Û” Ø§ÛŒÙ¾ Ú©Û’ Ø§Ù†Ø¯Ø± Ù…Ø­ÙÙˆØ¸ Ø·Ø±ÛŒÙ‚Û’ Ø³Û’ Ú†Ù„ØªØ§ ÛÛ’Û” ~3 MB ÚˆØ§Ø¤Ù† Ù„ÙˆÚˆÛ”</string>
+    <string name="settings_sandbox_description">Ø§ÛŒÚ© Linux Ù…Ø§Ø­ÙˆÙ„ Ø§Ù†Ø³Ù¹Ø§Ù„ Ú©Ø±ÛŒÚº ØªØ§Ú©Û AI Ø¢Ù¾ Ú©ÛŒ Ø¬Ø§Ù†Ø¨ Ø³Û’ Ø´ÛŒÙ„ Ú©Ù…Ø§Ù†ÚˆØ²ØŒ Ø§Ø³Ú©Ø±Ù¾Ù¹Ø³ Ø§ÙˆØ± Ù¹ÙˆÙ„Ø² Ú†Ù„Ø§ Ø³Ú©Û’Û” Ø§ÛŒÙ¾ Ú©Û’ Ø§Ù†Ø¯Ø± Ù…Ø­ÙÙˆØ¸ Ø·Ø±ÛŒÙ‚Û’ Ø³Û’ Ú†Ù„ØªØ§ ÛÛ’Û”</string>
     <string name="settings_sandbox_install">Ø§Ù†Ø³Ù¹Ø§Ù„ Ú©Ø±ÛŒÚº</string>
     <string name="settings_sandbox_install_packages">Ø¨Ù†ÛŒØ§Ø¯ÛŒ Ù¾ÛŒÚ©ÛŒØ¬Ø² Ø§Ù†Ø³Ù¹Ø§Ù„ Ú©Ø±ÛŒÚº</string>
     <string name="settings_sandbox_uninstall">Ø§Ù† Ø§Ù†Ø³Ù¹Ø§Ù„ Ú©Ø±ÛŒÚº</string>
@@ -838,6 +838,19 @@
     <string name="kai_build_terminal_key_down_content_description">نیچے تیر</string>
     <string name="kai_build_terminal_key_right_content_description">دائیں تیر</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">API کلید (اختیاری)</string>
+    <string name="settings_mcp_api_key_help">اختیاری۔ تلاش کے ٹولز کو jina.ai سے ایک مفت کلید درکار ہے؛ دیگر ٹولز کلید کے بغیر کام کرتے ہیں۔</string>
+    <string name="settings_sandbox_distro_title">ڈسٹریبیوشن</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">تجویز کردہ · ~150 MB · Kai Build کے ساتھ مشترک</string>
+    <string name="settings_sandbox_distro_debian_installed">انسٹال · Kai Build کے ساتھ مشترک</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">چھوٹا · ~4 MB · Kai Build اپنا Debian انسٹال کرتا ہے</string>
+    <string name="settings_sandbox_distro_alpine_installed">انسٹال · Kai Build اپنا Debian انسٹال کرتا ہے</string>
+    <string name="settings_sandbox_migrate_title">%1$s سے اپنی فائلیں لائیں</string>
+    <string name="settings_sandbox_migrate_detail">%1$d فائلیں · %2$s اس کے ہوم فولڈر میں ابھی یہاں موجود نہیں ہیں۔ کاپی کرنے سے یہاں پہلے سے موجود سب کچھ محفوظ رہتا ہے اور دوسرا سسٹم اچھوتا رہتا ہے، اس لیے آپ بعد میں اسے ان انسٹال کر سکتے ہیں۔</string>
+    <string name="settings_sandbox_migrate_action">فائلیں کاپی کریں</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Linux سینڈ باکس میں موجود تمام ڈیٹا ضائع ہو جائے گا، اور Kai Build بھی اپنا Linux کھو دے گا — یہ وہی استعمال کرتا ہے۔ آپ کے پروجیکٹس محفوظ رہیں گے۔ کیا آپ واقعی ان انسٹال کرنا چاہتے ہیں؟</string>
     <string name="settings_custom_model_label">حسبِ ضرورت ماڈل</string>
     <string name="settings_custom_model_hint">اپنے سرور کی معاونت یافتہ ماڈل آئی ڈی درج کریں، چاہے وہ اوپر فہرست میں نہ ہو۔</string>
 </resources>

@@ -220,7 +220,7 @@
     <string name="notification_channel_name">AI à¨¸à©‚à¨šà¨¨à¨¾à¨µà¨¾à¨‚</string>
     <string name="notification_channel_description">AI à¨¸à¨¹à¨¾à¨‡à¨• à¨¦à©à¨†à¨°à¨¾ à¨­à©‡à¨œà©€à¨†à¨‚ à¨¸à©‚à¨šà¨¨à¨¾à¨µà¨¾à¨‚</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">à¨‡à©±à¨• Linux à¨µà¨¾à¨¤à¨¾à¨µà¨°à¨¨ à¨‡à©°à¨¸à¨Ÿà¨¾à¨² à¨•à¨°à©‹ à¨¤à¨¾à¨‚ à¨œà©‹ AI à¨¤à©à¨¹à¨¾à¨¡à©€ à¨¤à¨°à¨«à¨¼à©‹à¨‚ à¨¸à¨¼à©ˆà©±à¨² à¨•à¨®à¨¾à¨‚à¨¡à¨¾à¨‚, à¨¸à¨•à©à¨°à¨¿à¨ªà¨Ÿà¨¾à¨‚ à¨…à¨¤à©‡ à¨Ÿà©‚à¨² à¨šà¨²à¨¾ à¨¸à¨•à©‡à¥¤ à¨à¨ª à¨¦à©‡ à¨…à©°à¨¦à¨° à¨¸à©à¨°à©±à¨–à¨¿à¨…à¨¤ à¨¢à©°à¨— à¨¨à¨¾à¨² à¨šà©±à¨²à¨¦à¨¾ à¨¹à©ˆà¥¤ ~3 MB à¨¡à¨¾à¨Šà¨¨à¨²à©‹à¨¡à¥¤</string>
+    <string name="settings_sandbox_description">à¨‡à©±à¨• Linux à¨µà¨¾à¨¤à¨¾à¨µà¨°à¨¨ à¨‡à©°à¨¸à¨Ÿà¨¾à¨² à¨•à¨°à©‹ à¨¤à¨¾à¨‚ à¨œà©‹ AI à¨¤à©à¨¹à¨¾à¨¡à©€ à¨¤à¨°à¨«à¨¼à©‹à¨‚ à¨¸à¨¼à©ˆà©±à¨² à¨•à¨®à¨¾à¨‚à¨¡à¨¾à¨‚, à¨¸à¨•à©à¨°à¨¿à¨ªà¨Ÿà¨¾à¨‚ à¨…à¨¤à©‡ à¨Ÿà©‚à¨² à¨šà¨²à¨¾ à¨¸à¨•à©‡à¥¤ à¨à¨ª à¨¦à©‡ à¨…à©°à¨¦à¨° à¨¸à©à¨°à©±à¨–à¨¿à¨…à¨¤ à¨¢à©°à¨— à¨¨à¨¾à¨² à¨šà©±à¨²à¨¦à¨¾ à¨¹à©ˆà¥¤</string>
     <string name="settings_sandbox_install">à¨‡à©°à¨¸à¨Ÿà¨¾à¨² à¨•à¨°à©‹</string>
     <string name="settings_sandbox_install_packages">à¨®à©à©±à¨¢à¨²à©‡ à¨ªà©ˆà¨•à©‡à¨œ à¨‡à©°à¨¸à¨Ÿà¨¾à¨² à¨•à¨°à©‹</string>
     <string name="settings_sandbox_uninstall">à¨…à¨£à¨‡à©°à¨¸à¨Ÿà¨¾à¨² à¨•à¨°à©‹</string>
@@ -838,6 +838,19 @@
     <string name="kai_build_terminal_key_down_content_description">ਹੇਠਾਂ ਤੀਰ</string>
     <string name="kai_build_terminal_key_right_content_description">ਸੱਜਾ ਤੀਰ</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">API ਕੁੰਜੀ (ਵਿਕਲਪਿਕ)</string>
+    <string name="settings_mcp_api_key_help">ਵਿਕਲਪਿਕ। ਖੋਜ ਟੂਲਾਂ ਨੂੰ jina.ai ਤੋਂ ਇੱਕ ਮੁਫ਼ਤ ਕੁੰਜੀ ਦੀ ਲੋੜ ਹੈ; ਹੋਰ ਟੂਲ ਬਿਨਾਂ ਕੁੰਜੀ ਦੇ ਕੰਮ ਕਰਦੇ ਹਨ।</string>
+    <string name="settings_sandbox_distro_title">ਡਿਸਟ੍ਰੀਬਿਊਸ਼ਨ</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">ਸਿਫ਼ਾਰਸ਼ੀ · ~150 MB · Kai Build ਨਾਲ ਸਾਂਝਾ</string>
+    <string name="settings_sandbox_distro_debian_installed">ਇੰਸਟਾਲ · Kai Build ਨਾਲ ਸਾਂਝਾ</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">ਛੋਟਾ · ~4 MB · Kai Build ਆਪਣਾ Debian ਇੰਸਟਾਲ ਕਰਦਾ ਹੈ</string>
+    <string name="settings_sandbox_distro_alpine_installed">ਇੰਸਟਾਲ · Kai Build ਆਪਣਾ Debian ਇੰਸਟਾਲ ਕਰਦਾ ਹੈ</string>
+    <string name="settings_sandbox_migrate_title">%1$s ਤੋਂ ਆਪਣੀਆਂ ਫਾਈਲਾਂ ਲਿਆਓ</string>
+    <string name="settings_sandbox_migrate_detail">%1$d ਫਾਈਲਾਂ · %2$s ਇਸਦੇ ਹੋਮ ਫੋਲਡਰ ਵਿੱਚ ਅਜੇ ਇੱਥੇ ਨਹੀਂ ਹਨ। ਕਾਪੀ ਕਰਨ ਨਾਲ ਇੱਥੇ ਪਹਿਲਾਂ ਤੋਂ ਮੌਜੂਦ ਸਭ ਕੁਝ ਸੁਰੱਖਿਅਤ ਰਹਿੰਦਾ ਹੈ ਅਤੇ ਦੂਜਾ ਸਿਸਟਮ ਅਛੂਤਾ ਰਹਿੰਦਾ ਹੈ, ਇਸ ਲਈ ਤੁਸੀਂ ਬਾਅਦ ਵਿੱਚ ਇਸਨੂੰ ਅਣਇੰਸਟਾਲ ਕਰ ਸਕਦੇ ਹੋ।</string>
+    <string name="settings_sandbox_migrate_action">ਫਾਈਲਾਂ ਕਾਪੀ ਕਰੋ</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Linux ਸੈਂਡਬਾਕਸ ਦਾ ਸਾਰਾ ਡਾਟਾ ਗੁਆਚ ਜਾਵੇਗਾ, ਅਤੇ Kai Build ਦਾ Linux ਵੀ ਚਲਾ ਜਾਵੇਗਾ — ਇਹ ਉਹੀ ਵਰਤਦਾ ਹੈ। ਤੁਹਾਡੇ ਪ੍ਰੋਜੈਕਟ ਸੁਰੱਖਿਅਤ ਰਹਿਣਗੇ। ਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਤੌਰ ਤੇ ਅਣਇੰਸਟਾਲ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?</string>
     <string name="settings_custom_model_label">ਕਸਟਮ ਮਾਡਲ</string>
     <string name="settings_custom_model_hint">ਆਪਣੇ ਸਰਵਰ ਵੱਲੋਂ ਸਮਰਥਿਤ ਮਾਡਲ ID ਦਰਜ ਕਰੋ, ਭਾਵੇਂ ਇਹ ਉੱਪਰ ਸੂਚੀਬੱਧ ਨਾ ਹੋਵੇ।</string>
 </resources>

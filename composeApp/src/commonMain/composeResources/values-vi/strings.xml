@@ -220,7 +220,7 @@
     <string name="notification_channel_name">ThÃ´ng báo AI</string>
     <string name="notification_channel_description">ThÃ´ng báo Ä‘Æ°á»£c gá»­i bá»Ÿi trá»£ lÃ½ AI</string>
     <string name="settings_tab_sandbox">Linux Sandbox</string>
-    <string name="settings_sandbox_description">CÃ i Ä‘áº·t mÃ´i trÆ°á»ng Linux Ä‘á»ƒ AI cÃ³ thá»ƒ cháº¡y các lá»‡nh shell, táº­p lá»‡nh vÃ  cÃ´ng cá»¥ thay máº·t báº¡n. Cháº¡y an toÃ n bÃªn trong á»©ng dá»¥ng. ~3 MB táº£i xuá»‘ng.</string>
+    <string name="settings_sandbox_description">CÃ i Ä‘áº·t mÃ´i trÆ°á»ng Linux Ä‘á»ƒ AI cÃ³ thá»ƒ cháº¡y các lá»‡nh shell, táº­p lá»‡nh vÃ  cÃ´ng cá»¥ thay máº·t báº¡n. Cháº¡y an toÃ n bÃªn trong á»©ng dá»¥ng.</string>
     <string name="settings_sandbox_install">CÃ i Ä‘áº·t</string>
     <string name="settings_sandbox_install_packages">CÃ i Ä‘áº·t gÃ³i cÆ¡ báº£n</string>
     <string name="settings_sandbox_uninstall">Gá»¡ cÃ i Ä‘áº·t</string>
@@ -838,6 +838,19 @@
     <string name="kai_build_terminal_key_down_content_description">Mũi tên xuống</string>
     <string name="kai_build_terminal_key_right_content_description">Mũi tên phải</string>
     <string name="kai_build_terminal_key_enter_content_description">Enter</string>
+    <string name="settings_mcp_api_key">Khóa API (tùy chọn)</string>
+    <string name="settings_mcp_api_key_help">Tùy chọn. Công cụ tìm kiếm cần khóa miễn phí từ jina.ai; các công cụ khác hoạt động mà không cần khóa.</string>
+    <string name="settings_sandbox_distro_title">Bản phân phối</string>
+    <string name="settings_sandbox_distro_debian">Debian 12</string>
+    <string name="settings_sandbox_distro_debian_detail">Khuyên dùng · ~150 MB · dùng chung với Kai Build</string>
+    <string name="settings_sandbox_distro_debian_installed">Đã cài đặt · dùng chung với Kai Build</string>
+    <string name="settings_sandbox_distro_alpine">Alpine Linux</string>
+    <string name="settings_sandbox_distro_alpine_detail">Nhỏ hơn · ~4 MB · Kai Build cài Debian riêng</string>
+    <string name="settings_sandbox_distro_alpine_installed">Đã cài đặt · Kai Build cài Debian riêng</string>
+    <string name="settings_sandbox_migrate_title">Chuyển tệp của bạn từ %1$s</string>
+    <string name="settings_sandbox_migrate_detail">%1$d tệp · %2$s trong thư mục chính của hệ thống đó vẫn chưa có ở đây. Sao chép sẽ giữ nguyên mọi thứ đã có và không ảnh hưởng đến hệ thống kia, vì vậy bạn có thể gỡ cài đặt nó sau.</string>
+    <string name="settings_sandbox_migrate_action">Sao chép tệp</string>
+    <string name="settings_sandbox_uninstall_confirm_shared">Tất cả dữ liệu trong sandbox Linux sẽ bị mất, và Kai Build cũng mất Linux của nó — vì cả hai dùng chung một hệ thống. Các dự án của bạn vẫn được giữ lại. Bạn có chắc chắn muốn gỡ cài đặt không?</string>
     <string name="settings_custom_model_label">Mô hình tùy chỉnh</string>
     <string name="settings_custom_model_hint">Nhập id mô hình mà máy chủ của bạn hỗ trợ, ngay cả khi nó không có trong danh sách ở trên.</string>
 </resources>
