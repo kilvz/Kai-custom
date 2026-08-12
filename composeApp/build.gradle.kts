@@ -91,11 +91,45 @@ kotlin {
     }
 
     sourceSets {
-        val desktopMain = getByName("desktopMain")
-        val commonMain = getByName("commonMain").apply {
+        commonMain {
             kotlin.srcDir(layout.buildDirectory.dir("generated/src/commonMain/kotlin"))
+            dependencies {
+                implementation(libs.compose.material3)
+                implementation(libs.compose.material.icons.core)
+                implementation(libs.compose.material.icons.extended)
+                implementation(libs.compose.runtime)
+                implementation(libs.compose.foundation)
+                implementation(libs.compose.ui)
+                implementation(libs.compose.components.resources)
+                implementation(libs.compose.components.uiToolingPreview)
+                implementation(libs.androidx.navigation.compose)
+                implementation(libs.androidx.lifecycle.viewmodel)
+                implementation(libs.androidx.lifecycle.runtime.compose)
+                implementation(libs.androidx.lifecycle.viewmodel.compose)
+                implementation(libs.kotlinx.collections.immutable)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.ktor.client.logging)
+                implementation(libs.tts)
+                implementation(libs.tts.compose)
+                implementation(libs.koin.compose)
+                implementation(libs.koin.compose.viewmodel)
+                implementation(libs.koin.core)
+                implementation(libs.multiplatform.settings)
+                implementation(libs.multiplatform.settings.no.arg)
+                implementation(libs.filekit.core)
+                implementation(libs.filekit.compose)
+                implementation(libs.coil.compose)
+                implementation(libs.coil.svg)
+                implementation(libs.coil.network.ktor3)
+                implementation(libs.reorderable)
+                implementation(libs.sqldelight.runtime)
+            }
         }
-        val commonTest = getByName("commonTest").apply {
+        commonTest {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.kotlinx.coroutines.test)
@@ -103,93 +137,49 @@ kotlin {
                 implementation(libs.multiplatform.settings.test)
             }
         }
-
-        val androidMain = getByName("androidMain").apply {
+        androidMain {
             kotlin.srcDir("src/jvmShared/kotlin")
+            dependencies {
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.androidx.lifecycle.process)
+                implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+                implementation(libs.spght.encryptedprefs)
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.koin.android)
+                implementation(libs.material)
+                implementation(libs.bouncycastle.provider)
+                implementation(libs.litert.lm)
+                implementation(libs.sqldelight.android.driver)
+                implementation(libs.xz)
+                implementation(libs.tensorflow.lite)
+                implementation(libs.tensorflow.lite.task.text)
+                implementation("com.google.auto.value:auto-value-annotations:1.10.4")
+                implementation(libs.shizuku.api)
+                implementation(libs.shizuku.provider)
+                implementation(libs.jsch)
+                implementation(libs.ktor.server.core)
+                implementation(libs.ktor.server.cio)
+                implementation(libs.ktor.server.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+            }
         }
-        desktopMain.kotlin.srcDir("src/jvmShared/kotlin")
-        androidMain.dependencies {
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.lifecycle.process)
-            implementation(libs.androidx.lifecycle.viewmodel.savedstate)
-            implementation(libs.spght.encryptedprefs)
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.koin.android)
-            implementation(libs.material)
-            implementation(libs.bouncycastle.provider)
-            implementation(libs.litert.lm)
-            implementation(libs.sqldelight.android.driver)
-            implementation(libs.xz)
-            implementation(libs.tensorflow.lite)
-            implementation(libs.tensorflow.lite.task.text)
-            implementation("com.google.auto.value:auto-value-annotations:1.10.4")
-            implementation(libs.shizuku.api)
-            implementation(libs.shizuku.provider)
-            implementation(libs.jsch)
-            implementation(libs.ktor.server.core)
-            implementation(libs.ktor.server.cio)
-            implementation(libs.ktor.server.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
-        }
-        commonMain.dependencies {
-            implementation(libs.compose.material3)
-            implementation(libs.compose.material.icons.core)
-            implementation(libs.compose.material.icons.extended)
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.ui)
-            implementation(libs.compose.components.resources)
-            implementation(libs.compose.components.uiToolingPreview)
-
-            implementation(libs.androidx.navigation.compose)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
-
-            implementation(libs.kotlinx.collections.immutable)
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.kotlinx.datetime)
-
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
-            implementation(libs.ktor.client.logging)
-
-            implementation(libs.tts)
-            implementation(libs.tts.compose)
-
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.koin.core)
-
-            implementation(libs.multiplatform.settings)
-            implementation(libs.multiplatform.settings.no.arg)
-
-            implementation(libs.filekit.core)
-            implementation(libs.filekit.compose)
-
-            implementation(libs.coil.compose)
-            implementation(libs.coil.svg)
-            implementation(libs.coil.network.ktor3)
-
-            implementation(libs.reorderable)
-
-            implementation(libs.sqldelight.runtime)
-        }
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.kotlinx.coroutines.swing)
-            implementation(libs.ktor.client.cio)
-            implementation(libs.bouncycastle.provider)
-            implementation(libs.slf4j.nop)
-            implementation(libs.litert.lm.jvm)
-            implementation(libs.sqldelight.sqlite.driver)
-            implementation(libs.jsch)
-            implementation(libs.ktor.server.core)
-            implementation(libs.ktor.server.cio)
-            implementation(libs.ktor.server.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
-            implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+        getByName("desktopMain") {
+            kotlin.srcDir("src/jvmShared/kotlin")
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutines.swing)
+                implementation(libs.ktor.client.cio)
+                implementation(libs.bouncycastle.provider)
+                implementation(libs.slf4j.nop)
+                implementation(libs.litert.lm.jvm)
+                implementation(libs.sqldelight.sqlite.driver)
+                implementation(libs.jsch)
+                implementation(libs.ktor.server.core)
+                implementation(libs.ktor.server.cio)
+                implementation(libs.ktor.server.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
+                implementation("org.xerial:sqlite-jdbc:3.49.1.0")
+            }
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

@@ -206,9 +206,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -219,6 +217,7 @@ import com.kai.custom.ui.components.KaiChip
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
+import com.kai.custom.ui.rememberCopyToClipboard
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.bot_message_copy_content_description
 import kai.composeapp.generated.resources.kai_ui_code_copy
@@ -486,9 +485,7 @@ private fun RenderButton(
     onCallback: (String, Map<String, String>) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
-
-    @Suppress("DEPRECATION")
-    val clipboardManager = LocalClipboardManager.current
+    val copyToClipboard = rememberCopyToClipboard()
     var clicked by remember { mutableStateOf(false) }
     LaunchedEffect(isInteractive) {
         if (isInteractive) clicked = false
@@ -518,7 +515,7 @@ private fun RenderButton(
                 }
 
                 is CopyToClipboardAction -> {
-                    clipboardManager.setText(AnnotatedString(action.text))
+                    copyToClipboard(action.text)
                 }
 
                 null -> {}
@@ -1196,8 +1193,7 @@ private fun RenderIcon(node: IconNode) {
 
 @Composable
 private fun RenderCode(node: CodeNode) {
-    @Suppress("DEPRECATION")
-    val clipboardManager = LocalClipboardManager.current
+    val copyToClipboard = rememberCopyToClipboard()
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(8.dp),
@@ -1226,7 +1222,7 @@ private fun RenderCode(node: CodeNode) {
                     .size(28.dp)
                     .clip(RoundedCornerShape(6.dp))
                     .handCursor()
-                    .clickable { clipboardManager.setText(AnnotatedString(node.code)) },
+                    .clickable { copyToClipboard(node.code) },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

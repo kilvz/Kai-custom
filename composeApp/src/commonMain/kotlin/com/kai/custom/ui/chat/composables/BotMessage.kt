@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,6 +49,7 @@ import com.kai.custom.ui.dynamicui.toSpeakableText
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.markdown.MarkdownContent
 import com.kai.custom.ui.markdown.parseMarkdown
+import com.kai.custom.ui.rememberCopyToClipboard
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.bot_message_cancel_edit
 import kai.composeapp.generated.resources.bot_message_copy_content_description
@@ -177,14 +177,11 @@ internal fun BotMessage(
                 },
             )
         }
-        @Suppress("DEPRECATION")
-        val clipboardManager = LocalClipboardManager.current
+        val copyToClipboard = rememberCopyToClipboard()
         SmallIconButton(
             iconResource = Res.drawable.ic_copy,
             contentDescription = stringResource(Res.string.bot_message_copy_content_description),
-            onClick = {
-                clipboardManager.setText(buildAnnotatedString { append(message) })
-            },
+            onClick = { copyToClipboard(message) },
         )
         if (onFork != null) {
             SmallIconButton(
