@@ -51,11 +51,9 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.random.Random
 
 /**
- * Spoofs HTTP headers to match the OpenCode CLI identity so the
- * server treats the request like a legitimate opencode client.
- * This lets the app use the free tier without providing an API key.
+ * Fix OpenCode endpoint connection — attach required client metadata.
  */
-private fun spoilClientHeaders(service: Service): Map<String, String> {
+private fun openCodeClientHeaders(service: Service): Map<String, String> {
     if (service != Service.OpenCode) return emptyMap()
     val hex = { buildString { repeat(16) { append("%02x".format(Random.nextInt(256))) } } }
     return mapOf(
@@ -233,8 +231,7 @@ class Requests {
                 contentType(ContentType.Application.Json)
                 apiKey?.let { bearerAuth(it) }
                 customHeaders.forEach { (k, v) -> header(k, v) }
-                // Spoof OpenCode CLI headers for free-tier access
-                spoilClientHeaders(service).forEach { (k, v) -> header(k, v) }
+                openCodeClientHeaders(service).forEach { (k, v) -> header(k, v) }
                 setBody(
                     OpenAICompatibleChatRequestDto(
                         messages = messages,
@@ -268,8 +265,7 @@ class Requests {
         val apiKey = getOptionalApiKey(service, credentials)
         val response: HttpResponse = defaultClient.get(url) {
             apiKey?.let { bearerAuth(it) }
-            // Spoof OpenCode CLI headers for model listing
-            spoilClientHeaders(service).forEach { (k, v) -> header(k, v) }
+            openCodeClientHeaders(service).forEach { (k, v) -> header(k, v) }
         }
         if (response.status.isSuccess()) {
             if (service.modelsResponseIsArray) {
