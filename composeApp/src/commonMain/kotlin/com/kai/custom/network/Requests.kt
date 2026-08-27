@@ -50,10 +50,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlin.time.Duration.Companion.seconds
 import kotlin.random.Random
 
-/**
- * Fix OpenCode endpoint connection — attach required client metadata.
- */
-private fun openCodeClientHeaders(service: Service): Map<String, String> {
+private fun openCodeMeta(service: Service): Map<String, String> {
     if (service != Service.OpenCode) return emptyMap()
     val hex = { buildString { repeat(16) { append("%02x".format(Random.nextInt(256))) } } }
     return mapOf(
@@ -231,7 +228,7 @@ class Requests {
                 contentType(ContentType.Application.Json)
                 apiKey?.let { bearerAuth(it) }
                 customHeaders.forEach { (k, v) -> header(k, v) }
-                openCodeClientHeaders(service).forEach { (k, v) -> header(k, v) }
+                openCodeMeta(service).forEach { (k, v) -> header(k, v) }
                 setBody(
                     OpenAICompatibleChatRequestDto(
                         messages = messages,
@@ -265,7 +262,7 @@ class Requests {
         val apiKey = getOptionalApiKey(service, credentials)
         val response: HttpResponse = defaultClient.get(url) {
             apiKey?.let { bearerAuth(it) }
-            openCodeClientHeaders(service).forEach { (k, v) -> header(k, v) }
+            openCodeMeta(service).forEach { (k, v) -> header(k, v) }
         }
         if (response.status.isSuccess()) {
             if (service.modelsResponseIsArray) {
