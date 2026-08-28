@@ -34,6 +34,8 @@ import kai.composeapp.generated.resources.service_free_expert
 import kai.composeapp.generated.resources.service_free_fast
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
+import kai.composeapp.generated.resources.ic_service_aihorde
+import kai.composeapp.generated.resources.ic_service_perplexity
 
 enum class FreeMode(val modelId: String, val nameRes: StringResource, val icon: DrawableResource) {
     FAST("fast-free", Res.string.service_free_fast, Res.drawable.ic_service_free_fast),
@@ -532,7 +534,7 @@ sealed class Service(
     )
 
     companion object {
-        val all: List<Service> get() = listOf(Free, AtlasCloud, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, Nvidia, Cerebras, OllamaCloud, LongCat, Together, HuggingFace, Venice, Moonshot, Zai, ZaiCodingPlan, Minimax, AiHubMix, DeepInfra, FireworksAI, OpenCode, PublicAI, SpAIder, OpenAICompatible, LiteRT)
+        val all: List<Service> get() = listOf(Free, AtlasCloud, Gemini, Anthropic, OpenAI, DeepSeek, Mistral, XAI, OpenRouter, Groq, Nvidia, Cerebras, OllamaCloud, LongCat, Together, HuggingFace, Venice, Moonshot, Zai, ZaiCodingPlan, Minimax, AiHubMix, DeepInfra, FireworksAI, OpenCode, PublicAI, AIHorde, Perplexity, OpenAICompatible, LiteRT)
 
         val DEFAULT_OPENAI_COMPATIBLE_BASE_URL: String get() = com.kai.custom.defaultOpenAICompatibleBaseUrl()
 
@@ -542,4 +544,36 @@ sealed class Service(
     val apiKeyKey: String get() = "service_${settingsKeyPrefix}_api_key"
     val modelIdKey: String get() = "service_${settingsKeyPrefix}_model_id"
     val baseUrlKey: String get() = "service_${settingsKeyPrefix}_base_url"
+
+    data object AIHorde : Service(
+        id = "aihorde",
+        displayName = "AI Horde",
+        icon = Res.drawable.ic_service_aihorde,
+        requiresApiKey = true,
+        defaultModel = null,
+        settingsKeyPrefix = "aihorde",
+        chatUrl = "https://oai.aihorde.net/v1/chat/completions",
+        modelsUrl = "https://oai.aihorde.net/v1/models",
+        apiKeyUrl = "https://aihorde.net/register",
+        apiKeyUrlDisplay = "aihorde.net/register",
+    )
+
+    data object Perplexity : Service(
+        id = "perplexity",
+        displayName = "Perplexity",
+        icon = Res.drawable.ic_service_perplexity,
+        requiresApiKey = true,
+        defaultModel = "sonar-pro",
+        settingsKeyPrefix = "perplexity",
+        chatUrl = "https://api.perplexity.ai/chat/completions",
+        modelsUrl = null,
+        defaultModels = listOf(
+            ModelDefinition(id = "sonar", subtitle = "Perplexity"),
+            ModelDefinition(id = "sonar-pro", subtitle = "Perplexity"),
+            ModelDefinition(id = "sonar-reasoning-pro", subtitle = "Perplexity"),
+            ModelDefinition(id = "sonar-deep-research", subtitle = "Perplexity"),
+        ),
+        apiKeyUrl = "https://console.perplexity.ai",
+        apiKeyUrlDisplay = "console.perplexity.ai",
+    )
 }

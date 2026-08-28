@@ -3,10 +3,14 @@ package com.kai.custom.tools
 import android.content.Context
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
+import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.openFileWithIntent
 import com.kai.custom.sandbox.resolveSandboxFile
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.tool_open_file_description
+import kai.composeapp.generated.resources.tool_open_file_name
 import org.koin.java.KoinJavaComponent.inject
 
 private const val OPEN_FILE_DESCRIPTION = """Open a file from the sandbox /root directory in the user's default Android app — browser for HTML, image viewer for PNG/JPG, PDF viewer for PDF, markdown viewer for .md, etc. This is how you show finished work to the user.
@@ -57,4 +61,12 @@ object OpenFileTool : Tool {
             mapOf("success" to false, "error" to (result.error ?: "Failed to open file"))
         }
     }
+
+    val toolInfo = ToolInfo(
+        id = "open_file",
+        name = "Open File",
+        description = "Open sandbox files in your default Android app",
+        nameRes = Res.string.tool_open_file_name,
+        descriptionRes = Res.string.tool_open_file_description,
+    )
 }
