@@ -73,6 +73,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -196,6 +197,13 @@ fun ChatScreenContent(
     // Kai Build is a transient surface, not a conversation — unlike interactive
     // mode it needs no persistence beyond surviving configuration changes.
     var isKaiBuildOpen by rememberSaveable { mutableStateOf(false) }
+
+    // Shared text opens a new chat; leave Kai Build so the composer is visible.
+    LaunchedEffect(uiState.composerPrefill) {
+        if (uiState.composerPrefill != null && isKaiBuildOpen) {
+            isKaiBuildOpen = false
+        }
+    }
 
     when {
         uiState.isInteractiveMode && !uiState.isRestoring -> InteractiveModeScreen(
@@ -608,6 +616,16 @@ private fun ChatModeScreen(
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(uiState.composerPrefill) {
+        val prefill = uiState.composerPrefill ?: return@LaunchedEffect
+        questionInputText = TextFieldValue(
+            text = prefill,
+            selection = TextRange(prefill.length),
+        )
+        if (isSandboxOpen) isSandboxOpen = false
+        uiState.actions.consumeComposerPrefill()
+    }
 
     // When the active conversation changes (e.g. user starts a new chat from the
     // top bar or taps the heartbeat banner), collapse the sandbox/SSH view so the

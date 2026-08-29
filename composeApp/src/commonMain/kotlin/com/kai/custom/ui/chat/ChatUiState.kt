@@ -111,6 +111,7 @@ data class ChatUiState(
     val installedSkills: ImmutableList<SkillManifest> = persistentListOf(),
     val activeSkill: SkillManifest? = null,
     val pendingMessages: ImmutableList<String> = persistentListOf(),
+    val composerPrefill: String? = null,
 ) {
     val heartbeatConversationId: String?
         get() = savedConversations.firstOrNull { it.isHeartbeat }?.id

@@ -36,4 +36,5 @@ data class ChatActions(
     val truncateFrom: (String) -> Unit,
     val forkConversation: ((String) -> Unit)?,
     val onSetActiveSkill: (SkillManifest?) -> Unit = {},
+    val consumeComposerPrefill: () -> Unit,
 )
