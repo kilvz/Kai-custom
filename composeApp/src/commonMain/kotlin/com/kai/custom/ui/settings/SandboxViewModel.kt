@@ -8,6 +8,7 @@ import com.kai.custom.SandboxController
 import com.kai.custom.SandboxController.BackupResult
 import com.kai.custom.SandboxMigration
 import com.kai.custom.SandboxStatus
+import com.kai.custom.SandboxStatusLabel
 import com.kai.custom.currentPlatform
 import com.kai.custom.data.DataRepository
 import com.kai.custom.isRootAvailable
@@ -23,7 +24,7 @@ data class SandboxUiState(
     val sandboxInstalled: Boolean = false,
     val sandboxReady: Boolean = false,
     val sandboxProgress: Float? = null,
-    val sandboxStatusText: String = "",
+    val sandboxStatusLabel: SandboxStatusLabel? = null,
     val sandboxDiskUsageMB: Long = 0,
     val sandboxPackagesInstalled: Boolean = false,
     val isSandboxEnabled: Boolean = true,
@@ -92,7 +93,7 @@ class SandboxViewModel(
         sandboxInstalled = status.installed,
         sandboxReady = status.ready,
         sandboxProgress = status.progress,
-        sandboxStatusText = status.statusText,
+        sandboxStatusLabel = status.label,
         sandboxDiskUsageMB = status.diskUsageMB,
         sandboxPackagesInstalled = status.packagesInstalled,
         isWorking = status.working,

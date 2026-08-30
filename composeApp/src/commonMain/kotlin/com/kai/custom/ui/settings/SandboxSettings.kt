@@ -49,6 +49,7 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
 import com.kai.custom.linux.LinuxDistro
+import com.kai.custom.ui.sandbox.sandboxStatusText
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.sandbox_settings_alt_memory
 import kai.composeapp.generated.resources.sandbox_settings_distribution
@@ -121,6 +122,7 @@ internal fun SandboxSettingsCard(
         saveFileToDevice(path, "sandbox-rootfs", "tar.gz")
         onExportSaved()
     }
+    val statusText = sandboxStatusText(sandboxState.sandboxStatusLabel)
     SettingsCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -170,13 +172,13 @@ internal fun SandboxSettingsCard(
         }
 
         if (sandboxState.sandboxProgress != null) {
-            SandboxProgressRow(sandboxState.sandboxProgress, sandboxState.sandboxStatusText, onCancelSandbox)
+            SandboxProgressRow(sandboxState.sandboxProgress, statusText, onCancelSandbox)
         } else if (sandboxState.isWorking) {
-            SandboxProgressRow(null, sandboxState.sandboxStatusText, onCancelSandbox)
+            SandboxProgressRow(null, statusText, onCancelSandbox)
         } else if (sandboxState.hasError) {
             Spacer(Modifier.height(8.dp))
             Text(
-                text = sandboxState.sandboxStatusText,
+                text = statusText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )

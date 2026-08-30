@@ -11,6 +11,7 @@ import com.kai.custom.TerminalLine
 import com.kai.custom.SandboxSessions
 import app.cash.turbine.test
 import com.kai.custom.SandboxMigration
+import com.kai.custom.SandboxStatusLabel
 import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.testutil.FakeDataRepository
 import kotlinx.coroutines.Dispatchers
@@ -166,7 +167,7 @@ class SandboxViewModelTest {
                 ready = true,
                 working = false,
                 progress = 1.0f,
-                statusText = "Done",
+                label = SandboxStatusLabel.Ready,
                 diskUsageMB = 250L,
                 packagesInstalled = true,
                 error = false,
@@ -177,7 +178,7 @@ class SandboxViewModelTest {
             assertTrue(updated.sandboxInstalled)
             assertTrue(updated.sandboxReady)
             assertEquals(1.0f, updated.sandboxProgress)
-            assertEquals("Done", updated.sandboxStatusText)
+            assertEquals(SandboxStatusLabel.Ready, updated.sandboxStatusLabel)
             assertEquals(250L, updated.sandboxDiskUsageMB)
             assertTrue(updated.sandboxPackagesInstalled)
             assertFalse(updated.isWorking)
@@ -235,7 +236,7 @@ class SandboxViewModelTest {
             skipItems(1)
             fakeSandboxController.status.value = SandboxStatus(
                 working = true,
-                statusText = "Downloading rootfs...",
+                label = SandboxStatusLabel.Downloading,
                 distro = LinuxDistro.DEBIAN,
             )
             testDispatcher.scheduler.advanceUntilIdle()
@@ -323,12 +324,13 @@ class SandboxViewModelTest {
 
         viewModel.state.test {
             skipItems(1)
-            fakeSandboxController.status.value = SandboxStatus(error = true, statusText = "Failed")
+            fakeSandboxController.status.value =
+                SandboxStatus(error = true, label = SandboxStatusLabel.Failure.Setup("boom"))
             testDispatcher.scheduler.advanceUntilIdle()
 
             val updated = awaitItem()
             assertTrue(updated.hasError)
-            assertEquals("Failed", updated.sandboxStatusText)
+            assertEquals(SandboxStatusLabel.Failure.Setup("boom"), updated.sandboxStatusLabel)
         }
     }
 }

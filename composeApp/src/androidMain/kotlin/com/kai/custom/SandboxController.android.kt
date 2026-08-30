@@ -19,6 +19,8 @@ import com.kai.custom.sandbox.importFileInto
 import com.kai.custom.shizuku.ShizukuManager
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import io.github.vinceglb.filekit.PlatformFile
+import kai.composeapp.generated.resources.Res
+import kai.composeapp.generated.resources.terminal_sandbox_not_ready
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.getString
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.io.IOException
@@ -91,7 +94,7 @@ class AndroidSandboxController : SandboxController {
                     _status.value = SandboxStatus(
                         distro = sandboxManager.distro,
                         error = true,
-                        statusText = "Sandbox status error: ${e.message ?: e::class.simpleName}",
+                        label = SandboxStatusLabel.Failure.Status(e.message ?: e::class.simpleName.orEmpty()),
                     )
                 }
                 previousState = state
@@ -124,20 +127,20 @@ class AndroidSandboxController : SandboxController {
     }
 
     private fun mapState(state: SandboxState): SandboxStatus = when (state) {
-        is SandboxState.NotInstalled -> status(statusText = "Not installed")
+        is SandboxState.NotInstalled -> status(label = SandboxStatusLabel.NotInstalled)
 
         is SandboxState.Downloading -> status(
             working = true,
             progress = state.progress,
-            statusText = "Downloading rootfs...",
+            label = SandboxStatusLabel.Downloading,
         )
 
-        is SandboxState.Extracting -> status(working = true, statusText = "Extracting...")
+        is SandboxState.Extracting -> status(working = true, label = SandboxStatusLabel.Extracting)
 
         is SandboxState.Installing -> status(
             installed = java.io.File(sandboxManager.rootfsPath).isDirectory,
             working = true,
-            statusText = state.detail.ifEmpty { "Installing..." },
+            label = state.label,
             diskUsageMB = cachedDiskUsageMB,
         )
 
@@ -156,7 +159,7 @@ class AndroidSandboxController : SandboxController {
                 installed = rootfsExists,
                 ready = rootfsExists,
                 error = true,
-                statusText = "Error: $msg",
+                label = state.label,
                 diskUsageMB = cachedDiskUsageMB,
                 // Force packagesInstalled=false so the Install Packages button
                 // reappears and the user can retry after a failed install.
@@ -176,7 +179,7 @@ class AndroidSandboxController : SandboxController {
     private fun readyStatus(diskUsageMB: Long = 0) = status(
         installed = true,
         ready = true,
-        statusText = "Ready",
+        label = SandboxStatusLabel.Ready,
         diskUsageMB = diskUsageMB,
         packagesInstalled = sandboxManager.arePackagesInstalled(),
     )
@@ -203,7 +206,7 @@ class AndroidSandboxController : SandboxController {
         ready: Boolean = false,
         working: Boolean = false,
         progress: Float? = null,
-        statusText: String = "",
+        label: SandboxStatusLabel? = null,
         diskUsageMB: Long = 0,
         packagesInstalled: Boolean = false,
         error: Boolean = false,
@@ -212,7 +215,7 @@ class AndroidSandboxController : SandboxController {
         ready = ready,
         working = working,
         progress = progress,
-        statusText = statusText,
+        label = label,
         diskUsageMB = diskUsageMB,
         packagesInstalled = packagesInstalled,
         error = error,
@@ -364,7 +367,9 @@ class AndroidSandboxController : SandboxController {
         val state = sandboxManager.state.value
         val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
         if (state !is SandboxState.Ready && !(state is SandboxState.Error && rootfsExists)) {
-            onStderr(SANDBOX_NOT_READY)
+            // Streaming output is read by a person in the terminal, unlike
+            // [executeCommand]'s return value, which is an agent tool result.
+            onStderr(getString(Res.string.terminal_sandbox_not_ready))
             return NoOpCommandHandle
         }
         val shell = sandboxManager.shellFor(sessionId)
@@ -1106,6 +1111,7 @@ private fun File.toEntry(parent: String): SandboxFileEntry = SandboxFileEntry(
     lastModifiedMs = lastModified(),
 )
 
+/** Returned to the agent as a tool result, so it stays English like the rest of the tool surface. */
 private const val SANDBOX_NOT_READY = "Sandbox is not ready"
 
 private class PersistentCommandHandle(
