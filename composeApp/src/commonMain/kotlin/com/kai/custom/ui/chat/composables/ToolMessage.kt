@@ -182,8 +182,12 @@ internal fun PulsingStatusIndicator(
                 )
             }
             if (toolSummary != null) {
+                // Weighted: the animated status text ahead of this takes what it needs,
+                // and without a weight the summary — the only hint of what the agent is
+                // actually doing — is pushed off the right edge at large font scales.
                 Text(
                     text = stringResource(Res.string.tool_message_summary_separator, toolSummary),
+                    modifier = Modifier.weight(1f),
                     color = textColor,
                     style = textStyle,
                     maxLines = 1,

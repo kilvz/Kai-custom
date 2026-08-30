@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kai.custom.mcp.PopularMcpServer
 import com.kai.custom.mcp.authorizationHeaderValue
@@ -182,6 +183,7 @@ private fun McpServerCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -394,20 +396,35 @@ private fun AddMcpServerDialog(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
+                            // The floating labels must stay on one line: at large font
+                            // scales a wrapped label grows upward out of the field and
+                            // lands on top of the URL field above it.
                             KaiOutlinedTextField(
                                 value = entry.key,
                                 onValueChange = { headers[index] = entry.copy(key = it) },
-                                label = { Text(stringResource(Res.string.settings_mcp_header_key)) },
+                                label = {
+                                    Text(
+                                        text = stringResource(Res.string.settings_mcp_header_key),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
                                 singleLine = true,
-                                modifier = Modifier.weight(0.4f),
+                                modifier = Modifier.weight(0.5f),
                             )
                             Spacer(Modifier.width(8.dp))
                             KaiOutlinedTextField(
                                 value = entry.value,
                                 onValueChange = { headers[index] = entry.copy(value = it) },
-                                label = { Text(stringResource(Res.string.settings_mcp_header_value)) },
+                                label = {
+                                    Text(
+                                        text = stringResource(Res.string.settings_mcp_header_value),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
                                 singleLine = true,
-                                modifier = Modifier.weight(0.6f),
+                                modifier = Modifier.weight(0.5f),
                             )
                             IconButton(
                                 onClick = { headers.removeAt(index) },

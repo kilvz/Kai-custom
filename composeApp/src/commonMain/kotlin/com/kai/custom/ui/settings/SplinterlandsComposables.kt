@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -431,11 +432,13 @@ private fun SplinterlandsModelRow(rank: Int, stats: ModelStats) {
                 text = stringResource(Res.string.splinterlands_wins_losses, stats.wins, stats.losses),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
             )
             Text(
                 text = "$winPct%",
                 style = MaterialTheme.typography.labelMedium,
                 color = barColor,
+                maxLines = 1,
             )
         }
     }
@@ -868,10 +871,12 @@ private fun SplinterlandsAccountRow(
 
             // Match info row: opponent, mana, rulesets
             if (bs.currentOpponent.isNotBlank() || bs.currentMana > 0) {
-                Row(
+                // FlowRow: three unweighted facts in a Row run off the right edge once
+                // the text grows, taking the rulesets with them.
+                FlowRow(
                     modifier = Modifier.padding(start = 40.dp, top = 2.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     if (bs.currentOpponent.isNotBlank()) {
                         Text(
@@ -893,6 +898,7 @@ private fun SplinterlandsAccountRow(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
