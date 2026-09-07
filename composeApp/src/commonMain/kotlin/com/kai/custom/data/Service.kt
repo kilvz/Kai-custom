@@ -86,6 +86,12 @@ sealed class Service(
     val settingsKeyPrefix: String,
     val defaultModels: List<ModelDefinition> = emptyList(),
     val chatUrl: String = "",
+    /**
+     * OpenAI Responses API endpoint (`/v1/responses`), for the services that expose one. Only
+     * reached for models that [requiresResponsesApi] selects; every other model stays on
+     * [chatUrl].
+     */
+    val responsesUrl: String? = null,
     val modelsUrl: String? = null,
     val modelsResponseIsArray: Boolean = false,
     val filterActiveStrictly: Boolean = false,
@@ -208,6 +214,7 @@ sealed class Service(
         defaultModel = null,
         settingsKeyPrefix = "openai",
         chatUrl = "https://api.openai.com/v1/chat/completions",
+        responsesUrl = "https://api.openai.com/v1/responses",
         modelsUrl = "https://api.openai.com/v1/models",
         apiKeyUrl = "https://platform.openai.com/api-keys",
         apiKeyUrlDisplay = "platform.openai.com/api-keys",
@@ -559,6 +566,7 @@ sealed class Service(
         defaultModel = null,
         settingsKeyPrefix = "openai-compatible",
         chatUrl = "/chat/completions",
+        responsesUrl = "/responses",
         modelsUrl = "/models",
         sortModelsById = true,
     )
