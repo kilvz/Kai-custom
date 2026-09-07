@@ -226,6 +226,19 @@ class RemoteDataRepository(
     private fun getLocalSafeTools(): List<Tool> = getAvailableTools()
         .filter { it.schema.name in LOCAL_TOOL_ALLOWLIST }
 
+    /**
+     * Whether the on-device model file for [modelId] carries a tool section in its chat
+     * template. A model that doesn't isn't merely worse at tools — it answers *instead* of
+     * calling them, inventing whatever the tool would have returned, which is how Qwen3
+     * 0.6B reports a fictional time rather than calling `get_local_time`. Withholding the
+     * tools makes it a plain chat model, which is what it actually is.
+     *
+     * The engine reports null when it cannot read the declaration (iOS, or a bundle whose
+     * metadata predates it). That is *unknown*, not *no*: keep offering the allowlist there
+     * so existing setups behave exactly as before.
+     */
+    private suspend fun localModelDeclaresTools(modelId: String): Boolean = localInferenceEngine?.modelCapabilities(modelId)?.supportsFunctionCalling != false
+
     // Per-instance model storage: instanceId -> models flow
     private val modelsByInstance: MutableMap<String, MutableStateFlow<List<SettingsModel>>> = mutableMapOf()
 
@@ -548,12 +561,16 @@ class RemoteDataRepository(
         // prompt shape). We hand whichever one through to the engine unchanged.
         // Native litert-lm `automaticToolCalling` owns the tool loop — our allowlisted
         // tools are passed once via [localToolDescriptionJson] and the engine drives them.
-        val localTools: List<LocalTool> = getLocalSafeTools().map { tool ->
-            LocalTool(
-                name = tool.schema.name,
-                descriptionJsonString = localToolDescriptionJson(tool),
-                execute = { jsonArgs -> runLocalToolWithUiFeedback(tool.schema.name, jsonArgs, history) },
-            )
+        val localTools: List<LocalTool> = if (localModelDeclaresTools(model.id)) {
+            getLocalSafeTools().map { tool ->
+                LocalTool(
+                    name = tool.schema.name,
+                    descriptionJsonString = localToolDescriptionJson(tool),
+                    execute = { jsonArgs -> runLocalToolWithUiFeedback(tool.schema.name, jsonArgs, history) },
+                )
+            }
+        } else {
+            emptyList()
         }
 
         val inferenceMessages = messages.mapNotNull { msg ->
@@ -2154,7 +2171,7 @@ class RemoteDataRepository(
 
         val hasTools = when (variant) {
             SystemPromptVariant.CHAT_REMOTE -> !isLimited && getAvailableTools().isNotEmpty()
-            SystemPromptVariant.CHAT_LOCAL -> getLocalSafeTools().isNotEmpty()
+            SystemPromptVariant.CHAT_LOCAL -> getLocalSafeTools().isNotEmpty() && localModelDeclaresTools(modelId)
         }
 
         val soulUserText = appSettings.getSoulUser(activePersona.id)
