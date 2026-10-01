@@ -395,6 +395,15 @@ class AppSettings(internal val settings: Settings) {
     // Agent memories
     fun getMemoriesJson(): String = settings.getString(KEY_AGENT_MEMORIES, "[]")
 
+    /**
+     * Keeps a persisted JSON blob that no longer decodes (e.g. after a schema change without a
+     * migration) under its own key, so the store's next write can't destroy the only copy.
+     * Not part of settings export; recoverable by hand or by a later migration.
+     */
+    fun backupCorruptJson(label: String, raw: String) {
+        settings.putString("$KEY_CORRUPT_JSON_BACKUP_PREFIX$label", raw)
+    }
+
     fun setMemoriesJson(json: String) {
         settings.putString(KEY_AGENT_MEMORIES, json)
     }
@@ -1136,6 +1145,7 @@ class AppSettings(internal val settings: Settings) {
         const val KEY_ALT_MEMORY_INSTALLED = "alt_memory_installed"
         const val KEY_ALT_MEMORY_MODE = "alt_memory_mode"
         const val KEY_AGENT_MEMORIES = "agent_memories"
+        const val KEY_CORRUPT_JSON_BACKUP_PREFIX = "corrupt_json_backup."
         const val KEY_SCHEDULED_TASKS = "scheduled_tasks"
         const val KEY_SCHEDULING_ENABLED = "scheduling_enabled"
         const val KEY_DYNAMIC_UI_ENABLED = "dynamic_ui_enabled"
