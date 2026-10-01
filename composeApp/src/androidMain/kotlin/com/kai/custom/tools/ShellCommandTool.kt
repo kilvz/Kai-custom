@@ -13,6 +13,10 @@ import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_execute_shell_command_description
 import kai.composeapp.generated.resources.tool_execute_shell_command_name
 import org.koin.java.KoinJavaComponent.inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+
+private const val MAX_TIMEOUT_SECONDS = 60L
 
 /**
  * Built per distro rather than patched afterwards: the package manager and the
@@ -54,6 +58,10 @@ object ShellCommandTool : Tool {
      */
     private const val ANDROID_WARNING = "\n\nIMPORTANT \u2014 Android system commands (pm, am, dumpsys, settings, wm, input, device_config, content, appops, cmd, and anything under /system, /vendor, /apex) do NOT exist in this sandbox. It is NOT the Android shell. For ADB-level system commands, use the separate run_adb tool instead \u2014 that tool goes through Shizuku and can access all Android system services."
 
+    // The executor's default 30s would cut off the advertised 60s max; the shell enforces the
+    // per-call timeout itself and needs a few seconds more to interrupt or reset a hung command.
+    override val timeout: Duration = (MAX_TIMEOUT_SECONDS + 10).seconds
+
     override val schema: ToolSchema
         get() = ToolSchema(
             name = "execute_shell_command",
@@ -80,7 +88,7 @@ object ShellCommandTool : Tool {
         }
 
         val timeoutSeconds = ((args["timeout"] as? Number)?.toLong() ?: 30L)
-            .coerceIn(1, 60L)
+            .coerceIn(1, MAX_TIMEOUT_SECONDS)
         val workingDir = args["working_dir"] as? String
 
         val envMap = (args["env"] as? Map<String, Any>)
