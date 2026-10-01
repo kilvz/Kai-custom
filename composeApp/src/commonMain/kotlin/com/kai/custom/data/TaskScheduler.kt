@@ -15,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.min
@@ -176,7 +177,18 @@ class TaskScheduler(
                 ?.map { it.content }
                 ?: emptyList()
             val heartbeatPrompt = manager.buildHeartbeatPrompt(recentResponses, pendingEmails, pendingSms, pendingNotifications)
-            val response = dataRepository.askWithTools(heartbeatPrompt, manager.getConfig().heartbeatInstanceId)
+            // Resolve the heartbeat conversation id BEFORE the AI starts emitting
+            // tool calls, so any execute_shell_command call binds to the heartbeat's
+            // own persistent bash session rather than the chat the user happens to
+            // be viewing right now.
+            val heartbeatConversationId = dataRepository.getOrCreateHeartbeatConversationId()
+            val response = withContext(HeartbeatRunElement) {
+                dataRepository.askWithTools(
+                    prompt = heartbeatPrompt,
+                    instanceId = manager.getConfig().heartbeatInstanceId,
+                    conversationIdOverride = heartbeatConversationId,
+                )
+            }
             heartbeatMemoryExtractor?.extractFromHeartbeat(response)
             manager.markHeartbeatExecuted()
             manager.recordHeartbeat(success = true)
