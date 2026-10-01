@@ -47,6 +47,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -137,6 +138,9 @@ private inline fun <T> openAICompatibleResult(block: () -> Result<T>): Result<T>
     block()
 } catch (e: OpenAICompatibleApiException) {
     Result.failure(e)
+} catch (e: CancellationException) {
+    // Stop/timeout must cancel the caller, not surface as a connection or API error.
+    throw e
 } catch (e: Exception) {
     Result.failure(OpenAICompatibleConnectionException())
 }
@@ -204,6 +208,8 @@ class Requests {
         }
     } catch (e: GeminiApiException) {
         Result.failure(e)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(GeminiGenericException("Connection failed", e))
     }
@@ -261,6 +267,8 @@ class Requests {
                 }
             }
         }
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         if (isDebugBuild) {
             println("[GeminiChat] ERROR: ${e::class.simpleName} — ${e.message}")
@@ -312,6 +320,8 @@ class Requests {
         Result.failure(e)
     } catch (e: io.ktor.client.plugins.HttpRequestTimeoutException) {
         Result.failure(OpenAICompatibleConnectionException())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(mapOpenAICompatibleException(e))
     }
@@ -354,6 +364,8 @@ class Requests {
         Result.failure(e)
     } catch (e: io.ktor.client.plugins.HttpRequestTimeoutException) {
         Result.failure(OpenAICompatibleConnectionException())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(mapOpenAICompatibleException(e))
     }
@@ -443,6 +455,8 @@ class Requests {
         }
     } catch (e: AnthropicApiException) {
         Result.failure(e)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(AnthropicGenericException("Anthropic: ${e.message}", e))
     }
@@ -481,6 +495,8 @@ class Requests {
         }
     } catch (e: AnthropicApiException) {
         Result.failure(e)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(AnthropicGenericException("Anthropic: ${e.message}", e))
     }
