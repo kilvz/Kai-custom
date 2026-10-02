@@ -29,6 +29,7 @@ See the [README](../README.md) for build requirements and commands.
 2. Start chatting immediately using the **Free** tier (no API key needed)
 3. For better models, open **Settings** and add a service (e.g. OpenAI, Gemini, DeepSeek)
 4. Enter your API key â€” Kai validates the connection and loads available models automatically
+5. Prefer to stay offline? On Android, iOS and desktop, add the **Local Model** service and download an on-device model â€” see [On-Device Inference](features/on-device-inference.md)
 
 ## Adding a Service
 
