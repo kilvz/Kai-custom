@@ -6,7 +6,6 @@ import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
-import com.kai.custom.data.isHeartbeatRun
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_promote_learning_description
 import kai.composeapp.generated.resources.tool_promote_learning_name
@@ -24,10 +23,6 @@ object HeartbeatTools {
         )
 
         override suspend fun execute(args: Map<String, Any>): Any {
-            // Rewriting the soul is permanent; only the heartbeat's own review may do it.
-            if (!isHeartbeatRun()) {
-                return mapOf("success" to false, "error" to "promote_learning is only available during heartbeat runs")
-            }
             val memoryKey = args["memory_key"]?.toString()
                 ?: return mapOf("success" to false, "error" to "Missing memory_key")
             val soulAddition = args["soul_addition"]?.toString()
