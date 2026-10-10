@@ -31,6 +31,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,12 +45,14 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -63,6 +66,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,6 +91,8 @@ import kai.composeapp.generated.resources.settings_screen_database_reset
 import kai.composeapp.generated.resources.settings_screen_ok
 import kai.composeapp.generated.resources.settings_sponsors_monthly
 import kai.composeapp.generated.resources.settings_sponsors_past
+import kai.composeapp.generated.resources.settings_licenses
+import kai.composeapp.generated.resources.settings_licenses_close
 import kai.composeapp.generated.resources.settings_tab_agent
 import kai.composeapp.generated.resources.settings_tab_general
 import kai.composeapp.generated.resources.settings_tab_integrations
@@ -679,9 +685,49 @@ private fun BottomInfo() {
                 .clickable { uriHandler.openUri("https://github.com/kilvz/Kai-custom") }
                 .handCursor(),
         )
+
+        var showLicenses by remember { mutableStateOf(false) }
+        Text(
+            text = stringResource(Res.string.settings_licenses),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .clickable { showLicenses = true }
+                .handCursor(),
+        )
+        if (showLicenses) {
+            LicensesDialog(onDismiss = { showLicenses = false })
+        }
     }
 
     Spacer(Modifier.height(8.dp))
+}
+
+// The Android app ships GPL-2.0 PRoot and LGPL-3.0 talloc binaries, whose licenses
+// require their text and a source offer to travel with the app itself.
+@Composable
+private fun LicensesDialog(onDismiss: () -> Unit) {
+    val notices by produceState<String?>(null) {
+        value = Res.readBytes("files/licenses/THIRD_PARTY_NOTICES.txt").decodeToString()
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.settings_licenses)) },
+        text = {
+            Text(
+                text = notices.orEmpty(),
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                style = MaterialTheme.typography.bodySmall,
+                fontFamily = FontFamily.Monospace,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss, modifier = Modifier.handCursor()) {
+                Text(stringResource(Res.string.settings_licenses_close))
+            }
+        },
+    )
 }
 
 @Composable
