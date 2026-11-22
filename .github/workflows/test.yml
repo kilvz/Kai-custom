@@ -68,9 +68,6 @@ jobs:
       - name: Run spotlessApply
         run: ./gradlew spotlessApply --no-daemon --stacktrace
 
-      - name: Run updateScreenshots
-        run: ./gradlew :screenshotTests:updateScreenshots --no-daemon --stacktrace
-
       - name: Install cwebp
         run: sudo apt-get update && sudo apt-get install -y webp
 
@@ -97,7 +94,6 @@ jobs:
           echo "::error::This PR from a fork requires formatting or screenshot updates."
           echo "Please run the following commands locally and push the changes:"
           echo "  ./gradlew spotlessApply"
-          echo "  ./gradlew :screenshotTests:updateScreenshots"
           echo "  ./scripts/convert-site-images-to-webp.sh"
           exit 1
 
@@ -109,5 +105,5 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -A
-          git commit -m "Auto-fix: spotlessApply and updateScreenshots [skip ci]"
+          git commit -m "Auto-fix: spotlessApply [skip ci]"
           git push
