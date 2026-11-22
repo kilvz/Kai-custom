@@ -688,7 +688,7 @@ class RemoteDataRepository(
                 toolExecutor.executeTool(name, arguments, conversationIdForTool)
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                """{"success": false, "error": "${e.message ?: "Tool execution failed"}"}"""
+                toolErrorJson(e.message ?: "Tool execution failed")
             }
             val elapsed = Clock.System.now().toEpochMilliseconds() - startTime
             if (elapsed < MIN_TOOL_DISPLAY_MS) {
@@ -1478,7 +1478,28 @@ class RemoteDataRepository(
         }
     }
 
-    private fun isNonRetryableException(e: Exception): Boolean = e is AnthropicInsufficientCreditsException || e is OpenAICompatibleQuotaExhaustedException
+    /**
+     * Failures that a retry a second later cannot fix: exhausted credit, rejected credentials, and
+     * requests the provider refused as malformed, too large or disallowed. Retrying these only
+     * delays the fallback chain (~3 s per service). Unknown/generic errors stay retryable.
+     */
+    private fun isNonRetryableException(e: Exception): Boolean = when (e) {
+        is AnthropicInsufficientCreditsException,
+        is OpenAICompatibleQuotaExhaustedException,
+        is AnthropicInvalidApiKeyException,
+        is GeminiInvalidApiKeyException,
+        is OpenAICompatibleInvalidApiKeyException,
+        is OpenAICompatibleModelNotFoundException,
+        is OpenAICompatibleRequestTooLargeException,
+        is OpenAICompatibleContentModerationException,
+        is OpenAICompatibleBadRequestException,
+        is ContextWindowExceededException,
+        is UnsupportedFileTypeException,
+        is FileTooLargeException,
+        -> true
+
+        else -> false
+    }
 
     /**
      * Retries an API call with simple exponential backoff.
