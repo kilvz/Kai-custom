@@ -31,10 +31,10 @@ Every time the main activity is brought to the foreground, if daemon mode is ena
 
 The daemon's task scheduler polls every 60 seconds and handles four types of background work:
 
-- **Scheduled tasks** Ã¢â‚¬” executes due tasks by sending their prompts through the AI pipeline
-- **Heartbeat checks** Ã¢â‚¬” periodic self-checks during active hours (see heartbeat doc)
-- **Email polling** Ã¢â‚¬” fetches new emails from configured accounts on a configurable interval
-- **SMS polling** Ã¢â‚¬” checks for new incoming SMS messages on a configurable interval
+- **Scheduled tasks** â€” executes due tasks by sending their prompts through the AI pipeline
+- **Heartbeat checks** â€” periodic self-checks during active hours (see heartbeat doc)
+- **Email polling** â€” fetches new emails from configured accounts on a configurable interval
+- **SMS polling** â€” checks for new incoming SMS messages on a configurable interval
 
 
 
@@ -49,8 +49,8 @@ The daemon's task scheduler polls every 60 seconds and handles four types of bac
 
 The app declares two permissions in the Android manifest:
 
-- `FOREGROUND_SERVICE` Ã¢â‚¬” required for all foreground services
-- `FOREGROUND_SERVICE_DATA_SYNC` Ã¢â‚¬” required for the `dataSync` service type
+- `FOREGROUND_SERVICE` â€” required for all foreground services
+- `FOREGROUND_SERVICE_DATA_SYNC` â€” required for the `dataSync` service type
 
 No wake locks or battery optimization exemptions are requested. The service relies on Android's standard process management with `START_STICKY` for restart behavior.
 
