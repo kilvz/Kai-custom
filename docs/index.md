@@ -7,9 +7,9 @@ An **open-source AI assistant with persistent memory** that runs on **Android, i
 
 ## Overview
 
-Kai-custom is a public FOSS fork of [Kai](https://github.com/SimonSchubert/Kai). It connects to 30 LLM providers (plus a keyless Free tier and on-device models) with automatic fallback, remembers important details across conversations, can act autonomously via scheduled heartbeats, and runs tools in a Linux sandbox. This fork adds wake word activation, SSH tooling, Shizuku/root tools, two-tier memory, persona management, a debug API, automatic memory extraction, and more.
+Kai-custom is a public FOSS fork of [Kai](https://github.com/SimonSchubert/Kai). It connects to 32 LLM providers (plus a keyless Free tier and on-device models) with automatic fallback, remembers important details across conversations, can act autonomously via scheduled heartbeats, and runs tools in a Linux sandbox. This fork adds wake word activation, SSH tooling, Shizuku/root tools, two-tier memory, persona management, a debug API, automatic memory extraction, and more.
 
-Current version: **v3.6.4** â€” based on upstream v2.7.0.
+Current version: **v4.0.0** â€” based on upstream v3.3.0.
 
 ## Key Features
 
@@ -17,7 +17,7 @@ Current version: **v3.6.4** â€” based on upstream v2.7.0.
 - **Customizable soul** â€” Split into user-edited text and auto-generated behavior notes
 - **Persona system** â€” Named persona profiles with editable descriptions
 - **Wake word** â€” "Hey Kai" keyword spotting on Android
-- **Multi-service fallback** â€” 30 providers with automatic failover, plus LiteRT on-device inference
+- **Multi-service fallback** â€” 32 providers with automatic failover, plus LiteRT on-device inference
 - **Tool execution** â€” Web search, notifications, calendar, SMS, contacts, shell commands, SSH, ADB, and more
 - **Linux sandbox** â€” Alpine Linux via proot for shell commands and scripts (Android)
 - **SSH tooling** â€” Profile management, session lifecycle, terminal UI
@@ -90,7 +90,7 @@ Current version: **v3.6.4** â€” based on upstream v2.7.0.
 
 ## Supported Services
 
-**[Atlas Cloud](https://www.atlascloud.ai?utm_source=github&utm_medium=link&utm_campaign=Kai)** Ã‚Â· [Anthropic](https://console.anthropic.com) Ã‚Â· [OpenAI](https://openai.com) Ã‚Â· [Gemini](https://aistudio.google.com) Ã‚Â· [DeepSeek](https://www.deepseek.com) Ã‚Â· [Mistral](https://mistral.ai) Ã‚Â· [xAI](https://x.ai) Ã‚Â· [OpenRouter](https://openrouter.ai) Â· [Requesty](https://requesty.ai) Ã‚Â· [Groq](https://groq.com) Ã‚Â· [NVIDIA](https://developer.nvidia.com) Ã‚Â· [Cerebras](https://cerebras.ai) Ã‚Â· [Ollama Cloud](https://ollama.com) Ã‚Â· [LongCat](https://longcat.chat) Ã‚Â· [Together AI](https://together.ai) Ã‚Â· [Hugging Face](https://huggingface.co) Ã‚Â· [Venice AI](https://venice.ai) Ã‚Â· [Moonshot AI](https://moonshot.cn) Ã‚Â· [Z.AI](https://z.ai) Ã‚Â· [MiniMax](https://minimax.io) Ã‚Â· [AIHubMix](https://aihubmix.com) Ã‚Â· [Deep Infra](https://deepinfra.com) Ã‚Â· [Fireworks AI](https://fireworks.ai) Ã‚Â· [OpenCode](https://opencode.ai) Â· [Public AI](https://publicai.co) Â· [AI Horde](https://stablehorde.net/) Â· [1min.AI](https://1min.ai) Â· [Perplexity](https://www.perplexity.ai) Ã‚Â· OpenAI-Compatible API Ã‚Â· LiteRT On-Device (Android) Ã‚Â· Free tier (no API key needed)
+**[Atlas Cloud](https://www.atlascloud.ai?utm_source=github&utm_medium=link&utm_campaign=Kai)** Ã‚Â· [Anthropic](https://console.anthropic.com) Ã‚Â· [OpenAI](https://openai.com) Ã‚Â· [Gemini](https://aistudio.google.com) Ã‚Â· [DeepSeek](https://www.deepseek.com) Ã‚Â· [Mistral](https://mistral.ai) Ã‚Â· [xAI](https://x.ai) Ã‚Â· [OpenRouter](https://openrouter.ai) Â· [Requesty](https://requesty.ai) Ã‚Â· [Groq](https://groq.com) Ã‚Â· [NVIDIA](https://developer.nvidia.com) Ã‚Â· [Cerebras](https://cerebras.ai) Ã‚Â· [Ollama Cloud](https://ollama.com) Ã‚Â· [LongCat](https://longcat.chat) Ã‚Â· [Together AI](https://together.ai) Ã‚Â· [Hugging Face](https://huggingface.co) Ã‚Â· [Venice AI](https://venice.ai) Ã‚Â· [Moonshot AI](https://moonshot.cn) Ã‚Â· [Z.AI](https://z.ai) Ã‚Â· [MiniMax](https://minimax.io) Ã‚Â· [AIHubMix](https://aihubmix.com) Ã‚Â· [Deep Infra](https://deepinfra.com) Ã‚Â· [Fireworks AI](https://fireworks.ai) Ã‚Â· [OpenCode](https://opencode.ai) Â· [Public AI](https://publicai.co) Â· SpAIder Â· [AI Horde](https://stablehorde.net/) Â· [1min.AI](https://1min.ai) Â· [Perplexity](https://www.perplexity.ai) Ã‚Â· OpenAI-Compatible API Ã‚Â· LiteRT On-Device (Android) Ã‚Â· Free tier (no API key needed)
 
 ## Platforms
 

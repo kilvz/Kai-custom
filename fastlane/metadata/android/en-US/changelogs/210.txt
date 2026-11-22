@@ -1,0 +1,7 @@
+Rebased onto upstream Kai v3.3.0 (189 commits)
+Add Requesty and 1min.AI providers
+Show third-party licenses in Settings
+Upgrade litert-lm to 0.19.1 and Android Gradle Plugin to 9.5.2
+Batch terminal output to fix ANRs
+Refresh feature documentation
+Upgrade dependencies

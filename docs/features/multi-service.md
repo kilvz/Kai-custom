@@ -2,7 +2,7 @@
 
 **Last verified:** 2026-10-02
 
-Kai supports 30 LLM providers (plus a built-in Free tier). Each provider uses one of three API formats: **OpenAI-compatible** (most services), **Gemini native**, or **Anthropic native** -- plus **LiteRT on-device** for local inference. A handful of OpenAI models additionally require OpenAI's **Responses API**; Kai switches to it per model, transparently. Users can configure multiple service instances, reorder them, and Kai automatically falls back through the chain on failure.
+Kai supports 32 LLM providers (plus a built-in Free tier). Each provider uses one of three API formats: **OpenAI-compatible** (most services), **Gemini native**, or **Anthropic native** -- plus **LiteRT on-device** for local inference. A handful of OpenAI models additionally require OpenAI's **Responses API**; Kai switches to it per model, transparently. Users can configure multiple service instances, reorder them, and Kai automatically falls back through the chain on failure.
 
 ## Concepts
 
@@ -81,6 +81,7 @@ The id is Kai's own random conversation identifier; nothing about the user or th
 | Service | `id` | Requires API Key | API Type |
 |---|---|---|---|
 | Free | `free` | No | OpenAI-compatible |
+| Atlas Cloud | `atlascloud` | Yes | OpenAI-compatible |
 | Gemini | `gemini` | Yes | Gemini native |
 | Anthropic | `anthropic` | Yes | Anthropic native |
 | OpenAI | `openai` | Yes | OpenAI-compatible |
@@ -106,6 +107,7 @@ The id is Kai's own random conversation identifier; nothing about the user or th
 | Fireworks AI | `fireworksai` | Yes | OpenAI-compatible |
 | OpenCode | `opencode` | Yes | OpenAI-compatible (every request carries an `x-opencode-session` header — see [Session Header](#session-header-opencode)) |
 | Public AI | `publicai` | Yes | OpenAI-compatible |
+| SpAIder | `spaider` | No | OpenAI-compatible (local service on localhost:8890) |
 | AI Horde | `aihorde` | Yes (anonymous key `0000000000` allowed at lowest priority) | OpenAI-compatible (via [oai.aihorde.net](https://oai.aihorde.net/); model list is the set of text models with online volunteer workers — availability and latency vary) |
 | 1min.AI | `1minai` | Yes | OpenAI-compatible (via 1min.AI's `/openai/v1` adapter; text-only, so image attachments are not sent; requests are capped at 200 messages and 100,000 characters including tool definitions) |
 | Perplexity | `perplexity` | Yes | OpenAI-compatible (Sonar; ships with a curated default model list — no authenticated `/models` endpoint for Sonar; connection validation probes the chat endpoint with an incomplete body to check the API key) |

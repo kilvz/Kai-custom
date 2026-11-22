@@ -31,7 +31,7 @@ Same rock-solid core. More features. Still FOSS, still private.
 
 ## What Comes From Kai 9000
 
-- 24+ AI providers with automatic fallback
+- 32 AI providers with automatic fallback
 - Persistent memory stored locally
 - Linux sandbox (proot) on Android
 - Automated heartbeat & scheduled tasks
