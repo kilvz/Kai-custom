@@ -24,19 +24,19 @@ class DockerUnavailableSandboxController(
     private val dockerManager: DockerManager,
 ) : SandboxController {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val _status = MutableStateFlow(SandboxStatus(error = true, statusText = "Docker Desktop not found — click Install to set it up"))
+    private val _status = MutableStateFlow(SandboxStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "Docker Desktop not found — click Install to set it up")))
     override val status: StateFlow<SandboxStatus> = _status
     override val sessions: StateFlow<List<String>> =
         MutableStateFlow(emptyList())
     override fun setup() {
-        _status.value = _status.value.copy(working = true, statusText = "Installing Docker Desktop...")
+        _status.value = _status.value.copy(working = true, label = SandboxStatusLabel.Installing)
         scope.launch {
             val installed = dockerManager.installDockerDesktop()
             if (installed) {
                 val info = dockerManager.getInfo()
-                _status.value = _status.value.copy(working = false, error = false, statusText = "Docker installed. Restart the app to use the sandbox.")
+                _status.value = _status.value.copy(working = false, error = false, label = SandboxStatusLabel.NotInstalled)
             } else {
-                _status.value = _status.value.copy(working = false, error = true, statusText = "Docker installation failed. Install Docker Desktop manually from https://docker.com")
+                _status.value = _status.value.copy(working = false, error = true, label = SandboxStatusLabel.Failure.Install(detail = "Docker installation failed. Install Docker Desktop manually from https://docker.com"))
             }
         }
     }

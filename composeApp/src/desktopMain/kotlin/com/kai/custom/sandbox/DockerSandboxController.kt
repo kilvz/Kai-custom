@@ -7,6 +7,7 @@ import com.kai.custom.NoOpCommandHandle
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxFileEntry
 import com.kai.custom.SandboxStatus
+import com.kai.custom.SandboxStatusLabel
 import com.kai.custom.TerminalLine
 import com.kai.custom.TextFileResult
 import com.kai.custom.data.AppSettings
@@ -62,7 +63,7 @@ class DockerSandboxController(
     private val imageName = "alpine:latest"
 
     override fun setup() {
-        _status.value = _status.value.copy(working = true, statusText = "Setting up Docker sandbox...")
+        _status.value = _status.value.copy(working = true, label = SandboxStatusLabel.Installing)
         scope.launch {
             try {
                 val info = dockerManager.getInfo()
@@ -70,13 +71,13 @@ class DockerSandboxController(
                     _status.value = _status.value.copy(
                         working = false,
                         error = true,
-                        statusText = "Docker is not available. Please install Docker Desktop.",
+                        label = SandboxStatusLabel.Failure.Status(detail = "Docker is not available. Please install Docker Desktop."),
                     )
                     return@launch
                 }
-                _status.value = _status.value.copy(statusText = "Pulling Docker image ($imageName)...")
+                _status.value = _status.value.copy(label = SandboxStatusLabel.Downloading)
                 dockerManager.pullImage(imageName)
-                _status.value = _status.value.copy(statusText = "Creating sandbox container...")
+                _status.value = _status.value.copy(label = SandboxStatusLabel.Configuring)
                 val cid = dockerManager.createContainer(
                     imageName,
                     containerName,
@@ -87,21 +88,21 @@ class DockerSandboxController(
                         installed = true,
                         ready = true,
                         working = false,
-                        statusText = "Sandbox ready ($imageName)",
+                        label = SandboxStatusLabel.Ready,
                     )
                     refreshStatus()
                 } else {
                     _status.value = _status.value.copy(
                         working = false,
                         error = true,
-                        statusText = "Failed to create Docker container",
+                        label = SandboxStatusLabel.Failure.Setup(detail = "Failed to create Docker container"),
                     )
                 }
             } catch (e: Exception) {
                 _status.value = _status.value.copy(
                     working = false,
                     error = true,
-                    statusText = "Setup failed: ${e.message}",
+                    label = SandboxStatusLabel.Failure.Setup(detail = "Setup failed: ${e.message}"),
                 )
             }
         }
@@ -112,7 +113,7 @@ class DockerSandboxController(
     }
 
     override fun reset() {
-        _status.value = _status.value.copy(working = true, statusText = "Removing sandbox container...")
+        _status.value = _status.value.copy(working = true, label = SandboxStatusLabel.NotInstalled)
         scope.launch {
             dockerManager.removeContainer(containerName, force = true)
             _status.value = SandboxStatus()
@@ -127,27 +128,27 @@ class DockerSandboxController(
     }
 
     override fun installPackages() {
-        _status.value = _status.value.copy(working = true, statusText = "Installing packages...")
+        _status.value = _status.value.copy(working = true, label = SandboxStatusLabel.BasePackages)
         scope.launch {
             try {
                 dockerManager.execCommand(
                     containerName,
                     "apk add --no-cache python3 nodejs npm curl git bash sudo",
                 )
-                _status.value = _status.value.copy(statusText = "Installing edge-tts...")
+                _status.value = _status.value.copy(label = SandboxStatusLabel.InstallingPackage("edge-tts"))
                 runCatching {
                     dockerManager.execCommand(containerName, "pip install --no-cache-dir edge-tts 2>&1")
                 }
                 _status.value = _status.value.copy(
                     working = false,
                     packagesInstalled = true,
-                    statusText = "Packages installed",
+                    label = SandboxStatusLabel.Ready,
                 )
             } catch (e: Exception) {
                 _status.value = _status.value.copy(
                     working = false,
                     error = true,
-                    statusText = "Install failed: ${e.message}",
+                    label = SandboxStatusLabel.Failure.Install(detail = "Install failed: ${e.message}"),
                 )
             }
         }
