@@ -158,21 +158,23 @@ class LinuxSandboxManager(
         // Copy libtalloc with correct soname (Android strips .so.2 suffix in jniLibs)
         copyLibtalloc()
 
-        // Download rootfs
+        // Download rootfs. Wipe any partial/previous rootfs so retries after a
+        // failed apk update (or a version pin change) always re-extract cleanly.
         val rootfsDir = File(sandboxDir, "rootfs")
-        if (!rootfsDir.isDirectory) {
-            val tarGzFile = File(sandboxDir, "rootfs.tar.gz")
-            try {
-                _state.value = SandboxState.Downloading(0f)
-                downloader.download(arch, tarGzFile, distro) { progress ->
-                    _state.value = SandboxState.Downloading(progress)
-                }
-
-                _state.value = SandboxState.Extracting
-                downloader.extractTarGz(tarGzFile, rootfsDir)
-            } finally {
-                tarGzFile.delete()
+        if (rootfsDir.exists()) {
+            rootfsDir.deleteRecursively()
+        }
+        val tarGzFile = File(sandboxDir, "rootfs.tar.gz")
+        try {
+            _state.value = SandboxState.Downloading(0f)
+            downloader.download(arch, tarGzFile, distro) { progress ->
+                _state.value = SandboxState.Downloading(progress)
             }
+
+            _state.value = SandboxState.Extracting
+            downloader.extractTarGz(tarGzFile, rootfsDir)
+        } finally {
+            tarGzFile.delete()
         }
 
         // Post-setup
@@ -198,6 +200,7 @@ class LinuxSandboxManager(
             val executor = createProotExecutor()
             val updateCmd = if (distro == "ubuntu") "apt-get update" else "apk update"
             var updated = false
+            var lastDetail = ""
             for (mirror in downloader.getMirrors(distro, arch)) {
                 downloader.writeRepositories(rootfsDir, mirror, distro)
                 val result = executor.execute(updateCmd, timeoutSeconds = 180)
@@ -205,9 +208,17 @@ class LinuxSandboxManager(
                     updated = true
                     break
                 }
+                val stderr = (result["stderr"] as? String).orEmpty().trim()
+                val stdout = (result["stdout"] as? String).orEmpty().trim()
+                val error = (result["error"] as? String).orEmpty().trim()
+                lastDetail = listOf(stderr, stdout, error).firstOrNull { it.isNotEmpty() }.orEmpty()
             }
             if (!updated) {
-                throw IllegalStateException("$updateCmd failed on all mirrors")
+                // Partial rootfs would skip re-download on the next Install attempt
+                // and keep failing; wipe so the next try starts clean.
+                rootfsDir.deleteRecursively()
+                val suffix = if (lastDetail.isNotEmpty()) ": $lastDetail" else ""
+                throw IllegalStateException("$updateCmd failed on all mirrors$suffix")
             }
         }
 
