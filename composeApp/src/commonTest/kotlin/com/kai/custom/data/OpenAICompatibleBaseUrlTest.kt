@@ -1,5 +1,6 @@
 package com.inspiredandroid.kai.data
 
+import com.kai.custom.data.Service
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

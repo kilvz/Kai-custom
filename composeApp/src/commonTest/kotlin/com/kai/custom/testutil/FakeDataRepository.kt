@@ -581,6 +581,29 @@ class FakeDataRepository : DataRepository {
     override fun setSandboxEnabled(enabled: Boolean) {
     }
 
+    private var autoUpdateEnabled = false
+    private var autoDownloadEnabled = false
+    private var autoInstallEnabled = false
+
+    override fun isAutoUpdateEnabled(): Boolean = autoUpdateEnabled
+    override fun setAutoUpdateEnabled(enabled: Boolean) {
+        autoUpdateEnabled = enabled
+    }
+    override fun isAutoDownloadEnabled(): Boolean = autoDownloadEnabled
+    override fun setAutoDownloadEnabled(enabled: Boolean) {
+        autoDownloadEnabled = enabled
+    }
+    override fun isAutoInstallEnabled(): Boolean = autoInstallEnabled
+    override fun setAutoInstallEnabled(enabled: Boolean) {
+        autoInstallEnabled = enabled
+    }
+
+    private var sandboxWorkDir: String = ""
+    override fun getSandboxWorkDir(): String = sandboxWorkDir
+    override fun setSandboxWorkDir(uri: String) {
+        sandboxWorkDir = uri
+    }
+
     override fun isSandboxStorageMountEnabled(): Boolean = false
 
     override fun setSandboxStorageMountEnabled(enabled: Boolean) {
@@ -626,9 +649,10 @@ class FakeDataRepository : DataRepository {
     override fun getHeartbeatInstanceId(): String? = null
     override fun setHeartbeatInstanceId(instanceId: String?) {}
 
-    override suspend fun askWithTools(prompt: String, instanceId: String?): String = ""
+    override suspend fun askWithTools(prompt: String, instanceId: String?, conversationIdOverride: String?): String = ""
     override suspend fun askWithToolsVerbose(prompt: String, instanceId: String?): AskWithToolsResult = AskWithToolsResult("")
-    override suspend fun askSilently(question: String): String = ""
+    override suspend fun askSilently(question: String, timeoutMs: Long): String = ""
+    override suspend fun getOrCreateHeartbeatConversationId(): String = "test-heartbeat-conversation"
     override suspend fun askSilentlyWithInstance(instanceId: String, prompt: String, timeoutMs: Long): String = ""
     override suspend fun addAssistantMessage(content: String) {}
 
@@ -763,10 +787,10 @@ class FakeDataRepository : DataRepository {
         debugApiEnabled = enabled
     }
 
-    var debugEndpointEnabled = false
-    override fun isDebugEndpointEnabled(): Boolean = debugEndpointEnabled
+    var debugEndpointEnabledValue = false
+    override fun isDebugEndpointEnabled(): Boolean = debugEndpointEnabledValue
     override fun setDebugEndpointEnabled(enabled: Boolean) {
-        debugEndpointEnabled = enabled
+        debugEndpointEnabledValue = enabled
     }
 
     override fun isNotificationsEnabled(): Boolean = notificationsEnabled

@@ -1,11 +1,11 @@
 package com.kai.custom.ui.chat
 
 import app.cash.turbine.test
-import com.kai.custom.NoOpSpeechToText
 import com.kai.custom.data.TaskScheduler
 import com.kai.custom.testutil.FakeDataRepository
+import com.kai.custom.testutil.TestSpeechToText
+import com.kai.custom.testutil.TestWakeWordController
 import com.kai.custom.tools.MicrophonePermissionController
-import com.kai.custom.wakeword.NoOpWakeWordController
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,8 +35,8 @@ class ChatViewModelFileAttachmentTest {
     private val testDispatcher = StandardTestDispatcher()
     private val unconfinedDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeRepository: FakeDataRepository
-    private val testSpeechToText = NoOpSpeechToText()
-    private val testWakeWordController = NoOpWakeWordController()
+    private val testSpeechToText = TestSpeechToText()
+    private val testWakeWordController = TestWakeWordController()
     private val testMicrophonePermissionController = MicrophonePermissionController()
 
     @BeforeTest

@@ -1,5 +1,6 @@
 package com.inspiredandroid.kai.tools
 
+import com.kai.custom.tools.ShellCommandTool
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout

@@ -41,6 +41,8 @@ class SplinterlandsViewModelTest {
             object : DaemonController {
                 override fun start() {}
                 override fun stop() {}
+                override fun startFloatingBall(): Boolean = true
+                override fun stopFloatingBall() {}
             },
         )
     }

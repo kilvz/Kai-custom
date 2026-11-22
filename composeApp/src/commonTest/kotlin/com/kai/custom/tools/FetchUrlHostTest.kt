@@ -1,5 +1,7 @@
 package com.inspiredandroid.kai.tools
 
+import com.kai.custom.tools.isBlockedFetchHost
+import com.kai.custom.tools.resolveRedirect
 import io.ktor.http.Url
 import kotlin.test.Test
 import kotlin.test.assertEquals

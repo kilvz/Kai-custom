@@ -81,7 +81,7 @@ class SandboxViewModelTest {
             installPackagesCalls++
         }
 
-        override suspend fun executeCommand(command: String, sessionId: String): String = ""
+        override suspend fun executeCommand(command: String, sessionId: String, useRoot: Boolean, timeoutSeconds: Long): String = ""
 
         override suspend fun executeCommandStructured(
             command: String,

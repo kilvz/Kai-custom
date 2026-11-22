@@ -1,5 +1,6 @@
 package com.inspiredandroid.kai.mcp
 
+import com.kai.custom.mcp.uniqueMcpToolName
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

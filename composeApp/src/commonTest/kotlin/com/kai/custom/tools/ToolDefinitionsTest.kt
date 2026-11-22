@@ -1,9 +1,11 @@
 package com.kai.custom.tools
 
-import com.kai.custom.data.AppSettings
+import com.kai.custom.data.DiaryEntry
+import com.kai.custom.data.MemoryCategory
+import com.kai.custom.data.MemoryEntry
 import com.kai.custom.data.MemoryStore
+import com.kai.custom.data.dimension.KGFact
 import com.kai.custom.network.tools.Tool
-import com.russhwolf.settings.MapSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -33,9 +35,41 @@ class ToolDefinitionsTest {
         assertTrue(missing.isEmpty(), "Executable tools with no ToolInfo (chat shows the raw id): $missing")
     }
 
+    /**
+     * MemoryStore is an interface now; the memory tools only need an instance to
+     * build their schemas — no store method is invoked by this test.
+     */
+    private val memoryStore = object : MemoryStore {
+        override suspend fun store(key: String, content: String, category: MemoryCategory, source: String?): MemoryEntry =
+            MemoryEntry(key, content, 0, 0)
+
+        override suspend fun updateContent(key: String, content: String): MemoryEntry? = null
+        override suspend fun reinforceMemory(key: String): MemoryEntry? = null
+        override suspend fun forget(key: String): Boolean = false
+        override suspend fun deleteAllMemories(force: Boolean) {}
+        override suspend fun storeProtected(key: String, content: String, category: MemoryCategory, source: String?): MemoryEntry =
+            MemoryEntry(key, content, 0, 0)
+
+        override fun getUserMemories(max: Int): List<MemoryEntry> = emptyList()
+        override fun getBehaviorMemories(): List<MemoryEntry> = emptyList()
+        override fun getAllMemories(max: Int): List<MemoryEntry> = emptyList()
+        override fun searchMemories(query: String, limit: Int, mode: String): List<MemoryEntry> = emptyList()
+        override fun getPromotionCandidates(minHits: Int, max: Int): List<MemoryEntry> = emptyList()
+        override fun exportDimension(): ByteArray = ByteArray(0)
+        override fun importDimension(data: ByteArray) {}
+        override suspend fun addFact(subject: String, predicate: String, `object`: String): KGFact =
+            KGFact(id = "", subject = subject, predicate = predicate, `object` = `object`, createdAt = 0)
+
+        override fun queryFacts(entity: String?, relation: String?, limit: Int): List<KGFact> = emptyList()
+        override suspend fun invalidateFact(subject: String, predicate: String, `object`: String) {}
+        override suspend fun diaryWrite(agentName: String, content: String, topic: String) {}
+        override fun diaryRead(agentName: String, lastN: Int): List<DiaryEntry> = emptyList()
+        override suspend fun diaryDelete(id: String): Boolean = false
+    }
+
     @Test
     fun everyMemoryToolHasADefinition() {
-        val missing = CommonTools.getMemoryTools(MemoryStore(AppSettings(MapSettings())))
+        val missing = CommonTools.getMemoryTools(memoryStore)
             .map { it.schema.name }
             .filterNot { it in definitionIds }
         assertTrue(missing.isEmpty(), "Memory tools with no ToolInfo: $missing")
