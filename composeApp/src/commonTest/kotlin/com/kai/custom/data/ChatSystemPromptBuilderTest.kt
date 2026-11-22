@@ -79,7 +79,9 @@ class ChatSystemPromptBuilderTest {
             uiMode = uiMode,
             preferredLanguage = "en",
             renderMode = RenderMode.FORK_ENHANCED,
-            taskDomains = if (relevantMemories.isNotEmpty() || generalMemories.isNotEmpty()) {
+            taskDomains = if (relevantMemories.isNotEmpty() || generalMemories.isNotEmpty() ||
+                preferenceMemories.isNotEmpty() || learningMemories.isNotEmpty() || errorMemories.isNotEmpty()
+            ) {
                 setOf(TaskDomain.MEMORY_QUERY)
             } else {
                 setOf(TaskDomain.GENERAL_CHAT)
@@ -106,15 +108,21 @@ class ChatSystemPromptBuilderTest {
     }
 
     @Test
-    fun `removed sections are not present in either variant`() {
+    fun `technical sections follow variant gating`() {
+        // Since the v3.6.3 prompt-pipeline rearch, Tool Use / Memory System /
+        // Automation are emitted by UnifiedPromptBuilder (they were only absent
+        // from the old pre-rearch builder). Memory System and Automation are
+        // CHAT_REMOTE-only; "When to Act" only appears in UPSTREAM_COMPAT mode.
         val remote = build(SystemPromptVariant.CHAT_REMOTE)
+        assertTrue("## Tool Use" in remote)
+        assertTrue("## Memory System" in remote)
+        assertTrue("## Automation" in remote)
+        assertFalse("## When to Act" in remote)
         val local = build(SystemPromptVariant.CHAT_LOCAL)
-        for (out in listOf(remote, local)) {
-            assertFalse("## Tool Use" in out)
-            assertFalse("## When to Act" in out)
-            assertFalse("## Memory System" in out)
-            assertFalse("## Automation" in out)
-        }
+        assertTrue("## Tool Use" in local)
+        assertFalse("## Memory System" in local)
+        assertFalse("## Automation" in local)
+        assertFalse("## When to Act" in local)
     }
 
     @Test
@@ -281,15 +289,18 @@ class ChatSystemPromptBuilderTest {
             memoryEnabled = false,
             schedulingEnabled = false,
         )
+        // Since the v3.6.3 rearch the persona order is Soul, Honesty, Language,
+        // and build() joins an empty task part, so the output ends with "\n\n"
+        // after the Context section's own trailing newline.
         val expected = "You're a personal assistant.\n\n" +
-            "## Language\nAdapt to the user's language. Speak the language they write in.\n\n" +
             DEFAULT_HONESTY_RULE + "\n\n" +
+            "## Language\nAdapt to the user's language. Speak the language they write in.\n\n" +
             "## Context\n" +
             "- Local time: 2026-04-11T02:00:00+02:00 (Europe/Berlin)\n" +
             "- UTC: 2026-04-11T00:00:00Z\n" +
             "- Platform: Test\n" +
             "- Model: test-model\n" +
-            "- Provider: Test Provider\n"
+            "- Provider: Test Provider\n" + "\n\n"
         assertEquals(expected, out)
     }
 
@@ -448,22 +459,29 @@ class ChatSystemPromptBuilderTest {
     // region Golden snapshots
 
     @Test
-    fun `golden CHAT_LOCAL with soul + language + honesty + context`() {
+    fun `golden CHAT_LOCAL with default flags`() {
         val out = build(
             variant = SystemPromptVariant.CHAT_LOCAL,
             soul = "You are Kai, a helpful assistant.",
             pendingTasks = listOf(task(description = "ignored task")),
             uiMode = ChatPromptUiMode.DYNAMIC_UI,
         )
+        // Pinned to the v3.6.3 rearch builder: persona order Soul, Honesty,
+        // Language; CHAT_LOCAL with default flags includes Tool Use and the
+        // memory-search guidance (hasTools/memoryEnabled default true), while
+        // Memory System, Automation and Dynamic UI are CHAT_REMOTE-only.
+        // Output ends with "\n\n" from the empty task part.
         val expected = "You are Kai, a helpful assistant.\n\n" +
-            "## Language\nAdapt to the user's language. Speak the language they write in.\n\n" +
             DEFAULT_HONESTY_RULE + "\n\n" +
+            "## Language\nAdapt to the user's language. Speak the language they write in.\n\n" +
+            "## Tool Use\nUse tools to verify work and resolve ambiguity. Don't ask the user for lookups you can do yourself. Check available tools in the tools array before saying a capability is unavailable. Summarize noisy output instead of dumping raw logs.\n\n" +
+            "When you don't know something or need information, first search your memory with search_memories (supports vector/semantic and keyword matching). If not found, search the internet with web_search. Save what you learn with memory_store.\n\n" +
             "## Context\n" +
             "- Local time: 2026-04-11T02:00:00+02:00 (Europe/Berlin)\n" +
             "- UTC: 2026-04-11T00:00:00Z\n" +
             "- Platform: Test\n" +
             "- Model: test-model\n" +
-            "- Provider: Test Provider\n"
+            "- Provider: Test Provider\n" + "\n\n"
         assertEquals(expected, out)
     }
 
@@ -492,19 +510,27 @@ class ChatSystemPromptBuilderTest {
             ),
             uiMode = ChatPromptUiMode.NONE,
         )
+        // Section order pinned to the v3.6.3 rearch builder: persona (Soul,
+        // Honesty, Language), then technical sections, then the memory dump
+        // (a task adapter, so it comes after Context). The headerless
+        // memory-search guidance line sits between Memory System and Automation.
         val headerOrder = listOf(
             "You are Kai.",
-            "## Language",
             DEFAULT_HONESTY_RULE,
+            "## Language",
+            "## Tool Use",
+            "## Memory System",
+            "## Automation",
+            "## Email Policy",
+            "## Email Accounts",
+            "## Scheduled Tasks",
+            "## Heartbeat Additions",
+            "## Context",
             "## What I Know About You",
             "## Your Memories",
             "## User Preferences",
             "## Learnings",
             "## Known Issues & Resolutions",
-            "## Email Accounts",
-            "## Scheduled Tasks",
-            "## Heartbeat Additions",
-            "## Context",
         )
         var lastIdx = -1
         for (header in headerOrder) {

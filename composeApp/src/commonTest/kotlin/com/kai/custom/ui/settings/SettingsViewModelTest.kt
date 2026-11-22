@@ -16,10 +16,15 @@ import com.kai.custom.tools.AppPermission
 import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.ToolPermissionBridge
 import com.russhwolf.settings.MapSettings
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -55,19 +60,38 @@ class SettingsViewModelTest {
     private val fakeAutoUpdateManager = AutoUpdateManager()
     private val fakeNotificationPermissionController = PermissionController(AppPermission.POST_NOTIFICATIONS)
 
-    private fun createViewModel() = SettingsViewModel(
-        dataRepository = fakeRepository,
-        daemonController = fakeDaemonController,
-        debugApiController = fakeDebugApiController,
-        notificationPermissionController = fakeNotificationPermissionController,
-        taskScheduler = noOpScheduler,
-        wakeWordController = fakeWakeWordController,
-        sandboxController = fakeSandboxController,
-        mcpServerManager = fakeMcpServerManager,
-        toolPermissionBridge = fakeToolPermissionBridge,
-        autoUpdateManager = fakeAutoUpdateManager,
-        backgroundDispatcher = testDispatcher,
-    )
+    /**
+     * Creates the ViewModel and arranges for its [viewModelScope] to be cancelled
+     * when the test body finishes.
+     *
+     * The ViewModel starts an infinite 5s poll loop in its scope at init
+     * (SettingsViewModel.kt:368), and `runTest` shares this test's scheduler
+     * (via `Dispatchers.setMain`). At the end of `runTest` it drains that
+     * scheduler with `advanceUntilIdleOr`, which never returns while the poll
+     * loop keeps rescheduling its next delay — the test spins at 100% CPU
+     * forever (no timeout applies to that drain). Cancelling the scope here
+     * removes the loop's pending delay event, so the drain terminates.
+     * This touches test code only; the production poll loop is unchanged.
+     */
+    private suspend fun TestScope.createViewModel(): SettingsViewModel {
+        val viewModel = SettingsViewModel(
+            dataRepository = fakeRepository,
+            daemonController = fakeDaemonController,
+            debugApiController = fakeDebugApiController,
+            notificationPermissionController = fakeNotificationPermissionController,
+            taskScheduler = noOpScheduler,
+            wakeWordController = fakeWakeWordController,
+            sandboxController = fakeSandboxController,
+            mcpServerManager = fakeMcpServerManager,
+            toolPermissionBridge = fakeToolPermissionBridge,
+            autoUpdateManager = fakeAutoUpdateManager,
+            backgroundDispatcher = testDispatcher,
+        )
+        currentCoroutineContext()[Job]?.invokeOnCompletion {
+            viewModel.viewModelScope.cancel()
+        }
+        return viewModel
+    }
 
     /**
      * Bounded replacement for [TestCoroutineScheduler.advanceUntilIdle]: the

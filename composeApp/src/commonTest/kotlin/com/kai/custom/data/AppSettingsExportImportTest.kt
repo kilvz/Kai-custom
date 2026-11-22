@@ -831,7 +831,10 @@ class AppSettingsExportImportTest {
         val json = appSettings.exportToJson(toolIds)
         val sections = detectExportableSections(json)
         // Tools and Memory (toggle) are always present on a fresh install.
-        assertEquals(setOf(ImportSection.TOOLS, ImportSection.MEMORY), sections.keys)
+        // SOUL is too: exportToJson always writes persona_list because
+        // PersonaManager.getAllPersonas() returns the built-in personas
+        // (PersonaCatalog.all) even when the user has stored none.
+        assertEquals(setOf(ImportSection.TOOLS, ImportSection.MEMORY, ImportSection.SOUL), sections.keys)
     }
 
     @Test
