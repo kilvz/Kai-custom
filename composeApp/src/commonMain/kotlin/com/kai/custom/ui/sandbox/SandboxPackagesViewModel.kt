@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxSessions
+import com.kai.custom.data.DataRepository
 import com.kai.custom.linux.PackageEntry
 import com.kai.custom.linux.PackageManagerSpec
 import kai.composeapp.generated.resources.Res

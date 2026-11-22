@@ -93,12 +93,6 @@ private val SshPrompt = Color(0xFF6CB6FF)
 private val SshError = Color(0xFFF48771)
 private val SshDimText = Color(0xFF666666)
 
-private fun monoStyle(size: TextUnit, color: Color = Color.Unspecified) = TextStyle(
-    fontFamily = FontFamily.Monospace,
-    fontSize = size,
-    color = color,
-)
-
 @Composable
 internal fun SshTerminalContent(
     sshViewModel: SshViewModel,

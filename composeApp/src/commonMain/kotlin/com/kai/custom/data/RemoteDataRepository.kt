@@ -90,6 +90,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
@@ -2419,6 +2420,10 @@ class RemoteDataRepository(
         appSettings.setSandboxDistro(distro)
     }
 
+    override fun setSandboxDistro(distro: String) {
+        appSettings.setSandboxDistro(LinuxDistro.fromId(distro))
+    }
+
     // Wake word
     override fun isWakeWordEnabled(): Boolean = appSettings.isWakeWordEnabled()
 
@@ -2711,7 +2716,7 @@ class RemoteDataRepository(
 
     override fun importDimension(data: ByteArray) = memoryStore.importDimension(data)
 
-    override suspend fun askWithTools(prompt: String, instanceId: String?): String {
+    override suspend fun askWithTools(prompt: String, instanceId: String?, conversationIdOverride: String?): String {
         val fallbackEntries = getOrderedFallbackEntries().filter { hasValidInstanceApiKey(it.instanceId, it.service) }
         if (fallbackEntries.isEmpty()) return ""
 
@@ -2721,7 +2726,18 @@ class RemoteDataRepository(
         val messages = listOf(History(role = History.Role.USER, content = prompt))
         val systemPrompt = getActiveSystemPrompt()
         val localHistory = MutableStateFlow(messages)
-        return askWithService(service, messages, systemPrompt, entry.instanceId, localHistory).content
+        // When a conversation override is set (heartbeat / scheduled tasks), bind any
+        // tool calls in this run to that conversation's sandbox session via the
+        // coroutine context — otherwise tool dispatch would inherit `_currentConversationId`
+        // (the chat the user is viewing), routing the heartbeat's shell commands into
+        // that chat's persistent bash session.
+        return if (conversationIdOverride != null) {
+            withContext(ConversationIdElement(conversationIdOverride)) {
+                askWithService(service, messages, systemPrompt, entry.instanceId, localHistory).content
+            }
+        } else {
+            askWithService(service, messages, systemPrompt, entry.instanceId, localHistory).content
+        }
     }
 
     override suspend fun askWithToolsVerbose(prompt: String, instanceId: String?): AskWithToolsResult {
@@ -2821,11 +2837,28 @@ class RemoteDataRepository(
         _pendingShareText.value = null
     }
 
+    override suspend fun getOrCreateHeartbeatConversationId(): String {
+        val existing = savedConversations.value.find { it.type == Conversation.TYPE_HEARTBEAT }
+        if (existing != null) return existing.id
+        val now = Clock.System.now().toEpochMilliseconds()
+        val id = Uuid.random().toString()
+        conversationStorage.saveConversation(
+            Conversation(
+                id = id,
+                messages = emptyList(),
+                createdAt = now,
+                updatedAt = now,
+                type = Conversation.TYPE_HEARTBEAT,
+            ),
+        )
+        return id
+    }
+
     override suspend fun addAssistantMessage(content: String) {
         val now = Clock.System.now().toEpochMilliseconds()
 
         val existing = savedConversations.value.find { it.type == Conversation.TYPE_HEARTBEAT }
-        val heartbeatId = existing?.id ?: Uuid.random().toString()
+        val heartbeatId = existing?.id ?: getOrCreateHeartbeatConversationId()
 
         val newMessage = Conversation.Message(
             id = Uuid.random().toString(),

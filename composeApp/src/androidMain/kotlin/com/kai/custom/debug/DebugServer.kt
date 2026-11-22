@@ -1451,7 +1451,7 @@ class DebugServer(
                                 put("ready", JsonPrimitive(s.ready))
                                 put("working", JsonPrimitive(s.working))
                                 put("progress", s.progress?.let { JsonPrimitive(it) } ?: JsonNull)
-                                put("statusText", JsonPrimitive(s.statusText))
+                                put("statusText", s.label?.let { JsonPrimitive(it.toString()) } ?: JsonNull)
                                 put("error", JsonPrimitive(s.error))
                                 put("lastWhatsAppError", s.lastWhatsAppError?.let { JsonPrimitive(it) } ?: JsonNull)
                                 put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))

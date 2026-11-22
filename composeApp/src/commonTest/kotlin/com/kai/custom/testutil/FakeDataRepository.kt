@@ -586,8 +586,6 @@ class FakeDataRepository : DataRepository {
     override fun setSandboxStorageMountEnabled(enabled: Boolean) {
     }
 
-    override fun getSandboxDistro(): String = "alpine"
-
     override fun setSandboxDistro(distro: String) {
     }
 

@@ -1,5 +1,6 @@
 package com.kai.custom.inference
 
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -55,6 +56,21 @@ class GgufInferenceEngine(
 
     private val _downloadError = MutableStateFlow<DownloadError?>(null)
     override val downloadError: StateFlow<DownloadError?> = _downloadError
+
+    // GGUF models cannot be imported as .litertlm bundles; these stay null.
+    override val importingFileName: StateFlow<String?> = MutableStateFlow(null)
+    override val importProgress: StateFlow<Float?> = MutableStateFlow(null)
+    override val importError: StateFlow<ModelImportError?> = MutableStateFlow(null)
+
+    // GGUF engine has no .litertlm import path; importing is a LiteRT-only feature.
+    override fun getImportedLocalModels(): List<LocalModel> = emptyList()
+
+    override suspend fun importModel(source: PlatformFile): ModelImportResult = ModelImportResult.Failure(
+        ModelImportError.INVALID_EXTENSION,
+        "GGUF engine does not support importing .litertlm models",
+    )
+
+    override fun cancelImport() = Unit
 
     override suspend fun initialize(model: DownloadedModel, contextTokens: Int) {
         if (native == null) throw IllegalStateException("GGUF native library not loaded. Please ensure the app was built with GGUF support.")

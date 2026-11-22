@@ -202,12 +202,11 @@ interface DataRepository {
     fun setSandboxEnabled(enabled: Boolean)
     fun isSandboxStorageMountEnabled(): Boolean
     fun setSandboxStorageMountEnabled(enabled: Boolean)
-    fun getSandboxDistro(): String
-    fun setSandboxDistro(distro: String)
 
     /** Distro a fresh sandbox install would use. An existing install keeps its own. */
     fun getSandboxDistro(): LinuxDistro
     fun setSandboxDistro(distro: LinuxDistro)
+    fun setSandboxDistro(distro: String)
 
     // Kai Build
 
@@ -308,7 +307,9 @@ interface DataRepository {
     suspend fun editAndBranch(messageId: String, newContent: String): Boolean
 
     // Background ask with tools (no chat history update, supports tool-calling loop)
-    suspend fun askWithTools(prompt: String, instanceId: String? = null): String
+    // When `conversationIdOverride` is set, tool calls during this run route to that
+    // conversation's sandbox session instead of the chat currently being viewed.
+    suspend fun askWithTools(prompt: String, instanceId: String? = null, conversationIdOverride: String? = null): String
     suspend fun askWithToolsVerbose(prompt: String, instanceId: String? = null): AskWithToolsResult
 
     // Silent ask (no tools, no chat history update)
@@ -319,6 +320,7 @@ interface DataRepository {
     // Heartbeat notification
     val hasUnreadHeartbeat: StateFlow<Boolean>
     fun clearUnreadHeartbeat()
+    suspend fun getOrCreateHeartbeatConversationId(): String
 
     /**
      * Pulse that fires when the user taps a heartbeat push notification while the app is

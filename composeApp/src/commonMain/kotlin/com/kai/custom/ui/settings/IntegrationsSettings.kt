@@ -58,6 +58,7 @@ import com.kai.custom.data.DataRepository
 import com.kai.custom.decodeToImageBitmap
 import com.kai.custom.listCalendarAccounts
 import com.kai.custom.ui.handCursor
+import com.kai.custom.ui.sandbox.sandboxStatusText
 import com.kai.custom.whatsapp.WhatsAppLifecycleManager
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.integrations_calendar_auto
@@ -383,7 +384,7 @@ private fun WhatsAppSection(
             // Live progress during install
             if (sandboxStatus.working) {
                 Text(
-                    text = sandboxStatus.statusText,
+                    text = sandboxStatusText(sandboxStatus.label),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

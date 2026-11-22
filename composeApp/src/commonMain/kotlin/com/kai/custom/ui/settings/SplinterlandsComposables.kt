@@ -120,6 +120,7 @@ import kai.composeapp.generated.resources.splinterlands_waiting_for_result
 import kai.composeapp.generated.resources.splinterlands_wins_losses
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableColumn
 import kotlin.time.Duration.Companion.seconds
 

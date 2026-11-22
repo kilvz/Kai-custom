@@ -305,6 +305,8 @@ actual fun createLegacySettings(): Settings? = try {
     null
 }
 
+actual fun createSshConnectionManager(): SshConnectionManager = AndroidSshConnectionManager()
+
 // Tool definitions for Android platform. Every tool Android can execute is listed, including the
 // ones no per-tool switch controls — chat resolves display names from here, and an omission shows
 // the raw tool id instead. Tools driven by a master toggle carry `userToggleable = false`, which

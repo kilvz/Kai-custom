@@ -153,7 +153,7 @@ class AndroidSandboxController : SandboxController {
 
         is SandboxState.Error -> {
             val rootfsExists = java.io.File(sandboxManager.rootfsPath).isDirectory
-            val msg = state.message
+            val msg = state.label.detail
             SandboxStatus(
                 distro = sandboxManager.distro,
                 installed = rootfsExists,
@@ -282,16 +282,7 @@ class AndroidSandboxController : SandboxController {
         if (state !is SandboxState.Ready && !(state is SandboxState.Error && rootfsExists)) return@withContext SANDBOX_NOT_READY
 
         if (!useRoot) {
-            val executor = ProotExecutor(
-                prootPath = sandboxManager.prootPath,
-                libDir = File(sandboxManager.rootfsPath).parent!!,
-                rootfsPath = sandboxManager.rootfsPath,
-                homePath = sandboxManager.homePath,
-                tmpPath = sandboxManager.tmpPath,
-            ).apply {
-                sandboxStorageMountEnabled = appSettings.isSandboxStorageMountEnabled()
-                sandboxRootEnabled = false
-            }
+            val executor = sandboxManager.createProotExecutor(rootEnabled = false)
             val result = executor.execute(command, timeoutSeconds = timeoutSeconds)
             val stdout = result["stdout"] as? String ?: ""
             val stderr = result["stderr"] as? String ?: ""
@@ -729,13 +720,13 @@ class AndroidSandboxController : SandboxController {
             working: Boolean = false,
             error: Boolean = false,
             progress: Float? = null,
-            statusText: String = "",
+            label: SandboxStatusLabel? = null,
         ) {
             _status.value = _status.value.copy(
                 working = working,
                 error = error,
                 progress = progress,
-                statusText = statusText,
+                label = label ?: _status.value.label,
             )
         }
 
@@ -743,7 +734,7 @@ class AndroidSandboxController : SandboxController {
             val executor = sandboxManager.createProotExecutor()
 
             if (!force) {
-                updateStatus(working = true, statusText = "Checking Alt-Memory…")
+                updateStatus(working = true, label = SandboxStatusLabel.Configuring)
                 val check = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
                 if (check["success"] as? Boolean == true && (check["stdout"] as? String)?.trim() == "1") {
                     appSettings.setAltMemoryInstalled(true)
@@ -755,7 +746,7 @@ class AndroidSandboxController : SandboxController {
 
             // Phase 1 — download-only: safe, never touches site-packages
             val actionLabel = if (force) "Updating" else "Installing"
-            updateStatus(working = true, statusText = "Downloading Alt-Memory packages…")
+            updateStatus(working = true, label = SandboxStatusLabel.Downloading)
             executor.execute("mkdir -p /tmp/pip-download", timeoutSeconds = 5)
             val download = executor.execute(
                 "pip download --no-cache-dir --retries 10 --timeout 60 --dest /tmp/pip-download alt-memory 2>&1",
@@ -767,12 +758,12 @@ class AndroidSandboxController : SandboxController {
                 val error = download["error"] as? String ?: ""
                 val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
                 android.util.Log.e("SandboxController", "pip download failed: $msg")
-                updateStatus(error = true, statusText = "Alt-Memory download failed: $msg")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "Alt-Memory download failed: $msg"))
                 return@withContext false
             }
 
             // Phase 2 — install from local cache: fast, no network
-            updateStatus(working = true, statusText = "$actionLabel Alt-Memory (pip)…")
+            updateStatus(working = true, label = SandboxStatusLabel.Installing)
             val install = executor.execute(
                 "pip install --no-cache-dir --break-system-packages --no-index --find-links /tmp/pip-download alt-memory 2>&1",
                 timeoutSeconds = 300,
@@ -784,16 +775,16 @@ class AndroidSandboxController : SandboxController {
                 val error = install["error"] as? String ?: ""
                 val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
                 android.util.Log.e("SandboxController", "pip install failed: $msg")
-                updateStatus(error = true, statusText = "Alt-Memory $actionLabel failed: $msg")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "Alt-Memory $actionLabel failed: $msg"))
                 return@withContext false
             }
 
-            updateStatus(working = true, statusText = "Verifying Alt-Memory…")
+            updateStatus(working = true, label = SandboxStatusLabel.Configuring)
 
             val verify = executor.execute("python3 -c 'import alt_memory; print(1)' 2>/dev/null", timeoutSeconds = 30)
             val ok = verify["success"] as? Boolean == true && (verify["stdout"] as? String)?.trim() == "1"
             if (!ok) {
-                updateStatus(error = true, statusText = "Alt-Memory $actionLabel: import check failed")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "Alt-Memory $actionLabel: import check failed"))
                 return@withContext false
             }
 
@@ -836,13 +827,13 @@ class AndroidSandboxController : SandboxController {
         fun updateStatus(
             working: Boolean = false,
             error: Boolean = false,
-            statusText: String = "",
+            label: SandboxStatusLabel? = null,
             lastWhatsAppError: String? = null,
         ) {
             _status.value = _status.value.copy(
                 working = working,
                 error = error,
-                statusText = statusText,
+                label = label ?: _status.value.label,
                 lastWhatsAppError = lastWhatsAppError ?: _status.value.lastWhatsAppError,
             )
         }
@@ -868,13 +859,13 @@ class AndroidSandboxController : SandboxController {
 
             logStep("START", "$label WhatsApp bridge")
 
-            updateStatus(working = true, statusText = "$label WhatsApp bridge (deploying)…")
+            updateStatus(working = true, label = SandboxStatusLabel.Installing)
 
             logStep("MKDIR", "creating /root/whatsapp-bridge")
             val mkdir = executor.execute("mkdir -p /root/whatsapp-bridge", timeoutSeconds = 10)
             if (mkdir["success"] as? Boolean != true) {
                 logFail("mkdir", mkdir)
-                updateStatus(error = true, statusText = "WhatsApp $label: mkdir failed")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "WhatsApp $label: mkdir failed"))
                 return@withContext false
             }
 
@@ -886,7 +877,7 @@ class AndroidSandboxController : SandboxController {
             )
             if (bridgeDl["success"] as? Boolean != true || (bridgeDl["stdout"] as? String)?.trim() != "DOWNLOAD_OK") {
                 logFail("download", bridgeDl)
-                updateStatus(error = true, statusText = "WhatsApp $label: download bridge.js failed")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "WhatsApp $label: download bridge.js failed"))
                 return@withContext false
             }
 
@@ -913,12 +904,12 @@ class AndroidSandboxController : SandboxController {
             )
             if (nodeDl["success"] as? Boolean != true) {
                 logFail("node_install", nodeDl)
-                updateStatus(error = true, statusText = "WhatsApp $label: node install failed")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "WhatsApp $label: node install failed"))
                 return@withContext false
             }
             logStep("NODE_DONE", "node ready")
 
-            updateStatus(working = true, statusText = "$label WhatsApp bridge (npm)…")
+            updateStatus(working = true, label = SandboxStatusLabel.Installing)
             logStep("NPM_INSTALL", "starting npm install (timeout 300s)")
 
             val install = executor.execute(
@@ -932,12 +923,12 @@ class AndroidSandboxController : SandboxController {
                 val stdout = install["stdout"] as? String ?: ""
                 val error = install["error"] as? String ?: ""
                 val msg = stderr.ifEmpty { error }.ifEmpty { stdout }.take(200)
-                updateStatus(error = true, statusText = "WhatsApp $label failed: $msg")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "WhatsApp $label failed: $msg"))
                 return@withContext false
             }
             logStep("NPM_DONE", "npm install succeeded")
 
-            updateStatus(working = true, statusText = "Verifying WhatsApp bridge…")
+            updateStatus(working = true, label = SandboxStatusLabel.Configuring)
             logStep("VERIFY", "checking require('@whiskeysockets/baileys')")
 
             val verify = executor.execute(
@@ -947,7 +938,7 @@ class AndroidSandboxController : SandboxController {
             val ok = verify["success"] as? Boolean == true && (verify["stdout"] as? String)?.trim() == "1"
             if (!ok) {
                 logFail("verify", verify)
-                updateStatus(error = true, statusText = "WhatsApp $label: require check failed")
+                updateStatus(error = true, label = SandboxStatusLabel.Failure.Status(detail = "WhatsApp $label: require check failed"))
                 return@withContext false
             }
             logStep("VERIFY_OK", "require check passed")

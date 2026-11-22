@@ -192,12 +192,12 @@ class SandboxViewModel(
 
     fun onBackupSandbox() {
         viewModelScope.launch {
-            _state.update { it.copy(isWorking = true, sandboxStatusText = "Creating backup...") }
+            _state.update { it.copy(isWorking = true) }
             val result = sandboxController.backupSandbox()
             result.onSuccess { backup ->
-                _state.update { it.copy(isWorking = false, backupExportPath = backup.path, sandboxStatusText = "Choose where to save the backup") }
+                _state.update { it.copy(isWorking = false, backupExportPath = backup.path) }
             }.onFailure { e ->
-                _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusText = "Backup failed: ${e.message}") }
+                _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusLabel = SandboxStatusLabel.Failure.Status(detail = e.message ?: "")) }
             }
         }
     }
@@ -208,12 +208,12 @@ class SandboxViewModel(
 
     fun onImportSandbox(data: ByteArray) {
         viewModelScope.launch {
-            _state.update { it.copy(isWorking = true, sandboxStatusText = "Importing sandbox...") }
+            _state.update { it.copy(isWorking = true) }
             val result = sandboxController.importSandbox(data)
             result.onSuccess {
-                _state.update { it.copy(isWorking = false, sandboxStatusText = "Sandbox restored") }
+                _state.update { it.copy(isWorking = false) }
             }.onFailure { e ->
-                _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusText = "Import failed: ${e.message}") }
+                _state.update { it.copy(isWorking = false, hasError = true, sandboxStatusLabel = SandboxStatusLabel.Failure.Status(detail = e.message ?: "")) }
             }
         }
     }

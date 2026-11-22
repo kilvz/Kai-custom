@@ -278,9 +278,9 @@ class LinuxSandboxManager(
     }
 
     /** proot for the installed rootfs, with the binds and flags its distro needs. */
-    fun createProotExecutor(): ProotExecutor = ProotExecutor(createLauncher())
+    fun createProotExecutor(rootEnabled: Boolean? = null): ProotExecutor = ProotExecutor(createLauncher(rootEnabled))
 
-    private fun createLauncher(): ProotLauncher {
+    private fun createLauncher(rootEnabled: Boolean? = null): ProotLauncher {
         val current = marker ?: legacyMarker()
         val spec = DistroSpec.of(current.distro)
         paths.copyLibtalloc()
@@ -311,7 +311,7 @@ class LinuxSandboxManager(
             binds = binds,
             extraArgs = spec.prootArgs,
             env = spec.env,
-            rootEnabled = appSettings.isSandboxRootEnabled() && appSettings.isRootEnabled(),
+            rootEnabled = rootEnabled ?: (appSettings.isSandboxRootEnabled() && appSettings.isRootEnabled()),
         )
     }
 
@@ -459,7 +459,7 @@ class LinuxSandboxManager(
         // answer. Idempotent; failures here are non-fatal.
         runCatching { SshConfigManager(File(homePath)).ensureDefaults() }
             .onFailure { android.util.Log.w("LinuxSandbox", "ssh defaults seed failed: ${it.message}") }
-        _state.value = SandboxState.Installing("Installing edge-tts...")
+        _state.value = SandboxState.Installing(SandboxStatusLabel.InstallingPackage("edge-tts"))
         runCatching {
             val pip = if (current.distro == LinuxDistro.UBUNTU) "pip3" else "pip"
             executor.execute("$pip install --no-cache-dir edge-tts 2>&1", timeoutSeconds = 60)

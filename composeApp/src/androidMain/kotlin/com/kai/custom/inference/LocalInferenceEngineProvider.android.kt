@@ -1,5 +1,6 @@
 package com.kai.custom.inference
 
+import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,6 +69,16 @@ private class CompositeEngine(
         get() = ggufEngine?.downloadProgress ?: liteRt.downloadProgress
     override val downloadError: StateFlow<DownloadError?>
         get() = ggufEngine?.downloadError ?: liteRt.downloadError
+    override val importingFileName: StateFlow<String?>
+        get() = ggufEngine?.importingFileName ?: liteRt.importingFileName
+    override val importProgress: StateFlow<Float?>
+        get() = ggufEngine?.importProgress ?: liteRt.importProgress
+    override val importError: StateFlow<ModelImportError?>
+        get() = ggufEngine?.importError ?: liteRt.importError
+
+    override fun getImportedLocalModels(): List<LocalModel> = liteRt.getImportedLocalModels()
+    override suspend fun importModel(source: PlatformFile): ModelImportResult = liteRt.importModel(source)
+    override fun cancelImport() = liteRt.cancelImport()
 
     override suspend fun initialize(model: DownloadedModel, contextTokens: Int) {
         if (isGgufModel(model.id, model.filePath)) {

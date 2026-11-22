@@ -95,6 +95,7 @@ import kotlin.time.Duration.Companion.seconds
 class SettingsViewModel(
     private val dataRepository: DataRepository,
     private val daemonController: DaemonController,
+    private val debugApiController: DebugApiController,
     private val notificationPermissionController: PermissionController,
     private val taskScheduler: TaskScheduler,
     private val wakeWordController: WakeWordController,
@@ -284,7 +285,7 @@ class SettingsViewModel(
         onAddPopularMcpServer = ::onAddPopularMcpServer,
         onDownloadLocalModel = ::onDownloadLocalModel,
         onCancelLocalModelDownload = ::onCancelLocalModelDownload,
-        onImportLocalModel = ::onImportLocalModel,
+        onImportModel = ::onImportLocalModel,
         onCancelLocalModelImport = ::onCancelLocalModelImport,
         onDeleteLocalModel = ::onDeleteLocalModel,
         onChangeModelContextTokens = ::onChangeModelContextTokens,

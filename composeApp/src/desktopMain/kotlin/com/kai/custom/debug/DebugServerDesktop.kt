@@ -1363,7 +1363,7 @@ class DebugServerDesktop(
                                 put("ready", JsonPrimitive(s.ready))
                                 put("working", JsonPrimitive(s.working))
                                 put("progress", s.progress?.let { JsonPrimitive(it) } ?: JsonNull)
-                                put("statusText", JsonPrimitive(s.statusText))
+                                put("statusText", s.label?.let { JsonPrimitive(it.toString()) } ?: JsonNull)
                                 put("error", JsonPrimitive(s.error))
                                 put("sandbox_enabled", JsonPrimitive(dataRepository.isSandboxEnabled()))
                                 put("sandbox_distro", JsonPrimitive(dataRepository.getSandboxDistro().id))

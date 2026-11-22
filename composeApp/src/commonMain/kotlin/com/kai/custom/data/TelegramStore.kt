@@ -2,7 +2,6 @@ package com.kai.custom.data
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.serializer
 
 class TelegramStore(private val appSettings: AppSettings) {
@@ -12,7 +11,8 @@ class TelegramStore(private val appSettings: AppSettings) {
     private val pendingQueue = PendingQueue<TelegramPendingMessage, String>(
         readJson = appSettings::getTelegramPendingJson,
         writeJson = appSettings::setTelegramPendingJson,
-        serializer = ListSerializer(serializer<TelegramPendingMessage>()),
+        serializer = serializer<TelegramPendingMessage>(),
+        label = "TelegramStore.pending",
         keyOf = { "${it.chatId}:${it.messageId}" },
     )
 
