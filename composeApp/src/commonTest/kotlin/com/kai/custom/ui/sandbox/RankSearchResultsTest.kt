@@ -1,4 +1,4 @@
-package com.inspiredandroid.kai.ui.sandbox
+package com.kai.custom.ui.sandbox
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

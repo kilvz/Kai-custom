@@ -1,7 +1,7 @@
 package com.kai.custom.data
 
-import com.inspiredandroid.kai.network.tools.Tool
-import com.inspiredandroid.kai.network.tools.ToolSchema
+import com.kai.custom.network.tools.Tool
+import com.kai.custom.network.tools.ToolSchema
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay

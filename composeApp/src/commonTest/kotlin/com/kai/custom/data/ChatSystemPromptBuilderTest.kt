@@ -59,7 +59,7 @@ class ChatSystemPromptBuilderTest {
         heartbeatAdditions: List<ScheduledTask> = emptyList(),
         emailAccounts: List<EmailAccountSummary> = emptyList(),
         uiMode: ChatPromptUiMode = ChatPromptUiMode.NONE,
-        activeSkill: com.inspiredandroid.kai.skills.SkillManifest? = null,
+        activeSkill: com.kai.custom.skills.SkillManifest? = null,
     ) = UnifiedPromptBuilder().build(
         PromptContext(
             variant = variant,
