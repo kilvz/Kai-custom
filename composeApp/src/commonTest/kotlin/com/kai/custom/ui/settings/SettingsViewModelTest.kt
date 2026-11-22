@@ -1,5 +1,6 @@
 package com.kai.custom.ui.settings
 
+import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import com.kai.custom.AutoUpdateManager
 import com.kai.custom.DaemonController
@@ -16,7 +17,6 @@ import com.kai.custom.tools.AppPermission
 import com.kai.custom.tools.PermissionController
 import com.kai.custom.tools.ToolPermissionBridge
 import com.russhwolf.settings.MapSettings
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
