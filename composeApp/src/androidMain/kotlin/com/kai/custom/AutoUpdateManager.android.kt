@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.content.FileProvider
+import com.kai.custom.httpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
-import com.kai.custom.httpClient
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
@@ -38,7 +38,10 @@ actual class AutoUpdateManager actual constructor() {
             val response = client.get("https://api.github.com/repos/kilvz/Kai-custom/releases/latest")
             if (!response.status.isSuccess()) {
                 return@withContext UpdateCheckResult(
-                    updateAvailable = false, latestVersion = "", downloadUrl = null, releaseUrl = null,
+                    updateAvailable = false,
+                    latestVersion = "",
+                    downloadUrl = null,
+                    releaseUrl = null,
                     error = "GitHub API returned ${response.status.value}",
                 )
             }
@@ -57,7 +60,10 @@ actual class AutoUpdateManager actual constructor() {
             )
         } catch (e: Exception) {
             UpdateCheckResult(
-                updateAvailable = false, latestVersion = "", downloadUrl = null, releaseUrl = null,
+                updateAvailable = false,
+                latestVersion = "",
+                downloadUrl = null,
+                releaseUrl = null,
                 error = e.message ?: "Unknown error",
             )
         }
@@ -115,7 +121,9 @@ actual class AutoUpdateManager actual constructor() {
         try {
             val file = File(filePath)
             val apkUri = FileProvider.getUriForFile(
-                context, "${context.packageName}.fileprovider", file,
+                context,
+                "${context.packageName}.fileprovider",
+                file,
             )
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(apkUri, "application/vnd.android.package-archive")

@@ -93,8 +93,7 @@ object SandboxFileTransferTool : Tool {
         }
     }
 
-    private fun isAbsoluteHostPath(path: String): Boolean =
-        HOST_STORAGE_PREFIXES.any { path.startsWith(it) }
+    private fun isAbsoluteHostPath(path: String): Boolean = HOST_STORAGE_PREFIXES.any { path.startsWith(it) }
 
     private fun resolveHostPath(path: String): String {
         if (path.startsWith("/sdcard/")) {
@@ -161,7 +160,9 @@ object SandboxFileTransferTool : Tool {
                 if (data == null) {
                     val apiHint = if (Build.VERSION.SDK_INT >= 30 && !hasAllFilesAccess()) {
                         " Grant 'All files access' to Kai in Settings > Apps > Special app access > All files access."
-                    } else ""
+                    } else {
+                        ""
+                    }
                     return mapOf("success" to false, "error" to "Cannot read file at $androidPath. File not found or permission denied.$apiHint")
                 }
                 val ok = sandboxController.writeBinaryFile(sandboxPath, data)
@@ -178,6 +179,7 @@ object SandboxFileTransferTool : Tool {
                     mapOf("success" to false, "error" to "Failed to write file to sandbox at $sandboxPath")
                 }
             }
+
             "to_android" -> {
                 val content = (sandboxController.readTextFile(sandboxPath, maxBytes) as? TextFileResult.Text)?.content
                 if (content == null) {
@@ -205,6 +207,7 @@ object SandboxFileTransferTool : Tool {
                     mapOf("success" to false, "error" to writeError)
                 }
             }
+
             else -> mapOf("success" to false, "error" to "action must be 'to_sandbox' or 'to_android'")
         }
     }
@@ -215,7 +218,11 @@ object SandboxFileTransferTool : Tool {
 
         if (file.exists() && file.isFile && file.canRead()) {
             if (file.length() > maxBytes) return null
-            return try { file.readBytes() } catch (_: Exception) { null }
+            return try {
+                file.readBytes()
+            } catch (_: Exception) {
+                null
+            }
         }
 
         return tryReadViaMediaStore(resolved, maxBytes)
@@ -235,21 +242,21 @@ object SandboxFileTransferTool : Tool {
         return when {
             apiLevel >= 30 && !hasAccess ->
                 "Cannot write to $androidPath. Grant 'All files access' to Kai: open phone Settings > Apps > Special app access > All files access > enable for Kai. Then retry."
+
             apiLevel >= 30 ->
                 "Cannot write to $androidPath. Even with all-files-access granted, this path is not writable. Ensure the parent directory exists."
+
             else -> "Cannot write to $androidPath. Check that parent directory exists and WRITE_EXTERNAL_STORAGE is granted."
         }
     }
 
-    private fun tryWriteDirectFile(path: String, data: ByteArray): Boolean {
-        return try {
-            val file = File(path)
-            file.parentFile?.mkdirs()
-            file.writeBytes(data)
-            true
-        } catch (_: Exception) {
-            false
-        }
+    private fun tryWriteDirectFile(path: String, data: ByteArray): Boolean = try {
+        val file = File(path)
+        file.parentFile?.mkdirs()
+        file.writeBytes(data)
+        true
+    } catch (_: Exception) {
+        false
     }
 
     private fun tryWriteViaMediaStore(androidPath: String, data: ByteArray): Boolean {
@@ -336,7 +343,9 @@ object SandboxFileTransferTool : Tool {
                     context.contentResolver.openInputStream(fileUri)?.use { input ->
                         input.readBytes().takeIf { it.size.toLong() <= maxBytes }
                     }
-                } else null
+                } else {
+                    null
+                }
             }
         } catch (_: Exception) {
             null
@@ -374,6 +383,7 @@ object SandboxFileTransferTool : Tool {
                     mapOf("success" to false, "error" to "Failed to write file to sandbox at $sandboxPath")
                 }
             }
+
             "to_android" -> {
                 val content = (sandboxController.readTextFile(sandboxPath, maxBytes) as? TextFileResult.Text)?.content
                 if (content == null) {
@@ -397,6 +407,7 @@ object SandboxFileTransferTool : Tool {
                     "message" to "Copied ${rawBytes.size} bytes from sandbox to $androidRel",
                 )
             }
+
             else -> mapOf("success" to false, "error" to "action must be 'to_sandbox' or 'to_android'")
         }
     }
@@ -408,7 +419,10 @@ object SandboxFileTransferTool : Tool {
         } catch (_: Exception) { }
         val mimeType = getMimeType(fileName)
         val createdUri = DocumentsContract.createDocument(
-            context.contentResolver, treeUri, mimeType, fileName
+            context.contentResolver,
+            treeUri,
+            mimeType,
+            fileName,
         )
         if (createdUri != null) {
             context.contentResolver.openOutputStream(createdUri)?.use { it.write(data) }
@@ -456,6 +470,7 @@ object SandboxFileTransferTool : Tool {
                     }
                 }
             }
+
             "to_android" -> {
                 androidFile.parentFile?.mkdirs()
                 val content = (sandboxController.readTextFile(sandboxPath, maxBytes) as? TextFileResult.Text)?.content
@@ -482,6 +497,7 @@ object SandboxFileTransferTool : Tool {
                     }
                 }
             }
+
             else -> mapOf("success" to false, "error" to "action must be 'to_sandbox' or 'to_android'")
         }
     }

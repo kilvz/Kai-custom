@@ -137,6 +137,7 @@ interface SandboxController : FileBrowserSource {
     fun setup()
     fun cancel()
     fun reset()
+
     /** Restart the sandbox — close shells and kill proot processes but keep rootfs intact. */
     fun restart()
     fun installPackages()
@@ -190,7 +191,6 @@ interface SandboxController : FileBrowserSource {
     fun clearTranscript(sessionId: String) {}
 
     suspend fun writeBinaryFile(path: String, data: ByteArray): Boolean
-
 
     suspend fun startAltMemory() {}
     suspend fun stopAltMemory() {}

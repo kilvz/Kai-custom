@@ -8,13 +8,13 @@ import com.kai.custom.inference.EngineState
 import com.kai.custom.inference.LocalModel
 import com.kai.custom.inference.ModelImportError
 import com.kai.custom.inference.ModelImportResult
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.mcp.McpServerConfig
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.skills.RegistrySkillEntry
 import com.kai.custom.skills.SkillManifest
 import com.kai.custom.ui.chat.History
 import com.kai.custom.ui.settings.SettingsModel
-import com.kai.custom.linux.LinuxDistro
 import io.github.vinceglb.filekit.PlatformFile
 import kotlinx.coroutines.flow.StateFlow
 

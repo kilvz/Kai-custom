@@ -360,23 +360,23 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
                     }
                 }
 
-            val toolProviders = tools.map { tool(LocalToolOpenApiAdapter(it)) }
-            val config = ConversationConfig(
-                systemInstruction = sanitizedSystemPrompt?.let { Contents.of(it) },
-                initialMessages = initialMessages,
-                tools = toolProviders,
-                samplerConfig = currentModelCapabilities?.sampler?.let {
-                    SamplerConfig(topK = it.topK, topP = it.topP.toDouble(), temperature = it.temperature.toDouble())
-                } ?: SamplerConfig(topK = 40, topP = 0.95, temperature = 0.8),
-                // automaticToolCalling = true drives the parser; only enable when we
-                // actually have tools, otherwise plain-text responses get parsed as FCs.
-                automaticToolCalling = toolProviders.isNotEmpty(),
-            )
-            val prev = conversation
-            conversation = null
-            runCatching { prev?.close() }
-            val conv = currentEngine.createConversation(config)
-            conversation = conv
+                val toolProviders = tools.map { tool(LocalToolOpenApiAdapter(it)) }
+                val config = ConversationConfig(
+                    systemInstruction = sanitizedSystemPrompt?.let { Contents.of(it) },
+                    initialMessages = initialMessages,
+                    tools = toolProviders,
+                    samplerConfig = currentModelCapabilities?.sampler?.let {
+                        SamplerConfig(topK = it.topK, topP = it.topP.toDouble(), temperature = it.temperature.toDouble())
+                    } ?: SamplerConfig(topK = 40, topP = 0.95, temperature = 0.8),
+                    // automaticToolCalling = true drives the parser; only enable when we
+                    // actually have tools, otherwise plain-text responses get parsed as FCs.
+                    automaticToolCalling = toolProviders.isNotEmpty(),
+                )
+                val prev = conversation
+                conversation = null
+                runCatching { prev?.close() }
+                val conv = currentEngine.createConversation(config)
+                conversation = conv
 
                 val lastMessage = sanitizeForLiteRt(messages[lastUserIndex].content) ?: ""
                 val response = try {
@@ -411,7 +411,6 @@ class LiteRTInferenceEngine : LocalInferenceEngine {
             release()
         }
     }
-
 
     override fun getDownloadedModels(): List<DownloadedModel> {
         val modelsDir = File(getModelStorageDirectory())

@@ -256,7 +256,7 @@ private fun AppContent(
                                     navController.navigate(Settings(tab = tab))
                                 },
                                 isSandboxAvailable = currentPlatform is Platform.Mobile.Android,
-                            isKaiBuildAvailable = currentPlatform is Platform.Mobile.Android,
+                                isKaiBuildAvailable = currentPlatform is Platform.Mobile.Android,
                                 isSshAvailable = currentPlatform is Platform.Mobile.Android,
                                 navigationTabBar = if (showTabBar) navigationTabBar else null,
                             )

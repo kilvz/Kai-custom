@@ -69,9 +69,6 @@ import io.ktor.serialization.kotlinx.json.json
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.error_unknown
 import kai.composeapp.generated.resources.error_unrecognized_github_repo
-import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -91,6 +88,9 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.jetbrains.compose.resources.getString
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class SettingsViewModel(
     private val dataRepository: DataRepository,
@@ -603,7 +603,6 @@ class SettingsViewModel(
             refreshServiceList()
         }
     }
-
 
     private fun onToggleUseCustomModel(instanceId: String, useCustom: Boolean) {
         dataRepository.updateInstanceUseCustomModel(instanceId, useCustom)

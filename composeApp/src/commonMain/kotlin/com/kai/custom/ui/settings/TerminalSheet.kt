@@ -57,9 +57,9 @@ import com.kai.custom.CommandHandle
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxSessions
 import com.kai.custom.TerminalLine
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.sandbox.SandboxSessionViewModel
-import com.kai.custom.linux.LinuxDistro
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.terminal_command_failed
 import kai.composeapp.generated.resources.terminal_help_text

@@ -1,5 +1,6 @@
 package com.kai.custom.tools
 
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
@@ -7,7 +8,6 @@ import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.SandboxState
 import com.kai.custom.sandbox.SshConfigManager
-import com.kai.custom.linux.LinuxDistro
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 
@@ -70,7 +70,8 @@ object SshConfigureHostTool : Tool {
                 "A line to append to ~/.ssh/known_hosts to pre-accept the host key (TOFU skip). Format: 'hostname key-type base64-key'.",
                 false,
             ),
-        )
+        ),
+    )
 
     val toolInfo = ToolInfo(
         id = "ssh_configure_host",

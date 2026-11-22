@@ -123,7 +123,6 @@ import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.readAvailable
-import java.io.FileOutputStream
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_create_calendar_event_description
 import kai.composeapp.generated.resources.tool_create_calendar_event_name
@@ -149,15 +148,16 @@ import kai.composeapp.generated.resources.tool_send_notification_description
 import kai.composeapp.generated.resources.tool_send_notification_name
 import kai.composeapp.generated.resources.tool_set_alarm_description
 import kai.composeapp.generated.resources.tool_set_alarm_name
-import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.java.KoinJavaComponent
 import org.koin.java.KoinJavaComponent.inject
+import java.io.FileOutputStream
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 actual fun httpClient(config: HttpClientConfig<*>.() -> Unit): HttpClient = HttpClient(OkHttp) {
     config(this)
@@ -859,8 +859,8 @@ actual fun getAvailableTools(): List<Tool> {
                         val ts = System.currentTimeMillis()
                         val aiDir = java.io.File(context.filesDir, "ai_captures")
                         aiDir.mkdirs()
-                        val outputFile = java.io.File(aiDir, "screenshot_${ts}.png")
-                        val sandboxName = "screenshot_${ts}.png"
+                        val outputFile = java.io.File(aiDir, "screenshot_$ts.png")
+                        val sandboxName = "screenshot_$ts.png"
                         val errors = mutableListOf<String>()
 
                         // Try 1: AccessibilityService (no dialog, needs Screen Reader enabled)
@@ -872,7 +872,10 @@ actual fun getAvailableTools(): List<Tool> {
                                 }
                                 copyScreenshotToSandbox(sandboxController, outputFile, sandboxName)
                                 mapOf("success" to true, "method" to "accessibility", "path" to outputFile.absolutePath)
-                            } else { errors.add("AccessibilityService not connected"); null }
+                            } else {
+                                errors.add("AccessibilityService not connected")
+                                null
+                            }
                         } catch (e: Exception) {
                             errors.add("Accessibility error: ${e.message}")
                             null
@@ -886,12 +889,16 @@ actual fun getAvailableTools(): List<Tool> {
                             if (proc.exitValue() == 0 && outputFile.exists() && outputFile.length() > 0) {
                                 copyScreenshotToSandbox(sandboxController, outputFile, sandboxName)
                                 mapOf("success" to true, "method" to "direct", "path" to outputFile.absolutePath)
-                            } else null
-                        } catch (_: Exception) { null }
+                            } else {
+                                null
+                            }
+                        } catch (_: Exception) {
+                            null
+                        }
                         if (directResult != null) return directResult
 
                         // Try 3: Shizuku screencap (write to /data/local/tmp, then copy)
-                        val shScrPath = "/data/local/tmp/${sandboxName}"
+                        val shScrPath = "/data/local/tmp/$sandboxName"
                         val shResult = try {
                             ShizukuManager.runCommand("screencap -p $shScrPath")
                         } catch (e: Exception) {
@@ -921,7 +928,9 @@ actual fun getAvailableTools(): List<Tool> {
 
                         val hint = if (!ScreenReaderService.isConnected()) {
                             "Enable Kai Screen Reader in Accessibility settings (Settings → Accessibility → Kai Screen Reader), then try again."
-                        } else ""
+                        } else {
+                            ""
+                        }
                         return mapOf(
                             "success" to false,
                             "error" to errors.joinToString("; ").ifEmpty { "All screenshot methods failed." },
@@ -2182,10 +2191,13 @@ private suspend fun captureScreenViaMediaProjection(
 
     val virtualDisplay = mediaProjection.createVirtualDisplay(
         "KaiScreenshotCapture",
-        width, height, density,
+        width,
+        height,
+        density,
         DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
         imageReader.surface,
-        null, null,
+        null,
+        null,
     )
 
     try {

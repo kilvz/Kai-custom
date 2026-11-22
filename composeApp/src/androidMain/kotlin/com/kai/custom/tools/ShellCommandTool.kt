@@ -2,13 +2,13 @@ package com.kai.custom.tools
 
 import com.kai.custom.SandboxSessions
 import com.kai.custom.data.currentConversationIdOrNull
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.network.tools.ParameterSchema
 import com.kai.custom.network.tools.Tool
 import com.kai.custom.network.tools.ToolInfo
 import com.kai.custom.network.tools.ToolSchema
 import com.kai.custom.sandbox.LinuxSandboxManager
 import com.kai.custom.sandbox.SandboxState
-import com.kai.custom.linux.LinuxDistro
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.tool_execute_shell_command_description
 import kai.composeapp.generated.resources.tool_execute_shell_command_name
@@ -75,8 +75,6 @@ object ShellCommandTool : Tool {
                 "fresh" to ParameterSchema("boolean", "If true, run in a one-shot isolated shell that does not share state with the persistent session. Default false.", false),
             ),
         )
-
-
 
     @Suppress("UNCHECKED_CAST")
     override suspend fun execute(args: Map<String, Any>): Any {

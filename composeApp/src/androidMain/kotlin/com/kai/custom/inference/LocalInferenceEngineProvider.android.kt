@@ -146,7 +146,13 @@ private class CompositeEngine(
             } else if (safFile != null) {
                 val contentUri = safFile.readText().trim()
                 val sizeFile = modelDir.listFiles()?.firstOrNull { it.name == "model.size" }
-                var actualSize = sizeFile?.let { try { it.readText().trim().toLongOrNull() } catch (_: Exception) { null } } ?: 0L
+                var actualSize = sizeFile?.let {
+                    try {
+                        it.readText().trim().toLongOrNull()
+                    } catch (_: Exception) {
+                        null
+                    }
+                } ?: 0L
                 if (actualSize <= 0L) {
                     try {
                         val native = GgufPluginManager.ensureLoaded()

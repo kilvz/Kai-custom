@@ -264,5 +264,3 @@ private fun extractDsmlToolCalls(content: String, tools: List<Tool>): InlineTool
     }
     return InlineToolCallExtraction(cleaned.toString().trim(), calls)
 }
-
-

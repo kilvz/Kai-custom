@@ -45,14 +45,13 @@ class McpServerManager(private val appSettings: AppSettings) {
         builtInServers[id] = McpServerConfig(id = id, name = name, url = url, headers = headers, isEnabled = true)
     }
 
-    /** User-configured servers from AppSettings (excludes built-in). */
-
     init {
         // One-shot: fill missing popular default headers (e.g. Jina Authorization) without
         // overwriting headers the user already configured.
         migratePopularDefaultHeaders()
     }
 
+    /** User-configured servers from AppSettings (excludes built-in). */
     fun getServers(): List<McpServerConfig> = servers.get()
 
     /** All servers including built-in. */

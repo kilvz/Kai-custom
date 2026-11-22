@@ -124,6 +124,9 @@ class LocalModelCatalogTest {
         val bytes = ByteArray(32) { (it * 7).toByte() }
         assertTrue(digestMatches(bytes.toDigestHex(), bytes.toDigestHex()))
         assertEquals(64, bytes.toDigestHex().length)
+    }
+
+    @Test
     fun catalogContextDefaultsFitInsideTheirMaximum() {
         // A model whose export tops out at its own default (LFM2.5) has no headroom for a
         // typo to hide in: the settings slider would offer a size the engine refuses.

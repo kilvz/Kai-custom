@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -24,8 +24,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,14 +42,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.kai.custom.formatFileSize
+import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.saveFileToDevice
 import com.kai.custom.ui.handCursor
 import com.kai.custom.ui.sandbox.SandboxProgressRow
+import com.kai.custom.ui.sandbox.sandboxStatusText
 import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.readBytes
-import com.kai.custom.linux.LinuxDistro
-import com.kai.custom.ui.sandbox.sandboxStatusText
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.sandbox_settings_alt_memory
 import kai.composeapp.generated.resources.sandbox_settings_distribution
@@ -82,8 +82,8 @@ import kai.composeapp.generated.resources.settings_sandbox_migrate_detail
 import kai.composeapp.generated.resources.settings_sandbox_migrate_title
 import kai.composeapp.generated.resources.settings_sandbox_uninstall
 import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm
-import kotlinx.coroutines.launch
 import kai.composeapp.generated.resources.settings_sandbox_uninstall_confirm_shared
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)

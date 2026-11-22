@@ -218,33 +218,33 @@ actual fun closeSafHandle(handle: PlatformSafHandle) {
     } catch (_: Exception) {}
 }
 
-actual fun resolveContentUriSize(uri: String): Long {
-    return try {
-        val parsedUri = android.net.Uri.parse(uri)
-        var size = 0L
-        // 1. Cursor query
-        context.contentResolver.query(parsedUri, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val sIdx = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
-                if (sIdx >= 0) size = cursor.getLong(sIdx)
-            }
+actual fun resolveContentUriSize(uri: String): Long = try {
+    val parsedUri = android.net.Uri.parse(uri)
+    var size = 0L
+    // 1. Cursor query
+    context.contentResolver.query(parsedUri, null, null, null, null)?.use { cursor ->
+        if (cursor.moveToFirst()) {
+            val sIdx = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+            if (sIdx >= 0) size = cursor.getLong(sIdx)
         }
-        // 2. ParcelFileDescriptor.statSize
-        if (size <= 0L) {
-            context.contentResolver.openFileDescriptor(parsedUri, "r")?.use { pfd ->
-                val stat = pfd.statSize
-                if (stat > 0L) size = stat
-            }
+    }
+    // 2. ParcelFileDescriptor.statSize
+    if (size <= 0L) {
+        context.contentResolver.openFileDescriptor(parsedUri, "r")?.use { pfd ->
+            val stat = pfd.statSize
+            if (stat > 0L) size = stat
         }
-        // 3. AssetFileDescriptor.length
-        if (size <= 0L) {
-            context.contentResolver.openAssetFileDescriptor(parsedUri, "r")?.use { afd ->
-                val len = afd.length
-                if (len > 0L && len != android.content.res.AssetFileDescriptor.UNKNOWN_LENGTH) size = len
-            }
+    }
+    // 3. AssetFileDescriptor.length
+    if (size <= 0L) {
+        context.contentResolver.openAssetFileDescriptor(parsedUri, "r")?.use { afd ->
+            val len = afd.length
+            if (len > 0L && len != android.content.res.AssetFileDescriptor.UNKNOWN_LENGTH) size = len
         }
-        size
-    } catch (_: Exception) { 0L }
+    }
+    size
+} catch (_: Exception) {
+    0L
 }
 
 @androidx.compose.runtime.Composable
@@ -298,7 +298,7 @@ actual fun rememberSafDirectoryPicker(
             try {
                 context.contentResolver.takePersistableUriPermission(
                     uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                 )
                 onResult(uri.toString())
             } catch (e: Exception) {

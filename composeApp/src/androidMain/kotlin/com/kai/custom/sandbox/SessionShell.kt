@@ -1,8 +1,8 @@
 package com.kai.custom.sandbox
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import com.kai.custom.TerminalLine
 import com.inspiredandroid.kai.TerminalLine
+import com.kai.custom.TerminalLine
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 

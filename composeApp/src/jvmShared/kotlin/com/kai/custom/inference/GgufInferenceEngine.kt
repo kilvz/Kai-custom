@@ -213,9 +213,15 @@ class GgufInferenceEngine(
                 } catch (_: Exception) {
                     null
                 }
-            } ?: (modelDir.listFiles()?.firstOrNull { it.name == "model.size" }?.let { f ->
-                try { f.readText().trim().toLongOrNull() } catch (_: Exception) { null }
-            }) ?: (ggufFile?.length() ?: 0L)
+            } ?: (
+                modelDir.listFiles()?.firstOrNull { it.name == "model.size" }?.let { f ->
+                    try {
+                        f.readText().trim().toLongOrNull()
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+                ) ?: (ggufFile?.length() ?: 0L)
 
             DownloadedModel(
                 id = modelDir.name,

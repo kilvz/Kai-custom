@@ -34,9 +34,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kai.custom.linux.PackageEntry
 import com.kai.custom.ui.components.KaiSearchField
 import com.kai.custom.ui.handCursor
-import com.kai.custom.linux.PackageEntry
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.sandbox_files_dialog_cancel
 import kai.composeapp.generated.resources.sandbox_packages_action_clear_search

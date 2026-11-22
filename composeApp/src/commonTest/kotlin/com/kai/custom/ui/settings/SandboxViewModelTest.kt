@@ -1,39 +1,39 @@
 package com.kai.custom.ui.settings
 
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import app.cash.turbine.test
 import com.kai.custom.CommandHandle
 import com.kai.custom.ExecResult
 import com.kai.custom.NoOpCommandHandle
 import com.kai.custom.SandboxController
 import com.kai.custom.SandboxFileEntry
-import com.kai.custom.SandboxStatus
-import com.kai.custom.TextFileResult
-import com.kai.custom.TerminalLine
-import com.kai.custom.SandboxSessions
-import app.cash.turbine.test
 import com.kai.custom.SandboxMigration
+import com.kai.custom.SandboxSessions
+import com.kai.custom.SandboxStatus
 import com.kai.custom.SandboxStatusLabel
+import com.kai.custom.TerminalLine
+import com.kai.custom.TextFileResult
 import com.kai.custom.linux.LinuxDistro
 import com.kai.custom.testutil.FakeDataRepository
+import io.github.vinceglb.filekit.PlatformFile
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
-import io.github.vinceglb.filekit.PlatformFile
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlinx.collections.immutable.persistentListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SandboxViewModelTest {
@@ -155,6 +155,9 @@ class SandboxViewModelTest {
         val controller = FakeSandboxController()
         controller.installPackages()
         assertEquals(1, controller.installPackagesCalls)
+    }
+
+    @Test
     fun `controller status updates flow into state`() = runTest {
         val viewModel = SandboxViewModel(fakeRepository, fakeSandboxController)
 

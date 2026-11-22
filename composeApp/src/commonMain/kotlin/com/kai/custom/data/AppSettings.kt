@@ -512,7 +512,6 @@ class AppSettings(internal val settings: Settings) {
         settings.putString(KEY_SANDBOX_DISTRO, distro.id)
     }
 
-
     fun isAltMemoryMigrationComplete(): Boolean = settings.getBoolean(KEY_ALT_MEMORY_MIGRATION_COMPLETE, false)
 
     fun setAltMemoryMigrationComplete(complete: Boolean) {

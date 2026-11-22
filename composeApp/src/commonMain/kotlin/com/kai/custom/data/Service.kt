@@ -28,8 +28,8 @@ import kai.composeapp.generated.resources.ic_service_opencode
 import kai.composeapp.generated.resources.ic_service_openrouter
 import kai.composeapp.generated.resources.ic_service_perplexity
 import kai.composeapp.generated.resources.ic_service_publicai
-import kai.composeapp.generated.resources.ic_service_spaider
 import kai.composeapp.generated.resources.ic_service_requesty
+import kai.composeapp.generated.resources.ic_service_spaider
 import kai.composeapp.generated.resources.ic_service_together
 import kai.composeapp.generated.resources.ic_service_venice
 import kai.composeapp.generated.resources.ic_service_xai
@@ -116,7 +116,6 @@ sealed class Service(
         chatUrl = "https://api.kilv.my.id/chat/completions",
         modelsUrl = null,
         reasoningRequestMode = ReasoningRequestMode.REASONING_CONTENT,
-    )
     )
 
     data object Groq : Service(

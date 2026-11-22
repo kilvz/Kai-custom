@@ -88,10 +88,7 @@ import com.kai.custom.ui.kaiAdaptiveCardBorder
 import com.kai.custom.ui.kaiAdaptiveCardColors
 import com.kai.custom.ui.kaiAdaptiveCardSurface
 import io.github.vinceglb.filekit.PlatformFile
-import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.name
 import io.github.vinceglb.filekit.readBytes
@@ -118,32 +115,6 @@ import kai.composeapp.generated.resources.litert_performance_ok
 import kai.composeapp.generated.resources.litert_performance_poor
 import kai.composeapp.generated.resources.litert_recommended
 import kai.composeapp.generated.resources.litert_tool_support
-import kai.composeapp.generated.resources.settings_add_service
-import kai.composeapp.generated.resources.settings_api_key_label
-import kai.composeapp.generated.resources.settings_api_key_optional_label
-import kai.composeapp.generated.resources.settings_base_url_label
-import kai.composeapp.generated.resources.settings_become_sponsor
-import kai.composeapp.generated.resources.settings_custom_model_hint
-import kai.composeapp.generated.resources.settings_custom_model_label
-import kai.composeapp.generated.resources.settings_free_fallback
-import kai.composeapp.generated.resources.settings_free_tier_description
-import kai.composeapp.generated.resources.settings_free_tier_title
-import kai.composeapp.generated.resources.settings_model_label
-import kai.composeapp.generated.resources.settings_open_app_settings
-import kai.composeapp.generated.resources.settings_openai_compatible_or_other_service
-import kai.composeapp.generated.resources.settings_openai_compatible_providers
-import kai.composeapp.generated.resources.settings_openai_compatible_setup_ollama
-import kai.composeapp.generated.resources.settings_remove_service
-import kai.composeapp.generated.resources.settings_reorder_content_description
-import kai.composeapp.generated.resources.settings_sign_in_copy_api_key_from
-import kai.composeapp.generated.resources.settings_status_checking
-import kai.composeapp.generated.resources.settings_status_connected
-import kai.composeapp.generated.resources.settings_status_error
-import kai.composeapp.generated.resources.settings_status_error_connection_failed
-import kai.composeapp.generated.resources.settings_status_error_invalid_key
-import kai.composeapp.generated.resources.settings_status_error_local_network
-import kai.composeapp.generated.resources.settings_status_error_quota_exhausted
-import kai.composeapp.generated.resources.settings_status_error_rate_limited
 import kai.composeapp.generated.resources.services_model_advanced
 import kai.composeapp.generated.resources.services_model_default
 import kai.composeapp.generated.resources.services_model_external
@@ -181,6 +152,32 @@ import kai.composeapp.generated.resources.services_model_top_p_description
 import kai.composeapp.generated.resources.services_model_top_p_max
 import kai.composeapp.generated.resources.services_model_top_p_min
 import kai.composeapp.generated.resources.services_model_uncensored
+import kai.composeapp.generated.resources.settings_add_service
+import kai.composeapp.generated.resources.settings_api_key_label
+import kai.composeapp.generated.resources.settings_api_key_optional_label
+import kai.composeapp.generated.resources.settings_base_url_label
+import kai.composeapp.generated.resources.settings_become_sponsor
+import kai.composeapp.generated.resources.settings_custom_model_hint
+import kai.composeapp.generated.resources.settings_custom_model_label
+import kai.composeapp.generated.resources.settings_free_fallback
+import kai.composeapp.generated.resources.settings_free_tier_description
+import kai.composeapp.generated.resources.settings_free_tier_title
+import kai.composeapp.generated.resources.settings_model_label
+import kai.composeapp.generated.resources.settings_open_app_settings
+import kai.composeapp.generated.resources.settings_openai_compatible_or_other_service
+import kai.composeapp.generated.resources.settings_openai_compatible_providers
+import kai.composeapp.generated.resources.settings_openai_compatible_setup_ollama
+import kai.composeapp.generated.resources.settings_remove_service
+import kai.composeapp.generated.resources.settings_reorder_content_description
+import kai.composeapp.generated.resources.settings_sign_in_copy_api_key_from
+import kai.composeapp.generated.resources.settings_status_checking
+import kai.composeapp.generated.resources.settings_status_connected
+import kai.composeapp.generated.resources.settings_status_error
+import kai.composeapp.generated.resources.settings_status_error_connection_failed
+import kai.composeapp.generated.resources.settings_status_error_invalid_key
+import kai.composeapp.generated.resources.settings_status_error_local_network
+import kai.composeapp.generated.resources.settings_status_error_quota_exhausted
+import kai.composeapp.generated.resources.settings_status_error_rate_limited
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -1156,6 +1153,7 @@ private fun LiteRTSettings(
         val contextTokens = model.defaultContextTokens + (contextSliderValue.roundToInt() * 1024)
         val estimatedMemoryMb = estimateGpuMemoryMb(model, contextTokens)
         val performance = calculateDevicePerformance(totalDeviceMemoryBytes, estimatedMemoryMb)
+    }
 
     if (importingFileName != null) {
         Spacer(Modifier.height(8.dp))
@@ -1394,8 +1392,14 @@ private fun LiteRTSettings(
                         false
                     }
                     val resolvedSize = if (sizeBytes <= 0L) {
-                        try { com.kai.custom.inference.resolveContentUriSize(uriOrPath) } catch (_: Exception) { 0L }
-                    } else sizeBytes
+                        try {
+                            com.kai.custom.inference.resolveContentUriSize(uriOrPath)
+                        } catch (_: Exception) {
+                            0L
+                        }
+                    } else {
+                        sizeBytes
+                    }
                     val id = if (isGguf) {
                         com.kai.custom.inference.linkGgufExternal(uriOrPath, displayName ?: "model", resolvedSize)
                     } else {
@@ -1405,8 +1409,12 @@ private fun LiteRTSettings(
                         try {
                             val modelDir = java.io.File(com.kai.custom.inference.getModelStorageDirectory(), id)
                             modelDir.listFiles()?.firstOrNull { f -> f.isFile && !f.name.endsWith(".txt") }?.length() ?: resolvedSize
-                        } catch (_: Exception) { resolvedSize }
-                    } else resolvedSize
+                        } catch (_: Exception) {
+                            resolvedSize
+                        }
+                    } else {
+                        resolvedSize
+                    }
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         if (id != null) {
                             onImportPlatformFileComplete(

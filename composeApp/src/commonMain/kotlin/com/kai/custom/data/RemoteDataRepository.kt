@@ -78,15 +78,6 @@ import io.github.vinceglb.filekit.readBytes
 import io.github.vinceglb.filekit.size
 import kai.composeapp.generated.resources.Res
 import kai.composeapp.generated.resources.default_soul
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -116,6 +107,15 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import org.jetbrains.compose.resources.getString
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 private const val MAX_TOOL_ITERATIONS = 15
 private const val MIN_TOOL_DISPLAY_MS = 2000L
@@ -1147,8 +1147,6 @@ class RemoteDataRepository(
                     )
                 }
                 val sessionId = activeConversationId()
-                val response = retryApiCall {
-                    requests.openAICompatibleChat(service, credentials, msgs, tools, sessionId = sessionId).getOrThrow()
                 val response = try {
                     retryApiCall {
                         requests.openAICompatibleChat(service, credentials, msgs, tools, sessionId = sessionId).getOrThrow()
@@ -2420,7 +2418,6 @@ class RemoteDataRepository(
     override fun setSandboxDistro(distro: LinuxDistro) {
         appSettings.setSandboxDistro(distro)
     }
-
 
     // Wake word
     override fun isWakeWordEnabled(): Boolean = appSettings.isWakeWordEnabled()
