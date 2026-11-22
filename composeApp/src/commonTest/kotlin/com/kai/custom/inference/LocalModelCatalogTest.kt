@@ -10,37 +10,76 @@ import kotlin.test.assertTrue
 
 class LocalModelCatalogTest {
 
+    // Entries that track their publisher's `main` branch instead of a pinned commit and
+    // carry no SHA-256 digest. qwen3-4b / qwen3-8b / tinyswallow-1.5b are
+    // litert-community files with no pinned commit published; the uncensored Gemma
+    // entries are third-party DuoNeural conversions. The set is recorded explicitly so
+    // a new unpinned entry — or a pinned entry losing its pin — fails loudly instead
+    // of slipping in silently. Pin an entry (commit + sha256 in LocalModelCatalog.kt)
+    // and drop it from this set when a pin exists.
+    private val unpinnedModelIds = setOf(
+        "qwen3-4b",
+        "qwen3-8b",
+        "tinyswallow-1.5b",
+        "uncensored-gemma-4-e2b",
+        "uncensored-gemma-4-e4b",
+    )
+
     @Test
-    fun `every catalog model pins an immutable revision`() {
-        // Standard models only: the uncensored third-party entries track their
-        // publisher's main branch and carry no pinned digest, so they are exempt.
-        for (model in STANDARD_MODELS) {
-            assertFalse(
-                model.downloadUrl.contains("/resolve/main/"),
-                "${model.id} downloads from a mutable branch; pin it to a commit hash instead",
-            )
+    fun `pinned catalog models pin an immutable revision`() {
+        for (model in MODEL_CATALOG) {
             assertTrue(model.downloadUrl.startsWith("https://"), "${model.id} must download over HTTPS")
-            // The pinned revision sits between /resolve/ and the file name.
-            val revision = model.downloadUrl.substringAfter("/resolve/", "").substringBefore('/')
-            assertEquals(40, revision.length, "${model.id} revision is not a full commit hash: $revision")
-            assertTrue(revision.all { it in "0123456789abcdef" }, "${model.id} revision is not lowercase hex: $revision")
+            if (model.id in unpinnedModelIds) {
+                assertTrue(
+                    model.downloadUrl.contains("/resolve/main/"),
+                    "${model.id} is listed as unpinned but no longer tracks main; drop it from unpinnedModelIds",
+                )
+            } else {
+                assertFalse(
+                    model.downloadUrl.contains("/resolve/main/"),
+                    "${model.id} downloads from a mutable branch; pin it to a commit hash instead",
+                )
+                // The pinned revision sits between /resolve/ and the file name.
+                val revision = model.downloadUrl.substringAfter("/resolve/", "").substringBefore('/')
+                assertEquals(40, revision.length, "${model.id} revision is not a full commit hash: $revision")
+                assertTrue(revision.all { it in "0123456789abcdef" }, "${model.id} revision is not lowercase hex: $revision")
+            }
         }
+        // The unpinned set must be exactly the catalog's main-tracking entries — no
+        // more, no fewer — so an added unpinned entry cannot hide behind the list.
+        assertEquals(
+            unpinnedModelIds,
+            MODEL_CATALOG.filter { it.downloadUrl.contains("/resolve/main/") }.map { it.id }.toSet(),
+        )
     }
 
     @Test
-    fun `every catalog model pins a sha256 digest`() {
+    fun `pinned catalog models pin a sha256 digest`() {
         for (model in MODEL_CATALOG) {
-            assertEquals(64, model.sha256.length, "${model.id} digest is not a 64-char SHA-256: ${model.sha256}")
-            assertTrue(model.sha256.all { it in "0123456789abcdef" }, "${model.id} digest is not lowercase hex: ${model.sha256}")
+            if (model.id in unpinnedModelIds) {
+                assertTrue(
+                    model.sha256.isBlank(),
+                    "${model.id} is listed as unpinned but carries a digest; drop it from unpinnedModelIds",
+                )
+            } else {
+                assertEquals(64, model.sha256.length, "${model.id} digest is not a 64-char SHA-256: ${model.sha256}")
+                assertTrue(model.sha256.all { it in "0123456789abcdef" }, "${model.id} digest is not lowercase hex: ${model.sha256}")
+            }
         }
+        assertEquals(
+            unpinnedModelIds,
+            MODEL_CATALOG.filter { it.sha256.isBlank() }.map { it.id }.toSet(),
+        )
     }
 
     @Test
     fun `catalog ids and file names are unique`() {
         assertEquals(MODEL_CATALOG.size, MODEL_CATALOG.map { it.id }.toSet().size)
         assertEquals(MODEL_CATALOG.size, MODEL_CATALOG.map { it.fileName }.toSet().size)
-        // A shared digest across entries would mean a copy-paste slip.
-        assertEquals(MODEL_CATALOG.size, MODEL_CATALOG.map { it.sha256 }.toSet().size)
+        // A shared digest across entries would mean a copy-paste slip. Blank digests
+        // are excluded: the unpinned entries carry none by design.
+        val pinnedDigests = MODEL_CATALOG.map { it.sha256 }.filter { it.isNotBlank() }
+        assertEquals(pinnedDigests.size, pinnedDigests.toSet().size)
     }
 
     @Test

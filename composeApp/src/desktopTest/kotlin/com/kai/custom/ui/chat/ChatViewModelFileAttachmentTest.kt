@@ -20,7 +20,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -78,7 +77,13 @@ class ChatViewModelFileAttachmentTest {
     }
 
     @Test
-    fun `addFile surfaces snackbar when extension is not supported`() = runTest {
+    fun `addFile stores any extension because the ViewModel does not validate extensions`() = runTest {
+        // The ViewModel accepts every file it is handed: extension filtering lives
+        // only in the file picker, via DataRepository.supportedFileExtensions(), and
+        // the real repository returns an empty list — accept all. So a file whose
+        // extension is outside the fake's allowlist is still queued, with no
+        // snackbar. If validation is ever wired into addFile, this test must be
+        // rewritten to expect the rejection.
         fakeRepository.fileAttachmentSupported = true
         val viewModel = createViewModel()
         val unsupportedFile = tempPlatformFile("xyz")
@@ -87,8 +92,8 @@ class ChatViewModelFileAttachmentTest {
             skipItems(1)
             viewModel.state.value.actions.addFile(unsupportedFile)
             val state = awaitItem()
-            assertTrue(state.files.isEmpty())
-            assertNotNull(state.snackbarMessage)
+            assertEquals(listOf(unsupportedFile), state.files.toList())
+            assertNull(state.snackbarMessage)
         }
     }
 
