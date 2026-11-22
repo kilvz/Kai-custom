@@ -8,7 +8,7 @@ import com.kai.custom.TerminalLine
 import com.kai.custom.data.AppSettings
 import com.kai.custom.data.ConversationStorage
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
+import io.ktor.client.engine.okhttp.OkHttp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -72,7 +72,7 @@ class LinuxSandboxManager(
     val prootPath: String get() = File(context.applicationInfo.nativeLibraryDir, "libproot.so").absolutePath
     val nativeLibDir: String get() = context.applicationInfo.nativeLibraryDir
 
-    private val downloader = RootfsDownloader(HttpClient(Android))
+    private val downloader = RootfsDownloader(HttpClient(OkHttp))
 
     init {
         checkExistingInstallation()

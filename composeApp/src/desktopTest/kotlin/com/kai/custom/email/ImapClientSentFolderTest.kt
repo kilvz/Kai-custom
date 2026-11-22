@@ -1,4 +1,4 @@
-package com.inspiredandroid.kai.email
+package com.kai.custom.email
 
 import kotlinx.coroutines.runBlocking
 import java.io.InputStream
